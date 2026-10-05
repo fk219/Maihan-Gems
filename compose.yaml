@@ -1,0 +1,49 @@
+# =============================================================================
+# Maihan Gems — local development database ONLY.
+# =============================================================================
+# Authority:
+#   INITIAL_IMPLEMENTATION_PLAN.md section 36 task 2 — "Provision a disposable
+#     local PostgreSQL 16 ... for migrations".
+#   technical_design/02_TECH_STACK.md  — locked stack: PostgreSQL 16+, pgvector
+#     0.6+ with vector(1024) and HNSW.
+#   technical_design/04_DATABASE_IMPLEMENTATION.md — migration 0001 must be able
+#     to CREATE EXTENSION: vector, citext, pg_trgm, unaccent, btree_gin
+#     (pg_stat_statements optional).
+#   technical_design/29 section 3 — environments: `local` is NOT production.
+#
+# Image: pgvector/pgvector:pg16 was verified to contain PostgreSQL 16.15 with
+# `vector` 0.8.7 (architecture requires >= 0.6; Phase 0 validated 0.6.2) plus
+# citext, pg_trgm, unaccent, btree_gin and pg_stat_statements. The plain
+# `postgres:16-alpine` image was found to LACK `vector` and must never be used
+# here — doing so breaks the locked schema's HNSW indexes and vector(1024).
+#
+# This service is DEVELOPMENT ONLY. It is disposable. It holds no real data
+# ever: synthetic data everywhere, including staging (technical_design/32 rule 8).
+#
+# The password below is a local-only throwaway credential for a container that
+# binds to localhost only. It is NOT a repository secret: production secrets
+# live in the platform secret manager (AGENTS.md section 10) and never here.
+# =============================================================================
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: maihan-dev-db
+    restart: unless-stopped
+    environment:
+      # Local-throwaway credential. Never reuse outside the container.
+      POSTGRES_PASSWORD: maihan_local_dev_only
+      POSTGRES_DB: maihan_dev
+    ports:
+      # Bind to localhost only — never expose to the network.
+      - '127.0.0.1:5433:5432'
+    volumes:
+      - maihan_dev_dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d maihan_dev']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  maihan_dev_dbdata:

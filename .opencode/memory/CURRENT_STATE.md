@@ -51,15 +51,17 @@ target instance before Phase 1 migrations.
 
 ## 3. Implementation status
 
-**Workspace skeleton exists. ZERO application code beyond it.** No migrations,
-no schema, no domain models, no tests, no infrastructure.
+**Workspace skeleton exists plus a validated local PostgreSQL 16 dev instance.
+ZERO application code beyond the skeleton.** No migrations, no schema, no
+domain models, no tests, no infrastructure beyond the dev database.
 
 | Item | Status |
 |---|---|
 | Current phase | **Phase 1 — Database + Domain Foundation. IN PROGRESS.** |
-| Task 1 — workspace skeleton | **COMPLETE.** Exit gate PASS |
-| Tasks 2-9 | Not started |
-| Coding status | Task 1 authorised and complete. Further tasks need their own approval |
+| Task 1 — workspace skeleton | **COMPLETE.** Exit gate PASS, committed `1e9e26f` |
+| Task 2 — database infrastructure | **COMPLETE.** Local PostgreSQL 16.15 (`maihan_dev`) AND new Neon project "Maihan Gems Dev" (PostgreSQL 16.15, `maihan_dev`, schema public) — both with six extensions, HNSW + NUMERIC smoke PASS, 0 application tables. Old PG18 project abandoned for dev; production never touched. `DATABASE_URL` is the single sanctioned database variable (§29.6) |
+| Tasks 3-9 | Not started. Task 3 needs `naturalgemstones/`, ABSENT from this Codespace. Next coding task is **Task 4** (DDL migrations) |
+| Coding status | Tasks 1-2 authorised and executed per scope. Further tasks need their own approval |
 | Blocking approval | **ADR-021 (test tooling)** blocks Task 6 onward and the Phase 1 exit gate |
 
 ---
@@ -94,13 +96,15 @@ no schema, no domain models, no tests, no infrastructure.
 | # | Blocker | Type | Resolvable by |
 |---|---|---|---|
 | 1 | **ADR-021 test tooling unresolved** | **Approval.** Unit/integration/E2E/load runners not selected. Plan task 6 requires green unit tests. | Client decision |
-| 2 | `docs/evidence/MANIFEST.md` not written | Execution. No dependency; can start immediately. | `MIGRATION_ENGINEER` |
-| 3 | Repository structure not approved | Approval on plan §5 | Client sign-off |
-| 4 | Local PostgreSQL 16 not provisioned | Execution | Engineering |
-| 5 | Neon dev branch not provisioned | Execution | Engineering |
+| 2 | **`docs/evidence/MANIFEST.md` not written** | Execution. No dependency; can start immediately. **Also needs `naturalgemstones/`, ABSENT from this Codespace** | `MIGRATION_ENGINEER` |
+| 3 | Repository structure approved | APPROVED — client signed off at Task 1 | — |
+| 4 | Local PostgreSQL 16 not provisioned | **RESOLVED 2026-10-05.** 16.15 via `compose.yaml`, six extensions live-verified | — |
+| 5 | **Neon dev branch provisioned but on the WRONG major version** | **BLOCKING.** Neon project is `pg_version 18`; the authoritative dev contract is PostgreSQL **16.x**. Neon fixes `pg_version` at project creation: no `--pg-version` flag on `branches create` or `projects update`, so there is no in-place major-version change. The available API key is **project-scoped** and is rejected for project creation (`project-scoped keys are not allowed to create projects`), so a PG16 replacement project cannot be created either | **Client action: create a PostgreSQL 16 Neon project via the Neon console/account** |
 | 6 | Vercel env secrets not configured | Execution | Engineering |
 | 7 | OTel collector + error reporting not configured | Execution | Engineering |
-| 8 | Contrib extension availability unconfirmed on target | Verification, not design | Engineering |
+| 8 | Contrib extension availability unconfirmed on Neon | **PARTIALLY RESOLVED.** All six verified live on the PG18 dev branch; still unverified on a PG16 target because none exists yet | Engineering, after blocker 5 |
+| 9 | **Exposed Neon credentials not rotated** | **Security.** The connection string and API key were pasted into the chat transcript and are treated as compromised. Stored only in gitignored `.env`; verified absent from all tracked files. The API key cannot rotate itself (rejected as an organization key), so rotation needs the console | **Client action** |
+| 10 | Neon development database is named `neondb`, not `maihan_dev` | Naming contract deviation; unresolved independently of blocker 5 | Client decision, after blocker 5 |
 
 **ADR-021 is the only true design blocker.** Everything else is provisioning or
 approval, and nothing requires a later phase.

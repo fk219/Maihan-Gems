@@ -28,9 +28,9 @@ evidence package, which produced a locked architecture.
 
 ## Started
 
-**Phase 1 Task 1 — workspace skeleton — is COMPLETE.** 8 packages, 9 workspace
+**Phase 1 Task 1 — workspace skeleton — COMPLETE.** 8 packages, 9 workspace
 projects, pnpm workspaces, TypeScript project references, ESLint boundary rules
-active. Committed as `feat: Phase 1 Task 1 workspace skeleton`.
+active. Committed as `1e9e26f feat: Phase 1 Task 1 workspace skeleton`.
 
 **Zero application code beyond the skeleton.** No migrations, no schema, no
 domain models, no tests, no infrastructure.
@@ -57,12 +57,24 @@ State lives in `.opencode/memory/`:
 
 **Phase 1 — Database + Domain Foundation. IN PROGRESS.**
 
-Task 1 complete. **Next task: Task 2** — provision a disposable local
-PostgreSQL 16 and a Neon dev branch target (`INITIAL_IMPLEMENTATION_PLAN.md`
-§36 task 2). Task 3, the evidence manifest, is also dependency-free but is
-blocked until the source archive is restored.
-
-Full task list: `IMPLEMENTATION_STATE.md` → **Next**.
+- Task 1 — workspace skeleton — **COMPLETE**, committed `1e9e26f`.
+- Task 2 — database infrastructure — **COMPLETE 2026-10-05 (final pass)**.
+  **Local:** PostgreSQL 16.15 via `compose.yaml`, database `maihan_dev`, six
+  extensions, HNSW + NUMERIC smoke PASS, 0 tables.
+  **Neon:** NEW project "Maihan Gems Dev" (client-created in the console after
+  the PG16 requirement), PostgreSQL **16.15**, database **`maihan_dev`**, schema
+  public, six extensions live-verified, HNSW + NUMERIC smoke PASS, 0 application
+  tables. The old PG18.6 "Maihan Gems" project is abandoned for dev use —
+  **not deleted, not a target**. Production never touched.
+- **Variable contract enforced:** `DATABASE_URL` is the ONLY database variable
+  (`PROJECT_SOURCE_OF_TRUTH.md` §29.6). Interim suffixed variables removed.
+- **Credential note:** the client states the Neon API key was rotated and `.env`
+  updated. Confirm the `neondb_owner` password was reset too; both live only in
+  gitignored `.env`.
+- **Do NOT begin Task 3** — it needs `naturalgemstones/`, absent here.
+- **Next task: Task 4** — port the validated DDL into ordered migrations on the
+  now-standardized PG16 targets.
+- Full task list: `IMPLEMENTATION_STATE.md` → **Next**.
 
 ---
 
@@ -71,11 +83,12 @@ Full task list: `IMPLEMENTATION_STATE.md` → **Next**.
 | # | Blocker | Type |
 |---|---|---|
 | 1 | **ADR-021 test tooling unresolved.** Plan task 6 requires green unit tests; §23.4 forbids selecting a runner. | **Client approval** |
-| 2 | Repository structure not signed off (plan §5) | Client approval |
-| 3 | `docs/evidence/MANIFEST.md` not written — no dependency, can start now | Execution |
-| 4 | Local PostgreSQL 16 + Neon dev branch not provisioned | Execution |
-| 5 | Vercel env secrets, OTel collector, error reporting not configured | Execution |
-| 6 | Contrib extensions (`citext`, `pg_trgm`, `unaccent`, `btree_gin`) unconfirmed on target | Verification |
+| 2 | ~~Repository structure not signed off~~ — **RESOLVED** at Task 1 authorisation | — |
+| 3 | `docs/evidence/MANIFEST.md` — needs `naturalgemstones/`, **ABSENT** in this Codespace; restore out of band | Execution |
+| 4 | ~~Local PostgreSQL 16~~ **RESOLVED 2026-10-05**: `compose.yaml`, `pgvector/pgvector:pg16`, DB `maihan_dev` on 127.0.0.1:5433, healthy | — |
+| 5 | ~~Neon dev target on PG18.6~~ **RESOLVED 2026-10-05**: NEW "Maihan Gems Dev" project, PostgreSQL 16.15, database `maihan_dev`, verified live. Old PG18 project abandoned for dev | — |
+| 6 | Vercel env secrets, OTel collector, error reporting not configured | Execution |
+| 7 | **Confirm the exposed `neondb_owner` password was rotated** (client states the API key was rotated) | **Client: Neon console** |
 
 ADR-021 is the **only** true design blocker. Nothing else needs a later phase.
 
@@ -83,8 +96,14 @@ ADR-021 is the **only** true design blocker. Nothing else needs a later phase.
 
 ## Critical — do NOT do
 
-- **Do NOT** begin implementation without explicit user approval.
-- **Do NOT** begin Phase 1 until ADR-021 is resolved and the structure is signed off.
+- **Do NOT** begin Task 3 or Task 4. Task 2 is BLOCKED and Task 4 depends on it.
+- **Do NOT** treat the PostgreSQL 18.6 Neon branch as conformant. The
+  authoritative development contract is PostgreSQL 16.x.
+- **Do NOT** attempt to create a Neon project, rotate the API key, or complete a
+  Neon OAuth flow from this environment. The available credential is
+  project-scoped; those actions require account-level capability. A Neon OAuth
+  authorization code carries organization-wide scope including `projects:delete`
+  and `orgs:delete` and must not be completed on an agent's initiative.
 - **Do NOT** install any test framework (ADR-021 blocks it).
 - **Do NOT** add any technology not in `technical_design/02`. That needs an ADR.
 - **Do NOT** redesign the locked architecture. Propose a change; do not implement one.
