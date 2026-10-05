@@ -12,3 +12,10 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'tools/*'
+
+# pnpm build-script approval. esbuild (a transitive dependency of Drizzle Kit,
+# the approved migration tooling per SKILL_MATRIX_AND_TOOLING.md section 14.1)
+# needs its install script allowed; without it pnpm refuses a frozen-lockfile
+# install. No other package builds scripts.
+allowBuilds:
+  esbuild: true

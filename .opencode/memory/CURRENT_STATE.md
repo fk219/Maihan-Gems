@@ -24,15 +24,22 @@
 
 ## 2. Architecture lock — validated numbers
 
+Locked counts below were **re-produced by the Task 4 migrations** on both dev
+targets on 2026-10-05 (see §3 and IMPLEMENTATION_STATE.md). The one number that
+needed interpretation is the CHECK count: the migrated DDL holds **28 CHECK
+constraints plus 563 NOT NULL column constraints = 591** — the documented 591
+counts both classes (PG17-style introspection counts NOT NULL in
+`pg_constraint`; PG16 keeps it in `pg_attribute`).
+
 | Object | Count |
 |---|---|
 | Tables | 74 |
 | Enums | 33 |
-| Foreign keys | 94 (graph provably acyclic) |
-| CHECK constraints | 591 |
+| Foreign keys | 94 (graph provably acyclic; deferred `dyo_configurations_customer_fk` applied in migration 0009) |
+| CHECK constraints | 28 pg_constraint CHECKs (+ 563 NOT NULL columns = 591 documented) |
 | UNIQUE constraints | 59 |
 | Indexes | 263 (12 GIN, 2 HNSW) |
-| Named invariant constraints | 9 |
+| Named invariant constraints | 9 (+ `discounts_code_ck`, present but not counted among the 9) |
 | RLS tables / policies | 6 / 6 (0 policy-less) |
 | Triggers | 1 (`gemstones_search_document_fn`) |
 | Views | 1 (`certificate_public`) |
@@ -42,26 +49,28 @@
 | Invariants | INV-01 … INV-10 |
 | ADRs | 20 Accepted (001–020) + 4 Proposed (021–024) |
 
-**Extension availability gap:** `vector` 0.6.2 was executed during validation.
-`citext`, `pg_trgm`, `unaccent` and `btree_gin` were **statically validated only**
-(absent from the validation build; standard on the Neon image). Confirm on the
-target instance before Phase 1 migrations.
+**Extension availability gap: CLOSED.** All six extensions are live-created by
+migration 0001 on a pristine local database and verified present on the Neon
+dev project. Local image ships `vector` 0.8.7; the Neon image ships `vector`
+0.8.0 — both ≥ the 0.6+ architecture requirement and both produce identical
+vector columns and HNSW definitions (verified by catalog diff).
 
 ---
 
 ## 3. Implementation status
 
-**Workspace skeleton exists plus a validated local PostgreSQL 16 dev instance.
-ZERO application code beyond the skeleton.** No migrations, no schema, no
-domain models, no tests, no infrastructure beyond the dev database.
+**Workspace skeleton, dev databases and the ordered DDL migrations exist.
+ZERO application code beyond the skeleton + migration tooling.** No Drizzle TS
+schema, no domain models, no repositories, no tests, no seeders.
 
 | Item | Status |
 |---|---|
 | Current phase | **Phase 1 — Database + Domain Foundation. IN PROGRESS.** |
 | Task 1 — workspace skeleton | **COMPLETE.** Exit gate PASS, committed `1e9e26f` |
 | Task 2 — database infrastructure | **COMPLETE.** Local PostgreSQL 16.15 (`maihan_dev`) AND new Neon project "Maihan Gems Dev" (PostgreSQL 16.15, `maihan_dev`, schema public) — both with six extensions, HNSW + NUMERIC smoke PASS, 0 application tables. Old PG18 project abandoned for dev; production never touched. `DATABASE_URL` is the single sanctioned database variable (§29.6) |
-| Tasks 3-9 | Not started. Task 3 needs `naturalgemstones/`, ABSENT from this Codespace. Next coding task is **Task 4** (DDL migrations) |
-| Coding status | Tasks 1-2 authorised and executed per scope. Further tasks need their own approval |
+| Task 4 — ordered DDL migrations | **COMPLETE (2026-10-05).** 17 migrations (doc 04 ordering) in `packages/db/migrations/`; applied cleanly from a pristine local database AND on the Neon dev database; introspection matches every documented count (74 tables, 33 enums, 94 FKs, 59 UNIQUE, 28 CHECK + 563 NOT NULL = the documented 591, 263 indexes, 9 named invariants, 2 HNSW, 1 trigger, 2 functions, 1 view, 6/6 RLS); local vs Neon schema metadata identical. Committed in the Task 4 commit |
+| Tasks 3, 5-9 | Not started. Task 3 needs `naturalgemstones/`, ABSENT from this Codespace. Next per plan: **Task 5** (schema-fidelity assertions against a fresh database) |
+| Coding status | Tasks 1, 2 and 4 authorised and executed per scope. Further tasks need their own approval |
 | Blocking approval | **ADR-021 (test tooling)** blocks Task 6 onward and the Phase 1 exit gate |
 
 ---
@@ -98,13 +107,13 @@ domain models, no tests, no infrastructure beyond the dev database.
 | 1 | **ADR-021 test tooling unresolved** | **Approval.** Unit/integration/E2E/load runners not selected. Plan task 6 requires green unit tests. | Client decision |
 | 2 | **`docs/evidence/MANIFEST.md` not written** | Execution. No dependency; can start immediately. **Also needs `naturalgemstones/`, ABSENT from this Codespace** | `MIGRATION_ENGINEER` |
 | 3 | Repository structure approved | APPROVED — client signed off at Task 1 | — |
-| 4 | Local PostgreSQL 16 not provisioned | **RESOLVED 2026-10-05.** 16.15 via `compose.yaml`, six extensions live-verified | — |
-| 5 | **Neon dev branch provisioned but on the WRONG major version** | **BLOCKING.** Neon project is `pg_version 18`; the authoritative dev contract is PostgreSQL **16.x**. Neon fixes `pg_version` at project creation: no `--pg-version` flag on `branches create` or `projects update`, so there is no in-place major-version change. The available API key is **project-scoped** and is rejected for project creation (`project-scoped keys are not allowed to create projects`), so a PG16 replacement project cannot be created either | **Client action: create a PostgreSQL 16 Neon project via the Neon console/account** |
+| 4 | ~~Local PostgreSQL 16 not provisioned~~ **RESOLVED 2026-10-05.** 16.15 via `compose.yaml`, six extensions live-verified | — | — |
+| 5 | ~~Neon dev target on the wrong major version~~ **RESOLVED 2026-10-05.** New "Maihan Gems Dev" project, PostgreSQL 16.15, db `maihan_dev`; Task 4 migrated it | — | — |
 | 6 | Vercel env secrets not configured | Execution | Engineering |
 | 7 | OTel collector + error reporting not configured | Execution | Engineering |
-| 8 | Contrib extension availability unconfirmed on Neon | **PARTIALLY RESOLVED.** All six verified live on the PG18 dev branch; still unverified on a PG16 target because none exists yet | Engineering, after blocker 5 |
+| 8 | ~~Contrib extension availability~~ **RESOLVED 2026-10-05.** Migration 0001 creates all six on a pristine local DB; all six verified on Neon dev | — | — |
 | 9 | **Exposed Neon credentials not rotated** | **Security.** The connection string and API key were pasted into the chat transcript and are treated as compromised. Stored only in gitignored `.env`; verified absent from all tracked files. The API key cannot rotate itself (rejected as an organization key), so rotation needs the console | **Client action** |
-| 10 | Neon development database is named `neondb`, not `maihan_dev` | Naming contract deviation; unresolved independently of blocker 5 | Client decision, after blocker 5 |
+| 10 | ~~Neon dev database naming~~ **RESOLVED.** New project's database is `maihan_dev` | — | — |
 
 **ADR-021 is the only true design blocker.** Everything else is provisioning or
 approval, and nothing requires a later phase.
@@ -149,10 +158,14 @@ requires editing the authoritative plan.
 
 ## 9. Next major action
 
-1. Client resolves **ADR-021**.
-2. Client signs off on the repository structure (`INITIAL_IMPLEMENTATION_PLAN.md` §5).
-3. Build `docs/evidence/MANIFEST.md` (plan task 3, no dependency).
-4. Provision local PostgreSQL 16 + Neon dev branch; confirm contrib extensions.
-5. Then, and only then, begin Phase 1 task 1.
+1. Task 5 — schema-fidelity assertions against a fresh database (plan task 5,
+   depends only on Task 4, now complete). A framework-free introspection
+   script (`packages/db/src/verify-schema.ts`) already reports every required
+   count; the CI wiring can avoid ADR-021 scope because it asserts catalogs,
+   not units.
+2. Client resolves **ADR-021** before any task requiring a test framework
+   (task 6 onward).
+3. Task 3 (`docs/evidence/MANIFEST.md`) remains NOT STARTED — requires the
+   source archive, absent from this Codespace.
 
-**Do not begin Phase 1 without explicit user approval.**
+**Do not begin a task without explicit user approval.**

@@ -32,8 +32,15 @@ evidence package, which produced a locked architecture.
 projects, pnpm workspaces, TypeScript project references, ESLint boundary rules
 active. Committed as `1e9e26f feat: Phase 1 Task 1 workspace skeleton`.
 
-**Zero application code beyond the skeleton.** No migrations, no schema, no
-domain models, no tests, no infrastructure.
+**Phase 1 Task 4 — ordered DDL migrations — COMPLETE (2026-10-05).** 17
+migrations in `packages/db/migrations/` (doc 04 ordering), applied cleanly from
+a pristine local database AND on the Neon dev database; introspection matches
+every documented count; local vs Neon schema metadata identical. Migration
+runner: `packages/db/src/migrate.ts`; introspection CLI:
+`packages/db/src/verify-schema.ts`.
+
+**Zero application code beyond the skeleton + migration tooling.** No Drizzle
+TS schema, no domain models, no repositories, no tests, no seeders.
 
 ---
 
@@ -60,20 +67,28 @@ State lives in `.opencode/memory/`:
 - Task 1 — workspace skeleton — **COMPLETE**, committed `1e9e26f`.
 - Task 2 — database infrastructure — **COMPLETE 2026-10-05 (final pass)**.
   **Local:** PostgreSQL 16.15 via `compose.yaml`, database `maihan_dev`, six
-  extensions, HNSW + NUMERIC smoke PASS, 0 tables.
+  extensions, HNSW + NUMERIC smoke PASS.
   **Neon:** NEW project "Maihan Gems Dev" (client-created in the console after
   the PG16 requirement), PostgreSQL **16.15**, database **`maihan_dev`**, schema
-  public, six extensions live-verified, HNSW + NUMERIC smoke PASS, 0 application
-  tables. The old PG18.6 "Maihan Gems" project is abandoned for dev use —
-  **not deleted, not a target**. Production never touched.
+  public, six extensions live-verified. The old PG18.6 "Maihan Gems" project is
+  abandoned for dev use — **not deleted, not a target**. Production never
+  touched.
+- Task 4 — ordered DDL migrations — **COMPLETE 2026-10-05.** 17 migrations
+  (`0001_extensions` … `0017_trust_view`), verbatim port of SoT §8 in doc 04
+  order; history in `drizzle.__drizzle_migrations`; rerun = no-op; failure =
+  full rollback (proven); schema counts match the locked numbers (74 tables,
+  33 enums, 94 FKs, 263 indexes, 9 named invariants, 2 HNSW, 6/6 RLS, 1
+  trigger, 2 functions, 1 view); local and Neon metadata identical.
 - **Variable contract enforced:** `DATABASE_URL` is the ONLY database variable
   (`PROJECT_SOURCE_OF_TRUTH.md` §29.6). Interim suffixed variables removed.
 - **Credential note:** the client states the Neon API key was rotated and `.env`
   updated. Confirm the `neondb_owner` password was reset too; both live only in
   gitignored `.env`.
 - **Do NOT begin Task 3** — it needs `naturalgemstones/`, absent here.
-- **Next task: Task 4** — port the validated DDL into ordered migrations on the
-  now-standardized PG16 targets.
+- **Next task: Task 5** — schema-fidelity assertions against a fresh database
+  (framework-free script `packages/db/src/verify-schema.ts` already reports
+  every count; wire it as the gate). Tasks needing a test framework (6 onward)
+  remain blocked by ADR-021.
 - Full task list: `IMPLEMENTATION_STATE.md` → **Next**.
 
 ---
@@ -85,8 +100,8 @@ State lives in `.opencode/memory/`:
 | 1 | **ADR-021 test tooling unresolved.** Plan task 6 requires green unit tests; §23.4 forbids selecting a runner. | **Client approval** |
 | 2 | ~~Repository structure not signed off~~ — **RESOLVED** at Task 1 authorisation | — |
 | 3 | `docs/evidence/MANIFEST.md` — needs `naturalgemstones/`, **ABSENT** in this Codespace; restore out of band | Execution |
-| 4 | ~~Local PostgreSQL 16~~ **RESOLVED 2026-10-05**: `compose.yaml`, `pgvector/pgvector:pg16`, DB `maihan_dev` on 127.0.0.1:5433, healthy | — |
-| 5 | ~~Neon dev target on PG18.6~~ **RESOLVED 2026-10-05**: NEW "Maihan Gems Dev" project, PostgreSQL 16.15, database `maihan_dev`, verified live. Old PG18 project abandoned for dev | — |
+| 4 | ~~Local PostgreSQL 16~~ **RESOLVED 2026-10-05**: `compose.yaml`, `pgvector/pgvector:pg16`, DB `maihan_dev` on 127.0.0.1:5433, healthy, migrated by Task 4 | — |
+| 5 | ~~Neon dev target on PG18.6~~ **RESOLVED 2026-10-05**: NEW "Maihan Gems Dev" project, PostgreSQL 16.15, database `maihan_dev`; migrated by Task 4, schema identical to local | — |
 | 6 | Vercel env secrets, OTel collector, error reporting not configured | Execution |
 | 7 | **Confirm the exposed `neondb_owner` password was rotated** (client states the API key was rotated) | **Client: Neon console** |
 

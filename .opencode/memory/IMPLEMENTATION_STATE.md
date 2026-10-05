@@ -14,7 +14,12 @@ Task 1 complete and committed (`1e9e26f feat: Phase 1 Task 1 workspace skeleton`
 client-created Neon project "Maihan Gems Dev" — PostgreSQL **16.15**, database
 **`maihan_dev`** — are both provisioned and live-verified. The old PG18.6
 "Maihan Gems" project is abandoned for development use (not deleted, not a
-target). Tasks 3-9 not started.
+target).
+
+**Task 4 COMPLETE (2026-10-05).** The validated DDL is ported into 17 ordered
+Drizzle migrations and applied cleanly on a pristine local PostgreSQL 16.15
+database and on the Neon dev database; schema metadata is identical on both.
+Tasks 3 and 5-9 not started.
 MVP chain is Phase 1 → 2 → 3 → 4 → 5 → 6. Phases 7–13 are post-MVP.
 
 **Contract correction applied:** `DATABASE_URL` is the SINGLE sanctioned database
@@ -30,32 +35,22 @@ reintroduced — per-environment selection is a property of the value stored in
 
 # Current Task
 
-Task 1 complete. **Task 2 COMPLETE on the NEW "Maihan Gems Dev" Neon project.**
-
-**Path to PG16 (resolved across three passes):** the old "Maihan Gems" project
-was locked at `pg_version 18` — Neon fixes `pg_version` at project creation, has
-no `--pg-version` on `branches create` or `projects update`, so no in-place
-downgrade exists, and a project-scoped API key is rejected for project creation
-(`project-scoped keys are not allowed to create projects`). The client therefore
-created a NEW project **"Maihan Gems Dev"** in the Neon console, pinned to
-PostgreSQL 16, with database `maihan_dev`. All Task 2 exit gate items verified
-against it on 2026-10-05:
+**Task 4 COMPLETE (2026-10-05) — ordered DDL migrations.**
 
 | Check | Result |
 |---|---|
-| New project connectivity via `DATABASE_URL` | PASS |
-| `SELECT version()` | **PostgreSQL 16.15** |
-| `SELECT current_database()` | **`maihan_dev`** |
-| `SELECT current_schema()` | `public` |
-| Six required extensions | ALL INSTALLED and verified via `pg_extension` (`vector 0.8.0`, `citext 1.6`, `pg_trgm 1.6`, `unaccent 1.1`, `btree_gin 1.3`, `pg_stat_statements 1.10`) |
-| HNSW + `vector(4)` smoke | PASS (temporary objects, cleaned) |
-| `NUMERIC(12,4)` smoke | PASS (incl. overflow rejection at 10^8; cleaned) |
-| Application tables | **0** |
-| Old PG18 project | NOT touched, NOT deleted; abandoned for dev use |
-
-**Open security item:** the Neon credentials exposed in chat earlier still need
-console-side rotation if that has not happened yet. They live only in gitignored
-`.env`, verified absent from tracked files and memory.
+| Migration framework | Drizzle Kit custom SQL migrations + the Drizzle migrator, `packages/db/migrations/` + `packages/db/src/migrate.ts` |
+| Migration count | **17** (`0001_extensions` … `0017_trust_view`), one logical unit per SoT §8 subsection per doc 04 |
+| Clean local install | PASS — pristine throwaway database `maihan_dev_t4clean` (created, migrated, introspected, dropped): extensions created from zero, all 17 applied |
+| Local `maihan_dev` install | PASS — 17 applied, introspection green |
+| Neon dev install | PASS — same chain via the single `DATABASE_URL`, 17 recorded |
+| History | `drizzle.__drizzle_migrations` on both targets; 17 rows, deterministic hashes, strictly increasing `when`; public schema holds exactly the 74 locked tables |
+| Rerun behaviour | no-op on both targets (watermark skip by history) |
+| Failure behaviour | proven with a tampered migration copy on a throwaway DB: hard failure, FULL rollback (0 tables, 0 enums, 0 extensions, 0 history rows); nothing marked applied |
+| Schema counts | 74 tables · 33 enums · 74 PK · 94 FK · 59 UNIQUE · 28 CHECK (+563 NOT NULL = the documented 591) · 263 indexes · 9 named invariants · 2 HNSW · 2 vector(1024) columns · 1 trigger · 2 functions · 1 view · 6/6 RLS · 0 policy-less |
+| Local vs Neon fidelity | **IDENTICAL** — tables, enums+member counts, FKs, constraint counts, index definitions, HNSW, vector columns, trigger, functions, views, RLS all MATCH; only descriptive fields differ (platform pgvector 0.8.7 local / 0.8.0 Neon, both ≥ 0.6) |
+| Behavioural smoke | trigger populates/maintains `search_document`; INV-01/02/03, `dyo_one_stone_ck`, `dyo_pair_is_earrings_ck`, `certificates_subject_ck` all reject violations (23514); CITEXT email uniqueness rejected case-variant duplicate (23505); smoke rows cleaned, 0 leftovers |
+| lint / build / tsc --dry | PASS / PASS / PASS |
 
 **ADR-021 remains OPEN.** No test framework is installed and none may be, until
 it is resolved. This blocks Task 6 onward and the Phase 1 exit gate.
@@ -66,14 +61,13 @@ it is resolved. This blocks Task 6 onward and the Phase 1 exit gate.
 
 | Item | State |
 |---|---|
-| Phase 1 | **Started. Task 1 complete, Task 2 BLOCKED.** Tasks 3-10 not started |
-| Tasks 1-10 | **Task 1 COMPLETE. Task 2 BLOCKED** (Neon is PG18.6; contract requires PG16.x). Tasks 3-10 not started |
+| Phase 1 | **Started. Tasks 1, 2 and 4 complete.** Tasks 3, 5-10 not started |
 | Application code | **None exists.** Workspace skeleton only; every `src/index.ts` is a documentation-only barrel |
-| Database migrations | **None written** (Task 4) |
+| Database migrations | **17 ordered DDL migrations, applied and verified on both dev targets** (Task 4) |
 | Tests | **None written.** ADR-021 still OPEN |
 | Repository / workspaces | **EXISTS.** 8 packages, 9 workspace projects, pnpm 12.3.4 |
-| Local PostgreSQL 16 | **EXISTS and correct.** 16.15 via compose.yaml, database `maihan_dev`, all six extensions live-verified |
-| Neon development branch | **RESOLVED and CONFORMANT.** NEW project "Maihan Gems Dev": PostgreSQL **16.15**, database **`maihan_dev`** (user-created after the PG16 requirement), schema public, six extensions live-verified, HNSW + NUMERIC PASS, 0 application tables. The OLD PG18 project/branch is abandoned for dev (not deleted, not a target) |
+| Local PostgreSQL 16 | **EXISTS and correct.** 16.15 via compose.yaml, database `maihan_dev`, all six extensions; Task 4 migrated it |
+| Neon dev | **EXISTS and correct.** "Maihan Gems Dev": PostgreSQL 16.15, db `maihan_dev`; Task 4 migrated it; schema identical to local |
 | `docs/evidence/MANIFEST.md` | **Not written.** Task 3; blocked, archive absent |
 
 ---
@@ -93,6 +87,7 @@ Planning complete. **Tasks 1 and 2 are the first implementation tasks completed.
 | `.gitignore` fixed to exclude the source archive | 2026-10-05; `git check-ignore` verified |
 | **Phase 1 Task 1 — workspace skeleton** | **8 packages, 9 workspace projects, pnpm 12.3.4. Exit gate PASS: workspaces install; boundary lint rules active** |
 | **Phase 1 Task 2 — database infrastructure** | **COMPLETE.** LOCAL: PostgreSQL 16.15 via `compose.yaml` (`pgvector/pgvector:pg16`), database `maihan_dev` on 127.0.0.1:5433, healthy; six extensions live-verified (`vector 0.8.7`, `citext 1.6`, `pg_trgm 1.6`, `unaccent 1.1`, `btree_gin 1.3`, `pg_stat_statements 1.10`); HNSW + `vector(4)` + `NUMERIC(12,4)` smoke tests PASS; 0 application tables. NEON: standardized on a NEW project "Maihan Gems Dev" (created by the client in the console after the PG16 requirement), PostgreSQL **16.15**, database **`maihan_dev`**, schema `public`; six extensions installed and live-verified (`vector 0.8.0`, `citext 1.6`, `pg_trgm 1.6`, `unaccent 1.1`, `btree_gin 1.3`, `pg_stat_statements 1.10`); HNSW + `NUMERIC(12,4)` smoke tests PASS; 0 application tables. The OLD "Maihan Gems" PG18 project and its `dev` branch are abandoned for development use (not deleted, not a valid target). Production verified untouched (0 extensions, 0 tables) |
+| **Phase 1 Task 4 — ordered DDL migrations** | **COMPLETE.** 17 migrations ported verbatim from SoT §8 in doc 04 order; applied from clean state on local (throwaway DB incl. extension creation + real `maihan_dev`) and on Neon dev; introspection matches every documented count; local vs Neon metadata identical; rerun no-op; failure rollback proven; behavioural smoke green (trigger, INV bites, CITEXT) |
 
 ---
 
@@ -111,7 +106,7 @@ First ten tasks, verbatim from `INITIAL_IMPLEMENTATION_PLAN.md` §36.
 | 1 | Stand up the workspace skeleton: `apps/web`, `apps/worker`, `packages/{db,domain,contracts,config,observability}`, `tools/migrate`, `docs/adr`, with pnpm workspaces | 1 | — | Workspaces install; boundary lint rules active — **DONE** |
 | 2 | Provision a disposable local PostgreSQL 16 and a Neon **dev branch** target for migrations | 1 | 1 | Both reachable; neither is production — **DONE. Local: PG 16.15, db `maihan_dev`. Neon: NEW project "Maihan Gems Dev" (client-created), PG 16.15, db `maihan_dev`. Old PG18 project abandoned, production never touched** |
 | 3 | Write `docs/evidence/MANIFEST.md` recording storage location, SHA-256 and retention class of every migration-critical file | 1 | — | All ten entries present with verified checksums |
-| 4 | Port the validated DDL into ordered migrations, one logical unit per source-of-truth schema subsection | 1 | 2 | Applies cleanly on a clean database |
+| 4 | Port the validated DDL into ordered migrations, one logical unit per source-of-truth schema subsection | 1 | 2 | Applies cleanly on a clean database — **DONE** |
 | 5 | Assert schema fidelity in CI: 74 tables, 33 enums, 94 FKs, 591 CHECK, 263 indexes, 9 named invariant constraints, 6 RLS policies with 0 policy-less tables, 2 HNSW indexes, 1 trigger, 1 view, 2 functions | 1 | 4 | Introspection test green against a fresh database |
 | 6 | Implement the domain value objects and INV-01, INV-02, INV-03 as pure predicates | 1 | 4 | Unit tests green; no infrastructure imports |
 | 7 | Implement the SKU grammar parser with the validated regex and prove it against the 1,024-record corpus | 1 | 6 | 1,024/1,024 match, 0 mismatches (gates V3, V19) |
@@ -164,6 +159,12 @@ during planning and are recorded in `technical_design/40` and
 | 2026-10-05 (T2) | Dev database name fixed as `maihan_dev`; identical across environments so migration tooling is written once (`MAIHAN_DB_NAME`) | `.env.example`, `compose.yaml` |
 | 2026-10-05 (T2) | `MAIHAN_ENV` discriminator added per `technical_design/29` §3 (`local` / `preview` / `staging` / `production`) for the future startup environment guard; guard itself is NOT Task 2 scope | `.env.example` |
 | 2026-10-05 (T2) | Neon provisioning deferred to explicit credential handoff. Do NOT proceed without a real `NEON_API_KEY`; values are never invented (AGENTS.md prohibition 1) | This file, Blockers |
+| 2026-10-05 (T4) | Migration tooling = **Drizzle Kit custom SQL migrations** applied by the Drizzle migrator (`drizzle-orm/node-postgres`), per SKILL_MATRIX tooling table ("Migration authoring — Drizzle Kit — packages/db") and doc 02. Hand-authored SQL because the DDL is ported verbatim from SoT §8, not re-derived from a TS schema. `tools/migrate` stays the Phase 2 DATA pipeline only | `packages/db/migrations/`, `packages/db/drizzle.config.ts` |
+| 2026-10-05 (T4) | PostgreSQL driver = **`pg`** (node-postgres), exact-pinned with `@types/pg`. It is the portable direct-pool driver doc 29 §4 requires for migrations, and doc 03's boundary rules already name `pg` as the anticipated db-package client | `packages/db/package.json` |
+| 2026-10-05 (T4) | Migration history stays in the Drizzle default `drizzle.__drizzle_migrations` so `public` holds EXACTLY the 74 locked tables — history is inspectable and separate from the schema inventory | `packages/db/src/migrate.ts` |
+| 2026-10-05 (T4) | Advisory lock `hashtext('maihan-gems-ddl-migrations')` taken around the run (doc 29 §4: "concurrent attempts blocked by an advisory lock"); a pooled-endpoint host triggers a WARNING pointing at the direct endpoint | `packages/db/src/migrate.ts` |
+| 2026-10-05 (T4) | 0001 runs the six `CREATE EXTENSION IF NOT EXISTS` verbatim then FAILS LOUDLY (DO block) if any of the five schema-load-bearing extensions is absent; `pg_stat_statements` warns only (doc 04 marks it optional) | `packages/db/migrations/0001_extensions.sql` |
+| 2026-10-05 (T4) | `pnpm-workspace.yaml` gained `allowBuilds: esbuild: true` — pnpm 12 build-script approval for esbuild, drizzle-kit's own transitive dependency; without it a frozen-lockfile install exits non-zero. No new technology introduced | `pnpm-workspace.yaml` |
 
 ---
 
@@ -184,6 +185,7 @@ No application files. Planning-stage only.
 | **Task 1 files** | 31 files: root configs (`package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `tsconfig.json`, `tsconfig.base.json`, `eslint.config.mjs`), 8 package manifests + tsconfigs + `src/index.ts` barrels, 4 directory READMEs | Commit `1e9e26f` |
 | **Task 2 files** | `compose.yaml` (local PostgreSQL 16 dev instance), `.env.example` (non-secret environment contract) | This task; see Commit section |
 | **Task 1 memory** | `CURRENT_STATE.md`, `DECISIONS.md`, `IMPLEMENTATION_STATE.md`, `SESSION_HANDOFF.md` updated to record Task 1 completion and ECC harness tracking | Commit `1e9e26f` |
+| **Task 4 files** | `packages/db/migrations/` (17 SQL + `meta/_journal.json`), `packages/db/src/migrate.ts` (runner), `packages/db/src/verify-schema.ts` (introspection CLI), `packages/db/drizzle.config.ts`, `packages/db/package.json` (+drizzle-orm/drizzle-kit/pg scripts), root `package.json` (+`@types/node`), `pnpm-workspace.yaml` (esbuild build approval), `pnpm-lock.yaml` | Task 4 commit |
 
 ---
 
@@ -208,19 +210,24 @@ Verification performed during planning:
 | **Production safety** | **PASS** — all operations against the new dev project only via `DATABASE_URL`; the old PG18 project and its production branch were never connected to this session, and their credentials no longer exist in `.env` |
 | **Credential exposure** | **Client states the API key is rotated; `.env` now holds the new values.** Rotation of the `neondb_owner` password should be confirmed. Held only in gitignored `.env`; secret scan of tracked files and memory: 0 credential hits |
 | **Secret hygiene** | **PASS** — `.env` gitignored (`.gitignore:25`) and untracked; `.env.example` scanned: 0 occurrences of `npg_`, `napi_`, or any real host credential; only non-secret identifiers retained |
+| **Task 4 (local)** | Clean-install: throwaway `maihan_dev_t4clean` migrated from zero (extensions created, 17/17 applied) then dropped · `maihan_dev` migrated · introspection: 74 tables, 33 enums, 94 FK, 74 PK, 59 UNIQUE, 28 CHECK + 563 NOT NULL, 263 indexes, 9 named invariants, 2 HNSW, 2 vector(1024) columns, 1 trigger, 2 functions, 1 view, 6/6 RLS, 0 policy-less · rerun no-op · failure rollback proven (tampered copy on throwaway DB: 0 objects, 0 history rows) · behavioural smoke: trigger populates+maintains `search_document`, INV-01/02/03 + `dyo_one_stone_ck` + `dyo_pair_is_earrings_ck` + `certificates_subject_ck` reject (23514), CITEXT duplicate rejected (23505), all smoke rows cleaned |
+| **Task 4 (Neon)** | Same 17 migrations via the single `DATABASE_URL`: applied 17/17 on PostgreSQL 16.15 db `maihan_dev`; history 17 rows strictly increasing; rerun no-op; introspection identical to local |
+| **Task 4 (fidelity)** | Local vs Neon catalog diff: MATCH on tables, enums+member counts, FKs, constraint counts, index definitions, HNSW, vector columns, trigger, functions, views, RLS tables/policies. Only extension VERSION differs (platform images: vector 0.8.7 vs 0.8.0; both ≥ 0.6 required) |
+| **Task 4 (toolchain)** | `pnpm install --frozen-lockfile` PASS (esbuild build script approved) · `pnpm run lint` PASS · `pnpm run build` PASS · `npx tsc -b --dry` PASS |
 
 ---
 
 # Migration Status
 
-**Not started.**
+**DDL migrations: COMPLETE (Task 4). Data pipeline: not started (Phase 2).**
 
 | Item | Status |
 |---|---|
-| `tools/migrate` built | No |
+| `packages/db` DDL migrations | **17 applied and verified on both dev targets** |
+| `tools/migrate` built | No (Phase 2, task 10) |
 | Stages 1–8 implemented | No |
 | Gates V1–V22 running | No |
-| Staging tables populated | No |
+| Staging tables populated | No (tables exist, empty) |
 | Canonical catalogue populated | No |
 | `import_batches` written | No |
 | Redirects generated (44,218) | No |
@@ -249,6 +256,9 @@ catalogue. Full detail in `AGENTS.md` §9.
 | Re-provision local Postgres outside Docker Compose | Compose file exists; single source of truth for the local instance |
 | Expose port 5433 to anything except 127.0.0.1 | A dev DB with a throwaway password must never be network-reachable |
 | Substitute a fake Neon connection string | BLOCKED is the answer, not a placeholder |
+| Hand-edit the migrated schema on a dev target | "Staging drift is rebuilt from migrations, never hand-patched" (doc 29 §9). Any change = a new migration |
+| Regenerate/replace the 17 Task 4 SQL files from a Drizzle TS schema | They are the verbatim port of the validated DDL; a TS schema mirror is a separate later task (E1.2) and must diff against these |
+| Put seed data into migrations | Migrations are DDL only; seeds are plan task 9 (separate files/runners) |
 
 ---
 
