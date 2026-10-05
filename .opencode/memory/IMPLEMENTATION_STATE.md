@@ -7,12 +7,11 @@
 
 # Current Phase
 
-**NONE — implementation has not started.**
+**Phase 1 — Database + Domain Foundation. IN PROGRESS.**
 
-Next coding phase: **Phase 1 — Database + Domain Foundation**
-(`INITIAL_IMPLEMENTATION_PLAN.md` §8)
-
-MVP chain is Phase 1 → 2 → 3 → 4 → 5 → 6. Phases 7–13 are post-MVP.
+Task 1 complete and committed (`feat: Phase 1 Task 1 workspace skeleton`).
+Tasks 2–9 not started. MVP chain is Phase 1 → 2 → 3 → 4 → 5 → 6.
+Phases 7–13 are post-MVP.
 
 ---
 
@@ -20,8 +19,13 @@ MVP chain is Phase 1 → 2 → 3 → 4 → 5 → 6. Phases 7–13 are post-MVP.
 
 **NONE. No task is in progress.**
 
-The first task is blocked on ADR-021 (test tooling). Do not begin it, and do not
-begin any task ahead of it.
+Task 1 is complete. The next task is **Task 2 — provision a disposable local
+PostgreSQL 16 and a Neon dev branch target**. It requires credentials and
+infrastructure that must not be provisioned without explicit approval.
+
+**ADR-021 remains OPEN.** No test framework is installed and none may be, until
+it is resolved. This blocks Task 6 onward and the Phase 1 exit gate. It does not
+block Tasks 2, 3, 4, 5 or 9.
 
 ---
 
@@ -29,19 +33,19 @@ begin any task ahead of it.
 
 | Item | State |
 |---|---|
-| Phase 1 | Not started |
-| Tasks 1–10 | **None completed** |
-| Application code | **None exists** |
+| Phase 1 | **Started. Task 1 complete.** Tasks 2-10 not started |
+| Tasks 1-10 | **Task 1 COMPLETE.** Tasks 2-10 none completed |
+| Application code | **None exists.** Workspace skeleton only; every `src/index.ts` is a documentation-only barrel |
 | Database migrations | **None written** |
-| Tests | **None written** |
-| Repository / workspaces | **Does not exist** |
-| `docs/evidence/MANIFEST.md` | **Not written** |
+| Tests | **None written.** ADR-021 still OPEN |
+| Repository / workspaces | **EXISTS.** 8 packages, 9 workspace projects, pnpm 12.3.4 |
+| `docs/evidence/MANIFEST.md` | **Not written.** Task 3; blocked, archive absent |
 
 ---
 
 # Completed
 
-Planning only. Nothing in the implementation column.
+Planning complete. **Task 1 is the first implementation task completed.**
 
 | Completed | Evidence |
 |---|---|
@@ -52,6 +56,7 @@ Planning only. Nothing in the implementation column.
 | Skill and tooling matrix | `SKILL_MATRIX_AND_TOOLING.md` |
 | Persistent project context | `AGENTS.md`, `.opencode/memory/` |
 | `.gitignore` fixed to exclude the source archive | 2026-10-05; `git check-ignore` verified |
+| **Phase 1 Task 1 — workspace skeleton** | **8 packages, 9 workspace projects, pnpm 12.3.4. Exit gate PASS: workspaces install; boundary lint rules active** |
 
 ---
 

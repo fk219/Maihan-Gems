@@ -26,10 +26,14 @@ evidence package, which produced a locked architecture.
 | Skill and tooling matrix | `SKILL_MATRIX_AND_TOOLING.md` |
 | Persistent project context | `AGENTS.md`, `.opencode/memory/` |
 
-## NOT started
+## Started
 
-**Zero application code.** No repository, no migrations, no packages, no tests,
-no infrastructure. Phase 1 has not begun.
+**Phase 1 Task 1 — workspace skeleton — is COMPLETE.** 8 packages, 9 workspace
+projects, pnpm workspaces, TypeScript project references, ESLint boundary rules
+active. Committed as `feat: Phase 1 Task 1 workspace skeleton`.
+
+**Zero application code beyond the skeleton.** No migrations, no schema, no
+domain models, no tests, no infrastructure.
 
 ---
 
@@ -51,10 +55,12 @@ State lives in `.opencode/memory/`:
 
 ## Current phase
 
-**Not started.** Next: **Phase 1 — Database + Domain Foundation**.
+**Phase 1 — Database + Domain Foundation. IN PROGRESS.**
 
-**Next task:** workspace skeleton with pnpm workspaces
-(`INITIAL_IMPLEMENTATION_PLAN.md` task 1).
+Task 1 complete. **Next task: Task 2** — provision a disposable local
+PostgreSQL 16 and a Neon dev branch target (`INITIAL_IMPLEMENTATION_PLAN.md`
+§36 task 2). Task 3, the evidence manifest, is also dependency-free but is
+blocked until the source archive is restored.
 
 Full task list: `IMPLEMENTATION_STATE.md` → **Next**.
 
@@ -97,7 +103,7 @@ ADR-021 is the **only** true design blocker. Nothing else needs a later phase.
 ## Source archive
 
 ```
-naturalgemstones/     46,810 files, present in this environment
+naturalgemstones/     46,810 files. ABSENT in this Codespace (verified 2026-10-05)
 ```
 
 **Never committed. Ignored by `.gitignore`.**

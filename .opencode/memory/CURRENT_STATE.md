@@ -51,15 +51,16 @@ target instance before Phase 1 migrations.
 
 ## 3. Implementation status
 
-**ZERO application code exists.** No repository, no migrations, no packages, no
-tests, no infrastructure. Nothing has been built.
+**Workspace skeleton exists. ZERO application code beyond it.** No migrations,
+no schema, no domain models, no tests, no infrastructure.
 
 | Item | Status |
 |---|---|
-| Current phase | **Not started.** Phase 0 (planning) only. |
-| Next coding phase | **Phase 1 — Database + Domain Foundation** |
-| Coding status | **NOT AUTHORISED** |
-| Blocking approval | **ADR-021 (test tooling)** |
+| Current phase | **Phase 1 — Database + Domain Foundation. IN PROGRESS.** |
+| Task 1 — workspace skeleton | **COMPLETE.** Exit gate PASS |
+| Tasks 2-9 | Not started |
+| Coding status | Task 1 authorised and complete. Further tasks need their own approval |
+| Blocking approval | **ADR-021 (test tooling)** blocks Task 6 onward and the Phase 1 exit gate |
 
 ---
 

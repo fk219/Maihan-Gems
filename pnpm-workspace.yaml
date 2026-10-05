@@ -1,0 +1,14 @@
+# pnpm workspace definition.
+#
+# Authority: INITIAL_IMPLEMENTATION_PLAN.md section 5, technical_design/03.
+# The package set is exactly the layout the architecture specifies. No package
+# may be added or renamed without an ADR (AGENTS.md section 6, prohibition 5).
+#
+# Deliberately excluded from this list:
+#   - e2e/, tests/   spec directories, not workspace packages. Their runner is
+#                   OPEN under ADR-021 and may not contain a test.
+#   - docs/          documentation only, no manifest.
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'tools/*'

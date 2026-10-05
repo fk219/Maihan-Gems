@@ -1,0 +1,17 @@
+{
+  "name": "@maihan/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@maihan/config": "workspace:*",
+    "@maihan/contracts": "workspace:*",
+    "@maihan/db": "workspace:*",
+    "@maihan/domain": "workspace:*",
+    "@maihan/observability": "workspace:*"
+  }
+}

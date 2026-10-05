@@ -112,6 +112,9 @@ approved. `DEFERRED` = deliberately postponed.
 | Vision/OCR model | UNKNOWN | Phase 8 | Chosen within the locked `ModelGateway` |
 | Email provider | UNKNOWN | Phase 6 | Deferred decision |
 | Jurisdiction / statutory retention | UNKNOWN | Compliance | Retention table is conditional |
+| `process.env` lint scope | **AMBIGUOUS — follow-up** | Task 1 follow-up | `technical_design/01` line 56 scopes the `process.env` restriction to `packages/domain`; `technical_design/03` implementation constraint 3 states no package may read `process.env` except `packages/config`. Task 1 implements the narrower `technical_design/01` reading and changed nothing further. Plan owner to reconcile. No ADR created; this is a documentation conflict, not a technology choice |
+| `packages/ai` in the Task 1 skeleton | **NOT CREATED** | Phase 9 | `AGENTS.md` section 2 lists it in the future layout; `INITIAL_IMPLEMENTATION_PLAN.md` section 5, the authority for Task 1, omits it. Task 1 followed the plan. Sequencing ambiguity for the plan owner |
+| CI provider | **ACCEPTED: GitHub Actions** | Phase 1 boundary-lint job | Decided 2026-10-05 at Task 1 closure: the repository is hosted on GitHub and `technical_design/03` requires a blocking boundary-lint CI job. **No workflow file created.** Deferred to a later authorised task |
 
 **Proposed is not Accepted.** A proposal names candidates; it does not authorise
 installation or implementation.

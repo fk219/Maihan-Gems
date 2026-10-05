@@ -1,0 +1,19 @@
+{
+  "name": "@maihan/migrate",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "maihan-migrate": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@maihan/config": "workspace:*",
+    "@maihan/db": "workspace:*",
+    "@maihan/domain": "workspace:*",
+    "@maihan/observability": "workspace:*"
+  }
+}
