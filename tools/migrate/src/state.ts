@@ -132,6 +132,13 @@ export class MigrationState {
     );
   }
 
+  /** The stage's durable import_batches.id (null when the stage never ran). */
+
+  async stageBatchId(stageKey: string): Promise<string | null> {
+    const r = await this.client.query<{ id: string }>('SELECT id::text AS id FROM import_batches WHERE batch_key = $1', [stageKey]);
+    return r.rows[0]?.id ?? null;
+  }
+
   /** Every stage row, for the status command. */
   async listStages(): Promise<StageStateRow[]> {
     const r = await this.client.query<{ batch_key: string; status: string; source_artifact: string | null; notes: string | null; started_at: string | null; finished_at: string | null }>(

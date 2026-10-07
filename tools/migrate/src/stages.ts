@@ -53,8 +53,7 @@ export const STAGES: readonly StageDefinition[] = Object.freeze([
     id: 'extract-staging',
     description: 'Load urls.jsonl verbatim into staging_source_pages (44,218 rows unchanged)',
     requiredArtifacts: ['urls.jsonl'],
-    implemented: false,
-    blockedBy: 'plan task 11 (Phase 2)',
+    implemented: true,
   },
   {
     id: 'parse-slugs',

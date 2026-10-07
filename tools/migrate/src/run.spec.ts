@@ -29,6 +29,7 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ArtifactVerificationError, parseManifest, verifyArtifact } from './manifest.js';
 import { runStages } from './run.js';
+import { STAGES } from './stages.js';
 import { MigrationState } from './state.js';
 import { runMigrations, defaultMigrationsFolder } from '@maihan/db';
 
@@ -55,6 +56,17 @@ function createFixture(): Fixture {
   const artifacts = [
     { no: '1', name: 'fixture-alpha.jsonl', bytes: 'alpha content A\n'.repeat(64) },
     { no: '2', name: 'fixture-beta.jsonl', bytes: JSON.stringify({ ok: true }) + '\n' },
+    // Phase 2 extract stage consumes urls.jsonl: a minimal fixture spine (the
+    // REAL 44,218-row corpus is held to the authoritative count by the gate
+    // runner, not by the fixture chain).
+    {
+      no: '3',
+      name: 'urls.jsonl',
+      bytes: [
+        JSON.stringify({ url: 'https://naturalgemstones.com/cart', classification: 'cart', crawl: { http_status: null } }),
+        JSON.stringify({ url: 'https://naturalgemstones.com/garnet', classification: 'variety_index', crawl: { http_status: null } }),
+      ].join('\n') + '\n',
+    },
   ];
   // An ABSOLUTE archiveRoot replaces the 'naturalgemstones' marker segment
   // entirely: artifactAbsolutePath maps actualPath onto archiveRoot/<rest>.
@@ -167,13 +179,11 @@ d('hash-mismatch refusal (mandatory gate 1)', () => {
 
 d('resume (mandatory gate 2)', () => {
   it('runs the full chain; completed stages stay complete and skipped stages never rework', async () => {
-    // Full chain once: verify-artifacts + migrate-schema + seed-reference.
+    // Full chain once: verify-artifacts + migrate-schema + seed-reference +
+    // every stage implemented at this point (Phase 2 grows the chain).
+    const expected = (await import('./stages.js')).STAGES.filter((s) => s.implemented).map((s) => [s.id, 'RAN'] as const);
     const outcomes = await runStages({ databaseUrl: scratchConnectionString(), repoRoot: fixture.repoRoot, manifestPath: fixture.manifestPath, archiveRoot: fixture.archiveRoot, minManifestArtifacts: 2 });
-    expect(outcomes.map((o) => [o.id, o.action])).toEqual([
-      ['verify-artifacts', 'RAN'],
-      ['migrate-schema', 'RAN'],
-      ['seed-reference', 'RAN'],
-    ]);
+    expect(outcomes.map((o) => [o.id, o.action])).toEqual(expected);
     expect(await stageStatus('verify-artifacts')).toBe('SUCCEEDED');
     expect(await stageStatus('migrate-schema')).toBe('SUCCEEDED');
     expect(await stageStatus('seed-reference')).toBe('SUCCEEDED');
@@ -186,13 +196,12 @@ d('resume (mandatory gate 2)', () => {
     await simulateFailed('stage:seed-reference', 'simulated interruption before completion');
 
     // Downstream of the failure point there is nothing (seed-reference is
-    // last); the completed upstream stages must remain SUCCEEDED and SKIP.
+    // followed by later Phase 2 stages only); the completed upstream stages
+    // must remain SUCCEEDED and SKIP.
+    const impl = (await import('./stages.js')).STAGES.filter((s) => s.implemented);
+    const expectedActions = impl.map((s) => [s.id, s.id === 'seed-reference' ? 'RAN' : 'SKIPPED'] as const);
     const outcomes = await runStages({ databaseUrl: scratchConnectionString(), repoRoot: fixture.repoRoot, manifestPath: fixture.manifestPath, archiveRoot: fixture.archiveRoot, minManifestArtifacts: 2 });
-    expect(outcomes.map((o) => [o.id, o.action])).toEqual([
-      ['verify-artifacts', 'SKIPPED'],
-      ['migrate-schema', 'SKIPPED'],
-      ['seed-reference', 'RAN'],
-    ]);
+    expect(outcomes.map((o) => [o.id, o.action])).toEqual(expectedActions);
     expect(await stageStatus('seed-reference')).toBe('SUCCEEDED');
     // Idempotent rework: the seed did not duplicate rows.
     expect(await referenceCounts()).toEqual(seedCountsBefore);
@@ -231,15 +240,20 @@ d('idempotency (mandatory gate 3)', () => {
 
 d('not-implemented stage refusal', () => {
   it('a declared future stage refuses to execute and marks itself FAILED', async () => {
+    // Phase 2 implements stages incrementally: target the FIRST stage that is
+    // still declared-but-not-implemented (currently parse-slugs; becomes
+    // nothing once the whole Phase 2 chain is implemented — the test skips).
+    const pending = STAGES.find((s) => !s.implemented);
+    if (pending === undefined) return; // whole chain implemented
     try {
-      await runStages({ databaseUrl: scratchConnectionString(), repoRoot: fixture.repoRoot, manifestPath: fixture.manifestPath, archiveRoot: fixture.archiveRoot, minManifestArtifacts: 2, onlyStageIds: ['extract-staging'] });
+      await runStages({ databaseUrl: scratchConnectionString(), repoRoot: fixture.repoRoot, manifestPath: fixture.manifestPath, archiveRoot: fixture.archiveRoot, minManifestArtifacts: 2, onlyStageIds: [pending.id] });
       expect.unreachable('must refuse');
     } catch (e) {
       expect(e instanceof Error).toBe(true);
       expect((e as Error).message).toContain('declared but not implemented');
-      expect((e as Error).message).toContain('extract-staging');
+      expect((e as Error).message).toContain(pending.id);
     }
-    expect(await stageStatus('extract-staging')).toBe('FAILED');
+    expect(await stageStatus(pending.id)).toBe('FAILED');
   });
 });
 
@@ -291,7 +305,7 @@ async function referenceCounts(): Promise<Record<string, number>> {
 }
 
 async function snapshot(): Promise<Record<string, string>> {
-  const tables = ['metals', 'jewellery_types', 'setting_styles', 'treatments', 'treatment_labels', 'colour_intensities', 'clarities', 'clarity_labels'];
+  const tables = ['metals', 'jewellery_types', 'setting_styles', 'treatments', 'treatment_labels', 'colour_intensities', 'clarities', 'clarity_labels', 'staging_source_pages', 'import_batches'];
   const out: Record<string, string> = {};
   for (const table of tables) {
     const r = await scratch.query<{ h: string }>(`SELECT md5(string_agg(mSort, ',' ORDER BY mSort)) AS h FROM (SELECT (to_jsonb(t)::text) AS mSort FROM ${table} t) s`);

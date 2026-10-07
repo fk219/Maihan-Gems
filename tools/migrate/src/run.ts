@@ -31,10 +31,12 @@
  *      started/finished timestamps are all in the durable rows; errors carry
  *      artifact/digest details and never secrets.
  */
-import { ArtifactVerificationError, parseManifest, resolveArchiveRoot, verifyArtifact, type ManifestArtifact } from './manifest.js';
+import { ArtifactVerificationError, parseManifest, resolveArchiveRoot, verifyArtifact, artifactAbsolutePath, type ManifestArtifact, type ParsedManifest } from './manifest.js';
 import { STAGES, requiredArtifactsFor, type StageDefinition } from './stages.js';
 import { MigrationState, type StageStatus } from './state.js';
 import { runMigrations, defaultMigrationsFolder, seedReferenceData } from '@maihan/db';
+import type { StageContext } from './stages/context.js';
+import { runExtractStaging, EXPECTED_EXTRACT_ROWS } from './stages/extract-staging.js';
 
 export interface RunOptions {
   databaseUrl: string;
@@ -72,20 +74,54 @@ function artifactNote(artifacts: readonly ManifestArtifact[]): string {
   return `${artifacts.length} manifest artifacts`;
 }
 
+/**
+ * Build the stage execution context: the client is the runner's durable-state
+ * connection; artifact paths resolve through the ALREADY-verified manifest
+ * rows (the runner parsed and verified them before this call).
+ */
+function stageContext(
+  stage: StageDefinition,
+  options: {
+    repoRoot: string;
+    archiveRoot: string;
+    importBatchId: string;
+    manifest: ParsedManifest;
+  },
+  db: StageContext['db'],
+): StageContext {
+  const paths = new Map<string, string>();
+  for (const artifact of options.manifest.artifacts) {
+    paths.set(artifact.artifact, artifactAbsolutePath(artifact, options.archiveRoot, options.repoRoot));
+  }
+  return {
+    db: db as unknown as StageContext['db'],
+    archiveRoot: options.archiveRoot,
+    repoRoot: options.repoRoot,
+    importBatchId: options.importBatchId,
+    write,
+    artifactPath: (name: string) => {
+      const resolved = paths.get(name);
+      if (resolved === undefined) throw new Error(`stage ${stage.id}: unverified artifact "${name}" is not in the manifest`);
+      return resolved;
+    },
+  };
+}
+
 async function executeStage(
   stage: StageDefinition,
-  options: { databaseUrl: string; repoRoot: string; manifestPath: string; archiveRoot: string },
-): Promise<void> {
+  options: { databaseUrl: string; repoRoot: string; manifestPath: string; archiveRoot: string; importBatchId: string },
+  ctx: StageContext,
+): Promise<string> {
   switch (stage.id) {
     case 'verify-artifacts': {
       // The per-artifact verification already ran in the gating loop with
       // progress output; this stage is its own gate.
-      return;
+      return 'manifest verification complete (see gating output)';
     }
     case 'migrate-schema': {
       const result = await runMigrations({ databaseUrl: options.databaseUrl, migrationsFolder: defaultMigrationsFolder() });
       write(`  migrate-schema: target ${result.database}, ${result.recorded} migration(s) recorded`);
-      return;
+      return `ordered DDL migration chain applied (${result.recorded} recorded)`;
     }
     case 'seed-reference': {
       const { Client } = await import('pg');
@@ -103,7 +139,11 @@ async function executeStage(
       } finally {
         await client.end().catch(() => undefined);
       }
-      return;
+      return 'authoritative reference vocabulary seeded (ON CONFLICT DO NOTHING)';
+    }
+    case 'extract-staging': {
+      const result = await runExtractStaging(ctx);
+      return `urls.jsonl -> staging_source_pages verbatim: seen ${result.recordsSeen}, loaded ${result.rowsLoaded}/${EXPECTED_EXTRACT_ROWS}`;
     }
     default:
       throw new Error(`stage ${stage.id} has no executor (declared but not implemented: ${stage.blockedBy ?? 'unknown'})`);
@@ -181,21 +221,34 @@ export async function runStages(options: RunOptions): Promise<readonly StageOutc
         stageKey: `stage:${stage.id}`,
         sourceArtifact: artifactNote(artifacts),
       });
+      const batchId = await state.stageBatchId(`stage:${stage.id}`);
+      if (batchId === null) {
+        throw new Error(`stage ${stage.id}: import_batches row vanished after markRunning; refusing to execute without a durable provenance anchor`);
+      }
+      // The stage executor works on its own dedicated connection (never the
+      // durable-state client; never a pooled endpoint; never production).
+      const { Client } = await import('pg');
+      const stageClient = new Client({ connectionString: options.databaseUrl });
+      await stageClient.connect();
+      const ctx = stageContext(stage, {
+        repoRoot: options.repoRoot,
+        archiveRoot,
+        importBatchId: batchId,
+        manifest,
+      }, stageClient);
+
+      let notes = '';
       try {
-        await executeStage(stage, { databaseUrl: options.databaseUrl, repoRoot: options.repoRoot, manifestPath, archiveRoot });
-        const notes =
-          stage.id === 'verify-artifacts'
-            ? `${artifacts.length} manifest artifacts verified against recorded SHA-256 (archive read-only)`
-            : stage.id === 'migrate-schema'
-              ? 'ordered DDL migration chain applied (Drizzle history authoritative)'
-              : 'authoritative reference vocabulary seeded (ON CONFLICT DO NOTHING)';
-        await state.markSucceeded({ stageKey: `stage:${stage.id}`, notes });
-        outcomes.push(outcomeOf(stage.id, 'RAN', 'SUCCEEDED', notes));
+        notes = await executeStage(stage, { databaseUrl: options.databaseUrl, repoRoot: options.repoRoot, manifestPath, archiveRoot, importBatchId: batchId }, ctx);
       } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
         await state.markFailed({ stageKey: `stage:${stage.id}`, reason });
         throw new Error(`stage ${stage.id} FAILED: ${reason}; downstream stages stopped, state preserved for resume`, { cause: error });
+      } finally {
+        await stageClient.end().catch(() => undefined);
       }
+      await state.markSucceeded({ stageKey: `stage:${stage.id}`, notes });
+      outcomes.push(outcomeOf(stage.id, 'RAN', 'SUCCEEDED', notes));
     }
   } finally {
     await state.end();
