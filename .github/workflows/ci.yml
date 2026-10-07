@@ -53,6 +53,12 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      # ADR-021 ACCEPTED 2026-10-07: Vitest runs the unit/domain layer. Task 6
+      # scope = packages/domain value objects + INV-01/02/03 predicates.
+      # (Playwright/E2E is accepted but deliberately not run here.)
+      - name: Domain unit tests
+        run: pnpm test
+
       # Migrates a fresh scratch database (maihan_dev_fidelity) from zero on
       # the disposable instance, asserts the locked schema exactly, and always
       # drops the scratch database afterwards. The local credential below is

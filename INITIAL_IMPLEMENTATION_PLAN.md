@@ -1083,6 +1083,8 @@ A permanent regression test asserts that the imported catalogue contains all fiv
 
 `[UNKNOWN]` The Source of Truth specifies test layers and required coverage but names no runner. **No runner has been selected in this plan**, because selecting one is a technology decision the Source of Truth does not make. This is recorded as an unresolved decision requiring an ADR at Phase 1 kickoff. The same applies to the E2E driver and the load-test tool.
 
+> **RESOLVED 2026-10-07:** ADR-021 ACCEPTED by explicit user authorization — Vitest (unit/domain/integration/contract) and Playwright (E2E); the load-test tool remains undecided. See `technical_design/40` ADR-021.
+
 ---
 
 ## 24. CI/CD STRATEGY
@@ -1361,6 +1363,8 @@ All were genuine and all were fixed before lock: `clarity_labels` double primary
 ### 35.2 New ADR required
 
 **ADR-021 (open): test tooling stack.** Unit, E2E and load-test runners are named in Source of Truth 34 but not selected. Must be decided at Phase 1 kickoff and recorded before the first test is written. No technology has been chosen in this plan.
+
+> **RESOLVED 2026-10-07:** ADR-021 is **ACCEPTED** by explicit user authorization at Phase 1 Task 6 — Vitest for unit/domain/integration/contract, Playwright for E2E. Recorded in `technical_design/40_ARCHITECTURE_DECISION_RECORDS.md`, the decision register of record. The text above is preserved as the planning-time record.
 
 ---
 

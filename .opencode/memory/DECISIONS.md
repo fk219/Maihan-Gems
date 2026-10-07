@@ -100,7 +100,7 @@ approved. `DEFERRED` = deliberately postponed.
 
 | Decision | Status | Blocks | Note |
 |---|---|---|---|
-| **ADR-021 test tooling** | **PROPOSED** | **Phase 1 task 6** | ADR names Vitest and Playwright as a *proposal*. Plan §23.4 states no runner has been selected. **Do not install.** |
+| **ADR-021 test tooling** | **ACCEPTED 2026-10-07** | — | The user explicitly authorized acceptance at Task 6. Vitest = runner for unit/domain/integration/contract (installed 5.0.3, domain layer); Playwright = accepted E2E runner, **not installed** until a phase requires it. Recorded in `technical_design/40` with the authorization note |
 | **ADR-022 design-system primitives** | **PROPOSED** | Phase 4 | shadcn, Radix, MUI, Chakra and Tailwind are **not approved**. None is named in any authoritative document. |
 | **ADR-023 AI evaluation harness** | **PROPOSED** | Phase 9 | First-party harness argued, not selected. |
 | **ADR-024 provenance storage design** | **PROPOSED** | Phase 2 | Explicit table argued over a framework; not selected. |
@@ -114,7 +114,7 @@ approved. `DEFERRED` = deliberately postponed.
 | Jurisdiction / statutory retention | UNKNOWN | Compliance | Retention table is conditional |
 | `process.env` lint scope | **AMBIGUOUS — follow-up** | Task 1 follow-up | `technical_design/01` line 56 scopes the `process.env` restriction to `packages/domain`; `technical_design/03` implementation constraint 3 states no package may read `process.env` except `packages/config`. Task 1 implements the narrower `technical_design/01` reading and changed nothing further. Plan owner to reconcile. No ADR created; this is a documentation conflict, not a technology choice |
 | `packages/ai` in the Task 1 skeleton | **NOT CREATED** | Phase 9 | `AGENTS.md` section 2 lists it in the future layout; `INITIAL_IMPLEMENTATION_PLAN.md` section 5, the authority for Task 1, omits it. Task 1 followed the plan. Sequencing ambiguity for the plan owner |
-| CI provider | **ACCEPTED: GitHub Actions** | Phase 1 boundary-lint job | Decided 2026-10-05 at Task 1 closure: the repository is hosted on GitHub and `technical_design/03` requires a blocking boundary-lint CI job. **No workflow file created.** Deferred to a later authorised task |
+| CI provider | **ACCEPTED: GitHub Actions** | Phase 1 boundary-lint job | Decided 2026-10-05 at Task 1 closure: the repository is hosted on GitHub and `technical_design/03` requires a blocking boundary-lint CI job. **Workflow created at Task 5** (`.github/workflows/ci.yml`); Task 6 added the domain unit-test job |
 
 **Proposed is not Accepted.** A proposal names candidates; it does not authorise
 installation or implementation.
@@ -129,7 +129,7 @@ installation or implementation.
 | An ADR marked Proposed is never implemented without approval. | `AGENTS.md` §6 |
 | A superseded ADR is never deleted; the reasoning chain is preserved. | `technical_design/40` |
 | Two reviewers; `ADMIN_SUPER` for any decision affecting money, inventory or trust. | `technical_design/40` |
-| No test framework may be installed until ADR-021 is resolved. | Plan §23.4, `AGENTS.md` §6 |
+| No test framework may be installed until ADR-021 is resolved. | Plan §23.4, `AGENTS.md` §6 — **satisfied**: ADR-021 ACCEPTED 2026-10-07; from now on, installation follows the layer needs recorded in `SKILL_MATRIX_AND_TOOLING.md` §The testing table (Vitest now; Playwright at its phase; load tool still undecided) |
 | Any relaxation of an NFR requires an ADR. | `technical_design/36` |
 | Migrating runs on a Neon **dev branch** or local PostgreSQL 16, never managed production, without explicit current approval. | `AGENTS.md` §6 |
 

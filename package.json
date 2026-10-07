@@ -13,6 +13,7 @@
     "clean": "tsc -b --clean",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "pnpm -r run test",
     "schema-fidelity": "pnpm run build && pnpm --filter @maihan/db run schema-fidelity"
   },
   "devDependencies": {

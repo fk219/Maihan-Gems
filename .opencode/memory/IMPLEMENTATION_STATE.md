@@ -22,8 +22,15 @@ database and on the Neon dev database; schema metadata is identical on both.
 
 **Task 5 COMPLETE (2026-10-07).** Schema fidelity is now a blocking CI
 assertion: fresh-database orchestrator + framework-free assertion over the
-shared introspection; GitHub Actions workflow added. Tasks 3 and 6-9 not
-started; Task 6 onward blocked by ADR-021.
+shared introspection; GitHub Actions workflow added.
+
+**ADR-021 ACCEPTED (2026-10-07) by explicit user authorization.**
+Vitest 5.0.3 installed for the domain layer (unit/domain runner); Playwright
+accepted for E2E but NOT installed; the load-test tool remains open.
+
+**Task 6 COMPLETE (2026-10-07).** Domain value objects + INV-01/02/03 as pure
+predicates; zero runtime dependencies; 70 unit tests green. Tasks 3 and 7-9
+not started (Task 7's corpus gate needs `naturalgemstones/`).
 MVP chain is Phase 1 → 2 → 3 → 4 → 5 → 6. Phases 7–13 are post-MVP.
 
 **Contract correction applied:** `DATABASE_URL` is the SINGLE sanctioned database
@@ -39,21 +46,20 @@ reintroduced — per-environment selection is a property of the value stored in
 
 # Current Task
 
-**Task 5 COMPLETE (2026-10-07) — schema-fidelity CI assertion.**
+**Task 6 COMPLETE (2026-10-07) — domain value objects and INV-01/02/03 + ADR-021 accepted.**
 
 | Check | Result |
 |---|---|
-| Assertion | `packages/db/src/assert-schema.ts` — framework-free (ADR-021 untouched); consumes the SAME introspection as the Task-4 verifier via the new shared `packages/db/src/introspect.ts` (counting semantics unchanged — verified field-by-field before/after the refactor) |
-| Expectations | `packages/db/src/expected-schema.ts` — the fidelity mirror of the locked schema: exact 74 table names, 33 enums WITH exact member sets, exact 94 FK names, 9 named invariants, 6 RLS tables + 6 exact policies, 2 HNSW indexes WITH exact catalog definitions, 1 trigger, 2 functions, 1 view, 2 vector(1024) columns, 6 extension NAMES (versions deliberately not asserted — platform property) |
-| Fresh-database run | **PASS** — `packages/db/src/schema-fidelity.ts`: scratch `maihan_dev_fidelity` created on the disposable local instance, 17 migrations applied from zero, history == journal (17), all assertions green, scratch ALWAYS dropped (also on failure) |
-| Determinism | **PASS** — ran twice, identical verdict; no leftover scratch databases |
-| Negative probe | **PASS** — doctored scratch (unexpected table, dropped CHECK/invariant/unique/FK-less index/HNSW/trigger/function/view/policy, disabled RLS, added enum member) produced named, actionable failures for every drift class; exit 1 |
-| Dual-target | read-only assertion PASS on local `maihan_dev` AND on the Neon dev database via `DATABASE_URL`; orchestrator REFUSES Neon hosts (covers production) |
-| CI | `pnpm run schema-fidelity` (root: build + run) + blocking `.github/workflows/ci.yml` (install → compose up --wait → lint → build → schema-fidelity → compose down -v) |
-| lint / build / tsc --dry | PASS / PASS / PASS |
-
-**ADR-021 remains OPEN and UNMODIFIED.** No test framework installed. This
-blocks Task 6 onward and the Phase 1 exit gate.
+| ADR-021 | **ACCEPTED** — status updated in `technical_design/40` (index + body with authorization note), `SKILL_MATRIX_AND_TOOLING.md` (registers + testing table), plan §35.2/§23.4 (resolution notes), memory. ADR-022/023/024 UNTOUCHED |
+| Vitest | 5.0.3 devDependency of `packages/domain`; `vitest.config.ts` (one config, domain layer per ADR-021); `pnpm test` = `pnpm -r run test` |
+| Playwright | Accepted, **NOT installed** (no phase requires it) |
+| Value objects implemented | GemRef (branded, `^(K\|PR)\d+$`, isPair), Money (decimal string, USD-only, ≤2dp, NUMERIC(12,2) bound, frozen), WeightCt (branded, NUMERIC(8,3), positive), DimensionsMm (NUMERIC(8,3) axes + depth-exceeds-min WARN), SourceSku (branded, uppercase-normalised required — never repaired), DerivedSku + ProductIdentity discriminated union (provenance: URL_SLUG/parserVersion/confidence[0,1]), Sku composite (numeric core + 15 metal codes + optional gemRef), ConfigurationHash (shape `sha256:<64 lowercase hex>` + version — **hash function deliberately NOT implemented; plan task 8**); enum unions ProductKind/JewelleryType/GemstoneKind/MetalCode(15)/EvidenceStatus(5); DomainError/InvariantError model with stable codes |
+| INV predicates | `satisfiesInv01/02/03` + `assertComposition` in `packages/domain/src/product/invariants.ts`; INV-01 mirrors the FULL products_composition_ck CASE (CONFIGURED / SETTING_ONLY / else); INV-02 pair⇒EARRINGS; INV-03 configured EARRINGS⇒pair. DB constraints untouched |
+| Purity | **ZERO runtime dependencies** (doc 03 rule 3, asserted by a purity test reading package.json); only devDependency = vitest; no I/O imports in runtime code; lint boundary rules intact (specs may read package.json — documented exemption) |
+| Tests | **70 tests / 11 files PASS** (twice — deterministic). Coverage: every VO valid/invalid/boundary/normalization/immutability; the §7 INV matrix (configured+setting+stone PASS, +pair PASS, -setting FAIL, -stone FAIL, both FAIL; pair+earrings PASS, pair+non-earrings FAIL per type; configured-earrings-pair PASS, without-pair FAIL); combinations + no false positives (READY_MADE carrying a setting FAILs INV-01; non-configured earrings need no pair); stable codes asserted via the property |
+| lint / build / tsc --dry / install --frozen-lockfile | PASS / PASS / PASS / PASS |
+| Task 5 schema fidelity | **STILL PASS** from zero (fresh scratch, 17 migrations) — no migration touched |
+| CI | `Domain unit tests` step added to `.github/workflows/ci.yml` between Build and Schema fidelity; E2E/Playwright deliberately absent |
 
 ---
 
@@ -61,13 +67,14 @@ blocks Task 6 onward and the Phase 1 exit gate.
 
 | Item | State |
 |---|---|
-| Phase 1 | **Started. Tasks 1, 2, 4 and 5 complete.** Tasks 3, 6-10 not started |
-| Application code | **None exists.** Workspace skeleton only; every `src/index.ts` is a documentation-only barrel |
+| Phase 1 | **Started. Tasks 1, 2, 4, 5 and 6 complete.** Tasks 3, 7-10 not started |
+| Application code | **None exists beyond the domain foundation.** Workspace skeleton + migrations + pure domain layer |
 | Database migrations | **17 ordered DDL migrations, applied and verified on both dev targets** (Task 4) |
 | Schema-fidelity gate | **Blocking CI assertion, green on fresh databases** (Task 5) |
-| Tests | **None written.** ADR-021 still OPEN (Task 5 is framework-free by design) |
+| Domain layer | **Pure value objects + INV-01/02/03 with zero runtime dependencies** (Task 6) |
+| Tests | **70 unit tests green (packages/domain).** Vitest per ADR-021 (ACCEPTED 2026-10-07) |
 | Repository / workspaces | **EXISTS.** 8 packages, 9 workspace projects, pnpm 12.3.4 |
-| CI | **EXISTS.** `.github/workflows/ci.yml`: lint → build → schema fidelity on a disposable fresh PostgreSQL 16 |
+| CI | **EXISTS.** `.github/workflows/ci.yml`: lint → build → domain tests → schema fidelity on a disposable fresh PostgreSQL 16 |
 | Local PostgreSQL 16 | **EXISTS and correct.** 16.15 via compose.yaml, database `maihan_dev`, all six extensions; migrated by Task 4 |
 | Neon dev | **EXISTS and correct.** "Maihan Gems Dev": PostgreSQL 16.15, db `maihan_dev`; migrated by Task 4; schema identical to local |
 | `docs/evidence/MANIFEST.md` | **Not written.** Task 3; blocked, archive absent |
@@ -91,6 +98,8 @@ Planning complete. **Tasks 1 and 2 are the first implementation tasks completed.
 | **Phase 1 Task 2 — database infrastructure** | **COMPLETE.** LOCAL: PostgreSQL 16.15 via `compose.yaml` (`pgvector/pgvector:pg16`), database `maihan_dev` on 127.0.0.1:5433, healthy; six extensions live-verified (`vector 0.8.7`, `citext 1.6`, `pg_trgm 1.6`, `unaccent 1.1`, `btree_gin 1.3`, `pg_stat_statements 1.10`); HNSW + `vector(4)` + `NUMERIC(12,4)` smoke tests PASS; 0 application tables. NEON: standardized on a NEW project "Maihan Gems Dev" (created by the client in the console after the PG16 requirement), PostgreSQL **16.15**, database **`maihan_dev`**, schema `public`; six extensions installed and live-verified (`vector 0.8.0`, `citext 1.6`, `pg_trgm 1.6`, `unaccent 1.1`, `btree_gin 1.3`, `pg_stat_statements 1.10`); HNSW + `NUMERIC(12,4)` smoke tests PASS; 0 application tables. The OLD "Maihan Gems" PG18 project and its `dev` branch are abandoned for development use (not deleted, not a valid target). Production verified untouched (0 extensions, 0 tables) |
 | **Phase 1 Task 4 — ordered DDL migrations** | **COMPLETE.** 17 migrations ported verbatim from SoT §8 in doc 04 order; applied from clean state on local (throwaway DB incl. extension creation + real `maihan_dev`) and on Neon dev; introspection matches every documented count; local vs Neon metadata identical; rerun no-op; failure rollback proven; behavioural smoke green (trigger, INV bites, CITEXT) |
 | **Phase 1 Task 5 — schema-fidelity CI assertion** | **COMPLETE.** Shared introspection (`introspect.ts`) + expectations mirror (`expected-schema.ts`) + framework-free assertion (`assert-schema.ts`) + fresh-database orchestrator (`schema-fidelity.ts`, scratch lifecycle with unconditional cleanup and Neon-host refusal) + root script + blocking GitHub Actions workflow. Fresh run PASS twice (deterministic); every drift class proven caught by negative probe; read-only assertion green on both dev targets |
+| **ADR-021 resolution** | **ACCEPTED 2026-10-07 by explicit user authorization.** `technical_design/40` (index + body), `SKILL_MATRIX_AND_TOOLING.md` (status tables + testing rows), plan §35.2/§23.4 resolution notes, memory. ADR-022/023/024 untouched. Playwright accepted-only; load tool still open |
+| **Phase 1 Task 6 — domain value objects + INV-01/02/03** | **COMPLETE.** Pure `packages/domain`: `errors.ts` (DomainError/InvariantError, stable codes), `enums.ts` (ProductKind, JewelleryType, GemstoneKind, MetalCode×15, EvidenceStatus), 8 value-object modules (`gem-ref`, `money`, `weight-ct`, `dimensions-mm`, `source-sku`, `derived-sku`+ProductIdentity, `sku`, `configuration-hash`), `product/invariants.ts` (three predicates + assertComposition), `index.ts` barrel. Vitest 5.0.3 + `vitest.config.ts` + 11 spec files, 70 tests green. Zero runtime dependencies; lint exempted spec-file node:fs with documented rationale. CI gained the domain-test step |
 
 ---
 
@@ -111,7 +120,7 @@ First ten tasks, verbatim from `INITIAL_IMPLEMENTATION_PLAN.md` §36.
 | 3 | Write `docs/evidence/MANIFEST.md` recording storage location, SHA-256 and retention class of every migration-critical file | 1 | — | All ten entries present with verified checksums |
 | 4 | Port the validated DDL into ordered migrations, one logical unit per source-of-truth schema subsection | 1 | 2 | Applies cleanly on a clean database — **DONE** |
 | 5 | Assert schema fidelity in CI: 74 tables, 33 enums, 94 FKs, 591 CHECK, 263 indexes, 9 named invariant constraints, 6 RLS policies with 0 policy-less tables, 2 HNSW indexes, 1 trigger, 1 view, 2 functions | 1 | 4 | Introspection test green against a fresh database — **DONE** (framework-free assertion + blocking workflow) |
-| 6 | Implement the domain value objects and INV-01, INV-02, INV-03 as pure predicates | 1 | 4 | Unit tests green; no infrastructure imports |
+| 6 | Implement the domain value objects and INV-01, INV-02, INV-03 as pure predicates | 1 | 4 | Unit tests green; no infrastructure imports — **DONE** (70 Vitest tests; zero runtime dependencies) |
 | 7 | Implement the SKU grammar parser with the validated regex and prove it against the 1,024-record corpus | 1 | 6 | 1,024/1,024 match, 0 mismatches (gates V3, V19) |
 | 8 | Implement the configuration-hash function and slug derivation | 1 | 6 | Deterministic; property tests green |
 | 9 | Seed reference data: 15 metals, 8 jewellery types, setting styles, treatments, intensities, clarities | 1 | 4 | Seeds idempotent; counts asserted |
@@ -172,6 +181,10 @@ during planning and are recorded in `technical_design/40` and
 | 2026-10-05 (T5) | `introspect.ts` is the single source of counting semantics; `verify-schema.ts` (Task 4 CLI) and `assert-schema.ts` (Task 5) both consume it — verified field-by-field that the refactor changed no pre-existing value (only added `enum_members`) | `packages/db/src/introspect.ts` |
 | 2026-10-05 (T5) | `expected-schema.ts` is a fidelity MIRROR of the authoritative DDL, not a schema master: a failing assertion means the migration drifted from the locked schema and is fixed via a migration/ADR, never by editing the expectation | `packages/db/src/expected-schema.ts` |
 | 2026-10-05 (T5) | Fresh-database fidelity runs use a scratch database `maihan_dev_fidelity` on whatever disposable instance `DATABASE_URL` names (value-selection, never a second variable); Neon hosts are refused outright, which also covers production; scratch cleanup is unconditional | `packages/db/src/schema-fidelity.ts` |
+| 2026-10-07 (T6) | **ADR-021 ACCEPTED by explicit user authorization.** Registry of record updated (`technical_design/40`); SKILL_MATRIX testing rows updated; plan §35.2/§23.4 got resolution notes. Vitest 5.0.3 installed as a devDependency OF `packages/domain` (dev-only keeps the runtime-dependency purity gate true); Playwright accepted but NOT installed; load-test tool still undecided | `technical_design/40`, `SKILL_MATRIX_AND_TOOLING.md`, `packages/domain/package.json` |
+| 2026-10-07 (T6) | Task 6 implements the doc-05 value objects WITHOUT the parser (task 7) and WITHOUT the hash function (task 8): ConfigurationHash validates the `sha256:<hex>` shape only. GemRef/WeightCt/SourceSku are branded strings; struct VOs are frozen readonly factories; DomainError/InvariantError carry stable `code` properties (messages are context, codes are contracts) | `packages/domain/src/**` |
+| 2026-10-07 (T6) | INV-01 at the domain layer mirrors the FULL `products_composition_ck` CASE (CONFIGURED / SETTING_ONLY / else-must-not-carry-a-setting), which doc 04 labels "INV-01 composition by kind" — not merely the CONFIGURED branch | `packages/domain/src/product/invariants.ts` |
+| 2026-10-07 (T6) | Domain specs may read `package.json` with node:fs (purity gate test, doc 03 rule 3); the eslint DOMAIN_FORBIDDEN boundary got a documented spec-file exemption. Runtime domain code remains I/O-free and specs are unreachable through the exports map | `eslint.config.mjs`, `packages/domain/src/domain-purity.spec.ts` |
 
 ---
 
@@ -194,6 +207,8 @@ No application files. Planning-stage only.
 | **Task 1 memory** | `CURRENT_STATE.md`, `DECISIONS.md`, `IMPLEMENTATION_STATE.md`, `SESSION_HANDOFF.md` updated to record Task 1 completion and ECC harness tracking | Commit `1e9e26f` |
 | **Task 4 files** | `packages/db/migrations/` (17 SQL + `meta/_journal.json`), `packages/db/src/migrate.ts` (runner), `packages/db/src/verify-schema.ts` (introspection CLI), `packages/db/drizzle.config.ts`, `packages/db/package.json` (+drizzle-orm/drizzle-kit/pg scripts), root `package.json` (+`@types/node`), `pnpm-workspace.yaml` (esbuild build approval), `pnpm-lock.yaml` | Task 4 commit |
 | **Task 5 files** | `packages/db/src/introspect.ts` (NEW — shared introspection; queries extracted verbatim from verify-schema.ts + enum_members added), `packages/db/src/expected-schema.ts` (NEW — fidelity mirror), `packages/db/src/assert-schema.ts` (NEW — assertion engine), `packages/db/src/schema-fidelity.ts` (NEW — fresh-DB orchestrator), `packages/db/src/verify-schema.ts` (thin CLI, zero semantic change), `packages/db/src/migrate.ts` (runMigrations exported; CLI via direct-execution guard), `packages/db/package.json` + root `package.json` (scripts), `.github/workflows/ci.yml` (NEW), 3 memory files | Task 5 commit |
+| **ADR-021 files** | `technical_design/40_ARCHITECTURE_DECISION_RECORDS.md`, `SKILL_MATRIX_AND_TOOLING.md`, `INITIAL_IMPLEMENTATION_PLAN.md` (§35.2, §23.4 resolution notes) | Task 6 commit |
+| **Task 6 files** | `packages/domain/src/{errors,enums}.ts`, `packages/domain/src/value-objects/{gem-ref,money,weight-ct,dimensions-mm,source-sku,derived-sku,sku,configuration-hash,index}.ts`, `packages/domain/src/product/invariants.ts`, `packages/domain/src/testing/expect-domain-code.ts`, `packages/domain/src/index.ts`, 11 `*.spec.ts` files, `packages/domain/vitest.config.ts`, `packages/domain/package.json` (+vitest devDep + test script), root `package.json` (`test` script), `eslint.config.mjs` (spec exemption), `.github/workflows/ci.yml` (test step), `pnpm-lock.yaml`, 3 memory files | Task 6 commit |
 
 ---
 
@@ -223,6 +238,7 @@ Verification performed during planning:
 | **Task 4 (fidelity)** | Local vs Neon catalog diff: MATCH on tables, enums+member counts, FKs, constraint counts, index definitions, HNSW, vector columns, trigger, functions, views, RLS tables/policies. Only extension VERSION differs (platform images: vector 0.8.7 vs 0.8.0; both ≥ 0.6 required) |
 | **Task 4 (toolchain)** | `pnpm install --frozen-lockfile` PASS (esbuild build script approved) · `pnpm run lint` PASS · `pnpm run build` PASS · `npx tsc -b --dry` PASS |
 | **Task 5** | Refactor equivalence: pre-refactor vs post-refactor verifier JSON identical on all pre-existing fields (only `enum_members` added; enum lists match SoT §8.3 exactly) · fresh-database fidelity PASS twice (deterministic) · negative probe: every drift class caught by exact name (unexpected table, enum member, dropped CHECK/invariant/unique constraint, missing index/HNSW/trigger/function/view, RLS policy drop → policy-less) · read-only assertion PASS on local `maihan_dev` AND Neon dev · orchestrator refuses Neon hosts · scratch cleanup unconditional (0 leftovers) · `pnpm install --frozen-lockfile` / lint / build / `tsc -b --dry` PASS · compose config valid |
+| **Task 6** | `pnpm install --frozen-lockfile` PASS · lint PASS · build (tsc -b) PASS · `tsc -b --dry` PASS · **Vitest 70/70 PASS twice (11 files)** · schema fidelity re-run from zero **PASS** (migrations untouched) · domain import-graph grep: zero infrastructure imports in runtime code (only the purity spec's node:fs, exempted + documented) · negative checks: VO invalid inputs all throw stable INVALID_* codes; invariant codes asserted via property (INV-01/02/03); purity test asserts zero runtime deps |
 
 ---
 

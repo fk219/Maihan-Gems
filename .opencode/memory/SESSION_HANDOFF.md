@@ -40,17 +40,26 @@ runner: `packages/db/src/migrate.ts`; introspection CLI:
 `packages/db/src/verify-schema.ts`.
 
 **Phase 1 Task 5 — schema-fidelity CI assertion — COMPLETE (2026-10-07).**
-Framework-free (ADR-021 untouched): shared introspection
-(`packages/db/src/introspect.ts`), expectations mirror
-(`packages/db/src/expected-schema.ts`), assertion (`assert-schema.ts`), and a
-fresh-database orchestrator (`schema-fidelity.ts`) that migrates a scratch
-database from zero, asserts the locked schema exactly, and always drops the
-scratch. Blocking GitHub Actions workflow: `.github/workflows/ci.yml`.
-Fresh run green (deterministic); every drift class proven caught by name;
-read-only assertion green on both dev targets.
+Framework-free: shared introspection (`packages/db/src/introspect.ts`),
+expectations mirror (`packages/db/src/expected-schema.ts`), assertion
+(`assert-schema.ts`), and a fresh-database orchestrator (`schema-fidelity.ts`)
+that migrates a scratch database from zero, asserts the locked schema exactly,
+and always drops the scratch. Blocking GitHub Actions workflow:
+`.github/workflows/ci.yml`.
 
-**Zero application code beyond the skeleton + migration tooling.** No Drizzle
-TS schema, no domain models, no repositories, no tests, no seeders.
+**ADR-021 — ACCEPTED (2026-10-07, explicit user authorization).** Vitest
+5.0.3 is the unit/domain/integration/contract runner (installed for the domain
+layer); Playwright is accepted for E2E but NOT installed until a phase
+requires it; the load-test tool remains open.
+
+**Phase 1 Task 6 — domain value objects + INV-01/02/03 — COMPLETE
+(2026-10-07).** Pure `packages/domain`: ten doc-05 value objects (no parser,
+no hash function — Tasks 7/8), enum unions, DomainError/InvariantError model,
+and `assertComposition` + `satisfiesInv01/02/03`. ZERO runtime dependencies;
+70 Vitest tests green; CI gained the domain-test step.
+
+**Zero application code beyond the skeleton + migration tooling + the pure
+domain foundation.** No Drizzle TS schema, no repositories, no seeders.
 
 ---
 
@@ -92,17 +101,21 @@ State lives in `.opencode/memory/`:
 - Task 5 — schema-fidelity CI assertion — **COMPLETE 2026-10-07.** Blocking,
   framework-free: `pnpm run schema-fidelity` migrates a FRESH scratch database
   from zero and asserts the locked schema exactly (counts + exact names and
-  definitions); GitHub Actions workflow added. ADR-021 remains OPEN — Task 6
-  onward still blocked.
+  definitions); GitHub Actions workflow added.
+- **ADR-021 — ACCEPTED 2026-10-07 by explicit user authorization.** Vitest
+  5.0.3 runs the domain unit tests; Playwright accepted-only (never installed
+  until a phase requires it); the load-test tool remains open.
+- Task 6 — domain value objects + INV-01/02/03 — **COMPLETE 2026-10-07.**
+  Pure domain layer, zero runtime dependencies, 70 unit tests green.
 - **Variable contract enforced:** `DATABASE_URL` is the ONLY database variable
   (`PROJECT_SOURCE_OF_TRUTH.md` §29.6). Interim suffixed variables removed.
 - **Credential note:** the client states the Neon API key was rotated and `.env`
   updated. Confirm the `neondb_owner` password was reset too; both live only in
   gitignored `.env`.
 - **Do NOT begin Task 3** — it needs `naturalgemstones/`, absent here.
-- **Next task: Task 6** (domain value objects + INV-01/02/03 predicates) —
-  **BLOCKED on ADR-021** (requires green unit tests). Task 3 remains deferred
-  on the source archive.
+- **Next task: Task 7** (SKU grammar parser) — depends on Task 6 (done), but
+  its completion gate (1,024/1,024 against the observed corpus) requires
+  `naturalgemstones/`; awaiting explicit user authorization either way.
 - Full task list: `IMPLEMENTATION_STATE.md` → **Next**.
 
 ---
@@ -111,7 +124,7 @@ State lives in `.opencode/memory/`:
 
 | # | Blocker | Type |
 |---|---|---|
-| 1 | **ADR-021 test tooling unresolved.** Plan task 6 requires green unit tests; §23.4 forbids selecting a runner. | **Client approval** |
+| 1 | ~~ADR-021 test tooling unresolved~~ **RESOLVED 2026-10-07 — ACCEPTED by explicit user authorization** (Vitest for unit/domain; Playwright accepted; load tool still open) | — |
 | 2 | ~~Repository structure not signed off~~ — **RESOLVED** at Task 1 authorisation | — |
 | 3 | `docs/evidence/MANIFEST.md` — needs `naturalgemstones/`, **ABSENT** in this Codespace; restore out of band | Execution |
 | 4 | ~~Local PostgreSQL 16~~ **RESOLVED 2026-10-05**: `compose.yaml`, `pgvector/pgvector:pg16`, DB `maihan_dev` on 127.0.0.1:5433, healthy, migrated by Task 4 | — |
@@ -119,13 +132,20 @@ State lives in `.opencode/memory/`:
 | 6 | Vercel env secrets, OTel collector, error reporting not configured | Execution |
 | 7 | **Confirm the exposed `neondb_owner` password was rotated** (client states the API key was rotated) | **Client: Neon console** |
 
-ADR-021 is the **only** true design blocker. Nothing else needs a later phase.
+No design blocker remains. The remaining execution blockers are provisioning
+and the deferred Task 3 archive.
 
 ---
 
 ## Critical — do NOT do
 
-- **Do NOT** begin Task 3 or Task 4. Task 2 is BLOCKED and Task 4 depends on it.
+- **Do NOT** begin Task 3. It needs `naturalgemstones/`, absent in this Codespace.
+- **Do NOT** begin Task 7 or later without explicit user authorization.
+- **Test runner is DECIDED (ADR-021, ACCEPTED 2026-10-07): Vitest** for
+  unit/domain/integration/contract. Do not add Jest or any other runner.
+  **Playwright is accepted for E2E but not installed** — do not install it
+  before a phase requires browser testing. The load-test tool is still open.
+- **Do NOT** treat ADR-022/023/024 as accepted. They remain Proposed.
 - **Do NOT** treat the PostgreSQL 18.6 Neon branch as conformant. The
   authoritative development contract is PostgreSQL 16.x.
 - **Do NOT** attempt to create a Neon project, rotate the API key, or complete a
@@ -133,7 +153,9 @@ ADR-021 is the **only** true design blocker. Nothing else needs a later phase.
   project-scoped; those actions require account-level capability. A Neon OAuth
   authorization code carries organization-wide scope including `projects:delete`
   and `orgs:delete` and must not be completed on an agent's initiative.
-- **Do NOT** install any test framework (ADR-021 blocks it).
+- ~~Do NOT install any test framework (ADR-021 blocks it)~~ **OBSOLETE
+  2026-10-07:** ADR-021 is ACCEPTED; Vitest is the installed runner. Do not
+  add any runner BEYOND it, and do not install Playwright before its phase.
 - **Do NOT** add any technology not in `technical_design/02`. That needs an ADR.
 - **Do NOT** redesign the locked architecture. Propose a change; do not implement one.
 - **Do NOT** restart reverse engineering. It is complete and validated.

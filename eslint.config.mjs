@@ -168,6 +168,26 @@ export default tseslint.config(
     },
   },
 
+  // Spec files inside packages/domain are test harness code, not domain
+  // runtime logic: the purity rule polices domain logic. The colocated purity
+  // test may read the package's own package.json (node:fs) to assert the
+  // declared dependency surface (doc 03 validation rule 3). Specs are never
+  // imported by runtime code: index.ts does not re-export them, and compiled
+  // spec files are unreachable through the package's exports map.
+  {
+    files: ['packages/domain/src/**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: DOMAIN_FORBIDDEN.filter(
+            (p) => !p.group.some((g) => g === 'node:fs' || g.startsWith('node:fs/')),
+          ),
+        },
+      ],
+    },
+  },
+
   // ---------------------------------------------------------------------------
   // packages/contracts — parse and coerce only.
   // ---------------------------------------------------------------------------

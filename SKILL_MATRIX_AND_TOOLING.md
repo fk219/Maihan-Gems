@@ -54,7 +54,8 @@ These are the figures every skill in this matrix must satisfy. They come from `I
 |---|---|
 | Locked technology stack (22 items) | **APPROVED** in `technical_design/02` |
 | Core engineering, database, migration, backend, frontend skills | **APPROVED** |
-| Test runner, E2E driver, load-test tool | **OPEN — ADR-021** |
+| Test runner, E2E driver | **APPROVED — ADR-021 ACCEPTED 2026-10-07** (Vitest; Playwright for E2E when its phase requires it) |
+| Load-test tool | **OPEN** — not covered by ADR-021's decision; needed at Phase 13 |
 | Design-system primitives | **OPEN — ADR-022** |
 | AI evaluation harness | **OPEN — ADR-023** |
 | Provenance storage design | **OPEN — ADR-024** |
@@ -64,9 +65,9 @@ These are the figures every skill in this matrix must satisfy. They come from `I
 
 ### Is coding allowed yet
 
-**NOT YET.** Four gates block the first coding task:
+**NOT YET.** ~~Four gates block the first coding task~~ **Update 2026-10-07: coding is under way (Tasks 1, 2, 4, 5 complete; Task 6 authorised). The gate list below is the record of the pre-coding state; only the ADR-021 entry changed status:**
 
-1. **ADR-021 (test tooling)** is unresolved. Plan task 6 requires unit tests green before completion; the plan explicitly forbids writing tests on an unselected runner.
+1. **~~ADR-021 (test tooling) is unresolved~~ RESOLVED 2026-10-07: ADR-021 ACCEPTED by explicit user authorization** (Vitest for unit/domain/integration/contract; Playwright for E2E, not installed until required). Unit tests may be written on Vitest from Task 6 onward.
 2. **ADR-022 (design system)** is unresolved. Not required for Phase 1, required for Phase 4.
 3. **Migration-critical evidence retention** is not yet secured. Plan task 3 requires `docs/evidence/MANIFEST.md` with verified checksums, and it has no dependency, so it can be done immediately.
 4. **Extension availability on the target Neon instance** is structurally validated only. This is the first technical unknown for Phase 1.
@@ -88,7 +89,7 @@ NO SILENT ADR RESOLUTION                     Proposed ADRs are not Accepted
 
 | Gate | Blocks | Owner |
 |---|---|---|
-| ADR-021 test tooling | Phase 1 task 6 onward | Client / `ADMIN_SUPER` |
+| ~~ADR-021 test tooling~~ **RESOLVED 2026-10-07 — ACCEPTED by explicit user authorization** | ~~Phase 1 task 6 onward~~ — | — |
 | ADR-022 design system | Phase 4 | Client / `ADMIN_SUPER` |
 | ADR-023 evaluation harness | Phase 9 | Client / `ADMIN_SUPER` |
 | ADR-024 provenance storage | Phase 2 | Client / `ADMIN_SUPER` |
@@ -413,17 +414,17 @@ Every implementation skill required by the locked architecture, grouped A to R. 
 
 | Skill | Technology | Required For | Phase | Package/App | Priority | Status | ADR | Required Before Coding |
 |---|---|---|---|---|---|---|---|---|
-| Unit and domain testing | **UNDECIDED** | Every phase | 1 | `tests` | P0 | **OPEN** | ADR-021 | **Yes** |
-| Property-based testing | **UNDECIDED** | SKU parser, hash | 1 | `tests` | P0 | **OPEN** | ADR-021 | **Yes** |
-| Integration testing on real Postgres | **UNDECIDED** | Repositories, RLS, outbox | 1 | `tests` | P0 | **OPEN** | ADR-021 | **Yes** |
-| Schema introspection assertions | **UNDECIDED** | Schema fidelity | 1 | `tests` | P0 | **OPEN** | ADR-021 | **Yes** |
-| API contract testing | **UNDECIDED** | Endpoint schemas | 3 | `tests` | P1 | **OPEN** | ADR-021 | No |
-| End-to-end browser testing | **UNDECIDED** | Critical journeys | 4, 6 | `e2e` | P1 | **OPEN** | ADR-021 | No |
-| Accessibility automated audit | **UNDECIDED**, axe-core implied by WCAG method | Zero critical issues | 4 | `e2e` | P1 | **OPEN** | ADR-021, ADR-022 | No |
-| Load testing | **UNDECIDED** | NFR targets, NFR-15 | 13 | `tools/` | P3 | **OPEN** | ADR-021 | No |
-| Security matrix testing | **UNDECIDED** | 15 security gates | 13 | `tests` | P3 | **OPEN** | ADR-021 | No |
-| Migration gate runner | **UNDECIDED** | V1 to V22 | 2 | `tests` | P1 | **OPEN** | ADR-021 | No |
-| Evidence-linked test fixtures | Committed corpus samples | NFR-13 | 1 | `tests` | P0 | APPROVED, **runner OPEN** | ADR-021 | **Yes** |
+| Unit and domain testing | **Vitest** | Every phase | 1 | `tests` | P0 | **APPROVED — ADR-021 ACCEPTED 2026-10-07** | ADR-021 | **Yes** |
+| Property-based testing | **Vitest** (property extensions as needed) | SKU parser, hash | 1 | `tests` | P0 | **APPROVED — ADR-021 ACCEPTED 2026-10-07** | ADR-021 | **Yes** |
+| Integration testing on real Postgres | **Vitest** | Repositories, RLS, outbox | 1 | `tests` | P0 | **APPROVED — ADR-021 ACCEPTED 2026-10-07** | ADR-021 | **Yes** |
+| Schema introspection assertions | **Vitest** / framework-free scripts | Schema fidelity | 1 | `tests` | P0 | **APPROVED** — implemented framework-free at Task 5; ADR-021 ACCEPTED 2026-10-07 | ADR-021 | **Yes** |
+| API contract testing | **Vitest** | Endpoint schemas | 3 | `tests` | P1 | **APPROVED — ADR-021 ACCEPTED 2026-10-07**; not installed until Phase 3 | ADR-021 | No |
+| End-to-end browser testing | **Playwright** | Critical journeys | 4, 6 | `e2e` | P1 | **APPROVED — ADR-021 ACCEPTED 2026-10-07**; NOT installed until its phase requires it | ADR-021 | No |
+| Accessibility automated audit | Playwright + axe-core implied by WCAG method | Zero critical issues | 4 | `e2e` | P1 | Playwright APPROVED (ADR-021 ACCEPTED 2026-10-07), axe wiring still touches ADR-022 scope | ADR-021, ADR-022 | No |
+| Load testing | **UNDECIDED** | NFR targets, NFR-15 | 13 | `tools/` | P3 | **OPEN** — the load-test tool was never decided by ADR-021 | ADR-021 | No |
+| Security matrix testing | **Vitest** | 15 security gates | 13 | `tests` | P3 | **APPROVED — ADR-021 ACCEPTED 2026-10-07**; not installed until its phase | ADR-021 | No |
+| Migration gate runner | **Vitest** | V1 to V22 | 2 | `tests` | P1 | **APPROVED — ADR-021 ACCEPTED 2026-10-07**; not installed until Phase 2 | ADR-021 | No |
+| Evidence-linked test fixtures | Committed corpus samples | NFR-13 | 1 | `tests` | P0 | APPROVED, runner ACCEPTED (ADR-021, 2026-10-07) | ADR-021 | **Yes** |
 
 ### Q. CI/CD
 
@@ -432,11 +433,11 @@ Every implementation skill required by the locked architecture, grouped A to R. 
 | Lint and typecheck gate | ESLint plus `tsc --noEmit` | Every push | 1 | CI | P0 | APPROVED | - | Yes |
 | Boundary rule enforcement | ESLint `no-restricted-imports` | ADR-019 | 1 | CI | P0 | APPROVED | ADR-019 | Yes |
 | Schema drift gate | Drizzle vs migrations | Every push | 1 | CI | P0 | APPROVED | - | Yes |
-| Migration gate execution | V1 to V22 on real Postgres | Every PR | 2 | CI | P1 | APPROVED, **runner OPEN** | ADR-021 | No |
+| Migration gate execution | V1 to V22 on real Postgres | Every PR | 2 | CI | P1 | APPROVED, runner ACCEPTED (ADR-021, 2026-10-07) | ADR-021 | No |
 | Bundle budget enforcement | PG-5, AR budget | Every PR | 4, 11 | CI | P1 | APPROVED | - | No |
 | Dependency drift detection | Declared sets vs doc 02 | Every push | 1 | CI | P1 | APPROVED | - | No |
-| Secret scanning gate | SG-7 | Every push | 1 | CI | P0 | **Depends on ADR-021** | ADR-021 | Yes |
-| PII scan gate | SG-14 | Every push | 1 | CI | P0 | **Depends on ADR-021** | ADR-021 | Yes |
+| Secret scanning gate | SG-7 | Every push | 1 | CI | P0 | **APPROVED — ADR-021 ACCEPTED 2026-10-07** (CI secrets scan is toolchain work for a later task) | ADR-021 | Yes |
+| PII scan gate | SG-14 | Every push | 1 | CI | P0 | **APPROVED — ADR-021 ACCEPTED 2026-10-07** (implementation later task) | ADR-021 | Yes |
 | Alert-without-runbook gate | Every alert names an owner | Every push | 13 | CI | P3 | APPROVED | - | No |
 | Preview and staging deploy | Neon branch per PR | Continuous | 1 | CI/CD | P1 | APPROVED, **phase-entry dependency** | - | No |
 
@@ -738,7 +739,7 @@ Phases 7 and 8 both depend on 3; 7 additionally depends on 6. Phase 9 depends on
 
 ### 6.1 Accepted ADRs, inherited unchanged
 
-The 20 ADRs in `PROJECT_SOURCE_OF_TRUTH.md` section 35 are binding. `INITIAL_IMPLEMENTATION_PLAN.md` section 35 states: "This plan implements them; it does not reopen them." Phase of first impact is taken from that plan.
+The 21 accepted ADRs in `PROJECT_SOURCE_OF_TRUTH.md` section 35 are binding. `INITIAL_IMPLEMENTATION_PLAN.md` section 35 states: "This plan implements them; it does not reopen them." Phase of first impact is taken from that plan. (ADR-021 was Proposed at planning time and ACCEPTED 2026-10-07 by explicit user authorization; `technical_design/40` is the decision register of record.)
 
 | ADR | Decision | First bites |
 |---|---|---|
@@ -762,14 +763,15 @@ The 20 ADRs in `PROJECT_SOURCE_OF_TRUTH.md` section 35 are binding. `INITIAL_IMP
 | ADR-018 | A single embedding dimension and model | P5 |
 | ADR-019 | Modular monolith with explicit extraction triggers | All |
 | ADR-020 | Transactional outbox rather than direct publishing | P1, P2 |
+| ADR-021 | Test runner is Vitest, with Playwright for end-to-end (**ACCEPTED 2026-10-07 by explicit user authorization**) | P1 onward |
 
 ### 6.2 Proposed ADRs — NOT accepted
 
-Four ADRs are recorded in `technical_design/40` with status **Proposed**. Proposed means a reasoned recommendation exists and no approval has been given. None may be treated as a decision.
+Three ADRs remain recorded in `technical_design/40` with status **Proposed**. Proposed means a reasoned recommendation exists and no approval has been given. None may be treated as a decision. (A fourth, ADR-021, was ACCEPTED 2026-10-07 by explicit user authorization and moved to the accepted register above.)
 
 | ADR | Proposed decision | Status | Phase blocked | Notes |
 |---|---|---|---|---|
-| **ADR-021** | Test runner is Vitest, with Playwright for end-to-end | **Proposed** | **P1 task 6 onward** | `INITIAL_IMPLEMENTATION_PLAN.md` 23.4 states no runner has been selected "because selecting one is a technology decision the Source of Truth does not make". `technical_design/02` lists it OPEN. The proposal names candidates; it does not authorise them. **This is the single blocking decision for coding.** |
+| **ADR-022** | Design-system primitives built in-repo, composed of unstyled accessible libraries | **Proposed** | P4 | `technical_design/02` line 54 lists it OPEN with a recommendation. The proposal names no specific library; it also must not be read as authorising shadcn, Radix, MUI, Chakra or Tailwind, none of which is named in any authoritative document. |
 | **ADR-022** | Design-system primitives built in-repo, composed of unstyled accessible libraries | **Proposed** | P4 | `technical_design/02` line 54 lists it OPEN with a recommendation. The proposal names no specific library; it also must not be read as authorising shadcn, Radix, MUI, Chakra or Tailwind, none of which is named in any authoritative document. |
 | **ADR-023** | AI evaluation harness is first-party, versioned against the prompt registry | **Proposed** | P9 | Requires a domain-specific assertion set, so a general framework is argued insufficient. Still a tooling choice requiring approval. |
 | **ADR-024** | Field-level provenance is a first-class relational table, not a framework | **Proposed** | P2 | Argues an explicit column plus table beats a framework and beats JSON blobs. Affects migration tooling shape. |
@@ -1187,7 +1189,7 @@ Once coding is authorised, and only for Phase 1:
 | MediaPipe and Three.js | Phase 11 |
 | Draco and KTX2 tooling | Phase 11 |
 | Payment provider SDK | Phase 6, and only after the provider is chosen |
-| Any test framework | **ADR-021 resolution** |
+| ~~Any test framework~~ **ADR-021 RESOLVED 2026-10-07:** Vitest may be installed for the unit/domain/integration/contract layers as each layer's tests require it; **Playwright waits** until a phase requires browser testing | — |
 
 ### 14.3 What requires ADR approval before installation
 
@@ -1195,7 +1197,7 @@ Every item in Section 13, plus:
 
 | Item | ADR |
 |---|---|
-| Any test runner, E2E driver, load tool, property-testing library, accessibility auditor, secret scanner, PII scanner | ADR-021 |
+| ~~Any test runner, E2E driver, load tool, property-testing library, accessibility auditor, secret scanner, PII scanner~~ **ADR-021 ACCEPTED 2026-10-07** for the runner + E2E driver (Vitest/Playwright). The load-test tool, property-testing extensions, accessibility auditor, secret and PII scanners remain individual installation decisions | ADR-021 (partially resolved as above) |
 | Any component, CSS or state-management library | ADR-022 |
 | Any AI evaluation framework | ADR-023 |
 | Any provenance or lineage framework | ADR-024 |

@@ -47,7 +47,9 @@ counts both classes (PG17-style introspection counts NOT NULL in
 | Validation gates | V1–V22 |
 | NFRs | NFR-01 … NFR-15 |
 | Invariants | INV-01 … INV-10 |
-| ADRs | 20 Accepted (001–020) + 4 Proposed (021–024) |
+| ADRs | 21 Accepted (001–021; ADR-021 accepted 2026-10-07 by explicit user authorization) + 3 Proposed (022–024) |
+
+**Task 6 domain facts now enforced in code:** INV-01 (full `products_composition_ck` semantics), INV-02, INV-03 as pure predicates in `packages/domain`; the ten doc-05 value objects implemented (configuration-hash validates the `sha256:<hex>` shape only — the hash function itself is plan task 8).
 
 **Extension availability gap: CLOSED.** All six extensions are live-created by
 migration 0001 on a pristine local database and verified present on the Neon
@@ -70,8 +72,10 @@ schema, no domain models, no repositories, no tests, no seeders.
 | Task 2 — database infrastructure | **COMPLETE.** Local PostgreSQL 16.15 (`maihan_dev`) AND new Neon project "Maihan Gems Dev" (PostgreSQL 16.15, `maihan_dev`, schema public) — both with six extensions, HNSW + NUMERIC smoke PASS, 0 application tables. Old PG18 project abandoned for dev; production never touched. `DATABASE_URL` is the single sanctioned database variable (§29.6) |
 | Task 4 — ordered DDL migrations | **COMPLETE (2026-10-05).** 17 migrations (doc 04 ordering) in `packages/db/migrations/`; applied cleanly from a pristine local database AND on the Neon dev database; introspection matches every documented count (74 tables, 33 enums, 94 FKs, 59 UNIQUE, 28 CHECK + 563 NOT NULL = the documented 591, 263 indexes, 9 named invariants, 2 HNSW, 1 trigger, 2 functions, 1 view, 6/6 RLS); local vs Neon schema metadata identical. Committed in the Task 4 commit |
 | Task 5 — schema-fidelity CI assertion | **COMPLETE (2026-10-07).** Framework-free (ADR-021 untouched): `packages/db/src/assert-schema.ts` asserts the locked schema exactly (counts + exact names/definitions) over the SHARED introspection (`packages/db/src/introspect.ts`, semantics identical to Task 4's verifier); `packages/db/src/schema-fidelity.ts` orchestrates fresh-database runs (scratch `maihan_dev_fidelity` created, migrated from zero, asserted, ALWAYS dropped; refuses Neon hosts); CI command `pnpm run schema-fidelity` + blocking GitHub Actions workflow `.github/workflows/ci.yml` reusing the committed compose.yaml. Fresh-database run PASS (twice — deterministic); negative probe proved every drift class is caught by name; read-only assertion also PASS on local `maihan_dev` and Neon dev |
-| Tasks 3, 6-9 | Not started. Task 3 needs `naturalgemstones/`, ABSENT from this Codespace. Next per plan: **Task 6** (domain value objects + INV-01/02/03 predicates) — **BLOCKED on ADR-021** |
-| Coding status | Tasks 1, 2, 4 and 5 authorised and executed per scope. Further tasks need their own approval |
+| **ADR-021 (test tooling)** | **ACCEPTED 2026-10-07 by explicit user authorization.** Vitest 5.0.3 = unit/domain/integration/contract runner (installed for the domain layer); Playwright accepted for E2E, NOT installed (no phase requires it yet); load-test tool remains OPEN (never part of ADR-021's decision) |
+| Task 6 — domain value objects + INV-01/02/03 | **COMPLETE (2026-10-07).** Pure `packages/domain`: error model, enum unions (product_kind/jewellery_type/gemstone_kind/metal_code/evidence_status), value objects (GemRef, Money, WeightCt, DimensionsMm, SourceSku, DerivedSku + ProductIdentity union, Sku composite, ConfigurationHash shape), INV-01/02/03 predicates + `assertComposition`. ZERO runtime dependencies. 70 Vitest tests green (11 files); lint/build/tsc green; schema fidelity still PASS |
+| Tasks 3, 7-9 | Not started. Task 3 needs `naturalgemstones/`, ABSENT from this Codespace. Next per plan: **Task 7** (SKU grammar parser, 1,024/1,024 against the corpus) — **BLOCKED: Task 7 depends on Task 6 (done) but needs the corpus from `naturalgemstones/` for its completion gate** |
+| Coding status | Tasks 1, 2, 4, 5 and 6 authorised and executed per scope. Further tasks need their own approval |
 | Blocking approval | **ADR-021 (test tooling)** blocks Task 6 onward and the Phase 1 exit gate |
 
 ---
@@ -105,7 +109,7 @@ schema, no domain models, no repositories, no tests, no seeders.
 
 | # | Blocker | Type | Resolvable by |
 |---|---|---|---|
-| 1 | **ADR-021 test tooling unresolved** | **Approval.** Unit/integration/E2E/load runners not selected. Plan task 6 requires green unit tests. | Client decision |
+| 1 | ~~ADR-021 test tooling unresolved~~ **RESOLVED 2026-10-07 — ACCEPTED by explicit user authorization.** Vitest installed for the domain layer (5.0.3); Playwright accepted, not installed; load-test tool still open (not part of the decision) | — | — |
 | 2 | **`docs/evidence/MANIFEST.md` not written** | Execution. No dependency; can start immediately. **Also needs `naturalgemstones/`, ABSENT from this Codespace** | `MIGRATION_ENGINEER` |
 | 3 | Repository structure approved | APPROVED — client signed off at Task 1 | — |
 | 4 | ~~Local PostgreSQL 16 not provisioned~~ **RESOLVED 2026-10-05.** 16.15 via `compose.yaml`, six extensions live-verified | — | — |
@@ -125,7 +129,7 @@ approval, and nothing requires a later phase.
 
 | Decision | Blocks | Owner |
 |---|---|---|
-| ADR-021 test tooling | **Phase 1 task 6** | Client |
+| ~~ADR-021 test tooling~~ **ACCEPTED 2026-10-07 by explicit user authorization** | ~~Phase 1 task 6~~ — | — |
 | ADR-022 design-system primitives | Phase 4 | Client |
 | ADR-023 AI evaluation harness | Phase 9 | Client |
 | ADR-024 provenance storage design | Phase 2 | Client |
@@ -150,7 +154,7 @@ requires editing the authoritative plan.
 
 | # | Issue | Severity |
 |---|---|---|
-| 1 | Plan §35.2 says "no technology has been chosen" while `technical_design/40` ADR-021 names Vitest and Playwright as *proposed* | **Medium** — a reader could install a runner |
+| 1 | ~~Plan §35.2 says "no technology has been chosen" while ADR-021 names Vitest and Playwright as *proposed*~~ **RESOLVED 2026-10-07**: ADR-021 ACCEPTED and a resolution note was appended to plan §35.2 and §23.4, pointing at `technical_design/40` as the register of record | — |
 | 2 | Plan task 9 seeds "15 metals, 8 jewellery types"; observed counts are 14 metal codes and 5 jewellery types (`R10` is enum-only) | Low |
 | 3 | Plan says "thirteen" AI evaluation dimensions in three places; source of truth and `technical_design/32` both enumerate **fourteen** | Low |
 | 4 | Plan §35 and `technical_design/02` both use pre-ADR-022 wording for the design system | Informational |
@@ -161,10 +165,14 @@ requires editing the authoritative plan.
 
 1. Task 5 — COMPLETE 2026-10-07 (schema-fidelity CI assertion; fresh-database
    run green; workflow `.github/workflows/ci.yml` blocking).
-2. Task 6 — domain value objects and INV-01/02/03 predicates — is next per the
-   plan but **BLOCKED on ADR-021** (its done-when requires green unit tests and
-   a test runner may not be chosen until ADR-021 is resolved).
-3. Task 3 (`docs/evidence/MANIFEST.md`) remains NOT STARTED — requires the
+2. Task 6 — COMPLETE 2026-10-07 (domain value objects + INV-01/02/03 predicates;
+   70 unit tests green, framework-free lint boundaries intact; ADR-021 accepted
+   and Vitest installed).
+3. Task 7 — SKU grammar parser (depends on Task 6, now done). Its completion
+   gate (1,024/1,024 against the observed corpus) REQUIRES `naturalgemstones/`,
+   absent from this Codespace — the parser may be built, but Task 7 cannot be
+   declared done until the corpus is available or the gate is re-scoped.
+4. Task 3 (`docs/evidence/MANIFEST.md`) remains NOT STARTED — requires the
    source archive, absent from this Codespace.
 
 **Do not begin a task without explicit user approval.**

@@ -30,7 +30,7 @@
 | 018 | A single embedding dimension and model for all vectors | Accepted |
 | 019 | Modular monolith with explicit extraction triggers | Accepted |
 | 020 | Transactional outbox rather than direct event publishing | Accepted |
-| 021 | Test runner is Vitest, with Playwright for end-to-end | Proposed |
+| 021 | Test runner is Vitest, with Playwright for end-to-end | Accepted |
 | 022 | Design-system primitives are built in-repo, not adopted | Proposed |
 | 023 | AI evaluation harness is first-party, versioned against the prompt registry | Proposed |
 | 024 | Field-level provenance is a first-class relational table, not a framework | Proposed |
@@ -264,7 +264,15 @@
 - **Reason:** Vitest shares TypeScript and ESM configuration with the application, so there is one transform pipeline and one config file rather than two. It supports the in-process Postgres test setup this architecture needs, since tests must run against a real database rather than a mock. Playwright is required for the keyboard-accessibility and multi-channel tests, which need a real browser.
 - **Consequences:** One test config per layer. Integration tests require a local or containerised Postgres, so CI provisions one. Vitest's watch mode is a development benefit; its watch-mode state must never reach CI.
 - **Evidence:** `[INFERRED]`; no source evidence exists for tooling. Layer structure per section 34.1, the real-Postgres requirement per section 34.1, and the browser requirements in section 34.3.
-- **Status:** Proposed; requires approval before implementation.
+- **Status:** Accepted.
+
+**Resolution note (2026-10-07).** The user explicitly authorized accepting this
+decision at Phase 1 Task 6 authorization, removing the tooling blocker. The
+decision text above is preserved unchanged as the accepted rationale. Vitest is
+installed where a layer's tests require it (unit/domain first); Playwright is
+accepted but is NOT installed until a phase requires browser testing. The
+load-test tool named alongside this ADR in `SKILL_MATRIX_AND_TOOLING.md` was
+never part of this decision and remains open.
 
 ---
 
