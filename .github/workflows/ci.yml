@@ -1,0 +1,67 @@
+# Maihan Gems — CI.
+#
+# Phase 1 Task 5: schema fidelity becomes a blocking check.
+# INITIAL_IMPLEMENTATION_PLAN.md section 36 task 5:
+#   "Assert schema fidelity in CI: 74 tables, 33 enums, 94 FKs, 591 CHECK,
+#    263 indexes, 9 named invariant constraints, 6 RLS policies with
+#    0 policy-less tables, 2 HNSW indexes, 1 trigger, 1 view, 2 functions."
+#
+# Sequence per the task contract: provision the disposable local PostgreSQL 16
+# (the committed compose.yaml — no other infrastructure mechanism), apply the
+# complete ordered migration chain on a FRESH scratch database created by the
+# orchestrator, run the framework-free schema-fidelity assertion, and exit
+# non-zero on any mismatch.
+#
+# Never points at production or the shared Neon development database: the
+# DATABASE_URL used here is the documented local throwaway endpoint
+# (compose.yaml binds 127.0.0.1:5433 inside the runner), and the orchestrator
+# refuses Neon hosts outright.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    name: lint, build, schema fidelity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # Disposable local PostgreSQL 16 with every required extension
+      # (pgvector/pgvector:pg16). --wait blocks until the healthcheck passes.
+      - name: Start disposable PostgreSQL 16
+        run: docker compose up -d --wait db
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Build
+        run: pnpm run build
+
+      # Migrates a fresh scratch database (maihan_dev_fidelity) from zero on
+      # the disposable instance, asserts the locked schema exactly, and always
+      # drops the scratch database afterwards. The local credential below is
+      # the documented throwaway container credential from compose.yaml.
+      - name: Schema fidelity (fresh database)
+        env:
+          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
+        run: pnpm run schema-fidelity
+
+      - name: Stop disposable PostgreSQL 16
+        if: always()
+        run: docker compose down -v

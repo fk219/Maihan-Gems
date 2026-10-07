@@ -1,5 +1,7 @@
 /**
- * packages/db — DDL migration runner (Phase 1 Task 4).
+ * packages/db — DDL migration runner (Phase 1 Task 4; library surface added in
+ * Task 5 so the schema-fidelity orchestrator can migrate a fresh scratch
+ * database without duplicating the runner).
  *
  * Authority:
  *   technical_design/02  "Tooling by activity" — schema migrations are applied
@@ -17,7 +19,7 @@
  *
  * Behaviour:
  *   - Applies every pending migration from ./migrations (override the folder
- *     with MAIHAN_MIGRATIONS_DIR for verification runs only).
+ *     with the migrationsFolder option or MAIHAN_MIGRATIONS_DIR).
  *   - Drizzle's migrator wraps the whole pending set in ONE transaction: a
  *     failure rolls everything back and records nothing, so the schema is
  *     recoverable and no failed migration is ever marked applied. History is
@@ -25,29 +27,44 @@
  *     exactly equal to the locked 74-table inventory.
  *   - Re-running is a no-op once every migration is recorded.
  *
- * This file is intentionally self-contained (no relative imports) so the
- * compiled dist/migrate.js runs under plain Node ESM.
+ * As a CLI (`node dist/migrate.js`) it targets DATABASE_URL and refuses any
+ * database outside the maihan_dev* dev contract.
  */
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import pg from 'pg';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const { Client } = pg;
 
 const MIGRATION_LOCK_KEY = 'maihan-gems-ddl-migrations';
 
-function fail(message: string): never {
-  process.stderr.write(`migrate: ${message}\n`);
-  process.exit(1);
+/** The migrations folder: packages/db/migrations next to the compiled dist/. */
+export function defaultMigrationsFolder(): string {
+  return path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'migrations');
 }
 
-async function main(): Promise<void> {
-  const databaseUrl = process.env['DATABASE_URL'];
+export interface RunMigrationsOptions {
+  /** The single sanctioned database variable (Source of Truth 29.6). */
+  databaseUrl: string;
+  /** Defaults to packages/db/migrations; overridable for verification runs. */
+  migrationsFolder?: string;
+}
+
+export interface RunMigrationsResult {
+  database: string;
+  postgres_version_short: string;
+  /** Rows now in drizzle.__drizzle_migrations. */
+  recorded: number;
+}
+
+export async function runMigrations(options: RunMigrationsOptions): Promise<RunMigrationsResult> {
+  const { databaseUrl } = options;
   if (!databaseUrl || databaseUrl.length === 0) {
-    fail('DATABASE_URL is not set. It is the single sanctioned database variable (Source of Truth 29.6).');
+    throw new Error('DATABASE_URL is not set. It is the single sanctioned database variable (Source of Truth 29.6).');
   }
+  const migrationsFolder = options.migrationsFolder ?? process.env['MAIHAN_MIGRATIONS_DIR'] ?? defaultMigrationsFolder();
 
   // doc 29 section 4: migrations belong on a direct connection. The Neon
   // pooled endpoint uses transaction-mode pooling, where session-level
@@ -56,16 +73,13 @@ async function main(): Promise<void> {
   try {
     host = new URL(databaseUrl).host;
   } catch {
-    fail('DATABASE_URL is not a valid URL.');
+    throw new Error('DATABASE_URL is not a valid URL.');
   }
   if (host?.includes('-pooler.')) {
     process.stderr.write(
       'migrate: WARNING: DATABASE_URL points at a pooled endpoint; doc 29 section 4 requires migrations on the direct endpoint (session advisory locks do not survive transaction-mode pooling).\n',
     );
   }
-
-  const defaultFolder = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'migrations');
-  const migrationsFolder = process.env['MAIHAN_MIGRATIONS_DIR'] ?? defaultFolder;
 
   // Dedicated client for the advisory lock so the lock and the migration
   // transaction share one session on a direct connection.
@@ -75,7 +89,9 @@ async function main(): Promise<void> {
     await lockClient.query('SELECT pg_advisory_lock(hashtext($1))', [MIGRATION_LOCK_KEY]);
   } catch (error) {
     await lockClient.end().catch(() => undefined);
-    fail(`could not acquire the migration advisory lock: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `could not acquire the migration advisory lock: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 
   const db = drizzle({ client: lockClient });
@@ -84,9 +100,9 @@ async function main(): Promise<void> {
       'SELECT version() AS version, current_database() AS db, current_schema() AS schema',
     );
     const row = target.rows[0];
-    if (!row) fail('target database did not answer the identity probe');
+    if (!row) throw new Error('target database did not answer the identity probe');
     if (!row.db.startsWith('maihan_dev')) {
-      fail(`refusing to migrate: current_database() is "${row.db}", the dev contract is maihan_dev (Task 2)`);
+      throw new Error(`refusing to migrate: current_database() is "${row.db}", the dev contract is maihan_dev (Task 2)`);
     }
     process.stdout.write(`migrate: target ${row.db} on ${row.version.split(',')[0]}\n`);
 
@@ -94,7 +110,13 @@ async function main(): Promise<void> {
     const applied = await lockClient.query<{ count: string }>(
       'SELECT count(*)::text AS count FROM drizzle.__drizzle_migrations',
     );
-    process.stdout.write(`migrate: complete; ${applied.rows[0]?.count ?? '?'} migration(s) recorded in history\n`);
+    const recorded = Number(applied.rows[0]?.count ?? 0);
+    process.stdout.write(`migrate: complete; ${recorded} migration(s) recorded in history\n`);
+    return {
+      database: row.db,
+      postgres_version_short: row.version.split(' ').slice(0, 2).join(' '),
+      recorded,
+    };
   } finally {
     try {
       await lockClient.query('SELECT pg_advisory_unlock(hashtext($1))', [MIGRATION_LOCK_KEY]);
@@ -104,7 +126,14 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((error: unknown) => {
-  process.stderr.write(`migrate: FAILED: ${error instanceof Error ? error.message : String(error)}\n`);
-  process.exitCode = 1;
-});
+// CLI entry point: only when this module is the executed script. The library
+// export above must never trigger a migration run on import.
+const isDirectExecution =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isDirectExecution) {
+  runMigrations({ databaseUrl: process.env['DATABASE_URL'] ?? '' }).catch((error: unknown) => {
+    process.stderr.write(`migrate: FAILED: ${error instanceof Error ? error.message : String(error)}\n`);
+    process.exitCode = 1;
+  });
+}

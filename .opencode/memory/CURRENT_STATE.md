@@ -69,8 +69,9 @@ schema, no domain models, no repositories, no tests, no seeders.
 | Task 1 — workspace skeleton | **COMPLETE.** Exit gate PASS, committed `1e9e26f` |
 | Task 2 — database infrastructure | **COMPLETE.** Local PostgreSQL 16.15 (`maihan_dev`) AND new Neon project "Maihan Gems Dev" (PostgreSQL 16.15, `maihan_dev`, schema public) — both with six extensions, HNSW + NUMERIC smoke PASS, 0 application tables. Old PG18 project abandoned for dev; production never touched. `DATABASE_URL` is the single sanctioned database variable (§29.6) |
 | Task 4 — ordered DDL migrations | **COMPLETE (2026-10-05).** 17 migrations (doc 04 ordering) in `packages/db/migrations/`; applied cleanly from a pristine local database AND on the Neon dev database; introspection matches every documented count (74 tables, 33 enums, 94 FKs, 59 UNIQUE, 28 CHECK + 563 NOT NULL = the documented 591, 263 indexes, 9 named invariants, 2 HNSW, 1 trigger, 2 functions, 1 view, 6/6 RLS); local vs Neon schema metadata identical. Committed in the Task 4 commit |
-| Tasks 3, 5-9 | Not started. Task 3 needs `naturalgemstones/`, ABSENT from this Codespace. Next per plan: **Task 5** (schema-fidelity assertions against a fresh database) |
-| Coding status | Tasks 1, 2 and 4 authorised and executed per scope. Further tasks need their own approval |
+| Task 5 — schema-fidelity CI assertion | **COMPLETE (2026-10-07).** Framework-free (ADR-021 untouched): `packages/db/src/assert-schema.ts` asserts the locked schema exactly (counts + exact names/definitions) over the SHARED introspection (`packages/db/src/introspect.ts`, semantics identical to Task 4's verifier); `packages/db/src/schema-fidelity.ts` orchestrates fresh-database runs (scratch `maihan_dev_fidelity` created, migrated from zero, asserted, ALWAYS dropped; refuses Neon hosts); CI command `pnpm run schema-fidelity` + blocking GitHub Actions workflow `.github/workflows/ci.yml` reusing the committed compose.yaml. Fresh-database run PASS (twice — deterministic); negative probe proved every drift class is caught by name; read-only assertion also PASS on local `maihan_dev` and Neon dev |
+| Tasks 3, 6-9 | Not started. Task 3 needs `naturalgemstones/`, ABSENT from this Codespace. Next per plan: **Task 6** (domain value objects + INV-01/02/03 predicates) — **BLOCKED on ADR-021** |
+| Coding status | Tasks 1, 2, 4 and 5 authorised and executed per scope. Further tasks need their own approval |
 | Blocking approval | **ADR-021 (test tooling)** blocks Task 6 onward and the Phase 1 exit gate |
 
 ---
@@ -158,13 +159,11 @@ requires editing the authoritative plan.
 
 ## 9. Next major action
 
-1. Task 5 — schema-fidelity assertions against a fresh database (plan task 5,
-   depends only on Task 4, now complete). A framework-free introspection
-   script (`packages/db/src/verify-schema.ts`) already reports every required
-   count; the CI wiring can avoid ADR-021 scope because it asserts catalogs,
-   not units.
-2. Client resolves **ADR-021** before any task requiring a test framework
-   (task 6 onward).
+1. Task 5 — COMPLETE 2026-10-07 (schema-fidelity CI assertion; fresh-database
+   run green; workflow `.github/workflows/ci.yml` blocking).
+2. Task 6 — domain value objects and INV-01/02/03 predicates — is next per the
+   plan but **BLOCKED on ADR-021** (its done-when requires green unit tests and
+   a test runner may not be chosen until ADR-021 is resolved).
 3. Task 3 (`docs/evidence/MANIFEST.md`) remains NOT STARTED — requires the
    source archive, absent from this Codespace.
 

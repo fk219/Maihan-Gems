@@ -19,7 +19,11 @@ target).
 **Task 4 COMPLETE (2026-10-05).** The validated DDL is ported into 17 ordered
 Drizzle migrations and applied cleanly on a pristine local PostgreSQL 16.15
 database and on the Neon dev database; schema metadata is identical on both.
-Tasks 3 and 5-9 not started.
+
+**Task 5 COMPLETE (2026-10-07).** Schema fidelity is now a blocking CI
+assertion: fresh-database orchestrator + framework-free assertion over the
+shared introspection; GitHub Actions workflow added. Tasks 3 and 6-9 not
+started; Task 6 onward blocked by ADR-021.
 MVP chain is Phase 1 → 2 → 3 → 4 → 5 → 6. Phases 7–13 are post-MVP.
 
 **Contract correction applied:** `DATABASE_URL` is the SINGLE sanctioned database
@@ -35,25 +39,21 @@ reintroduced — per-environment selection is a property of the value stored in
 
 # Current Task
 
-**Task 4 COMPLETE (2026-10-05) — ordered DDL migrations.**
+**Task 5 COMPLETE (2026-10-07) — schema-fidelity CI assertion.**
 
 | Check | Result |
 |---|---|
-| Migration framework | Drizzle Kit custom SQL migrations + the Drizzle migrator, `packages/db/migrations/` + `packages/db/src/migrate.ts` |
-| Migration count | **17** (`0001_extensions` … `0017_trust_view`), one logical unit per SoT §8 subsection per doc 04 |
-| Clean local install | PASS — pristine throwaway database `maihan_dev_t4clean` (created, migrated, introspected, dropped): extensions created from zero, all 17 applied |
-| Local `maihan_dev` install | PASS — 17 applied, introspection green |
-| Neon dev install | PASS — same chain via the single `DATABASE_URL`, 17 recorded |
-| History | `drizzle.__drizzle_migrations` on both targets; 17 rows, deterministic hashes, strictly increasing `when`; public schema holds exactly the 74 locked tables |
-| Rerun behaviour | no-op on both targets (watermark skip by history) |
-| Failure behaviour | proven with a tampered migration copy on a throwaway DB: hard failure, FULL rollback (0 tables, 0 enums, 0 extensions, 0 history rows); nothing marked applied |
-| Schema counts | 74 tables · 33 enums · 74 PK · 94 FK · 59 UNIQUE · 28 CHECK (+563 NOT NULL = the documented 591) · 263 indexes · 9 named invariants · 2 HNSW · 2 vector(1024) columns · 1 trigger · 2 functions · 1 view · 6/6 RLS · 0 policy-less |
-| Local vs Neon fidelity | **IDENTICAL** — tables, enums+member counts, FKs, constraint counts, index definitions, HNSW, vector columns, trigger, functions, views, RLS all MATCH; only descriptive fields differ (platform pgvector 0.8.7 local / 0.8.0 Neon, both ≥ 0.6) |
-| Behavioural smoke | trigger populates/maintains `search_document`; INV-01/02/03, `dyo_one_stone_ck`, `dyo_pair_is_earrings_ck`, `certificates_subject_ck` all reject violations (23514); CITEXT email uniqueness rejected case-variant duplicate (23505); smoke rows cleaned, 0 leftovers |
+| Assertion | `packages/db/src/assert-schema.ts` — framework-free (ADR-021 untouched); consumes the SAME introspection as the Task-4 verifier via the new shared `packages/db/src/introspect.ts` (counting semantics unchanged — verified field-by-field before/after the refactor) |
+| Expectations | `packages/db/src/expected-schema.ts` — the fidelity mirror of the locked schema: exact 74 table names, 33 enums WITH exact member sets, exact 94 FK names, 9 named invariants, 6 RLS tables + 6 exact policies, 2 HNSW indexes WITH exact catalog definitions, 1 trigger, 2 functions, 1 view, 2 vector(1024) columns, 6 extension NAMES (versions deliberately not asserted — platform property) |
+| Fresh-database run | **PASS** — `packages/db/src/schema-fidelity.ts`: scratch `maihan_dev_fidelity` created on the disposable local instance, 17 migrations applied from zero, history == journal (17), all assertions green, scratch ALWAYS dropped (also on failure) |
+| Determinism | **PASS** — ran twice, identical verdict; no leftover scratch databases |
+| Negative probe | **PASS** — doctored scratch (unexpected table, dropped CHECK/invariant/unique/FK-less index/HNSW/trigger/function/view/policy, disabled RLS, added enum member) produced named, actionable failures for every drift class; exit 1 |
+| Dual-target | read-only assertion PASS on local `maihan_dev` AND on the Neon dev database via `DATABASE_URL`; orchestrator REFUSES Neon hosts (covers production) |
+| CI | `pnpm run schema-fidelity` (root: build + run) + blocking `.github/workflows/ci.yml` (install → compose up --wait → lint → build → schema-fidelity → compose down -v) |
 | lint / build / tsc --dry | PASS / PASS / PASS |
 
-**ADR-021 remains OPEN.** No test framework is installed and none may be, until
-it is resolved. This blocks Task 6 onward and the Phase 1 exit gate.
+**ADR-021 remains OPEN and UNMODIFIED.** No test framework installed. This
+blocks Task 6 onward and the Phase 1 exit gate.
 
 ---
 
@@ -61,13 +61,15 @@ it is resolved. This blocks Task 6 onward and the Phase 1 exit gate.
 
 | Item | State |
 |---|---|
-| Phase 1 | **Started. Tasks 1, 2 and 4 complete.** Tasks 3, 5-10 not started |
+| Phase 1 | **Started. Tasks 1, 2, 4 and 5 complete.** Tasks 3, 6-10 not started |
 | Application code | **None exists.** Workspace skeleton only; every `src/index.ts` is a documentation-only barrel |
 | Database migrations | **17 ordered DDL migrations, applied and verified on both dev targets** (Task 4) |
-| Tests | **None written.** ADR-021 still OPEN |
+| Schema-fidelity gate | **Blocking CI assertion, green on fresh databases** (Task 5) |
+| Tests | **None written.** ADR-021 still OPEN (Task 5 is framework-free by design) |
 | Repository / workspaces | **EXISTS.** 8 packages, 9 workspace projects, pnpm 12.3.4 |
-| Local PostgreSQL 16 | **EXISTS and correct.** 16.15 via compose.yaml, database `maihan_dev`, all six extensions; Task 4 migrated it |
-| Neon dev | **EXISTS and correct.** "Maihan Gems Dev": PostgreSQL 16.15, db `maihan_dev`; Task 4 migrated it; schema identical to local |
+| CI | **EXISTS.** `.github/workflows/ci.yml`: lint → build → schema fidelity on a disposable fresh PostgreSQL 16 |
+| Local PostgreSQL 16 | **EXISTS and correct.** 16.15 via compose.yaml, database `maihan_dev`, all six extensions; migrated by Task 4 |
+| Neon dev | **EXISTS and correct.** "Maihan Gems Dev": PostgreSQL 16.15, db `maihan_dev`; migrated by Task 4; schema identical to local |
 | `docs/evidence/MANIFEST.md` | **Not written.** Task 3; blocked, archive absent |
 
 ---
@@ -88,6 +90,7 @@ Planning complete. **Tasks 1 and 2 are the first implementation tasks completed.
 | **Phase 1 Task 1 — workspace skeleton** | **8 packages, 9 workspace projects, pnpm 12.3.4. Exit gate PASS: workspaces install; boundary lint rules active** |
 | **Phase 1 Task 2 — database infrastructure** | **COMPLETE.** LOCAL: PostgreSQL 16.15 via `compose.yaml` (`pgvector/pgvector:pg16`), database `maihan_dev` on 127.0.0.1:5433, healthy; six extensions live-verified (`vector 0.8.7`, `citext 1.6`, `pg_trgm 1.6`, `unaccent 1.1`, `btree_gin 1.3`, `pg_stat_statements 1.10`); HNSW + `vector(4)` + `NUMERIC(12,4)` smoke tests PASS; 0 application tables. NEON: standardized on a NEW project "Maihan Gems Dev" (created by the client in the console after the PG16 requirement), PostgreSQL **16.15**, database **`maihan_dev`**, schema `public`; six extensions installed and live-verified (`vector 0.8.0`, `citext 1.6`, `pg_trgm 1.6`, `unaccent 1.1`, `btree_gin 1.3`, `pg_stat_statements 1.10`); HNSW + `NUMERIC(12,4)` smoke tests PASS; 0 application tables. The OLD "Maihan Gems" PG18 project and its `dev` branch are abandoned for development use (not deleted, not a valid target). Production verified untouched (0 extensions, 0 tables) |
 | **Phase 1 Task 4 — ordered DDL migrations** | **COMPLETE.** 17 migrations ported verbatim from SoT §8 in doc 04 order; applied from clean state on local (throwaway DB incl. extension creation + real `maihan_dev`) and on Neon dev; introspection matches every documented count; local vs Neon metadata identical; rerun no-op; failure rollback proven; behavioural smoke green (trigger, INV bites, CITEXT) |
+| **Phase 1 Task 5 — schema-fidelity CI assertion** | **COMPLETE.** Shared introspection (`introspect.ts`) + expectations mirror (`expected-schema.ts`) + framework-free assertion (`assert-schema.ts`) + fresh-database orchestrator (`schema-fidelity.ts`, scratch lifecycle with unconditional cleanup and Neon-host refusal) + root script + blocking GitHub Actions workflow. Fresh run PASS twice (deterministic); every drift class proven caught by negative probe; read-only assertion green on both dev targets |
 
 ---
 
@@ -107,7 +110,7 @@ First ten tasks, verbatim from `INITIAL_IMPLEMENTATION_PLAN.md` §36.
 | 2 | Provision a disposable local PostgreSQL 16 and a Neon **dev branch** target for migrations | 1 | 1 | Both reachable; neither is production — **DONE. Local: PG 16.15, db `maihan_dev`. Neon: NEW project "Maihan Gems Dev" (client-created), PG 16.15, db `maihan_dev`. Old PG18 project abandoned, production never touched** |
 | 3 | Write `docs/evidence/MANIFEST.md` recording storage location, SHA-256 and retention class of every migration-critical file | 1 | — | All ten entries present with verified checksums |
 | 4 | Port the validated DDL into ordered migrations, one logical unit per source-of-truth schema subsection | 1 | 2 | Applies cleanly on a clean database — **DONE** |
-| 5 | Assert schema fidelity in CI: 74 tables, 33 enums, 94 FKs, 591 CHECK, 263 indexes, 9 named invariant constraints, 6 RLS policies with 0 policy-less tables, 2 HNSW indexes, 1 trigger, 1 view, 2 functions | 1 | 4 | Introspection test green against a fresh database |
+| 5 | Assert schema fidelity in CI: 74 tables, 33 enums, 94 FKs, 591 CHECK, 263 indexes, 9 named invariant constraints, 6 RLS policies with 0 policy-less tables, 2 HNSW indexes, 1 trigger, 1 view, 2 functions | 1 | 4 | Introspection test green against a fresh database — **DONE** (framework-free assertion + blocking workflow) |
 | 6 | Implement the domain value objects and INV-01, INV-02, INV-03 as pure predicates | 1 | 4 | Unit tests green; no infrastructure imports |
 | 7 | Implement the SKU grammar parser with the validated regex and prove it against the 1,024-record corpus | 1 | 6 | 1,024/1,024 match, 0 mismatches (gates V3, V19) |
 | 8 | Implement the configuration-hash function and slug derivation | 1 | 6 | Deterministic; property tests green |
@@ -165,6 +168,10 @@ during planning and are recorded in `technical_design/40` and
 | 2026-10-05 (T4) | Advisory lock `hashtext('maihan-gems-ddl-migrations')` taken around the run (doc 29 §4: "concurrent attempts blocked by an advisory lock"); a pooled-endpoint host triggers a WARNING pointing at the direct endpoint | `packages/db/src/migrate.ts` |
 | 2026-10-05 (T4) | 0001 runs the six `CREATE EXTENSION IF NOT EXISTS` verbatim then FAILS LOUDLY (DO block) if any of the five schema-load-bearing extensions is absent; `pg_stat_statements` warns only (doc 04 marks it optional) | `packages/db/migrations/0001_extensions.sql` |
 | 2026-10-05 (T4) | `pnpm-workspace.yaml` gained `allowBuilds: esbuild: true` — pnpm 12 build-script approval for esbuild, drizzle-kit's own transitive dependency; without it a frozen-lockfile install exits non-zero. No new technology introduced | `pnpm-workspace.yaml` |
+| 2026-10-05 (T5) | Schema fidelity implemented FRAMEWORK-FREE (no test framework; ADR-021 untouched): the assertion is a compiled Node CLI over the shared introspection, wired as a blocking GitHub Actions job. Doc 04's "CI asserts..." rule 1 is satisfied without choosing a runner | `packages/db/src/assert-schema.ts`, `.github/workflows/ci.yml` |
+| 2026-10-05 (T5) | `introspect.ts` is the single source of counting semantics; `verify-schema.ts` (Task 4 CLI) and `assert-schema.ts` (Task 5) both consume it — verified field-by-field that the refactor changed no pre-existing value (only added `enum_members`) | `packages/db/src/introspect.ts` |
+| 2026-10-05 (T5) | `expected-schema.ts` is a fidelity MIRROR of the authoritative DDL, not a schema master: a failing assertion means the migration drifted from the locked schema and is fixed via a migration/ADR, never by editing the expectation | `packages/db/src/expected-schema.ts` |
+| 2026-10-05 (T5) | Fresh-database fidelity runs use a scratch database `maihan_dev_fidelity` on whatever disposable instance `DATABASE_URL` names (value-selection, never a second variable); Neon hosts are refused outright, which also covers production; scratch cleanup is unconditional | `packages/db/src/schema-fidelity.ts` |
 
 ---
 
@@ -186,6 +193,7 @@ No application files. Planning-stage only.
 | **Task 2 files** | `compose.yaml` (local PostgreSQL 16 dev instance), `.env.example` (non-secret environment contract) | This task; see Commit section |
 | **Task 1 memory** | `CURRENT_STATE.md`, `DECISIONS.md`, `IMPLEMENTATION_STATE.md`, `SESSION_HANDOFF.md` updated to record Task 1 completion and ECC harness tracking | Commit `1e9e26f` |
 | **Task 4 files** | `packages/db/migrations/` (17 SQL + `meta/_journal.json`), `packages/db/src/migrate.ts` (runner), `packages/db/src/verify-schema.ts` (introspection CLI), `packages/db/drizzle.config.ts`, `packages/db/package.json` (+drizzle-orm/drizzle-kit/pg scripts), root `package.json` (+`@types/node`), `pnpm-workspace.yaml` (esbuild build approval), `pnpm-lock.yaml` | Task 4 commit |
+| **Task 5 files** | `packages/db/src/introspect.ts` (NEW — shared introspection; queries extracted verbatim from verify-schema.ts + enum_members added), `packages/db/src/expected-schema.ts` (NEW — fidelity mirror), `packages/db/src/assert-schema.ts` (NEW — assertion engine), `packages/db/src/schema-fidelity.ts` (NEW — fresh-DB orchestrator), `packages/db/src/verify-schema.ts` (thin CLI, zero semantic change), `packages/db/src/migrate.ts` (runMigrations exported; CLI via direct-execution guard), `packages/db/package.json` + root `package.json` (scripts), `.github/workflows/ci.yml` (NEW), 3 memory files | Task 5 commit |
 
 ---
 
@@ -214,6 +222,7 @@ Verification performed during planning:
 | **Task 4 (Neon)** | Same 17 migrations via the single `DATABASE_URL`: applied 17/17 on PostgreSQL 16.15 db `maihan_dev`; history 17 rows strictly increasing; rerun no-op; introspection identical to local |
 | **Task 4 (fidelity)** | Local vs Neon catalog diff: MATCH on tables, enums+member counts, FKs, constraint counts, index definitions, HNSW, vector columns, trigger, functions, views, RLS tables/policies. Only extension VERSION differs (platform images: vector 0.8.7 vs 0.8.0; both ≥ 0.6 required) |
 | **Task 4 (toolchain)** | `pnpm install --frozen-lockfile` PASS (esbuild build script approved) · `pnpm run lint` PASS · `pnpm run build` PASS · `npx tsc -b --dry` PASS |
+| **Task 5** | Refactor equivalence: pre-refactor vs post-refactor verifier JSON identical on all pre-existing fields (only `enum_members` added; enum lists match SoT §8.3 exactly) · fresh-database fidelity PASS twice (deterministic) · negative probe: every drift class caught by exact name (unexpected table, enum member, dropped CHECK/invariant/unique constraint, missing index/HNSW/trigger/function/view, RLS policy drop → policy-less) · read-only assertion PASS on local `maihan_dev` AND Neon dev · orchestrator refuses Neon hosts · scratch cleanup unconditional (0 leftovers) · `pnpm install --frozen-lockfile` / lint / build / `tsc -b --dry` PASS · compose config valid |
 
 ---
 

@@ -15,7 +15,8 @@
     "build": "tsc -b",
     "typecheck": "tsc -b",
     "migrate": "node ./dist/migrate.js",
-    "verify-schema": "node ./dist/verify-schema.js"
+    "verify-schema": "node ./dist/verify-schema.js",
+    "schema-fidelity": "node ./dist/schema-fidelity.js"
   },
   "dependencies": {
     "@maihan/domain": "workspace:*",

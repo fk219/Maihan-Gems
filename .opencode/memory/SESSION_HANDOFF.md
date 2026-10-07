@@ -39,6 +39,16 @@ every documented count; local vs Neon schema metadata identical. Migration
 runner: `packages/db/src/migrate.ts`; introspection CLI:
 `packages/db/src/verify-schema.ts`.
 
+**Phase 1 Task 5 — schema-fidelity CI assertion — COMPLETE (2026-10-07).**
+Framework-free (ADR-021 untouched): shared introspection
+(`packages/db/src/introspect.ts`), expectations mirror
+(`packages/db/src/expected-schema.ts`), assertion (`assert-schema.ts`), and a
+fresh-database orchestrator (`schema-fidelity.ts`) that migrates a scratch
+database from zero, asserts the locked schema exactly, and always drops the
+scratch. Blocking GitHub Actions workflow: `.github/workflows/ci.yml`.
+Fresh run green (deterministic); every drift class proven caught by name;
+read-only assertion green on both dev targets.
+
 **Zero application code beyond the skeleton + migration tooling.** No Drizzle
 TS schema, no domain models, no repositories, no tests, no seeders.
 
@@ -79,16 +89,20 @@ State lives in `.opencode/memory/`:
   full rollback (proven); schema counts match the locked numbers (74 tables,
   33 enums, 94 FKs, 263 indexes, 9 named invariants, 2 HNSW, 6/6 RLS, 1
   trigger, 2 functions, 1 view); local and Neon metadata identical.
+- Task 5 — schema-fidelity CI assertion — **COMPLETE 2026-10-07.** Blocking,
+  framework-free: `pnpm run schema-fidelity` migrates a FRESH scratch database
+  from zero and asserts the locked schema exactly (counts + exact names and
+  definitions); GitHub Actions workflow added. ADR-021 remains OPEN — Task 6
+  onward still blocked.
 - **Variable contract enforced:** `DATABASE_URL` is the ONLY database variable
   (`PROJECT_SOURCE_OF_TRUTH.md` §29.6). Interim suffixed variables removed.
 - **Credential note:** the client states the Neon API key was rotated and `.env`
   updated. Confirm the `neondb_owner` password was reset too; both live only in
   gitignored `.env`.
 - **Do NOT begin Task 3** — it needs `naturalgemstones/`, absent here.
-- **Next task: Task 5** — schema-fidelity assertions against a fresh database
-  (framework-free script `packages/db/src/verify-schema.ts` already reports
-  every count; wire it as the gate). Tasks needing a test framework (6 onward)
-  remain blocked by ADR-021.
+- **Next task: Task 6** (domain value objects + INV-01/02/03 predicates) —
+  **BLOCKED on ADR-021** (requires green unit tests). Task 3 remains deferred
+  on the source archive.
 - Full task list: `IMPLEMENTATION_STATE.md` → **Next**.
 
 ---
