@@ -40,6 +40,7 @@ import { runExtractStaging, EXPECTED_EXTRACT_ROWS } from './stages/extract-stagi
 import { runParseSlugs, CORPUS_EXPECTATIONS } from './stages/parse-slugs.js';
 import { runTokenizeStones } from './stages/tokenize-stones.js';
 import { runCanonicalCatalog } from './stages/canonical-catalog.js';
+import { runDerivedIdentities } from './stages/derived-identities.js';
 
 /** The artifact name the tokenize engine asserts this stage's digest against. */
 const SPECIFICATIONS_ARTIFACT = 'specifications.jsonl';
@@ -161,6 +162,11 @@ async function executeStage(
     case 'extract-staging': {
       const result = await runExtractStaging(ctx);
       return `urls.jsonl -> staging_source_pages verbatim: seen ${result.recordsSeen}, loaded ${result.rowsLoaded}/${EXPECTED_EXTRACT_ROWS}`;
+    }
+    case 'derived-identities': {
+      const corpus = options.minManifestArtifacts >= 13;
+      const result = await runDerivedIdentities(ctx, { corpus, productsDigest: manifestArtifactDigest('products.jsonl') });
+      return `derived-identities: ${String(result.derivedRows)} failed-fetch rows, enforced ${String(result.enforced)}, V19 observed ${String(result.observedParsed)}, V20 collisions ${String(result.collisions)}`;
     }
     case 'canonical-catalog': {
       const corpus = options.minManifestArtifacts >= 13;

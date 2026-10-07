@@ -76,9 +76,8 @@ export const STAGES: readonly StageDefinition[] = Object.freeze([
   {
     id: 'derived-identities',
     description: 'The 221 derived-identity write path; gate V18 (INFERRED, null attributes, DRAFT) and V20 (0 collisions)',
-    requiredArtifacts: ['urls.jsonl'],
-    implemented: false,
-    blockedBy: 'plan task 15 (Phase 2)',
+    requiredArtifacts: ['products.jsonl'],
+    implemented: true,
   },
   {
     id: 'prices-observations',
