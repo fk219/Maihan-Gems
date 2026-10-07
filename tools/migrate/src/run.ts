@@ -40,6 +40,7 @@ import { runExtractStaging, EXPECTED_EXTRACT_ROWS } from './stages/extract-stagi
 import { runParseSlugs, CORPUS_EXPECTATIONS } from './stages/parse-slugs.js';
 import { runTokenizeStones } from './stages/tokenize-stones.js';
 import { runCanonicalCatalog } from './stages/canonical-catalog.js';
+import { runPricesObservations } from './stages/prices-observations.js';
 import { runDerivedIdentities } from './stages/derived-identities.js';
 
 /** The artifact name the tokenize engine asserts this stage's digest against. */
@@ -167,6 +168,11 @@ async function executeStage(
       const corpus = options.minManifestArtifacts >= 13;
       const result = await runDerivedIdentities(ctx, { corpus, productsDigest: manifestArtifactDigest('products.jsonl') });
       return `derived-identities: ${String(result.derivedRows)} failed-fetch rows, enforced ${String(result.enforced)}, V19 observed ${String(result.observedParsed)}, V20 collisions ${String(result.collisions)}`;
+    }
+    case 'prices-observations': {
+      const corpus = options.minManifestArtifacts >= 13;
+      const result = await runPricesObservations(ctx, { corpus });
+      return `price recovery: pages ${String(result.pagesSeen)}, recovered ${String(result.pricesRecovered)}, product entries ${String(result.productEntryCount)}, residual entries ${String(result.variantEntryCount)}, observations ${String(result.observations)}, product rows updated ${String(result.productRowsUpdated)}, gemstone rows updated ${String(result.gemstoneRowsUpdated)}`;
     }
     case 'canonical-catalog': {
       const corpus = options.minManifestArtifacts >= 13;

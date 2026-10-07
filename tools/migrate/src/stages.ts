@@ -83,8 +83,7 @@ export const STAGES: readonly StageDefinition[] = Object.freeze([
     id: 'prices-observations',
     description: 'Price recovery from pages_analyzed.jsonl into price_model_observations; 1,024 prices; gate V15',
     requiredArtifacts: ['pages_analyzed.jsonl'],
-    implemented: false,
-    blockedBy: 'plan task 16 (Phase 2)',
+    implemented: true,
   },
   {
     id: 'assets',

@@ -69,7 +69,10 @@ function createFixture(): Fixture {
     {
       no: '4',
       name: 'specifications.jsonl',
-      bytes: JSON.stringify({ page_url: 'https://naturalgemstones.com/design-your-own/review/x', field_key: 'weight', field_value: '1.28 Ct.' }) + '\n',
+      bytes: [
+        JSON.stringify({ page_url: 'https://naturalgemstones.com/design-your-own/review/x', field_key: 'weight', field_value: '1.28 Ct.' }),
+        JSON.stringify({ page_url: 'https://naturalgemstones.com/design-your-own/review/x', field_key: 'per_carat_price_help', field_value: '$50 $50' }),
+      ].join('\n') + '\n',
     },
     {
       no: '5',
@@ -80,6 +83,25 @@ function createFixture(): Fixture {
       no: '6',
       name: 'taxonomy.json',
       bytes: JSON.stringify({ fields: {}, notes: 'fixture', evidence_status: 'EXTRACTED' }),
+    },
+    {
+      no: '7',
+      name: 'pages_analyzed.jsonl',
+      bytes: JSON.stringify({
+        url: 'https://naturalgemstones.com/design-your-own/review/x',
+        product: {
+          json: {
+            structured_data: {
+              offers: {
+                price: 100,
+                priceCurrency: 'USD',
+                priceValidUntil: '2026-12-31',
+                availability: 'http://schema.org/InStock',
+              },
+            },
+          },
+        },
+      }) + '\n',
     },
   ];
   // An ABSOLUTE archiveRoot replaces the 'naturalgemstones' marker segment
