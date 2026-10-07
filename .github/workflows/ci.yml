@@ -57,7 +57,17 @@ jobs:
       # scope = packages/domain value objects + INV-01/02/03 predicates.
       # (Playwright/E2E is accepted but deliberately not run here.)
       - name: Domain unit tests
-        run: pnpm test
+        run: pnpm --filter @maihan/domain run test
+
+      # Phase 1 Task 9: reference-data seed gate — counts, values, uniqueness,
+      # idempotency on a disposable scratch database (maihan_dev_seed) carved
+      # from the local compose instance, always dropped. The local credential
+      # below is the documented throwaway container credential from
+      # compose.yaml; the shared Neon dev database is never touched.
+      - name: Reference seed gate (disposable database)
+        env:
+          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
+        run: pnpm --filter @maihan/db run test
 
       # Migrates a fresh scratch database (maihan_dev_fidelity) from zero on
       # the disposable instance, asserts the locked schema exactly, and always
