@@ -75,9 +75,10 @@ schema, no domain models, no repositories, no tests, no seeders.
 | **ADR-021 (test tooling)** | **ACCEPTED 2026-10-07 by explicit user authorization.** Vitest 5.0.3 = unit/domain/integration/contract runner (installed for the domain layer); Playwright accepted for E2E, NOT installed (no phase requires it yet); load-test tool remains OPEN (never part of ADR-021's decision) |
 | Task 6 — domain value objects + INV-01/02/03 | **COMPLETE (2026-10-07).** Pure `packages/domain`: error model, enum unions (product_kind/jewellery_type/gemstone_kind/metal_code/evidence_status), value objects (GemRef, Money, WeightCt, DimensionsMm, SourceSku, DerivedSku + ProductIdentity union, Sku composite, ConfigurationHash shape), INV-01/02/03 predicates + `assertComposition`. ZERO runtime dependencies. 70 Vitest tests green (11 files); lint/build/tsc green; schema fidelity still PASS |
 | Task 3 — evidence manifest | **COMPLETE (2026-10-07).** `docs/evidence/MANIFEST.md`: 13 physical artifacts implementing the 10 authoritative logical entries of plan §22.3; every SHA-256 computed from the actual archive bytes during the run (0 failures, 0 duplicates, all 64 lowercase hex); retention class **A — "Must remain permanently"** (`technical_design/31` §2A) with the §22.3 operational requirements; criticality and loss consequences verbatim from the authoritative documents; `crawler.sqlite`/`-wal`/`-shm` as separate rows under one logical artifact; `report.json`/`appraisal.json` hashed separately; canonical-vs-redundant path disambiguation (`exports/products.jsonl` = class B per td31 §2B); SQLite WAL state documented byte-level (not checkpointed; three files are one indivisible unit; checkpoint only ever on a disposable copy); source archive proven unmodified; secret scan 0 hits |
-| Tasks 7-9 | Not started. **Task 7 is next** (SKU grammar parser, 1,024/1,024 against the corpus) — the corpus is now PRESENT in `naturalgemstones/`, so its completion gate is reachable |
-| Coding status | Tasks 1, 2, 3, 4, 5 and 6 authorised and executed per scope. Further tasks need their own approval |
-| Blocking approval | ADR-021 ACCEPTED. No approval blocker remains for Task 7 |
+| Task 7 — SKU grammar parser | **COMPLETE (2026-10-07).** `packages/domain/src/sku/grammar.ts` — the SoT §1.1 grammar (version '1'): SETTING / CONFIGURED / READY-MADE via `parseSkuString` + `parseSkuOrThrow` (precise INVALID_SKU reasons), `parseSkuFromSlug` (Example B trailing-token derivation, case-canonicalising) and `composeSku` (doc-05 inverse); provenance split preserved (observed → `parseSourceSku`; slug → `parseDerivedSku` URL_SLUG/grammar-1). **Corpus gate V3+V19: 1,024 / 1,024, 0 mismatches, 0 malformed** on `naturalgemstones/reverse_engineered/data/products.jsonl` (MANIFEST entry 5; SHA-256 cross-checked read-only). SoT-verified aggregates reproduced exactly: 105 cores, 35 gemRefs, 11 metals, 683 variants, 113 pairs / 911 singles, 0 duplicate SKUs. 100 tests / 13 files green (30 new); archive fingerprint identical pre/post (46,810 files / 3,069,038,249 B) |
+| Tasks 8-9 | Not started. Next per plan: **Task 8** (configuration-hash function + slug derivation) |
+| Coding status | Tasks 1-7 authorised and executed per scope. Further tasks need their own approval |
+| Blocking approval | **None.** ADR-021 ACCEPTED (2026-10-07). ADR-022/023/024 remain Proposed (block Phases 4/9/2 respectively — not Phase 1) |
 
 ---
 
@@ -167,14 +168,13 @@ requires editing the authoritative plan.
 1. Task 5 — COMPLETE 2026-10-07 (schema-fidelity CI assertion; fresh-database
    run green; workflow `.github/workflows/ci.yml` blocking).
 2. Task 6 — COMPLETE 2026-10-07 (domain value objects + INV-01/02/03 predicates;
-   70 unit tests green, framework-free lint boundaries intact; ADR-021 accepted
-   and Vitest installed).
-3. Task 7 — SKU grammar parser (depends on Task 6, done). Its completion gate
-   (1,024/1,024 against the observed corpus) is now REACHABLE:
-   `naturalgemstones/` is present in this Codespace and the corpus checksum is
-   recorded in `docs/evidence/MANIFEST.md` (artifact 5, sha256-verified
-   2026-10-07). The parser may be built and its gate executed here.
-4. Task 3 — COMPLETE 2026-10-07 (`docs/evidence/MANIFEST.md` exists and is
-   validated). The archive's presence is no longer a blocker.
+   70 unit tests green, framework-free purity intact; ADR-021 accepted and
+   Vitest installed).
+3. **Task 7 — COMPLETE 2026-10-07**: SKU grammar parser + the V3/V19 corpus gate
+   at **1,024/1,024 with 0 mismatches, 0 malformed**, evidence cross-checked
+   against MANIFEST entry 5 (SHA-256 verified read-only); archive untouched.
+4. Task 3 — COMPLETE 2026-10-07 (manifest exists and validated).
+5. **Task 8 (configuration-hash function + slug derivation) is next per the
+   plan; awaits explicit user approval; Task 9 (reference-data seeders) follows after.**
 
 **Do not begin a task without explicit user approval.**

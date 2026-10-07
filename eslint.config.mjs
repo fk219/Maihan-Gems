@@ -185,6 +185,9 @@ export default tseslint.config(
           ),
         },
       ],
+      // Test harness code may also locate evidence fixtures via an environment
+      // override (NATURALGEMSTONES_ROOT); runtime domain code may not.
+      'no-restricted-syntax': 'off',
     },
   },
 

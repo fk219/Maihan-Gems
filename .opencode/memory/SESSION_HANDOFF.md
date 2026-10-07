@@ -58,6 +58,18 @@ no hash function — Tasks 7/8), enum unions, DomainError/InvariantError model,
 and `assertComposition` + `satisfiesInv01/02/03`. ZERO runtime dependencies;
 70 Vitest tests green; CI gained the domain-test step.
 
+**Phase 1 Task 7 — SKU grammar parser + 1,024-record corpus validation —
+COMPLETE (2026-10-07).** `packages/domain/src/sku/grammar.ts`, grammar
+version '1': SETTING / CONFIGURED / READY-MADE + `parseSkuFromSlug`
+(Example B trailing-token) + `composeSku` (doc-05 inverse). **Corpus gate
+V3+V19: 1,024/1,024 with 0 mismatches and 0 malformed** on
+`naturalgemstones/reverse_engineered/data/products.jsonl` (MANIFEST entry 5,
+SHA-256 cross-checked, read-only); every SoT-verified aggregate reproduced
+(105 cores, 35 gemRefs, 11 metals, 683 variants, 113 pairs / 911 singles).
+Provenance split preserved: observed → SourceSku; slug-derived →
+DerivedSku/URL_SLUG. 100 tests / 13 files green. The archive stays
+all-external and untouched.
+
 **Zero application code beyond the skeleton + migration tooling + the pure
 domain foundation.** No Drizzle TS schema, no repositories, no seeders.
 
@@ -107,6 +119,10 @@ State lives in `.opencode/memory/`:
   until a phase requires it); the load-test tool remains open.
 - Task 6 — domain value objects + INV-01/02/03 — **COMPLETE 2026-10-07.**
   Pure domain layer, zero runtime dependencies, 70 unit tests green.
+- Task 3 — evidence manifest — **COMPLETE 2026-10-07** (`docs/evidence/MANIFEST.md`;
+  the corpus is checksum-recorded there, which is how Task 7 binds its gate).
+- **Task 7 — COMPLETE 2026-10-07.** Parser + corpus gate 1,024/1,024 / 0
+  mismatches / 0 malformed (V3+V19), SHA-256 cross-checked, archive untouched. 100 tests green.
 - Task 3 — evidence manifest — **COMPLETE 2026-10-07.**
   `docs/evidence/MANIFEST.md` created and validated: 13 physical artifacts
   implementing the 10 authoritative logical entries of plan §22.3; every
@@ -124,10 +140,12 @@ State lives in `.opencode/memory/`:
 - **Credential note:** the client states the Neon API key was rotated and `.env`
   updated. Confirm the `neondb_owner` password was reset too; both live only in
   gitignored `.env`.
-- **Next task: Task 7** (SKU grammar parser) — depends on Task 6 (done), and its
-  completion gate is now REACHABLE: the observed 1,024-record corpus
-  (`naturalgemstones/reverse_engineered/data/products.jsonl`) is present and its
-  checksum is recorded in the manifest. Awaiting explicit user authorization.
+- **Task 7 — COMPLETE 2026-10-07.** SKU grammar parser + V3/V19 corpus gate:
+  1,024/1,024, 0 mismatches, 0 malformed; the provenance split (observed
+  SourceSku vs slug-derived DerivedSku) is preserved end to end.
+- **Next task: Task 8** — configuration-hash function and slug derivation
+  (depends on Task 6, done; awaiting explicit user authorization). Task 9
+  (reference-data seeders) follows.
 - Full task list: `IMPLEMENTATION_STATE.md` → **Next**.
 
 ---
@@ -151,7 +169,7 @@ and the deferred Task 3 archive.
 
 ## Critical — do NOT do
 
-- **Do NOT** begin Task 7 or later without explicit user authorization.
+- **Do NOT** begin Task 8 or later without explicit user authorization.
 - **Do NOT** modify `naturalgemstones/` in any way — it is now PRESENT and must
   stay read-only, Git-ignored and untracked. This includes not checkpointing
   `crawler.sqlite`'s WAL in place (the checkpoint td31 requires must run on a
