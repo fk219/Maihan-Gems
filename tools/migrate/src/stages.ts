@@ -64,9 +64,8 @@ export const STAGES: readonly StageDefinition[] = Object.freeze([
   {
     id: 'tokenize-stones',
     description: 'D9 multi-value tokenizer producing gemstone_stones rows; gates V8, V9 on all 113 pairs',
-    requiredArtifacts: ['specifications.jsonl'],
-    implemented: false,
-    blockedBy: 'plan task 13 (Phase 2)',
+    requiredArtifacts: ['specifications.jsonl', 'products.jsonl'],
+    implemented: true,
   },
   {
     id: 'canonical-catalog',

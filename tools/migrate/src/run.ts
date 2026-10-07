@@ -38,6 +38,21 @@ import { runMigrations, defaultMigrationsFolder, seedReferenceData } from '@maih
 import type { StageContext } from './stages/context.js';
 import { runExtractStaging, EXPECTED_EXTRACT_ROWS } from './stages/extract-staging.js';
 import { runParseSlugs, CORPUS_EXPECTATIONS } from './stages/parse-slugs.js';
+import { runTokenizeStones } from './stages/tokenize-stones.js';
+
+/** The artifact name the tokenize engine asserts this stage's digest against. */
+const SPECIFICATIONS_ARTIFACT = 'specifications.jsonl';
+
+/** The parsed manifest of the CURRENT run (the runner caches it here). */
+let parsedManifestCache: ParsedManifest = { source: '', artifacts: [] };
+
+/** The already-verified digest of one manifest artifact (empty = skip re-assert). */
+function manifestArtifactDigest(name: string): string {
+  for (const artifact of parsedManifestCache.artifacts) {
+    if (artifact.artifact === name) return artifact.sha256;
+  }
+  return '';
+}
 
 export interface RunOptions {
   databaseUrl: string;
@@ -146,6 +161,13 @@ async function executeStage(
       const result = await runExtractStaging(ctx);
       return `urls.jsonl -> staging_source_pages verbatim: seen ${result.recordsSeen}, loaded ${result.rowsLoaded}/${EXPECTED_EXTRACT_ROWS}`;
     }
+    case 'tokenize-stones': {
+      // specifications.jsonl digest is already verified by the gating loop;
+      // re-pass it for the engine's own assertion (defence-in-depth only).
+      const corpus = options.minManifestArtifacts >= 13;
+      const result = await runTokenizeStones(ctx, { corpus, expectDigest: manifestArtifactDigest(SPECIFICATIONS_ARTIFACT) });
+      return `D9 tokenizer: ${String(result.productsProcessed)} products, pairs ${String(result.pairPages)} reconcile, gemstone_stones rows ${String(result.stonesRows)}`;
+    }
     case 'parse-slugs': {
       const corpus = options.minManifestArtifacts >= 13;
       const result = await runParseSlugs(ctx, corpus ? CORPUS_EXPECTATIONS : undefined);
@@ -167,6 +189,7 @@ export async function runStages(options: RunOptions): Promise<readonly StageOutc
   const archiveRoot = options.archiveRoot ?? resolveArchiveRoot();
 
   const manifest = parseManifest(manifestPath, { minArtifacts: options.minManifestArtifacts ?? 13 }); // fail fast: a partial real manifest refuses everything
+  parsedManifestCache = manifest;
   // The default chain covers IMPLEMENTED stages only: declared future stages
   // refuse explicitly when targeted by --stage, and the full run ends after
   // the last implemented stage rather than tripping them.

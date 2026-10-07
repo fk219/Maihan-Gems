@@ -54,11 +54,10 @@ function createFixture(): Fixture {
   mkdirSync(path.join(archiveRoot, 'naturalgemstones', 'fixtures'), { recursive: true });
 
   const artifacts = [
+    // Every artifact the implemented chain consumes gets a small fixture row;
+    // the REAL corpus-count gates hold only in corpus mode (real manifest).
     { no: '1', name: 'fixture-alpha.jsonl', bytes: 'alpha content A\n'.repeat(64) },
     { no: '2', name: 'fixture-beta.jsonl', bytes: JSON.stringify({ ok: true }) + '\n' },
-    // Phase 2 extract stage consumes urls.jsonl: a minimal fixture spine (the
-    // REAL 44,218-row corpus is held to the authoritative count by the gate
-    // runner, not by the fixture chain).
     {
       no: '3',
       name: 'urls.jsonl',
@@ -66,6 +65,21 @@ function createFixture(): Fixture {
         JSON.stringify({ url: 'https://naturalgemstones.com/cart', classification: 'cart', crawl: { http_status: null } }),
         JSON.stringify({ url: 'https://naturalgemstones.com/garnet', classification: 'variety_index', crawl: { http_status: null } }),
       ].join('\n') + '\n',
+    },
+    {
+      no: '4',
+      name: 'specifications.jsonl',
+      bytes: JSON.stringify({ page_url: 'https://naturalgemstones.com/design-your-own/review/x', field_key: 'weight', field_value: '1.28 Ct.' }) + '\n',
+    },
+    {
+      no: '5',
+      name: 'products.jsonl',
+      bytes: JSON.stringify({ url: 'https://naturalgemstones.com/design-your-own/review/x', sku: 'JS1016W14-K1324', name: 'Test Ring 1.28Ct.Tw.' }) + '\n',
+    },
+    {
+      no: '6',
+      name: 'taxonomy.json',
+      bytes: JSON.stringify({ fields: {}, notes: 'fixture', evidence_status: 'EXTRACTED' }),
     },
   ];
   // An ABSOLUTE archiveRoot replaces the 'naturalgemstones' marker segment
