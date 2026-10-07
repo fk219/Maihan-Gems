@@ -70,9 +70,8 @@ export const STAGES: readonly StageDefinition[] = Object.freeze([
   {
     id: 'canonical-catalog',
     description: 'Canonical upserts in dependency order: taxonomy, stones, pairs, settings, 10,349 variants, products; gates V4-V7, V10, V12, V13',
-    requiredArtifacts: ['urls.jsonl', 'specifications.jsonl', 'taxonomy.json', 'products.jsonl'],
-    implemented: false,
-    blockedBy: 'plan task 14 (Phase 2)',
+    requiredArtifacts: ['specifications.jsonl', 'products.jsonl'],
+    implemented: true,
   },
   {
     id: 'derived-identities',

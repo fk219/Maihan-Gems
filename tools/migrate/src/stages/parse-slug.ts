@@ -254,12 +254,23 @@ function findShapeStart(body: readonly string[]): number | undefined {
   }
   return undefined;
 }
+
+/** The shape match at a start index (adjacent 2-token phrase, then single token). */
+function shapeMatchAt(body: readonly string[], start: number): { value: string; length: number } | null {
+  const twoToken = `${body[start] ?? ''}-${body[start + 1] ?? ''}`;
+  if (body[start + 1] !== undefined && SHAPE_VALUES.has(twoToken.toLowerCase())) {
+    return { value: SHAPE_VALUES.get(twoToken.toLowerCase()) ?? '', length: 2 };
+  }
+  const single = (body[start] ?? '').toLowerCase();
+  if (SHAPE_VALUES.has(single)) return { value: SHAPE_VALUES.get(single) ?? '', length: 1 };
+  return null;
+}
 /**
  * Split a loose/pair slug body: first token is the weight; the trailing ref
  * (and, for pairs, the literal 'pair' token) comes off the end. Returns the
  * body tokens between them and an (optional) exact-shape token index.
  */
-function looseOrPairBody(path: string): { body: readonly string[]; shapeIndex?: number } | null {
+function looseOrPairBody(path: string): { body: readonly string[]; shapeIndex?: number; shapeLen: number } | null {
   const segments = path.split('/');
   const slug = segments[segments.length - 1] ?? '';
   const tokens = slug.split('-');
@@ -270,13 +281,14 @@ function looseOrPairBody(path: string): { body: readonly string[]; shapeIndex?: 
   if (k === null && pr === null) return null;
   if (pr !== null) {
     // pair family: '...-{variety tokens}-pair-PR#####'
-    if (k !== null) return null; // 'k...' token and 'pr...' token can't both be
     if ((tokens[tokens.length - 2] ?? '').toLowerCase() !== 'pair') return null;
     const body = tokens.slice(1, tokens.length - 2);
-    return Object.freeze({ body, shapeIndex: findShapeStart(body) });
+    const shapeIndex = findShapeStart(body);
+    return Object.freeze({ body, shapeIndex, shapeLen: shapeIndex === undefined ? 0 : (shapeMatchAt(body, shapeIndex)?.length ?? 1) });
   }
   const body = tokens.slice(1, tokens.length - 1);
-  return Object.freeze({ body, shapeIndex: findShapeStart(body) });
+  const shapeIndex = findShapeStart(body);
+  return Object.freeze({ body, shapeIndex, shapeLen: shapeIndex === undefined ? 0 : (shapeMatchAt(body, shapeIndex)?.length ?? 1) });
 }
 
 // ---------------------------------------------------------------------------
@@ -323,7 +335,7 @@ function parseLoosePairFields(
   let colourStart = 0;
   if (parsed.shapeIndex !== undefined) {
     originValue = parsed.shapeIndex > 0 ? body.slice(0, parsed.shapeIndex).join('-') : null;
-    colourStart = parsed.shapeIndex + 1;
+    colourStart = parsed.shapeIndex + parsed.shapeLen;
   } else if (originVocabulary !== undefined) {
     // Split the leading run by the longest known origin phrase (2-token,
     // then 3, then 1) — pass-1 vocabulary, deterministic.

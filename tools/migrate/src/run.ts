@@ -39,6 +39,7 @@ import type { StageContext } from './stages/context.js';
 import { runExtractStaging, EXPECTED_EXTRACT_ROWS } from './stages/extract-staging.js';
 import { runParseSlugs, CORPUS_EXPECTATIONS } from './stages/parse-slugs.js';
 import { runTokenizeStones } from './stages/tokenize-stones.js';
+import { runCanonicalCatalog } from './stages/canonical-catalog.js';
 
 /** The artifact name the tokenize engine asserts this stage's digest against. */
 const SPECIFICATIONS_ARTIFACT = 'specifications.jsonl';
@@ -160,6 +161,11 @@ async function executeStage(
     case 'extract-staging': {
       const result = await runExtractStaging(ctx);
       return `urls.jsonl -> staging_source_pages verbatim: seen ${result.recordsSeen}, loaded ${result.rowsLoaded}/${EXPECTED_EXTRACT_ROWS}`;
+    }
+    case 'canonical-catalog': {
+      const corpus = options.minManifestArtifacts >= 13;
+      const result = await runCanonicalCatalog(ctx, { corpus, productsDigest: manifestArtifactDigest('products.jsonl') });
+      return `canonical upserts in dependency order: taxonomy (species ${String(result.taxonomy.species)}, varieties ${String(result.taxonomy.varieties)}, colours ${String(result.taxonomy.colours)}, origins ${String(result.taxonomy.origins)}), settings ${String(result.settings)}, setting_variants ${String(result.settingVariants)}, stones ${String(result.stones)}, pairs ${String(result.pairs)}, gemstone_stones ${String(result.gemstoneStones)}, configured ${String(result.configuredProducts)}, ready_made ${String(result.readyMadeProducts)}`;
     }
     case 'tokenize-stones': {
       // specifications.jsonl digest is already verified by the gating loop;
