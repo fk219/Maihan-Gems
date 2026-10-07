@@ -59,8 +59,7 @@ export const STAGES: readonly StageDefinition[] = Object.freeze([
     id: 'parse-slugs',
     description: 'Five-family slug classifier into staging_parsed_urls; gates V1, V2 at 100%; V14 counts',
     requiredArtifacts: ['urls.jsonl'],
-    implemented: false,
-    blockedBy: 'plan task 12 (Phase 2)',
+    implemented: true,
   },
   {
     id: 'tokenize-stones',

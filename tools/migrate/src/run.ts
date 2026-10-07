@@ -37,6 +37,7 @@ import { MigrationState, type StageStatus } from './state.js';
 import { runMigrations, defaultMigrationsFolder, seedReferenceData } from '@maihan/db';
 import type { StageContext } from './stages/context.js';
 import { runExtractStaging, EXPECTED_EXTRACT_ROWS } from './stages/extract-staging.js';
+import { runParseSlugs, CORPUS_EXPECTATIONS } from './stages/parse-slugs.js';
 
 export interface RunOptions {
   databaseUrl: string;
@@ -109,7 +110,7 @@ function stageContext(
 
 async function executeStage(
   stage: StageDefinition,
-  options: { databaseUrl: string; repoRoot: string; manifestPath: string; archiveRoot: string; importBatchId: string },
+  options: { databaseUrl: string; repoRoot: string; manifestPath: string; archiveRoot: string; importBatchId: string; minManifestArtifacts: number },
   ctx: StageContext,
 ): Promise<string> {
   switch (stage.id) {
@@ -145,6 +146,12 @@ async function executeStage(
       const result = await runExtractStaging(ctx);
       return `urls.jsonl -> staging_source_pages verbatim: seen ${result.recordsSeen}, loaded ${result.rowsLoaded}/${EXPECTED_EXTRACT_ROWS}`;
     }
+    case 'parse-slugs': {
+      const corpus = options.minManifestArtifacts >= 13;
+      const result = await runParseSlugs(ctx, corpus ? CORPUS_EXPECTATIONS : undefined);
+      const census = Object.entries(result.census).filter(([, n]) => n > 0).map(([f, n]) => `${f}=${n}`).join(', ');
+      return `staging_parsed_urls: parsed ${result.urlsParsed}, staged ${result.staged.seen} rows, census ${census}, shared PR refs ${result.sharedPairRefs}, conflicts ${result.conflicts}`;
+    }
     default:
       throw new Error(`stage ${stage.id} has no executor (declared but not implemented: ${stage.blockedBy ?? 'unknown'})`);
   }
@@ -171,6 +178,7 @@ export async function runStages(options: RunOptions): Promise<readonly StageOutc
   }
 
   const state = await MigrationState.connect(options.databaseUrl);
+  const minManifestArtifacts = options.minManifestArtifacts ?? 13; // fail fast: a partial real manifest refuses everything
   const outcomes: StageOutcome[] = [];
   try {
     await state.assertDevContract();
@@ -239,7 +247,7 @@ export async function runStages(options: RunOptions): Promise<readonly StageOutc
 
       let notes = '';
       try {
-        notes = await executeStage(stage, { databaseUrl: options.databaseUrl, repoRoot: options.repoRoot, manifestPath, archiveRoot, importBatchId: batchId }, ctx);
+        notes = await executeStage(stage, { databaseUrl: options.databaseUrl, repoRoot: options.repoRoot, manifestPath, archiveRoot, importBatchId: batchId, minManifestArtifacts: minManifestArtifacts }, ctx);
       } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
         await state.markFailed({ stageKey: `stage:${stage.id}`, reason });
