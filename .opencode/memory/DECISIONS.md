@@ -73,6 +73,13 @@ approved. `DEFERRED` = deliberately postponed.
 | Source routes are preserved through redirects, not by copying the source route tree. | ACCEPTED | ADR-015 |
 | The source product-type taxonomy is **rejected** as a target model. | ACCEPTED | ADR-014 |
 | Generation-A artefacts are excluded from migration inputs. | ACCEPTED | ADR-017 |
+| The canonical configuration representation is SoT 19.2 verbatim; the hash embeds `hash_version`; the configuration slug is base62 of the full digest; engraving text never enters the identity. | ACCEPTED (implementation, Task 8) | SoT 19.2, doc 14 §2 |
+| `normaliseSlug` folds NFKD, lowercases, collapses non-[a-z0-9] runs to '-' (the doc-34 '5.98ct'→'5-ct' behaviour). | ACCEPTED (implementation, Task 8) | doc 34 §5 |
+| The FULL metal_code and jewellery_type enums are seeded (15/8) with enum-only members marked `INFERRED`; per-treatment only the 3 observed values seed the treatments table. | ACCEPTED (implementation, Task 9) | plan task 9 note; doc 11 |
+| Metal slug phrases are extracted from the observed URL tokens (1:1 per code); setting styles seed all 22 slugs (15 base + 7 pendant variants; 10,772 routes reconciled). | ACCEPTED (implementation, Task 9) | SoT §4, INV-04 |
+| Intensity/clarity `rank` orderings are a merchandising decision ours (light<medium<intense<vivid<dark; eye_clean cleanest) — [INFERRED], documented and test-visible; the value rows stay OBSERVED. | ACCEPTED (implementation, Task 9) | doc 11 ("rank enables a sensible default sort") |
+| Migration stage state lives in the locked `import_batches` table keyed by stable stage ids; no new table, no process memory. | ACCEPTED (implementation, Task 10) | SoT 8.4, doc 33 |
+| Future catalogue stages are DECLARED and refuse execution until their plan tasks land. | ACCEPTED (implementation, Task 10) | plan tasks 11-20 |
 | Transactions emit events through a **transactional outbox**, not direct publishing. Consumers are idempotent via `event_consumers`. | ACCEPTED | ADR-020 |
 
 ---

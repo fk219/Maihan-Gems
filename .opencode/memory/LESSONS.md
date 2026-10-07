@@ -294,3 +294,25 @@ is inspectable; `staging_conflicts` exists so a conflict is reviewable.
 
 **Rule:** every "unknown" gets a named home. An unnamed unknown becomes an
 assumption nobody notices. Source: ADR-010, `technical_design/16` §2.
+---
+
+## 17. An interrupted package-manager install leaves broken symlinks
+
+**Observed 2026-10-07 (Phase 1 Tasks 9-10):** a session restart during
+`pnpm install` left `node_modules/.pnpm` without the peer-suffixed store
+directory, and every subsequent install kept creating symlinks at the bare
+name (`vitest@5.0.3/node_modules/vitest`) that pointed into a nonexistent
+path. Packages that predated the interruption (domain) kept working; newly
+created links periodically reverted to the bare path and module resolution
+failed with `ERR_MODULE_NOT_FOUND` while the lockfile looked correct.
+
+**Rule:** after ANY session/server interruption mid-install, verify that the
+packages you are about to build/test can actually resolve their new
+dependencies (`node --input-type=module -e "import('<dep>')"` from the
+package directory) before blaming the code. Repair by pointing the package
+symlink at the real (peer-suffixed) store directory — the same link shape
+the healthy package uses — or by a clean reinstall of that package's
+node_modules. Do not churn package.json workarounds for an install-state
+artifact.
+
+---

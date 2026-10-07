@@ -70,6 +70,41 @@ Provenance split preserved: observed → SourceSku; slug-derived →
 DerivedSku/URL_SLUG. 100 tests / 13 files green. The archive stays
 all-external and untouched.
 
+**Phase 1 Task 8 — configuration hash + slug derivation — COMPLETE
+(2026-10-07, commit `ef6a72b`).** Pure `packages/domain/src/configuration/`:
+the SoT 19.2 / doc-14 §2 canonical configuration representation,
+`computeConfigurationHash` (frozen Task 6 ConfigurationHash VO;
+hash_version inside the hashed object), the configuration slug =
+fixed-43-digit base62 of the full sha256 digest (URL-safe, no truncation,
+collision-resistant in the versioned identity space), and the pure
+`normaliseSlug` primitive. 26 + 12 tests with 10 frozen digest/slug
+examples; rejects malformed inputs with stable codes; node:crypto only.
+
+**Phase 1 Task 9 — reference data seeds — COMPLETE (2026-10-07, commit
+`992d14b`).** `packages/db/src/seed/` + CLI: 70 idempotent rows — 15 metals
+(full enum, R10 INFERRED), 8 jewellery types (full enum, BROOCH/CUFFLINKS/
+CHARM INFERRED), 22 setting styles, 3 treatments + 5 verbatim treatment
+labels, 5 colour intensities, 5 clarities + 7 clarity labels. ON CONFLICT
+(natural key) DO NOTHING; second run inserts 0. Corpus gate re-derives the
+values from taxonomy.json + urls.jsonl (SHA-256-gated, read-only): 14 metal
+phrase 1:1 (per-code aggregates match the SoT counts), 22 style slugs
+reconcile exactly (9,500 + 1,272 = 10,772 settings routes). 15/15 tests on a
+disposable scratch DB.
+
+**Phase 1 Task 10 — tools/migrate — COMPLETE (2026-10-07, commit
+`22c57dd`).** bin `maihan-migrate` (plan / run / status); durable stage
+state over the LOCKED `import_batches` table; SHA-256 gating against
+`docs/evidence/MANIFEST.md` before any artifact-consuming stage (refusal
+names stage/artifact/expected/actual); 3 implemented stages
+(verify-artifacts, migrate-schema, seed-reference) + 11 DECLARED future
+stages that refuse until their plan tasks land. Hash-mismatch refusal,
+resume and idempotency are test-frozen (14/14); the REAL 13-artifact chain
+was executed read-only on a disposable scratch DB and re-run as a pure skip.
+Production never touched; the real archive never written.
+
+**PHASE 1 IS COMPLETE. PHASE 2 IS OPEN (next task: the extract stage — see
+CURRENT STATE "Next major action" for the exact plan numbering).**
+
 **Zero application code beyond the skeleton + migration tooling + the pure
 domain foundation.** No Drizzle TS schema, no repositories, no seeders.
 
@@ -93,7 +128,7 @@ State lives in `.opencode/memory/`:
 
 ## Current phase
 
-**Phase 1 — Database + Domain Foundation. IN PROGRESS.**
+**Phase 1 — Database + Domain Foundation. COMPLETE (2026-10-07).**
 
 - Task 1 — workspace skeleton — **COMPLETE**, committed `1e9e26f`.
 - Task 2 — database infrastructure — **COMPLETE 2026-10-05 (final pass)**.
@@ -143,9 +178,8 @@ State lives in `.opencode/memory/`:
 - **Task 7 — COMPLETE 2026-10-07.** SKU grammar parser + V3/V19 corpus gate:
   1,024/1,024, 0 mismatches, 0 malformed; the provenance split (observed
   SourceSku vs slug-derived DerivedSku) is preserved end to end.
-- **Next task: Task 8** — configuration-hash function and slug derivation
-  (depends on Task 6, done; awaiting explicit user authorization). Task 9
-  (reference-data seeders) follows.
+- **Tasks 8, 9, 10 COMPLETE (2026-10-07).** Phase 1 done. Next: Phase 2,
+  starting from the plan's extract stage (plan task 11 / detailed task 3).
 - Full task list: `IMPLEMENTATION_STATE.md` → **Next**.
 
 ---
@@ -160,6 +194,7 @@ State lives in `.opencode/memory/`:
 | 4 | ~~Local PostgreSQL 16~~ **RESOLVED 2026-10-05**: `compose.yaml`, `pgvector/pgvector:pg16`, DB `maihan_dev` on 127.0.0.1:5433, healthy, migrated by Task 4 | — |
 | 5 | ~~Neon dev target on PG18.6~~ **RESOLVED 2026-10-05**: NEW "Maihan Gems Dev" project, PostgreSQL 16.15, database `maihan_dev`; migrated by Task 4, schema identical to local | — |
 | 6 | Vercel env secrets, OTel collector, error reporting not configured | Execution |
+| 6a | **ADR-024 (provenance storage) remains PROPOSED and gates Phase 2's provenance model** — unchanged by Phase 1, must be resolved by the client | Client |
 | 7 | **Confirm the exposed `neondb_owner` password was rotated** (client states the API key was rotated) | **Client: Neon console** |
 
 No design blocker remains. The remaining execution blockers are provisioning

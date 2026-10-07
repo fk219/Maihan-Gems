@@ -1,13 +1,17 @@
 # IMPLEMENTATION STATE
 
-**Last updated:** 2026-10-05
+**Last updated:** 2026-10-07
 **Update this file after every meaningful implementation task.**
 
 ---
 
 # Current Phase
 
-**Phase 1 — Database + Domain Foundation. IN PROGRESS.**
+**PHASE 1 — Database + Domain Foundation. COMPLETE (2026-10-07). Tasks 1-10
+done; commits `1e9e26f` T1 · `f238474` T2 · `2b57a80` T4 · `5d34601` T5 ·
+`f46537a` T6 · `5eeb9d9` T3 · `9b8b8e9` T7 · `ef6a72b` T8 · `992d14b` T9 ·
+`22c57dd` T10. PHASE 2 IS OPEN** — see "Next Task" for the plan's exact dual
+numbering.
 
 Task 1 complete and committed (`1e9e26f feat: Phase 1 Task 1 workspace skeleton`).
 **Task 2 COMPLETE (final pass 2026-10-05).** Local PostgreSQL 16.15 AND the new
@@ -35,8 +39,32 @@ predicates; zero runtime dependencies; 70 unit tests green.
 `packages/domain/src/sku/grammar.ts`, validated against the real
 `naturalgemstones/reverse_engineered/data/products.jsonl` corpus: **gates
 V3+V19 at 1,024/1,024 with 0 mismatches, 0 malformed** (SHA-256 cross-checked
-against MANIFEST entry 5, read-only). 100 tests / 13 files green. Tasks 8-9
-not started.
+against MANIFEST entry 5, read-only). 100 tests / 13 files green.
+
+**Task 8 COMPLETE (2026-10-07).** Configuration identity in pure
+`packages/domain`: the SoT 19.2 / doc-14 §2 canonical representation,
+`computeConfigurationHash` (`sha256:<hex>` + version, Task 6 value-object
+output), the configuration slug (fixed-43-digit base62 of the FULL sha256
+digest — collision-resistant, URL-safe, no truncation), and the pure
+`normaliseSlug` primitive. Frozen by explicit digest examples.
+
+**Task 9 COMPLETE (2026-10-07).** Reference seeders in `packages/db/src/seed/`:
+15 metals (full enum; R10 INFERRED), 8 jewellery types (full enum; BROOCH/
+CUFFLINKS/CHARM INFERRED), 22 setting styles, 3 treatments + 5 verbatim
+treatment labels, 5 colour intensities, 5 clarities + 7 clarity labels —
+70 rows, idempotent ON CONFLICT DO NOTHING, evidence-bound by a corpus gate
+(taxonomy.json + urls.jsonl SHA-256-gated).
+
+**Task 10 COMPLETE (2026-10-07).** `tools/migrate` is a real CLI:
+`plan` / `run` / `status`; resumable + idempotent stage execution over the
+locked `import_batches` table; per-artifact SHA-256 gating against
+`docs/evidence/MANIFEST.md`; 3 implemented stages (verify-artifacts,
+migrate-schema, seed-reference) + 11 declared future stages that refuse
+until their Phase 2 plan tasks land. Hash-mismatch, resume and idempotency
+are test-frozen gates; the REAL 13-artifact chain was executed (0.89 GB
+re-hashed, archive read-only) and re-run as a pure skip.
+
+MVP chain is Phase 1 → 2 → 3 → 4 → 5 → 6. Phases 7–13 are post-MVP.
 
 **Task 3 COMPLETE (2026-10-07).** `docs/evidence/MANIFEST.md` created and
 verified: 13 physical artifacts covering the 10 authoritative logical entries of
@@ -62,39 +90,74 @@ reintroduced — per-environment selection is a property of the value stored in
 
 # Current Task
 
-**Task 7 COMPLETE (2026-10-07) — SKU grammar parser + 1,024-record corpus validation.**
+**Tasks 8, 9 and 10 COMPLETE (2026-10-07) — PHASE 1 COMPLETE; PHASE 2 OPEN.**
+
+## Task 8 — configuration hash + slug derivation
 
 | Check | Result |
 |---|---|
-| Parser | `packages/domain/src/sku/grammar.ts` — the SoT §1.1 grammar, version **'1'** (`SKU_GRAMMAR_VERSION`) |
-| Grammar | SETTING `JS<core><metal>` · CONFIGURED `JS<core><metal>-<K\|PR><digits>` · READY-MADE `J<digits>` · gemRefs `K<digits>`=single / `PR<digits>`=pair · metal alphabet = all 15 enum members (R10 accepted though unobserved in the 1,024) — NOT broadened beyond the validated forms |
-| API | `parseSkuString` (total; null for non-SKU input; case-insensitive canonicalising; frozen output) · `parseSkuOrThrow` (INVALID_SKU with a deterministic per-class reason) · `parseSkuFromSlug` (Example B trailing-token derivation, '-'/start-bounded, uppercase-canonicalising) · `composeSku` (doc 05, inverse of parse) |
-| Value-object reuse | GemRef, MetalCode/METAL_CODES (enums), the Task 6 `Sku` composite builder, SourceSku + DerivedSku/ProductIdentity for provenance — no second SKU model created |
-| Corpus source | `naturalgemstones/reverse_engineered/data/products.jsonl` (MANIFEST entry 5, 929,149 B) — "Observed product.sku ground truth for the 1,024-record corpus"; SHA-256 cross-checked against the manifest before any parsing |
-| Selection rule | every record with a non-empty top-level `sku` field → **1,024 observed**; the 221 empty-sku records are the documented failed-fetch set and are explicitly NOT part of this gate (their derivation is the Phase 2 write path, plan task 15) |
-| Gate result | **1,024 / 1,024 parsed · 0 structural mismatches (V3) · 0 composition mismatches (V19) · 0 malformed · 0 duplicate SKUs** |
-| SoT aggregates reproduced | 105 design cores · 35 gemRefs · 11 metals (`PT R14 R18 W14 W18 WY14 WY18 Y14 Y18 YW14 YW18`) · 683 (design,metal) variants · 113 PR pairs / 911 K singles — every number matches the SoT [VERIFIED] values |
-| Provenance hold | observed values enter via `parseSourceSku` (OBSERVED); slug-produced values via `parseDerivedSku` (URL_SLUG, grammar '1', confidence 1) — never promoted (task §6; SoT 3.1 Example B; INV-08) |
-| Purity | runtime parser imports domain modules only; zero new dependencies; the archive is read ONLY by the corpus spec (fs/crypto in the documented test-layer exemption) |
-| Tests | **100 / 100 PASS across 13 files** (30 new grammar/corpus tests). The corpus spec runs the full V3+V19 proof in ~0.3 s and reproduces deterministically; the gate was ALSO re-proven standalone without Vitest against the built `dist` (same result) |
-| lint / build / tsc --dry / install --frozen-lockfile | PASS / PASS / PASS / PASS |
-| Task 5 schema fidelity | **STILL PASS** from zero — no migration touched |
-| Archive safety | fingerprint identical pre/post (46,810 files / 3,069,038,249 B); `git check-ignore -v naturalgemstones/` → `.gitignore:19`; secret scan clean |
-| Next task | **Task 8 — configuration-hash function and slug derivation** (depends on Task 6, done; awaiting explicit user authorization) |
+| Implementation | `packages/domain/src/configuration/` — `canonical-configuration.ts` (explicit canonical object, sorted keys, arrays sorted by stable key, plain-JSON-only values, engraving TEXT excluded from hashing), `hash.ts` (`computeConfigurationIdentity` / `computeConfigurationHash`), `slug.ts` (`deriveConfigurationSlug`, `normaliseSlug`, `isConfigurationSlugShape`) |
+| Hash version | `hash_version` INSIDE the hashed object (SoT 19.2); validated in [1, 32767]; output is the frozen Task 6 `ConfigurationHash` value object |
+| Canonicalisation | verbatim SoT 19.2 / doc 14 §2 field set: `{engravingPresent, gemRef?, hashVersion, jewelleryType, options(sorted), settingVariantSku, sideStones(sorted)}`; keys sorted at every level; no insignificant whitespace; non-JSON values REJECTED (Maps/Sets/BigInt/undefined never silently dropped) |
+| Slug | `base62(sha256(canonicalJson))`, fixed 43 digits, zero-padded big-endian; collision-resistant across the whole versioned identity space (no truncation); URL-safe (encodeURIComponent-stable — no separators, symbols or reserved characters); independent of key insertion order |
+| Tests | **38 new** (26 hash + 12 slug, incl. 10 frozen digest/slug examples = the Example B pair PR5681/JS1383R14 and RING K1324/JS1409W14); determinism, insertion-order independence, identity sensitivity, engraving-presence-only, malformed rejection (INVALID_SKU / INVALID_GEM_REF / INVALID_SIDE_STONES / INVALID_OPTIONS / INVALID_ENGRAVING_TEXT / INVALID_HASH_VERSION) |
+| Purity | runtime imports only node:crypto createHash — a pure byte computation, no I/O builtins; lint boundary rules green; zero runtime dependencies unchanged |
+
+## Task 9 — reference data seeds
+
+| Check | Result |
+|---|---|
+| Location | `packages/db/src/seed/` — `reference-seed.ts` (runner), `reference-data.ts` (provenance-traced constants), CLI `packages/db/src/seed.ts` (`pnpm --filter @maihan/db run seed`), spec gates `reference-seed.spec.ts` + `reference-corpus.spec.ts` |
+| Categories & counts (expected = actual) | metals **15** · jewellery_types **8** · setting_styles **22** · treatments **3** · treatment_labels **5** · colour_intensities **5** · clarities **5** · clarity_labels **7** (70 rows) |
+| Idempotency | `INSERT ... ON CONFLICT (natural key) DO NOTHING`; second run inserts 0 (proven twice in tests and by double CLI run on `maihan_dev_seed_gate`, dropped after) |
+| Evidence binding | 14 metal slug phrases EXTRACTED from urls.jsonl (1:1 per code, INV-04, aggregate matches the SoT URL counts per code); 22 style slugs reconcile EXACTLY (9,500 base + 1,272 pendant variants = 10,772 settings routes); intensities/clarities/treatments verified against taxonomy.json (entries 2+7, SHA-256-gated, D9 doubled forms collapsed) |
+| Honesty markers | R10 + BROOCH/CUFFLINKS/CHARM = enum-only `INFERRED`; 14 metals OBSERVED; 5 jewellery types evidenced (4 EXTRACTED + BRACELET OBSERVED); intensity/clarity `rank` = our merchandising ordering (DECISIONS.md), values OBSERVED |
+| Tests | 15/15 in packages/db (scratch `maihan_dev_seed`: counts, values, uniqueness on all 9 natural keys, idempotency, rerun, no unexpected rows); corpus spec skips when the archive is absent |
+
+## Task 10 — tools/migrate
+
+| Check | Result |
+|---|---|
+| Location | `tools/migrate/src/` — `manifest.ts` (parse MANIFEST §4, SHA-256 gating), `stages.ts` (ordered registry), `state.ts` (durable state over the LOCKED `import_batches` table; batch_key = `stage:<id>`), `run.ts` (runner), `cli.ts` (bin `maihan-migrate`: plan / run / status) |
+| Stages | 3 implemented: `verify-artifacts` (ALL_MANIFEST), `migrate-schema` (runMigrations), `seed-reference` (seedReferenceData); 11 declared-but-refusing future stages (extract-staging … verify-gates) with their authoritative artifact sets and gate references (plan tasks 11–20, doc 33 M1–M9) |
+| Resumability | durable rows; rerun skips SUCCEEDED, resumes FAILED/absent; failure stops downstream immediately, never marks it complete |
+| Idempotency | re-run = skip-based no-op; migrate-schema and seed-reference are themselves idempotent (Drizzle history; ON CONFLICT DO NOTHING) |
+| SHA-256 gating | per-artifact verify BEFORE execution; refusal names stage + artifact + expected vs actual digest; paths/digests only in errors (no secrets); partial real manifest (13 rows required) refuses outright |
+| Mandatory gates | hash-mismatch refusal (tampered fixture COPY in /tmp — the real archive untouched), resume after simulated interruption, idempotent rerun — all in `tools/migrate/src/{manifest,run}.spec.ts`, 14/14 green |
+| REAL chain proof | `maihan-migrate run` on a disposable scratch DB against the REAL manifest: 13/13 artifacts verified (0.89 GB re-hashed, read-only), 17 migrations applied, 70 reference rows seeded; second run = pure SKIP; scratch dropped after |
+| Guard | dev-contract guard `maihan_dev*` state mirrors the DDL migrator; database selected by the value of DATABASE_URL only |
+
+# Next Task
+
+**PHASE 2 IS OPEN. The next implementation task, quoted exactly from the
+plan, in BOTH of the plan's own numberings (they differ; both are recorded
+verbatim, not silently merged):**
+
+| Plan numbering | Exact wording | Done when | Dependencies |
+|---|---|---|---|
+| **Global tracker, task 11 of 20** (plan §37 table) | "Implement the extract stage: load `urls.jsonl` verbatim into `staging_source_pages`" | "44,218 rows loaded unchanged" | depends on task 10 (done) |
+| **Phase 2 detailed breakdown, task 3 of 20** (plan §9 'Tasks.') | "Load `urls.jsonl` verbatim into `staging_source_pages`" | — | follows detailed tasks 1-2, which the global task 10 already delivered ("Build tools/migrate with resumable, idempotent stage execution." + "Hash each source artifact; record in `import_batches.source_sha256`; refuse to run on hash mismatch.") |
+
+The same work item is referenced by epic **E2.1 "Extract and integrity-gate"** (plan §9).
+Nothing of Phase 2 was implemented in the Tasks 8-10 run.
+
+**Client decisions that gate Phase 2 (all remain PROPOSED/UNKNOWN, unchanged):**
+ADR-024 provenance storage design; per the plan §26 task numbering in CURRENT_STATE the
+configuration-hash consumer tasks also arrive with Phase 2. Report; do not resolve.
 
 # Status
 
 | Item | State |
 |---|---|
-| Phase 1 | **Started. Tasks 1-7 complete.** Tasks 8-10 not started |
-| Application code | **None exists beyond the pure domain foundation.** Workspace skeleton + migrations + pure domain layer + evidence manifest |
+| Phase 1 | **COMPLETE (2026-10-07). Tasks 1-10 done.** Commits: T8 `ef6a72b`, T9 `992d14b`, T10 `22c57dd` |
+| Application code | **Pure domain foundation + reference seeds + migration runner.** Workspace skeleton + migrations + domain (incl. configuration identity, Tasks 8) + seeders (Task 9) + `tools/migrate` runner (Task 10) + evidence manifest. Still ZERO routes, repositories or product data |
 | Database migrations | **17 ordered DDL migrations, applied and verified on both dev targets** (Task 4) |
 | Schema-fidelity gate | **Blocking CI assertion, green on fresh databases** (Task 5) |
-| Domain layer | **Pure value objects + INV-01/02/03 with zero runtime dependencies** (Task 6) |
-| Tests | **100 unit tests green (packages/domain: 30 Task 7 grammar/corpus + 70 Task 6).** Vitest per ADR-021 (ACCEPTED 2026-10-07) |
+| Domain layer | **Pure value objects + INV-01/02/03 + SKU grammar + configuration identity (hash, canonical rep, slug derivation, normaliseSlug) with zero runtime dependencies** (Tasks 6-8) |
+| Tests | **167 green: domain 138/138 (15 files; +26 hash +12 slug for Task 8) · packages/db 15/15 seed gates · tools/migrate 14/14 runner gates.** Vitest per ADR-021 (ACCEPTED 2026-10-07) |
 | SKU grammar | **VALIDATED — version '1', gates V3+V19 at 1,024/1,024 / 0 mismatches against the real corpus** (Task 7) |
 | Repository / workspaces | **EXISTS.** 8 packages, 9 workspace projects, pnpm 12.3.4 |
-| CI | **EXISTS.** `.github/workflows/ci.yml`: lint → build → domain tests → schema fidelity on a disposable fresh PostgreSQL 16 |
+| CI | **EXISTS.** `.github/workflows/ci.yml`: lint → build → domain tests → seed gate → migration-runner gate → schema fidelity on a disposable fresh PostgreSQL 16 |
 | Local PostgreSQL 16 | **EXISTS and correct.** 16.15 via compose.yaml, database `maihan_dev`, all six extensions; migrated by Task 4 |
 | Neon dev | **EXISTS and correct.** "Maihan Gems Dev": PostgreSQL 16.15, db `maihan_dev`; migrated by Task 4; schema identical to local |
 | Evidence manifest | **EXISTS.** `docs/evidence/MANIFEST.md`: 13 physical artifacts / 10 logical entries, SHA-256 computed from actual bytes, retention class A, WAL state documented. Source archive proven unmodified (Task 3, 2026-10-07) |
@@ -121,7 +184,10 @@ Planning complete. **Tasks 1-6 of Phase 1 are implemented (Task 3 = manifest).**
 | **Phase 1 Task 5 — schema-fidelity CI assertion** | **COMPLETE.** Shared introspection (`introspect.ts`) + expectations mirror (`expected-schema.ts`) + framework-free assertion (`assert-schema.ts`) + fresh-database orchestrator (`schema-fidelity.ts`, scratch lifecycle with unconditional cleanup and Neon-host refusal) + root script + blocking GitHub Actions workflow. Fresh run PASS twice (deterministic); every drift class proven caught by negative probe; read-only assertion green on both dev targets |
 | **ADR-021 resolution** | **ACCEPTED 2026-10-07 by explicit user authorization.** `technical_design/40` (index + body), `SKILL_MATRIX_AND_TOOLING.md` (status tables + testing rows), plan §35.2/§23.4 resolution notes, memory. ADR-022/023/024 untouched. Playwright accepted-only; load tool still open |
 
-| **Phase 1 Task 7 — SKU grammar parser + corpus validation** | **COMPLETE.** Grammar ported verbatim from SoT §1.1 (version '1'); `parseSkuString`/`parseSkuOrThrow`/`parseSkuFromSlug`/`composeSku`; V3+V19 corpus gate **1,024/1,024, 0 mismatches, 0 malformed** on MANIFEST-entry-5 `products.jsonl` (sha256 cross-check first); SoT aggregates reproduced (105/35/11/683/113/911); provenance split demonstrated at scale (OBSERVED vs URL_SLUG-DERIVED); 30 new Vitest tests; standalone (non-Vitest) re-proof passes; archive untouched || **Phase 1 Task 3 — migration evidence manifest** | **COMPLETE 2026-10-07.** `docs/evidence/MANIFEST.md`: 13 physical files / 10 logical entries per plan §22.3; every SHA-256 computed from the actual archive bytes during the run (0 failures, 0 duplicates, 64-lowercase-hex); retention class **A — "Must remain permanently"** (`technical_design/31` §2A) with the §22.3 operational requirements; criticality + loss consequences verbatim from the authoritative documents; `crawler.sqlite`/`-wal`/`-shm` as separate rows under one logical artifact; `report.json`/`appraisal.json` hashed separately; canonical-vs-redundant path disambiguation recorded (`exports/products.jsonl` = class B per td31 §2B); WAL state documented byte-level (**not checkpointed**, no SQLite library invoked, three files are one indivisible unit, checkpoint only ever on a disposable copy); archive proven unmodified (46,810 files and 3,069,038,249 B identical pre/post, all 13 hashes stable, `git status` silent, no temp file inside the archive); secret scan 0 hits |
+| **Phase 1 Task 7 — SKU grammar parser + corpus validation** | **COMPLETE.** Grammar ported verbatim from SoT §1.1 (version '1'); `parseSkuString`/`parseSkuOrThrow`/`parseSkuFromSlug`/`composeSku`; V3+V19 corpus gate **1,024/1,024, 0 mismatches, 0 malformed** on MANIFEST-entry-5 `products.jsonl` (sha256 cross-check first); SoT aggregates reproduced (105/35/11/683/113/911); provenance split demonstrated at scale (OBSERVED vs URL_SLUG-DERIVED); 30 new Vitest tests; standalone (non-Vitest) re-proof passes; archive untouched (commit `9b8b8e9`) || **Phase 1 Task 3 — migration evidence manifest** | **COMPLETE 2026-10-07.** `docs/evidence/MANIFEST.md`: 13 physical files / 10 logical entries per plan §22.3; every SHA-256 computed from the actual archive bytes during the run (0 failures, 0 duplicates, 64-lowercase-hex); retention class **A — "Must remain permanently"** (`technical_design/31` §2A) with the §22.3 operational requirements; criticality + loss consequences verbatim from the authoritative documents; `crawler.sqlite`/`-wal`/`-shm` as separate rows under one logical artifact; `report.json`/`appraisal.json` hashed separately; canonical-vs-redundant path disambiguation recorded (`exports/products.jsonl` = class B per td31 §2B); WAL state documented byte-level (**not checkpointed**, no SQLite library invoked, three files are one indivisible unit, checkpoint only ever on a disposable copy); archive proven unmodified (46,810 files and 3,069,038,249 B identical pre/post, all 13 hashes stable, `git status` silent, no temp file inside the archive); secret scan 0 hits |
+| **Phase 1 Task 8 — configuration hash + slug derivation** | **COMPLETE (2026-10-07, commit `ef6a72b`).** Pure `packages/domain/src/configuration/`: the SoT 19.2 / doc-14 §2 canonical representation (sorted keys, arrays sorted by stable key, plain-JSON-only values, engraving presence not text), `computeConfigurationHash` returning the frozen Task 6 `ConfigurationHash` VO with `hash_version` inside the hashed object, the configuration slug = fixed-43-digit base62 of the FULL sha256 digest (collision-resistant, URL-safe), and the pure `normaliseSlug` primitive. 38 tests green incl. 10 frozen digest/slug examples; malformed inputs rejected with stable codes; zero new runtime dependencies |
+| **Phase 1 Task 9 — reference data seeds** | **COMPLETE (2026-10-07, commit `992d14b`).** `packages/db/src/seed/` + CLI `pnpm --filter @maihan/db run seed`; 70 rows: 15 metals (full enum; R10 `INFERRED`), 8 jewellery types (full enum; BROOCH/CUFFLINKS/CHARM `INFERRED`), 22 setting styles, 3 treatments + 5 verbatim treatment labels, 5 colour intensities, 5 clarities + 7 clarity labels. `ON CONFLICT (natural key) DO NOTHING` idempotency (second run inserts 0; counts stable). Evidence-bound: 14 metal slug phrases EXTRACTED from urls.jsonl 1:1 (per-code URL aggregates match the SoT counts exactly), 22 style slugs reconcile exactly (9,500 + 1,272 = 10,772 settings routes), taxonomies verified against taxonomy.json (entries 2+7, SHA-256-gated). 15/15 package tests (scratch DB) |
+| **Phase 1 Task 10 — tools/migrate** | **COMPLETE (2026-10-07, commit `22c57dd`).** `tools/migrate` bin `maihan-migrate` (plan / run / status); durable stage state over the LOCKED `import_batches` table (batch_key = `stage:<id>`, job_state states, started/finished timestamps, notes); 3 implemented stages (verify-artifacts, migrate-schema, seed-reference) + 11 declared future stages that refuse until their plan tasks land; SHA-256 gating against `docs/evidence/MANIFEST.md` before every artifact-consuming stage (refusal names stage/artifact/expected/actual; partial real manifest refuses). Test-frozen gates: hash-mismatch refusal (tampered temp COPY), resume after simulated interruption, idempotent rerun; the REAL 13-artifact chain executed read-only (0.89 GB re-hashed) and re-run as a pure skip |
 | **Phase 1 Task 6 — domain value objects + INV-01/02/03** | **COMPLETE.** Pure `packages/domain`: `errors.ts` (DomainError/InvariantError, stable codes), `enums.ts` (ProductKind, JewelleryType, GemstoneKind, MetalCode×15, EvidenceStatus), 8 value-object modules (`gem-ref`, `money`, `weight-ct`, `dimensions-mm`, `source-sku`, `derived-sku`+ProductIdentity, `sku`, `configuration-hash`), `product/invariants.ts` (three predicates + assertComposition), `index.ts` barrel. Vitest 5.0.3 + `vitest.config.ts` + 11 spec files, 70 tests green. Zero runtime dependencies; lint exempted spec-file node:fs with documented rationale. CI gained the domain-test step |
 
 ---
@@ -145,17 +211,18 @@ First ten tasks, verbatim from `INITIAL_IMPLEMENTATION_PLAN.md` §36.
 | 5 | Assert schema fidelity in CI: 74 tables, 33 enums, 94 FKs, 591 CHECK, 263 indexes, 9 named invariant constraints, 6 RLS policies with 0 policy-less tables, 2 HNSW indexes, 1 trigger, 1 view, 2 functions | 1 | 4 | Introspection test green against a fresh database — **DONE** (framework-free assertion + blocking workflow) |
 | 6 | Implement the domain value objects and INV-01, INV-02, INV-03 as pure predicates | 1 | 4 | Unit tests green; no infrastructure imports — **DONE** (70 Vitest tests; zero runtime dependencies) |
 | 7 | Implement the SKU grammar parser with the validated regex and prove it against the 1,024-record corpus | 1 | 6 | 1,024/1,024 match, 0 mismatches (gates V3, V19) — **DONE** (1,024/1,024, 0 mismatches, 0 malformed; grammar version '1'; MANIFEST-cross-checked corpus) |
-| 8 | Implement the configuration-hash function and slug derivation | 1 | 6 | Deterministic; property tests green |
-| 9 | Seed reference data: 15 metals, 8 jewellery types, setting styles, treatments, intensities, clarities | 1 | 4 | Seeds idempotent; counts asserted |
-| 10 | Build `tools/migrate` with resumable, idempotent stage execution and per-artifact SHA-256 gating | 2 | 9 | Refuses to run on hash mismatch |
+| 8 | Implement the configuration-hash function and slug derivation | 1 | 6 | Deterministic; property tests green — **DONE** (commit `ef6a72b`; 26 hash + 12 slug tests with 10 frozen examples) |
+| 9 | Seed reference data: 15 metals, 8 jewellery types, setting styles, treatments, intensities, clarities | 1 | 4 | Seeds idempotent; counts asserted — **DONE** (commit `992d14b`; 70 rows; evidence-bound corpus gate) |
+| 10 | Build `tools/migrate` with resumable, idempotent stage execution and per-artifact SHA-256 gating | 2 | 9 | Refuses to run on hash mismatch — **DONE** (commit `22c57dd`; mismatch/resume/idempotency test-frozen; real 13-artifact chain executed and re-run as pure skip) |
 
 **Note on task 9.** "15 metals, 8 jewellery types" are **enum member counts**.
 Observed counts are 14 metal codes and 5 jewellery types. `R10` is enum-only and
 is recorded as absent from all evidence. Insert the full enum; do not describe
 these counts as observed.
 
-Tasks 1, 2 and 3 have no prior dependency. Tasks 4–9 complete Phase 1. Task 10
-opens Phase 2.
+Tasks 1, 2 and 3 have no prior dependency. **PHASE 1 IS COMPLETE (tasks 1-10).**
+Task 10 (migration tooling) opens Phase 2; the next task is the extract stage —
+see "Next Task" above for the plan's exact dual numbering.
 
 ---
 
@@ -212,6 +279,14 @@ during planning and are recorded in `technical_design/40` and
 | 2026-10-07 (T7) | `composeSku` implemented as the doc-05 inverse of parse; the corpus gate compared BOTH slug-derived structures and composed strings against each observed SKU (V3 structural + V19 composition equality) |
 | 2026-10-07 (T7) | Corpus gate reads `naturalgemstones/reverse_engineered/data/products.jsonl` ONLY after the SHA-256 matches `docs/evidence/MANIFEST.md` entry 5 — the gate validates the recorded artifact, never a path-incident substitute. The archive stays read-only and uncommitted |
 | 2026-10-07 (T7) | Provenance discipline in the parser surface: the parser returns structures only; observed identities come via `parseSourceSku`, derived ones via `parseDerivedSku(URL_SLUG, parserVersion='1')`. No promotion path exists in the grammar module |
+| 2026-10-07 (T8) | Configuration-hash canonicalisation is the SoT 19.2 field set with the doc-14 §2 rules realised as: keys sorted at every level, arrays sorted by their canonical-JSON string ("a stable key"), plain-JSON-only values (undefined/Map/Set/BigInt/class instances REJECTED, never silently dropped), and engraving TEXT excluded (presence only). The hash input is versioned via `hash_version` INSIDE the object; changing the canonical rule requires a version bump, never a silent rewrite |
+| 2026-10-07 (T8) | Configuration slug derivation = fixed-43-digit base62 of the FULL sha256 digest (no truncation), single encoding chain with the hash so a slug and its hash can never disagree; descriptive slug tokens/URL routing stay with doc 34 and later tasks ("do not build SEO/routing systems here"). `normaliseSlug` is the shared URL-safe primitive (NFKD folding, [a-z0-9-] output) reproducing the observed '5.98ct'→'5-98ct' doc-34 shape |
+| 2026-10-07 (T9) | Metals + jewellery types: the FULL authoritative enums are seeded (15 / 8) per the plan's own note, with enum-only members (R10, BROOCH, CUFFLINKS, CHARM) marked `INFERRED` and their attribute values kept pattern-consistent, never claimed as observed. This overrides doc 11's "R10 is not seeded" line per the document hierarchy (plan > td); the conflict is REPORTED, not silently fixed in doc 11 |
+| 2026-10-07 (T9) | Treatments seed ONLY the three observed values with `requires_disclosure=true` (doc 11 verbatim); the other 5 enum members stay unseeded so the model can say "not recorded". `treatment_labels`/`clarity_labels` carry every verbatim source string including the D9 doubles, bound by the corpus gate to taxonomy.json (MANIFEST entry 7) and urls.jsonl (entry 2) by SHA-256 |
+| 2026-10-07 (T9) | Metal slug phrases are EXTRACTED from the observed URL tokens (weight-anchored run between the weight and SKU tokens): 1:1 per code with zero conflicts, per-code URL aggregates matching the SoT §4 counts exactly. Metals sort_order ranks by observed URL counts desc, R10 (enum-only) last. Intensity/clarity `rank` values are OUR merchandising ordering (`INFERRED`: light<medium<intense<vivid<dark; eye_clean cleanest), noted in DECISIONS.md; the value rows stay OBSERVED |
+| 2026-10-07 (T10) | Stage state is durable in the LOCKED `import_batches` table (batch_key = `stage:<id>`); no new table (`schema fidelity` stays exact), no process memory. Stage identities are stable strings; the 11 future catalogue stages are DECLARED with their authoritative artifact sets and refuse execution until their plan tasks land |
+| 2026-10-07 (T10) | The default migration chain runs implemented stages only; declaring-but-targeting a future stage fails clearly. SHA-256 gating runs BEFORE execution and marks the failing stage FAILED with the artifact/expected/actual digest; `markFailed` is an UPSERT so a first-touch verification failure still lands durably |
+
 
 ---
 
@@ -238,6 +313,10 @@ No application files. Planning-stage only.
 | **Task 7 files** | `packages/domain/src/sku/grammar.ts` (NEW), `packages/domain/src/sku/grammar.spec.ts` (NEW, 30 tests), `packages/domain/src/sku/corpus.spec.ts` (NEW, V3+V19 corpus proof), `packages/domain/src/index.ts` (barrel export), `eslint.config.mjs` (spec exemption: env-based fixture location), 3 memory files | Task 7 commit |
 | **Task 6 files** | `packages/domain/src/{errors,enums}.ts`, `packages/domain/src/value-objects/{gem-ref,money,weight-ct,dimensions-mm,source-sku,derived-sku,sku,configuration-hash,index}.ts`, `packages/domain/src/product/invariants.ts`, `packages/domain/src/testing/expect-domain-code.ts`, `packages/domain/src/index.ts`, 11 `*.spec.ts` files, `packages/domain/vitest.config.ts`, `packages/domain/package.json` (+vitest devDep + test script), root `package.json` (`test` script), `eslint.config.mjs` (spec exemption), `.github/workflows/ci.yml` (test step), `pnpm-lock.yaml`, 3 memory files | Task 6 commit |
 | **Task 3 files** | `docs/evidence/MANIFEST.md` (NEW — 13 physical artifacts / 10 logical entries, SHA-256 from actual bytes, retention class A per td31 §2A, WAL state documented), 3 memory files | Task 3 commit |
+| **Task 8 files** | `packages/domain/src/configuration/{canonical-configuration,hash,slug,index}.ts` (NEW), `packages/domain/src/configuration/{configuration-hash,slug}.spec.ts` (NEW, 38 tests), `packages/domain/src/index.ts` (barrel) | Commit `ef6a72b` |
+| **Task 9 files** | `packages/db/src/seed/{reference-data,reference-seed}.ts` (NEW), `packages/db/src/seed/{reference-seed,reference-corpus}.spec.ts` (NEW, 15 tests), `packages/db/src/seed.ts` (NEW CLI), `packages/db/vitest.config.ts` (NEW), `packages/db/package.json` (+vitest devDep + seed/test scripts), `pnpm-lock.yaml`, `.github/workflows/ci.yml` (seed gate step) | Commit `992d14b` |
+| **Task 10 files** | `tools/migrate/src/{manifest,stages,state,run,cli}.ts` (NEW), `tools/migrate/src/{manifest,run}.spec.ts` (NEW, 14 tests), `tools/migrate/src/index.ts` (real package doc + library surface), `tools/migrate/vitest.config.ts` (NEW), `tools/migrate/package.json` (+pg +vitest + scripts), `packages/db/src/index.ts` (exports the runner + seeder + seed data), `pnpm-lock.yaml`, `.github/workflows/ci.yml` (runner gate step) | Commit `22c57dd` |
+| **Phase 1 close-out memory** | `.opencode/memory/*.md` (Task 8/9/10 completion, decisions, Phase 1 COMPLETE / Phase 2 OPEN) | memory commit |
 
 ---
 
@@ -271,6 +350,9 @@ Verification performed during planning:
 | **Task 5** | Refactor equivalence: pre-refactor vs post-refactor verifier JSON identical on all pre-existing fields (only `enum_members` added; enum lists match SoT §8.3 exactly) · fresh-database fidelity PASS twice (deterministic) · negative probe: every drift class caught by exact name (unexpected table, enum member, dropped CHECK/invariant/unique constraint, missing index/HNSW/trigger/function/view, RLS policy drop → policy-less) · read-only assertion PASS on local `maihan_dev` AND Neon dev · orchestrator refuses Neon hosts · scratch cleanup unconditional (0 leftovers) · `pnpm install --frozen-lockfile` / lint / build / `tsc -b --dry` PASS · compose config valid |
 | **Task 6** | `pnpm install --frozen-lockfile` PASS · lint PASS · build (tsc -b) PASS · `tsc -b --dry` PASS · **Vitest 70/70 PASS twice (11 files)** · schema fidelity re-run from zero **PASS** (migrations untouched) · domain import-graph grep: zero infrastructure imports in runtime code (only the purity spec's node:fs, exempted + documented) · negative checks: VO invalid inputs all throw stable INVALID_* codes; invariant codes asserted via property (INV-01/02/03); purity test asserts zero runtime deps |
 | **Task 7** | Corpus identity: SHA-256 of `products.jsonl` == MANIFEST entry 5 digest (computed before parsing) · records: 1,245 total / 1,024 observed / 221 empty-sku (documented set, excluded from the gate) · **parsed 1,024 / 1,024 · structural mismatches 0 (V3) · composition mismatches 0 (V19) · malformed 0 · duplicate SKUs 0** · SoT aggregates: 105 cores, 35 gemRefs, 11 metals, 683 variants, 113 pairs / 911 singles · archive fingerprint identical pre/post (46,810 files / 3,069,038,249 B) · `git check-ignore -v naturalgemstones/` PASS · standalone (non-Vitest) re-validation reproduces the gate · lint/build/tsc-dry/frozen-install PASS · schema-fidelity from zero PASS · secret scan clean |
+| **Task 8** | `pnpm install --frozen-lockfile` PASS · lint PASS · build PASS · `tsc -b --dry` PASS · domain suite 138/138 (26 hash + 12 slug new) · hash determinism, key-insertion-order independence, identity-field sensitivity, engraving-presence-only, frozen digest/slug examples (Example B pair + loose-stone ref), malformed rejection codes · schema fidelity from zero PASS · archive digest intact |
+| **Task 9** | gates as Task 8 · packages/db 15/15 on scratch `maihan_dev_seed` (counts; 9 natural-key uniqueness checks; values incl. metals labels/purity, two-tone map, jewellery flags per SoT 8.5, disclosure on 3 treatments, unique intensity ranks; idempotency + 3rd-run stability; md5 snapshot equality) · seed CLI twice on scratch `maihan_dev_seed_gate`: run 1 inserts 70, run 2 inserts 0 · corpus spec re-derives intensities/clarities/treatments from taxonomy.json and the 14 metal phrases + 22 style slugs from urls.jsonl (SHA-256-gated; 10,772 routes reconcile) |
+| **Task 10** | gates as Task 8 · tools/migrate 14/14 on scratch `maihan_dev_migrate` with disposable fixture manifest/archive copies: mismatch refusal (wrong bytes → ArtifactVerificationError, artifact+expected+actual, stage FAILED, no downstream rows), missing-artifact refusal, full chain RAN×3, simulated seed interruption resumes with zero duplicate work, pure-skip idempotency via md5 snapshots, declared stages refuse · REAL chain on scratch `maihan_dev_migrate_gate`: 13/13 manifest artifacts verified (0.89 GB, read-only), 17 migrations, 70 seeds, second run pure SKIP, status table correct · scratch dropped · production never touched |
 
 ---
 
@@ -281,7 +363,7 @@ Verification performed during planning:
 | Item | Status |
 |---|---|
 | `packages/db` DDL migrations | **17 applied and verified on both dev targets** |
-| `tools/migrate` built | No (Phase 2, task 10) |
+| `tools/migrate` built | **YES (Task 10).** Resumable/hash-gated runner + 3 implemented stages + 11 declared stages; CLI `maihan-migrate` plan/run/status |
 | Stages 1–8 implemented | No |
 | Gates V1–V22 running | No |
 | Staging tables populated | No (tables exist, empty) |
@@ -322,6 +404,11 @@ catalogue. Full detail in `AGENTS.md` §9.
 | Modify `naturalgemstones/` in any way — including checkpointing `crawler.sqlite`'s WAL | The archive is read-only evidence. The WAL checkpoint td31 requires must run on a disposable COPY, never in place |
 | Copy checksums from a manifest instead of recomputing them | Manifest digests are only trustworthy when recomputed from the actual files; re-verify before relying on them |
 | Treat `exports/products.jsonl` or `architecture/taxonomy/taxonomy.json` as the canonical artifacts | `reverse_engineered/data/products.jsonl` (929 KB) and `data/taxonomy.json` (26 KB) are canonical per plan §22.3 / td31 §2A; the others are class-B redundant |
+| Rework Task 8's canonical form outside a deliberate hash-version bump | The canonical representation + slugs are FROZEN by explicit digest examples; changing them silently re-idents every existing configuration (tested gate) |
+| Re-derive seed values outside the corpus gate | Seed constants are provenance-commented and SHA-256-gate-verified against the archive at test time; edits must carry evidence |
+| Pre-digest any referenced artifact's hash | Manifest digests are always re-computed from actual bytes by the runner |
+| Implement the declared future migration stages now | They are explicitly DECLARED and refused; catalogue migration is Phase 2 plan tasks 11-20 |
+| Re-run seeds with destructive replace instead of ON CONFLICT DO NOTHING | Idempotency contract: second run changes zero rows (V17 spirit) |
 
 ---
 
