@@ -69,6 +69,14 @@ jobs:
           DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
         run: pnpm --filter @maihan/db run test
 
+      # Phase 1 Task 10: the migration runner gates — manifest parsing,
+      # SHA-256 refusal on a tampered fixture COPY (never the real archive),
+      # resumability and idempotency on a disposable scratch database.
+      - name: Migration runner gates (disposable database)
+        env:
+          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
+        run: pnpm --filter @maihan/migrate run test
+
       # Migrates a fresh scratch database (maihan_dev_fidelity) from zero on
       # the disposable instance, asserts the locked schema exactly, and always
       # drops the scratch database afterwards. The local credential below is
