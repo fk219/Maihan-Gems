@@ -24,3 +24,4 @@ export * from './enums.js';
 export * from './value-objects/index.js';
 export * from './product/invariants.js';
 export * from './sku/grammar.js';
+export * from './configuration/index.js';
