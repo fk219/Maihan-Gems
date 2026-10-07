@@ -107,15 +107,27 @@ State lives in `.opencode/memory/`:
   until a phase requires it); the load-test tool remains open.
 - Task 6 — domain value objects + INV-01/02/03 — **COMPLETE 2026-10-07.**
   Pure domain layer, zero runtime dependencies, 70 unit tests green.
+- Task 3 — evidence manifest — **COMPLETE 2026-10-07.**
+  `docs/evidence/MANIFEST.md` created and validated: 13 physical artifacts
+  implementing the 10 authoritative logical entries of plan §22.3; every
+  SHA-256 computed from the actual archive bytes during the run; retention
+  class **A — "Must remain permanently"** (`technical_design/31` §2A);
+  criticality and loss consequences verbatim from the authoritative documents;
+  `crawler.sqlite`/`-wal`/`-shm` as separate rows under one logical artifact;
+  `report.json`/`appraisal.json` hashed separately; canonical-vs-redundant path
+  disambiguation recorded; SQLite WAL state documented byte-level (not
+  checkpointed; the three files are one indivisible unit; checkpoint only ever
+  on a disposable copy). The source archive is **PRESENT** in this Codespace
+  (46,810 files) and was proven unmodified; it stays Git-ignored and untracked.
 - **Variable contract enforced:** `DATABASE_URL` is the ONLY database variable
   (`PROJECT_SOURCE_OF_TRUTH.md` §29.6). Interim suffixed variables removed.
 - **Credential note:** the client states the Neon API key was rotated and `.env`
   updated. Confirm the `neondb_owner` password was reset too; both live only in
   gitignored `.env`.
-- **Do NOT begin Task 3** — it needs `naturalgemstones/`, absent here.
-- **Next task: Task 7** (SKU grammar parser) — depends on Task 6 (done), but
-  its completion gate (1,024/1,024 against the observed corpus) requires
-  `naturalgemstones/`; awaiting explicit user authorization either way.
+- **Next task: Task 7** (SKU grammar parser) — depends on Task 6 (done), and its
+  completion gate is now REACHABLE: the observed 1,024-record corpus
+  (`naturalgemstones/reverse_engineered/data/products.jsonl`) is present and its
+  checksum is recorded in the manifest. Awaiting explicit user authorization.
 - Full task list: `IMPLEMENTATION_STATE.md` → **Next**.
 
 ---
@@ -126,7 +138,7 @@ State lives in `.opencode/memory/`:
 |---|---|---|
 | 1 | ~~ADR-021 test tooling unresolved~~ **RESOLVED 2026-10-07 — ACCEPTED by explicit user authorization** (Vitest for unit/domain; Playwright accepted; load tool still open) | — |
 | 2 | ~~Repository structure not signed off~~ — **RESOLVED** at Task 1 authorisation | — |
-| 3 | `docs/evidence/MANIFEST.md` — needs `naturalgemstones/`, **ABSENT** in this Codespace; restore out of band | Execution |
+| 3 | ~~`docs/evidence/MANIFEST.md`~~ **RESOLVED 2026-10-07** — created and validated; the archive is present, so the manifest doubles as the corpus-checksum ledger for Task 7 | — |
 | 4 | ~~Local PostgreSQL 16~~ **RESOLVED 2026-10-05**: `compose.yaml`, `pgvector/pgvector:pg16`, DB `maihan_dev` on 127.0.0.1:5433, healthy, migrated by Task 4 | — |
 | 5 | ~~Neon dev target on PG18.6~~ **RESOLVED 2026-10-05**: NEW "Maihan Gems Dev" project, PostgreSQL 16.15, database `maihan_dev`; migrated by Task 4, schema identical to local | — |
 | 6 | Vercel env secrets, OTel collector, error reporting not configured | Execution |
@@ -139,8 +151,11 @@ and the deferred Task 3 archive.
 
 ## Critical — do NOT do
 
-- **Do NOT** begin Task 3. It needs `naturalgemstones/`, absent in this Codespace.
 - **Do NOT** begin Task 7 or later without explicit user authorization.
+- **Do NOT** modify `naturalgemstones/` in any way — it is now PRESENT and must
+  stay read-only, Git-ignored and untracked. This includes not checkpointing
+  `crawler.sqlite`'s WAL in place (the checkpoint td31 requires must run on a
+  disposable copy).
 - **Test runner is DECIDED (ADR-021, ACCEPTED 2026-10-07): Vitest** for
   unit/domain/integration/contract. Do not add Jest or any other runner.
   **Playwright is accepted for E2E but not installed** — do not install it
@@ -173,10 +188,11 @@ and the deferred Task 3 archive.
 ## Source archive
 
 ```
-naturalgemstones/     46,810 files. ABSENT in this Codespace (verified 2026-10-05)
+naturalgemstones/     46,810 files, 3.0 GB. PRESENT in this Codespace
+                      (verified + SHA-256 recorded 2026-10-07, docs/evidence/MANIFEST.md)
 ```
 
-**Never committed. Ignored by `.gitignore`.**
+**Never committed. Ignored by `.gitignore` (`.gitignore:19`).**
 
 **It will be ABSENT in a fresh clone or Codespace. That is expected and correct.**
 Absence is not evidence that it does not exist. Restore it out of band.

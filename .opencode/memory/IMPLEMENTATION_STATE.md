@@ -29,8 +29,17 @@ Vitest 5.0.3 installed for the domain layer (unit/domain runner); Playwright
 accepted for E2E but NOT installed; the load-test tool remains open.
 
 **Task 6 COMPLETE (2026-10-07).** Domain value objects + INV-01/02/03 as pure
-predicates; zero runtime dependencies; 70 unit tests green. Tasks 3 and 7-9
-not started (Task 7's corpus gate needs `naturalgemstones/`).
+predicates; zero runtime dependencies; 70 unit tests green.
+
+**Task 3 COMPLETE (2026-10-07).** `docs/evidence/MANIFEST.md` created and
+verified: 13 physical artifacts covering the 10 authoritative logical entries of
+plan §22.3, every SHA-256 computed from the actual archive bytes during this
+run, retention class A ("Must remain permanently", `technical_design/31` §2A),
+criticality and loss consequences preserved verbatim from the authoritative
+documents, and the SQLite WAL state documented byte-level (not checkpointed;
+three files retained as one indivisible unit). Source archive proven unmodified.
+**Task 7 remains next** (SKU grammar parser + 1,024-record corpus — corpus now
+available in `naturalgemstones/`).
 MVP chain is Phase 1 → 2 → 3 → 4 → 5 → 6. Phases 7–13 are post-MVP.
 
 **Contract correction applied:** `DATABASE_URL` is the SINGLE sanctioned database
@@ -46,17 +55,26 @@ reintroduced — per-environment selection is a property of the value stored in
 
 # Current Task
 
-**Task 6 COMPLETE (2026-10-07) — domain value objects and INV-01/02/03 + ADR-021 accepted.**
+**Task 3 COMPLETE (2026-10-07) — migration evidence manifest. Task 7 is next.**
 
 | Check | Result |
 |---|---|
-| ADR-021 | **ACCEPTED** — status updated in `technical_design/40` (index + body with authorization note), `SKILL_MATRIX_AND_TOOLING.md` (registers + testing table), plan §35.2/§23.4 (resolution notes), memory. ADR-022/023/024 UNTOUCHED |
-| Vitest | 5.0.3 devDependency of `packages/domain`; `vitest.config.ts` (one config, domain layer per ADR-021); `pnpm test` = `pnpm -r run test` |
-| Playwright | Accepted, **NOT installed** (no phase requires it) |
-| Value objects implemented | GemRef (branded, `^(K\|PR)\d+$`, isPair), Money (decimal string, USD-only, ≤2dp, NUMERIC(12,2) bound, frozen), WeightCt (branded, NUMERIC(8,3), positive), DimensionsMm (NUMERIC(8,3) axes + depth-exceeds-min WARN), SourceSku (branded, uppercase-normalised required — never repaired), DerivedSku + ProductIdentity discriminated union (provenance: URL_SLUG/parserVersion/confidence[0,1]), Sku composite (numeric core + 15 metal codes + optional gemRef), ConfigurationHash (shape `sha256:<64 lowercase hex>` + version — **hash function deliberately NOT implemented; plan task 8**); enum unions ProductKind/JewelleryType/GemstoneKind/MetalCode(15)/EvidenceStatus(5); DomainError/InvariantError model with stable codes |
-| INV predicates | `satisfiesInv01/02/03` + `assertComposition` in `packages/domain/src/product/invariants.ts`; INV-01 mirrors the FULL products_composition_ck CASE (CONFIGURED / SETTING_ONLY / else); INV-02 pair⇒EARRINGS; INV-03 configured EARRINGS⇒pair. DB constraints untouched |
-| Purity | **ZERO runtime dependencies** (doc 03 rule 3, asserted by a purity test reading package.json); only devDependency = vitest; no I/O imports in runtime code; lint boundary rules intact (specs may read package.json — documented exemption) |
-| Tests | **70 tests / 11 files PASS** (twice — deterministic). Coverage: every VO valid/invalid/boundary/normalization/immutability; the §7 INV matrix (configured+setting+stone PASS, +pair PASS, -setting FAIL, -stone FAIL, both FAIL; pair+earrings PASS, pair+non-earrings FAIL per type; configured-earrings-pair PASS, without-pair FAIL); combinations + no false positives (READY_MADE carrying a setting FAILs INV-01; non-configured earrings need no pair); stable codes asserted via the property |
+| Manifest location | `docs/evidence/MANIFEST.md` (the path plan §22.3 and doc 03 both prescribe) |
+| Logical entries | **10 / 10** authoritative entries of `INITIAL_IMPLEMENTATION_PLAN.md` §22.3 |
+| Physical files hashed | **13** — `crawler.sqlite` + `-wal` + `-shm` as three separate rows under one logical artifact; `report.json` + `appraisal.json` hashed separately |
+| SHA-256 | 13/13 computed from actual archive bytes this run, 64 lowercase hex, 0 failures, 0 duplicates |
+| Retention class | **A — "Must remain permanently"** (`technical_design/31` §2A; the authoritative terminology, not an invented label) with the §22.3 operational requirements: durable external storage, reachable read-only at import, checksum-verifiable, excluded from Git |
+| Criticality / loss consequences | Preserved verbatim from plan §22.3 and td31 §2A — the two single points of irreversible loss (`pages_analyzed.jsonl` → all 1,024 prices; `urls.jsonl` → 33,934 commerce URLs) stated exactly as documented |
+| Path disambiguation | `reverse_engineered/data/products.jsonl` (929 KB) is canonical; `exports/products.jsonl` documented as class-B redundant (td31 §2B), not a manifest entry |
+| SQLite WAL state | **Not checkpointed** — byte-level inspection only (no SQLite library invoked, no `PRAGMA wal_checkpoint`); `-wal` is 26 MB ≈ 6,349 frames; `-shm` header does not correspond to the current WAL (stale index) so checkpoint progress is undeterminable from bytes. Documented: the three files must be retained and restored as one indivisible unit, and any checkpoint must run on a disposable copy, never in place |
+| Source archive safety | Read-only throughout. File count (46,810) and total size (3,069,038,249 B) identical pre/post; all 13 hashes stable within the run; `git status` reports nothing for the archive; no temp file created inside it (working files in `/tmp`) |
+| Git exclusion | `git check-ignore -v naturalgemstones/` → `.gitignore:19:/naturalgemstones` |
+| Secret scan | **0** secret-bearing strings in the manifest (relative paths, digests, sizes, retention metadata only) |
+| Scope | `docs/evidence/MANIFEST.md` is the ONLY substantive change; no migrations/schema/domain/test/Task-7 work |
+
+**Next task: Task 7** — SKU grammar parser + 1,024-record corpus validation. The
+corpus (`naturalgemstones/reverse_engineered/data/products.jsonl`) is now
+present in this environment, so Task 7's completion gate is reachable.
 | lint / build / tsc --dry / install --frozen-lockfile | PASS / PASS / PASS / PASS |
 | Task 5 schema fidelity | **STILL PASS** from zero (fresh scratch, 17 migrations) — no migration touched |
 | CI | `Domain unit tests` step added to `.github/workflows/ci.yml` between Build and Schema fidelity; E2E/Playwright deliberately absent |
@@ -67,8 +85,8 @@ reintroduced — per-environment selection is a property of the value stored in
 
 | Item | State |
 |---|---|
-| Phase 1 | **Started. Tasks 1, 2, 4, 5 and 6 complete.** Tasks 3, 7-10 not started |
-| Application code | **None exists beyond the domain foundation.** Workspace skeleton + migrations + pure domain layer |
+| Phase 1 | **Started. Tasks 1, 2, 3, 4, 5 and 6 complete.** Tasks 7-10 not started |
+| Application code | **None exists beyond the domain foundation.** Workspace skeleton + migrations + pure domain layer + evidence manifest |
 | Database migrations | **17 ordered DDL migrations, applied and verified on both dev targets** (Task 4) |
 | Schema-fidelity gate | **Blocking CI assertion, green on fresh databases** (Task 5) |
 | Domain layer | **Pure value objects + INV-01/02/03 with zero runtime dependencies** (Task 6) |
@@ -77,13 +95,14 @@ reintroduced — per-environment selection is a property of the value stored in
 | CI | **EXISTS.** `.github/workflows/ci.yml`: lint → build → domain tests → schema fidelity on a disposable fresh PostgreSQL 16 |
 | Local PostgreSQL 16 | **EXISTS and correct.** 16.15 via compose.yaml, database `maihan_dev`, all six extensions; migrated by Task 4 |
 | Neon dev | **EXISTS and correct.** "Maihan Gems Dev": PostgreSQL 16.15, db `maihan_dev`; migrated by Task 4; schema identical to local |
-| `docs/evidence/MANIFEST.md` | **Not written.** Task 3; blocked, archive absent |
+| Evidence manifest | **EXISTS.** `docs/evidence/MANIFEST.md`: 13 physical artifacts / 10 logical entries, SHA-256 computed from actual bytes, retention class A, WAL state documented. Source archive proven unmodified (Task 3, 2026-10-07) |
+| Source archive | **PRESENT in this Codespace** (46,810 files, ~3.0 GB). Git-ignored, untracked, read-only. Task 7's corpus gate is now reachable |
 
 ---
 
 # Completed
 
-Planning complete. **Tasks 1 and 2 are the first implementation tasks completed.**
+Planning complete. **Tasks 1-6 of Phase 1 are implemented (Task 3 = manifest).**
 
 | Completed | Evidence |
 |---|---|
@@ -99,6 +118,7 @@ Planning complete. **Tasks 1 and 2 are the first implementation tasks completed.
 | **Phase 1 Task 4 — ordered DDL migrations** | **COMPLETE.** 17 migrations ported verbatim from SoT §8 in doc 04 order; applied from clean state on local (throwaway DB incl. extension creation + real `maihan_dev`) and on Neon dev; introspection matches every documented count; local vs Neon metadata identical; rerun no-op; failure rollback proven; behavioural smoke green (trigger, INV bites, CITEXT) |
 | **Phase 1 Task 5 — schema-fidelity CI assertion** | **COMPLETE.** Shared introspection (`introspect.ts`) + expectations mirror (`expected-schema.ts`) + framework-free assertion (`assert-schema.ts`) + fresh-database orchestrator (`schema-fidelity.ts`, scratch lifecycle with unconditional cleanup and Neon-host refusal) + root script + blocking GitHub Actions workflow. Fresh run PASS twice (deterministic); every drift class proven caught by negative probe; read-only assertion green on both dev targets |
 | **ADR-021 resolution** | **ACCEPTED 2026-10-07 by explicit user authorization.** `technical_design/40` (index + body), `SKILL_MATRIX_AND_TOOLING.md` (status tables + testing rows), plan §35.2/§23.4 resolution notes, memory. ADR-022/023/024 untouched. Playwright accepted-only; load tool still open |
+| **Phase 1 Task 3 — migration evidence manifest** | **COMPLETE 2026-10-07.** `docs/evidence/MANIFEST.md`: 13 physical files / 10 logical entries per plan §22.3; every SHA-256 computed from the actual archive bytes during the run (0 failures, 0 duplicates, 64-lowercase-hex); retention class **A — "Must remain permanently"** (`technical_design/31` §2A) with the §22.3 operational requirements; criticality + loss consequences verbatim from the authoritative documents; `crawler.sqlite`/`-wal`/`-shm` as separate rows under one logical artifact; `report.json`/`appraisal.json` hashed separately; canonical-vs-redundant path disambiguation recorded (`exports/products.jsonl` = class B per td31 §2B); WAL state documented byte-level (**not checkpointed**, no SQLite library invoked, three files are one indivisible unit, checkpoint only ever on a disposable copy); archive proven unmodified (46,810 files and 3,069,038,249 B identical pre/post, all 13 hashes stable, `git status` silent, no temp file inside the archive); secret scan 0 hits |
 | **Phase 1 Task 6 — domain value objects + INV-01/02/03** | **COMPLETE.** Pure `packages/domain`: `errors.ts` (DomainError/InvariantError, stable codes), `enums.ts` (ProductKind, JewelleryType, GemstoneKind, MetalCode×15, EvidenceStatus), 8 value-object modules (`gem-ref`, `money`, `weight-ct`, `dimensions-mm`, `source-sku`, `derived-sku`+ProductIdentity, `sku`, `configuration-hash`), `product/invariants.ts` (three predicates + assertComposition), `index.ts` barrel. Vitest 5.0.3 + `vitest.config.ts` + 11 spec files, 70 tests green. Zero runtime dependencies; lint exempted spec-file node:fs with documented rationale. CI gained the domain-test step |
 
 ---
@@ -142,7 +162,7 @@ opens Phase 2.
 |---|---|---|---|
 | 1 | **ADR-021 test tooling unresolved.** Plan task 6's completion criterion is "unit tests green". Plan §23.4 forbids selecting a runner. | **Approval** | Client |
 | 2 | ~~Repository structure not approved~~ **RESOLVED** — client signed off at Task 1 authorisation | — | — |
-| 3 | `docs/evidence/MANIFEST.md` not written | Execution, no dependency. **REQUIRES `naturalgemstones/`, which is ABSENT from this Codespace** — restore the archive out of band first | `MIGRATION_ENGINEER` |
+| 3 | ~~`docs/evidence/MANIFEST.md` not written~~ **RESOLVED 2026-10-07.** `docs/evidence/MANIFEST.md` created: 13 physical artifacts (10 logical entries per plan §22.3) with SHA-256 computed from actual bytes, retention class A ("Must remain permanently", `technical_design/31` §2A), criticality and loss consequences verbatim from the authoritative documents, SQLite WAL state documented (not checkpointed; three files are an indivisible unit). Source archive verified unmodified (file count, total size, and all 13 hashes stable across the run); `git check-ignore` re-verified | — | — |
 | 4 | ~~Local PostgreSQL 16 not provisioned~~ **RESOLVED 2026-10-05.** `compose.yaml` + `pgvector/pgvector:pg16` running on localhost:5433, database `maihan_dev`, all six extensions live-verified. | — | — |
 | 5 | ~~Neon dev target on PG18.6~~ **RESOLVED 2026-10-05.** Client created the NEW "Maihan Gems Dev" project pinned to PostgreSQL 16.15 with database `maihan_dev`; verified live. Old PG18 project abandoned for dev (not deleted, not a target) | — | — |
 | 5a | ~~PG version mismatch~~ **RESOLVED.** New dev project is PostgreSQL 16.15 — matches the 16.x contract and the Phase 0 validation baseline | — | — |
@@ -209,12 +229,14 @@ No application files. Planning-stage only.
 | **Task 5 files** | `packages/db/src/introspect.ts` (NEW — shared introspection; queries extracted verbatim from verify-schema.ts + enum_members added), `packages/db/src/expected-schema.ts` (NEW — fidelity mirror), `packages/db/src/assert-schema.ts` (NEW — assertion engine), `packages/db/src/schema-fidelity.ts` (NEW — fresh-DB orchestrator), `packages/db/src/verify-schema.ts` (thin CLI, zero semantic change), `packages/db/src/migrate.ts` (runMigrations exported; CLI via direct-execution guard), `packages/db/package.json` + root `package.json` (scripts), `.github/workflows/ci.yml` (NEW), 3 memory files | Task 5 commit |
 | **ADR-021 files** | `technical_design/40_ARCHITECTURE_DECISION_RECORDS.md`, `SKILL_MATRIX_AND_TOOLING.md`, `INITIAL_IMPLEMENTATION_PLAN.md` (§35.2, §23.4 resolution notes) | Task 6 commit |
 | **Task 6 files** | `packages/domain/src/{errors,enums}.ts`, `packages/domain/src/value-objects/{gem-ref,money,weight-ct,dimensions-mm,source-sku,derived-sku,sku,configuration-hash,index}.ts`, `packages/domain/src/product/invariants.ts`, `packages/domain/src/testing/expect-domain-code.ts`, `packages/domain/src/index.ts`, 11 `*.spec.ts` files, `packages/domain/vitest.config.ts`, `packages/domain/package.json` (+vitest devDep + test script), root `package.json` (`test` script), `eslint.config.mjs` (spec exemption), `.github/workflows/ci.yml` (test step), `pnpm-lock.yaml`, 3 memory files | Task 6 commit |
+| **Task 3 files** | `docs/evidence/MANIFEST.md` (NEW — 13 physical artifacts / 10 logical entries, SHA-256 from actual bytes, retention class A per td31 §2A, WAL state documented), 3 memory files | Task 3 commit |
 
 ---
 
 # Tests / Verification
 
-**No tests exist.** ADR-021 blocks test framework installation.
+Tests exist for the domain layer (Task 6): 70 unit tests green under Vitest.
+ADR-021 is now ACCEPTED, so the prohibition is lifted.
 
 Verification performed during planning:
 
@@ -233,6 +255,7 @@ Verification performed during planning:
 | **Production safety** | **PASS** — all operations against the new dev project only via `DATABASE_URL`; the old PG18 project and its production branch were never connected to this session, and their credentials no longer exist in `.env` |
 | **Credential exposure** | **Client states the API key is rotated; `.env` now holds the new values.** Rotation of the `neondb_owner` password should be confirmed. Held only in gitignored `.env`; secret scan of tracked files and memory: 0 credential hits |
 | **Secret hygiene** | **PASS** — `.env` gitignored (`.gitignore:25`) and untracked; `.env.example` scanned: 0 occurrences of `npg_`, `napi_`, or any real host credential; only non-secret identifiers retained |
+| **Task 3** | `docs/evidence/MANIFEST.md` created and validated: 13 physical rows / 10 logical entries, every SHA-256 recomputed from disk and matched (0 failures), sizes match, retention class A present on every row, no duplicates, all hashes 64 lowercase hex · pre/post inventory identical (46,810 files / 3,069,038,249 B) · all 13 hashes stable within the run · `git status` silent for the archive · no temp file created inside the archive (working files in `/tmp`) · manifest secret scan 0 hits |
 | **Task 4 (local)** | Clean-install: throwaway `maihan_dev_t4clean` migrated from zero (extensions created, 17/17 applied) then dropped · `maihan_dev` migrated · introspection: 74 tables, 33 enums, 94 FK, 74 PK, 59 UNIQUE, 28 CHECK + 563 NOT NULL, 263 indexes, 9 named invariants, 2 HNSW, 2 vector(1024) columns, 1 trigger, 2 functions, 1 view, 6/6 RLS, 0 policy-less · rerun no-op · failure rollback proven (tampered copy on throwaway DB: 0 objects, 0 history rows) · behavioural smoke: trigger populates+maintains `search_document`, INV-01/02/03 + `dyo_one_stone_ck` + `dyo_pair_is_earrings_ck` + `certificates_subject_ck` reject (23514), CITEXT duplicate rejected (23505), all smoke rows cleaned |
 | **Task 4 (Neon)** | Same 17 migrations via the single `DATABASE_URL`: applied 17/17 on PostgreSQL 16.15 db `maihan_dev`; history 17 rows strictly increasing; rerun no-op; introspection identical to local |
 | **Task 4 (fidelity)** | Local vs Neon catalog diff: MATCH on tables, enums+member counts, FKs, constraint counts, index definitions, HNSW, vector columns, trigger, functions, views, RLS tables/policies. Only extension VERSION differs (platform images: vector 0.8.7 vs 0.8.0; both ≥ 0.6 required) |
@@ -284,6 +307,9 @@ catalogue. Full detail in `AGENTS.md` §9.
 | Hand-edit the migrated schema on a dev target | "Staging drift is rebuilt from migrations, never hand-patched" (doc 29 §9). Any change = a new migration |
 | Regenerate/replace the 17 Task 4 SQL files from a Drizzle TS schema | They are the verbatim port of the validated DDL; a TS schema mirror is a separate later task (E1.2) and must diff against these |
 | Put seed data into migrations | Migrations are DDL only; seeds are plan task 9 (separate files/runners) |
+| Modify `naturalgemstones/` in any way — including checkpointing `crawler.sqlite`'s WAL | The archive is read-only evidence. The WAL checkpoint td31 requires must run on a disposable COPY, never in place |
+| Copy checksums from a manifest instead of recomputing them | Manifest digests are only trustworthy when recomputed from the actual files; re-verify before relying on them |
+| Treat `exports/products.jsonl` or `architecture/taxonomy/taxonomy.json` as the canonical artifacts | `reverse_engineered/data/products.jsonl` (929 KB) and `data/taxonomy.json` (26 KB) are canonical per plan §22.3 / td31 §2A; the others are class-B redundant |
 
 ---
 
@@ -305,11 +331,17 @@ Phase 2 requires the archive.
 | `source_snapshots/manifest.jsonl` | 24 MB | HTML SHA-256 for re-crawl integrity | Cannot prove a re-crawl is faithful |
 | `raw_html` (1,024 real files) | 1.4 GB | DOM ground truth; deferred use | Lost unless archived |
 
-**Currently available in this environment** (`naturalgemstones/`, 46,810 files).
-**Will be absent** in a fresh clone or Codespace. That is expected.
+**Currently available in this environment** (`naturalgemstones/`, 46,810 files,
+3,069,038,249 bytes — verified 2026-10-07, hashes recorded in
+`docs/evidence/MANIFEST.md`). **Will be absent** in a fresh clone or Codespace.
+That is expected.
 
-**WAL note:** checkpoint `crawler.sqlite` WAL into the main file before archiving,
-or the 26 MB `-wal` may hold committed rows absent from the main file.
+**WAL note (observed 2026-10-07, byte-level):** the `-wal` is present and
+non-empty (26,157,912 B ≈ 6,349 frames) and is **not verifiably checkpointed**;
+the `-shm` is a stale index that does not correspond to it. The 26 MB `-wal` may
+hold committed rows absent from the main file, so the three files must be
+restored and used together. Any checkpoint must run on a disposable copy — the
+archive itself is never modified.
 
 **If a task requires any of these and they are unavailable:** stop, report that
 the source archive must be made available, and do not synthesise a substitute.

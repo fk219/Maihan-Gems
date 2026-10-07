@@ -74,9 +74,10 @@ schema, no domain models, no repositories, no tests, no seeders.
 | Task 5 — schema-fidelity CI assertion | **COMPLETE (2026-10-07).** Framework-free (ADR-021 untouched): `packages/db/src/assert-schema.ts` asserts the locked schema exactly (counts + exact names/definitions) over the SHARED introspection (`packages/db/src/introspect.ts`, semantics identical to Task 4's verifier); `packages/db/src/schema-fidelity.ts` orchestrates fresh-database runs (scratch `maihan_dev_fidelity` created, migrated from zero, asserted, ALWAYS dropped; refuses Neon hosts); CI command `pnpm run schema-fidelity` + blocking GitHub Actions workflow `.github/workflows/ci.yml` reusing the committed compose.yaml. Fresh-database run PASS (twice — deterministic); negative probe proved every drift class is caught by name; read-only assertion also PASS on local `maihan_dev` and Neon dev |
 | **ADR-021 (test tooling)** | **ACCEPTED 2026-10-07 by explicit user authorization.** Vitest 5.0.3 = unit/domain/integration/contract runner (installed for the domain layer); Playwright accepted for E2E, NOT installed (no phase requires it yet); load-test tool remains OPEN (never part of ADR-021's decision) |
 | Task 6 — domain value objects + INV-01/02/03 | **COMPLETE (2026-10-07).** Pure `packages/domain`: error model, enum unions (product_kind/jewellery_type/gemstone_kind/metal_code/evidence_status), value objects (GemRef, Money, WeightCt, DimensionsMm, SourceSku, DerivedSku + ProductIdentity union, Sku composite, ConfigurationHash shape), INV-01/02/03 predicates + `assertComposition`. ZERO runtime dependencies. 70 Vitest tests green (11 files); lint/build/tsc green; schema fidelity still PASS |
-| Tasks 3, 7-9 | Not started. Task 3 needs `naturalgemstones/`, ABSENT from this Codespace. Next per plan: **Task 7** (SKU grammar parser, 1,024/1,024 against the corpus) — **BLOCKED: Task 7 depends on Task 6 (done) but needs the corpus from `naturalgemstones/` for its completion gate** |
-| Coding status | Tasks 1, 2, 4, 5 and 6 authorised and executed per scope. Further tasks need their own approval |
-| Blocking approval | **ADR-021 (test tooling)** blocks Task 6 onward and the Phase 1 exit gate |
+| Task 3 — evidence manifest | **COMPLETE (2026-10-07).** `docs/evidence/MANIFEST.md`: 13 physical artifacts implementing the 10 authoritative logical entries of plan §22.3; every SHA-256 computed from the actual archive bytes during the run (0 failures, 0 duplicates, all 64 lowercase hex); retention class **A — "Must remain permanently"** (`technical_design/31` §2A) with the §22.3 operational requirements; criticality and loss consequences verbatim from the authoritative documents; `crawler.sqlite`/`-wal`/`-shm` as separate rows under one logical artifact; `report.json`/`appraisal.json` hashed separately; canonical-vs-redundant path disambiguation (`exports/products.jsonl` = class B per td31 §2B); SQLite WAL state documented byte-level (not checkpointed; three files are one indivisible unit; checkpoint only ever on a disposable copy); source archive proven unmodified; secret scan 0 hits |
+| Tasks 7-9 | Not started. **Task 7 is next** (SKU grammar parser, 1,024/1,024 against the corpus) — the corpus is now PRESENT in `naturalgemstones/`, so its completion gate is reachable |
+| Coding status | Tasks 1, 2, 3, 4, 5 and 6 authorised and executed per scope. Further tasks need their own approval |
+| Blocking approval | ADR-021 ACCEPTED. No approval blocker remains for Task 7 |
 
 ---
 
@@ -110,7 +111,7 @@ schema, no domain models, no repositories, no tests, no seeders.
 | # | Blocker | Type | Resolvable by |
 |---|---|---|---|
 | 1 | ~~ADR-021 test tooling unresolved~~ **RESOLVED 2026-10-07 — ACCEPTED by explicit user authorization.** Vitest installed for the domain layer (5.0.3); Playwright accepted, not installed; load-test tool still open (not part of the decision) | — | — |
-| 2 | **`docs/evidence/MANIFEST.md` not written** | Execution. No dependency; can start immediately. **Also needs `naturalgemstones/`, ABSENT from this Codespace** | `MIGRATION_ENGINEER` |
+| 2 | ~~`docs/evidence/MANIFEST.md` not written~~ **RESOLVED 2026-10-07.** Created and validated (13 physical artifacts / 10 logical entries, SHA-256 from actual bytes, retention class A). The archive is now present, and the manifest doubles as the evidence ledger for Task 7's corpus gate | — | — |
 | 3 | Repository structure approved | APPROVED — client signed off at Task 1 | — |
 | 4 | ~~Local PostgreSQL 16 not provisioned~~ **RESOLVED 2026-10-05.** 16.15 via `compose.yaml`, six extensions live-verified | — | — |
 | 5 | ~~Neon dev target on the wrong major version~~ **RESOLVED 2026-10-05.** New "Maihan Gems Dev" project, PostgreSQL 16.15, db `maihan_dev`; Task 4 migrated it | — | — |
@@ -168,11 +169,12 @@ requires editing the authoritative plan.
 2. Task 6 — COMPLETE 2026-10-07 (domain value objects + INV-01/02/03 predicates;
    70 unit tests green, framework-free lint boundaries intact; ADR-021 accepted
    and Vitest installed).
-3. Task 7 — SKU grammar parser (depends on Task 6, now done). Its completion
-   gate (1,024/1,024 against the observed corpus) REQUIRES `naturalgemstones/`,
-   absent from this Codespace — the parser may be built, but Task 7 cannot be
-   declared done until the corpus is available or the gate is re-scoped.
-4. Task 3 (`docs/evidence/MANIFEST.md`) remains NOT STARTED — requires the
-   source archive, absent from this Codespace.
+3. Task 7 — SKU grammar parser (depends on Task 6, done). Its completion gate
+   (1,024/1,024 against the observed corpus) is now REACHABLE:
+   `naturalgemstones/` is present in this Codespace and the corpus checksum is
+   recorded in `docs/evidence/MANIFEST.md` (artifact 5, sha256-verified
+   2026-10-07). The parser may be built and its gate executed here.
+4. Task 3 — COMPLETE 2026-10-07 (`docs/evidence/MANIFEST.md` exists and is
+   validated). The archive's presence is no longer a blocker.
 
 **Do not begin a task without explicit user approval.**
