@@ -42,6 +42,7 @@ import { runTokenizeStones } from './stages/tokenize-stones.js';
 import { runCanonicalCatalog } from './stages/canonical-catalog.js';
 import { runPricesObservations } from './stages/prices-observations.js';
 import { runAssets } from './stages/assets.js';
+import { runCertificates } from './stages/certificates.js';
 import { runDerivedIdentities } from './stages/derived-identities.js';
 
 /** The artifact name the tokenize engine asserts this stage's digest against. */
@@ -169,6 +170,11 @@ async function executeStage(
       const corpus = options.minManifestArtifacts >= 13;
       const result = await runDerivedIdentities(ctx, { corpus, productsDigest: manifestArtifactDigest('products.jsonl') });
       return `derived-identities: ${String(result.derivedRows)} failed-fetch rows, enforced ${String(result.enforced)}, V19 observed ${String(result.observedParsed)}, V20 collisions ${String(result.collisions)}`;
+    }
+    case 'certificates': {
+      const corpus = options.minManifestArtifacts >= 13;
+      const result = await runCertificates(ctx, { corpus });
+      return `certificate artefacts: ${String(result.artefacts)} paths (certificates ${String(result.certificates)}, reports ${String(result.reports)}, appraisals ${String(result.appraisals)}), inserted ${String(result.inserted)}, subjects gemstones ${String(result.gemstoneSubjects)}/products ${String(result.productSubjects)}, entity artefacts covered ${String(result.entityArtefactsCovered)}`;
     }
     case 'assets': {
       const corpus = options.minManifestArtifacts >= 13;

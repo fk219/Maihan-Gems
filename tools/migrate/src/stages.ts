@@ -94,9 +94,8 @@ export const STAGES: readonly StageDefinition[] = Object.freeze([
   {
     id: 'certificates',
     description: 'Certificate artefact extraction from /cert, /sarin, /appraisal paths; all UNVERIFIED',
-    requiredArtifacts: ['entities/media/report.json', 'entities/media/appraisal.json'],
-    implemented: false,
-    blockedBy: 'plan task 18 (Phase 2)',
+    requiredArtifacts: ['media_analyzed.jsonl', 'report.json', 'appraisal.json'],
+    implemented: true,
   },
   {
     id: 'cms-redirects',

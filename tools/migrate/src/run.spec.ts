@@ -111,6 +111,16 @@ function createFixture(): Fixture {
         JSON.stringify({ page_url: 'https://naturalgemstones.com/design-your-own/review/x', image_url: null, position: 1, alt: null, title: null }),
       ].join('\n') + '\n',
     },
+    {
+      no: '9',
+      name: 'report.json',
+      bytes: JSON.stringify([]) + '\n',
+    },
+    {
+      no: '10',
+      name: 'appraisal.json',
+      bytes: JSON.stringify([]) + '\n',
+    },
   ];
   // An ABSOLUTE archiveRoot replaces the 'naturalgemstones' marker segment
   // entirely: artifactAbsolutePath maps actualPath onto archiveRoot/<rest>.
