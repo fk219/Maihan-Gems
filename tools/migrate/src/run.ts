@@ -41,6 +41,7 @@ import { runParseSlugs, CORPUS_EXPECTATIONS } from './stages/parse-slugs.js';
 import { runTokenizeStones } from './stages/tokenize-stones.js';
 import { runCanonicalCatalog } from './stages/canonical-catalog.js';
 import { runPricesObservations } from './stages/prices-observations.js';
+import { runAssets } from './stages/assets.js';
 import { runDerivedIdentities } from './stages/derived-identities.js';
 
 /** The artifact name the tokenize engine asserts this stage's digest against. */
@@ -168,6 +169,11 @@ async function executeStage(
       const corpus = options.minManifestArtifacts >= 13;
       const result = await runDerivedIdentities(ctx, { corpus, productsDigest: manifestArtifactDigest('products.jsonl') });
       return `derived-identities: ${String(result.derivedRows)} failed-fetch rows, enforced ${String(result.enforced)}, V19 observed ${String(result.observedParsed)}, V20 collisions ${String(result.collisions)}`;
+    }
+    case 'assets': {
+      const corpus = options.minManifestArtifacts >= 13;
+      const result = await runAssets(ctx, { corpus });
+      return `media classification: records ${String(result.recordsSeen)}, without url ${String(result.recordsWithoutUrl)}, distinct urls ${String(result.distinctUrls)}, inserted ${String(result.inserted)}, pending ${String(result.pending)}, skipped ${String(result.skipped)} [${result.topSkipReasons.join(', ')}]`;
     }
     case 'prices-observations': {
       const corpus = options.minManifestArtifacts >= 13;

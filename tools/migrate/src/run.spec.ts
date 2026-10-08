@@ -103,6 +103,14 @@ function createFixture(): Fixture {
         },
       }) + '\n',
     },
+    {
+      no: '8',
+      name: 'media_analyzed.jsonl',
+      bytes: [
+        JSON.stringify({ page_url: 'https://naturalgemstones.com/design-your-own/review/x', image_url: 'https://naturalgemstones.com/images/normal/logos/mob-logo.png', position: 0, alt: 'logo', title: null }),
+        JSON.stringify({ page_url: 'https://naturalgemstones.com/design-your-own/review/x', image_url: null, position: 1, alt: null, title: null }),
+      ].join('\n') + '\n',
+    },
   ];
   // An ABSOLUTE archiveRoot replaces the 'naturalgemstones' marker segment
   // entirely: artifactAbsolutePath maps actualPath onto archiveRoot/<rest>.

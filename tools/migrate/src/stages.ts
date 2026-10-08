@@ -89,8 +89,7 @@ export const STAGES: readonly StageDefinition[] = Object.freeze([
     id: 'assets',
     description: 'Media classification by path stem with explicit JS/chrome skip; gate V16',
     requiredArtifacts: ['media_analyzed.jsonl'],
-    implemented: false,
-    blockedBy: 'plan task 17 (Phase 2)',
+    implemented: true,
   },
   {
     id: 'certificates',
