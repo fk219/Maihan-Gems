@@ -16,6 +16,9 @@
     "@maihan/domain": "workspace:*",
     "@maihan/observability": "workspace:*",
     "ioredis": "6.0.0",
+    "next": "^16.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "zod": "3.25.76"
   },
   "devDependencies": {
