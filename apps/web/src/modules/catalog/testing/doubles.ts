@@ -214,6 +214,34 @@ export class FakeCatalogPort implements CatalogQueryPort {
   /** Identities that resolve to their documented not-found contract error. */
   readonly notFound = new Set<string>();
 
+  /** Configurable responses (Phase 4 page specs); defaults stay as before. */
+  private productLists = new Map<string, ProductListResult>();
+  private productDetails = new Map<string, ProductDetailReadModel>();
+  private settingListResult: SettingListResult | null = null;
+  private taxonomyResult: TaxonomyReadModel | null = null;
+
+  /** Queue a product list for the matching filter identity (variety slug). */
+  setProductListForVariety(varietySlug: string, result: ProductListResult): void {
+    this.productLists.set(`variety:${varietySlug}`, result);
+  }
+
+  /** Queue a product list for any query (fallback when no variety match). */
+  setProductList(result: ProductListResult): void {
+    this.productLists.set('*', result);
+  }
+
+  setProductDetail(slug: string, detail: ProductDetailReadModel): void {
+    this.productDetails.set(slug, detail);
+  }
+
+  setSettingList(result: SettingListResult): void {
+    this.settingListResult = result;
+  }
+
+  setTaxonomy(taxonomy: TaxonomyReadModel): void {
+    this.taxonomyResult = taxonomy;
+  }
+
   private guard<K extends keyof PortCallCounts>(method: K): void {
     this.calls[method] += 1;
     if (this.failure !== null) throw this.failure;
@@ -221,6 +249,11 @@ export class FakeCatalogPort implements CatalogQueryPort {
 
   async listProducts(query: ProductListQuery): Promise<ProductListResult> {
     this.guard('listProducts');
+    const variety = (query as { filters?: { variety?: string[] } }).filters?.variety?.[0];
+    if (variety !== undefined && this.productLists.has(`variety:${variety}`)) {
+      return this.productLists.get(`variety:${variety}`) as ProductListResult;
+    }
+    if (this.productLists.has('*')) return this.productLists.get('*') as ProductListResult;
     const parsed = (query as { limit?: number }).limit;
     return emptyProductList(typeof parsed === 'number' ? parsed : 24);
   }
@@ -230,6 +263,8 @@ export class FakeCatalogPort implements CatalogQueryPort {
     if (this.notFound.has(slug)) {
       throw contractNotFound('PRODUCT_NOT_FOUND', 'slug', slug);
     }
+    const configured = this.productDetails.get(slug);
+    if (configured !== undefined) return configured;
     return productDetailFixture(slug);
   }
 
@@ -244,6 +279,7 @@ export class FakeCatalogPort implements CatalogQueryPort {
   async listSettings(_query: SettingListQuery): Promise<SettingListResult> {
     this.guard('listSettings');
     void _query;
+    if (this.settingListResult !== null) return this.settingListResult;
     return {
       items: [],
       facets: EMPTY_FACETS,
@@ -275,6 +311,7 @@ export class FakeCatalogPort implements CatalogQueryPort {
 
   async getTaxonomy(): Promise<TaxonomyReadModel> {
     this.guard('getTaxonomy');
+    if (this.taxonomyResult !== null) return this.taxonomyResult;
     return emptyTaxonomy();
   }
 

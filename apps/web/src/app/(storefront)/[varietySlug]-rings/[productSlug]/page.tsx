@@ -1,20 +1,33 @@
 /**
  * apps/web/src/app/(storefront)/[varietySlug]-rings/[productSlug]/page.tsx
  *
- * `/tsavorite-garnet-rings/<slug>` — ready-made product detail.
- * SoT 12.2 `[variety]-rings/[slug]/page.tsx`.
- *
- * Segment name `productSlug` — this nested slug is the SAME canonical
- * product slug the products detail route uses, not a different token family;
- * the manifest records it as an alias of `productSlug` so docs and phases 5-6
- * agree on which identifier owns which segment.
+ * `/tsavorite-garnet-rings/<slug>` — ready-made product detail (Task 4,
+ * reached via the source's /{variety}-rings/{slug}-J##### family). Delegates
+ * to the SAME loader and renderer as /products/[productSlug]: one detail
+ * implementation, one contract, no duplicates.
  */
-import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: 'Ready-made product',
-};
+import { isProductNotFound } from '../../../../lib/catalog-errors.js';
+import { loadProductDetail } from '../../../../lib/catalog-server.js';
+import { ProductDetailContent } from '../../../../components/catalog/ProductDetailContent.js';
 
-export default function VarietyRingDetailPage() {
-  return null;
+interface PageProps {
+  params: Promise<{ productSlug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<{ title: string }> {
+  const { productSlug } = await params;
+  const detail = await loadProductDetail(productSlug);
+  return detail.ok ? { title: `${detail.value.title} | Maihan Gems` } : { title: 'Product | Maihan Gems' };
+}
+
+export default async function VarietyRingDetailPage({ params }: PageProps) {
+  const { productSlug } = await params;
+  const detail = await loadProductDetail(productSlug);
+  if (!detail.ok) {
+    if (isProductNotFound(detail.error)) notFound();
+    throw detail.error;
+  }
+  return <ProductDetailContent detail={detail.value} />;
 }

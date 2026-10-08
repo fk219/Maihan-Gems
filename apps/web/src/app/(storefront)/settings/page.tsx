@@ -1,15 +1,83 @@
 /**
  * apps/web/src/app/(storefront)/settings/page.tsx
  *
- * `/gemstone-rings` — settings catalog (stone-only catalogue index; doc 10
- * SETTING_ONLY / design-core detail). SoT 12.2 `settings/page.tsx`.
+ * `/gemstone-rings` — settings catalog index (Task 3, target of the observed
+ * /gemstone-ring-settings and /gemstone-bracelet-settings routes). Driven by
+ * the Phase 3 `listSettings` contract (design summaries + keyset pagination);
+ * no invented fields, no per-design pages.
  */
 import type { Metadata } from 'next';
+import Link from 'next/link';
+
+import { catalogServer } from '../../../lib/catalog-server.js';
+import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
+import { EmptyState } from '../../../components/design-system/EmptyState.js';
+import { Pagination } from '../../../components/design-system/Pagination.js';
+
+interface PageProps {
+  searchParams: Promise<{ cursor?: string; limit?: string }>;
+}
 
 export const metadata: Metadata = {
-  title: 'Settings',
+  title: 'Gemstone settings | Maihan Gems',
 };
 
-export default function SettingsIndexPage() {
-  return null;
+export default async function SettingsIndexPage({ searchParams }: PageProps) {
+  const { cursor, limit } = await searchParams;
+  const limitRaw = Number(limit);
+  const service = catalogServer();
+
+  const result = (
+    await service.listSettings({
+      limit: Number.isInteger(limitRaw) && limitRaw >= 1 && limitRaw <= 100 ? limitRaw : 24,
+      ...(cursor !== undefined && cursor !== '' ? { cursor } : {}),
+    })
+  ).value;
+
+  return (
+    <main className="page settings-page">
+      <Breadcrumbs
+        crumbs={[
+          { label: 'Home', href: '/' },
+          { label: 'Settings' },
+        ]}
+      />
+      <h1>Gemstone Settings</h1>
+      <p className="result-count">
+        {result.items.length === 0
+          ? 'No settings currently listed.'
+          : `${result.items.length} setting design${result.items.length === 1 ? '' : 's'}`}
+      </p>
+
+      {result.items.length === 0 ? (
+        <EmptyState
+          title="No settings are currently listed."
+          action={<Link href="/">Browse gemstones</Link>}
+        />
+      ) : (
+        <ul className="settings-grid">
+          {result.items.map((setting) => (
+            <li key={setting.design_code}>
+              <article className="card settings-card">
+                <h3 className="settings-card__title">{setting.name}</h3>
+                <p className="settings-card__meta">
+                  {setting.jewellery_type.toLowerCase()}
+                  {setting.style !== null && <> · {setting.style.label}</>}
+                  {' · '}
+                  {setting.variant_count} metal option{setting.variant_count === 1 ? '' : 's'}
+                </p>
+              </article>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Pagination
+        basePath="/settings"
+        previousCursor={null}
+        nextCursor={result.meta.next_cursor}
+        hasNext={result.meta.has_more}
+      />
+    </main>
+  );
 }

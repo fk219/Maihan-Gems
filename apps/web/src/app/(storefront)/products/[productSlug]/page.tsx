@@ -1,17 +1,32 @@
 /**
  * apps/web/src/app/(storefront)/products/[productSlug]/page.tsx
  *
- * `/products/<slug>` — canonical product detail (target of the four source
- * families: loose stone, pair, ready-made, and configured redirect).
- * SoT 12.2 `products/[slug]/page.tsx`. SEO, states and islands are Phase 4
- * epics E4.4/E4.5/E4.6.
+ * `/products/<slug>` — canonical product detail (Task 4; target of the four
+ * source families: loose stone, pair, ready-made, configured). Uses the ONE
+ * shared ProductDetailContent renderer and the Phase 3 service.
  */
-import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: 'Product',
-};
+import { isProductNotFound } from '../../../../lib/catalog-errors.js';
+import { loadProductDetail } from '../../../../lib/catalog-server.js';
+import { ProductDetailContent } from '../../../../components/catalog/ProductDetailContent.js';
 
-export default function ProductDetailPage() {
-  return null;
+interface PageProps {
+  params: Promise<{ productSlug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<{ title: string }> {
+  const { productSlug } = await params;
+  const detail = await loadProductDetail(productSlug);
+  return detail.ok ? { title: `${detail.value.title} | Maihan Gems` } : { title: 'Product | Maihan Gems' };
+}
+
+export default async function ProductDetailPage({ params }: PageProps) {
+  const { productSlug } = await params;
+  const detail = await loadProductDetail(productSlug);
+  if (!detail.ok) {
+    if (isProductNotFound(detail.error)) notFound();
+    throw detail.error; // route error boundary renders the recovery view (Task 5)
+  }
+  return <ProductDetailContent detail={detail.value} />;
 }
