@@ -43,6 +43,7 @@ import { runCanonicalCatalog } from './stages/canonical-catalog.js';
 import { runPricesObservations } from './stages/prices-observations.js';
 import { runAssets } from './stages/assets.js';
 import { runCertificates } from './stages/certificates.js';
+import { runCmsRedirects } from './stages/cms-redirects.js';
 import { runDerivedIdentities } from './stages/derived-identities.js';
 
 /** The artifact name the tokenize engine asserts this stage's digest against. */
@@ -170,6 +171,11 @@ async function executeStage(
       const corpus = options.minManifestArtifacts >= 13;
       const result = await runDerivedIdentities(ctx, { corpus, productsDigest: manifestArtifactDigest('products.jsonl') });
       return `derived-identities: ${String(result.derivedRows)} failed-fetch rows, enforced ${String(result.enforced)}, V19 observed ${String(result.observedParsed)}, V20 collisions ${String(result.collisions)}`;
+    }
+    case 'cms-redirects': {
+      const corpus = options.minManifestArtifacts >= 13;
+      const result = await runCmsRedirects(ctx, { corpus });
+      return `redirects: ${String(result.rows)} source URLs, inserted ${String(result.inserted)}; status [${result.byStatus}]; family [${result.byFamily}]`;
     }
     case 'certificates': {
       const corpus = options.minManifestArtifacts >= 13;

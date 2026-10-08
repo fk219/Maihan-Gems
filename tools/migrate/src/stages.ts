@@ -101,8 +101,7 @@ export const STAGES: readonly StageDefinition[] = Object.freeze([
     id: 'cms-redirects',
     description: 'CMS pages, navigation and the 44,218 redirect rows from the doc 34 mapping',
     requiredArtifacts: ['urls.jsonl'],
-    implemented: false,
-    blockedBy: 'plan task 19 (Phase 2)',
+    implemented: true,
   },
   {
     id: 'knowledge-embeddings',
