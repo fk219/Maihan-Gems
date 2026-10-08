@@ -22,8 +22,12 @@
  *
  * Phase 1 delivered (in implementation order): the DDL migration runner
  * (Task 4, `migrate.ts`), the schema-fidelity toolchain (Task 5), and the
- * reference-data seeder (Task 9, `seed/`). Repositories arrive with the
- * application phases that need them; no repository exists yet.
+ * reference-data seeder (Task 9, `seed/`).
+ *
+ * Phase 3 (tasks 1-5) delivered the catalogue READ foundation: the read
+ * repositories (products / gemstones / settings / taxonomy), the structured
+ * filter + facet + keyset-cursor machinery, and the CatalogQueryPort
+ * implementation. Catalogue reads are read-only; no write path exists.
  *
  * index.ts is the enforced public surface of the package. The migration
  * tooling (tools/migrate) consumes the runner and the seeder through this
@@ -63,3 +67,11 @@ export {
   type ColourIntensitySeedRow,
   type ClaritySeedRow,
 } from './seed/reference-data.js';
+export {
+  createCatalogDatabase,
+  type CatalogDatabase,
+} from './catalog/executor.js';
+export {
+  createCatalogQueryPort,
+} from './catalog/port.js';
+export type { CatalogQueryPort } from '@maihan/contracts';
