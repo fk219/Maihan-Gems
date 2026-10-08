@@ -43,7 +43,12 @@ describe('parseManifest — the authoritative manifest', () => {
     expect(names).toContain('PROJECT_SOURCE_OF_TRUTH.md');
     for (const a of manifest.artifacts) {
       expect(a.sha256).toMatch(/^[0-9a-f]{64}$/);
-      expect(a.sizeBytes).toBeGreaterThan(0);
+      // A size of exactly 0 is legal: Amendment A2 (docs/evidence/MANIFEST.md
+      // §10) records the post-checkpoint crawler.sqlite-wal as 0 bytes with
+      // the well-known empty-file digest. The parser must still have parsed a
+      // size — undefined is not a size — so the assertion is >= 0, not
+      // truthiness.
+      expect(a.sizeBytes).toBeGreaterThanOrEqual(0);
     }
   });
 });

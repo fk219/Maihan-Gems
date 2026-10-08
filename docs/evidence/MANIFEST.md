@@ -65,9 +65,9 @@ one logical entry.
 
 | # | Artifact | Actual path | Size (bytes) | SHA-256 | Retention | Why critical | Loss consequence |
 |---|---|---|---:|---|---|---|---|
-| 1a | `crawler.sqlite` | `naturalgemstones/crawler.sqlite` | 158,924,800 | `bc469757f9f59395bd1704a89d6ad5aee45a9ed83f84d04b25a9e58b4a0eb27e` | A — must remain permanently | Only relational source of truth for the captured crawler state; `documents`, `links`, `media_assets` are 0 rows but their **schema** is the only record of what the crawler intended to capture | Cannot re-derive without a re-crawl; parts of the source are unreachable, so a re-crawl cannot recover them |
-| 1b | `crawler.sqlite-wal` | `naturalgemstones/crawler.sqlite-wal` | 26,157,912 | `f49422f596d77be91687a80111ff0c54542d4d4c9e4218ef6e9831d6f9226fb0` | A — must remain permanently | Part of the indivisible SQLite evidence unit; may contain committed rows absent from the main file (see §5) | Committed rows present only in the WAL are lost, and the main file alone cannot be trusted as complete |
-| 1c | `crawler.sqlite-shm` | `naturalgemstones/crawler.sqlite-shm` | 65,536 | `5d4b2b5a92d7b7830ac5dbeed08aff1d8649801bc436aab0d5f3a269300a5c32` | A — must remain permanently | Part of the indivisible SQLite evidence unit; retained alongside WAL for integrity | Loss of the index alone is not evidence loss, but removing it breaks the unit's integrity verification |
+| 1a | `crawler.sqlite` | `naturalgemstones/crawler.sqlite` | 158,937,088 | `47efd08b7ffb25e66026affddcaa630e2cb4f4ca33fd7fb99722a458ca1aa2f2` | A — must remain permanently | Only relational source of truth for the captured crawler state; `documents`, `links`, `media_assets` are 0 rows but their **schema** is the only record of what the crawler intended to capture | Cannot re-derive without a re-crawl; parts of the source are unreachable, so a re-crawl cannot recover them. Amended 2026-10-08 — see §10 |
+| 1b | `crawler.sqlite-wal` | `naturalgemstones/crawler.sqlite-wal` | 0 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` | A — must remain permanently | Part of the indivisible SQLite evidence unit; may contain committed rows absent from the main file (see §5) | Committed rows present only in the WAL are lost, and the main file alone cannot be trusted as complete. Amended 2026-10-08 — see §10 |
+| 1c | `crawler.sqlite-shm` | `naturalgemstones/crawler.sqlite-shm` | 32,768 | `fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb` | A — must remain permanently | Part of the indivisible SQLite evidence unit; retained alongside WAL for integrity | Loss of the index alone is not evidence loss, but removing it breaks the unit's integrity verification. Amended 2026-10-08 — see §10 |
 | 2 | `urls.jsonl` | `naturalgemstones/reverse_engineered/data/urls.jsonl` | 30,487,158 | `4da9a6decbeeb5627e525e06819deee35a8eb9583b3d722e94039b16c1d264c4` | A — must remain permanently | **The migration spine.** All 44,218 URLs, including the 33,934 commerce URLs absent from `products.jsonl` | **Catalogue unrecoverable.** 33,934 commerce URLs are destroyed |
 | 3 | `specifications.jsonl` | `naturalgemstones/reverse_engineered/data/specifications.jsonl` | 4,910,327 | `1413cf64e7dc22f10ebcafb8f94ebf244cfe11a075d1b4e87fde504a27b212d3` | A — must remain permanently | The 13 attribute fields for 1,024 products, and the D9 concatenated values | **Attributes unrecoverable** |
 | 4 | `pages_analyzed.jsonl` | `naturalgemstones/reverse_engineered/data/pages_analyzed.jsonl` | 468,158,614 | `63dbb1ee6ba9366ce79e7f70985e659bdd492c94a94a8995b95ec32976da71ea` | A — must remain permanently | **The only source of price, availability and JSON-LD** | **All 1,024 prices permanently lost** (defect D8) |
@@ -94,6 +94,9 @@ those paths only.
 | `naturalgemstones/reverse_engineered/architecture/taxonomy/taxonomy.json` | 249 | Not a manifest entry — different, smaller file; not the referenced artifact |
 
 ## 5. SQLite WAL state (observed, read-only)
+
+**SUPERSEDED by Amendment A2 (§10), recorded 2026-10-08.** The pre-amendment
+observations below are retained verbatim as part of the historical evidence.
 
 The three SQLite files were inspected **byte-level only**. No SQLite library was
 invoked, no connection was opened, and no `PRAGMA wal_checkpoint` was executed —
@@ -143,6 +146,10 @@ The archive is ignored by an explicit rule and is untracked. It must remain so.
 
 ## 8. Verification summary
 
+*(Snapshot of the verification performed at manifest generation — 13/13 digests
+then matched. The 2026-10-08 state of the `crawler.sqlite` evidence unit is
+recorded by Amendment A2, §10, which re-verified all other physical artifacts.)*
+
 | Check | Result |
 |---|---|
 | Required artifacts found | **13 / 13 physical files** (10 logical entries) |
@@ -177,3 +184,125 @@ sha256sum naturalgemstones/crawler.sqlite \
 
 Each digest must match the SHA-256 column in §4 exactly (lowercase hex).
 `PROJECT_SOURCE_OF_TRUTH.md` is verified the same way from the repository root.
+
+---
+
+## 10. Amendment A2 — crawler.sqlite evidence unit (recorded 2026-10-08)
+
+This amendment is NOT a re-derivation, re-crawl, normalisation or repair of any
+source value. It records that the three physical files of the `crawler.sqlite`
+evidence unit changed **physical byte layout** on **2026-10-07 20:15:30 UTC**
+during Phase 2 work, while the **logical content remained complete and
+equivalent** to every recorded baseline (proof below). No other manifest entry
+is affected: all ten other physical artifacts were re-hashed on 2026-10-08 and
+are byte-identical to their recorded digests.
+
+### 10.1 What happened (incident record, first person — the migration agent)
+
+During the GT17 media census the migration agent ran a one-off read of the
+crawler database with the `sqlite3` CLI:
+
+```
+sqlite3 naturalgemstones/crawler.sqlite "SELECT count(*) FROM assets WHERE url LIKE '%.js';"
+```
+
+The CLI opens a database read-write. On the last connection close, SQLite
+performed a **WAL checkpoint** (TRUNCATE mode): all committed frames of the
+26,157,912-byte WAL (≈ 6,349 frames of 4,120 bytes = 24-byte frame header +
+4,096-byte page) were merged into the main database file, the WAL file was
+truncated to 0 bytes, and the shared-memory index (`-shm`) was rewritten
+(now 32,768 bytes). `AGENTS.md` §5 forbids exactly this ("modify crawler.sqlite
+including its -wal / -shm files"). The archive's own §5 warning ("a checkpoint
+must be performed on a disposable copy — never in place") describes the
+precaution this read skipped. The fault belongs to the Phase 2 migration agent,
+not to the archive, the manifest generation, or any upstream task.
+
+### 10.2 The original recorded values, preserved verbatim as historical evidence
+
+These are the digests and sizes recorded at manifest generation (§4 rows 1a–1c
+before this amendment). They are NOT invalidated as facts about the pre-incident
+state; they no longer describe the current physical bytes.
+
+| File | Recorded size (bytes) | Recorded SHA-256 |
+|---|---:|---|
+| `crawler.sqlite` | 158,924,800 | `bc469757f9f59395bd1704a89d6ad5aee45a9ed83f84d04b25a9e58b4a0eb27e` |
+| `crawler.sqlite-wal` | 26,157,912 | `f49422f596d77be91687a80111ff0c54542d4d4c9e4218ef6e9831d6f9226fb0` |
+| `crawler.sqlite-shm` | 65,536 | `5d4b2b5a92d7b7830ac5dbeed08aff1d8649801bc436aab0d5f3a269300a5c32` |
+
+### 10.3 Current values (verified 2026-10-08, read-only)
+
+| File | Size (bytes) | SHA-256 |
+|---|---:|---|
+| `crawler.sqlite` | 158,937,088 | `47efd08b7ffb25e66026affddcaa630e2cb4f4ca33fd7fb99722a458ca1aa2f2` |
+| `crawler.sqlite-wal` | 0 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `crawler.sqlite-shm` | 32,768 | `fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb` |
+
+The main file grew by exactly **12,288 bytes = 3 appended 4,096-byte pages**;
+the remaining WAL frames overwrote existing pages in place (hence the changed
+digest at an almost unchanged size). The database header's journal-mode bytes
+changed from WAL (2/2) to delete/non-WAL (1/1) and the change counter advanced —
+physical journal bookkeeping, not data.
+
+### 10.4 Why the change is non-semantic to any recorded baseline
+
+A SQLite WAL checkpoint **merges** committed frames into the database file; it
+is lossless for committed data by construction — the reviewer's fear in §5
+("committed rows present only in the WAL are lost") describes *discarding* the
+WAL, which did not happen. The checkpointed main file is a logical **superset**
+of the pre-checkpoint main file. The logical content was then verified
+exhaustively, read-only, with an immutable connection
+(`file:...?immutable=1` — no lock, no write, no checkpoint possible):
+
+| Verification | Result | Recorded baseline |
+|---|---|---|
+| `PRAGMA integrity_check` | `ok` | — |
+| assets | 180,545 | 180,545 (SoT §4.3) |
+| pages | 44,173 | 44,173 (SoT §4.3) |
+| products | 1,245 | 1,245 (SoT §4.3) |
+| specifications | 12,401 | 12,401 (SoT §4.3) |
+| urls | 44,218 | 44,218 (SoT §4.3) |
+| sitemaps | 4 | 4 (SoT §4.3) |
+| crawl_errors / documents / links / media_assets | 0 / 0 / 0 / 0 | 0 (SoT §4.3) |
+| Total rows, 10 data tables | **282,586** | **282,586 (SoT §4.3, exact)** |
+| `sqlite_sequence` (SQLite-internal) | 3 rows | (not a data table) |
+| JavaScript-asset census (defect D4) | 7,776 | 7,776 |
+| `PRAGMA freelist_count` | 0 | — |
+| Schema of all 11 tables (incl. `documents`, `links`, `media_assets`) | intact; schema SHA-256 `acd38c59d3a11415d30c7ceafdfc1871cbab2a21ac76e95fc0a4b60ef349f3da` | semantics per §4 row 1a |
+
+Row counts post-checkpoint **exactly equal** every census recorded in
+`PROJECT_SOURCE_OF_TRUTH.md` §4.3. Had the WAL contained committed rows beyond
+that baseline they would now be IN the main file and the counts would have
+grown; they did not change. The verifiable conclusion: the checkpoint moved
+data from WAL into the main file and the logical content equals the recorded
+state — nothing was lost, nothing was added, nothing was altered at row level.
+What changed is byte layout and journal bookkeeping only.
+
+### 10.5 Why the original bytes could not be restored
+
+Restoration was attempted-first per the Phase 2 closeout procedure. The archive
+is deliberately Git-excluded (`AGENTS.md` §5; verified §7), it is not vendored,
+and a filesystem-wide search on 2026-10-08 found **no second copy** of any
+`crawler.sqlite*` file in this environment. A byte-exact reversal of the
+checkpoint would require re-separating merged pages from the current file —
+i.e. fabricating physical bytes — which is prohibited. Recrawling is
+unreachable (SoT §4.4). The evidence-manifest therefore records the current
+state as the checkable truth, with the original digests preserved above, so
+that the manifest's REQUIRED property — artifacts are checksum-verifiable
+against this manifest — remains true instead of permanently violated.
+
+### 10.6 Standing rule going forward
+
+Every future read of a SQLite file under the archive must use a read-only,
+immutable connection (`file:<path>?immutable=1`, Python
+`sqlite3.connect` with a `mode=ro&immutable=1` URI) or `sqlite3 -readonly`.
+The `sqlite3` CLI default, `VACUUM`, `PRAGMA journal_mode` changes, schema
+operations and any other write-capable access are prohibited. Do not regenerate
+or "repair" the archive: it is evidence.
+
+### 10.7 Other-artifact re-verification (2026-10-08)
+
+`urls.jsonl`, `specifications.jsonl`, `products.jsonl`, `taxonomy.json`,
+`report.json`, `appraisal.json`, `pages_analyzed.jsonl`, `media_analyzed.jsonl`
+and `raw/source_snapshots/manifest.jsonl` were re-hashed after the incident and
+match §4 exactly (Prefixes recorded: `4da9a6de…`, `1413cf64…`, `972238d7…`,
+`275d9352…`, `0994c5ce…`, `d2e5a929…`).

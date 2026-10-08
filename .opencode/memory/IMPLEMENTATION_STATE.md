@@ -1,7 +1,71 @@
 # IMPLEMENTATION STATE
 
-**Last updated:** 2026-10-07
+**Last updated:** 2026-10-08
 **Update this file after every meaningful implementation task.**
+
+## Documentation refresh
+
+**Task:** simplified the root SRS to a concise, client-friendly format.
+
+- Replaced the long technical SRS with a short plain-English version under 250 lines.
+- Removed references to copying an existing website and kept the product scope generic.
+- Included the core features: catalog, search, DYO, checkout, accounts, content, media, AI, WhatsApp, try-on, certificate intelligence, SEO, and accessibility.
+- Kept the document readable for non-technical stakeholders.
+
+## Client SRS
+
+**Task:** prepared the client-facing Maihan Gems SRS in
+`docs/MAIHAN_GEMS_CLIENT_SRS.md`.
+
+- Consolidated the root SRS into a client scope baseline with 36 functional
+  requirements, customer journeys, workstreams, deliverables, and sign-off.
+- Preserved verified migration and catalogue figures while distinguishing
+  observed, inferred, incomplete, and unknown information.
+- Qualified phased and conditional capabilities, including provider choices,
+  certificate review, and WebAR asset dependencies.
+
+---
+
+---
+
+# Documentation Deliverable — SRS.md (2026-10-07)
+
+**`SRS.md` written at repository root.** A client-facing Software Requirements
+Specification in plain business language, derived by full analysis of all 49
+planning documents (~21,000 lines: 4 root documents, `technical_design/01-40`,
+and `.opencode/memory/`).
+
+Contents: executive summary · scope and deferrals · functional requirements by
+capability (281 numbered `FR-*` across 21 areas) · 15 `NFR-*` · acceptance
+criteria · data and content requirements with a data-completeness gap table ·
+13-phase delivery approach with dependency graph · 19 `DEC-*` client decisions ·
+17 `RISK-*` risks · gaps in the planning package · glossary · sign-off block.
+
+**Status:** documentation only. No implementation, no code, no migration, no
+database change. No phase advanced. Phase 2 remains open and unauthorised.
+
+**Facts worth preserving from that analysis:**
+
+- **The planning package contains ZERO cost, duration, effort, headcount or rate
+  estimates.** Verified by exhaustive search of all four root documents for
+  person-day/week/month/FTE/rate/budget terms. This is a deliberate charter
+  position (NFR-15 + Phase 13 task 8), not an oversight. `SRS.md` §0.5 and §9.5
+  exist so the commercial proposal has a defensible sizing basis.
+- **Prices exist for only 1,024 of ~24,000 sellable units.** `pages_analyzed`
+  covers 1,024 pages only; the 19,665 loose stones, 3,072 pairs and 10,349
+  setting variants carry no captured selling price. Surfaced as `DEC-04`.
+- **Full specification data exists for those same 1,024 pages only.** The
+  remaining ~22,700 loose stones and pairs carry only address-derived attributes
+  (variety, weight, origin, shape, colour, `gem_ref`); dimensions, clarity, cut
+  and treatment are `[UNKNOWN]` for them.
+- **Zero website copy exists** (`content/` directories empty — defect D5).
+  ~25 pages plus 100-145 variety guides must be authored. `DEC-14`.
+- **Zero 3D models exist** (defect D4: the 7,778 apparent 3D/360 assets were
+  `/_nuxt/*.js`). 951 designs to model. Largest cost item. `RISK-10` / `DEC-15`.
+- **53 client-gated obligations** exist across `SKILL_MATRIX` §21.5 and the
+  doc-38 open-decision register; 19 are material enough to appear as `DEC-*`.
+- Phase 13 depends on a **load-test tool that no ADR has selected** — ADR-021's
+  resolution note explicitly excluded it.
 
 ---
 
@@ -444,3 +508,72 @@ archive itself is never modified.
 
 **If a task requires any of these and they are unavailable:** stop, report that
 the source archive must be made available, and do not synthesise a substitute.
+
+---
+
+# Technical SRS Deliverable (2026-10-08)
+
+Created `docs/MAIHAN_GEMS_TECHNICAL_SRS.md` as the CTO-facing technical
+requirements layer. It records the approved target baseline separately from
+implementation status, preserves source evidence labels and domain
+invariants, and identifies unresolved scope/architecture decisions.
+
+Documentation only: no implementation phase advanced and no migration
+completion or full-corpus V1–V22/V17 result was asserted. The SRS records the
+discrepancy between the migration status above and additional uncommitted
+stage code in the current working tree; reconcile and validate that code
+before updating the Phase 2 completion status.
+---
+
+# GT20 COMPLETE — Phase 2 CLOSED (2026-10-08)
+
+**Phase 2 final validation is GREEN.** All 22 gates PASS against the real
+corpus on `maihan_dev`; V17 (deep idempotency) re-executes every implemented
+stage under its own import batch and the 18-table canonical digest is
+unchanged (`43c113e9…`). Commit: `feat(migrate): complete phase 2 migration gates`.
+
+## What GT20 added
+
+- **`compatibility` stage** — 1,024 EXTRACTED ALLOW rules from the observed
+  (setting, stone) pairs (105 designs, 152 distinct rules, 0 DENY, no
+  colour/shape/weight bounds invented; every rule traceable to its source
+  page). Conflict ledger audited: 328 rows, all UNRESOLVED, provenance
+  complete, disagreement scans added (0 new).
+- **`verify-gates` stage** — the V1–V22 runner + V17 + final census +
+  provenance audit. Notable V-passes: V1 19,666/19,666; V2 3,077/3,077; V3
+  1,024/1,024; V8 113/113; V14 exact spine reconciliation (44,218/10
+  families); V21 0 unresolved with the 42 DYO-only variants correctly held
+  INFERRED.
+
+## Blockers resolved this session
+
+1. **crawler.sqlite archive drift** (GT17 census read opened the SQLite file
+   read-write → WAL checkpoint). Logical content proven equal to every SoT
+   baseline; no backup existed; resolved by the explicit, evidence-preserving
+   **Amendment A2** in `docs/evidence/MANIFEST.md` §10 (original digests
+   retained verbatim). Lesson recorded in `LESSONS.md` §18: archive SQLite
+   reads must use immutable/read-only URIs.
+2. **parse-slugs conflict rebuild** broke physical idempotency (delete +
+   reinsert = new UUIDs/timestamps). Fixed with content-guard inserts; the
+   DELETE is gone (artifact digests are manifest-gated, so content drift
+   halts before any stage).
+3. **verify-gates V17** re-executes each stage under ITS OWN import batch
+   id — re-running under a fresh batch would duplicate
+   `(import_batch_id, source_url)`-keyed staging rows instead of proving
+   idempotency.
+
+## Final census (maihan_dev, 2026-10-08)
+
+stones 19,693 · pairs 3,072 · gemstone_stones 40 · settings 964 (951
+EXTRACTED + 13 INFERRED) · setting_variants 10,391 (10,349 + 42 INFERRED) ·
+configured 9,812 (1,024 OBSERVED + 8,788 INFERRED) · ready_made 88 ·
+derived-only DYO 221 · price_entries 1,707 (1,024 OBSERVED + 683 INFERRED) ·
+price_model_observations 1,024 · media 16,906 assets (15,582 PENDING + 1,324
+SKIPPED) · certificates 1,135 (all UNVERIFIED) · redirects 44,218 (301×43,539
+/ 200×357 / 302×4 / 410×318) · compatibility 1,024 · staging_conflicts 328
+(all unresolved) · staging_source_pages 44,218 · staging_parsed_urls 44,218.
+
+## Phase status
+
+**PHASE 1 — COMPLETE. PHASE 2 — COMPLETE (all gates green, committed).
+PHASE 3 — NOT STARTED.**

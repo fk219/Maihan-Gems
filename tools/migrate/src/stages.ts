@@ -111,11 +111,16 @@ export const STAGES: readonly StageDefinition[] = Object.freeze([
     blockedBy: 'plan task 20 / Phase 2+',
   },
   {
+    id: 'compatibility',
+    description: 'ALLOW compatibility evidence from the 1,024 observed (setting, stone) pairs; conflict ledger completion',
+    requiredArtifacts: [],
+    implemented: true,
+  },
+  {
     id: 'verify-gates',
     description: 'Gate runner V1-V22 plus the V17 idempotency check (second run: zero row changes)',
     requiredArtifacts: 'ALL_MANIFEST',
-    implemented: false,
-    blockedBy: 'plan task 20 (Phase 2, after stages 11-19)',
+    implemented: true,
   },
 ] as const);
 

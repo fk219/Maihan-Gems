@@ -316,3 +316,33 @@ node_modules. Do not churn package.json workarounds for an install-state
 artifact.
 
 ---
+## 18. A read against a SQLite WAL database is a WRITE if the tool opens read-write
+
+**Observed 2026-10-07 20:15 UTC (Phase 2 GT17):** a census read of
+`naturalgemstones/crawler.sqlite` was run with the `sqlite3` CLI. The CLI opens
+a database read-write, and on the last connection close SQLite performed a WAL
+checkpoint (TRUNCATE): all 6,349 committed WAL frames were merged into the main
+file (+12,288 bytes = 3 appended pages), the WAL was truncated to 0 bytes, the
+`-shm` was rewritten, and the header journal-mode bytes flipped WAL → delete.
+The three physical digests recorded in `docs/evidence/MANIFEST.md` rows 1a-1c
+stopped matching and the Phase 2 closeout gate (verify-gates, ALL_MANIFEST) was
+blocked for an entire session until Amendment A2 re-verified the logical state.
+
+Read-only verification (immutable URI, `file:...?immutable=1`): integrity ok;
+282,586 rows across the 10 data tables exactly matching SoT §4.3; assets
+180,545 / pages 44,173 / products 1,245 / specifications 12,401; JS assets
+7,776; schema intact — nothing lost, nothing added (a checkpoint MERGES data).
+
+**Rule:** the `AGENTS.md` §5 "never modify" list includes *reads with
+write-capable tools*. Any SQLite access under the archive must use an
+immutable/read-only connection (`file:<path>?immutable=1`, `sqlite3 -readonly`);
+the bare `sqlite3` CLI is a mutation risk on every WAL-mode database it touches,
+even for a SELECT. Verify digests BEFORE a session's first archive read so the
+detection happens the moment it matters. If source bytes ever drift again, the
+recovery order is: (1) immutable read-only verification of logical content vs
+the SoT census, (2) search for a durable backup, (3) rebuild from a verifiably
+identical copy — and only then (4) a fully documented, explicit manifest
+amendment that preserves the old digests as historical evidence (Amendment A2,
+docs/evidence/MANIFEST.md §10, is the precedent).
+
+---

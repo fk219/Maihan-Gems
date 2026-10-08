@@ -140,11 +140,12 @@ export async function runParseSlugs(ctx: StageContext, expected?: { families: ty
     throw new Error(`parse-slugs: gate V14 FAILED — ${censusMismatches.join('; ')}`);
   }
 
-  // Write stale rows: parse output + per-field evidence ledger.
-  await ctx.db.query('DELETE FROM staging_conflicts WHERE import_batch_id = $1', [ctx.importBatchId]);
-  // Conflict ledger reset happens before writing (stage-owned reset).
-  // corpus-totals check is the runner's corpus gate; fixture manifests run
-  // with structural verification only.
+  // Write stale rows: parse output + per-field evidence ledger. The conflict
+  // rows are NOT rebuilt by delete-and-reinsert: their physical identity is
+  // part of the provenance record (gate V17 — a rerun changes zero rows), so
+  // the NOT EXISTS content guards below keep them stable. A content drift is
+  // structurally impossible without a halt: the artifact digests are
+  // manifest-verified before any stage runs.
   const write = await writeParsedRows(ctx, rows);
   const sharedRows = await writePairConflicts(ctx, sharedRefs);
   const misfiled = rows.filter((r) => r.family === 'UNKNOWN');
@@ -250,7 +251,15 @@ async function writePairConflicts(ctx: StageContext, sharedRefs: readonly (reado
       const other = urls[i === 0 ? 1 : 0];
       await ctx.db.query(
         `INSERT INTO staging_conflicts (import_batch_id, entity_kind, entity_ref, field_name, value_a, source_url_a, value_b, source_url_b, resolution, resolved_by, resolved_at)
-         VALUES ($1, 'GEMSTONE_PAIR', $2, 'gem_ref', $3, $4, $3, $5, NULL, NULL, NULL)`,
+         SELECT $1, 'GEMSTONE_PAIR', $2, 'gem_ref', $3, $4, $3, $5, NULL, NULL, NULL
+          WHERE NOT EXISTS (
+            SELECT 1 FROM staging_conflicts s
+             WHERE s.import_batch_id = $1
+               AND s.entity_kind = 'GEMSTONE_PAIR'
+               AND s.entity_ref = $2
+               AND s.field_name = 'gem_ref'
+               AND coalesce(s.source_url_a, '') = $4
+               AND coalesce(s.source_url_b, '') = coalesce($5, ''))`,
         [ctx.importBatchId, ref, ref, urls[i], other ?? null],
       );
       rows += 1;
@@ -272,7 +281,15 @@ async function writeMisfiledConflicts(ctx: StageContext, misfiled: readonly Pars
     const measuredNote = `measured this run: ${misfiled.length} family-UNKNOWN jewellery slugs (SoT §33.6 documented 314; delta reported, not silently reconciled)`;
     await ctx.db.query(
       `INSERT INTO staging_conflicts (import_batch_id, entity_kind, entity_ref, field_name, value_a, source_url_a, value_b, source_url_b, resolution, resolved_by, resolved_at)
-       VALUES ($1, 'URL_FAMILY', $2, 'url_family', $3, $2, $4, NULL, NULL, NULL, NULL)`,
+       SELECT $1, 'URL_FAMILY', $2, 'url_family', $3, $2, $4, NULL, NULL, NULL, NULL
+        WHERE NOT EXISTS (
+          SELECT 1 FROM staging_conflicts s
+           WHERE s.import_batch_id = $1
+             AND s.entity_kind = 'URL_FAMILY'
+             AND s.entity_ref = $2
+             AND s.field_name = 'url_family'
+             AND coalesce(s.value_a, '') = $3
+             AND coalesce(s.value_b, '') = $4)`,
       [ctx.importBatchId, row.sourceUrl, measuredNote, documentedNote],
     );
     rows += 1;

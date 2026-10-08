@@ -44,6 +44,8 @@ import { runPricesObservations } from './stages/prices-observations.js';
 import { runAssets } from './stages/assets.js';
 import { runCertificates } from './stages/certificates.js';
 import { runCmsRedirects } from './stages/cms-redirects.js';
+import { runCompatibility } from './stages/compatibility.js';
+import { runVerifyGates } from './stages/verify-gates.js';
 import { runDerivedIdentities } from './stages/derived-identities.js';
 
 /** The artifact name the tokenize engine asserts this stage's digest against. */
@@ -171,6 +173,23 @@ async function executeStage(
       const corpus = options.minManifestArtifacts >= 13;
       const result = await runDerivedIdentities(ctx, { corpus, productsDigest: manifestArtifactDigest('products.jsonl') });
       return `derived-identities: ${String(result.derivedRows)} failed-fetch rows, enforced ${String(result.enforced)}, V19 observed ${String(result.observedParsed)}, V20 collisions ${String(result.collisions)}`;
+    }
+    case 'compatibility': {
+      const corpus = options.minManifestArtifacts >= 13;
+      const result = await runCompatibility(ctx, { corpus });
+      return `compatibility + conflicts: observed pairs ${String(result.observedPairs)}, ALLOW rules seeded ${String(result.rulesSeeded)} (total ${String(result.rulesTotal)}, ${String(result.distinctSettings)} designs, ${String(result.distinctRules)} distinct rules, DENY ${String(result.denyRules)}); conflicts ${String(result.existingConflicts)} (unresolved ${String(result.unresolvedConflicts)}, new ${String(result.newConflicts)})`;
+    }
+    case 'verify-gates': {
+      const corpus = options.minManifestArtifacts >= 13;
+      const result = await runVerifyGates(ctx, { corpus });
+      const lines = result.gates.map((g) => `  ${g.id} ${g.passed ? 'PASS' : 'FAIL'} — ${g.name}: ${g.detail}`);
+      const counts = Object.entries(result.counts).map(([k, v]) => `${k}=${v}`);
+      ctx.write([...lines,
+        `  counts: ${counts.join(', ')}`,
+        `  provenance (rows missing import_batch_id): ${Object.entries(result.provenance).map(([k, v]) => `${k}=${v}`).join(', ')}`,
+        `  idempotency: ${result.idempotency}`,
+      ].join('\n'));
+      return `gates V1-V22 all PASS (${String(result.gates.length)} gates)`;
     }
     case 'cms-redirects': {
       const corpus = options.minManifestArtifacts >= 13;
