@@ -71,6 +71,11 @@ export {
   createCatalogDatabase,
   type CatalogDatabase,
 } from './catalog/executor.js';
+export { createPool, type CreatePoolOptions } from './pool.js';
+export {
+  incrementRateLimitCounter,
+  type RateLimitIncrement,
+} from './operations/rate-limit-counter.js';
 export {
   createCatalogQueryPort,
 } from './catalog/port.js';

@@ -13,10 +13,16 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "openapi:generate": "tsc -b && node ./dist/openapi/cli.js"
   },
   "dependencies": {
-    "zod": "3.25.76",
-    "@maihan/domain": "workspace:*"
+    "@asteasolutions/zod-to-openapi": "7.3.4",
+    "@maihan/domain": "workspace:*",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "vitest": "5.0.3"
   }
 }

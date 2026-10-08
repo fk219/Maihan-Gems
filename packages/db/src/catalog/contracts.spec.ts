@@ -21,7 +21,10 @@ import {
 } from '@maihan/contracts';
 
 describe('contract error registry', () => {
-  it('is closed and 400/404-mapped', () => {
+  it('is closed and status-mapped', () => {
+    // The registry is CLOSED: the HTTP-surface codes below arrived with
+    // tasks 8-10 (routing + rate limit + internal), registered in
+    // contracts/errors.ts so no call site ever invents a string.
     expect(CONTRACT_ERROR_CODES).toEqual([
       'VALIDATION_FAILED',
       'INVALID_FILTER',
@@ -29,10 +32,16 @@ describe('contract error registry', () => {
       'GEMSTONE_NOT_FOUND',
       'SETTING_VARIANT_NOT_FOUND',
       'SETTING_NOT_FOUND',
+      'NOT_FOUND',
+      'METHOD_NOT_ALLOWED',
+      'RATE_LIMITED',
+      'INTERNAL',
     ]);
     const e = new ContractError('PRODUCT_NOT_FOUND', 'x');
     expect(e.httpStatus).toBe(404);
     expect(new ContractError('VALIDATION_FAILED', 'x').httpStatus).toBe(400);
+    expect(new ContractError('RATE_LIMITED', 'x').httpStatus).toBe(429);
+    expect(new ContractError('METHOD_NOT_ALLOWED', 'x').httpStatus).toBe(405);
   });
 });
 

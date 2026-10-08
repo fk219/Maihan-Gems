@@ -57,3 +57,36 @@ export const FacetSetSchema = z.object({
 });
 
 export type FacetSet = z.infer<typeof FacetSetSchema>;
+
+// ─── Facet DEFINITIONS (`GET /taxonomy/facets`, Task 8) ─────────────────────
+
+/** One selectable value of a facet dimension: the filter vocabulary itself. */
+export const FacetDefinitionValueSchema = z
+  .object({
+    value: z.string().min(1),
+    label: z.string().min(1),
+  })
+  .strict();
+
+export type FacetDefinitionValue = z.infer<typeof FacetDefinitionValueSchema>;
+
+/**
+ * A facet definition: one closed dimension with its available values.
+ *
+ * The response documents what is RETURNED: definitions (value vocabulary)
+ * for every closed dimension. Value COUNTS are computed per query over the
+ * filtered result set and travel on the list endpoints' `facets` (task 3,
+ * single grouped pass); no global counts source exists in the Phase 3 port,
+ * and inventing counts here would violate the evidence rules.
+ */
+export const FacetDefinitionSchema = z
+  .object({
+    dimension: FACET_DIMENSION_NAMES,
+    values: z.array(FacetDefinitionValueSchema),
+  })
+  .strict();
+
+export type FacetDefinition = z.infer<typeof FacetDefinitionSchema>;
+
+export const FacetDefinitionListSchema = z.array(FacetDefinitionSchema);
+export type FacetDefinitionList = z.infer<typeof FacetDefinitionListSchema>;

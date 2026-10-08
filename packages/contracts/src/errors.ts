@@ -35,6 +35,16 @@ export const CONTRACT_ERROR_CODES = [
   'GEMSTONE_NOT_FOUND',
   'SETTING_VARIANT_NOT_FOUND',
   'SETTING_NOT_FOUND',
+  // ─── HTTP API surface codes (Phase 3 tasks 8-10) ───────────────────────────
+  // RATE_LIMITED and INTERNAL are named verbatim in the doc 07 / SoT 10.4
+  // registry (429 / 500 rows). NOT_FOUND and METHOD_NOT_ALLOWED complete the
+  // routing surface: doc 07's table lists example codes per class and its
+  // rule is "a new code requires review; an ad-hoc string is a defect" —
+  // these four are registered HERE so no call site invents a string.
+  'NOT_FOUND',
+  'METHOD_NOT_ALLOWED',
+  'RATE_LIMITED',
+  'INTERNAL',
 ] as const;
 
 export type ContractErrorCode = (typeof CONTRACT_ERROR_CODES)[number];
@@ -47,6 +57,10 @@ const HTTP_STATUS_BY_CODE: Record<ContractErrorCode, number> = {
   GEMSTONE_NOT_FOUND: 404,
   SETTING_VARIANT_NOT_FOUND: 404,
   SETTING_NOT_FOUND: 404,
+  NOT_FOUND: 404,
+  METHOD_NOT_ALLOWED: 405,
+  RATE_LIMITED: 429,
+  INTERNAL: 500,
 };
 
 export type ContractErrorDetail = { [field: string]: unknown };

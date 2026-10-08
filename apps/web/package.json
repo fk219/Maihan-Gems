@@ -5,13 +5,20 @@
   "type": "module",
   "scripts": {
     "build": "tsc -b",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "start": "node ./dist/api/server.js"
   },
   "dependencies": {
     "@maihan/config": "workspace:*",
     "@maihan/contracts": "workspace:*",
     "@maihan/db": "workspace:*",
     "@maihan/domain": "workspace:*",
-    "@maihan/observability": "workspace:*"
+    "@maihan/observability": "workspace:*",
+    "ioredis": "6.0.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "vitest": "5.0.3"
   }
 }

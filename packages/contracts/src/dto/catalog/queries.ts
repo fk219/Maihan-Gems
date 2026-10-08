@@ -36,6 +36,7 @@ import {
   ProductSummarySchema,
   ProductDetailSchema,
   SettingDetailSchema,
+  SettingVariantSummarySchema,
   GemstoneDetailSchema,
 } from './entities.js';
 import { TaxonomyListSchema } from './taxonomy.js';
@@ -51,7 +52,7 @@ import { TaxonomyListSchema } from './taxonomy.js';
  * HERE (contracts), and the portfolio semantics (states defaulting, unknown
  * value rejection) belong to the port.
  */
-const ProductFilterShape = z
+export const ProductFilterShapeSchema = z
   .object({
     kind: z.array(z.string()).optional(),
     jewelleryType: z.array(z.string()).optional(),
@@ -75,7 +76,7 @@ const ProductFilterShape = z
   .partial()
   .strict();
 
-const ListQueryCommonSchema = z.object({
+export const ListQueryCommonSchema = z.object({
   limit: z.number().int().min(1).max(PRODUCT_CURSOR_MAX_LIMIT).default(PRODUCT_CURSOR_DEFAULT_LIMIT),
   cursor: z.string().optional(),
   sort: PRODUCT_SORT_KEY_SCHEMA.default('price'),
@@ -84,7 +85,7 @@ const ListQueryCommonSchema = z.object({
 
 /** The products-list port input: structured filters + keyset pagination. */
 export const ProductListQuerySchema = ListQueryCommonSchema.extend({
-  filters: ProductFilterShape.default({}),
+  filters: ProductFilterShapeSchema.default({}),
 });
 
 export type ProductListQuery = z.input<typeof ProductListQuerySchema>;
@@ -123,6 +124,21 @@ export const SettingListResultSchema = z
   .strict();
 
 export type SettingListResult = z.infer<typeof SettingListResultSchema>;
+
+/**
+ * The `{ variant, design }` envelope returned by `getSettingVariantBySku`
+ * (the `/settings/{sku}` surface). Composed from the existing entity schemas
+ * — an explicit schema for an already-documented port return type, not a
+ * parallel contract.
+ */
+export const SettingVariantEnvelopeSchema = z
+  .object({
+    variant: SettingVariantSummarySchema,
+    design: SettingDetailSchema,
+  })
+  .strict();
+
+export type SettingVariantEnvelope = z.infer<typeof SettingVariantEnvelopeSchema>;
 
 /** Individual read-model aliases used by the port interface below. */
 export type SettingDesignReadModel = z.infer<typeof SettingDetailSchema>;

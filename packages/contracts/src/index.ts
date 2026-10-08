@@ -21,6 +21,8 @@
  */
 export * from './errors.js';
 export * from './dto/shared/provenance.js';
+export * from './dto/http/envelopes.js';
+export * from './dto/http/paths.js';
 export * from './dto/catalog/enums.js';
 export * from './dto/catalog/filters.js';
 export * from './dto/catalog/cursor.js';
@@ -28,3 +30,6 @@ export * from './dto/catalog/entities.js';
 export * from './dto/catalog/facets.js';
 export * from './dto/catalog/taxonomy.js';
 export * from './dto/catalog/queries.js';
+export * from './dto/catalog/http-query.js';
+export * from './openapi/endpoints.js';
+export * from './openapi/generate.js';
