@@ -128,6 +128,18 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
 
   {
+    // Node CLI scripts. `apps/web/scripts/**` runs under `node`, so process
+    // and console exist; this is not application source.
+    files: ['apps/web/scripts/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: 'module',
+      globals: { process: 'readonly', console: 'readonly' },
+    },
+    rules: { 'no-console': 'off' },
+  },
+
+  {
     // Structural rules only. Applied to every TypeScript source file.
     files: ['**/*.ts'],
     languageOptions: {
