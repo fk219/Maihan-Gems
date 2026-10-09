@@ -13,6 +13,13 @@ import { browsableVarieties } from '../../../lib/catalog-view.js';
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
 import { EmptyState } from '../../../components/design-system/EmptyState.js';
 
+// Route segment config. Catalog views render per request from the cached
+// CatalogQueryService (doc 12.3: Server-rendered, cacheable, no per-user
+// state); there is deliberately no build-time catalogue, so Next must not
+// prerender this route (it would otherwise invoke the page with empty params
+// during `next build`). Runtime caching stays in the service, not in Next.
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Gemstone varieties | Maihan Gems',
 };

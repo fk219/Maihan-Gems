@@ -11,6 +11,13 @@ import { isProductNotFound } from '../../../../lib/catalog-errors.js';
 import { loadProductDetail } from '../../../../lib/catalog-server.js';
 import { ProductDetailContent } from '../../../../components/catalog/ProductDetailContent.js';
 
+// Route segment config. Catalog views render per request from the cached
+// CatalogQueryService (doc 12.3: Server-rendered, cacheable, no per-user
+// state); there is deliberately no build-time catalogue, so Next must not
+// prerender this route (it would otherwise invoke the page with empty params
+// during `next build`). Runtime caching stays in the service, not in Next.
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ productSlug: string }>;
 }

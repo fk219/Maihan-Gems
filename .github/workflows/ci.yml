@@ -53,6 +53,14 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      # Phase 4: the Next.js production build is a gate, not an afterthought.
+      # `next build --webpack` needs no database — the catalogue routes are
+      # `dynamic = 'force-dynamic'` and render on demand. This step is the
+      # regression check for the `.js` -> `.ts` extension resolution fix in
+      # apps/web/next.config.ts (Turbopack cannot do it; see that file).
+      - name: Storefront production build
+        run: pnpm --filter @maihan/web run build
+
       # ADR-021 ACCEPTED 2026-10-07: Vitest runs the unit/domain layer. Task 6
       # scope = packages/domain value objects + INV-01/02/03 predicates.
       # (Playwright/E2E is accepted but deliberately not run here.)
