@@ -173,7 +173,7 @@ describe('determinism and committed-spec drift', () => {
 
   it('committed openapi.json equals a fresh generation (no drift)', () => {
     const fresh = `${JSON.stringify(generateOpenApiDocument(), null, 2)}\n`;
-    const onDisk = readFileSync(committedPath, 'utf8');
+    const onDisk = readFileSync(committedPath, 'utf8').replace(/\r\n/g, '\n');
     expect(onDisk).toBe(fresh);
   });
 

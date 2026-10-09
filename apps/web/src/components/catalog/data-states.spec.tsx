@@ -23,7 +23,7 @@ import { CatalogNotFoundView } from './CatalogNotFoundView.js';
 import { EmptyState } from '../design-system/EmptyState.js';
 import { CatalogErrorView } from './CatalogErrorView.js';
 
-const WEB_ROOT = process.cwd().endsWith('apps/web') ? process.cwd() : join(process.cwd(), 'apps/web');
+const WEB_ROOT = process.cwd().replace(/\\/g, '/').endsWith('apps/web') ? process.cwd() : join(process.cwd(), 'apps/web');
 const SF = 'src/app/(storefront)';
 
 const read = (rel: string): string => readFileSync(join(WEB_ROOT, rel), 'utf8');

@@ -20,7 +20,7 @@ import {
   type RouteManifestEntry,
 } from './route-manifest.js';
 
-const WEB_ROOT = join(process.cwd().endsWith('apps/web') ? process.cwd() : join(process.cwd(), 'apps/web'));
+const WEB_ROOT = join(process.cwd().replace(/\\/g, '/').endsWith('apps/web') ? process.cwd() : join(process.cwd(), 'apps/web'));
 const APP_ROOT = join(WEB_ROOT, 'src', 'app');
 
 /** All files under a directory, recursively, relative to `apps/web/`. */

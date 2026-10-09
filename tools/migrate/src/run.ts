@@ -314,7 +314,11 @@ export async function runStages(options: RunOptions): Promise<readonly StageOutc
       // The stage executor works on its own dedicated connection (never the
       // durable-state client; never a pooled endpoint; never production).
       const { Client } = await import('pg');
-      const stageClient = new Client({ connectionString: options.databaseUrl });
+      const stageClient = new Client({
+        connectionString: options.databaseUrl,
+        keepAlive: true,
+        keepAliveInitialDelayMillis: 10000,
+      });
       await stageClient.connect();
       const ctx = stageContext(stage, {
         repoRoot: options.repoRoot,

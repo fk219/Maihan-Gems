@@ -468,8 +468,10 @@ async function upsertSettingsAndVariants(db: StageContext['db'], batchId: string
   const styleRows = await db.query<{ slug: string; id: string }>('SELECT slug, id::text AS id FROM setting_styles');
   const styleIdBySlug = new Map<string, string>(styleRows.rows.map((r) => [r.slug, r.id]));
 
-  const settingIdByCore = new Map<string, string>();
+  const existingSettings = await db.query<{ design_code: string; id: string }>('SELECT design_code, id::text AS id FROM settings');
+  const settingIdByCore = new Map<string, string>(existingSettings.rows.map((r) => [r.design_code, r.id]));
   for (const core of [...designs.keys()].sort((a, b) => a.localeCompare(b))) {
+    if (settingIdByCore.has(core)) continue;
     const design = designs.get(core);
     if (design === undefined) continue;
     const styleId = design.styleSlug === null ? null : (styleIdBySlug.get(design.styleSlug) ?? null);
@@ -482,8 +484,10 @@ async function upsertSettingsAndVariants(db: StageContext['db'], batchId: string
     ));
   }
 
-  const variantIdBySku = new Map<string, string>();
+  const existingVariants = await db.query<{ sku: string; id: string }>('SELECT sku, id::text AS id FROM setting_variants');
+  const variantIdBySku = new Map<string, string>(existingVariants.rows.map((r) => [r.sku, r.id]));
   for (const sku of [...variants.keys()].sort((a, b) => a.localeCompare(b))) {
+    if (variantIdBySku.has(sku)) continue;
     const variant = variants.get(sku);
     if (variant === undefined) continue;
     const settingId = settingIdByCore.get(variant.core);
@@ -697,6 +701,117 @@ const SHAPE_VALUES: ReadonlyMap<string, string> = new Map(
 );
 
 
+async function batchUpsertGemstones(
+  db: StageContext['db'],
+  batch: readonly GemstoneRecord[],
+  batchId: string,
+  all: {
+    varietyIdBySlug: Map<string, string>;
+    colourIdBySlug: Map<string, string>;
+    originIdBySlug: Map<string, string>;
+    intensityIdByName: Map<string, string>;
+    clarityIdByLabel: Map<string, string>;
+    treatmentIdByLabel: Map<string, string>;
+  },
+  gemstoneIdByRef: Map<string, string>,
+): Promise<void> {
+  if (batch.length === 0) return;
+  const columns = [
+    'gem_ref', 'kind', 'variety_id', 'species_id',
+    'total_weight_ct', 'stone_count',
+    'colour_id', 'intensity_id', 'clarity_id', 'shape', 'cut_label', 'cutting_style',
+    'treatment_id', 'origin_id', 'currency', 'price_evidence',
+    'availability', 'availability_source', 'state',
+    'source_url', 'source_slug', 'ref_derived_from', 'ref_evidence_status',
+    'raw_spec', 'import_batch_id',
+  ];
+  const valueRows: unknown[][] = [];
+  for (const record of batch) {
+    const varietyId = all.varietyIdBySlug.get(record.varietySlug) ?? null;
+    if (varietyId === null) {
+      throw new Error(`canonical-catalog: gemstone ${record.gemRef} has no variety for slug '${record.varietySlug}'`);
+    }
+    const colourId = record.colourSlug === null ? null : (all.colourIdBySlug.get(record.colourSlug) ?? null);
+    const originId = record.originSlug === null ? null : (all.originIdBySlug.get(record.originSlug) ?? null);
+    const intensityId = record.intensityName === null ? null : (all.intensityIdByName.get(record.intensityName) ?? null);
+    const clarityId = record.clarityLabel === null ? null : (all.clarityIdByLabel.get(record.clarityLabel) ?? null);
+    const treatmentId = record.treatmentLabel === null ? null : (all.treatmentIdByLabel.get(record.treatmentLabel) ?? null);
+
+    valueRows.push([
+      record.gemRef, record.kind, varietyId, null,
+      record.totalWeightCt, record.stoneCount,
+      colourId, intensityId, clarityId, record.shape, record.cutLabel, record.cuttingStyle,
+      treatmentId, originId, 'USD', 'UNKNOWN',
+      true, null, 'DRAFT',
+      record.sourceUrl, record.sourceSlug, 'URL_SLUG', record.refEvidence,
+      '{}', batchId,
+    ]);
+  }
+
+  const placeholders: string[] = [];
+  const flatValues: unknown[] = [];
+  let paramIdx = 1;
+  for (const row of valueRows) {
+    const rowPlaceholders: string[] = [];
+    for (const val of row) {
+      rowPlaceholders.push(`$${paramIdx++}`);
+      flatValues.push(val);
+    }
+    placeholders.push(`(${rowPlaceholders.join(', ')})`);
+  }
+
+  const query = `
+    INSERT INTO gemstones (${columns.join(', ')})
+    VALUES ${placeholders.join(', ')}
+    ON CONFLICT (gem_ref) DO NOTHING
+    RETURNING id::text AS id, gem_ref
+  `;
+  const res = await db.query<{ id: string; gem_ref: string }>(query, flatValues);
+  for (const r of res.rows) {
+    gemstoneIdByRef.set(r.gem_ref, r.id);
+  }
+
+  const missingRefs = batch.filter((r) => !gemstoneIdByRef.has(r.gemRef)).map((r) => r.gemRef);
+  if (missingRefs.length > 0) {
+    const found = await db.query<{ id: string; gem_ref: string }>(
+      `SELECT id::text AS id, gem_ref FROM gemstones WHERE gem_ref = ANY($1::text[])`,
+      [missingRefs],
+    );
+    for (const r of found.rows) {
+      gemstoneIdByRef.set(r.gem_ref, r.id);
+    }
+  }
+}
+
+async function batchUpsertGemstoneStones(
+  db: StageContext['db'],
+  stonesToInsert: readonly {
+    gemstoneId: string;
+    position: number;
+    stone: StoneMeasure;
+  }[],
+): Promise<void> {
+  if (stonesToInsert.length === 0) return;
+  const placeholders: string[] = [];
+  const flatValues: unknown[] = [];
+  let paramIdx = 1;
+  for (const item of stonesToInsert) {
+    placeholders.push(`($${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++})`);
+    flatValues.push(
+      item.gemstoneId, item.position,
+      item.stone.weightCt, item.stone.lengthMm, item.stone.widthMm, item.stone.depthMm,
+      item.stone.rawWeightText, item.stone.rawDimensionsText,
+      '1.000', 'EXTRACTED',
+    );
+  }
+  const query = `
+    INSERT INTO gemstone_stones (gemstone_id, position, weight_ct, length_mm, width_mm, depth_mm, raw_weight_text, raw_dimensions_text, parse_confidence, evidence_status)
+    VALUES ${placeholders.join(', ')}
+    ON CONFLICT (gemstone_id, position) DO NOTHING
+  `;
+  await db.query(query, flatValues);
+}
+
 /** Upsert gemstones then gemstone_stones (D9 rows; per-stone measures). */
 async function upsertGemstones(db: StageContext['db'], batchId: string, all: {
   records: readonly GemstoneRecord[];
@@ -711,68 +826,61 @@ async function upsertGemstones(db: StageContext['db'], batchId: string, all: {
   const treatmentRows = await db.query<{ label: string; id: string }>('SELECT label, id::text AS id FROM treatments');
   const treatmentIdByLabel = new Map<string, string>(treatmentRows.rows.map((r) => [r.label, r.id]));
 
+  const existingGemstones = await db.query<{ gem_ref: string; id: string }>('SELECT gem_ref, id::text AS id FROM gemstones');
+  const gemstoneIdByRef = new Map<string, string>(existingGemstones.rows.map((r) => [r.gem_ref, r.id]));
+
+  const existingStones = await db.query<{ k: string }>('SELECT (gemstone_id::text || \':\' || position::text) AS k FROM gemstone_stones');
+  const existingStonesSet = new Set<string>(existingStones.rows.map((r) => r.k));
+
   let stones = 0;
   let pairs = 0;
-  let gemstoneStones = 0;
-  const gemstoneIdByRef = new Map<string, string>();
-  for (const record of all.records) {
-    const isPair = record.kind === 'PAIR';
-    if (record.varietySlug.length === 0 && record.sourceSlug !== null) {
-      // inference-created record in the failed-fetch-only set: variety stays
-      // NULL-side (the schema requires variety_id NOT NULL, so the stone
-      // keeps a DRAFT variety row we DID create from the inventory when it
-      // exists; the three new refs get their own inferred variety).
-    }
-    const varietyId = all.varietyIdBySlug.get(record.varietySlug) ?? null;
-    if (varietyId === null) {
-      throw new Error(`canonical-catalog: gemstone ${record.gemRef} has no variety for slug '${record.varietySlug}'`);
-    }
-    const colourId = record.colourSlug === null ? null : (all.colourIdBySlug.get(record.colourSlug) ?? null);
-    const originId = record.originSlug === null ? null : (all.originIdBySlug.get(record.originSlug) ?? null);
-    const intensityId = record.intensityName === null ? null : (intensityIdByName.get(record.intensityName) ?? null);
-    const clarityId = record.clarityLabel === null ? null : (clarityIdByLabel.get(record.clarityLabel) ?? null);
-    const treatmentId = record.treatmentLabel === null ? null : (treatmentIdByLabel.get(record.treatmentLabel) ?? null);
-    const gemstoneId = await upsertReturning(
-      db,
-      'gemstones',
-      ['gem_ref'],
-      [
-        'gem_ref', 'kind', 'variety_id', 'species_id',
-        'total_weight_ct', 'stone_count',
-        'colour_id', 'intensity_id', 'clarity_id', 'shape', 'cut_label', 'cutting_style',
-        'treatment_id', 'origin_id', 'currency', 'price_evidence',
-        'availability', 'availability_source', 'state',
-        'source_url', 'source_slug', 'ref_derived_from', 'ref_evidence_status',
-        'raw_spec', 'import_batch_id',
-      ],
-      [
-        record.gemRef, record.kind, varietyId, null,
-        record.totalWeightCt, record.stoneCount,
-        colourId, intensityId, clarityId, record.shape, record.cutLabel, record.cuttingStyle,
-        treatmentId, originId, 'USD', 'UNKNOWN',
-        true, null, 'DRAFT',
-        record.sourceUrl, record.sourceSlug, 'URL_SLUG', record.refEvidence,
-        '{}', batchId,
-      ],
-    );
-    gemstoneIdByRef.set(record.gemRef, gemstoneId);
-    if (isPair) pairs += 1;
-    else stones += 1;
+  let gemstoneStones = existingStonesSet.size;
 
-    // per-stone rows (the D9 output): singles 1 row, pairs 2 rows; pairs
-    // WITHOUT spec data carry no measured rows (attributes stay unknown).
-    for (let position = 1; position <= record.perStone.length; position += 1) {
-      const stone = record.perStone[position - 1];
-      if (stone === undefined) break;
-      await db.query(
-        `INSERT INTO gemstone_stones (gemstone_id, position, weight_ct, length_mm, width_mm, depth_mm, raw_weight_text, raw_dimensions_text, parse_confidence, evidence_status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-         ON CONFLICT (gemstone_id, position) DO NOTHING`,
-        [gemstoneId, position, stone.weightCt, stone.lengthMm, stone.widthMm, stone.depthMm, stone.rawWeightText, stone.rawDimensionsText, '1.000', 'EXTRACTED'],
-      );
-      gemstoneStones += 1;
+  const recordsToInsert: GemstoneRecord[] = [];
+  for (const record of all.records) {
+    if (record.kind === 'PAIR') pairs += 1;
+    else stones += 1;
+    if (!gemstoneIdByRef.has(record.gemRef)) {
+      recordsToInsert.push(record);
     }
   }
+
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < recordsToInsert.length; i += BATCH_SIZE) {
+    const chunk = recordsToInsert.slice(i, i + BATCH_SIZE);
+    await batchUpsertGemstones(db, chunk, batchId, {
+      varietyIdBySlug: all.varietyIdBySlug,
+      colourIdBySlug: all.colourIdBySlug,
+      originIdBySlug: all.originIdBySlug,
+      intensityIdByName,
+      clarityIdByLabel,
+      treatmentIdByLabel,
+    }, gemstoneIdByRef);
+    if ((i + chunk.length) % 1000 === 0 || i + chunk.length === recordsToInsert.length) {
+      process.stdout.write(`  canonical-catalog: gemstones inserted ${i + chunk.length}/${recordsToInsert.length}...\n`);
+    }
+  }
+
+  const stonesToInsert: { gemstoneId: string; position: number; stone: StoneMeasure }[] = [];
+  for (const record of all.records) {
+    const gemstoneId = gemstoneIdByRef.get(record.gemRef);
+    if (gemstoneId === undefined) continue;
+    for (let position = 1; position <= record.perStone.length; position += 1) {
+      const stoneKey = `${gemstoneId}:${position}`;
+      if (existingStonesSet.has(stoneKey)) continue;
+      const stone = record.perStone[position - 1];
+      if (stone === undefined) break;
+      stonesToInsert.push({ gemstoneId, position, stone });
+      existingStonesSet.add(stoneKey);
+    }
+  }
+
+  for (let i = 0; i < stonesToInsert.length; i += BATCH_SIZE) {
+    const chunk = stonesToInsert.slice(i, i + BATCH_SIZE);
+    await batchUpsertGemstoneStones(db, chunk);
+    gemstoneStones += chunk.length;
+  }
+
   void pairsCounting(pairs);
   return { stones, pairs, gemstoneStones, gemstoneIdByRef };
 }
@@ -867,25 +975,34 @@ export function buildProductRecords(all: {
   return out;
 }
 
-/** Upsert product rows. The canonical catalogue: DRAFT, unpriced (0/UNKNOWN). */
-async function upsertProducts(db: StageContext['db'], batchId: string, all: {
-  records: readonly ProductRecord[];
-  variantIdBySku: ReadonlyMap<string, string>;
-  gemstoneIdByRef: ReadonlyMap<string, string>;
-  varietyIdBySlug: ReadonlyMap<string, string>;
-  colourIdBySlug: ReadonlyMap<string, string>;
-  varietySlugByRef: ReadonlyMap<string, string>;
-  colourSlugByRef: ReadonlyMap<string, string>;
-}): Promise<{ configured: number; readyMade: number }> {
-  let configured = 0;
-  let readyMade = 0;
-  for (const record of all.records) {
+async function batchUpsertProducts(
+  db: StageContext['db'],
+  batch: readonly ProductRecord[],
+  batchId: string,
+  all: {
+    variantIdBySku: ReadonlyMap<string, string>;
+    gemstoneIdByRef: ReadonlyMap<string, string>;
+    varietyIdBySlug: ReadonlyMap<string, string>;
+    colourIdBySlug: ReadonlyMap<string, string>;
+    varietySlugByRef: ReadonlyMap<string, string>;
+    colourSlugByRef: ReadonlyMap<string, string>;
+  },
+): Promise<void> {
+  if (batch.length === 0) return;
+  const columns = [
+    'kind', 'slug', 'title',
+    'setting_variant_id', 'gemstone_id', 'gemstone_pair_id',
+    'jewellery_type', 'variety_id', 'colour_id',
+    'total_weight_ct', 'stone_count',
+    'price_amount', 'currency', 'price_evidence',
+    'state', 'availability',
+    'source_url', 'source_slug', 'source_sku', 'source_sku_derived', 'sku_evidence_status',
+    'import_batch_id',
+  ];
+  const valueRows: unknown[][] = [];
+  for (const record of batch) {
     const variantId = record.settingVariantSku === null ? null : (all.variantIdBySku.get(record.settingVariantSku) ?? null);
     if (record.kind === 'CONFIGURED' && variantId === null) {
-      // Gate V21 (warn and hold): the (design, metal) pair of a review URL
-      // that the settings listings never captured. The runner's inferred-
-      // variant pass creates those parent rows BEFORE this upsert, so
-      // reaching here is a defect, not a value judgment.
       throw new Error(`canonical-catalog: configured product ${record.slug} has unresolved setting variant ${record.settingVariantSku}`);
     }
     const gemRefUpper = record.gemRef?.toUpperCase().replace(/^J\d+$/, '') ?? null;
@@ -894,9 +1011,6 @@ async function upsertProducts(db: StageContext['db'], batchId: string, all: {
     if (record.kind === 'CONFIGURED' && gemstoneId === null) {
       throw new Error(`canonical-catalog: configured product ${record.slug} has unresolved stone reference ${String(record.gemRef)} (gate V22)`);
     }
-    // V4's canonical truth: a CONFIGURED product's variety is the STONE's own
-    // variety (its loose-stone URL's directory); the DYO slug's head run is
-    // display-trade only, so it never overrides the stone row.
     const stoneVariety = gemRefUpper !== null && gemRefUpper.length > 0 ? (all.varietySlugByRef.get(gemRefUpper) ?? null) : null;
     const varietySlug = record.kind === 'CONFIGURED' ? stoneVariety : record.varietySlug;
     const varietyId = varietySlug === null ? null : (all.varietyIdBySlug.get(varietySlug) ?? null);
@@ -906,41 +1020,75 @@ async function upsertProducts(db: StageContext['db'], batchId: string, all: {
     const stoneColour = gemRefUpper !== null && gemRefUpper.length > 0 ? (all.colourSlugByRef.get(gemRefUpper) ?? null) : null;
     const colourSlug = record.kind === 'CONFIGURED' ? stoneColour : record.colourSlug;
     const colourId = colourSlug === null ? null : (all.colourIdBySlug.get(colourSlug) ?? null);
-    // AGENTS §4 / SoT Example B: an observed SKU may only live in source_sku;
-    // a parsed identity only in source_sku_derived. The derived-identities
-    // stage (plan task 15) verifies the dedicated 221 rows.
+
     const sourceSkuValue = record.sourceSku;
     const derivedSkuValue = record.sourceSku === null ? record.derivedSkuIdentity : null;
-    await upsertReturning(
-      db,
-      'products',
-      ['slug'],      // partial unique index (deleted_at IS NULL) requires the predicate
 
-      [
-        'kind', 'slug', 'title',
-        'setting_variant_id', 'gemstone_id', 'gemstone_pair_id',
-        'jewellery_type', 'variety_id', 'colour_id',
-        'total_weight_ct', 'stone_count',
-        'price_amount', 'currency', 'price_evidence',
-        'state', 'availability',
-        'source_url', 'source_slug', 'source_sku', 'source_sku_derived', 'sku_evidence_status',
-        'import_batch_id',
-      ],
-      [
-        record.kind, record.slug, record.title,
-        variantId, isPairRef ? null : gemstoneId, isPairRef ? gemstoneId : null,
-        record.jewelleryType, varietyId, colourId,
-        record.totalWeightCt, record.stoneCount,
-        '0', 'USD', 'UNKNOWN',
-        'DRAFT', true,
-        record.sourceUrl, record.sourceSlug, sourceSkuValue, derivedSkuValue, record.skuEvidenceStatus,
-        batchId,
-      ],
-      { conflictPredicate: 'WHERE deleted_at IS NULL', lookupPositions: [1] },
-    );
+    valueRows.push([
+      record.kind, record.slug, record.title,
+      variantId, isPairRef ? null : gemstoneId, isPairRef ? gemstoneId : null,
+      record.jewelleryType, varietyId, colourId,
+      record.totalWeightCt, record.stoneCount,
+      '0', 'USD', 'UNKNOWN',
+      'DRAFT', true,
+      record.sourceUrl, record.sourceSlug, sourceSkuValue, derivedSkuValue, record.skuEvidenceStatus,
+      batchId,
+    ]);
+  }
+
+  const placeholders: string[] = [];
+  const flatValues: unknown[] = [];
+  let paramIdx = 1;
+  for (const row of valueRows) {
+    const rowPlaceholders: string[] = [];
+    for (const val of row) {
+      rowPlaceholders.push(`$${paramIdx++}`);
+      flatValues.push(val);
+    }
+    placeholders.push(`(${rowPlaceholders.join(', ')})`);
+  }
+
+  const query = `
+    INSERT INTO products (${columns.join(', ')})
+    VALUES ${placeholders.join(', ')}
+    ON CONFLICT (slug) WHERE deleted_at IS NULL DO NOTHING
+  `;
+  await db.query(query, flatValues);
+}
+
+async function upsertProducts(db: StageContext['db'], batchId: string, all: {
+  records: readonly ProductRecord[];
+  variantIdBySku: ReadonlyMap<string, string>;
+  gemstoneIdByRef: ReadonlyMap<string, string>;
+  varietyIdBySlug: ReadonlyMap<string, string>;
+  colourIdBySlug: ReadonlyMap<string, string>;
+  varietySlugByRef: ReadonlyMap<string, string>;
+  colourSlugByRef: ReadonlyMap<string, string>;
+}): Promise<{ configured: number; readyMade: number }> {
+  const existingProducts = await db.query<{ slug: string }>('SELECT slug FROM products WHERE deleted_at IS NULL');
+  const existingProductSlugs = new Set<string>(existingProducts.rows.map((r) => r.slug));
+
+  let configured = 0;
+  let readyMade = 0;
+  const productsToInsert: ProductRecord[] = [];
+
+  for (const record of all.records) {
     if (record.kind === 'CONFIGURED') configured += 1;
     else readyMade += 1;
+    if (!existingProductSlugs.has(record.slug)) {
+      productsToInsert.push(record);
+    }
   }
+
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < productsToInsert.length; i += BATCH_SIZE) {
+    const chunk = productsToInsert.slice(i, i + BATCH_SIZE);
+    await batchUpsertProducts(db, chunk, batchId, all);
+    if ((i + chunk.length) % 1000 === 0 || i + chunk.length === productsToInsert.length) {
+      process.stdout.write(`  canonical-catalog: products inserted ${i + chunk.length}/${productsToInsert.length}...\n`);
+    }
+  }
+
   return { configured, readyMade };
 }
 

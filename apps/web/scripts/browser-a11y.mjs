@@ -52,7 +52,6 @@ const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 async function runAxe(page) {
   await page.evaluate(AXE_SOURCE);
   return page.evaluate(async (tags) => {
-    // eslint-disable-next-line no-undef -- axe is injected above
     const res = await window.axe.run(document, {
       runOnly: { type: 'tag', values: tags },
       resultTypes: ['violations'],

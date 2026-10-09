@@ -8,13 +8,13 @@
 //
 // `server-only` resolves to its empty "react-server" build in tests: the
 // package's guard exists to fail CLIENT bundles, and vitest's node
-// environment is a server context.
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   resolve: {
     alias: {
-      'server-only': new URL('./node_modules/server-only/empty.js', import.meta.url).pathname,
+      'server-only': fileURLToPath(new URL('./node_modules/server-only/empty.js', import.meta.url)),
     },
   },
   test: {

@@ -71,7 +71,9 @@ function parseArgs(argv: readonly string[]): Args {
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const repoRoot = process.env['MAIHAN_REPO_ROOT'] ?? process.cwd();
-  const databaseUrl = process.env['DATABASE_URL'] ?? '';
+  const rawDatabaseUrl = process.env['DATABASE_URL'] ?? '';
+  // ADR/design requirement: migration execution requires a direct (non-pooled) connection
+  const databaseUrl = rawDatabaseUrl.replace('-pooler.', '.');
 
   if (args.command !== 'plan' && args.command !== 'run' && args.command !== 'status') {
     usage();

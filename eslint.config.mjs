@@ -134,7 +134,7 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',
-      globals: { process: 'readonly', console: 'readonly' },
+      globals: { process: 'readonly', console: 'readonly', document: 'readonly', window: 'readonly' },
     },
     rules: { 'no-console': 'off' },
   },
