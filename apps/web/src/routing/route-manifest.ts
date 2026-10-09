@@ -342,6 +342,24 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     storefront: false,
     group: 'api',
   },
+
+  // ── SEO endpoints (Phase 4 Task 7: generated, never migrated) ────────────
+  {
+    fsPath: 'src/app/sitemap.xml/route.ts',
+    sotPath: 'app/sitemap.xml/route.ts   # sitemap index',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.8 + technical_design/34 §9: sitemaps are generated, sharded above 50,000 URLs; /sitemap-static.xml 301s here.',
+    storefront: false,
+    group: 'app-root',
+  },
+  {
+    fsPath: 'src/app/sitemap-products/[shard]/route.ts',
+    sotPath: 'app/sitemap-products/[shard]/route.ts   # /sitemap-products/{N}.xml',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.8 + technical_design/34 §9: the numbered product sitemap shards; /sitemap-products-N.xml 301s here.',
+    storefront: false,
+    group: 'app-root',
+  },
 ];
 
 /** Every file the manifest expects to find on disk under `apps/web/`. */
