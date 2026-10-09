@@ -9,6 +9,8 @@ import { notFound } from 'next/navigation';
 
 import { isProductNotFound } from '../../../../lib/catalog-errors.js';
 import { loadProductDetail } from '../../../../lib/catalog-server.js';
+import { siteBaseUrl, productJsonLd } from '../../../../lib/jsonld.js';
+import { JsonLd } from '../../../../components/seo/JsonLd.js';
 import { ProductDetailContent } from '../../../../components/catalog/ProductDetailContent.js';
 
 // Route segment config. Catalog views render per request from the cached
@@ -35,5 +37,21 @@ export default async function ProductDetailPage({ params }: PageProps) {
     if (isProductNotFound(detail.error)) notFound();
     throw detail.error; // route error boundary renders the recovery view (Task 5)
   }
-  return <ProductDetailContent detail={detail.value} />;
+  // Task 8: JSON-LD from the SAME server data the page renders — the contract
+  // DTO plus the breadcrumb trail the page itself builds. SITE_URL provides the
+  // canonical base; without it the page must not emit wrong canonical URLs.
+  const base = siteBaseUrl();
+  const crumbs = [
+    { label: 'Home', href: '/' },
+    ...(detail.value.variety !== null
+      ? [{ label: detail.value.variety.name, href: `/${detail.value.variety.slug}` }]
+      : []),
+    { label: detail.value.title },
+  ];
+  return (
+    <>
+      <JsonLd payload={productJsonLd(base, detail.value, crumbs)} />
+      <ProductDetailContent detail={detail.value} />
+    </>
+  );
 }

@@ -8,10 +8,21 @@
  * tasks. Admin does not inherit storefront chrome; each group contributes
  * its own layout over this base.
  */
+import { organizationJsonLdPayload } from '../lib/jsonld.js';
+import { JsonLd } from '../components/seo/JsonLd.js';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {/* Task 8: the site-wide Organization entity, emitted only when the
+            canonical base (SITE_URL) is configured. Statically prerendered
+            pages build without it; the honest fallback omits the entity rather
+            than fabricating a domain. Surfaces whose correctness depends on
+            the base (sitemap, product canonicals) still fail loudly. */}
+        {organizationJsonLdPayload() !== null && <JsonLd payload={organizationJsonLdPayload() as string} />}
+        {children}
+      </body>
     </html>
   );
 }
