@@ -31,5 +31,6 @@ export * from './dto/catalog/facets.js';
 export * from './dto/catalog/taxonomy.js';
 export * from './dto/catalog/queries.js';
 export * from './dto/catalog/http-query.js';
+export * from './dto/catalog/search.js';
 export * from './openapi/endpoints.js';
 export * from './openapi/generate.js';
