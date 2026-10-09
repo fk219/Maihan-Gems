@@ -3,6 +3,62 @@
 **Last updated:** 2026-10-08
 **Update this file after every meaningful implementation task.**
 
+---
+
+# PHASE 3 — COMPLETE (2026-10-08). Tasks 1-10 done. PHASE 4 — READY (unauthorised).
+
+Foundation commit `476b1ba feat(api): implement catalog query foundation` (tasks
+1-5) + ONE continuation commit `feat(api): complete catalog api controls`
+(tasks 6-10). Every phase-3 task is implemented, tested and validated against
+the live local PostgreSQL 16 (`maihan_dev`) AND a live Redis 7 container.
+
+## Tasks 6-10 (the continuation commit)
+
+| Task | Delivered |
+|---|---|
+| 6 — cache tags + generation-bump invalidation | `apps/web/src/modules/catalog/application/`: deterministic cache keys (`{ns}:v1:{scope}:{kind}:{identity}:g={gen}:{actor}`), tags that are BOTH invalidation units and Task 10 surrogate keys, cache-aside service with generation-bump + tag purge, `{v:1}` codec envelope that decodes to a miss on any problem. 43 unit tests |
+| 7 — Redis degradation | `integrations/redis.ts` fail-fast client (offline queue off, bounded retries, errors recorded never thrown) + every store op throws so the service degrades to a BYPASS with Postgres as truth. Dead-Redis suite always runs; live-Redis suite runs under REDIS_URL |
+| 8 — OpenAPI from Zod | `@asteasolutions/zod-to-openapi` (APPROVED slot) generates OpenAPI 3.1 from the committed DTOs via ONE endpoint catalog shared with the router; committed `src/generated/openapi.json` is drift-tested (byte-identical generation, parameter/response fidelity). HTTP layer: web-standard `(Request)=>Response` handler, node adapter, SoT 10.4 envelopes, closed error registry |
+| 9 — rate limiting | SoT 11.11 verbatim: public GET **300/min per IP**, hashed PII-free bucket keys `rl:{scope}:{hash}:{window}` (SoT 15.1 row 15), Redis INCR/EXPIRE primary + LOCKED `rate_limit_counters` fallback, failure mode allow for public reads (doc 06), 429 RATE_LIMITED envelope + Retry-After + RateLimit-* headers. Socket-derived client identity in the adapter (spoofed header proven ignored over real HTTP) |
+| 10 — cache headers + surrogate keys | `api/headers.ts`: `Cache-Control: public, max-age={route TTL}, stale-while-revalidate={TTL}` from the SoT 11.2 route table (60s list / 300s detail / 1h taxonomy), `Surrogate-Key` = the SAME tag set invalidation purges (tested end-to-end), private surfaces never shared, internal cache keys never emitted |
+
+## Validation (2026-10-08)
+
+- `pnpm lint` 0 · `pnpm build` 0 · `tsc -b --dry` all projects up to date
+- **268 tests passed + 3 skipped, zero failures**, with live DB + live Redis:
+  domain 145 · contracts 13 · db 63 · **apps/web 135 (9 files)** · migrate 33
+- DB-backed contract suite (`api-db.spec.ts`): real migrated catalogue (44,218
+  staging rows / 9,900 products / 22,765 gemstones / 10,391 variants) —
+  envelope, facet consistency, pagination determinism + keyset advance,
+  provenance verbatim (source_url compared row-for-row), rejected-filters
+  honesty, publication gate (DRAFT stays 404). Publishes 3 real DRAFT rows for
+  the suite and restores their exact prior state (verified: 0 published, 0
+  rate-limit rows after every run); skips cleanly with no DATABASE_URL and on
+  an unmigrated database (CI-safe)
+- Performance (local PG16, n=200, filtered list variety+metal, limit 24):
+  uncached p50 38.7ms / **p95 65.3ms**; cached hit p50 0.06ms / **p95 0.12ms**
+- Real-server smoke test (dist server + curl): documented headers over HTTP,
+  404/405 envelopes, Redis buckets + cache tags visible — it CATCHES the
+  missing socket identity, fixed in the adapter and frozen by server.spec.ts
+- CI gained: contracts/OpenAPI drift gate, compose-DB migration, web suites
+
+## Decisions recorded in code (not ADRs)
+
+- Fixed-window counters (not token buckets) in BOTH backends, because SoT
+  15.1 key pattern AND the locked `rate_limit_counters` PK are window-shaped;
+  limits/windows/identity are verbatim SoT. Reconciliation documented in
+  `ratelimit/policy.ts`.
+- RateLimit gate returns a DECISION (allowed+headers), not `Response|null`, so
+  allowed responses carry their budget headers too.
+- DB-backed spec publishes 3 DRAFT products transiently with exact-state
+  restore (disposable local dev database only; archive untouched).
+
+**NEXT: PHASE 4 (Storefront) is READY but NOT authorised.** First task per
+INITIAL_IMPLEMENTATION_PLAN §11 Phase 4: “Build the route tree from Source of
+Truth 12.2”. Do not begin without explicit user approval.
+
+---
+
 ## Documentation refresh
 
 **Task:** simplified the root SRS to a concise, client-friendly format.
@@ -523,6 +579,20 @@ completion or full-corpus V1–V22/V17 result was asserted. The SRS records the
 discrepancy between the migration status above and additional uncommitted
 stage code in the current working tree; reconcile and validate that code
 before updating the Phase 2 completion status.
+
+## AI Gemologist SRS scope update (2026-10-08)
+
+Updated the Technical SRS and client-facing SRS to define the AI as a
+customer-facing Gemologist experience, not a generic chatbot: grounded
+gemstone guidance, real catalogue-backed product cards, comparisons, and
+guided DYO using existing eligible catalogue items. Compatibility, price, and
+availability remain deterministic application decisions. AI-generated
+jewellery imagery, 3D models, and manufacturing-ready bespoke designs are
+excluded unless separately approved. This is a requirements update only; the
+AI feature remains unimplemented.
+
+The Technical SRS was also reconciled with the later Phase 2 completion record
+below: V1–V22 and deep V17 passed on `maihan_dev`; Phase 3 remains not started.
 ---
 
 # GT20 COMPLETE — Phase 2 CLOSED (2026-10-08)
@@ -577,3 +647,12 @@ SKIPPED) · certificates 1,135 (all UNVERIFIED) · redirects 44,218 (301×43,539
 
 **PHASE 1 — COMPLETE. PHASE 2 — COMPLETE (all gates green, committed).
 PHASE 3 — NOT STARTED.**
+
+## Client-facing Technical SRS
+
+Revised `docs/MAIHAN_GEMS_TECHNICAL_SRS.md` to version 1.2 for FKodelabs to
+submit to Maihan Group. The document emphasizes the AI Gemologist experience,
+uses functional and architecture language, clarifies the configured-jewellery
+composition constraints, and omits repository progress and implementation
+identifiers from the client-facing text. Markdown structure and seven Mermaid
+diagrams were checked.
