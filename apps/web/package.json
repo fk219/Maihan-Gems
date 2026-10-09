@@ -7,7 +7,8 @@
     "build": "tsc -b && next build --webpack",
     "typecheck": "tsc -b",
     "test": "vitest run",
-    "start": "node ./dist/api/server.js"
+    "start": "node ./dist/api/server.js",
+    "check:budgets": "node scripts/check-bundle-budgets.mjs"
   },
   "dependencies": {
     "@maihan/config": "workspace:*",

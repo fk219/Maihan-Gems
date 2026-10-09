@@ -1,0 +1,16 @@
+{
+  "source": "PROJECT_SOURCE_OF_TRUTH.md section 12.11 (Performance budget)",
+  "note": "maxInitialJsGzipKb values are the SoT 12.11 budgets verbatim. This file is the enforcement configuration, not a new threshold.",
+  "budgets": [
+    {
+      "label": "category page",
+      "route": "(storefront)/[varietySlug]",
+      "maxInitialJsGzipKb": 170
+    },
+    {
+      "label": "product page",
+      "route": "(storefront)/products/[productSlug]",
+      "maxInitialJsGzipKb": 190
+    }
+  ]
+}

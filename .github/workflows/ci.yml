@@ -61,6 +61,17 @@ jobs:
       - name: Storefront production build
         run: pnpm --filter @maihan/web run build
 
+      # Phase 4 Task 10: the SoT 12.11 initial-JS budgets (category <= 170 KB
+      # gzip, product <= 190 KB gzip) enforced against the production build
+      # just produced. Deterministic: chunk selection comes from the build's
+      # own manifests (rootMainFiles + each route's client-reference
+      # manifest) and sizes are gzip of the exact chunk bytes. A missing build
+      # or missing chunk FAILS the check (fail closed, never skipped).
+      # SoT 12.11's LCP p75 < 2.5 s is a real-user metric on staging and is
+      # deliberately NOT claimed here; see the script's explicit output line.
+      - name: Storefront performance budgets (SoT 12.11)
+        run: pnpm --filter @maihan/web run check:budgets
+
       # ADR-021 ACCEPTED 2026-10-07: Vitest runs the unit/domain layer. Task 6
       # scope = packages/domain value objects + INV-01/02/03 predicates.
       # (Playwright/E2E is accepted but deliberately not run here.)
