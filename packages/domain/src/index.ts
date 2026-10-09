@@ -26,3 +26,4 @@ export * from './product/invariants.js';
 export * from './sku/grammar.js';
 export * from './configuration/index.js';
 export * from './spec/d9-tokenizer.js';
+export * from './search/intent.js';
