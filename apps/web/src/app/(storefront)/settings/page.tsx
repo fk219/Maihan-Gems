@@ -66,7 +66,7 @@ export default async function SettingsIndexPage({ searchParams }: PageProps) {
           {result.items.map((setting) => (
             <li key={setting.design_code}>
               <article className="card settings-card">
-                <h3 className="settings-card__title">{setting.name}</h3>
+                <h2 className="settings-card__title">{setting.name}</h2>
                 <p className="settings-card__meta">
                   {setting.jewellery_type.toLowerCase()}
                   {setting.style !== null && <> · {setting.style.label}</>}

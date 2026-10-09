@@ -32,9 +32,9 @@ const KIND_LABEL: Record<ProductSummary['kind'], string> = {
 export function ProductCard({ product }: ProductCardProps) {
   return (
     <Card href={`/products/${product.slug}`} linkLabel={product.title}>
-      <h3 className="product-card__title">
+      <h2 className="product-card__title">
         <a href={`/products/${product.slug}`}>{product.title}</a>
-      </h3>
+      </h2>
       {product.subtitle !== null && (
         <p className="product-card__subtitle">{product.subtitle}</p>
       )}
