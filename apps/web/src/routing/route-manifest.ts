@@ -69,7 +69,12 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: variety index for loose stones',
     storefront: true,
     group: 'storefront',
-    extraFiles: ['src/app/(storefront)/[varietySlug]/not-found.tsx'],
+    extraFiles: [
+      // SoT 12.2 line + Task 5 states (loading/error/not-found).
+      'src/app/(storefront)/[varietySlug]/not-found.tsx',
+      'src/app/(storefront)/[varietySlug]/loading.tsx',
+      'src/app/(storefront)/[varietySlug]/error.tsx',
+    ],
   },
   {
     fsPath: 'src/app/(storefront)/[varietySlug]-pairs/page.tsx',
@@ -77,6 +82,11 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: matched-pair variety index',
     storefront: true,
     group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/[varietySlug]-pairs/not-found.tsx',
+      'src/app/(storefront)/[varietySlug]-pairs/loading.tsx',
+      'src/app/(storefront)/[varietySlug]-pairs/error.tsx',
+    ],
   },
   {
     fsPath: 'src/app/(storefront)/[varietySlug]-rings/page.tsx',
@@ -84,6 +94,11 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: ready-made variety rings index',
     storefront: true,
     group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/[varietySlug]-rings/not-found.tsx',
+      'src/app/(storefront)/[varietySlug]-rings/loading.tsx',
+      'src/app/(storefront)/[varietySlug]-rings/error.tsx',
+    ],
   },
   {
     fsPath: 'src/app/(storefront)/[varietySlug]-rings/[productSlug]/page.tsx',
@@ -91,6 +106,11 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: ready-made product detail',
     storefront: true,
     group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/[varietySlug]-rings/[productSlug]/not-found.tsx',
+      'src/app/(storefront)/[varietySlug]-rings/[productSlug]/loading.tsx',
+      'src/app/(storefront)/[varietySlug]-rings/[productSlug]/error.tsx',
+    ],
   },
   {
     fsPath: 'src/app/(storefront)/colour/[colourSlug]/page.tsx',
@@ -98,6 +118,11 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: colour-family listing',
     storefront: true,
     group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/colour/[colourSlug]/not-found.tsx',
+      'src/app/(storefront)/colour/[colourSlug]/loading.tsx',
+      'src/app/(storefront)/colour/[colourSlug]/error.tsx',
+    ],
   },
   {
     fsPath: 'src/app/(storefront)/settings/page.tsx',
@@ -105,6 +130,11 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: settings catalog index',
     storefront: true,
     group: 'storefront',
+    extraFiles: [
+      // The settings index always exists; only loading/error apply (Task 5).
+      'src/app/(storefront)/settings/loading.tsx',
+      'src/app/(storefront)/settings/error.tsx',
+    ],
   },
   {
     fsPath: 'src/app/(storefront)/settings/[settingSku]/page.tsx',
@@ -126,6 +156,11 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2 + 13.2: unified product detail',
     storefront: true,
     group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/products/[productSlug]/not-found.tsx',
+      'src/app/(storefront)/products/[productSlug]/loading.tsx',
+      'src/app/(storefront)/products/[productSlug]/error.tsx',
+    ],
   },
   {
     fsPath: 'src/app/(storefront)/design-your-own/page.tsx',

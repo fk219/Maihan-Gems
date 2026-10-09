@@ -1,10 +1,12 @@
 /**
  * apps/web/src/app/(storefront)/[varietySlug]/not-found.tsx
  *
- * SoT 12.2 lists `[variety]/not-found.tsx` explicitly. UI lands with Phase 4
- * epic E4.5 (states); the file exists as a structural placeholder so the
- * route group is complete without pretending Task 5 was done.
+ * Not-found state for the variety route (Task 5, replacing the Task 1
+ * structural stub). The SoT 12.2 line `[variety]/not-found.tsx` now carries
+ * the real recovery navigation.
  */
+import { CatalogNotFoundView } from '../../../components/catalog/CatalogNotFoundView.js';
+
 export default function VarietyNotFound() {
-  return null;
+  return <CatalogNotFoundView subject="gemstone variety" browseHref="/varieties" browseLabel="Browse varieties" />;
 }
