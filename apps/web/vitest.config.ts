@@ -19,6 +19,10 @@ export default defineConfig({
   },
   test: {
     include: ['src/**/*.spec.ts', 'src/**/*.spec.tsx'],
+    // Default stays `node` (server-side specs, react-dom/server). Suites that
+    // exercise real interactive DOM behaviour (Phase 4 Task 9 mega menu)
+    // opt into `happy-dom` per-file via the `@vitest-environment` comment —
+    // no global environment change, no extra runner.
     environment: 'node',
   },
 });
