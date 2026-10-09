@@ -6,5 +6,10 @@
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["dist", "node_modules"],
+  // The source imports '@maihan/domain' (enums, filters, provenance). Without
+  // this reference, `tsc -b` type-checks contracts BEFORE domain has emitted
+  // dist/, so the types condition fails on a clean tree and only succeeds on
+  // a second run (once domain/dist exists from a previous build).
+  "references": [{ "path": "../domain" }]
 }

@@ -37,7 +37,13 @@ const { Client } = pg;
 
 const SCRATCH_DATABASE = 'maihan_dev_migrate';
 const databaseUrl = process.env['DATABASE_URL'] ?? '';
-const dbReady = databaseUrl.includes('@') && !(new URL(databaseUrl).host.endsWith('.neon.tech'));
+// dbReady guards the URL checks too: `new URL('')` throws before the skipIf
+// predicate ever evaluates, so an unconfigured environment must short-circuit
+// first (and a Neon endpoint never gets the disposable scratch database —
+// DROP/CREATE DDL is for the local Postgres only).
+const dbReady =
+  databaseUrl.includes('@') &&
+  !new URL(databaseUrl.startsWith('postgresql://') || databaseUrl.startsWith('postgres://') ? databaseUrl : 'postgresql://invalid.test/none').host.endsWith('.neon.tech');
 const d = describe.skipIf(!dbReady);
 
 interface Fixture {
@@ -145,6 +151,11 @@ let admin: pg.Client;
 let scratch: pg.Client;
 
 beforeAll(async () => {
+  // NOT dbReady means DATABASE_URL is unset or Neon: the skipIf predicate
+  // skipped every suite, but vitest still runs global beforeAll/afterAll hooks.
+  // Touch nothing database-related in that case (the fixture dir is only
+  // created when the suites will actually run).
+  if (!dbReady) return;
   fixture = createFixture();
   const adminUrl = new URL(databaseUrl);
   adminUrl.pathname = '/postgres';
@@ -272,6 +283,9 @@ d('idempotency (mandatory gate 3)', () => {
   });
 });
 
+d('downstream-stage isolation on refusal', () => {
+  // (Originally an orphaned `it(...)` between suite closes — a mis-merge left
+  // it outside every d('...') block, so it ran even when dbReady was false.)
   it('downstream stages do not execute when an upstream verification fails again', async () => {
     // Fail verify-artifacts durably (as if interrupted mid-verification).
     await simulateFailed('stage:verify-artifacts', 'simulated interruption during verification');
@@ -291,6 +305,7 @@ d('idempotency (mandatory gate 3)', () => {
     // Restore.
     writeFileSync(tamperedPath, 'alpha content A\n'.repeat(64));
   });
+});
 
 d('not-implemented stage refusal', () => {
   it('a declared future stage refuses to execute and marks itself FAILED', async () => {
