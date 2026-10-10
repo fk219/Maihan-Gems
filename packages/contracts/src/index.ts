@@ -35,3 +35,4 @@ export * from './dto/catalog/search.js';
 export * from './openapi/endpoints.js';
 export * from './openapi/generate.js';
 export * from './dto/commerce/cart.js';
+export * from './dto/commerce/checkout.js';

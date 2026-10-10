@@ -93,4 +93,15 @@ export {
   removeCartItem,
   mergeGuestCart,
 } from './commerce/cart-repository.js';
+export {
+  reserveStockForCart,
+  releaseStockForSession,
+  isGemstoneReserved,
+} from './commerce/inventory-reservation.js';
+export {
+  createCheckoutSession,
+  getCheckoutSession,
+  saveCheckoutSession,
+} from './commerce/checkout-session-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
+

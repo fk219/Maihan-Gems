@@ -30,3 +30,4 @@ export * from './search/intent.js';
 export * from './search/ranking.js';
 export * from './search/synonyms.js';
 export * from './commerce/cart.js';
+export * from './commerce/inventory.js';

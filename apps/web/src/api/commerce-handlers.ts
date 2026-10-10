@@ -13,13 +13,16 @@ import {
   AddToCartInputSchema,
   ContractError,
   CreateCartInputSchema,
+  CreateCheckoutSessionInputSchema,
   MergeCartInputSchema,
   UpdateCartItemInputSchema,
 } from '@maihan/contracts';
 import {
   addItemToCart,
   createCart,
+  createCheckoutSession,
   getCartByToken,
+  getCheckoutSession,
   mergeGuestCart,
   removeCartItem,
   updateCartItemQuantity,
@@ -115,4 +118,26 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
       body: { data: cart },
     };
   },
+
+  async createCheckoutSession(ctx) {
+    const db = getDb(ctx);
+    const body = await parseBody(ctx.request);
+    const input = CreateCheckoutSessionInputSchema.parse(body);
+    const session = await createCheckoutSession(db, input);
+    return {
+      status: 201,
+      body: { data: session },
+    };
+  },
+
+  async getCheckoutSession(ctx) {
+    const db = getDb(ctx);
+    const sessionId = requireIdentifier(ctx.params['sessionId'], 'sessionId');
+    const session = await getCheckoutSession(db, sessionId);
+    return {
+      status: 200,
+      body: { data: session },
+    };
+  },
 };
+

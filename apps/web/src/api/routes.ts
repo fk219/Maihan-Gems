@@ -74,6 +74,10 @@ export const COMMERCE_ROUTES: readonly RouteDefinition[] = [
   { id: 'removeCartItem', method: 'DELETE', path: '/carts/{cartToken}/items/{itemId}' },
   { id: 'mergeCart', method: 'POST', path: '/api/v1/carts/{cartToken}/merge' },
   { id: 'mergeCart', method: 'POST', path: '/carts/{cartToken}/merge' },
+  { id: 'createCheckoutSession', method: 'POST', path: '/api/v1/checkout/sessions' },
+  { id: 'createCheckoutSession', method: 'POST', path: '/checkout/sessions' },
+  { id: 'getCheckoutSession', method: 'GET', path: '/api/v1/checkout/sessions/{sessionId}' },
+  { id: 'getCheckoutSession', method: 'GET', path: '/checkout/sessions/{sessionId}' },
 ];
 
 export const ALL_ROUTES: readonly RouteDefinition[] = [
