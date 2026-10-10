@@ -39,6 +39,7 @@ import { ACCOUNT_HANDLERS } from './account-handlers.js';
 import { FAVORITES_HANDLERS } from './favorites-handlers.js';
 import { ADDON_HANDLERS } from './addon-handlers.js';
 import { DISCOUNT_HANDLERS } from './discount-handlers.js';
+import { REFUND_HANDLERS } from './refund-handlers.js';
 import {
   errorResponse,
   newRequestId,
@@ -121,7 +122,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       ACCOUNT_HANDLERS[lookup.route.id] ??
       FAVORITES_HANDLERS[lookup.route.id] ??
       ADDON_HANDLERS[lookup.route.id] ??
-      DISCOUNT_HANDLERS[lookup.route.id];
+      DISCOUNT_HANDLERS[lookup.route.id] ??
+      REFUND_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }

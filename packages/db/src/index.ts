@@ -150,6 +150,14 @@ export {
   validateDiscount,
   redeemDiscount,
 } from './commerce/discount-repository.js';
+export {
+  requestRefund,
+  approveRefund,
+  rejectRefund,
+  executeRefund,
+  getOrderRefunds,
+  getRefund,
+} from './commerce/refund-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
 
 

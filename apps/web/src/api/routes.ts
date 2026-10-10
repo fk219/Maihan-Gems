@@ -139,6 +139,19 @@ export const DISCOUNT_ROUTES: readonly RouteDefinition[] = [
   { id: 'getDiscountEndpoint', method: 'GET', path: '/discounts/{code}' },
 ];
 
+export const REFUND_ROUTES: readonly RouteDefinition[] = [
+  { id: 'requestRefundHandler', method: 'POST', path: '/api/v1/orders/{orderId}/refunds' },
+  { id: 'requestRefundHandler', method: 'POST', path: '/orders/{orderId}/refunds' },
+  { id: 'listOrderRefundsHandler', method: 'GET', path: '/api/v1/orders/{orderId}/refunds' },
+  { id: 'listOrderRefundsHandler', method: 'GET', path: '/orders/{orderId}/refunds' },
+  { id: 'approveRefundHandler', method: 'POST', path: '/api/v1/refunds/{refundId}/approve' },
+  { id: 'approveRefundHandler', method: 'POST', path: '/refunds/{refundId}/approve' },
+  { id: 'rejectRefundHandler', method: 'POST', path: '/api/v1/refunds/{refundId}/reject' },
+  { id: 'rejectRefundHandler', method: 'POST', path: '/refunds/{refundId}/reject' },
+  { id: 'executeRefundHandler', method: 'POST', path: '/api/v1/refunds/{refundId}/execute' },
+  { id: 'executeRefundHandler', method: 'POST', path: '/refunds/{refundId}/execute' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
@@ -147,6 +160,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...FAVORITES_ROUTES,
   ...ADDON_ROUTES,
   ...DISCOUNT_ROUTES,
+  ...REFUND_ROUTES,
 ];
 
 export type RouteLookup =

@@ -42,3 +42,4 @@ export * from './dto/commerce/account.js';
 export * from './dto/commerce/favorites.js';
 export * from './dto/commerce/addon.js';
 export * from './dto/commerce/discount.js';
+export * from './dto/commerce/refund.js';
