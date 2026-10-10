@@ -12,7 +12,7 @@
  *   - PROJECT_SOURCE_OF_TRUTH.md §11.3 & §14
  *   - technical_design/12_SEARCH_ARCHITECTURE.md §38-63
  */
-import { sql, type SQL } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import type { CatalogDatabase } from '../catalog/executor.js';
 import {
   buildProductsWhere,
@@ -21,7 +21,6 @@ import {
   resolveProductFilters,
 } from '../catalog/predicates.js';
 import {
-  type FilterWhitelist,
   resolveFilterWhitelists,
 } from '../catalog/whitelists.js';
 import type {

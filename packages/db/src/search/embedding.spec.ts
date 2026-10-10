@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Pool } from 'pg';
+import { sql } from 'drizzle-orm';
 import { createCatalogDatabase } from '../catalog/executor.js';
 import {
   composeProductEmbeddingDocument,
@@ -109,6 +110,9 @@ describe('Product Embedding Composition & Idempotency (Phase 5 Task 6)', () => {
       };
 
       const testModel = 'test-model-v1';
+
+      // Clean up previous test run row to ensure clean initial state
+      await db.execute(sql`DELETE FROM product_embeddings WHERE product_id = ${testProductId}::uuid AND embedding_model = ${testModel}`);
 
       // First run: should generate and persist
       const res1 = await syncProductEmbedding(db, testProductId, fakeProvider, testModel);

@@ -23,6 +23,11 @@ import type {
   SettingListResult,
   SettingVariantEnvelope,
   TaxonomyReadModel,
+  SearchQuery,
+  SearchResult,
+  SearchSuggestQuery,
+  SearchSuggestResult,
+  SimilarGemstonesResult,
 } from '@maihan/contracts';
 import { contractNotFound } from '@maihan/contracts';
 import { MemoryCacheStore, MemoryGenerationStore } from '../infrastructure/cache-store.js';
@@ -190,6 +195,9 @@ export interface PortCallCounts {
   getSettingByDesignCode: number;
   getSettingVariantBySku: number;
   getTaxonomy: number;
+  search: number;
+  suggest: number;
+  similarGemstones: number;
 }
 
 /**
@@ -206,6 +214,9 @@ export class FakeCatalogPort implements CatalogQueryPort {
     getSettingByDesignCode: 0,
     getSettingVariantBySku: 0,
     getTaxonomy: 0,
+    search: 0,
+    suggest: 0,
+    similarGemstones: 0,
   };
 
   /** When set, executed methods reject with this error. */
@@ -313,6 +324,43 @@ export class FakeCatalogPort implements CatalogQueryPort {
     this.guard('getTaxonomy');
     if (this.taxonomyResult !== null) return this.taxonomyResult;
     return emptyTaxonomy();
+  }
+
+  async search(_query: SearchQuery): Promise<SearchResult> {
+    this.guard('search');
+    void _query;
+    return {
+      items: [],
+      facets: EMPTY_FACETS,
+      rejected_filters: [],
+      meta: {
+        limit: 24,
+        has_more: false,
+        next_cursor: null,
+        search_version: 'search-v1',
+        strategy: 'STRUCTURED_ONLY',
+        intent: 'PRODUCT_SEARCH',
+        degraded: false,
+        candidate_count: 0,
+      },
+    };
+  }
+
+  async suggest(query: SearchSuggestQuery): Promise<SearchSuggestResult> {
+    this.guard('suggest');
+    return {
+      prefix: query.prefix,
+      suggestions: [],
+    };
+  }
+
+  async similarGemstones(gemRef: string, _limit?: number): Promise<SimilarGemstonesResult> {
+    this.guard('similarGemstones');
+    void _limit;
+    return {
+      source_gem_ref: gemRef,
+      items: [],
+    };
   }
 
   totalCalls(): number {

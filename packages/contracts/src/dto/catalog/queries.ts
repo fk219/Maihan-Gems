@@ -175,6 +175,15 @@ export interface CatalogQueryPort {
 
   /** Taxonomy read models for the /taxonomy/* surface. */
   getTaxonomy(): Promise<TaxonomyReadModel>;
+
+  /** Hybrid search with full-text, trigram fallback, business ranking and facets. */
+  search(query: import('./search.js').SearchQuery): Promise<import('./search.js').SearchResult>;
+
+  /** Prefix search suggestions across taxonomy and catalogue. */
+  suggest(query: import('./search.js').SearchSuggestQuery): Promise<import('./search.js').SearchSuggestResult>;
+
+  /** Visually and gemologically similar stones for gemRef. */
+  similarGemstones(gemRef: string, limit?: number): Promise<import('./search.js').SimilarGemstonesResult>;
 }
 
 /** Default limit and max-limit constants shared by every list port method. */

@@ -45,6 +45,10 @@ export const CATALOG_SURFACES = {
   settingDesign: { scope: 'settings', kind: 'design', ttlSeconds: 300, visibility: 'public' },
   settingVariant: { scope: 'settings', kind: 'variant', ttlSeconds: 300, visibility: 'public' },
   taxonomy: { scope: 'taxonomy', kind: 'all', ttlSeconds: 3600, visibility: 'public' },
+  search: { scope: 'search', kind: 'query', ttlSeconds: 60, visibility: 'public' },
+  searchFacets: { scope: 'search', kind: 'facets', ttlSeconds: 300, visibility: 'public' },
+  searchSuggest: { scope: 'search', kind: 'suggest', ttlSeconds: 3600, visibility: 'public' },
+  similarGemstones: { scope: 'search', kind: 'similar', ttlSeconds: 300, visibility: 'public' },
 } as const satisfies Record<string, SurfacePolicy>;
 
 export type CatalogSurfaceName = keyof typeof CATALOG_SURFACES;

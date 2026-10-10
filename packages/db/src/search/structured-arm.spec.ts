@@ -7,9 +7,6 @@ import type { RawSpecFilters } from '../catalog/predicates.js';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const SKIP = process.env['SKIP_DB_TESTS'] === '1';
-const d = SKIP ? describe.skip : describe;
-
 function getDatabaseUrl(): string | undefined {
   if (process.env['DATABASE_URL']) return process.env['DATABASE_URL'];
   const envPath = resolve(process.cwd(), '../../.env');

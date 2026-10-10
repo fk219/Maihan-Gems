@@ -10,7 +10,6 @@
  */
 import { z } from 'zod';
 import {
-  PRODUCT_SORT_KEY_SCHEMA,
   SORT_DIRECTION_SCHEMA,
   PageMetaSchema,
   RejectedFilterSchema,

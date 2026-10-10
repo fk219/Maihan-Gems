@@ -46,6 +46,16 @@ import {
   SettingVariantEnvelopeSchema,
   type SettingVariantEnvelope,
   type TaxonomyReadModel,
+  SearchQuerySchema,
+  SearchResultSchema,
+  SearchSuggestQuerySchema,
+  SearchSuggestResultSchema,
+  SimilarGemstonesResultSchema,
+  type SearchQuery,
+  type SearchResult,
+  type SearchSuggestQuery,
+  type SearchSuggestResult,
+  type SimilarGemstonesResult,
 } from '@maihan/contracts';
 import {
   actorToken,
@@ -119,11 +129,20 @@ export interface CatalogQueryService {
     options?: CatalogCallOptions,
   ): Promise<Cached<SettingVariantEnvelope>>;
   getTaxonomy(options?: CatalogCallOptions): Promise<Cached<TaxonomyReadModel>>;
+  search(query: SearchQuery, options?: CatalogCallOptions): Promise<Cached<SearchResult>>;
+  suggest(query: SearchSuggestQuery, options?: CatalogCallOptions): Promise<Cached<SearchSuggestResult>>;
+  similarGemstones(
+    gemRef: string,
+    limit?: number,
+    options?: CatalogCallOptions,
+  ): Promise<Cached<SimilarGemstonesResult>>;
 
   /** Delete every entry indexed under a tag (SoT 15.3). Returns the count. */
   invalidateTag(tag: string): Promise<number>;
   /** Bump a scope's generation, retiring every key in that scope (SoT 15.3). */
   bumpGeneration(scope: CacheScope): Promise<Generation>;
+  /** Bump search generation atomically retiring all cached search keys. */
+  bumpSearchGeneration(): Promise<Generation>;
 }
 
 const BYPASS_TAGS_SUFFIX = 'unavailable';
@@ -323,6 +342,38 @@ export function createCatalogQueryService(deps: CatalogQueryServiceDeps): Catalo
       );
     },
 
+    search(query, options) {
+      const parsed = SearchQuerySchema.parse(query);
+      return cachedRead(
+        'search',
+        queryIdentity('/api/v1/search', parsed),
+        SearchResultSchema,
+        () => deps.port.search(query),
+        options,
+      );
+    },
+
+    suggest(query, options) {
+      const parsed = SearchSuggestQuerySchema.parse(query);
+      return cachedRead(
+        'searchSuggest',
+        queryIdentity('/api/v1/search/suggest', parsed),
+        SearchSuggestResultSchema,
+        () => deps.port.suggest(query),
+        options,
+      );
+    },
+
+    similarGemstones(gemRef, limit, options) {
+      return cachedRead(
+        'similarGemstones',
+        identifierIdentity(gemRef + (limit ? `:${limit}` : '')),
+        SimilarGemstonesResultSchema,
+        () => deps.port.similarGemstones(gemRef, limit),
+        options,
+      );
+    },
+
     async invalidateTag(tag) {
       const keys = await deps.store.members(tag);
       if (keys.length === 0) return 0;
@@ -332,6 +383,10 @@ export function createCatalogQueryService(deps: CatalogQueryServiceDeps): Catalo
 
     bumpGeneration(scope) {
       return deps.generations.bump(scope);
+    },
+
+    bumpSearchGeneration() {
+      return deps.generations.bump('search');
     },
   };
 }

@@ -38,7 +38,7 @@ export const CACHE_SCHEMA_VERSION = 'v1';
  * (SoT 15.3 generation safety net, scoped so unrelated generations cannot
  * evict unrelated responses).
  */
-export const CACHE_SCOPES = ['products', 'settings', 'gemstones', 'taxonomy'] as const;
+export const CACHE_SCOPES = ['products', 'settings', 'gemstones', 'taxonomy', 'search'] as const;
 export type CacheScope = (typeof CACHE_SCOPES)[number];
 
 /** A generation token: opaque string, compared only for equality. */

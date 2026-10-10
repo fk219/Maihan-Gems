@@ -18,7 +18,6 @@ import { sql, type SQL } from 'drizzle-orm';
 import type { CatalogDatabase } from '../catalog/executor.js';
 import {
   buildProductsWhere,
-  isProductFacetDimension,
   type FilterPlan,
   type ProductFacetDimension,
   type RawSpecFilters,

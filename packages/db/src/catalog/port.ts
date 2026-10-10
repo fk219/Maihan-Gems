@@ -386,6 +386,21 @@ export function createCatalogQueryPort(db: CatalogDatabase): CatalogQueryPort {
       const raw = await loadTaxonomy(db);
       return TaxonomyListSchema.parse(raw) as TaxonomyReadModel;
     },
+
+    async search(query) {
+      const { executeSearch } = await import('../search/search-service.js');
+      return executeSearch(db, query);
+    },
+
+    async suggest(query) {
+      const { executeSuggest } = await import('../search/search-service.js');
+      return executeSuggest(db, query);
+    },
+
+    async similarGemstones(gemRef, limit) {
+      const { executeSimilarGemstones } = await import('../search/search-service.js');
+      return executeSimilarGemstones(db, gemRef, limit);
+    },
   };
 }
 
