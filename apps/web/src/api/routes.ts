@@ -23,11 +23,11 @@ export type RouteHandlerId = string;
 
 export interface RouteDefinition {
   readonly id: RouteHandlerId;
-  readonly method: 'GET' | 'POST';
+  readonly method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   /** OpenAPI path template, `/api/v1` base included. */
   readonly path: string;
   /** Cache surface (Task 6 policy: scope, TTL, visibility). */
-  readonly surface: CatalogSurfaceName;
+  readonly surface?: CatalogSurfaceName;
 }
 
 /** Endpoint id -> cache surface. Checked by the parity spec (no holes). */
@@ -61,7 +61,26 @@ export const SEARCH_ROUTES: readonly RouteDefinition[] = [
   { id: 'similarGemstones', method: 'GET', path: '/search/similar-gemstones/{gemRef}', surface: 'similarGemstones' },
 ];
 
-export const ALL_ROUTES: readonly RouteDefinition[] = [...CATALOG_ROUTES, ...SEARCH_ROUTES];
+export const COMMERCE_ROUTES: readonly RouteDefinition[] = [
+  { id: 'createCart', method: 'POST', path: '/api/v1/carts' },
+  { id: 'createCart', method: 'POST', path: '/carts' },
+  { id: 'getCart', method: 'GET', path: '/api/v1/carts/{cartToken}' },
+  { id: 'getCart', method: 'GET', path: '/carts/{cartToken}' },
+  { id: 'addCartItem', method: 'POST', path: '/api/v1/carts/{cartToken}/items' },
+  { id: 'addCartItem', method: 'POST', path: '/carts/{cartToken}/items' },
+  { id: 'updateCartItem', method: 'PATCH', path: '/api/v1/carts/{cartToken}/items/{itemId}' },
+  { id: 'updateCartItem', method: 'PATCH', path: '/carts/{cartToken}/items/{itemId}' },
+  { id: 'removeCartItem', method: 'DELETE', path: '/api/v1/carts/{cartToken}/items/{itemId}' },
+  { id: 'removeCartItem', method: 'DELETE', path: '/carts/{cartToken}/items/{itemId}' },
+  { id: 'mergeCart', method: 'POST', path: '/api/v1/carts/{cartToken}/merge' },
+  { id: 'mergeCart', method: 'POST', path: '/carts/{cartToken}/merge' },
+];
+
+export const ALL_ROUTES: readonly RouteDefinition[] = [
+  ...CATALOG_ROUTES,
+  ...SEARCH_ROUTES,
+  ...COMMERCE_ROUTES,
+];
 
 export type RouteLookup =
   | { kind: 'match'; route: RouteDefinition; params: Record<string, string> }

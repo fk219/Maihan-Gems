@@ -25,6 +25,7 @@ export interface RouteContext {
   readonly url: URL;
   readonly ids: CorrelationIds;
   readonly request?: Request;
+  readonly db?: import('@maihan/db').CatalogDatabase;
 }
 
 export interface HandlerOutcome {

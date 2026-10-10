@@ -34,6 +34,7 @@
 import { ContractError } from '@maihan/contracts';
 import { HANDLERS, type HandlerOutcome, type RouteContext } from './handlers.js';
 import { SEARCH_HANDLERS } from './search-handlers.js';
+import { COMMERCE_HANDLERS } from './commerce-handlers.js';
 import {
   errorResponse,
   newRequestId,
@@ -45,11 +46,13 @@ import { lookupRoute } from './routes.js';
 import { applyCacheHeaders } from './headers.js';
 import type { RateLimitDecision, RateLimitGate } from './ratelimit/gate.js';
 import type { CatalogQueryService } from '../modules/catalog/index.js';
+import type { CatalogDatabase } from '@maihan/db';
 
 export type { RateLimitDecision, RateLimitGate } from './ratelimit/gate.js';
 
 export interface CatalogApiOptions {
   service: CatalogQueryService;
+  db?: CatalogDatabase;
   /** Injected in tests for deterministic correlation ids. */
   ids?: Partial<CorrelationIds> | (() => CorrelationIds);
   /** Rate-limit gate (Task 9). Absent = no limiter wired (tests, local runs). */
@@ -107,7 +110,10 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       }
     }
 
-    const handler = HANDLERS[lookup.route.id] ?? SEARCH_HANDLERS[lookup.route.id];
+    const handler =
+      HANDLERS[lookup.route.id] ??
+      SEARCH_HANDLERS[lookup.route.id] ??
+      COMMERCE_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }
@@ -118,6 +124,7 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       url,
       ids,
       request,
+      db: options.db,
     };
 
     let outcome: HandlerOutcome;
@@ -130,8 +137,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
     // Task 10: cache headers derive from the handler's CacheInfo and the
     // route's surface policy — one place, so no handler can emit its own.
     const cacheHeaders =
-      outcome.cache === undefined
-        ? {}
+      outcome.cache === undefined || lookup.route.surface === undefined
+        ? { 'Cache-Control': 'private, no-store' }
         : applyCacheHeaders(outcome.cache, lookup.route.surface);
 
     return successResponse(outcome.body, outcome.status, ids, { ...cacheHeaders, ...rateHeaders });

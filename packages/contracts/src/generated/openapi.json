@@ -801,7 +801,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -871,7 +886,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -965,7 +995,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -1035,7 +1080,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -1544,7 +1604,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -1614,7 +1689,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -1684,7 +1774,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -1778,7 +1883,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -1848,7 +1968,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -2377,7 +2512,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -2447,7 +2597,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -2517,7 +2682,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -2611,7 +2791,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -2681,7 +2876,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -3384,7 +3594,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -3454,7 +3679,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -3548,7 +3788,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -3618,7 +3873,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -4058,7 +4328,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -4128,7 +4413,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -4198,7 +4498,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -4292,7 +4607,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -4362,7 +4692,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -4696,7 +5041,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -4766,7 +5126,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -4836,7 +5211,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -4930,7 +5320,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -5000,7 +5405,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -5168,7 +5588,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -5238,7 +5673,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -5332,7 +5782,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -5402,7 +5867,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -5576,7 +6056,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -5646,7 +6141,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -5740,7 +6250,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -5810,7 +6335,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -5960,7 +6500,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -6030,7 +6585,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -6124,7 +6694,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -6194,7 +6779,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -6366,7 +6966,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -6436,7 +7051,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -6530,7 +7160,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -6600,7 +7245,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -6751,7 +7411,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -6821,7 +7496,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -6915,7 +7605,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {
@@ -6985,7 +7690,22 @@
                             "NOT_FOUND",
                             "METHOD_NOT_ALLOWED",
                             "RATE_LIMITED",
-                            "INTERNAL"
+                            "INTERNAL",
+                            "PRICE_CHANGED",
+                            "OUT_OF_STOCK",
+                            "ALREADY_RESERVED",
+                            "CART_EXPIRED",
+                            "CHECKOUT_SESSION_EXPIRED",
+                            "PAIR_RESERVATION_FAILED",
+                            "DISCOUNT_INVALID",
+                            "REFUND_EXCEEDS_CAPTURED",
+                            "IDEMPOTENCY_CONFLICT",
+                            "PAYMENT_FAILED",
+                            "ORDER_NOT_FOUND",
+                            "CART_NOT_FOUND",
+                            "UNAUTHORIZED",
+                            "FORBIDDEN",
+                            "UNPROCESSABLE"
                           ]
                         },
                         "message": {

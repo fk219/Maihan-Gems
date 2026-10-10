@@ -36,12 +36,29 @@ describe('contract error registry', () => {
       'METHOD_NOT_ALLOWED',
       'RATE_LIMITED',
       'INTERNAL',
+      'PRICE_CHANGED',
+      'OUT_OF_STOCK',
+      'ALREADY_RESERVED',
+      'CART_EXPIRED',
+      'CHECKOUT_SESSION_EXPIRED',
+      'PAIR_RESERVATION_FAILED',
+      'DISCOUNT_INVALID',
+      'REFUND_EXCEEDS_CAPTURED',
+      'IDEMPOTENCY_CONFLICT',
+      'PAYMENT_FAILED',
+      'ORDER_NOT_FOUND',
+      'CART_NOT_FOUND',
+      'UNAUTHORIZED',
+      'FORBIDDEN',
+      'UNPROCESSABLE',
     ]);
     const e = new ContractError('PRODUCT_NOT_FOUND', 'x');
     expect(e.httpStatus).toBe(404);
     expect(new ContractError('VALIDATION_FAILED', 'x').httpStatus).toBe(400);
     expect(new ContractError('RATE_LIMITED', 'x').httpStatus).toBe(429);
     expect(new ContractError('METHOD_NOT_ALLOWED', 'x').httpStatus).toBe(405);
+    expect(new ContractError('PRICE_CHANGED', 'x').httpStatus).toBe(409);
+    expect(new ContractError('PAYMENT_FAILED', 'x').httpStatus).toBe(402);
   });
 });
 

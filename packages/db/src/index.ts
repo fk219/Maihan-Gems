@@ -85,4 +85,12 @@ export {
   type CircuitBreakerState,
   type CircuitBreakerOptions,
 } from './search/circuit-breaker.js';
+export {
+  createCart,
+  getCartByToken,
+  addItemToCart,
+  updateCartItemQuantity,
+  removeCartItem,
+  mergeGuestCart,
+} from './commerce/cart-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';

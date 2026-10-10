@@ -137,7 +137,7 @@ export async function wireApi(config: RuntimeConfig = loadRuntimeConfig()): Prom
     failureMode: 'allow',
   });
 
-  const api = createCatalogApi({ service, rateLimit });
+  const api = createCatalogApi({ service, rateLimit, db: catalogDatabase });
   const server = createNodeServer(api);
 
   return {
