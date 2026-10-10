@@ -34,6 +34,7 @@ const LISTING_ROUTES = [
   '[varietySlug]-rings',
   'colour/[colourSlug]',
   'settings',
+  'search',
 ];
 
 const DETAIL_ROUTES = ['products/[productSlug]', '[varietySlug]-rings/[productSlug]'];

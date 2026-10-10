@@ -149,6 +149,10 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2 + 13.2: hybrid search',
     storefront: true,
     group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/search/loading.tsx',
+      'src/app/(storefront)/search/error.tsx',
+    ],
   },
   {
     fsPath: 'src/app/(storefront)/products/[productSlug]/page.tsx',

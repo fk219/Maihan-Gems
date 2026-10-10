@@ -49,6 +49,7 @@ import ProductDetailPage from '../app/(storefront)/products/[productSlug]/page.j
 import ColourIndexPage from '../app/(storefront)/colour/[colourSlug]/page.js';
 import SettingsIndexPage from '../app/(storefront)/settings/page.js';
 import VarietiesIndexPage from '../app/(storefront)/varieties/page.js';
+import SearchPage from '../app/(storefront)/search/page.js';
 
 import { MegaMenu } from '../components/layout/MegaMenu.js';
 import { ProductDetailContent } from '../components/catalog/ProductDetailContent.js';
@@ -223,6 +224,28 @@ describe('Task 11 accessibility audit — representative templates (axe-core, cr
     wire(port);
     const page = await VarietyPairsPage({ params: Promise.resolve({ varietySlug: 'tsavorite-garnet' }), searchParams: Promise.resolve({}) });
     await audit('pairs listing', page);
+  });
+
+  it('search page (empty result state)', async () => {
+    port = fullPort();
+    port.setSearchResult({
+      items: [],
+      facets: emptyProductList().facets,
+      rejected_filters: [],
+      meta: {
+        search_version: 'search-v1',
+        strategy: 'STRUCTURED_ONLY',
+        intent: 'PRODUCT_SEARCH',
+        degraded: false,
+        candidate_count: 0,
+        limit: 24,
+        has_more: false,
+        next_cursor: null,
+      },
+    });
+    wire(port);
+    const page = await SearchPage({ searchParams: Promise.resolve({}) });
+    await audit('search page', page);
   });
 
   it('not-found state', async () => {
