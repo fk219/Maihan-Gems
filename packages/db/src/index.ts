@@ -110,6 +110,12 @@ export {
   placeOrder,
   getOrderById,
 } from './commerce/order-repository.js';
+export {
+  createPaymentRecord,
+  getPaymentByProviderPaymentId,
+  updatePaymentState,
+  type PaymentRecordRow,
+} from './commerce/payment-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
 
 
