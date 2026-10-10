@@ -121,6 +121,17 @@ export {
   reconcilePaymentWebhook,
   type WebhookReceiptResult,
 } from './commerce/webhook-reconciliation.js';
+export {
+  getOrCreateCustomer,
+  getCustomerProfile,
+  updateCustomerProfile,
+  getCustomerAddresses,
+  createCustomerAddress,
+  updateCustomerAddress,
+  deleteCustomerAddress,
+  getCustomerOrders,
+  getCustomerOrder,
+} from './commerce/account-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
 
 

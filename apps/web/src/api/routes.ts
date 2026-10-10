@@ -92,10 +92,30 @@ export const COMMERCE_ROUTES: readonly RouteDefinition[] = [
   { id: 'handlePaymentWebhook', method: 'POST', path: '/webhooks/payments/{provider}' },
 ];
 
+export const ACCOUNT_ROUTES: readonly RouteDefinition[] = [
+  { id: 'getProfile', method: 'GET', path: '/api/v1/account/profile' },
+  { id: 'getProfile', method: 'GET', path: '/account/profile' },
+  { id: 'updateProfile', method: 'PATCH', path: '/api/v1/account/profile' },
+  { id: 'updateProfile', method: 'PATCH', path: '/account/profile' },
+  { id: 'getAddresses', method: 'GET', path: '/api/v1/account/addresses' },
+  { id: 'getAddresses', method: 'GET', path: '/account/addresses' },
+  { id: 'createAddress', method: 'POST', path: '/api/v1/account/addresses' },
+  { id: 'createAddress', method: 'POST', path: '/account/addresses' },
+  { id: 'updateAddress', method: 'PATCH', path: '/api/v1/account/addresses/{addressId}' },
+  { id: 'updateAddress', method: 'PATCH', path: '/account/addresses/{addressId}' },
+  { id: 'deleteAddress', method: 'DELETE', path: '/api/v1/account/addresses/{addressId}' },
+  { id: 'deleteAddress', method: 'DELETE', path: '/account/addresses/{addressId}' },
+  { id: 'getOrders', method: 'GET', path: '/api/v1/account/orders' },
+  { id: 'getOrders', method: 'GET', path: '/account/orders' },
+  { id: 'getCustomerOrderDetail', method: 'GET', path: '/api/v1/account/orders/{orderId}' },
+  { id: 'getCustomerOrderDetail', method: 'GET', path: '/account/orders/{orderId}' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
   ...COMMERCE_ROUTES,
+  ...ACCOUNT_ROUTES,
 ];
 
 export type RouteLookup =

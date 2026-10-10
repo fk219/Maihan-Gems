@@ -35,6 +35,7 @@ import { ContractError } from '@maihan/contracts';
 import { HANDLERS, type HandlerOutcome, type RouteContext } from './handlers.js';
 import { SEARCH_HANDLERS } from './search-handlers.js';
 import { COMMERCE_HANDLERS } from './commerce-handlers.js';
+import { ACCOUNT_HANDLERS } from './account-handlers.js';
 import {
   errorResponse,
   newRequestId,
@@ -113,7 +114,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
     const handler =
       HANDLERS[lookup.route.id] ??
       SEARCH_HANDLERS[lookup.route.id] ??
-      COMMERCE_HANDLERS[lookup.route.id];
+      COMMERCE_HANDLERS[lookup.route.id] ??
+      ACCOUNT_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }
