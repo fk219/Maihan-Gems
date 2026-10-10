@@ -116,6 +116,11 @@ export {
   updatePaymentState,
   type PaymentRecordRow,
 } from './commerce/payment-repository.js';
+export {
+  recordWebhookReceipt,
+  reconcilePaymentWebhook,
+  type WebhookReceiptResult,
+} from './commerce/webhook-reconciliation.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
 
 

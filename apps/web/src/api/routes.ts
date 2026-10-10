@@ -88,6 +88,8 @@ export const COMMERCE_ROUTES: readonly RouteDefinition[] = [
   { id: 'placeOrder', method: 'POST', path: '/orders' },
   { id: 'getOrder', method: 'GET', path: '/api/v1/orders/{orderId}' },
   { id: 'getOrder', method: 'GET', path: '/orders/{orderId}' },
+  { id: 'handlePaymentWebhook', method: 'POST', path: '/api/v1/webhooks/payments/{provider}' },
+  { id: 'handlePaymentWebhook', method: 'POST', path: '/webhooks/payments/{provider}' },
 ];
 
 export const ALL_ROUTES: readonly RouteDefinition[] = [

@@ -30,6 +30,8 @@ import {
   getOrderById,
   mergeGuestCart,
   placeOrder,
+  recordWebhookReceipt,
+  reconcilePaymentWebhook,
   removeCartItem,
   submitConfirmCheckpoint,
   submitPaymentCheckpoint,
@@ -37,6 +39,7 @@ import {
   updateCartItemQuantity,
   type CatalogDatabase,
 } from '@maihan/db';
+import { TestPaymentProvider } from '../integrations/payment/test-payment-provider.js';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
@@ -203,6 +206,67 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     return {
       status: 200,
       body: { data: order },
+    };
+  },
+
+  async handlePaymentWebhook(ctx) {
+    const db = getDb(ctx);
+    const providerParam = (ctx.params['provider'] ?? 'TEST').toUpperCase();
+    const providerAdapter = new TestPaymentProvider();
+
+    const rawBody = ctx.request ? await ctx.request.text() : '';
+    const headers: Record<string, string> = {};
+    if (ctx.request) {
+      ctx.request.headers.forEach((val, key) => {
+        headers[key.toLowerCase()] = val;
+      });
+    }
+
+    const verified = providerAdapter.verifyWebhook({ rawBody, headers });
+
+    // Validate timestamp drift within 5 minutes
+    if (verified.isValid && verified.timestamp) {
+      const eventTime = new Date(verified.timestamp).getTime();
+      const driftSeconds = Math.abs(Date.now() - eventTime) / 1000;
+      if (driftSeconds > 300) {
+        throw new ContractError(
+          'UNAUTHORIZED',
+          `Webhook timestamp drift ${Math.round(driftSeconds)}s exceeds 300s tolerance window.`,
+        );
+      }
+    }
+
+    if (!verified.isValid) {
+      throw new ContractError(
+        'UNAUTHORIZED',
+        verified.signatureError ?? 'Webhook HMAC signature verification failed.',
+      );
+    }
+
+    const receipt = await recordWebhookReceipt(db, {
+      provider: providerParam,
+      external_event_id: verified.externalEventId,
+      signature_valid: true,
+      event_type: verified.eventType,
+      payload: verified.rawPayload,
+    });
+
+    if (receipt.isDuplicate && receipt.processedAt !== null) {
+      return {
+        status: 200,
+        body: { status: 'duplicate', message: 'Webhook event already processed.' },
+      };
+    }
+
+    const reconciliation = await reconcilePaymentWebhook(db, verified);
+
+    return {
+      status: 200,
+      body: {
+        status: reconciliation.reconciled ? 'processed' : 'unreconciled',
+        order_id: reconciliation.orderId,
+        error: reconciliation.error,
+      },
     };
   },
 };
