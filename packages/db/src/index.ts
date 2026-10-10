@@ -138,6 +138,12 @@ export {
   removeCustomerFavorite,
   getCompareMatrix,
 } from './commerce/favorites-repository.js';
+export {
+  listProductAddons,
+  getProductAddon,
+  createProductAddon,
+  attachAddonToOrder,
+} from './commerce/addon-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
 
 

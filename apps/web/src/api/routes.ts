@@ -123,12 +123,22 @@ export const FAVORITES_ROUTES: readonly RouteDefinition[] = [
   { id: 'getCompare', method: 'GET', path: '/compare-list' },
 ];
 
+export const ADDON_ROUTES: readonly RouteDefinition[] = [
+  { id: 'listAddons', method: 'GET', path: '/api/v1/addons' },
+  { id: 'listAddons', method: 'GET', path: '/addons' },
+  { id: 'getAddon', method: 'GET', path: '/api/v1/addons/{addonId}' },
+  { id: 'getAddon', method: 'GET', path: '/addons/{addonId}' },
+  { id: 'attachAddon', method: 'POST', path: '/api/v1/orders/{orderId}/addons' },
+  { id: 'attachAddon', method: 'POST', path: '/orders/{orderId}/addons' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
   ...COMMERCE_ROUTES,
   ...ACCOUNT_ROUTES,
   ...FAVORITES_ROUTES,
+  ...ADDON_ROUTES,
 ];
 
 export type RouteLookup =

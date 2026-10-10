@@ -40,3 +40,4 @@ export * from './dto/commerce/order.js';
 export * from './dto/commerce/payment.js';
 export * from './dto/commerce/account.js';
 export * from './dto/commerce/favorites.js';
+export * from './dto/commerce/addon.js';
