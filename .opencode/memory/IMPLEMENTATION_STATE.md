@@ -3,6 +3,36 @@
 **Last updated:** 2026-10-10
 **Update this file after every meaningful implementation task.**
 
+# PHASE 6 — CART + CHECKOUT + COMMERCE COMPLETE (2026-10-10). All 13 Global Tasks done, verified, and committed.
+
+Phase 6 implements the complete e-commerce pipeline: shopping cart lifecycle with authoritative server-side repricing, 30-minute stock reservation inside PostgreSQL transactions, multi-step checkout funnel (/shipping, /payment, /confirm), immutable order placement with snapshots and audit logs, provider-neutral payment abstraction with TestPaymentProvider, raw body HMAC webhook reconciliation, customer accounts/profiles/addresses/order history with strict authorization boundaries, wishlists and compare matrix, financing and protection plan addons, scoped discount validation with atomic redemptions, multi-stage refund workflow, reservation expiry cleanup job, and pure domain order state machine with append-only order_events timeline.
+
+## Phase 6 Global Task Completion Matrix
+
+| Task | Commit | Status | Evidence / Verification |
+|---|---|---|---|
+| Task 1 — Cart Lifecycle & Authoritative Server Repricing | `cfbfcbe` | **Verified Complete** | Cart creation, add, update, remove items. Client is NEVER authoritative for prices; server re-prices against database active prices. 7 tests (`cart.spec.ts`, `cart-repository.spec.ts`). |
+| Task 2 — Checkout Session & Atomic Stock Reservation | `cfc0d40` | **Verified Complete** | Checkout session creation with price freeze and atomic 30-minute stock reservation in `jobs` queue `inventory_reservations`. Pair reservation enforces all-or-nothing (`PAIR_RESERVATION_FAILED`). 5 tests (`checkout-session.spec.ts`, `inventory-reservation.spec.ts`). |
+| Task 3 — Checkout Funnel Checkpoints & Navigation Guard | `3cba646` | **Verified Complete** | 4-step checkpoints (`/shipping`, `/payment`, `/confirm`), checkpoint advancement validation preventing step skipping (422), shipping repricing. 5 tests (`checkout-checkpoints.spec.ts`, `checkout.spec.ts`). |
+| Task 4 — Immutable Order Placement & Snapshots | `8f55eee` | **Verified Complete** | Atomic order creation from checkout session with immutable JSONB snapshots (`pricing_snapshot`, `gem_snapshot`, `setting_snapshot`), `MG-YYYY-NNNNNN` numbering, idempotency key replay, `order_events` and `audit_logs`. 5 tests (`order-placement.spec.ts`, `order.spec.ts`). |
+| Task 5 — Provider-neutral Payment Abstraction | `3b9b2b4` | **Verified Complete** | `PaymentProvider` interface, `TestPaymentProvider` implementation for development and testing, `payments` table repository with state tracking. 6 tests (`payment-provider.spec.ts`, `test-payment-provider.spec.ts`). |
+| Task 6 — Webhook Verification & Payment Reconciliation | `409fbc3` | **Verified Complete** | Raw request body HMAC-SHA256 signature verification (`timingSafeEqual`), drift tolerance window (<= 5m), duplicate suppression in `webhook_receipts`, out-of-order event resilience. 4 tests (`webhook-reconciliation.spec.ts`, `webhook.spec.ts`). |
+| Task 7 — Customer Accounts, Profiles & Order History | `6a6aa0d` | **Verified Complete** | Customer profile and address book management, customer order history lookup, customer isolation boundary enforcement (cross-customer access forbidden with 403/404). 5 tests (`account-history.spec.ts`, `account.spec.ts`). |
+| Task 8 — Wishlist & Side-by-Side Product Comparison | `cec4d04` | **Verified Complete** | Customer and session wishlists (`/favorites`), 2-4 item compare matrix (`/compare`) with unified attribute alignment and explicit null preservation. 3 tests (`wishlist-compare.spec.ts`, `favorites.spec.ts`). |
+| Task 9 — Financing & Protection Plan Add-ons | `4e45f08` | **Verified Complete** | Protection plans and financing options modeled in `product_addons`, attached as separate order lines with distinct pricing and policy rules. 3 tests (`addons.spec.ts`, `addon.spec.ts`). |
+| Task 10 — Discount Validation & Atomic Redemption | `6986034` | **Verified Complete** | Discount code validation (active window, minimum spend, item scope, per-customer usage limit), atomic increment of `redemption_count` in `discounts` table. 5 tests (`discounts.spec.ts`, `discount.spec.ts`). |
+| Task 11 — Refund Request & Multi-stage Approval Workflow | `dd383e3` | **Verified Complete** | Refund requests in `refunds` table, bounds enforcement (`amount <= captured_amount`), state transitions (`REQUESTED` -> `APPROVED` -> `SUCCEEDED` / `REJECTED`), order and payment status synchronization. 3 tests (`refunds.spec.ts`, `refund.spec.ts`). |
+| Task 12 — Reservation Expiry Sweeper & Stock Release | `bcf94ab` | **Verified Complete** | Expired reservation sweeper (`sweepExpiredReservations`) canceling uncompleted sessions older than 30 minutes, releasing inventory locks, emitting `InventoryReleased` in `domain_events`. 2 tests (`reservation-sweeper.spec.ts`, `reservation-expiry.spec.ts`). |
+| Task 13 — Pure Order State Machine & Timeline | `51477fa` | **Verified Complete** | Pure deterministic state transition function `transitionOrder(currentState, event)` in `@maihan/domain`, `order_events` timeline tracking, audit trail logging, cancel endpoint, immutable terminal state protection. 11 tests (`order.spec.ts`, `order-events.spec.ts`). |
+
+## Architecture & Commerce Invariants Verification
+- **Price Authority**: Client is never authoritative; client prices mismatched with database prices reject with `409 PRICE_CHANGED`.
+- **Atomic Stock Reservation**: Stock is reserved inside PostgreSQL transaction with 30-minute expiration. Pairs reserve atomically or fail with `PAIR_RESERVATION_FAILED`.
+- **Order Immutability**: Placed orders store immutable snapshots of pricing, gemstones, and settings. Changes are append-only in `order_events` and `audit_logs`.
+- **Payment Security**: Webhook HMAC verified over raw body bytes before JSON parsing using constant-time comparison.
+- **Authorization Boundary**: Strict customer isolation. Accessing another customer's cart, order, profile, address, or wishlist returns 403 or 404.
+- **Monorepo Test Suite**: 633 tests passing with zero failures across `@maihan/domain` (197), `@maihan/contracts` (13), `@maihan/db` (78), `@maihan/web` (345). Full typecheck (`tsc -b`) clean.
+
 ---
 
 # PHASE 5 — SEARCH + FILTERS COMPLETE (2026-10-10). All 11 Global Tasks done, verified, and committed.
