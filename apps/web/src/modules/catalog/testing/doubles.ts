@@ -230,6 +230,9 @@ export class FakeCatalogPort implements CatalogQueryPort {
   private productDetails = new Map<string, ProductDetailReadModel>();
   private settingListResult: SettingListResult | null = null;
   private taxonomyResult: TaxonomyReadModel | null = null;
+  private searchResult: SearchResult | null = null;
+  private suggestResult: SearchSuggestResult | null = null;
+  private similarGemstonesResult: SimilarGemstonesResult | null = null;
 
   /** Queue a product list for the matching filter identity (variety slug). */
   setProductListForVariety(varietySlug: string, result: ProductListResult): void {
@@ -251,6 +254,18 @@ export class FakeCatalogPort implements CatalogQueryPort {
 
   setTaxonomy(taxonomy: TaxonomyReadModel): void {
     this.taxonomyResult = taxonomy;
+  }
+
+  setSearchResult(result: SearchResult): void {
+    this.searchResult = result;
+  }
+
+  setSuggestResult(result: SearchSuggestResult): void {
+    this.suggestResult = result;
+  }
+
+  setSimilarGemstonesResult(result: SimilarGemstonesResult): void {
+    this.similarGemstonesResult = result;
   }
 
   private guard<K extends keyof PortCallCounts>(method: K): void {
@@ -329,6 +344,7 @@ export class FakeCatalogPort implements CatalogQueryPort {
   async search(_query: SearchQuery): Promise<SearchResult> {
     this.guard('search');
     void _query;
+    if (this.searchResult !== null) return this.searchResult;
     return {
       items: [],
       facets: EMPTY_FACETS,
@@ -348,6 +364,7 @@ export class FakeCatalogPort implements CatalogQueryPort {
 
   async suggest(query: SearchSuggestQuery): Promise<SearchSuggestResult> {
     this.guard('suggest');
+    if (this.suggestResult !== null) return this.suggestResult;
     return {
       prefix: query.prefix,
       suggestions: [],
@@ -357,6 +374,7 @@ export class FakeCatalogPort implements CatalogQueryPort {
   async similarGemstones(gemRef: string, _limit?: number): Promise<SimilarGemstonesResult> {
     this.guard('similarGemstones');
     void _limit;
+    if (this.similarGemstonesResult !== null) return this.similarGemstonesResult;
     return {
       source_gem_ref: gemRef,
       items: [],

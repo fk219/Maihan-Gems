@@ -24,6 +24,7 @@ export interface RouteContext {
   readonly params: Record<string, string>;
   readonly url: URL;
   readonly ids: CorrelationIds;
+  readonly request?: Request;
 }
 
 export interface HandlerOutcome {

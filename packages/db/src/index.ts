@@ -79,4 +79,10 @@ export {
 export {
   createCatalogQueryPort,
 } from './catalog/port.js';
+export {
+  VectorCircuitBreaker,
+  defaultVectorCircuitBreaker,
+  type CircuitBreakerState,
+  type CircuitBreakerOptions,
+} from './search/circuit-breaker.js';
 export type { CatalogQueryPort } from '@maihan/contracts';

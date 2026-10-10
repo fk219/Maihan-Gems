@@ -38,10 +38,12 @@ import { executeTrigramArm } from './trigram-arm.js';
 import { evaluateSemanticGating, executeSemanticArm } from './semantic-arm.js';
 import { computeSearchFacets } from './facets.js';
 import type { SearchCandidate } from './types.js';
+import { VectorCircuitBreaker, defaultVectorCircuitBreaker } from './circuit-breaker.js';
 
 export interface SearchExecutionOptions {
   readonly queryVector?: readonly number[] | Float32Array;
   readonly isCircuitBreakerOpen?: () => boolean;
+  readonly circuitBreaker?: VectorCircuitBreaker;
 }
 
 export async function executeSearch(
@@ -177,7 +179,11 @@ export async function executeSearch(
   }
 
   // 7. Gated semantic search
-  const circuitBreakerOpen = options?.isCircuitBreakerOpen ? options.isCircuitBreakerOpen() : false;
+  const breaker = options?.circuitBreaker ?? defaultVectorCircuitBreaker;
+  const circuitBreakerOpen = options?.isCircuitBreakerOpen
+    ? options.isCircuitBreakerOpen()
+    : breaker.isOpen();
+
   const semanticDecision = evaluateSemanticGating({
     semanticRequested: query.semantic,
     intentType: intent.type,
@@ -200,6 +206,7 @@ export async function executeSearch(
         filterPlan: structuredResult.plan,
         limit: query.limit * 3,
       });
+      breaker.recordSuccess();
       if (semanticResult.candidates.length > 0) {
         strategy = 'SEMANTIC_HYBRID';
         for (const c of semanticResult.candidates) {
@@ -212,6 +219,7 @@ export async function executeSearch(
         }
       }
     } catch (err) {
+      breaker.recordFailure();
       degraded = true;
       degradationReason = `Vector arm failed: ${err instanceof Error ? err.message : String(err)}`;
     }

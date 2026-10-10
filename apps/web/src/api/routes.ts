@@ -23,7 +23,7 @@ export type RouteHandlerId = string;
 
 export interface RouteDefinition {
   readonly id: RouteHandlerId;
-  readonly method: 'GET';
+  readonly method: 'GET' | 'POST';
   /** OpenAPI path template, `/api/v1` base included. */
   readonly path: string;
   /** Cache surface (Task 6 policy: scope, TTL, visibility). */
@@ -52,6 +52,17 @@ export const CATALOG_ROUTES: readonly RouteDefinition[] = CATALOG_ENDPOINTS.map(
   surface: SURFACE_BY_ENDPOINT[endpoint.id] as CatalogSurfaceName,
 }));
 
+export const SEARCH_ROUTES: readonly RouteDefinition[] = [
+  { id: 'search', method: 'POST', path: '/api/v1/search', surface: 'search' },
+  { id: 'search', method: 'POST', path: '/search', surface: 'search' },
+  { id: 'searchSuggest', method: 'GET', path: '/api/v1/search/suggest', surface: 'searchSuggest' },
+  { id: 'searchSuggest', method: 'GET', path: '/search/suggest', surface: 'searchSuggest' },
+  { id: 'similarGemstones', method: 'GET', path: '/api/v1/search/similar-gemstones/{gemRef}', surface: 'similarGemstones' },
+  { id: 'similarGemstones', method: 'GET', path: '/search/similar-gemstones/{gemRef}', surface: 'similarGemstones' },
+];
+
+export const ALL_ROUTES: readonly RouteDefinition[] = [...CATALOG_ROUTES, ...SEARCH_ROUTES];
+
 export type RouteLookup =
   | { kind: 'match'; route: RouteDefinition; params: Record<string, string> }
   | { kind: 'method-not-allowed'; allowed: string }
@@ -63,7 +74,7 @@ interface CompiledRoute {
   paramNames: string[];
 }
 
-const COMPILED: CompiledRoute[] = CATALOG_ROUTES.map((route) => {
+const COMPILED: CompiledRoute[] = ALL_ROUTES.map((route) => {
   const segments = route.path.split('/').filter((s) => s.length > 0);
   const paramNames = segments
     .filter((s) => s.startsWith('{') && s.endsWith('}'))
@@ -74,12 +85,13 @@ const COMPILED: CompiledRoute[] = CATALOG_ROUTES.map((route) => {
 /**
  * Match a method + pathname against the table.
  * - path miss                -> not-found (404)
- * - path hit, method miss    -> method-not-allowed (405, `Allow` = GET)
+ * - path hit, method miss    -> method-not-allowed (405, `Allow` header populated)
  * - both hit                 -> match with captured path params
  */
 export function lookupRoute(method: string, pathname: string): RouteLookup {
   const parts = pathname.split('/').filter((s) => s.length > 0);
   let pathMatched = false;
+  const allowedMethods = new Set<string>();
 
   for (const compiled of COMPILED) {
     if (parts.length !== compiled.segments.length) continue;
@@ -100,9 +112,11 @@ export function lookupRoute(method: string, pathname: string): RouteLookup {
     }
     if (!ok) continue;
     pathMatched = true;
+    allowedMethods.add(compiled.route.method);
     if (compiled.route.method !== method.toUpperCase()) continue;
     return { kind: 'match', route: compiled.route, params };
   }
 
-  return pathMatched ? { kind: 'method-not-allowed', allowed: 'GET' } : { kind: 'not-found' };
+  const allowedStr = Array.from(allowedMethods).sort().join(', ');
+  return pathMatched ? { kind: 'method-not-allowed', allowed: allowedStr || 'GET' } : { kind: 'not-found' };
 }
