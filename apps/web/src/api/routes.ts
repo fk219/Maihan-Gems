@@ -92,6 +92,12 @@ export const COMMERCE_ROUTES: readonly RouteDefinition[] = [
   { id: 'handlePaymentWebhook', method: 'POST', path: '/webhooks/payments/{provider}' },
   { id: 'sweepInventoryReservations', method: 'POST', path: '/api/v1/inventory/sweep-expired' },
   { id: 'sweepInventoryReservations', method: 'POST', path: '/inventory/sweep-expired' },
+  { id: 'getOrderTimeline', method: 'GET', path: '/api/v1/orders/{orderId}/events' },
+  { id: 'getOrderTimeline', method: 'GET', path: '/orders/{orderId}/events' },
+  { id: 'getOrderTimeline', method: 'GET', path: '/api/v1/orders/{orderId}/timeline' },
+  { id: 'getOrderTimeline', method: 'GET', path: '/orders/{orderId}/timeline' },
+  { id: 'cancelOrder', method: 'POST', path: '/api/v1/orders/{orderId}/cancel' },
+  { id: 'cancelOrder', method: 'POST', path: '/orders/{orderId}/cancel' },
 ];
 
 export const ACCOUNT_ROUTES: readonly RouteDefinition[] = [

@@ -3,6 +3,7 @@ import {
   assertValidOrderTransition,
   formatOrderNumber,
   parseOrderNumber,
+  transitionOrder,
 } from './order.js';
 import { expectErrorCode } from '../testing/expect-domain-code.js';
 
@@ -43,6 +44,71 @@ describe('Order Domain Rules (Phase 6 Task 4 & 13)', () => {
     );
     expectErrorCode(
       () => assertValidOrderTransition('CANCELLED', 'PAID'),
+      'INVALID_ORDER_TRANSITION',
+    );
+  });
+
+  it('transitionOrder pure state machine executes valid events', () => {
+    // 1. Payment received
+    const payRes = transitionOrder('PENDING_PAYMENT', {
+      type: 'PAYMENT_RECEIVED',
+      transactionId: 'tx_123',
+      amount: '500.00',
+    });
+    expect(payRes.nextState).toBe('PAID');
+
+    // 2. Fulfillment started
+    const fulStartRes = transitionOrder('PAID', { type: 'FULFILLMENT_STARTED' });
+    expect(fulStartRes.nextState).toBe('IN_FULFILLMENT');
+
+    // 3. Fulfillment completed
+    const fulCompRes = transitionOrder('IN_FULFILLMENT', {
+      type: 'FULFILLMENT_COMPLETED',
+      trackingNumber: 'TRK123',
+    });
+    expect(fulCompRes.nextState).toBe('FULFILLED');
+
+    // 4. Cancellation
+    const cancelRes = transitionOrder('PENDING_PAYMENT', {
+      type: 'CANCEL_REQUESTED',
+      reason: 'Customer changed mind',
+    });
+    expect(cancelRes.nextState).toBe('CANCELLED');
+
+    // 5. Partial refund
+    const partRefRes = transitionOrder('PAID', {
+      type: 'REFUND_APPLIED',
+      refundId: 'ref_1',
+      amount: '100.00',
+      isFull: false,
+    });
+    expect(partRefRes.nextState).toBe('PARTIALLY_REFUNDED');
+
+    // 6. Full refund
+    const fullRefRes = transitionOrder('PAID', {
+      type: 'REFUND_APPLIED',
+      refundId: 'ref_2',
+      amount: '500.00',
+      isFull: true,
+    });
+    expect(fullRefRes.nextState).toBe('REFUNDED');
+  });
+
+  it('transitionOrder pure state machine rejects illegal events from terminal states', () => {
+    expectErrorCode(
+      () =>
+        transitionOrder('CANCELLED', {
+          type: 'PAYMENT_RECEIVED',
+          transactionId: 'tx_999',
+          amount: '500.00',
+        }),
+      'INVALID_ORDER_TRANSITION',
+    );
+    expectErrorCode(
+      () =>
+        transitionOrder('REFUNDED', {
+          type: 'FULFILLMENT_STARTED',
+        }),
       'INVALID_ORDER_TRANSITION',
     );
   });

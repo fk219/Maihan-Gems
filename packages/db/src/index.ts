@@ -111,6 +111,9 @@ export {
 export {
   placeOrder,
   getOrderById,
+  transitionOrderState,
+  getOrderEvents,
+  type OrderEventRow,
 } from './commerce/order-repository.js';
 export {
   createPaymentRecord,

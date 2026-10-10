@@ -18,7 +18,13 @@ import {
   type OrderItemDto,
   type PlaceOrderInput,
 } from '@maihan/contracts';
-import { formatOrderNumber } from '@maihan/domain';
+import {
+  formatOrderNumber,
+  transitionOrder,
+  type OrderEvent,
+  type OrderState as DomainOrderState,
+  type OrderTransitionResult,
+} from '@maihan/domain';
 import { getCartByToken } from './cart-repository.js';
 import { getCheckoutSession, saveCheckoutSession } from './checkout-session-repository.js';
 
@@ -400,4 +406,136 @@ export async function placeOrder(
   await saveCheckoutSession(db, completedSession);
 
   return getOrderById(db, orderId);
+}
+
+export interface OrderEventRow {
+  id: string;
+  order_id: string;
+  from_state: string | null;
+  to_state: string;
+  actor_type: string;
+  actor_id: string | null;
+  reason: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export async function getOrderEvents(
+  db: CatalogDatabase,
+  orderId: string,
+): Promise<OrderEventRow[]> {
+  const res = await db.execute(sql`
+    SELECT
+      id::text AS id,
+      order_id,
+      from_state::text AS from_state,
+      to_state::text AS to_state,
+      actor_type,
+      actor_id,
+      reason,
+      metadata,
+      created_at
+    FROM order_events
+    WHERE order_id = ${orderId}
+    ORDER BY order_events.id ASC
+  `);
+
+  return (res.rows as unknown as any[]).map((r) => ({
+    id: r.id,
+    order_id: r.order_id,
+    from_state: r.from_state,
+    to_state: r.to_state,
+    actor_type: r.actor_type,
+    actor_id: r.actor_id,
+    reason: r.reason,
+    metadata: r.metadata ?? {},
+    created_at: new Date(r.created_at).toISOString(),
+  }));
+}
+
+export async function transitionOrderState(
+  db: CatalogDatabase,
+  orderId: string,
+  event: OrderEvent,
+  actor: { type: string; id?: string },
+): Promise<{ order: OrderDto; transition: OrderTransitionResult }> {
+  const orderRes = await db.execute(sql`
+    SELECT id, state::text AS state, version
+    FROM orders
+    WHERE id = ${orderId} OR order_number = ${orderId}
+    LIMIT 1
+  `);
+
+  if (orderRes.rows.length === 0) {
+    throw new ContractError('ORDER_NOT_FOUND', `Order "${orderId}" not found.`);
+  }
+
+  const rawOrder = orderRes.rows[0] as { id: string; state: DomainOrderState; version: number };
+  const transition = transitionOrder(rawOrder.state, event);
+
+  const updateFields: any[] = [
+    sql`state = ${transition.nextState}`,
+    sql`version = version + 1`,
+    sql`updated_at = now()`,
+  ];
+
+  if (transition.nextState === 'PAID') {
+    updateFields.push(sql`paid_at = now()`);
+  } else if (transition.nextState === 'FULFILLED') {
+    updateFields.push(sql`fulfilled_at = now()`);
+  } else if (transition.nextState === 'CANCELLED') {
+    updateFields.push(sql`cancelled_at = now()`);
+    updateFields.push(sql`cancel_reason = ${transition.reason}`);
+  }
+
+  await db.execute(sql`
+    UPDATE orders
+    SET ${sql.join(updateFields, sql`, `)}
+    WHERE id = ${rawOrder.id}
+  `);
+
+  await db.execute(sql`
+    INSERT INTO order_events (
+      order_id,
+      from_state,
+      to_state,
+      actor_type,
+      actor_id,
+      reason,
+      metadata
+    ) VALUES (
+      ${rawOrder.id},
+      ${rawOrder.state},
+      ${transition.nextState},
+      ${actor.type},
+      ${actor.id ?? null},
+      ${transition.reason},
+      ${JSON.stringify(event)}::jsonb
+    )
+  `);
+
+  await db.execute(sql`
+    INSERT INTO audit_logs (
+      actor_type,
+      actor_id,
+      action,
+      entity_type,
+      entity_id,
+      before_state,
+      after_state,
+      reason
+    ) VALUES (
+      ${actor.type},
+      ${actor.id ?? null},
+      'STATE_TRANSITION',
+      'orders',
+      ${rawOrder.id},
+      ${JSON.stringify({ state: rawOrder.state })}::jsonb,
+      ${JSON.stringify({ state: transition.nextState })}::jsonb,
+      ${transition.reason}
+    )
+  `);
+
+  const updatedOrder = await getOrderById(db, rawOrder.id);
+  return { order: updatedOrder, transition };
 }

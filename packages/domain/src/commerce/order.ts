@@ -65,3 +65,51 @@ export function assertValidOrderTransition(from: OrderState, to: OrderState): vo
     );
   }
 }
+
+export type OrderEvent =
+  | { type: 'PAYMENT_RECEIVED'; transactionId: string; amount: string }
+  | { type: 'CANCEL_REQUESTED'; reason: string; actor?: 'CUSTOMER' | 'ADMIN' | 'SYSTEM' }
+  | { type: 'FULFILLMENT_STARTED' }
+  | { type: 'FULFILLMENT_COMPLETED'; trackingNumber?: string }
+  | { type: 'REFUND_APPLIED'; refundId: string; amount: string; isFull: boolean };
+
+export interface OrderTransitionResult {
+  nextState: OrderState;
+  reason: string;
+}
+
+/**
+ * Pure domain state transition function: (currentState, event) -> nextState
+ */
+export function transitionOrder(
+  currentState: OrderState,
+  event: OrderEvent,
+): OrderTransitionResult {
+  switch (event.type) {
+    case 'PAYMENT_RECEIVED': {
+      assertValidOrderTransition(currentState, 'PAID');
+      return { nextState: 'PAID', reason: `Payment received: $${event.amount}` };
+    }
+    case 'CANCEL_REQUESTED': {
+      assertValidOrderTransition(currentState, 'CANCELLED');
+      return { nextState: 'CANCELLED', reason: event.reason };
+    }
+    case 'FULFILLMENT_STARTED': {
+      assertValidOrderTransition(currentState, 'IN_FULFILLMENT');
+      return { nextState: 'IN_FULFILLMENT', reason: 'Fulfillment started' };
+    }
+    case 'FULFILLMENT_COMPLETED': {
+      assertValidOrderTransition(currentState, 'FULFILLED');
+      return { nextState: 'FULFILLED', reason: 'Fulfillment completed' };
+    }
+    case 'REFUND_APPLIED': {
+      const targetState: OrderState = event.isFull ? 'REFUNDED' : 'PARTIALLY_REFUNDED';
+      assertValidOrderTransition(currentState, targetState);
+      return { nextState: targetState, reason: `Refund applied: $${event.amount}` };
+    }
+    default: {
+      throw new DomainError('INVALID_ORDER_TRANSITION', `Unknown event type: ${(event as any).type}`);
+    }
+  }
+}
+

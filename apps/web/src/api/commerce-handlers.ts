@@ -28,6 +28,7 @@ import {
   getCartByToken,
   getCheckoutSession,
   getOrderById,
+  getOrderEvents,
   mergeGuestCart,
   placeOrder,
   recordWebhookReceipt,
@@ -37,6 +38,7 @@ import {
   submitPaymentCheckpoint,
   submitShippingCheckpoint,
   sweepExpiredReservations,
+  transitionOrderState,
   updateCartItemQuantity,
   type CatalogDatabase,
 } from '@maihan/db';
@@ -207,6 +209,33 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     return {
       status: 200,
       body: { data: order },
+    };
+  },
+
+  async getOrderTimeline(ctx) {
+    const db = getDb(ctx);
+    const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
+    const events = await getOrderEvents(db, orderId);
+    return {
+      status: 200,
+      body: { data: events },
+    };
+  },
+
+  async cancelOrder(ctx) {
+    const db = getDb(ctx);
+    const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
+    const body = await parseBody(ctx.request);
+    const reason = typeof (body as any)?.reason === 'string' ? (body as any).reason : 'Cancelled by customer';
+    const result = await transitionOrderState(
+      db,
+      orderId,
+      { type: 'CANCEL_REQUESTED', reason, actor: 'CUSTOMER' },
+      { type: 'CUSTOMER' },
+    );
+    return {
+      status: 200,
+      body: { data: result.order },
     };
   },
 
