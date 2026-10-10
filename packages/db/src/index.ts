@@ -97,6 +97,8 @@ export {
   reserveStockForCart,
   releaseStockForSession,
   isGemstoneReserved,
+  sweepExpiredReservations,
+  type InventoryReleaseResult,
 } from './commerce/inventory-reservation.js';
 export {
   createCheckoutSession,

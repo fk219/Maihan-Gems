@@ -90,6 +90,8 @@ export const COMMERCE_ROUTES: readonly RouteDefinition[] = [
   { id: 'getOrder', method: 'GET', path: '/orders/{orderId}' },
   { id: 'handlePaymentWebhook', method: 'POST', path: '/api/v1/webhooks/payments/{provider}' },
   { id: 'handlePaymentWebhook', method: 'POST', path: '/webhooks/payments/{provider}' },
+  { id: 'sweepInventoryReservations', method: 'POST', path: '/api/v1/inventory/sweep-expired' },
+  { id: 'sweepInventoryReservations', method: 'POST', path: '/inventory/sweep-expired' },
 ];
 
 export const ACCOUNT_ROUTES: readonly RouteDefinition[] = [

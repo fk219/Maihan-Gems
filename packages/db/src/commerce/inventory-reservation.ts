@@ -222,6 +222,78 @@ export async function reserveStockForCart(
   }
 }
 
+export interface InventoryReleaseResult {
+  jobId: string;
+  gemstoneId: string;
+  gemRef?: string;
+  sessionId?: string;
+  releasedAt: string;
+  reason: 'EXPIRED' | 'SESSION_RELEASED';
+}
+
+export async function sweepExpiredReservations(
+  db: CatalogDatabase,
+): Promise<InventoryReleaseResult[]> {
+  const res = await db.execute(sql`
+    UPDATE jobs
+    SET state = 'SUCCEEDED', updated_at = now()
+    WHERE queue = 'inventory_reservations'
+      AND state = 'QUEUED'
+      AND run_after <= now()
+    RETURNING id, payload
+  `);
+
+  const released: InventoryReleaseResult[] = [];
+  for (const row of res.rows as unknown as Array<{ id: string; payload: any }>) {
+    const payload = row.payload ?? {};
+    const gemstoneId = payload.gemstoneId;
+    const gemRef = payload.gemRef;
+    const sessionId = payload.sessionId;
+    const nowIso = new Date().toISOString();
+
+    if (gemstoneId) {
+      const eventPayloadJson = JSON.stringify({
+        sessionId,
+        cartId: payload.cartId,
+        gemstoneId,
+        gemRef,
+        isPair: payload.isPair ?? false,
+        reason: 'EXPIRED',
+        releasedAt: nowIso,
+      });
+
+      await db.execute(sql`
+        INSERT INTO domain_events (
+          event_id,
+          event_type,
+          aggregate_type,
+          aggregate_id,
+          payload,
+          status
+        ) VALUES (
+          gen_random_uuid(),
+          'InventoryReleased',
+          'GEMSTONE',
+          ${gemstoneId},
+          ${eventPayloadJson}::jsonb,
+          'PENDING'
+        )
+      `);
+    }
+
+    released.push({
+      jobId: row.id,
+      gemstoneId: gemstoneId ?? '',
+      gemRef,
+      sessionId,
+      releasedAt: nowIso,
+      reason: 'EXPIRED',
+    });
+  }
+
+  return released;
+}
+
 export async function releaseStockForSession(
   db: CatalogDatabase,
   sessionId: string,
@@ -232,8 +304,42 @@ export async function releaseStockForSession(
     WHERE queue = 'inventory_reservations'
       AND state = 'QUEUED'
       AND payload->>'sessionId' = ${sessionId}
-    RETURNING id
+    RETURNING id, payload
   `);
+
+  for (const row of res.rows as unknown as Array<{ id: string; payload: any }>) {
+    const payload = row.payload ?? {};
+    if (payload.gemstoneId) {
+      const eventPayloadJson = JSON.stringify({
+        sessionId,
+        cartId: payload.cartId,
+        gemstoneId: payload.gemstoneId,
+        gemRef: payload.gemRef,
+        isPair: payload.isPair ?? false,
+        reason: 'SESSION_RELEASED',
+        releasedAt: new Date().toISOString(),
+      });
+
+      await db.execute(sql`
+        INSERT INTO domain_events (
+          event_id,
+          event_type,
+          aggregate_type,
+          aggregate_id,
+          payload,
+          status
+        ) VALUES (
+          gen_random_uuid(),
+          'InventoryReleased',
+          'GEMSTONE',
+          ${payload.gemstoneId},
+          ${eventPayloadJson}::jsonb,
+          'PENDING'
+        )
+      `);
+    }
+  }
+
   return res.rows.length;
 }
 

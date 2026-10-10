@@ -36,6 +36,7 @@ import {
   submitConfirmCheckpoint,
   submitPaymentCheckpoint,
   submitShippingCheckpoint,
+  sweepExpiredReservations,
   updateCartItemQuantity,
   type CatalogDatabase,
 } from '@maihan/db';
@@ -267,6 +268,15 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
         order_id: reconciliation.orderId,
         error: reconciliation.error,
       },
+    };
+  },
+
+  async sweepInventoryReservations(ctx) {
+    const db = getDb(ctx);
+    const released = await sweepExpiredReservations(db);
+    return {
+      status: 200,
+      body: { data: { count: released.length, released } },
     };
   },
 };
