@@ -3,6 +3,46 @@
 **Last updated:** 2026-10-10
 **Update this file after every meaningful implementation task.**
 
+# PRODUCT DISCOVERY HOMEPAGE REDESIGN & VISIBILITY DIAGNOSIS COMPLETE (2026-10-10)
+
+- **Commit**: `7d44be5`
+- **Objective**: Diagnose why real products were not appearing, establish correct publication display rules, remove unverified marketing puffery, and implement an authentic, luxury product discovery experience adhering strictly to `Design.md`.
+- **Database & Visibility Diagnosis Evidence**:
+  - `products` table: 9,900 total rows; all 9,900 are `state = 'DRAFT'`, 0 are `state = 'ACTIVE'`, 0 have `published_at`.
+  - Database query filter (`packages/db/src/catalog/predicates.ts` line 227 & `products-repository.ts` line 342) enforces `WHERE p.deleted_at IS NULL AND p.state = 'ACTIVE'`.
+  - Reference taxonomy (`gemstone_varieties`, `gemstone_colours`) rows are also migrated as `state = 'DRAFT'` awaiting Phase 12 editorial curation.
+  - Public routes (`[varietySlug]`, `products/[productSlug]`) enforce `state === 'ACTIVE'` check and return 404 (`notFound()`) for DRAFT records.
+  - In contrast, `settings` (964 designs) and `setting_variants` (10,391 variants) are reference structures and are not publication-gated.
+- **Architectural Rules Honoured**:
+  - DRAFT status remains unchanged — zero products mutated or published without authorization.
+  - Zero fake product cards or manufactured prices/stock fabricated.
+  - Zero broken/empty product grids.
+- **Redesigned Experience**:
+  - Alternating section cadence strictly aligned with `Design.md`:
+    1. Hero: Deep Obsidian Navy (`#08121E`) with integrated catalogue search input bar submitting to `/search`, dual CTAs (`/search`, `/settings`, `/design-your-own`).
+    2. Marquee Ticker: Solid Metallic Gold (`#C9A84C`) with disciplined, verified gemmological values.
+    3. Master Atelier Settings: Dark Primary Navy (`#0D1B2A`) with live reference setting cards from `catalogServer().listSettings({ limit: 6 })` showing real design codes (`JS1016`, etc.), metal options, style labels, and direct links to `/settings`.
+    4. Bespoke Atelier Workflow: Crisp White (`#FFFFFF`) 3-stage custom jewellery creation guide (`/settings` -> `/search` -> `/design-your-own`).
+    5. Mineralogical Discovery: Midnight Obsidian (`#080D19`) variety cards (Emerald, Sapphire, Ruby, Spinel, Tsavorite, Tourmaline, Tanzanite, Aquamarine) linking to intelligent search (`/search?q={name}`), plus chromatic color pills linking to `/search?color={slug}`.
+    6. Grounded Gemmological Integrity: Ivory Off-White (`#FAFAF8`) with 4 verified pillars (100% Earth-Mined Natural, Transparent Treatment Disclosure, Master Goldsmith Mountings, Private Client Advisory) replacing unverified marketing puffery.
+- **Verification**: `tsc -b` passed with 0 errors; full `@maihan/web` test suite passed (353 passed); `src/lib/accessibility-audit.spec.tsx` passed with 0 blocking violations; Next.js production build (`next build --webpack`) succeeded.
+
+# SEARCH FRONTEND UI (/search) COMPLETE (2026-10-10)
+
+- **Commit**: `a448178`
+- **Objective**: Implement the Phase 5 `/search` frontend UI connected to the cached `CatalogQueryService.search()` pipeline.
+- **Deliverables**:
+  - `apps/web/src/lib/search-view.ts`: Pure URL `searchParams` ↔ `ResolvedSearchQuery` view model, facet toggle href builder, active filter chips extractor, pagination base path.
+  - `apps/web/src/lib/search-view.spec.ts`: 5 unit tests for view model logic.
+  - `apps/web/src/components/filters/SearchFilterPanel.tsx`: Server Component facet sidebar rendering counts and toggle links across 8 dimensions.
+  - `apps/web/src/app/(storefront)/search/page.tsx`: Complete Server Component search page with search bar, active filter chips, sort options (relevance, price, weight), meta status bar (strategy, intent, candidate count, degraded warning, rejected filter notices), product grid, and pagination.
+  - `apps/web/src/app/(storefront)/search/loading.tsx`: Route loading skeleton (`ListSkeleton`).
+  - `apps/web/src/app/(storefront)/search/error.tsx`: Route error boundary (`CatalogErrorView`).
+  - `apps/web/src/lib/theme-styles.ts`: Extended with complete search page layout, facet panel, search bar, active chip, and meta bar CSS tokens.
+  - `apps/web/src/routing/route-manifest.ts`: Registered `loading.tsx` and `error.tsx` under search route.
+  - `apps/web/src/lib/accessibility-audit.spec.tsx`: Automated WCAG 2.2 AA axe-core test for `/search` page (0 blocking violations).
+- **Verification**: `tsc -b` 0 errors, 353 web tests passing, production build succeeded.
+
 # STOREFRONT HOMEPAGE & INSTITUTIONAL FOOTER COMPLETE (2026-10-10)
 
 Implemented the authoritative storefront homepage (`apps/web/src/app/(storefront)/page.tsx`), institutional footer (`apps/web/src/components/layout/StorefrontFooter.tsx`), and theme tokens (`apps/web/src/lib/theme-styles.ts`) strictly derived from `Design.md` (Swiss Private Banking precision combined with modern Dubai luxury):
