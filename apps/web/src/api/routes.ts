@@ -111,11 +111,24 @@ export const ACCOUNT_ROUTES: readonly RouteDefinition[] = [
   { id: 'getCustomerOrderDetail', method: 'GET', path: '/account/orders/{orderId}' },
 ];
 
+export const FAVORITES_ROUTES: readonly RouteDefinition[] = [
+  { id: 'getFavorites', method: 'GET', path: '/api/v1/favorites' },
+  { id: 'getFavorites', method: 'GET', path: '/favorites' },
+  { id: 'addFavorite', method: 'POST', path: '/api/v1/favorites' },
+  { id: 'addFavorite', method: 'POST', path: '/favorites' },
+  { id: 'removeFavorite', method: 'DELETE', path: '/api/v1/favorites/{productId}' },
+  { id: 'removeFavorite', method: 'DELETE', path: '/favorites/{productId}' },
+  { id: 'getCompare', method: 'GET', path: '/api/v1/compare' },
+  { id: 'getCompare', method: 'GET', path: '/compare' },
+  { id: 'getCompare', method: 'GET', path: '/compare-list' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
   ...COMMERCE_ROUTES,
   ...ACCOUNT_ROUTES,
+  ...FAVORITES_ROUTES,
 ];
 
 export type RouteLookup =

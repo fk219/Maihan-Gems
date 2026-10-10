@@ -132,6 +132,12 @@ export {
   getCustomerOrders,
   getCustomerOrder,
 } from './commerce/account-repository.js';
+export {
+  getCustomerFavorites,
+  addCustomerFavorite,
+  removeCustomerFavorite,
+  getCompareMatrix,
+} from './commerce/favorites-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
 
 
