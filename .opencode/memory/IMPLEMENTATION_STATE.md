@@ -5,6 +5,35 @@
 
 ---
 
+# PHASE 5 — SEARCH + FILTERS COMPLETE (2026-10-10). All 11 Global Tasks done, verified, and committed.
+
+Phase 5 delivers hybrid search with facets, synonyms, business ranking, vector search degradation, and generation-based caching behind `CatalogQueryPort` without breaking storefront call sites.
+
+## Phase 5 Global Task Completion Matrix
+
+| Task | Commit | Status | Evidence / Verification |
+|---|---|---|---|
+| Task 1 — Deterministic Intent Detection | `04a8854` | **Verified Complete** | Pure deterministic rule-based query classifier (`detectSearchIntent`), identifier lookup, price/carat/attribute extraction, residual query preservation. 23 unit tests (`intent.spec.ts`). |
+| Task 2 — Index-backed Structured Arm | `cb8a9c0` | **Verified Complete** | Whitelist-resolved structured SQL filters over indexed columns only, unknown values rejected into `rejected_filters`, range validation. 3 tests (`structured-arm.spec.ts`). |
+| Task 3 — Full-Text Search Arm | `1e1ec17` | **Verified Complete** | PostgreSQL `websearch_to_tsquery('english', ...)` and `ts_rank_cd(..., 32)` over weighted `products` & `gemstones` tsvectors. 5 tests (`fulltext-arm.spec.ts`). |
+| Task 4 — Trigram Fallback Arm | `9f152b8` | **Verified Complete** | `pg_trgm` GIN similarity (threshold >= 0.3) on `gem_ref`, title, and variety name when FTS returns 0 candidates. 3 tests (`trigram-arm.spec.ts`). |
+| Task 5 — Gated Semantic Search Arm | `bdc37a3` | **Verified Complete** | HNSW cosine similarity (`<=>`) search against `product_embeddings`, gated by intent and candidate overflow rules. 9 tests (`semantic-arm.spec.ts`). |
+| Task 6 — Idempotent Product Embedding | `1b894dc` | **Verified Complete** | Document composition from 11 attributes, SHA-256 `content_hash` idempotency gating skipping model calls for unchanged products. 4 tests (`embedding.spec.ts`). |
+| Task 7 — Versioned Business Ranking | `46df949` | **Verified Complete** | Weighted scoring formula, treated stone modifier strictly `x1.00` (NEVER demoted), verified cert bonus `x1.15`, weights summing to 1.00. 11 tests (`ranking.spec.ts`). |
+| Task 8 — Seeded Synonym Map & Typos | `1fa10da` | **Verified Complete** | Synonym dictionary with explicit `OBSERVED` vs `CURATED` provenance, safe FTS expansion without duplicating rows. 7 tests (`synonyms.spec.ts`). |
+| Task 9 — Disjunctive Facet Computation | `23474fb` | **Verified Complete** | Single-pass grouped CTE over filtered candidates across all 8 closed dimensions; disjunctive colour/variety handling preserving sibling counts. 3 tests (`facets.spec.ts`). |
+| Task 10 — Search Caching & Generation Invalidation | `84ab30e` | **Verified Complete** | Search cache policies (`search: 60s`, `searchFacets: 300s`, `searchSuggest: 3600s`), generation token scoping, single-step cache invalidation via `bumpSearchGeneration()`. 4 tests (`search-cache.spec.ts`). |
+| Task 11 — Vector Circuit Breaker & Search API Endpoints | `f5783f4` | **Verified Complete** | Vector circuit breaker (`VectorCircuitBreaker`), safe search degradation to structured + full-text, `POST /search`, `GET /search/suggest`, `GET /search/similar-gemstones/{gemRef}`, zero-LLM architecture proof test, NFR-03 latency budget (<400ms). 18 tests (`circuit-breaker.spec.ts`, `search.spec.ts`). |
+
+## Architecture & Non-Functional Verification
+- **Zero LLM on Synchronous Request Path**: Mechanically verified by automated test asserting 0 model calls on search execution (`circuit-breaker.spec.ts`, `search.spec.ts`).
+- **Treated Stone Neutrality**: Heated/treated stones modifier factor is locked at `1.00` (never penalized or demoted, verified in `ranking.spec.ts`).
+- **NFR-03 Performance Budget**: Filtered search p95 latency under 400ms verified by automated benchmark (`search.spec.ts`).
+- **Safe Degradation**: Proved graceful fallback to structured + full-text when vector circuit breaker is open or vector query throws (`circuit-breaker.spec.ts`).
+- **Total Test Counts**: 553 passing tests across domain (176), contracts (13), db (66), web (298), with zero failures.
+
+---
+
 # PHASE 4 — STOREFRONT COMPLETE (2026-10-10). Tasks 1-11 done and verified against live Neon DB.
 
 Storefront implementation is complete and verified with real migrated catalog data from the reverse-engineering archive on the Neon PostgreSQL dev database (`maihan_dev`).
