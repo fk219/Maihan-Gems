@@ -106,5 +106,10 @@ export {
   submitPaymentCheckpoint,
   submitConfirmCheckpoint,
 } from './commerce/checkout-session-repository.js';
+export {
+  placeOrder,
+  getOrderById,
+} from './commerce/order-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
+
 

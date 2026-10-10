@@ -84,6 +84,10 @@ export const COMMERCE_ROUTES: readonly RouteDefinition[] = [
   { id: 'submitPayment', method: 'POST', path: '/checkout/sessions/{sessionId}/payment' },
   { id: 'submitConfirm', method: 'POST', path: '/api/v1/checkout/sessions/{sessionId}/confirm' },
   { id: 'submitConfirm', method: 'POST', path: '/checkout/sessions/{sessionId}/confirm' },
+  { id: 'placeOrder', method: 'POST', path: '/api/v1/orders' },
+  { id: 'placeOrder', method: 'POST', path: '/orders' },
+  { id: 'getOrder', method: 'GET', path: '/api/v1/orders/{orderId}' },
+  { id: 'getOrder', method: 'GET', path: '/orders/{orderId}' },
 ];
 
 export const ALL_ROUTES: readonly RouteDefinition[] = [

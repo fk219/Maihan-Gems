@@ -17,6 +17,7 @@ import {
   CreateCheckoutSessionInputSchema,
   MergeCartInputSchema,
   PaymentCheckpointInputSchema,
+  PlaceOrderInputSchema,
   ShippingCheckpointInputSchema,
   UpdateCartItemInputSchema,
 } from '@maihan/contracts';
@@ -26,7 +27,9 @@ import {
   createCheckoutSession,
   getCartByToken,
   getCheckoutSession,
+  getOrderById,
   mergeGuestCart,
+  placeOrder,
   removeCartItem,
   submitConfirmCheckpoint,
   submitPaymentCheckpoint,
@@ -179,6 +182,27 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     return {
       status: 200,
       body: { data: session },
+    };
+  },
+
+  async placeOrder(ctx) {
+    const db = getDb(ctx);
+    const body = await parseBody(ctx.request);
+    const input = PlaceOrderInputSchema.parse(body);
+    const order = await placeOrder(db, input);
+    return {
+      status: 201,
+      body: { data: order },
+    };
+  },
+
+  async getOrder(ctx) {
+    const db = getDb(ctx);
+    const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
+    const order = await getOrderById(db, orderId);
+    return {
+      status: 200,
+      body: { data: order },
     };
   },
 };

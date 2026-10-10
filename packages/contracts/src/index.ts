@@ -36,3 +36,5 @@ export * from './openapi/endpoints.js';
 export * from './openapi/generate.js';
 export * from './dto/commerce/cart.js';
 export * from './dto/commerce/checkout.js';
+export * from './dto/commerce/order.js';
+
