@@ -144,6 +144,12 @@ export {
   createProductAddon,
   attachAddonToOrder,
 } from './commerce/addon-repository.js';
+export {
+  createDiscount,
+  getDiscountByCode,
+  validateDiscount,
+  redeemDiscount,
+} from './commerce/discount-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
 
 

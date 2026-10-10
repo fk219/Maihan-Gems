@@ -132,6 +132,13 @@ export const ADDON_ROUTES: readonly RouteDefinition[] = [
   { id: 'attachAddon', method: 'POST', path: '/orders/{orderId}/addons' },
 ];
 
+export const DISCOUNT_ROUTES: readonly RouteDefinition[] = [
+  { id: 'validateDiscountEndpoint', method: 'POST', path: '/api/v1/discounts/validate' },
+  { id: 'validateDiscountEndpoint', method: 'POST', path: '/discounts/validate' },
+  { id: 'getDiscountEndpoint', method: 'GET', path: '/api/v1/discounts/{code}' },
+  { id: 'getDiscountEndpoint', method: 'GET', path: '/discounts/{code}' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
@@ -139,6 +146,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...ACCOUNT_ROUTES,
   ...FAVORITES_ROUTES,
   ...ADDON_ROUTES,
+  ...DISCOUNT_ROUTES,
 ];
 
 export type RouteLookup =
