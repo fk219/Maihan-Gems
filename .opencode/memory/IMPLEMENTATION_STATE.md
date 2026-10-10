@@ -3,6 +3,20 @@
 **Last updated:** 2026-10-10
 **Update this file after every meaningful implementation task.**
 
+# STOREFRONT HOMEPAGE & INSTITUTIONAL FOOTER COMPLETE (2026-10-10)
+
+Implemented the authoritative storefront homepage (`apps/web/src/app/(storefront)/page.tsx`), institutional footer (`apps/web/src/components/layout/StorefrontFooter.tsx`), and theme tokens (`apps/web/src/lib/theme-styles.ts`) strictly derived from `Design.md` (Swiss Private Banking precision combined with modern Dubai luxury):
+- **Aesthetic DNA & Color Tokens**: Obsidian Navy (`#08121E`, `#0D1B2A`, `#132234`), Master Gold Palette (`#C9A84C`, `#E8C96A`, `#8B6914`, `#F5E8C0`), Ivory Off-White (`#FAFAF8`), Crisp White (`#FFFFFF`), hairline gold precision borders (`1px rgba(201, 168, 76, 0.20)` with 1.5px top specular accent), and gold scrollbars.
+- **Alternating Background Cadence**:
+  1. Hero Section: Obsidian Deep (`#08121E`) with radial gold orbs, serif Cormorant Garamond typography, dual CTAs, and 4 trust metric cards (100% Earth-Mined, 70+ Mineral Varieties, GIA·Gübelin·SSEF Standards, 0% Synthetic Compromise).
+  2. Marquee Ticker: Solid Metallic Gold (`#C9A84C`) high-impact banner with obsidian text.
+  3. Mineral Varieties Showcase: Dark Primary Navy (`#0D1B2A`) with translucent glass cards (`#132234`) linking to `/{varietySlug}` and `/varieties`.
+  4. Spectrum by Colour: Crisp White (`#FFFFFF`) with dark navy typography and rich gemstone color swatches linking to `/colour/{colourSlug}`.
+  5. Master Goldsmith Settings: Midnight Obsidian (`#080D19`) with dark glass cards showcasing real settings from `catalogServer().listSettings({ limit: 6 })` with metal options, design codes, and links to `/settings` and `/design-your-own`.
+  6. Assurance & Provenance Pillars: Ivory Off-White (`#FAFAF8`) with white cards and champagne borders detailing 100% Natural Authenticity, World-Class Lab Certification, Spectroscopic Analysis, and Armored Custody Transit.
+  7. Institutional Footer: Deepest Obsidian (`#08121E`) with top gold hairline accent, brand mark, private client advisory disclosures, multi-column navigation hubs, copyright, and explicit INV-07/INV-08 truth disclosure.
+- **Verification**: Zero TypeScript errors (`tsc -b`), full Next.js production build succeeded (`next build --webpack`), all 345 web tests passed with zero failures (`pnpm --filter @maihan/web test`), automated axe-core accessibility audit passed with 0 blocking violations and 0 non-blocking warnings on homepage (`accessibility-audit.spec.tsx`), and initial-JS bundle budget checks passed (`check-bundle-budgets.mjs`: 134.5 KB gzip <= 170/190 KB budget).
+
 # PHASE 6 — CART + CHECKOUT + COMMERCE COMPLETE (2026-10-10). All 13 Global Tasks done, verified, and committed.
 
 Phase 6 implements the complete e-commerce pipeline: shopping cart lifecycle with authoritative server-side repricing, 30-minute stock reservation inside PostgreSQL transactions, multi-step checkout funnel (/shipping, /payment, /confirm), immutable order placement with snapshots and audit logs, provider-neutral payment abstraction with TestPaymentProvider, raw body HMAC webhook reconciliation, customer accounts/profiles/addresses/order history with strict authorization boundaries, wishlists and compare matrix, financing and protection plan addons, scoped discount validation with atomic redemptions, multi-stage refund workflow, reservation expiry cleanup job, and pure domain order state machine with append-only order_events timeline.

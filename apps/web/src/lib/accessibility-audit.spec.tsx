@@ -167,7 +167,8 @@ describe('Task 11 accessibility audit — representative templates (axe-core, cr
   it('home shell (header + mega menu + main landmark)', async () => {
     port = fullPort();
     wire(port);
-    await audit('home', <HomePage />);
+    const page = await HomePage();
+    await audit('home', page);
   });
 
   it('mega menu (disclosure semantics, real links)', async () => {

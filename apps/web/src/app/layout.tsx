@@ -10,10 +10,26 @@
  */
 import { organizationJsonLdPayload } from '../lib/jsonld.js';
 import { JsonLd } from '../components/seo/JsonLd.js';
+import { MAIHAN_THEME_CSS } from '../lib/theme-styles.js';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
+        <script
+          id="theme-init"
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme_preference')||'dark';var r=document.documentElement;r.setAttribute('data-theme',t);r.classList.remove('dark','light');r.classList.add(t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`,
+          }}
+        />
+        <style id="maihan-theme" dangerouslySetInnerHTML={{ __html: MAIHAN_THEME_CSS }} />
+      </head>
       <body>
         {/* Task 8: the site-wide Organization entity, emitted only when the
             canonical base (SITE_URL) is configured. Statically prerendered

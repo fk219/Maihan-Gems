@@ -9,12 +9,14 @@
  * are intentionally empty until their phase, not stubbed with fake chrome.
  */
 import { StorefrontHeader } from '../../components/layout/StorefrontHeader.js';
+import { StorefrontFooter } from '../../components/layout/StorefrontFooter.js';
 
 export default function StorefrontLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <StorefrontHeader />
       {children}
+      <StorefrontFooter />
     </>
   );
 }
