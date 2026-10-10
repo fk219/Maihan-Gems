@@ -8,6 +8,8 @@
     "node": ">=22.0.0"
   },
   "scripts": {
+    "dev": "pnpm --filter @maihan/web run dev",
+    "start": "pnpm --filter @maihan/web run start:web",
     "build": "tsc -b",
     "typecheck": "tsc -b",
     "clean": "tsc -b --clean",
