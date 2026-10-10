@@ -24,7 +24,7 @@ function getDatabaseUrl(): string | undefined {
   return undefined;
 }
 
-describe('Checkout HTTP API Endpoints (Phase 6 Task 2)', () => {
+describe('Checkout HTTP API & Checkpoint Funnel Endpoints (Phase 6 Tasks 2-3)', () => {
   let pool: ReturnType<typeof createPool> | undefined;
   let api: CatalogApi | undefined;
   let hasDb = false;
@@ -221,4 +221,148 @@ describe('Checkout HTTP API Endpoints (Phase 6 Task 2)', () => {
     expect(getBody.data.id).toBe(sessionBody.data.id);
     expect(getBody.data.pricing_snapshot.grand_total).toBe(sessionBody.data.pricing_snapshot.grand_total);
   });
+
+  it('enforces sequential server checkpoints and rejects skipping shipping step with 422', async () => {
+    if (!hasDb || !api || !sampleProductId) return;
+
+    // Create cart & add item
+    const createCartRes = await api(
+      new Request('https://maihan.test/api/v1/carts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      }),
+    );
+    const cartToken = (await createCartRes.json()).data.cart_token;
+    createdCartTokens.push(cartToken);
+
+    await api(
+      new Request(`https://maihan.test/api/v1/carts/${cartToken}/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: sampleProductId, quantity: 1 }),
+      }),
+    );
+
+    const sessionRes = await api(
+      new Request('https://maihan.test/api/v1/checkout/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart_token: cartToken }),
+      }),
+    );
+    const sessionId = (await sessionRes.json()).data.id;
+    createdSessionIds.push(sessionId);
+
+    // Attempt to jump directly to payment checkpoint without shipping
+    const paymentRes = await api(
+      new Request(`https://maihan.test/api/v1/checkout/sessions/${sessionId}/payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ method_type: 'TEST' }),
+      }),
+    );
+
+    expect(paymentRes.status).toBe(422);
+    const errBody = await paymentRes.json();
+    expect(errBody.error.code).toBe('UNPROCESSABLE');
+  });
+
+  it('completes shipping, payment and confirm checkpoints in sequence as the observed funnel', async () => {
+    if (!hasDb || !api || !sampleProductId) return;
+
+    // Create cart & add item
+    const createCartRes = await api(
+      new Request('https://maihan.test/api/v1/carts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      }),
+    );
+    const cartToken = (await createCartRes.json()).data.cart_token;
+    createdCartTokens.push(cartToken);
+
+    const addRes = await api(
+      new Request(`https://maihan.test/api/v1/carts/${cartToken}/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: sampleProductId, quantity: 1 }),
+      }),
+    );
+    const initialTotal = (await addRes.json()).data.pricing_snapshot.grand_total;
+
+    // Step 1: Create session
+    const sessionRes = await api(
+      new Request('https://maihan.test/api/v1/checkout/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart_token: cartToken, email: 'funnel@example.com' }),
+      }),
+    );
+    expect(sessionRes.status).toBe(201);
+    const sessionData = (await sessionRes.json()).data;
+    const sessionId = sessionData.id;
+    createdSessionIds.push(sessionId);
+    expect(sessionData.current_step).toBe('SHIPPING');
+
+    // Step 2: Shipping Checkpoint
+    const shippingRes = await api(
+      new Request(`https://maihan.test/api/v1/checkout/sessions/${sessionId}/shipping`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shipping_address: {
+            full_name: 'Jane Doe',
+            line1: '123 Gemstone Way',
+            city: 'New York',
+            postal_code: '10001',
+            country_code: 'US',
+          },
+          shipping_method: {
+            code: 'EXPRESS',
+            name: 'Express Insured Delivery',
+            amount: '25.00',
+          },
+        }),
+      }),
+    );
+    expect(shippingRes.status).toBe(200);
+    const shippingData = (await shippingRes.json()).data;
+    expect(shippingData.current_step).toBe('PAYMENT');
+    expect(shippingData.shipping_address.city).toBe('New York');
+    expect(shippingData.shipping_method.amount).toBe('25.00');
+    // Grand total adjusted with shipping
+    const expectedWithShipping = (Number(initialTotal) + 25).toFixed(2);
+    expect(shippingData.pricing_snapshot.grand_total).toBe(expectedWithShipping);
+
+    // Step 3: Payment Intent Checkpoint
+    const paymentRes = await api(
+      new Request(`https://maihan.test/api/v1/checkout/sessions/${sessionId}/payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ method_type: 'TEST' }),
+      }),
+    );
+    expect(paymentRes.status).toBe(200);
+    const paymentData = (await paymentRes.json()).data;
+    expect(paymentData.current_step).toBe('CONFIRM');
+    expect(paymentData.payment_intent_id).toMatch(/^pi_[a-f0-9]{48}$/);
+
+    // Step 4: Confirm Checkpoint
+    const confirmRes = await api(
+      new Request(`https://maihan.test/api/v1/checkout/sessions/${sessionId}/confirm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          idempotency_key: 'idem_test_checkpoint_4',
+          customer_note: 'Please gift wrap',
+        }),
+      }),
+    );
+    expect(confirmRes.status).toBe(200);
+    const confirmData = (await confirmRes.json()).data;
+    expect(confirmData.id).toBe(sessionId);
+    expect(confirmData.current_step).toBe('CONFIRM');
+  });
 });
+

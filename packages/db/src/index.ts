@@ -102,6 +102,9 @@ export {
   createCheckoutSession,
   getCheckoutSession,
   saveCheckoutSession,
+  submitShippingCheckpoint,
+  submitPaymentCheckpoint,
+  submitConfirmCheckpoint,
 } from './commerce/checkout-session-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
 

@@ -78,6 +78,12 @@ export const COMMERCE_ROUTES: readonly RouteDefinition[] = [
   { id: 'createCheckoutSession', method: 'POST', path: '/checkout/sessions' },
   { id: 'getCheckoutSession', method: 'GET', path: '/api/v1/checkout/sessions/{sessionId}' },
   { id: 'getCheckoutSession', method: 'GET', path: '/checkout/sessions/{sessionId}' },
+  { id: 'submitShipping', method: 'POST', path: '/api/v1/checkout/sessions/{sessionId}/shipping' },
+  { id: 'submitShipping', method: 'POST', path: '/checkout/sessions/{sessionId}/shipping' },
+  { id: 'submitPayment', method: 'POST', path: '/api/v1/checkout/sessions/{sessionId}/payment' },
+  { id: 'submitPayment', method: 'POST', path: '/checkout/sessions/{sessionId}/payment' },
+  { id: 'submitConfirm', method: 'POST', path: '/api/v1/checkout/sessions/{sessionId}/confirm' },
+  { id: 'submitConfirm', method: 'POST', path: '/checkout/sessions/{sessionId}/confirm' },
 ];
 
 export const ALL_ROUTES: readonly RouteDefinition[] = [

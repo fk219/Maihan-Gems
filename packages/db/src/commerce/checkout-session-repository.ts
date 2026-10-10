@@ -14,15 +14,25 @@ import { sql } from 'drizzle-orm';
 import type { CatalogDatabase } from '../catalog/executor.js';
 import {
   ContractError,
+  ShippingAddressDtoSchema,
+  ShippingMethodDtoSchema,
   type CheckoutSessionDto,
+  type ConfirmCheckpointInput,
   type CreateCheckoutSessionInput,
+  type PaymentCheckpointInput,
+  type PricingSnapshotDto,
+  type ShippingAddressDto,
+  type ShippingCheckpointInput,
+  type ShippingMethodDto,
 } from '@maihan/contracts';
 import {
   assertCartNotExpired,
   comparePriceMatch,
   computeReservationExpiry,
+  fromCents,
   isReservationExpired,
   RESERVATION_TTL_MINUTES,
+  toCents,
 } from '@maihan/domain';
 import { getCartByToken } from './cart-repository.js';
 import { reserveStockForCart } from './inventory-reservation.js';
@@ -147,3 +157,93 @@ export async function saveCheckoutSession(
 
   return session;
 }
+
+export async function submitShippingCheckpoint(
+  db: CatalogDatabase,
+  sessionId: string,
+  input: ShippingCheckpointInput,
+): Promise<CheckoutSessionDto> {
+  const session = await getCheckoutSession(db, sessionId);
+
+  const shippingAddress: ShippingAddressDto = ShippingAddressDtoSchema.parse(input.shipping_address);
+  const shippingMethod: ShippingMethodDto | null = input.shipping_method
+    ? ShippingMethodDtoSchema.parse(input.shipping_method)
+    : session.shipping_method ?? null;
+
+  let updatedSnapshot: PricingSnapshotDto = session.pricing_snapshot;
+  if (shippingMethod) {
+    const subtotalCents = toCents(session.pricing_snapshot.subtotal);
+    const discountCents = toCents(session.pricing_snapshot.discount_total);
+    const taxCents = toCents(session.pricing_snapshot.tax_total);
+    const shippingCents = toCents(shippingMethod.amount);
+    let grandTotalCents = subtotalCents - discountCents + taxCents + shippingCents;
+    if (grandTotalCents < 0n) grandTotalCents = 0n;
+
+    updatedSnapshot = {
+      ...session.pricing_snapshot,
+      shipping_total: fromCents(shippingCents),
+      grand_total: fromCents(grandTotalCents),
+      computed_at: new Date().toISOString(),
+    };
+  }
+
+  const updatedSession: CheckoutSessionDto = {
+    ...session,
+    shipping_address: shippingAddress,
+    shipping_method: shippingMethod,
+    pricing_snapshot: updatedSnapshot,
+    current_step: 'PAYMENT',
+  };
+
+  await saveCheckoutSession(db, updatedSession);
+  return updatedSession;
+}
+
+export async function submitPaymentCheckpoint(
+  db: CatalogDatabase,
+  sessionId: string,
+  _input: PaymentCheckpointInput = {},
+): Promise<CheckoutSessionDto> {
+  const session = await getCheckoutSession(db, sessionId);
+
+  if (!session.shipping_address) {
+    throw new ContractError(
+      'UNPROCESSABLE',
+      'Cannot proceed to payment checkpoint before shipping address is provided.',
+    );
+  }
+
+  const paymentIntentId = `pi_${randomBytes(24).toString('hex')}`;
+  const updatedSession: CheckoutSessionDto = {
+    ...session,
+    payment_intent_id: paymentIntentId,
+    current_step: 'CONFIRM',
+  };
+
+  await saveCheckoutSession(db, updatedSession);
+  return updatedSession;
+}
+
+export async function submitConfirmCheckpoint(
+  db: CatalogDatabase,
+  sessionId: string,
+  _input: ConfirmCheckpointInput,
+): Promise<CheckoutSessionDto> {
+  const session = await getCheckoutSession(db, sessionId);
+
+  if (!session.shipping_address) {
+    throw new ContractError(
+      'UNPROCESSABLE',
+      'Shipping address is required before confirmation.',
+    );
+  }
+  if (!session.payment_intent_id) {
+    throw new ContractError(
+      'UNPROCESSABLE',
+      'Payment intent is required before confirmation.',
+    );
+  }
+
+  return session;
+}
+

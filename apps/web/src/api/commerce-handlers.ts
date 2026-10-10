@@ -11,10 +11,13 @@
  */
 import {
   AddToCartInputSchema,
+  ConfirmCheckpointInputSchema,
   ContractError,
   CreateCartInputSchema,
   CreateCheckoutSessionInputSchema,
   MergeCartInputSchema,
+  PaymentCheckpointInputSchema,
+  ShippingCheckpointInputSchema,
   UpdateCartItemInputSchema,
 } from '@maihan/contracts';
 import {
@@ -25,6 +28,9 @@ import {
   getCheckoutSession,
   mergeGuestCart,
   removeCartItem,
+  submitConfirmCheckpoint,
+  submitPaymentCheckpoint,
+  submitShippingCheckpoint,
   updateCartItemQuantity,
   type CatalogDatabase,
 } from '@maihan/db';
@@ -134,6 +140,42 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     const db = getDb(ctx);
     const sessionId = requireIdentifier(ctx.params['sessionId'], 'sessionId');
     const session = await getCheckoutSession(db, sessionId);
+    return {
+      status: 200,
+      body: { data: session },
+    };
+  },
+
+  async submitShipping(ctx) {
+    const db = getDb(ctx);
+    const sessionId = requireIdentifier(ctx.params['sessionId'], 'sessionId');
+    const body = await parseBody(ctx.request);
+    const input = ShippingCheckpointInputSchema.parse(body);
+    const session = await submitShippingCheckpoint(db, sessionId, input);
+    return {
+      status: 200,
+      body: { data: session },
+    };
+  },
+
+  async submitPayment(ctx) {
+    const db = getDb(ctx);
+    const sessionId = requireIdentifier(ctx.params['sessionId'], 'sessionId');
+    const body = await parseBody(ctx.request);
+    const input = PaymentCheckpointInputSchema.parse(body);
+    const session = await submitPaymentCheckpoint(db, sessionId, input);
+    return {
+      status: 200,
+      body: { data: session },
+    };
+  },
+
+  async submitConfirm(ctx) {
+    const db = getDb(ctx);
+    const sessionId = requireIdentifier(ctx.params['sessionId'], 'sessionId');
+    const body = await parseBody(ctx.request);
+    const input = ConfirmCheckpointInputSchema.parse(body);
+    const session = await submitConfirmCheckpoint(db, sessionId, input);
     return {
       status: 200,
       body: { data: session },
