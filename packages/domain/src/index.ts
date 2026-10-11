@@ -32,4 +32,5 @@ export * from './search/synonyms.js';
 export * from './commerce/cart.js';
 export * from './commerce/inventory.js';
 export * from './commerce/order.js';
+export * from './certificate/index.js';
 

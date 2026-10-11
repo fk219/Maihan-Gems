@@ -49,6 +49,13 @@ import {
   addDyoToCartHandler,
 } from './dyo-handlers.js';
 import {
+  createCertificateHandler,
+  getCertificateHandler,
+  processOcrRunHandler,
+  reviewCertificateHandler,
+  getPublicGemstoneCertificatesHandler,
+} from './certificate-handlers.js';
+import {
   errorResponse,
   newRequestId,
   newTraceId,
@@ -132,6 +139,14 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       addDyoToCartHandler,
     };
 
+    const CERTIFICATE_HANDLERS: Record<string, any> = {
+      createCertificateHandler,
+      getCertificateHandler,
+      processOcrRunHandler,
+      reviewCertificateHandler,
+      getPublicGemstoneCertificatesHandler,
+    };
+
     const handler =
       HANDLERS[lookup.route.id] ??
       SEARCH_HANDLERS[lookup.route.id] ??
@@ -141,7 +156,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       ADDON_HANDLERS[lookup.route.id] ??
       DISCOUNT_HANDLERS[lookup.route.id] ??
       REFUND_HANDLERS[lookup.route.id] ??
-      DYO_HANDLERS[lookup.route.id];
+      DYO_HANDLERS[lookup.route.id] ??
+      CERTIFICATE_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }

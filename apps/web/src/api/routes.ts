@@ -170,9 +170,21 @@ export const DYO_ROUTES: readonly RouteDefinition[] = [
   { id: 'quoteDyoConfigurationHandler', method: 'POST', path: '/api/v1/dyo/configurations/{shortCode}/quote' },
   { id: 'quoteDyoConfigurationHandler', method: 'POST', path: '/dyo/configurations/{shortCode}/quote' },
   { id: 'getCompatibleSettingsHandler', method: 'GET', path: '/api/v1/dyo/configurations/{shortCode}/compatible-settings' },
-  { id: 'getCompatibleSettingsHandler', method: 'GET', path: '/dyo/configurations/{shortCode}/compatible-settings' },
   { id: 'addDyoToCartHandler', method: 'POST', path: '/api/v1/dyo/configurations/{shortCode}/add-to-cart' },
   { id: 'addDyoToCartHandler', method: 'POST', path: '/dyo/configurations/{shortCode}/add-to-cart' },
+];
+
+export const CERTIFICATE_ROUTES: readonly RouteDefinition[] = [
+  { id: 'createCertificateHandler', method: 'POST', path: '/api/v1/certificates' },
+  { id: 'createCertificateHandler', method: 'POST', path: '/certificates' },
+  { id: 'getCertificateHandler', method: 'GET', path: '/api/v1/certificates/{certificateId}' },
+  { id: 'getCertificateHandler', method: 'GET', path: '/certificates/{certificateId}' },
+  { id: 'processOcrRunHandler', method: 'POST', path: '/api/v1/certificates/{certificateId}/ocr' },
+  { id: 'processOcrRunHandler', method: 'POST', path: '/certificates/{certificateId}/ocr' },
+  { id: 'reviewCertificateHandler', method: 'POST', path: '/api/v1/certificates/{certificateId}/review' },
+  { id: 'reviewCertificateHandler', method: 'POST', path: '/certificates/{certificateId}/review' },
+  { id: 'getPublicGemstoneCertificatesHandler', method: 'GET', path: '/api/v1/gemstones/{gemRef}/certificates/public' },
+  { id: 'getPublicGemstoneCertificatesHandler', method: 'GET', path: '/gemstones/{gemRef}/certificates/public' },
 ];
 
 export const ALL_ROUTES: readonly RouteDefinition[] = [
@@ -185,6 +197,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...DISCOUNT_ROUTES,
   ...REFUND_ROUTES,
   ...DYO_ROUTES,
+  ...CERTIFICATE_ROUTES,
 ];
 
 export type RouteLookup =

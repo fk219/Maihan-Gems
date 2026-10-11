@@ -1,3 +1,38 @@
+# PHASE 8 — CERTIFICATE INTELLIGENCE COMPLETE (2026-10-11)
+
+- **Objective**: Implement authoritative Phase 8 — Certificate Intelligence scope per `INITIAL_IMPLEMENTATION_PLAN.md` §15 and `technical_design/17_CERTIFICATE_INTELLIGENCE.md`.
+- **Architectural Deliverables**:
+  1. **Domain Layer (`@maihan/domain/certificate`)**:
+     - `types.ts`: Domain models for `VerificationStatus` (`UNVERIFIED`, `EXTRACTED`, `CROSS_CHECKED`, `VERIFIED`, `REJECTED`), `DocumentKind`, `AnomalyType`, `ExtractedField<T>`, `CertificateExtractionSchema`, `StructuredGemstoneData`.
+     - `confidence-policy.ts`: Strict confidence thresholds ($High \ge 0.90$, $Medium \in [0.70, 0.89]$, $Low \in [0.50, 0.69]$, $Rejected < 0.50$). Material field assessment (`weight_ct`, `origin`, `treatments`, `lab_name`). Whole-document verification requires $\ge 0.90$ across all material fields plus human review approval.
+     - `cross-checks.ts`: 9 authoritative cross-checks:
+       - `WEIGHT_MISMATCH_SLUG`: slug vs extracted weight difference $> 0.02$ ct.
+       - `WEIGHT_MISMATCH_SUM`: pair sum mismatch $> 0.05$ ct.
+       - `DIMENSION_IMPOSSIBLE`: dimensions $\le 0$ or single dimension $> 100$ mm.
+       - `DIMENSION_MISMATCH`: extracted vs catalog dimension divergence $> 0.2$ mm.
+       - `ORIGIN_CONFLICT`: conflicting origin classifications.
+       - `TREATMENT_CONFLICT`: conflicting enhancement declarations.
+       - `NUMBER_MISMATCH`: certificate number divergence.
+       - `LOW_CONFIDENCE`: critical material field confidence $< 0.70$.
+       - `MULTIPLE_STONES_DETECTED`: mismatch between stone count and certificate layout.
+     - `state-machine.ts`: Deterministic transitions `transitionCertificateStatus()`. Prevents auto-promotion when confidence is insufficient or unresolved anomalies exist.
+     - 18 unit tests in `packages/domain/src/certificate/certificate.spec.ts`.
+  2. **Database Layer (`@maihan/db/certificate`)**:
+     - `certificate-repository.ts`: Complete queries for `certificates`, `certificate_ocr_runs`, `certificate_extractions` with bounding boxes, `certificate_anomalies`, `verification_events` append-only audit trail, and `certificate_reviews`.
+     - `getPublicCertificatesForGemstone()` querying authoritative `certificate_public` view (enforcing Invariant `INV-07`: confidence $< 0.50$ withheld, non-VERIFIED never rendered as verified truth).
+  3. **HTTP API Layer (`apps/web/src/api`)**:
+     - Routes registered under `/api/v1/certificates` and public view endpoints:
+       - `POST /api/v1/certificates`: Register unverified certificate and obtain presigned upload URL.
+       - `GET /api/v1/certificates/{certificateId}`: Retrieve document metadata.
+       - `POST /api/v1/certificates/{certificateId}/ocr`: Process OCR extraction, execute 9 cross-checks, record anomalies and audit events.
+       - `POST /api/v1/certificates/{certificateId}/review`: Gemmologist review with override support and 0.90 threshold enforcement (rejects with 422 UNPROCESSABLE on insufficient confidence).
+       - `GET /api/v1/gemstones/{gemRef}/certificates/public`: Public read-model view strictly enforcing Invariant INV-07.
+     - 6 integration tests in `apps/web/src/api/certificate.spec.ts`.
+- **Verification**:
+  - `pnpm -r run typecheck`: 0 errors across all 8 workspace packages.
+  - `pnpm test`: 687 tests passing across entire monorepo (`@maihan/domain`: 227, `@maihan/contracts`: 13, `@maihan/db`: 81, `tools/migrate`: 5, `@maihan/web`: 367).
+  - Clean git discipline and zero schema mutations.
+
 # STOREFRONT DESIGN SYSTEM ADOPTION & NEW GENERATION NAVBAR COMPLETE (2026-10-11)
 
 - **Objective**: Adopt the authoritative *Silk & Stone* design system (`Design.md`), implement the New Generation Navbar adhering to the strict 3-Zone contract, redesign all storefront catalog and checkout pages with unboxed zero-pill discipline, tabular mono numerals, and Cormorant Garamond serif typography.

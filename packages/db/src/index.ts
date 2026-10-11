@@ -174,6 +174,21 @@ export {
   type DyoConfigurationRow,
   type CreateDyoConfigurationInput,
 } from './dyo/dyo-repository.js';
+export {
+  createCertificate,
+  getCertificateById,
+  recordOcrRun,
+  persistExtractions,
+  recordAnomalies,
+  getCertificateAnomalies,
+  recordVerificationEvent,
+  updateCertificateStatus,
+  recordHumanReview,
+  getPublicCertificatesForGemstone,
+  type CertificateRow,
+  type CertificatePublicViewRow,
+  type CreateCertificateInput,
+} from './certificate/certificate-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
 
 
