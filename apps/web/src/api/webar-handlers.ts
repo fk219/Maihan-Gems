@@ -20,17 +20,21 @@ import {
 } from '@maihan/contracts';
 import type { RouteContext, HandlerOutcome } from './handlers.js';
 
+function getDb(ctx: RouteContext): any {
+  const db = ctx.db || (ctx.service as any)?.port?.db;
+  if (!db) {
+    throw new ContractError('INTERNAL', 'Database client unavailable.');
+  }
+  return (db as any).pool || db;
+}
+
 export async function getWebarAssetHandler(ctx: RouteContext): Promise<HandlerOutcome> {
-  const assetId = ctx.params.assetId;
+  const assetId = ctx.params['assetId'];
   if (!assetId) {
     throw new ContractError('VALIDATION_FAILED', 'Missing assetId in path parameters.');
   }
 
-  const db = ctx.db;
-  if (!db) {
-    throw new ContractError('INTERNAL', 'Database client unavailable.');
-  }
-
+  const db = getDb(ctx);
   const asset = await findWebarAssetById(db, assetId);
   if (!asset) {
     throw new ContractError('NOT_FOUND', `WebAR asset with ID ${assetId} not found.`);
@@ -39,18 +43,14 @@ export async function getWebarAssetHandler(ctx: RouteContext): Promise<HandlerOu
   return {
     status: 200,
     body: { data: asset },
-    cache: {
-      kind: 'hit',
-      data: asset,
-      fingerprint: asset.updatedAt,
-    },
   };
 }
 
 export async function createArHandoffHandler(ctx: RouteContext): Promise<HandlerOutcome> {
-  const db = ctx.db;
-  if (!db) {
-    throw new ContractError('INTERNAL', 'Database client unavailable.');
+  const db = getDb(ctx);
+
+  if (!ctx.request) {
+    throw new ContractError('VALIDATION_FAILED', 'Missing request object.');
   }
 
   let body: unknown;
@@ -62,9 +62,11 @@ export async function createArHandoffHandler(ctx: RouteContext): Promise<Handler
 
   const parsed = CreateHandoffRequestSchema.safeParse(body);
   if (!parsed.success) {
-    throw new ContractError('VALIDATION_FAILED', 'Invalid handoff request body.', {
-      issues: parsed.error.issues,
-    });
+    throw new ContractError(
+      'VALIDATION_FAILED',
+      'Invalid handoff request body.',
+      parsed.error.issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message }))
+    );
   }
 
   // Derive base URL from request origin or forwarded headers
@@ -82,15 +84,12 @@ export async function createArHandoffHandler(ctx: RouteContext): Promise<Handler
 }
 
 export async function redeemArHandoffHandler(ctx: RouteContext): Promise<HandlerOutcome> {
-  const rawToken = ctx.params.token;
+  const rawToken = ctx.params['token'];
   if (!rawToken) {
     throw new ContractError('VALIDATION_FAILED', 'Missing token in path parameters.');
   }
 
-  const db = ctx.db;
-  if (!db) {
-    throw new ContractError('INTERNAL', 'Database client unavailable.');
-  }
+  const db = getDb(ctx);
 
   try {
     const session = await redeemArHandoffToken(db, rawToken);

@@ -12,7 +12,8 @@
  * asset pipeline (Phase 4 Task 8 / doc 24) exposes media on the read model,
  * the gallery slots into the marked position.
  */
-import type { ProductDetailReadModel } from '@maihan/contracts';
+import type { ProductDetailReadModel, WebarAssetReadModel } from '@maihan/contracts';
+import { WebArLauncher } from '../webar/WebArLauncher.js';
 
 import { Breadcrumbs } from '../design-system/Breadcrumbs.js';
 import { Badge } from '../design-system/Badge.js';
@@ -20,6 +21,7 @@ import { SpecTable, type SpecRow } from '../design-system/SpecTable.js';
 
 export interface ProductDetailContentProps {
   readonly detail: ProductDetailReadModel;
+  readonly webarAsset?: WebarAssetReadModel | null;
 }
 
 const KIND_LABEL: Record<ProductDetailReadModel['kind'], string> = {
@@ -48,7 +50,7 @@ function specRows(detail: ProductDetailReadModel): SpecRow[] {
   return rows;
 }
 
-export function ProductDetailContent({ detail }: ProductDetailContentProps) {
+export function ProductDetailContent({ detail, webarAsset }: ProductDetailContentProps) {
   const isAvailable = detail.availability;
 
   return (
@@ -101,6 +103,19 @@ export function ProductDetailContent({ detail }: ProductDetailContentProps) {
               Inquire with Concierge
             </a>
           </div>
+
+          {/* WebAR & 3D Interactive Viewer Slot (Phase 11): Rendered ONLY when webarAsset is present */}
+          {webarAsset && (
+            <div style={{ marginTop: '2rem' }}>
+              <WebArLauncher
+                assetId={webarAsset.id}
+                glbUrl={webarAsset.cdnUrl}
+                title={detail.title}
+                fitRule={webarAsset.fitRule}
+                jewelleryType={webarAsset.jewelleryType}
+              />
+            </div>
+          )}
         </section>
 
         <section className="product-detail__specs" aria-label="Specifications">

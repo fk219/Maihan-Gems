@@ -218,5 +218,6 @@ export {
   redeemArHandoffToken,
   validateWebarAssetBudgets,
   type InsertWebarAssetParams,
+  type DbClient,
 } from './webar/webar-repository.js';
 

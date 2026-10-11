@@ -4,8 +4,8 @@ import {
   createArHandoffToken,
   redeemArHandoffToken,
   findWebarAssetById,
+  type DbClient,
 } from './webar-repository.js';
-import type { DbClient } from '../pool.js';
 import { WEBAR_BUDGETS } from '@maihan/contracts';
 
 describe('WebAR Repository & Budgets (Phase 11)', () => {
@@ -72,7 +72,9 @@ describe('WebAR Repository & Budgets (Phase 11)', () => {
       expect(result.expiresAt).toBeDefined();
 
       expect(mockQuery).toHaveBeenCalledOnce();
-      const [sql, params] = mockQuery.mock.calls[0];
+      const firstCall = mockQuery.mock.calls[0] as [string, any[]];
+      const sql = firstCall[0];
+      const params = firstCall[1];
       expect(sql).toContain('INSERT INTO ar_handoff_tokens');
       // Params: [tokenHash, productId, webarAssetId, expiresAt]
       expect(params[0]).not.toBe(result.rawToken); // Must store hash, not raw token

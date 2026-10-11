@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createCatalogApi } from './index.js';
 import type { CatalogQueryService } from '../modules/catalog/index.js';
-import type { DbClient } from '@maihan/db';
 
 describe('WebAR API Handlers (Phase 11 Task 4)', () => {
   const dummyService = {} as CatalogQueryService;
@@ -41,7 +40,7 @@ describe('WebAR API Handlers (Phase 11 Task 4)', () => {
           },
         ],
       }),
-    } as unknown as DbClient;
+    } as any;
 
     const api = createCatalogApi({
       service: dummyService,
@@ -64,7 +63,7 @@ describe('WebAR API Handlers (Phase 11 Task 4)', () => {
   it('GET /api/v1/webar/:assetId returns 404 when asset not found', async () => {
     const mockDb = {
       query: vi.fn().mockResolvedValue({ rowCount: 0, rows: [] }),
-    } as unknown as DbClient;
+    } as any;
 
     const api = createCatalogApi({
       service: dummyService,
@@ -84,7 +83,7 @@ describe('WebAR API Handlers (Phase 11 Task 4)', () => {
   it('POST /api/v1/ar/handoff creates handoff token with hashed storage', async () => {
     const mockDb = {
       query: vi.fn().mockResolvedValue({ rowCount: 1 }),
-    } as unknown as DbClient;
+    } as any;
 
     const api = createCatalogApi({
       service: dummyService,
@@ -135,7 +134,7 @@ describe('WebAR API Handlers (Phase 11 Task 4)', () => {
           ],
         })
         .mockResolvedValueOnce({ rowCount: 1 }),
-    } as unknown as DbClient;
+    } as any;
 
     const api = createCatalogApi({
       service: dummyService,
@@ -167,7 +166,7 @@ describe('WebAR API Handlers (Phase 11 Task 4)', () => {
           },
         ],
       }),
-    } as unknown as DbClient;
+    } as any;
 
     const api = createCatalogApi({
       service: dummyService,

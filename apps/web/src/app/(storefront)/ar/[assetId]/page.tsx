@@ -1,18 +1,30 @@
-/**
- * apps/web/src/app/(storefront)/ar/[assetId]/page.tsx
- *
- * `/ar/<assetId>` — WebAR, isolated (SoT 12.2: "AR route, isolated" — this
- * whole subtree ships `ssr:false` when the AR bundle lands, doc 02
- * implementation constraint 4). Route structure only; AR is Phase 11 and
- * disabled entry point but no functionality.
- */
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'AR viewer',
+  title: 'WebAR Experience | Maihan Gems',
   robots: { index: false, follow: false },
 };
 
-export default function ArViewerPage() {
-  return null;
+import { ArClientView } from '../../../../components/webar/ArClientView.js';
+
+interface PageProps {
+  params: Promise<{ assetId: string }>;
+}
+
+export default async function ArViewerPage({ params }: PageProps) {
+  const { assetId } = await params;
+
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#09090b',
+        color: '#fafafa',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <ArClientView assetId={assetId} />
+    </main>
+  );
 }
