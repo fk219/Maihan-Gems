@@ -30,25 +30,57 @@ const KIND_LABEL: Record<ProductSummary['kind'], string> = {
 };
 
 export function ProductCard({ product }: ProductCardProps) {
+  const isAvailable = product.availability;
   return (
     <Card href={`/products/${product.slug}`} linkLabel={product.title}>
+      {/* Clean Unboxed Status Indicator */}
+      <div className="product-card__status-header">
+        <span className="product-card__vault-tag">1-of-1 Vault</span>
+        <Badge tone={isAvailable ? 'positive' : 'neutral'} live>
+          {isAvailable ? 'Available' : 'Unavailable'}
+        </Badge>
+      </div>
+
+      {product.variety !== null && (
+        <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>
+          {product.variety.name}
+        </span>
+      )}
+
       <h2 className="product-card__title">
         <a href={`/products/${product.slug}`}>{product.title}</a>
       </h2>
+
       {product.subtitle !== null && (
         <p className="product-card__subtitle">{product.subtitle}</p>
       )}
+
+      {/* Unboxed Metadata with Typographic Separators */}
       <p className="product-card__meta">
-        {KIND_LABEL[product.kind]}
-        {product.variety !== null && <> · {product.variety.name}</>}
-        {product.total_weight_ct !== null && <> · {product.total_weight_ct} ct</>}
+        <span>{KIND_LABEL[product.kind]}</span>
+        {product.variety !== null && (
+          <>
+            <span aria-hidden="true"> · </span>
+            <span>{product.variety.name}</span>
+          </>
+        )}
+        {product.total_weight_ct !== null && (
+          <>
+            <span aria-hidden="true"> · </span>
+            <span className="font-mono tabular-nums">{product.total_weight_ct} ct</span>
+          </>
+        )}
       </p>
-      <p className="product-card__price">
-        <Money amount={product.price_amount} currency={product.currency} />
-      </p>
-      <Badge tone={product.availability ? 'positive' : 'neutral'} live>
-        {product.availability ? 'Available' : 'Unavailable'}
-      </Badge>
+
+      {/* Financial Value & Direct Action */}
+      <div className="product-card__price-row">
+        <p className="product-card__price">
+          <Money amount={product.price_amount} currency={product.currency} />
+        </p>
+        <span className="product-card__inquire">
+          Inquire <span aria-hidden="true">→</span>
+        </span>
+      </div>
     </Card>
   );
 }

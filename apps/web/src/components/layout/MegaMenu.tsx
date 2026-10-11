@@ -75,16 +75,29 @@ export function MegaMenu({ groups }: MegaMenuProps) {
               <button
                 type="button"
                 id={triggerId}
+                className="mega-menu__trigger"
                 aria-expanded={open}
                 aria-controls={panelId}
                 onClick={() => setOpenId(open ? null : group.id)}
               >
-                {group.label}
+                <span>{group.label}</span>
+                <svg
+                  className="mega-menu__chevron"
+                  viewBox="0 0 10 6"
+                  fill="none"
+                  width="8"
+                  height="6"
+                  aria-hidden="true"
+                >
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
               <ul id={panelId} className="mega-menu__panel" hidden={!open} aria-labelledby={triggerId}>
                 {group.links.map((link) => (
-                  <li key={link.href}>
-                    <a href={link.href}>{link.label}</a>
+                  <li key={link.href} className="mega-menu__item">
+                    <a href={link.href} className="mega-menu__link" onClick={() => setOpenId(null)}>
+                      {link.label}
+                    </a>
                   </li>
                 ))}
               </ul>

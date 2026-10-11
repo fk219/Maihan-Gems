@@ -56,7 +56,11 @@ export default async function ColourIndexPage({ params, searchParams }: PageProp
           { label: colour.name },
         ]}
       />
+      <span className="page-eyebrow">Chromatic Palette</span>
       <h1>{colour.name} Gemstones</h1>
+      <p className="page-subtitle">
+        Curated natural gemstones exhibiting exceptional {colour.name.toLowerCase()} hue saturation, crystal transparency, and scintillation.
+      </p>
       <p className="result-count">
         {items.length === 0 ? 'No gemstones currently listed.' : `${items.length} gemstone${items.length === 1 ? '' : 's'} listed`}
       </p>

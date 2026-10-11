@@ -36,14 +36,39 @@ export default async function VarietiesIndexPage() {
           { label: 'Varieties' },
         ]}
       />
+      <span className="page-eyebrow">Natural Mineralogy Directory</span>
       <h1>Gemstone Varieties</h1>
+      <p className="page-subtitle">
+        Explore our curated index of earth-mined, untreated mineral varieties.
+        Authenticated under strict gemmological standards with verified species classification.
+      </p>
       {varieties.length === 0 ? (
         <EmptyState title="No varieties are currently published." action={<Link href="/">Return home</Link>} />
       ) : (
-        <ul className="link-list">
+        <ul className="varieties-grid">
           {varieties.map((variety) => (
             <li key={variety.slug}>
-              <Link href={`/${variety.slug}`}>{variety.name}</Link>
+              <div className="variety-card">
+                <div>
+                  <span className="eyebrow" style={{ marginBottom: '0.25rem' }}>
+                    Untreated Mineralogy
+                  </span>
+                  <h2 className="variety-card__name">
+                    <Link href={`/${variety.slug}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                      {variety.name}
+                    </Link>
+                  </h2>
+                  <p className="variety-card__species">Verified Species Classification</p>
+                </div>
+                <div className="variety-card__links">
+                  <Link href={`/${variety.slug}`} className="variety-card__sublink">
+                    Loose Stones →
+                  </Link>
+                  <Link href={`/${variety.slug}-pairs`} className="variety-card__sublink">
+                    Matched Pairs →
+                  </Link>
+                </div>
+              </div>
             </li>
           ))}
         </ul>

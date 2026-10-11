@@ -62,7 +62,11 @@ export default async function VarietyIndexPage({ params, searchParams }: PagePro
           { label: variety.display_name },
         ]}
       />
+      <span className="page-eyebrow">Untreated Natural Mineralogy</span>
       <h1>{variety.display_name}</h1>
+      <p className="page-subtitle">
+        Direct-source untreated {variety.display_name} gemstones with lab-certified mineralogical verification.
+      </p>
       <p className="result-count">
         {items.length === 0 ? 'No gemstones currently listed.' : `${items.length} gemstone${items.length === 1 ? '' : 's'} listed`}
       </p>

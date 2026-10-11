@@ -1,7 +1,38 @@
-# IMPLEMENTATION STATE
+# STOREFRONT DESIGN SYSTEM ADOPTION & NEW GENERATION NAVBAR COMPLETE (2026-10-11)
 
-**Last updated:** 2026-10-11
-**Update this file after every meaningful implementation task.**
+- **Objective**: Adopt the authoritative *Silk & Stone* design system (`Design.md`), implement the New Generation Navbar adhering to the strict 3-Zone contract, redesign all storefront catalog and checkout pages with unboxed zero-pill discipline, tabular mono numerals, and Cormorant Garamond serif typography.
+- **Architectural Deliverables**:
+  1. **New Generation Navbar (`StorefrontHeader.tsx` & `MegaMenu.tsx`)**:
+     - **Zone 1 (Brand Wordmark)**: Cormorant Garamond serif `MAIHAN GEMS` with hairline gold vertical divider and uppercase tracked `Atelier` submark (`font-sans text-[10px] tracking-[0.25em]`).
+     - **Zone 2 (Nav Links & Accessible MegaMenu)**: Central navigation zone hosting the accessible `MegaMenu` client island (`<nav class="mega-menu" aria-label="Main">`) with 5 canonical route families (`Loose gemstones`, `Matched pairs`, `Ready-made rings`, `Shop by colour`, `Settings & Atelier`), keyboard Escape close-and-focus handling, and multi-column luxury flyout panels with hairline gold borders.
+     - **Zone 3 (Utilities & Primary Action)**: Direct utility links for Vault Search (`/search`), Shopping Bag (`/cart`) with live link and SVG icons, and brushed gold primary CTA button ("Bespoke Atelier" linking to `/design-your-own`).
+  2. **Silk & Stone Design System Stylesheet (`apps/web/src/lib/theme-styles.ts`)**:
+     - Comprehensive styling in `MAIHAN_THEME_CSS`:
+       - `.site-header`, `.site-header__container`, `.site-header__brand`, `.site-header__wordmark`, `.site-header__submark`, `.site-header__divider`.
+       - `.site-header__nav-zone`, `.mega-menu`, `.mega-menu__trigger`, `.mega-menu__panel`, `.mega-menu__link`.
+       - `.site-header__actions`, `.site-header__utility-btn`, `.site-header__cta-btn`.
+       - Core page container architecture: `.page`, `.page-eyebrow`, `.page-subtitle`, `.result-count`, `.settings-grid`, `.settings-card`, `.varieties-grid`, `.variety-card`.
+       - Full two-column product detail layout: `.product-detail__layout`, `.product-detail__summary`, `.product-detail__specs`, `.product-detail__provenance`, `.provenance-list`.
+       - Checkpoint funnel and auxiliary shells: `.checkout-shell`, `.checkout-steps`, `.checkout-step`, `.vault-shell`, `.concierge-shell`, `.showroom-grid`, `.showroom-card`, `.education-grid`, `.education-card`.
+  3. **Comprehensive Storefront Page Redesigns**:
+     - `ProductCard.tsx`: Unboxed `1-of-1 Vault` indicator, uppercase variety eyebrow, unboxed `·` separated metadata, tabular mono price figures (`font-mono tabular-nums`), and subtle `Inquire →` interactive link.
+     - `ProductDetailContent.tsx`: Editorial serif title, live provenance evidence badges, unboxed specification table, and dual CTAs ("Customise in Atelier" $\to$ `/design-your-own`, "Inquire with Concierge" $\to$ `/contact`).
+     - `settings/page.tsx`: Luxury mounting cards with unboxed jewellery categories, tabular metal option counts, and direct Atelier customization links.
+     - `settings/[settingSku]/page.tsx`: Upgraded from `null` to complete mounting detail view with noble metal options and technical mounting specifications.
+     - `varieties/page.tsx`: Mineralogical directory grid with verified species classifications and quick links to loose stones and matched suites.
+     - `[varietySlug]/page.tsx`, `[varietySlug]-pairs/page.tsx`, `[varietySlug]-rings/page.tsx`: Silk & Stone catalog views with editorial display headers, unboxed stone counts, and responsive product grids.
+     - `colour/[colourSlug]/page.tsx`: Chromatic palette view with gemstone saturation descriptions and unboxed count badges.
+     - `checkout/order-summary/page.tsx`, `checkout/payment-order/page.tsx`, `checkout/secure-payment/page.tsx`: Upgraded from `null` to complete 3-step checkpoint funnel views with armored transit disclosures, escrow settlement details, and secure checkout navigation.
+     - `favorites/page.tsx`: Curated Vault private portfolio wishlist shell.
+     - `compare/page.tsx`: Gemmological side-by-side comparison matrix shell.
+     - `contact/page.tsx`: Private Client Advisory concierge direct lines (Dubai, Geneva, London, Bangkok) and salon viewing requests.
+     - `showrooms/page.tsx`: International salons showcase for Dubai DIFC, Geneva Rue du Rhône, London Mayfair, and Bangkok Silom.
+     - `education/[[...educationPath]]/page.tsx`: Academic Gemmology compendium hub.
+- **Verification**:
+  - `pnpm -r run typecheck`: 0 errors across all 8 workspace packages.
+  - `pnpm test`: 669 tests passing across the entire monorepo (`@maihan/domain`: 209, `@maihan/contracts`: 13, `@maihan/db`: 81, `tools/migrate`: 5, `@maihan/web`: 361).
+  - Accessibility: WCAG 2.2 AA automated axe-core audits in `accessibility-audit.spec.tsx` and `dyo-flow.spec.tsx` pass with zero blocking violations.
+  - Next.js Route Manifest: 100% compliant (`route-manifest.spec.ts` passing, 0 stray files).
 
 # PHASE 7 — DESIGN YOUR OWN (DYO) COMPLETE (2026-10-11)
 

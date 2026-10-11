@@ -22,10 +22,54 @@ export async function StorefrontHeader() {
   assertCanonicalHrefs(groups);
   return (
     <header className="site-header">
-      <a href="/" className="site-header__brand">
-        Maihan Gems
-      </a>
-      <MegaMenu groups={groups} />
+      <div className="site-header__container">
+        {/* Zone 1: Brand Wordmark in Cormorant Garamond */}
+        <a href="/" className="site-header__brand" aria-label="Maihan Gems Atelier Homepage">
+          <span className="site-header__wordmark">MAIHAN GEMS</span>
+          <span className="site-header__divider" aria-hidden="true" />
+          <span className="site-header__submark">Atelier</span>
+        </a>
+
+        {/* Zone 2: Navigation Links + MegaMenu Island */}
+        <div className="site-header__nav-zone">
+          <MegaMenu groups={groups} />
+        </div>
+
+        {/* Zone 3: Direct Utilities & Primary Action */}
+        <div className="site-header__actions">
+          <a href="/search" className="site-header__utility-btn" aria-label="Search Gemstone Vault">
+            <svg
+              className="site-header__icon"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              width="16"
+              height="16"
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span className="site-header__utility-label">Search</span>
+          </a>
+          <a href="/cart" className="site-header__utility-btn" aria-label="Shopping Bag">
+            <svg
+              className="site-header__icon"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              width="16"
+              height="16"
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            <span className="site-header__utility-label">Bag</span>
+          </a>
+          <a href="/design-your-own" className="site-header__cta-btn">
+            Bespoke Atelier
+          </a>
+        </div>
+      </div>
     </header>
   );
 }

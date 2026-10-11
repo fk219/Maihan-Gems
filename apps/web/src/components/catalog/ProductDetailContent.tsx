@@ -69,6 +69,9 @@ export function ProductDetailContent({ detail }: ProductDetailContentProps) {
           (see header comment). Nothing fabricated renders here.
         */}
         <section className="product-detail__summary" aria-busy="false">
+          <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
+            {KIND_LABEL[detail.kind]}
+          </span>
           <h1>{detail.title}</h1>
           {detail.subtitle !== null && <p className="product-detail__subtitle">{detail.subtitle}</p>}
 
@@ -89,6 +92,15 @@ export function ProductDetailContent({ detail }: ProductDetailContentProps) {
           {detail.short_description !== null && (
             <p className="product-detail__short">{detail.short_description}</p>
           )}
+
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2.5rem' }}>
+            <a href="/design-your-own" className="btn-primary">
+              Customise in Atelier
+            </a>
+            <a href="/contact" className="btn-secondary">
+              Inquire with Concierge
+            </a>
+          </div>
         </section>
 
         <section className="product-detail__specs" aria-label="Specifications">

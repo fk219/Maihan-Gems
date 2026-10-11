@@ -62,7 +62,11 @@ export default async function VarietyRingsIndexPage({ params, searchParams }: Pa
           { label: 'Rings' },
         ]}
       />
+      <span className="page-eyebrow">Ready-Made Fine Jewellery</span>
       <h1>{variety.display_name} Rings</h1>
+      <p className="page-subtitle">
+        Completed fine rings combining untreated natural {variety.display_name.toLowerCase()} gems with master goldsmith mountings.
+      </p>
       <p className="result-count">
         {items.length === 0 ? 'No ready-made rings currently listed.' : `${items.length} ring${items.length === 1 ? '' : 's'} listed`}
       </p>

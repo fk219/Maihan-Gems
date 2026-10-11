@@ -49,7 +49,12 @@ export default async function SettingsIndexPage({ searchParams }: PageProps) {
           { label: 'Settings' },
         ]}
       />
+      <span className="page-eyebrow">Master Goldsmith Mountings</span>
       <h1>Gemstone Settings</h1>
+      <p className="page-subtitle">
+        Precision hand-crafted fine jewellery mountings in 18K gold and platinum.
+        Engineered with exact millimeter tolerances for natural certified gemstones.
+      </p>
       <p className="result-count">
         {result.items.length === 0
           ? 'No settings currently listed.'
@@ -66,13 +71,25 @@ export default async function SettingsIndexPage({ searchParams }: PageProps) {
           {result.items.map((setting) => (
             <li key={setting.design_code}>
               <article className="card settings-card">
-                <h2 className="settings-card__title">{setting.name}</h2>
-                <p className="settings-card__meta">
-                  {setting.jewellery_type.toLowerCase()}
-                  {setting.style !== null && <> · {setting.style.label}</>}
-                  {' · '}
-                  {setting.variant_count} metal option{setting.variant_count === 1 ? '' : 's'}
-                </p>
+                <div>
+                  <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>
+                    {setting.jewellery_type}
+                  </span>
+                  <h2 className="settings-card__title">{setting.name}</h2>
+                  <p className="settings-card__meta">
+                    {setting.jewellery_type.toLowerCase()}
+                    {setting.style !== null && <> · {setting.style.label}</>}
+                    {' · '}
+                    <span className="font-mono tabular-nums">
+                      {setting.variant_count} metal option{setting.variant_count === 1 ? '' : 's'}
+                    </span>
+                  </p>
+                </div>
+                <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(0, 0, 0, 0.05)' }}>
+                  <Link href="/design-your-own" className="settings-card__action">
+                    Configure in Atelier <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
               </article>
             </li>
           ))}

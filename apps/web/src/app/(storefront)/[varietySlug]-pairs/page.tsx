@@ -60,7 +60,11 @@ export default async function VarietyPairsIndexPage({ params, searchParams }: Pa
           { label: 'Pairs' },
         ]}
       />
+      <span className="page-eyebrow">Matched Earring Suites</span>
       <h1>{variety.display_name} Pairs</h1>
+      <p className="page-subtitle">
+        Strictly matched natural gemstone pairs curated for balance, color saturation, and dimensional optical harmony.
+      </p>
       <p className="result-count">
         {items.length === 0 ? 'No pairs currently listed.' : `${items.length} pair${items.length === 1 ? '' : 's'} listed`}
       </p>
