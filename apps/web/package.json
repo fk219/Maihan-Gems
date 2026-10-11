@@ -13,6 +13,7 @@
     "check:budgets": "node scripts/check-bundle-budgets.mjs"
   },
   "dependencies": {
+    "@maihan/ai": "workspace:*",
     "@maihan/config": "workspace:*",
     "@maihan/contracts": "workspace:*",
     "@maihan/db": "workspace:*",

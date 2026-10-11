@@ -1,3 +1,32 @@
+# PHASE 9 — AI CONCIERGE & ORCHESTRATION COMPLETE (2026-10-11)
+
+- **Objective**: Implement authoritative Phase 9 — AI Concierge & Orchestration scope per `INITIAL_IMPLEMENTATION_PLAN.md` §16 and `technical_design/18_AI_ORCHESTRATION_ARCHITECTURE.md`.
+- **Architectural Deliverables**:
+  1. **New Workspace Package (`@maihan/ai`)**:
+     - `gateway/`: `ModelGateway` interface and `DefaultModelGateway` with provider fallback chain (`VERCEL_AI_GATEWAY` $\to$ Direct Google Gemini $\to$ Anthropic), surface daily token budgets, and 1024-dimensional embedding generation.
+     - `tools/`: Strict tool interface (`Tool<I, O>`, `AuthzDecision`, `Citation`, `ToolServices`).
+       - Implemented 10 controlled tools: `search_inventory`, `get_product`, `get_gemstone`, `compare_gemstones`, `search_knowledge`, `check_dyo_compatibility`, `get_price_quote`, `get_certificate` (with unverified field redaction per INV-07), `create_customer_request`, `transfer_to_human`.
+       - Non-negotiable structural and contractual invariant: zero tools mutating price, inventory, orders, payments, certificates, or permissions (ADR-003, NFR-05). Validated via `assertStructuralMutationSafety()`.
+     - `grounding/`: `GroundingGate` enforcing `grounded_ratio >= 0.60`, stripping unverified claims, and emitting canonical refusals for null structured data (e.g., NULL `stone_type` across 911/1,024 pieces).
+     - `guardrails/`: `GuardrailEngine` implementing `<untrusted_context>` XML delimiter tags, state mutation directive blocking (`set inventory to 0`, `change price`, `DROP TABLE`), and SHA-256 trigger hashes.
+     - `rag/`: RAG heading-boundary chunker (400–800 tokens) with Markdown hierarchy preservation and hybrid retrieval with trust tier weighting (`VERIFIED_PRODUCT_DATA`, `CURATED`, `COMMUNITY`, `UNVERIFIED`).
+     - `handoff/`: `HandoffEngine` managing human specialist escalation across 9 authoritative triggers (`CUSTOMER_REQUEST`, `LOW_CONFIDENCE`, `PRICE_NEGOTIATION`, `BESPOKE_REQUEST`, `NEGATIVE_SENTIMENT`, `DISPUTE`, `AUTHENTICITY_QUESTION`, `REPEATED_INTENT`, `AGENT_INITIATED`), transitioning conversations to `AWAITING_HUMAN`.
+     - `orchestrator/`: 9-stage orchestrator pipeline (`RECEIVE` $\to$ `DE-CONTEXT` $\to$ `GUARDRAIL` $\to$ `PLAN` $\to$ `EXECUTE` $\to$ `GROUND` $\to$ `SYNTHESIZE` $\to$ `POLICY` $\to$ `RECORD`) with SSE frame streaming (`start`, `tool_call`, `grounding`, `content_delta`, `citation`, `done`, `handoff`).
+     - `eval/`: Offline evaluation harness with 7 test suites covering accuracy, refusal honesty, and injection resilience.
+     - Unit test suite: 7/7 tests passing in `packages/ai/src/ai.spec.ts`.
+  2. **Database Persistence (`@maihan/db/ai`)**:
+     - `ai-repository.ts`: CRUD operations supporting `0013_ai.sql` schema (`conversations`, `messages`, `tool_calls`, `ai_interactions`, `guardrail_events`).
+  3. **HTTP API Layer (`apps/web/src/api`)**:
+     - Endpoints registered under `/api/v1/ai/**`:
+       - `POST /api/v1/ai/chat`: Interactive conversational turn with live catalog/certificate/knowledge ports and SSE streaming support (`stream: true`).
+       - `POST /api/v1/ai/handoff`: Explicit transfer to human specialist (`AWAITING_HUMAN`).
+       - `GET /api/v1/ai/conversations/{conversationKey}`: Conversation transcript retrieval.
+     - Integration test suite: 5/5 tests passing in `apps/web/src/api/ai.spec.ts`.
+- **Verification**:
+  - `pnpm -r run typecheck`: 0 errors across all 9 workspace packages.
+  - `pnpm test`: 706 tests passing across entire monorepo (`@maihan/ai`: 14, `@maihan/domain`: 227, `@maihan/contracts`: 13, `@maihan/db`: 81, `tools/migrate`: 5, `@maihan/web`: 372).
+  - Clean git discipline and zero direct database connections in AI logic (ADR-003, SG-10).
+
 # PHASE 8 — CERTIFICATE INTELLIGENCE COMPLETE (2026-10-11)
 
 - **Objective**: Implement authoritative Phase 8 — Certificate Intelligence scope per `INITIAL_IMPLEMENTATION_PLAN.md` §15 and `technical_design/17_CERTIFICATE_INTELLIGENCE.md`.

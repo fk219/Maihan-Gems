@@ -133,12 +133,23 @@ export function errorResponse(
   return jsonResponse(envelope, mapped.status, { [TRACE_HEADER]: ids.traceId, ...extraHeaders });
 }
 
-/** Success response with the trace header (Task 10 adds cache headers here). */
 export function successResponse(
   body: unknown,
   status: number,
   ids: CorrelationIds,
   headers: Record<string, string> = {},
 ): Response {
+  if (body instanceof ReadableStream) {
+    return new Response(body as any, {
+      status,
+      headers: {
+        'content-type': 'text/event-stream; charset=utf-8',
+        'cache-control': 'no-cache, no-transform',
+        'connection': 'keep-alive',
+        [TRACE_HEADER]: ids.traceId,
+        ...headers,
+      },
+    });
+  }
   return jsonResponse(body, status, { [TRACE_HEADER]: ids.traceId, ...headers });
 }

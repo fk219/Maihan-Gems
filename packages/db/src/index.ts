@@ -190,5 +190,16 @@ export {
   type CreateCertificateInput,
 } from './certificate/certificate-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
+export {
+  createConversation,
+  getConversationByKey,
+  updateConversationState,
+  appendMessage,
+  recordToolCall,
+  recordAiInteraction,
+  recordGuardrailEvent,
+  type ConversationRow,
+  type MessageRow,
+} from './ai/ai-repository.js';
 
 

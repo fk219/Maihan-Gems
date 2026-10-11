@@ -1,0 +1,28 @@
+{
+  "name": "@maihan/ai",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@maihan/config": "workspace:*",
+    "@maihan/contracts": "workspace:*",
+    "@maihan/domain": "workspace:*",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "vitest": "5.0.3"
+  }
+}

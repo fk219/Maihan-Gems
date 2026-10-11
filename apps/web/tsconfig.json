@@ -10,6 +10,7 @@
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["dist", "node_modules", ".next"],
   "references": [
+    { "path": "../../packages/ai" },
     { "path": "../../packages/config" },
     { "path": "../../packages/contracts" },
     { "path": "../../packages/db" },

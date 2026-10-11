@@ -187,6 +187,15 @@ export const CERTIFICATE_ROUTES: readonly RouteDefinition[] = [
   { id: 'getPublicGemstoneCertificatesHandler', method: 'GET', path: '/gemstones/{gemRef}/certificates/public' },
 ];
 
+export const AI_ROUTES: readonly RouteDefinition[] = [
+  { id: 'aiChatHandler', method: 'POST', path: '/api/v1/ai/chat' },
+  { id: 'aiChatHandler', method: 'POST', path: '/ai/chat' },
+  { id: 'aiHandoffHandler', method: 'POST', path: '/api/v1/ai/handoff' },
+  { id: 'aiHandoffHandler', method: 'POST', path: '/ai/handoff' },
+  { id: 'aiGetConversationHandler', method: 'GET', path: '/api/v1/ai/conversations/{conversationKey}' },
+  { id: 'aiGetConversationHandler', method: 'GET', path: '/ai/conversations/{conversationKey}' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
@@ -198,6 +207,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...REFUND_ROUTES,
   ...DYO_ROUTES,
   ...CERTIFICATE_ROUTES,
+  ...AI_ROUTES,
 ];
 
 export type RouteLookup =

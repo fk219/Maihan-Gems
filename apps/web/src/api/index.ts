@@ -56,6 +56,11 @@ import {
   getPublicGemstoneCertificatesHandler,
 } from './certificate-handlers.js';
 import {
+  aiChatHandler,
+  aiHandoffHandler,
+  aiGetConversationHandler,
+} from './ai-handlers.js';
+import {
   errorResponse,
   newRequestId,
   newTraceId,
@@ -147,6 +152,12 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       getPublicGemstoneCertificatesHandler,
     };
 
+    const AI_HANDLERS: Record<string, any> = {
+      aiChatHandler,
+      aiHandoffHandler,
+      aiGetConversationHandler,
+    };
+
     const handler =
       HANDLERS[lookup.route.id] ??
       SEARCH_HANDLERS[lookup.route.id] ??
@@ -157,7 +168,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       DISCOUNT_HANDLERS[lookup.route.id] ??
       REFUND_HANDLERS[lookup.route.id] ??
       DYO_HANDLERS[lookup.route.id] ??
-      CERTIFICATE_HANDLERS[lookup.route.id];
+      CERTIFICATE_HANDLERS[lookup.route.id] ??
+      AI_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }
