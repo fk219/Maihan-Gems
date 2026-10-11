@@ -41,6 +41,32 @@ export default async function SettingDetailPage({ params }: PageProps) {
 
       <div className="product-detail__layout">
         <section className="product-detail__summary">
+          <div
+            style={{
+              position: 'relative',
+              aspectRatio: '16/10',
+              background: '#FAFAF8',
+              borderRadius: 'calc(var(--radius) - 4px)',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem',
+              marginBottom: '1.75rem',
+              border: '1px solid rgba(201, 168, 76, 0.15)',
+            }}
+          >
+            <img
+              src="/assets/settings/solitaire_ring.svg"
+              alt={`Setting Reference ${settingSku}`}
+              style={{
+                maxWidth: '75%',
+                maxHeight: '75%',
+                objectFit: 'contain',
+              }}
+            />
+          </div>
+
           <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
             Bespoke Atelier Mounting
           </span>

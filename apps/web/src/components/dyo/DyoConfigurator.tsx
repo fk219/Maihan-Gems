@@ -25,6 +25,7 @@ export interface SettingOption {
   readonly description: string;
   readonly basePriceCents: number;
   readonly defaultJewelleryType: JewelleryType;
+  readonly image: string;
 }
 
 export interface MetalOption {
@@ -42,6 +43,7 @@ export interface GemOption {
   readonly cut: string;
   readonly origin: string;
   readonly priceCents: number;
+  readonly image: string;
 }
 
 const SETTING_OPTIONS: SettingOption[] = [
@@ -51,6 +53,7 @@ const SETTING_OPTIONS: SettingOption[] = [
     description: 'Minimalist four-prong architectural cradle elevating light transmission.',
     basePriceCents: 125000,
     defaultJewelleryType: 'RING',
+    image: '/assets/settings/solitaire_ring.svg',
   },
   {
     designCode: 'JS1150',
@@ -58,6 +61,7 @@ const SETTING_OPTIONS: SettingOption[] = [
     description: 'Interwoven prongs with sweeping cathedral shoulders and knife-edge shank.',
     basePriceCents: 145000,
     defaultJewelleryType: 'RING',
+    image: '/assets/settings/three_stone_ring.svg',
   },
   {
     designCode: 'JS1383',
@@ -65,6 +69,7 @@ const SETTING_OPTIONS: SettingOption[] = [
     description: 'Micro-claw pavé rim designed to amplify perimeter refraction.',
     basePriceCents: 185000,
     defaultJewelleryType: 'RING',
+    image: '/assets/settings/halo_ring.svg',
   },
   {
     designCode: 'JS1169',
@@ -72,6 +77,7 @@ const SETTING_OPTIONS: SettingOption[] = [
     description: 'Balanced low-profile setting engineered for everyday earring comfort.',
     basePriceCents: 110000,
     defaultJewelleryType: 'EARRINGS',
+    image: '/assets/settings/stud_earrings.svg',
   },
 ];
 
@@ -93,6 +99,7 @@ const GEM_OPTIONS: GemOption[] = [
     cut: 'Oval Mixed',
     origin: 'Ratnapura, Sri Lanka',
     priceCents: 420000,
+    image: '/assets/gemstones/sapphire.svg',
   },
   {
     ref: 'K32255',
@@ -103,6 +110,7 @@ const GEM_OPTIONS: GemOption[] = [
     cut: 'Octagonal Step',
     origin: 'Muzo, Colombia',
     priceCents: 560000,
+    image: '/assets/gemstones/emerald.svg',
   },
   {
     ref: 'K18402',
@@ -113,6 +121,7 @@ const GEM_OPTIONS: GemOption[] = [
     cut: 'Cushion Brilliant',
     origin: 'Mogok, Myanmar',
     priceCents: 680000,
+    image: '/assets/gemstones/ruby.svg',
   },
   {
     ref: 'K24091',
@@ -123,6 +132,7 @@ const GEM_OPTIONS: GemOption[] = [
     cut: 'Pear Modified',
     origin: 'Merelani, Tanzania',
     priceCents: 240000,
+    image: '/assets/gemstones/tourmaline.svg',
   },
   {
     ref: 'PR5681',
@@ -133,6 +143,7 @@ const GEM_OPTIONS: GemOption[] = [
     cut: 'Matched Cushions',
     origin: 'Ratnapura, Sri Lanka',
     priceCents: 490000,
+    image: '/assets/gemstones/sapphire.svg',
   },
   {
     ref: 'PR14703',
@@ -143,6 +154,7 @@ const GEM_OPTIONS: GemOption[] = [
     cut: 'Matched Rounds',
     origin: 'Kagem, Zambia',
     priceCents: 620000,
+    image: '/assets/gemstones/emerald.svg',
   },
 ];
 
@@ -362,6 +374,33 @@ export function DyoConfigurator() {
                     selectedSetting.designCode === opt.designCode ? 'dyo-option-card--selected' : ''
                   }`}
                 >
+                  <div
+                    style={{
+                      position: 'relative',
+                      aspectRatio: '16/10',
+                      background: '#FAFAF8',
+                      borderRadius: 'calc(var(--radius) - 4px)',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '0.75rem',
+                      marginBottom: '1rem',
+                      border: '1px solid rgba(201, 168, 76, 0.1)',
+                    }}
+                  >
+                    <img
+                      src={opt.image}
+                      alt={opt.name}
+                      loading="lazy"
+                      style={{
+                        maxWidth: '80%',
+                        maxHeight: '80%',
+                        objectFit: 'contain',
+                      }}
+                    />
+                  </div>
+
                   <div>
                     <span className="text-[10px] tracking-[0.2em] uppercase text-[#8A867E] block mb-1">
                       {opt.designCode}
@@ -470,6 +509,33 @@ export function DyoConfigurator() {
                   selectedGem.ref === gem.ref ? 'dyo-option-card--selected' : ''
                 }`}
               >
+                <div
+                  style={{
+                    position: 'relative',
+                    aspectRatio: '1',
+                    background: '#FAFAF8',
+                    borderRadius: 'calc(var(--radius) - 4px)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '1rem',
+                    marginBottom: '1rem',
+                    border: '1px solid rgba(201, 168, 76, 0.1)',
+                  }}
+                >
+                  <img
+                    src={gem.image}
+                    alt={gem.name}
+                    loading="lazy"
+                    style={{
+                      maxWidth: '85%',
+                      maxHeight: '85%',
+                      objectFit: 'contain',
+                    }}
+                  />
+                </div>
+
                 <div>
                   <div className="flex justify-between items-start mb-1">
                     <span className="text-[10px] font-mono tracking-wider uppercase text-[#8A867E]">

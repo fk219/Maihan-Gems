@@ -130,40 +130,41 @@ export default async function HomePage() {
             {/* Left Column: Brand Statement & Discovery */}
             <div>
               <span className="section-eyebrow section-eyebrow--dark">
-                Natural Mineralogy &amp; Master Goldsmith Atelier
+                Natural Mineralogy &amp; Master Atelier
               </span>
               <h1
                 className="section-title"
                 style={{
-                  fontSize: 'clamp(2.25rem, 4.2vw, 3.75rem)',
-                  lineHeight: 1.15,
+                  fontSize: 'clamp(2.5rem, 4.5vw, 4rem)',
+                  lineHeight: 1.1,
                   margin: '0 0 1.25rem 0',
                   color: '#1a1a18',
+                  letterSpacing: '-0.02em',
                 }}
               >
-                Rare Earth Gemstones <span className="text-gold-gradient">&amp; Haute Atelier Mountings</span>
+                Rare Earth Gemstones <span className="text-gold-gradient">&amp; Haute Mountings</span>
               </h1>
               <p
                 className="storefront-section__subtitle"
                 style={{
                   color: '#4a4740',
-                  maxWidth: '580px',
+                  maxWidth: '540px',
                   margin: '0 0 2rem 0',
-                  fontSize: '1rem',
-                  lineHeight: 1.8,
+                  fontSize: '1.05rem',
+                  lineHeight: 1.7,
                 }}
               >
-                Direct custody of 100% natural, untreated earth-mined gemstones and precision-engineered
-                fine jewellery settings. Swiss Private Banking precision combined with modern Dubai luxury.
+                100% natural, untreated earth-mined gemstones and precision-cast 18K gold and platinum
+                mountings. Handcrafted to order in our private atelier.
               </p>
 
               {/* Integrated Search Discovery Form */}
-              <div style={{ maxWidth: '580px', marginBottom: '1.25rem' }}>
+              <div style={{ maxWidth: '540px', marginBottom: '1.5rem' }}>
                 <form action="/search" method="GET" className="search-bar-form" role="search">
                   <input
                     type="search"
                     name="q"
-                    placeholder="Search by variety (e.g. sapphire, emerald), shape, metal, or SKU..."
+                    placeholder="Search by mineral, cut, metal, or SKU..."
                     className="search-input"
                     aria-label="Search gemstones and fine settings catalogue"
                   />
@@ -173,32 +174,21 @@ export default async function HomePage() {
                 </form>
 
                 {/* Quick Discovery Pills */}
-                <div className="search-pills-row">
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.15em',
-                      color: '#8a867e',
-                      fontWeight: 600,
-                    }}
-                  >
-                    Popular:
-                  </span>
+                <div className="search-pills-row" style={{ marginTop: '0.85rem' }}>
                   <Link href="/search?q=sapphire" className="search-pill-link">
-                    Ceylon Sapphires
+                    Sapphires
                   </Link>
                   <Link href="/search?q=emerald" className="search-pill-link">
-                    Colombian Emeralds
+                    Emeralds
                   </Link>
                   <Link href="/search?q=ruby" className="search-pill-link">
-                    Burmese Rubies
+                    Rubies
                   </Link>
                   <Link href="/settings" className="search-pill-link">
                     18K Mountings
                   </Link>
                   <Link href="/design-your-own" className="search-pill-link">
-                    Bespoke Atelier
+                    Atelier Configurator
                   </Link>
                 </div>
               </div>
@@ -209,17 +199,14 @@ export default async function HomePage() {
                   display: 'flex',
                   gap: '1rem',
                   flexWrap: 'wrap',
-                  marginTop: '2rem',
+                  marginTop: '1.5rem',
                 }}
               >
                 <Link href="/search" className="btn-primary">
-                  Explore Gemstone Vault
-                </Link>
-                <Link href="/settings" className="btn-outline">
-                  Browse Atelier Mountings
+                  Explore Vault
                 </Link>
                 <Link href="/design-your-own" className="btn-outline">
-                  Design Your Own
+                  Design Your Own →
                 </Link>
               </div>
             </div>
