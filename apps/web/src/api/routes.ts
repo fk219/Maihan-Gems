@@ -205,6 +205,15 @@ export const WHATSAPP_ROUTES: readonly RouteDefinition[] = [
   { id: 'whatsappSendTemplateHandler', method: 'POST', path: '/whatsapp/send-template' },
 ];
 
+export const WEBAR_ROUTES: readonly RouteDefinition[] = [
+  { id: 'getWebarAssetHandler', method: 'GET', path: '/api/v1/webar/{assetId}' },
+  { id: 'getWebarAssetHandler', method: 'GET', path: '/webar/{assetId}' },
+  { id: 'createArHandoffHandler', method: 'POST', path: '/api/v1/ar/handoff' },
+  { id: 'createArHandoffHandler', method: 'POST', path: '/ar/handoff' },
+  { id: 'redeemArHandoffHandler', method: 'GET', path: '/api/v1/ar/handoff/{token}' },
+  { id: 'redeemArHandoffHandler', method: 'GET', path: '/ar/handoff/{token}' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
@@ -218,6 +227,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CERTIFICATE_ROUTES,
   ...AI_ROUTES,
   ...WHATSAPP_ROUTES,
+  ...WEBAR_ROUTES,
 ];
 
 export type RouteLookup =

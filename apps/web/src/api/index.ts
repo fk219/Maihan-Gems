@@ -66,6 +66,11 @@ import {
   whatsappSendTemplateHandler,
 } from './whatsapp-handlers.js';
 import {
+  getWebarAssetHandler,
+  createArHandoffHandler,
+  redeemArHandoffHandler,
+} from './webar-handlers.js';
+import {
   errorResponse,
   newRequestId,
   newTraceId,
@@ -169,6 +174,12 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       whatsappSendTemplateHandler,
     };
 
+    const WEBAR_HANDLERS: Record<string, any> = {
+      getWebarAssetHandler,
+      createArHandoffHandler,
+      redeemArHandoffHandler,
+    };
+
     const handler =
       HANDLERS[lookup.route.id] ??
       SEARCH_HANDLERS[lookup.route.id] ??
@@ -181,7 +192,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       DYO_HANDLERS[lookup.route.id] ??
       CERTIFICATE_HANDLERS[lookup.route.id] ??
       AI_HANDLERS[lookup.route.id] ??
-      WHATSAPP_HANDLERS[lookup.route.id];
+      WHATSAPP_HANDLERS[lookup.route.id] ??
+      WEBAR_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }
