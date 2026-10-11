@@ -52,9 +52,7 @@ describe('Phase 10 — WhatsApp Channel & Shared Brain Integration', () => {
   });
 
   const mockDb: any = {
-    execute: async (sqlQuery: any) => {
-      // Used by recordWebhookReceipt in db
-      const text = typeof sqlQuery === 'string' ? sqlQuery : sqlQuery?.queryChunk?.join?.(' ') ?? '';
+    execute: async (_sqlQuery: any) => {
       return { rows: [] };
     },
     query: async (queryText: string, params: any[]) => {
