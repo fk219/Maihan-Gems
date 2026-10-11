@@ -1,426 +1,536 @@
-# DESIGN SPECIFICATION & AI AGENT SYSTEM PROMPT
-> **Instruction for AI Agents**: Refer to this document as the single source of truth when generating UI layouts, components, styles, and page architectures. Adhere strictly to the color tokens, alternating background cadence, typography hierarchy, and luxury micro-interactions defined below. Never generate flat, generic, or default bootstrap-like interfaces.
+# Silk & Stone Design System Specification
+> **Brand & Atelier:** Maihan Gems  
+> **Aesthetic Philosophy:** *Silk & Stone* — Geological Permanence Meets Haute Couture Grace  
+> **Target Audiences:** High-Net-Worth Individuals (HNWI), collectors, bespoke luxury consumers across the UAE, GCC, and global markets  
+> **Reference Stack:** React 18+, Tailwind CSS (v4/v3 compatible), Cormorant Garamond + Montserrat + JetBrains Mono  
 
 ---
 
-## 1. Core Visual Archetype & Brand Philosophy
-- **Identity**: Private Wealth Advisory, Sovereign Commodity Trading & High-Asset Executive Portal.
-- **Aesthetic DNA**: *"Swiss Private Banking precision combined with modern Dubai luxury"*.
-- **Visual Pillars**:
-  1. **High-Contrast Alternating Rhythm**: Strategic switching between deep obsidian navy and crisp ivory/white blocks.
-  2. **Hairline Gold Precision**: 1px to 1.5px semi-transparent metallic gold borders (`rgba(201, 168, 76, 0.18)` to `0.40`).
-  3. **Monospace Tabular Numerals**: Every monetary figure, ROI percent, and ledger value strictly uses `font-mono` with `tabular-nums lining-nums`.
-  4. **Dynamic Specular Light**: Primary action buttons feature continuous 45° angled light sweep animations.
-  5. **Restrained Status Feedback**: Statuses use low-opacity tinted chips with hairline borders, never aggressive solid alert banners.
+## 1. Executive Summary & Design Philosophy
+
+The **Silk & Stone** design system was engineered to bridge the emotional intimacy of high jewelry with the mathematical rigor of natural mineralogy. Rather than defaulting to generic SaaS aesthetics or ubiquitous "AI slop" (purple neon gradients, pill-shaped tags, thick asymmetrical borders, and arbitrary badges), *Silk & Stone* draws direct inspiration from the world's most prestigious luxury houses: Place Vendôme, Geneva high-watchmaking salons, and the sovereign jewelry quarters of Dubai.
+
+### The Core Principles:
+1. **Silk (Organic Grace & Tactility):** Soft, warm-white alabaster canvases (`#FAFAF8`), subtle brushed-gold reflections, generous typographic tracking, and airy negative space that gives high-ticket pieces room to breathe.
+2. **Stone (Geological Precision & Permanence):** Razor-sharp hairline borders (`1px solid rgba(201, 168, 76, 0.15)`), balanced classical proportions, unboxed scientific metadata, and tabular figures for precise millimeter tolerances and carat weights.
+3. **Zero-Pill Discipline:** Categories, statuses, gem cuts, and dimensions are rendered as clean, unboxed typography separated by quiet punctuation (`·`, `/`), never trapped in neon capsules or generic rounded tags.
+4. **Anti-Cliché Restraint:** Strict ban on fake telemetry tickers, decorative pulsating green dots, comment headers (`// 01`), and multi-colored badge sandwiches. Every visual element has a functional purpose.
 
 ---
 
-## 2. The Signature Alternating Section Cadence
+## 2. Design Tokens & Color Palette
 
-The website does **NOT** use a single monotonous dark or light background. Instead, it alternates between distinct dark, accent, and light tones to create an editorial, magazine-like storytelling flow.
+The color system enforces the classical **60-30-10 rule**:
+- **60% Canvas & Atmosphere:** Warm alabaster (`#FAFAF8`) and pure white cards (`#FFFFFF`).
+- **30% Structure & Contrast:** Deep midnight navy (`#08121E`), espresso text (`#1A1A18`), warm slate text (`#4A4740`), and hairline gold borders.
+- **10% High-Intent Accents:** Brushed champagne gold gradients reserved exclusively for primary interactive anchors, CTA buttons, and selected states.
 
-### 2.1 The Cadence Sequence
-When designing multi-section landing pages or marketing flows, apply this rhythm:
+### 2.1 Core Neutral & Metal Tokens
 
-```
-[1. Hero Section]            ──> Deep Obsidian Navy  (#08121E) with radial gold orbs
-[2. Marquee Ticker]          ──> Solid Metallic Gold (#C9A84C) high-impact banner
-[3. Showcase / Units]        ──> Dark Primary Navy   (#0D1B2A) with translucent glass cards
-[4. Product / Deep Dive A]   ──> Split Hero + Crisp White (#FFFFFF) with dark typography
-[5. Product / Deep Dive B]   ──> Split Hero + Crisp White (#FFFFFF) with dark typography
-[6. Advisory Spotlight]      ──> Midnight Obsidian   (#080D19) high-focus dark contrast
-[7. Interactive Tabs]        ──> Crisp White         (#FFFFFF) with Off-White tab pill bar
-[8. Advantages / Why Us]     ──> Crisp White         (#FFFFFF) with light surface cards
-[9. Leadership Team]         ──> Ivory Off-White     (#FAFAF8) warm editorial background
-[10. Global Offices]         ──> Ivory Off-White     (#FAFAF8) with white cards & gold borders
-[11. Contact / Enquiries]    ──> Deep Primary Navy   (#0D1B2A) with dark translucent forms
-[12. Institutional Footer]   ──> Deepest Obsidian    (#08121E) with top gold hairline border
-```
+| Token Name | Hex Value | RGB / Alpha | Semantic Role | Tailwind Utility / CSS Var |
+| :--- | :--- | :--- | :--- | :--- |
+| **Warm Alabaster** | `#FAFAF8` | `rgb(250, 250, 248)` | Page background canvas, page backdrop | `bg-[#FAFAF8]`, `var(--warm-white)` |
+| **Studio White** | `#FFFFFF` | `rgb(255, 255, 255)` | Structural card surfaces, modals, popovers | `bg-white` |
+| **Deep Midnight** | `#08121E` | `rgb(8, 18, 30)` | Header accents, dark hero mode, footers | `bg-[#08121E]`, `var(--navy-deep)` |
+| **Atelier Navy** | `#0D1B2A` | `rgb(13, 27, 42)` | Secondary dark contrast, dropdown backdrops | `bg-[#0D1B2A]`, `var(--navy)` |
+| **Imperial Gold** | `#C9A84C` | `rgb(201, 168, 76)` | Primary brand metal, focused borders | `text-[#C9A84C]`, `var(--gold)` |
+| **Gold Light** | `#E8C96A` | `rgb(232, 201, 106)` | Gradient highlight, brushed metal shimmer | `var(--gold-light)` |
+| **Gold Dark** | `#8B6914` | `rgb(139, 105, 20)` | Gradient shadow, warm bronze depth | `var(--gold-dark)` |
+| **Text Primary** | `#1A1A18` | `rgb(26, 26, 24)` | High-contrast headlines, primary prose | `text-[#1A1A18]`, `var(--text-primary)` |
+| **Text Secondary** | `#4A4740` | `rgb(74, 71, 64)` | Body copy, descriptions, navigation links | `text-[#4A4740]`, `var(--text-secondary)` |
+| **Text Muted** | `#8A867E` | `rgb(138, 134, 126)` | Micro-labels, dimensions, unboxed tags | `text-[#8A867E]`, `var(--text-muted)` |
+| **Hairline Border** | `rgba(201,168,76,0.15)` | `rgba(201, 168, 76, 0.15)` | Luxury container outlines, divider rules | `border-[rgba(201,168,76,0.15)]` |
+| **Subtle Divider** | `rgba(0,0,0,0.06)` | `rgba(0, 0, 0, 0.06)` | Internal card split lines, table row borders | `border-[rgba(0,0,0,0.06)]` |
 
-### 2.2 Text & Contrast Rules by Section Tone
+### 2.2 Gemstone Accent Spectrum
 
-| Background Tone | Background Class / Hex | Primary Text | Subtext / Muted | Accent / Eyebrow | Card Background |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Obsidian Deep** | `bg-[#08121E]` | `text-white` | `text-white/60` | `text-gold` (`#C9A84C`) | `bg-[#132234]/80` (Glass) |
-| **Primary Navy** | `bg-[#0D1B2A]` | `text-white` | `text-white/70` | `text-gold` (`#C9A84C`) | `bg-white/[0.04]` border `gold/20` |
-| **Midnight Navy** | `bg-[#080D19]` | `text-white` | `text-white/65` | `text-gold-light` (`#E8C96A`) | `bg-white/5` border `gold/20` |
-| **Crisp White** | `bg-white` (`#FFFFFF`)| `text-[#0D1B2A]` (Navy)| `text-[#4A4740]` | `text-[#8B6914]` / `text-gold` | `bg-white` border `border-[#E8E4DC]` |
-| **Ivory Off-White** | `bg-[#FAFAF8]` | `text-[#0D1B2A]` (Navy)| `text-[#4A4740]` | `text-[#8B6914]` / `text-gold` | `bg-white` border `border-[#E8E1CE]` |
-| **Gold Banner** | `bg-gold` (`#C9A84C`) | `text-[#08121E]` (Dark)| `text-[#08121E]/80` | `text-[#08121E]` (Bold) | N/A (Banner strip) |
+Natural mineral accents provide rich color depth without polluting the primary brand canvas:
 
----
-
-## 3. Color Palette Tokens
-
-### 3.1 The Master Gold Palette
-- **`--color-gold`**: `#C9A84C` (RGB: `201, 168, 76`) — Primary brand gold, button gradients, active icons.
-- **`--color-gold-light`**: `#E8C96A` (RGB: `232, 201, 106`) — Hover highlights, gradient peaks, glowing strokes.
-- **`--color-gold-dark`**: `#8B6914` (RGB: `139, 105, 20`) — Gradient tails, deep shadows, dark gold on light backgrounds.
-- **`--color-gold-pale`**: `#F5E8C0` (RGB: `245, 232, 192`) — Subdued chip backgrounds in light theme.
-- **`--color-gold-ultra`**: `#FBF5E6` (RGB: `251, 245, 230`) — Light-theme badge fills and pill backgrounds.
-
-### 3.2 The Obsidian Navy Palette (Dark Theme)
-- **`--color-navy-deep`**: `#08121E` (RGB: `8, 18, 30`) — Deepest base canvas, footers, modal backdrops.
-- **`--color-navy`**: `#0D1B2A` (RGB: `13, 27, 42`) — Primary surfaces, sidebars, headers.
-- **`--color-navy-mid`**: `#132234` (RGB: `19, 34, 52`) — Elevated cards, table headers, hover highlights.
-- **`--color-navy-light`**: `#1C2E3F` (RGB: `28, 46, 63`) — Specular highlight gradient stop, active indicators.
-
-### 3.3 The Ivory Champagne Palette (Light Theme)
-- **`--portal-bg`**: `#F8FAFC` or `#FBF9F4` — Canvas background.
-- **`--portal-surface`**: `#FFFFFF` — Elevated card panels.
-- **`--portal-card-subtle`**: `#F1F5F9` — Inner panels, table header strips.
-- **`--portal-border`**: `#E8E1CE` — Warm champagne hairline border.
-- **`--portal-gold`**: `#B38E2E` — High-contrast gold calibrated for light surfaces.
-
-### 3.4 Semantic Status Colors (Low-Opacity Rule)
-- **Settled / Success**: Emerald `#34D399` ➔ `bg-emerald-400/10 text-emerald-300 border-emerald-400/25`
-- **Pending / In Review**: Amber `#FBBF24` ➔ `bg-amber-400/10 text-amber-300 border-amber-400/25`
-- **Critical / Overdue**: Rose `#FB7185` ➔ `bg-rose-400/10 text-rose-300 border-rose-400/25`
-- **Advisory / Institutional**: Sky `#38BDF8` ➔ `bg-sky-400/10 text-sky-300 border-sky-400/25`
+| Gemstone | Primary Hue | Deep Tone | Accent Light | Recommended Use |
+| :--- | :--- | :--- | :--- | :--- |
+| **Ceylon Sapphire** | `#1E3A8A` | `#0F172A` | `#3B82F6` | Royal blue filters, sapphire card indicators |
+| **Burmese Ruby** | `#991B1B` | `#450A0A` | `#EF4444` | "Pigeon's blood" red accents, high-value highlights |
+| **Colombian Emerald** | `#065F46` | `#022C22` | `#10B981` | Natural vivid green indicators, certificate seals |
+| **Padparadscha** | `#EA580C` | `#7C2D12` | `#FB923C` | Rare sunset pink-orange accents, bridal highlights |
+| **Canary Diamond** | `#D97706` | `#78350F` | `#FBBF24` | Vivid yellow sapphire / diamond highlights |
+| **Paraíba Tourmaline**| `#0891B2` | `#164E63` | `#06B6D4` | Electric neon-cyan highlights |
 
 ---
 
-## 4. Typography Hierarchy & Rules
+## 3. Typography & Hierarchy
 
-### 4.1 Fonts Setup
+The typography pairs an **editorial serif** with a **geometric sans**, complemented by a **monospace tabular font** for scientific metrics.
+
+### 3.1 Font Families
+
 ```html
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Google Fonts Embed Code -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 ```
 
-### 4.2 Font Mapping
-- **Display & Section Titles**: `'Cormorant Garamond', Georgia, serif`
-  - Always rendered with `font-feature-settings: "lnum" 1, "tnum" 1`.
-- **UI Headers, Buttons, Navigation**: `'Outfit', 'Montserrat', -apple-system, sans-serif`
-  - Modern geometric balance.
-- **Body & Editorial Copy**: `'Inter', -apple-system, sans-serif`
-  - Line height `1.7` to `1.8`.
-- **Financial Figures & Metrics**: `'JetBrains Mono', ui-monospace, monospace`
-  - Always `tabular-nums lining-nums` for currency, ROI percentages, dates, and tables.
+1. **Editorial Display:** `Cormorant Garamond, Georgia, serif`
+   - *Role:* Headlines (H1–H3), hero titles, product names, italic accents, editorial pull quotes.
+   - *Characteristics:* High contrast between thick and thin strokes, elegant calligraphic terminals, aristocratic dignity.
+2. **Interface & Body:** `Montserrat, -apple-system, sans-serif`
+   - *Role:* Body paragraphs, navigation links, button labels, uppercase eyebrows, form inputs.
+   - *Characteristics:* Wide geometric proportions, legible at micro-sizes, modern architectural feel.
+3. **Scientific & Tabular:** `JetBrains Mono, monospace` (with `font-variant-numeric: tabular-nums`)
+   - *Role:* Carat weights (e.g., `4.21 ct`), millimeter measurements (`10.4 × 8.2 × 5.1 mm`), prices, SKU identifiers, GIA/GRS lab certificate codes.
 
-### 4.3 Typography Helper Classes
+### 3.2 Typographic Hierarchy Matrix
+
+| Element | Font Family | Size | Weight | Tracking (Letter-spacing) | Line Height | Case & Style |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Hero Display** | Cormorant Garamond | `clamp(2.75rem, 5vw, 4.5rem)` | 500 | `-0.02em` | `1.05` | Title Case, `text-wrap: balance` |
+| **H1 Section Title** | Cormorant Garamond | `2.25rem` – `3rem` (36–48px) | 500 | `-0.015em` | `1.15` | Title Case |
+| **H2 Card / Feature**| Cormorant Garamond | `1.5rem` – `1.875rem` (24–30px)| 500 | `-0.01em` | `1.2` | Title Case |
+| **H3 Subsection** | Cormorant Garamond | `1.25rem` – `1.375rem` (20–22px)| 600 | `0` | `1.3` | Title Case |
+| **Uppercase Eyebrow**| Montserrat | `11px` (0.6875rem) | 600 | `+0.25em` (Widely tracked) | `1.0` | ALL-CAPS, `text-[#4A4740]` |
+| **Body Large** | Montserrat | `16px` (1.0rem) | 400 | `+0.01em` | `1.8` | Sentence case |
+| **Body Base** | Montserrat | `15px` (0.9375rem) | 400 | `+0.01em` | `1.8` | Sentence case, `text-[#4A4740]` |
+| **Micro Metadata** | Montserrat | `12px` (0.75rem) | 500 | `+0.08em` | `1.4` | Unboxed, separated by `·` |
+| **Button Label** | Montserrat | `11px` (0.6875rem) | 600 | `+0.2em` | `1.0` | ALL-CAPS, `whitespace-nowrap` |
+| **Tabular Metrics**| JetBrains Mono | `13px` – `15px` | 500 | `0` | `1.0` | `tabular-nums` |
+
+---
+
+## 4. Spacing, Elevation & Spatial Math
+
+### 4.1 Spatial Grid & Viewport Baseline
+- **Baseline Viewport:** 1440px wide desktop.
+- **Maximum Content Width:** `max-w-7xl` (1280px) or `max-w-6xl` (1152px) centered with `mx-auto`.
+- **Horizontal Container Padding:** `px-6` (24px) on mobile, `lg:px-12` (48px) on desktop.
+- **Vertical Section Rhythm:** `py-16` (64px) to `py-24` (96px) between major thematic chapters.
+
+### 4.2 Elevation & Border Math
+- **Single-Elevation Depth:** Avoid nesting cards within cards. Maximum one elevated surface per screen view.
+- **Surface Contrast:** Background-to-card brightness delta is $\le 5\%$ (soft off-white `#FAFAF8` to crisp `#FFFFFF`).
+- **Default Border Radius:** `12px` (`var(--radius)`).
+- **Nested Radius Rule:** $r_{\text{inner}} = r_{\text{outer}} - \text{padding}$.
+  - E.g., Card with $r = 12\text{px}$ and `p-3` (12px padding) contains an image container with $r = 0\text{px}$ or flush edge.
+- **Signature Box Shadow:**
+  ```css
+  /* Resting State */
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.03);
+
+  /* Hover State (Subtle Lift) */
+  box-shadow: 0 30px 60px -15px rgba(139, 105, 20, 0.08);
+  transform: translateY(-4px);
+  ```
+
+---
+
+## 5. Component Catalog & Code Patterns
+
+### 5.1 The 3-Zone Top Bar Navigation Contract
+The top bar follows a strict one-row, three-zone contract:
+`[Brand Wordmark]` — `[5 Single-Line Nav Links]` — `[Primary Action & Utility Icons]`
+
+```tsx
+<header className="sticky top-0 z-50 bg-[#FAFAF8]/95 backdrop-blur-md border-b border-[rgba(201,168,76,0.15)] transition-all">
+  <div className="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between gap-8">
+    
+    {/* Zone 1: Single Brand Wordmark in Cormorant Garamond */}
+    <a href="/" className="flex items-center gap-3 shrink-0 group">
+      <span className="font-serif text-2xl lg:text-3xl font-medium tracking-tight text-[#1A1A18] group-hover:text-[#C9A84C] transition-colors whitespace-nowrap">
+        CARATOZA
+      </span>
+      <span className="hidden sm:inline-block h-3 w-[1px] bg-[rgba(201,168,76,0.4)]" />
+      <span className="hidden sm:inline-block font-sans text-[10px] tracking-[0.25em] uppercase text-[#8A867E]">
+        Atelier
+      </span>
+    </a>
+
+    {/* Zone 2: Exactly 5 Single-Line Navigation Links */}
+    <nav className="hidden lg:flex items-center gap-8 text-[11px] font-semibold tracking-[0.25em] uppercase text-[#4A4740]">
+      <a href="#jewellery" className="hover:text-[#1A1A18] transition-colors whitespace-nowrap">Jewellery</a>
+      <a href="#gemstones" className="hover:text-[#1A1A18] transition-colors whitespace-nowrap">Gemstones</a>
+      <a href="#settings" className="hover:text-[#1A1A18] transition-colors whitespace-nowrap">Settings</a>
+      <a href="#education" className="hover:text-[#1A1A18] transition-colors whitespace-nowrap">Education</a>
+      <a href="#concierge" className="hover:text-[#1A1A18] transition-colors whitespace-nowrap">AI Concierge</a>
+    </nav>
+
+    {/* Zone 3: Primary Action & Direct Utilities */}
+    <div className="flex items-center gap-4 shrink-0">
+      <button className="px-5 py-2.5 text-[11px] font-semibold tracking-[0.2em] uppercase text-white bg-gradient-to-r from-[#C9A84C] via-[#E8C96A] to-[#8B6914] rounded-[12px] shadow-sm hover:brightness-105 hover:-translate-y-0.5 transition-all whitespace-nowrap cursor-pointer">
+        Book Appointment
+      </button>
+    </div>
+    
+  </div>
+</header>
+```
+
+### 5.2 Primary & Secondary Button Utilities
+
 ```css
-/* 1. Section Eyebrow (Overline) */
-.section-eyebrow {
-  font-family: var(--font-sans);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  color: var(--color-gold);
-}
-
-/* 2. Editorial Section Title */
-.section-title {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-/* 3. Gold Metallic Gradient Text */
-.text-gold-gradient {
+/* Brushed Gold Button (Primary) */
+.btn-primary {
   background: linear-gradient(135deg, #E8C96A 0%, #C9A84C 50%, #8B6914 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 1rem 2.2rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px -2px rgba(201, 168, 76, 0.25);
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -4px rgba(201, 168, 76, 0.35);
+  filter: brightness(1.04);
+}
+
+/* Alabaster & Gold Outline Button (Secondary) */
+.btn-secondary {
+  background: #FFFFFF;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  color: #1A1A18;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 1rem 2.2rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-secondary:hover {
+  background: rgba(201, 168, 76, 0.04);
+  border-color: #C9A84C;
+  transform: translateY(-1px);
+}
+```
+
+### 5.3 Luxury Gemstone / Product Card
+Adheres strictly to the **Zero-Pill Rule**: no rounded badge tags over the image. Unboxed metadata with typographic separators.
+
+```tsx
+<article className="group bg-white border border-[rgba(201,168,76,0.12)] rounded-[12px] overflow-hidden transition-all duration-500 hover:border-[rgba(201,168,76,0.35)] hover:-translate-y-1 hover:shadow-[0_24px_48px_-12px_rgba(139,105,20,0.08)] flex flex-col">
+  
+  {/* Visual Media Slot (65% Height with Subtle Zoom) */}
+  <div className="relative aspect-[4/3] bg-[#F7F7F5] overflow-hidden flex items-center justify-center p-6">
+    <img
+      src="/assets/gemstones/ceylon_sapphire.png"
+      alt="3.42 ct Cushion Royal Blue Ceylon Sapphire"
+      referrerPolicy="no-referrer"
+      className="max-h-full max-w-full object-contain transition-transform duration-700 ease-out group-hover:scale-105"
+    />
+    
+    {/* Clean Unboxed Status Indicator (Top Right) */}
+    <div className="absolute top-3 right-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8A867E]">
+      1-of-1 Vault
+    </div>
+  </div>
+
+  {/* Card Content & Metadata */}
+  <div className="p-5 flex-1 flex flex-col justify-between gap-4">
+    <div>
+      {/* Eyebrow / Provenance */}
+      <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8A867E] block mb-1">
+        Ceylon, Sri Lanka · Natural Unheated
+      </span>
+
+      {/* Title */}
+      <h3 className="font-serif text-xl font-medium text-[#1A1A18] leading-tight group-hover:text-[#C9A84C] transition-colors">
+        3.42 Carat Vivid Royal Blue Sapphire
+      </h3>
+
+      {/* Unboxed Metadata with Typographic Separators */}
+      <div className="mt-2.5 flex items-center gap-2 text-[12px] text-[#4A4740]">
+        <span>Cushion Cut</span>
+        <span aria-hidden="true" className="text-[rgba(201,168,76,0.5)]">·</span>
+        <span className="font-mono tabular-nums">9.12 × 7.84 mm</span>
+        <span aria-hidden="true" className="text-[rgba(201,168,76,0.5)]">·</span>
+        <span>GRS Certified</span>
+      </div>
+    </div>
+
+    {/* Financial Value & Direct Action */}
+    <div className="pt-3 border-t border-[rgba(0,0,0,0.05)] flex items-center justify-between">
+      <div>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-[#8A867E] block">Price (Inc. VAT)</span>
+        <span className="font-mono text-base font-semibold text-[#1A1A18] tabular-nums">
+          AED 48,500
+        </span>
+      </div>
+
+      <button className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#C9A84C] group-hover:text-[#8B6914] flex items-center gap-1 transition-colors">
+        Inquire <span aria-hidden="true">→</span>
+      </button>
+    </div>
+  </div>
+  
+</article>
+```
+
+### 5.4 AI Gemologist Concierge Search Bar
+An intelligent search and consultation bar with a gold accent rim and prompt suggestions:
+
+```tsx
+<div className="relative max-w-2xl mx-auto w-full">
+  <div className="relative flex items-center bg-white rounded-[12px] border border-[rgba(201,168,76,0.25)] shadow-[0_10px_30px_-5px_rgba(201,168,76,0.08)] focus-within:border-[#C9A84C] focus-within:ring-2 focus-within:ring-[rgba(201,168,76,0.2)] transition-all">
+    <div className="pl-4 text-[#C9A84C]">
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </div>
+    <input
+      type="text"
+      placeholder="Ask our AI Gemologist: 'Show untreated 3ct emeralds under AED 50,000'..."
+      className="w-full py-4 pl-3 pr-28 text-[14px] text-[#1A1A18] placeholder-[#8A867E] bg-transparent outline-none font-sans"
+    />
+    <button className="absolute right-2 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white bg-[#08121E] hover:bg-[#C9A84C] rounded-[8px] transition-colors">
+      Ask Vault
+    </button>
+  </div>
+</div>
+```
+
+---
+
+## 6. Motion & Micro-Interactions
+
+Luxury interfaces must never feel rushed, jerky, or hyperactive. All animations utilize a **decelerated cubic bezier settling curve**.
+
+### 6.1 Motion Timing Curves
+
+| Curve Type | Cubic Bezier | Typical Duration | Use Case |
+| :--- | :--- | :--- | :--- |
+| **Luxury Decelerate** | `cubic-bezier(0.16, 1, 0.3, 1)` | 400ms – 600ms | Drawers, modals, card expansion |
+| **Micro Hover Lift** | `cubic-bezier(0.16, 1, 0.3, 1)` | 200ms – 300ms | Card hover lift (`translateY(-4px)`), button glow |
+| **Page Fade In** | `cubic-bezier(0.16, 1, 0.3, 1)` | 1200ms – 1400ms | Hero typography and artwork on initial mount |
+
+### 6.2 Compositor Performance Rule
+- **Allowed Animated Properties:** `transform`, `opacity`, `filter`.
+- **Prohibited Animated Properties:** Never animate `width`, `height`, `top`, `left`, `margin`, or `padding` during scroll or hover triggers to prevent GPU layout reflows.
+
+```css
+/* Silk Fade-Up Keyframe */
+@keyframes silkFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.silk-enter {
+  animation: silkFadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 ```
 
 ---
 
-## 5. Master CSS Setup (`globals.css`)
+## 7. Complete Copy-Paste CSS Starter (`index.css`)
 
-Drop this into your project's global stylesheet (Tailwind CSS v4 or v3):
+Drop this into your project's main stylesheet (Tailwind v3 or v4 compatible):
 
 ```css
 @import "tailwindcss";
 
-@theme {
-  --color-gold: #c9a84c;
-  --color-gold-light: #e8c96a;
-  --color-gold-dark: #8b6914;
-  --color-gold-pale: #f5e8c0;
-  --color-gold-ultra: #fbf5e6;
-  
-  --color-navy: #0d1b2a;
-  --color-navy-mid: #132234;
-  --color-navy-light: #1c2e3f;
-  --color-navy-deep: #08121e;
+@layer base {
+  :root {
+    /* Sovereign Luxury Palette */
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --gold-dark: #8B6914;
+    --navy: #0D1B2A;
+    --navy-deep: #08121E;
+    --warm-white: #FAFAF8;
+    
+    /* Text Hierarchy */
+    --text-primary: #1A1A18;
+    --text-secondary: #4A4740;
+    --text-muted: #8A867E;
 
-  --color-off-white: #fafaf8;
-  --color-mid-grey: #e8e4dc;
+    /* Typography */
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    /* Global Radius */
+    --radius: 12px;
+  }
 
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans: 'Outfit', 'Montserrat', -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--warm-white);
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.8;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-  --shadow-gold: 0 10px 25px -5px rgba(201, 168, 76, 0.3), 0 8px 10px -6px rgba(201, 168, 76, 0.3);
-  --shadow-gold-sm: 0 4px 14px rgba(201, 168, 76, 0.4);
+  h1, h2, h3, h4, .font-editorial {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
 }
 
-/* ── Subtle Geometric Diamond Texture on Dark Canvas ── */
-body {
-  background-color: #0d1b2a;
-  color: #ffffff;
-  font-family: var(--font-sans);
-  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0L40 20L20 40L0 20L20 0Z' fill='none' stroke='%23ffffff' stroke-opacity='0.02' stroke-width='1'/%3E%3C/svg%3E");
-}
+@layer utilities {
+  /* Editorial Eyebrow */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--text-secondary);
+    line-height: 1;
+    display: block;
+  }
 
-/* ── Sleek 6px Gold Scrollbar ── */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(201, 168, 76, 0.3) transparent;
-}
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(201, 168, 76, 0.3);
-  border-radius: 9999px;
-  transition: background-color 0.2s ease;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(201, 168, 76, 0.6);
-}
+  /* Brushed Gold Text Gradient */
+  .gold-gradient-text {
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 
-/* ── Specular Light Shimmer Animation ── */
-@keyframes shimmer {
-  0% { transform: translateX(-100%) rotate(45deg); }
-  25%, 100% { transform: translateX(100%) rotate(45deg); }
-}
+  /* Luxury Card Surface */
+  .premium-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(201, 168, 76, 0.12);
+    border-radius: var(--radius);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 
-/* ── Button Component Classes ── */
-.btn-primary {
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(90deg, #c9a84c 0%, #e8c96a 50%, #c9a84c 100%);
-  color: #08121e;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  border-radius: 0.75rem;
-  padding: 0.625rem 1.25rem;
-  box-shadow: 0 10px 25px -5px rgba(201, 168, 76, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-}
-.btn-primary:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.05);
-  box-shadow: 0 14px 28px -5px rgba(201, 168, 76, 0.45);
-}
-.btn-primary::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  transform: rotate(45deg);
-  animation: shimmer 4s infinite;
-  pointer-events: none;
-}
+  .premium-card:hover {
+    border-color: rgba(201, 168, 76, 0.35);
+    box-shadow: 0 24px 48px -12px rgba(139, 105, 20, 0.08);
+    transform: translateY(-3px);
+  }
 
-.btn-outline {
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  border-radius: 0.75rem;
-  padding: 0.625rem 1.25rem;
-  transition: all 0.3s ease;
-}
-.btn-outline:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(201, 168, 76, 0.6);
-  transform: translateY(-2px);
-}
-```
+  /* Primary Button */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    padding: 1rem 2rem;
+    border-radius: var(--radius);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px -2px rgba(201, 168, 76, 0.25);
+  }
 
----
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -4px rgba(201, 168, 76, 0.35);
+    filter: brightness(1.05);
+  }
 
-## 6. Component Blueprints (Ready to Copy/Paste)
+  /* Secondary Button */
+  .btn-secondary {
+    background: #FFFFFF;
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    padding: 1rem 2rem;
+    border-radius: var(--radius);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    white-space: nowrap;
+  }
 
-### 6.1 The Private Bank Luxury Metric Card
-```tsx
-import React from 'react';
+  .btn-secondary:hover {
+    background: rgba(201, 168, 76, 0.04);
+    border-color: var(--gold);
+    transform: translateY(-1px);
+  }
 
-interface MetricCardProps {
-  title: string;
-  value: string;
-  subtitle?: string;
-  trend?: string;
-  isPositive?: boolean;
-  icon?: React.ReactNode;
-}
-
-export function MetricCard({ title, value, subtitle, trend, isPositive, icon }: MetricCardProps) {
-  return (
-    <div className="relative group overflow-hidden rounded-2xl transition-all duration-300
-      bg-[linear-gradient(165deg,rgba(28,46,63,0.5)_0%,rgba(19,34,52,0.72)_42%,rgba(8,18,30,0.92)_100%)]
-      backdrop-blur-md border border-gold/15 hover:border-gold/40
-      shadow-[0_10px_36px_-10px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.04)]
-      hover:shadow-[0_18px_48px_-12px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.06)]">
-      
-      {/* Top Hairline Gold Accent */}
-      <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-gold/80 to-transparent pointer-events-none" />
-
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-[11px] font-semibold uppercase tracking-[2px] text-white/50">
-            {title}
-          </span>
-          {icon && (
-            <div className="w-9 h-9 rounded-xl bg-gold/10 border border-gold/25 flex items-center justify-center text-gold-light group-hover:scale-110 transition-transform">
-              {icon}
-            </div>
-          )}
-        </div>
-
-        <div className="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2 tabular-nums">
-          {value}
-        </div>
-
-        {(subtitle || trend) && (
-          <div className="flex items-center gap-2 text-xs">
-            {trend && (
-              <span className={`font-mono font-semibold px-2 py-0.5 rounded-full ${
-                isPositive 
-                  ? 'bg-emerald-400/10 text-emerald-300 border border-emerald-400/25'
-                  : 'bg-rose-400/10 text-rose-300 border border-rose-400/25'
-              }`}>
-                {trend}
-              </span>
-            )}
-            {subtitle && <span className="text-white/40">{subtitle}</span>}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  /* Layout Container */
+  .section-container {
+    max-width: 80rem; /* 1280px */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
 }
 ```
 
 ---
 
-### 6.2 Financial Ledger Data Table
-```tsx
-export function LedgerTable({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
-  return (
-    <div className="w-full overflow-x-auto rounded-xl border border-gold/15 bg-navy-mid/60 backdrop-blur-md">
-      <table className="w-full text-left text-xs border-collapse">
-        <thead>
-          <tr className="border-b border-gold/15 bg-navy/80 text-[10px] uppercase tracking-[1.5px] text-white/45">
-            {headers.map((h, i) => (
-              <th key={i} className="py-3.5 px-4 font-semibold">{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-white/5">
-          {rows.map((row, rIdx) => (
-            <tr key={rIdx} className="hover:bg-gold/[0.03] transition-colors group">
-              {row.map((cell, cIdx) => (
-                <td key={cIdx} className="py-3 px-4 font-mono text-white/85 group-hover:text-white tabular-nums">
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-```
+## 8. How to Adapt This Design System for Other Projects
+
+The *Silk & Stone* philosophy translates seamlessly across high-value luxury domains by swapping the primary metal tone and adjusting typographic flavor:
+
+### 8.1 Fine Watchmaking & Horology (Geneva Haute Horlogerie)
+- **Palette Shift:** Replace Warm Gold (`#C9A84C`) with **Rose Gold** (`#B76E79`) or **Titanium Platinum** (`#E5E7EB` / `#475569`).
+- **Surface Shift:** Deep Charcoal `#121214` canvas with satin brushed metal dials.
+- **Data Emphasis:** Highlight movement frequencies (`28,800 vph`), power reserves (`72 Hours`), and case thicknesses in `JetBrains Mono`.
+
+### 8.2 Haute Parfumerie & Botanical Cosmetics
+- **Palette Shift:** Replace Gold with **Warm Terracotta / Amber** (`#C27803`) or **Sage Botanical Green** (`#3B5349`).
+- **Surface Shift:** French textured paper canvas (`#F7F5F0`).
+- **Metadata:** Render olfactory pyramid notes (Top, Heart, Base) as unboxed inline typography with `·` dividers.
+
+### 8.3 Bespoke Architecture & Interior Ateliers
+- **Palette Shift:** Monochromatic limestone (`#EBE9E4`), travertine, and blackened bronze (`#262320`).
+- **Typography:** Swap Montserrat for `Plus Jakarta Sans` or `Manrope` for structured Swiss architectural modernism.
+- **Imagery:** Focus on wide-angle architectural framing and material swatches.
+
+### 8.4 Contemporary Art Galleries & Sovereign Auction Houses
+- **Palette Shift:** Minimalist pure stark white (`#FFFFFF`) or obsidian noir (`#0A0A0A`).
+- **Focus:** 80% visual artwork space, 1-line provenance, auction estimates in clean tabular numerals.
 
 ---
 
-### 6.3 Luxury Form Input Field
-```tsx
-export function LuxuryInput({ label, error, ...props }: { label: string; error?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <div className="space-y-1.5 w-full">
-      <label className="block text-[11px] font-semibold tracking-wider uppercase text-white/60">
-        {label}
-      </label>
-      <input
-        {...props}
-        className="w-full px-3.5 py-2.5 rounded-xl text-sm font-sans bg-navy-deep/80 text-white placeholder-white/30 border border-gold/20 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold/50 transition-all duration-200"
-      />
-      {error && <p className="text-xs text-rose-400">{error}</p>}
-    </div>
-  );
-}
-```
+## 9. Quality Assurance & Anti-Slop Audit Checklist
 
----
+Before launching any screen using this design system, verify against this 10-point checklist:
 
-### 6.4 Restrained Status Badge
-```tsx
-type BadgeVariant = 'settled' | 'pending' | 'critical' | 'advisory';
-
-export function StatusBadge({ status, variant }: { status: string; variant: BadgeVariant }) {
-  const styles = {
-    settled: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/25',
-    pending: 'bg-amber-400/10 text-amber-300 border-amber-400/25',
-    critical: 'bg-rose-400/10 text-rose-300 border-rose-400/25',
-    advisory: 'bg-sky-400/10 text-sky-300 border-sky-400/25',
-  }[variant];
-
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-semibold uppercase tracking-wider border ${styles}`}>
-      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
-      {status}
-    </span>
-  );
-}
-```
-
----
-
-## 7. Zero-Flash Theme Initialization Script
-
-To eliminate dark/light theme flashing on page load, place this inside `<head>` in your root `layout.tsx` or `index.html`:
-
-```html
-<script id="theme-init">
-  (function(){
-    try {
-      var t = localStorage.getItem('theme_preference') || 'dark';
-      var r = document.documentElement;
-      r.setAttribute('data-theme', t);
-      r.classList.remove('dark', 'light');
-      r.classList.add(t);
-    } catch(e) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-  })();
-</script>
-```
-
----
-
-## 8. AI Agent Code Generation Rules
-When asked to build a page or component:
-1. **Never use standard grey `bg-gray-900` or blue `bg-blue-600`**. Use `--color-navy-deep` (`#08121E`), `--color-navy` (`#0D1B2A`), and `--color-gold` (`#C9A84C`).
-2. **Never create flat buttons**. Use `.btn-primary` with the gold gradient, subtle scale/lift on hover, and the 45° shimmer pseudo-element.
-3. **Always alternate sections on long-scroll landing pages** (Obsidian Deep ➔ Gold Marquee ➔ Dark Navy ➔ Crisp White ➔ Midnight Navy ➔ Ivory Off-White ➔ Deep Navy).
-4. **All numeric and monetary figures must have `tabular-nums lining-nums font-mono`**.
-5. **Always add the 1.5px gold hairline top accent** to cards and section dividers.
+- [ ] **No Pill Capsules on Metadata:** Are categories, dimensions, and tags rendered as clean unboxed text with `·` separators?
+- [ ] **One Dominant Visual Anchor:** Does each viewport contain exactly one primary CTA and hero focal point?
+- [ ] **Top Bar Simplicity:** Does the navigation header contain strictly 1 Brand wordmark, 4–5 single-line links, and 1 primary button?
+- [ ] **No Mechanical Prefixes:** Are all headings free from `//`, `/* */`, `>_`, or UPPERCASE_SNAKE_CASE?
+- [ ] **Tabular Numerals for Data:** Do prices, carats, millimeter dimensions, and metrics use `tabular-nums`?
+- [ ] **WCAG AA Contrast Verified:** Does body text meet at least 4.5:1 contrast against `#FAFAF8` and `#FFFFFF`?
+- [ ] **Single Elevation Depth:** Are cards free from nested inner-cards or thick colored left accent borders?
+- [ ] **Smooth Settling Curves:** Do hover states and modals use `cubic-bezier(0.16, 1, 0.3, 1)`?
+- [ ] **Single-Line Button Labels:** Are all button texts single-line (`whitespace-nowrap`) with zero awkward wrapping?
+- [ ] **Consistent Radius Math:** Do nested elements satisfy $r_{\text{inner}} = r_{\text{outer}} - \text{padding}$?
