@@ -32,6 +32,20 @@ export const MAIHAN_THEME_CSS = `
   --color-mid-grey: #e8e4dc;
   --color-champagne-border: #e8e1ce;
 
+  /* Silk & Stone Design System Aliases */
+  --gold: #c9a84c;
+  --gold-light: #e8c96a;
+  --gold-dark: #8b6914;
+  --navy: #0d1b2a;
+  --navy-deep: #08121e;
+  --warm-white: #fafaf8;
+
+  --text-primary: #1a1a18;
+  --text-secondary: #4a4740;
+  --text-muted: #8a867e;
+
+  --radius: 12px;
+
   --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --font-sans: 'Outfit', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -798,5 +812,133 @@ body {
   .search-bar-form {
     flex-direction: column;
   }
+}
+
+/* ── Silk & Stone Design System Classes ── */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--text-secondary);
+  line-height: 1;
+  display: block;
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.premium-card {
+  background: #ffffff;
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-radius: var(--radius);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.premium-card:hover {
+  border-color: rgba(201, 168, 76, 0.35);
+  box-shadow: 0 24px 48px -12px rgba(139, 105, 20, 0.08);
+  transform: translateY(-3px);
+}
+
+.unboxed-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.unboxed-meta__separator {
+  color: rgba(201, 168, 76, 0.5);
+  user-select: none;
+}
+
+/* ── Card & Product Card (Silk & Stone) ── */
+.card {
+  background: #ffffff;
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  border-color: rgba(201, 168, 76, 0.35);
+  box-shadow: 0 24px 48px -12px rgba(139, 105, 20, 0.08);
+  transform: translateY(-3px);
+}
+
+.card__link {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+  text-decoration: none;
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: color 0.2s ease;
+}
+
+.card__link:hover {
+  color: var(--gold-dark);
+}
+
+.product-card__title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0 0 0.5rem 0;
+}
+
+.product-card__title a {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.product-card__title a:hover {
+  color: var(--gold);
+}
+
+.product-card__subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+.product-card__meta {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  margin: 0 0 1rem 0;
+}
+
+.product-card__price {
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+  font-variant-numeric: tabular-nums;
 }
 `;
