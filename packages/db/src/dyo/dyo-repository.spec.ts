@@ -95,7 +95,7 @@ describe('DYO Database Repository (Phase 7 Task 2 & 5)', () => {
 
   it('finds compatible settings for single stone (filtering out EARRINGS)', async () => {
     const mockDb: any = {
-      query: async (sql: string, params: any[]) => {
+      query: async (sql: string, _params: any[]) => {
         if (sql.includes('FROM gemstones WHERE id = $1')) {
           return {
             rows: [

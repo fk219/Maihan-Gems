@@ -10,7 +10,6 @@
  *   - Compatible settings lookup for a chosen gemstone/pair
  *   - Cart conversion inside a PostgreSQL transaction (re-validating and re-pricing)
  */
-import type { Pool, PoolClient } from 'pg';
 import {
   calculateDyoPrice,
   evaluateCompatibility,
@@ -20,7 +19,12 @@ import {
   type DyoTrigger,
 } from '@maihan/domain';
 
-export type CatalogDatabase = Pool | PoolClient;
+export interface QueryResult<T = any> {
+  rows: T[];
+  rowCount?: number;
+}
+
+export type CatalogDatabase = any;
 
 export interface DyoConfigurationRow {
   id: string;
@@ -92,7 +96,7 @@ export async function createDyoConfiguration(
     DO UPDATE SET updated_at = now()
     RETURNING *;
   `;
-  const res = await db.query<DyoConfigurationRow>(sql, [
+  const res = (await db.query(sql, [
     input.configurationHash,
     shortCode,
     input.jewelleryType,
@@ -105,7 +109,7 @@ export async function createDyoConfiguration(
     input.anonymousSessionId ?? null,
     input.customerId ?? null,
     input.expiresAt ?? null,
-  ]);
+  ])) as QueryResult<DyoConfigurationRow>;
   return res.rows[0] as DyoConfigurationRow;
 }
 
@@ -113,10 +117,10 @@ export async function getDyoConfigurationByShortCode(
   db: CatalogDatabase,
   shortCode: string,
 ): Promise<DyoConfigurationRow | null> {
-  const res = await db.query<DyoConfigurationRow>(
+  const res = (await db.query(
     `SELECT * FROM dyo_configurations WHERE short_code = $1;`,
     [shortCode],
-  );
+  )) as QueryResult<DyoConfigurationRow>;
   return res.rows[0] ?? null;
 }
 
@@ -124,10 +128,10 @@ export async function getDyoConfigurationById(
   db: CatalogDatabase,
   id: string,
 ): Promise<DyoConfigurationRow | null> {
-  const res = await db.query<DyoConfigurationRow>(
+  const res = (await db.query(
     `SELECT * FROM dyo_configurations WHERE id = $1;`,
     [id],
-  );
+  )) as QueryResult<DyoConfigurationRow>;
   return res.rows[0] ?? null;
 }
 
@@ -148,7 +152,7 @@ export async function loadSettingCompatibilityRules(
     WHERE setting_id = $1 AND state = 'ACTIVE'
     ORDER BY priority DESC;
   `;
-  const res = await db.query<CompatibilityRuleInput>(sql, [settingId]);
+  const res = (await db.query(sql, [settingId])) as QueryResult<CompatibilityRuleInput>;
   return res.rows;
 }
 
@@ -210,12 +214,12 @@ export async function validateDyoConfiguration(
     WHERE id = $4
     RETURNING *;
   `;
-  const updatedRes = await db.query<DyoConfigurationRow>(updateSql, [
+  const updatedRes = (await db.query(updateSql, [
     transition.nextState,
     evaluation.status,
     JSON.stringify(evaluation.ruleDetails),
     config.id,
-  ]);
+  ])) as QueryResult<DyoConfigurationRow>;
   return updatedRes.rows[0] as DyoConfigurationRow;
 }
 

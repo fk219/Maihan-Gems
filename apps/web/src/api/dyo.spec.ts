@@ -221,8 +221,9 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
 
     const service = createCatalogQueryService({
       port: new FakeCatalogPort(),
-      cache: new MemoryCacheStore(),
+      store: new MemoryCacheStore(),
       generations: new MemoryGenerationStore(),
+      namespace: 'test',
     });
 
     const api = createCatalogApi({

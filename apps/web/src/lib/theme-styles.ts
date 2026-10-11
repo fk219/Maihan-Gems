@@ -941,4 +941,207 @@ body {
   margin: 0 0 0.75rem 0;
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Silk & Stone Design Your Own (DYO) Configurator ── */
+.dyo-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+}
+
+.dyo-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.dyo-step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.dyo-step-btn {
+  background: transparent;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid transparent;
+  transition: all 0.25s ease;
+}
+
+.dyo-step-btn--active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+.dyo-step-btn--completed {
+  color: var(--text-primary);
+}
+
+.dyo-panel {
+  background: #FFFFFF;
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.03);
+  margin-bottom: 2.5rem;
+}
+
+.dyo-grid-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.dyo-option-card {
+  background: #FAFAF8;
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.dyo-option-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -6px rgba(139, 105, 20, 0.08);
+}
+
+.dyo-option-card--selected {
+  background: #FFFFFF;
+  border: 1.5px solid var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 8px 20px -4px rgba(201, 168, 76, 0.15);
+}
+
+.dyo-option-title {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.35rem 0;
+}
+
+.dyo-option-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem 0;
+}
+
+.dyo-option-price {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.dyo-banner-compatible {
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-primary);
+}
+
+.dyo-banner-incompatible {
+  background: rgba(153, 27, 27, 0.05);
+  border: 1px solid rgba(153, 27, 27, 0.25);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #991b1b;
+}
+
+.dyo-summary-card {
+  background: #FAFAF8;
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.dyo-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.dyo-summary-row--total {
+  border-bottom: none;
+  padding-top: 1.25rem;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dyo-summary-row--total span:last-child {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  color: var(--gold-dark);
+}
+
+/* ── Cart Styles ── */
+.cart-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+}
+
+.cart-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+}
+
+.cart-items-table th {
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+}
+
+.cart-items-table td {
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  vertical-align: middle;
+}
 `;
+
