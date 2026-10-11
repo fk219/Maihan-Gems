@@ -59,37 +59,38 @@ export default async function HomePage() {
 
   return (
     <main className="storefront-home" id="main-content">
-      {/* ── SECTION 1: HERO (Deep Obsidian Navy #08121E) ── */}
+      {/* ── SECTION 1: HERO (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
       <section
-        className="storefront-section bg-obsidian-deep"
+        className="storefront-section bg-warm-alabaster"
         style={{
-          paddingTop: '5rem',
-          paddingBottom: '5.5rem',
+          paddingTop: '5.5rem',
+          paddingBottom: '6rem',
           backgroundImage:
-            'radial-gradient(circle at 50% 25%, rgba(201, 168, 76, 0.12) 0%, transparent 65%)',
+            'radial-gradient(circle at 50% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 65%)',
         }}
         aria-label="Hero Introduction"
       >
         <div className="storefront-section__container" style={{ textAlign: 'center' }}>
-          <span className="section-eyebrow">Natural Mineralogy &amp; Master Goldsmith Atelier</span>
+          <span className="section-eyebrow section-eyebrow--dark">Natural Mineralogy &amp; Master Goldsmith Atelier</span>
           <h1
-            className="section-title text-gold-gradient"
+            className="section-title"
             style={{
-              fontSize: 'clamp(2.25rem, 5vw, 4rem)',
-              maxWidth: '920px',
-              margin: '0 auto 1.25rem auto',
+              fontSize: 'clamp(2.5rem, 5vw, 4.25rem)',
+              maxWidth: '960px',
+              margin: '0 auto 1.5rem auto',
+              color: '#1a1a18',
             }}
           >
-            Fine Natural Gemstones &amp; Master Atelier Mountings
+            Fine Natural Gemstones <span className="text-gold-gradient">&amp; Master Atelier Mountings</span>
           </h1>
           <p
             className="storefront-section__subtitle"
             style={{
-              color: 'rgba(255, 255, 255, 0.75)',
+              color: '#4a4740',
               maxWidth: '740px',
-              margin: '0 auto 2.25rem auto',
+              margin: '0 auto 2.5rem auto',
               fontSize: 'clamp(1rem, 1.25vw, 1.15rem)',
-              lineHeight: 1.7,
+              lineHeight: 1.8,
             }}
           >
             Direct discovery of 100% natural, earth-mined loose gemstones and precision-engineered
@@ -161,21 +162,21 @@ export default async function HomePage() {
         </div>
       </aside>
 
-      {/* ── SECTION 3: ATELIER SETTINGS SHOWCASE (Dark Primary Navy #0D1B2A) ── */}
-      <section className="storefront-section bg-primary-navy" aria-labelledby="settings-title">
+      {/* ── SECTION 3: ATELIER SETTINGS SHOWCASE (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
+      <section className="storefront-section bg-warm-alabaster" aria-labelledby="settings-title">
         <div className="storefront-section__container">
           <div className="storefront-section__header">
-            <span className="section-eyebrow">Atelier Mountings</span>
+            <span className="section-eyebrow section-eyebrow--dark">Atelier Mountings</span>
             <h2
               id="settings-title"
-              className="section-title text-gold-gradient"
-              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)' }}
+              className="section-title"
+              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#1a1a18' }}
             >
-              Master Goldsmith Setting Designs
+              Master Goldsmith <span className="text-gold-gradient">Setting Designs</span>
             </h2>
             <p
               className="storefront-section__subtitle"
-              style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+              style={{ color: '#4a4740' }}
             >
               Precision-cast in 18K Yellow Gold, White Gold, Rose Gold, and 950 Platinum. Choose a signature
               mounting engineered to showcase bespoke natural gemstones.
@@ -184,7 +185,7 @@ export default async function HomePage() {
 
           {settings.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem 0' }}>
-              <p style={{ color: 'rgba(255, 255, 255, 0.7)', marginBottom: '1.5rem' }}>
+              <p style={{ color: '#4a4740', marginBottom: '1.5rem' }}>
                 Explore over 950 master mountings in our complete atelier catalogue.
               </p>
               <Link href="/settings" className="btn-primary">
@@ -196,7 +197,7 @@ export default async function HomePage() {
               {settings.map((setting) => (
                 <div
                   key={setting.design_code}
-                  className="luxury-card luxury-card--dark"
+                  className="luxury-card luxury-card--light"
                   style={{ padding: '2rem 1.75rem' }}
                 >
                   <div
@@ -211,21 +212,21 @@ export default async function HomePage() {
                       style={{
                         padding: '0.25rem 0.65rem',
                         borderRadius: '9999px',
-                        background: 'rgba(201, 168, 76, 0.12)',
+                        background: 'rgba(201, 168, 76, 0.1)',
                         border: '1px solid rgba(201, 168, 76, 0.25)',
                         fontFamily: 'var(--font-sans)',
                         fontSize: '0.6875rem',
                         fontWeight: 700,
                         letterSpacing: '0.08em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-gold-light)',
+                        color: 'var(--color-gold-dark)',
                       }}
                     >
                       {setting.jewellery_type.toLowerCase()}
                     </span>
                     <span
                       className="font-mono"
-                      style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.45)' }}
+                      style={{ fontSize: '0.75rem', color: '#8a867e' }}
                     >
                       {setting.design_code}
                     </span>
@@ -237,7 +238,7 @@ export default async function HomePage() {
                       fontSize: '1.5rem',
                       fontWeight: 600,
                       margin: '0 0 0.5rem 0',
-                      color: '#ffffff',
+                      color: '#1a1a18',
                     }}
                   >
                     {setting.name}
@@ -246,7 +247,7 @@ export default async function HomePage() {
                   <p
                     style={{
                       fontSize: '0.8125rem',
-                      color: 'rgba(255, 255, 255, 0.65)',
+                      color: '#4a4740',
                       margin: '0 0 1.5rem 0',
                       lineHeight: 1.5,
                     }}
@@ -266,7 +267,7 @@ export default async function HomePage() {
                         fontWeight: 700,
                         letterSpacing: '0.06em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-gold)',
+                        color: 'var(--color-gold-dark)',
                         textDecoration: 'none',
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -308,9 +309,9 @@ export default async function HomePage() {
             <h2
               id="bespoke-workflow-title"
               className="section-title"
-              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#0d1b2a' }}
+              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#1a1a18' }}
             >
-              Craft Your Custom Jewel
+              Craft Your <span className="text-gold-gradient">Custom Jewel</span>
             </h2>
             <p className="storefront-section__subtitle" style={{ color: '#4a4740' }}>
               A disciplined three-stage atelier process pairing rare earth gemstones with master goldsmith mountings.
@@ -345,7 +346,7 @@ export default async function HomePage() {
                   fontSize: '1.4rem',
                   fontWeight: 600,
                   margin: '0 0 0.75rem 0',
-                  color: '#0d1b2a',
+                  color: '#1a1a18',
                 }}
               >
                 Select Master Mounting
@@ -394,7 +395,7 @@ export default async function HomePage() {
                   fontSize: '1.4rem',
                   fontWeight: 600,
                   margin: '0 0 0.75rem 0',
-                  color: '#0d1b2a',
+                  color: '#1a1a18',
                 }}
               >
                 Pair Natural Gemstone
@@ -443,7 +444,7 @@ export default async function HomePage() {
                   fontSize: '1.4rem',
                   fontWeight: 600,
                   margin: '0 0 0.75rem 0',
-                  color: '#0d1b2a',
+                  color: '#1a1a18',
                 }}
               >
                 Hand-Set &amp; Hallmarked
@@ -474,21 +475,21 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── SECTION 5: MINERALOGICAL DISCOVERY (Midnight Obsidian #080D19) ── */}
-      <section className="storefront-section bg-midnight-obsidian" aria-labelledby="discovery-title">
+      {/* ── SECTION 5: MINERALOGICAL DISCOVERY (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
+      <section className="storefront-section bg-warm-alabaster" aria-labelledby="discovery-title">
         <div className="storefront-section__container">
           <div className="storefront-section__header">
-            <span className="section-eyebrow">Mineralogical Discovery</span>
+            <span className="section-eyebrow section-eyebrow--dark">Mineralogical Discovery</span>
             <h2
               id="discovery-title"
-              className="section-title text-gold-gradient"
-              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)' }}
+              className="section-title"
+              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#1a1a18' }}
             >
-              Explore by Mineral Variety &amp; Chromatic Hue
+              Explore by Mineral Variety <span className="text-gold-gradient">&amp; Chromatic Hue</span>
             </h2>
             <p
               className="storefront-section__subtitle"
-              style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+              style={{ color: '#4a4740' }}
             >
               Search our mineralogical database by certified species and vibrant colour families.
             </p>
@@ -500,7 +501,7 @@ export default async function HomePage() {
               <Link
                 key={v.slug}
                 href={`/search?q=${encodeURIComponent(v.name)}`}
-                className="luxury-card luxury-card--dark"
+                className="luxury-card luxury-card--light"
                 style={{ padding: '1.75rem 1.5rem' }}
               >
                 <div
@@ -518,7 +519,7 @@ export default async function HomePage() {
                       fontWeight: 700,
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
-                      color: 'var(--color-gold)',
+                      color: 'var(--color-gold-dark)',
                     }}
                   >
                     {v.species}
@@ -531,7 +532,7 @@ export default async function HomePage() {
                     fontSize: '1.5rem',
                     fontWeight: 600,
                     margin: '0 0 0.5rem 0',
-                    color: '#ffffff',
+                    color: '#1a1a18',
                   }}
                 >
                   {v.name}
@@ -539,7 +540,7 @@ export default async function HomePage() {
                 <p
                   style={{
                     fontSize: '0.8125rem',
-                    color: 'rgba(255, 255, 255, 0.6)',
+                    color: '#4a4740',
                     margin: '0 0 1rem 0',
                     lineHeight: 1.4,
                   }}
@@ -552,7 +553,7 @@ export default async function HomePage() {
                     fontFamily: 'var(--font-sans)',
                     fontSize: '0.75rem',
                     fontWeight: 700,
-                    color: 'var(--color-gold-light)',
+                    color: 'var(--color-gold-dark)',
                   }}
                 >
                   Search {v.name} →
@@ -570,7 +571,7 @@ export default async function HomePage() {
                 fontWeight: 600,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color: 'rgba(255, 255, 255, 0.55)',
+                color: '#4a4740',
               }}
             >
               Discover by Chromatic Family:
@@ -596,14 +597,15 @@ export default async function HomePage() {
                   gap: '0.6rem',
                   padding: '0.6rem 1.15rem',
                   borderRadius: '9999px',
-                  background: 'rgba(255, 255, 255, 0.04)',
+                  background: '#ffffff',
                   border: '1px solid rgba(201, 168, 76, 0.25)',
+                  boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.04)',
                   textDecoration: 'none',
-                  color: '#ffffff',
+                  color: '#1a1a18',
                   fontSize: '0.8125rem',
                   fontFamily: 'var(--font-sans)',
                   fontWeight: 600,
-                  transition: 'border-color 0.2s ease, background 0.2s ease',
+                  transition: 'border-color 0.2s ease, background 0.2s ease, transform 0.2s ease',
                 }}
               >
                 <span
@@ -613,7 +615,7 @@ export default async function HomePage() {
                     borderRadius: '50%',
                     background: c.gradient,
                     display: 'inline-block',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
                   }}
                   aria-hidden="true"
                 />
@@ -624,17 +626,17 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── SECTION 6: GEMMOLOGICAL INTEGRITY (Ivory Off-White #FAFAF8) ── */}
-      <section className="storefront-section bg-ivory-off-white" aria-labelledby="standards-title">
+      {/* ── SECTION 6: GEMMOLOGICAL INTEGRITY (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
+      <section className="storefront-section bg-warm-alabaster" aria-labelledby="standards-title">
         <div className="storefront-section__container">
           <div className="storefront-section__header">
             <span className="section-eyebrow section-eyebrow--dark">The Maihan Standard</span>
             <h2
               id="standards-title"
               className="section-title"
-              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#0d1b2a' }}
+              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#1a1a18' }}
             >
-              Grounded Gemmological Integrity
+              Grounded <span className="text-gold-gradient">Gemmological Integrity</span>
             </h2>
             <p className="storefront-section__subtitle" style={{ color: '#4a4740' }}>
               Rigorous physical evaluation, transparent disclosure, and master atelier craftsmanship.
@@ -667,7 +669,7 @@ export default async function HomePage() {
                   fontSize: '1.3rem',
                   fontWeight: 600,
                   margin: '0 0 0.5rem 0',
-                  color: '#0d1b2a',
+                  color: '#1a1a18',
                 }}
               >
                 100% Earth-Mined
@@ -703,7 +705,7 @@ export default async function HomePage() {
                   fontSize: '1.3rem',
                   fontWeight: 600,
                   margin: '0 0 0.5rem 0',
-                  color: '#0d1b2a',
+                  color: '#1a1a18',
                 }}
               >
                 Treatment Disclosure
@@ -739,7 +741,7 @@ export default async function HomePage() {
                   fontSize: '1.3rem',
                   fontWeight: 600,
                   margin: '0 0 0.5rem 0',
-                  color: '#0d1b2a',
+                  color: '#1a1a18',
                 }}
               >
                 Master Goldsmithing
@@ -775,7 +777,7 @@ export default async function HomePage() {
                   fontSize: '1.3rem',
                   fontWeight: 600,
                   margin: '0 0 0.5rem 0',
-                  color: '#0d1b2a',
+                  color: '#1a1a18',
                 }}
               >
                 Private Advisory
