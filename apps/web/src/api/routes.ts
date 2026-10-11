@@ -160,6 +160,21 @@ export const REFUND_ROUTES: readonly RouteDefinition[] = [
   { id: 'executeRefundHandler', method: 'POST', path: '/refunds/{refundId}/execute' },
 ];
 
+export const DYO_ROUTES: readonly RouteDefinition[] = [
+  { id: 'createDyoConfigurationHandler', method: 'POST', path: '/api/v1/dyo/configurations' },
+  { id: 'createDyoConfigurationHandler', method: 'POST', path: '/dyo/configurations' },
+  { id: 'getDyoConfigurationHandler', method: 'GET', path: '/api/v1/dyo/configurations/{shortCode}' },
+  { id: 'getDyoConfigurationHandler', method: 'GET', path: '/dyo/configurations/{shortCode}' },
+  { id: 'validateDyoConfigurationHandler', method: 'POST', path: '/api/v1/dyo/configurations/{shortCode}/validate' },
+  { id: 'validateDyoConfigurationHandler', method: 'POST', path: '/dyo/configurations/{shortCode}/validate' },
+  { id: 'quoteDyoConfigurationHandler', method: 'POST', path: '/api/v1/dyo/configurations/{shortCode}/quote' },
+  { id: 'quoteDyoConfigurationHandler', method: 'POST', path: '/dyo/configurations/{shortCode}/quote' },
+  { id: 'getCompatibleSettingsHandler', method: 'GET', path: '/api/v1/dyo/configurations/{shortCode}/compatible-settings' },
+  { id: 'getCompatibleSettingsHandler', method: 'GET', path: '/dyo/configurations/{shortCode}/compatible-settings' },
+  { id: 'addDyoToCartHandler', method: 'POST', path: '/api/v1/dyo/configurations/{shortCode}/add-to-cart' },
+  { id: 'addDyoToCartHandler', method: 'POST', path: '/dyo/configurations/{shortCode}/add-to-cart' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
@@ -169,6 +184,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...ADDON_ROUTES,
   ...DISCOUNT_ROUTES,
   ...REFUND_ROUTES,
+  ...DYO_ROUTES,
 ];
 
 export type RouteLookup =

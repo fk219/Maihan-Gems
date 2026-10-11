@@ -41,6 +41,14 @@ import { ADDON_HANDLERS } from './addon-handlers.js';
 import { DISCOUNT_HANDLERS } from './discount-handlers.js';
 import { REFUND_HANDLERS } from './refund-handlers.js';
 import {
+  createDyoConfigurationHandler,
+  getDyoConfigurationHandler,
+  validateDyoConfigurationHandler,
+  quoteDyoConfigurationHandler,
+  getCompatibleSettingsHandler,
+  addDyoToCartHandler,
+} from './dyo-handlers.js';
+import {
   errorResponse,
   newRequestId,
   newTraceId,
@@ -115,6 +123,15 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       }
     }
 
+    const DYO_HANDLERS: Record<string, any> = {
+      createDyoConfigurationHandler,
+      getDyoConfigurationHandler,
+      validateDyoConfigurationHandler,
+      quoteDyoConfigurationHandler,
+      getCompatibleSettingsHandler,
+      addDyoToCartHandler,
+    };
+
     const handler =
       HANDLERS[lookup.route.id] ??
       SEARCH_HANDLERS[lookup.route.id] ??
@@ -123,7 +140,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       FAVORITES_HANDLERS[lookup.route.id] ??
       ADDON_HANDLERS[lookup.route.id] ??
       DISCOUNT_HANDLERS[lookup.route.id] ??
-      REFUND_HANDLERS[lookup.route.id];
+      REFUND_HANDLERS[lookup.route.id] ??
+      DYO_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }
