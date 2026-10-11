@@ -1,17 +1,11 @@
-/**
- * apps/web/src/app/(storefront)/products/[productSlug]/page.tsx
- *
- * `/products/<slug>` — canonical product detail (Task 4; target of the four
- * source families: loose stone, pair, ready-made, configured). Uses the ONE
- * shared ProductDetailContent renderer and the Phase 3 service.
- */
 import { notFound } from 'next/navigation';
 
 import { isProductNotFound } from '../../../../lib/catalog-errors.js';
-import { loadProductDetail } from '../../../../lib/catalog-server.js';
+import { loadProductDetail, loadGemstoneDetail } from '../../../../lib/catalog-server.js';
 import { siteBaseUrl, productJsonLd } from '../../../../lib/jsonld.js';
 import { JsonLd } from '../../../../components/seo/JsonLd.js';
 import { ProductDetailContent } from '../../../../components/catalog/ProductDetailContent.js';
+import { adaptGemstoneToProductDetail } from '../../../../lib/gemstone-adapter.js';
 
 // Route segment config. Catalog views render per request from the cached
 // CatalogQueryService (doc 12.3: Server-rendered, cacheable, no per-user
@@ -24,18 +18,32 @@ interface PageProps {
   params: Promise<{ productSlug: string }>;
 }
 
+async function resolveProductOrGemstone(slug: string) {
+  const detail = await loadProductDetail(slug);
+  if (detail.ok) {
+    return { ok: true as const, value: detail.value };
+  }
+  // If product not found, check if slug corresponds to a gemstone reference (e.g. K1324, PR5681)
+  const gemRefUpper = slug.toUpperCase();
+  const gemResult = await loadGemstoneDetail(gemRefUpper);
+  if (gemResult.ok) {
+    return { ok: true as const, value: adaptGemstoneToProductDetail(gemResult.value, slug) };
+  }
+  return { ok: false as const, error: detail.error };
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<{ title: string }> {
   const { productSlug } = await params;
-  const detail = await loadProductDetail(productSlug);
-  return detail.ok ? { title: `${detail.value.title} | Maihan Gems` } : { title: 'Product | Maihan Gems' };
+  const resolved = await resolveProductOrGemstone(productSlug);
+  return resolved.ok ? { title: `${resolved.value.title} | Maihan Gems` } : { title: 'Product | Maihan Gems' };
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { productSlug } = await params;
-  const detail = await loadProductDetail(productSlug);
-  if (!detail.ok) {
-    if (isProductNotFound(detail.error)) notFound();
-    throw detail.error; // route error boundary renders the recovery view (Task 5)
+  const resolved = await resolveProductOrGemstone(productSlug);
+  if (!resolved.ok) {
+    if (isProductNotFound(resolved.error)) notFound();
+    throw resolved.error; // route error boundary renders the recovery view (Task 5)
   }
   // Task 8: JSON-LD from the SAME server data the page renders — the contract
   // DTO plus the breadcrumb trail the page itself builds. SITE_URL provides the
@@ -43,15 +51,16 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const base = siteBaseUrl();
   const crumbs = [
     { label: 'Home', href: '/' },
-    ...(detail.value.variety !== null
-      ? [{ label: detail.value.variety.name, href: `/${detail.value.variety.slug}` }]
+    ...(resolved.value.variety !== null
+      ? [{ label: resolved.value.variety.name, href: `/${resolved.value.variety.slug}` }]
       : []),
-    { label: detail.value.title },
+    { label: resolved.value.title },
   ];
   return (
     <>
-      <JsonLd payload={productJsonLd(base, detail.value, crumbs)} />
-      <ProductDetailContent detail={detail.value} />
+      <JsonLd payload={productJsonLd(base, resolved.value, crumbs)} />
+      <ProductDetailContent detail={resolved.value} />
     </>
   );
 }
+

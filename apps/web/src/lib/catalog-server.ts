@@ -94,3 +94,16 @@ export async function loadProductDetail(
     return { ok: false, error };
   }
 }
+
+/** Load one gemstone detail by gemRef, classifying not-found vs transient. */
+export async function loadGemstoneDetail(
+  gemRef: string,
+): Promise<{ readonly ok: true; readonly value: Awaited<ReturnType<CatalogQueryService['getGemstoneByGemRef']>>['value'] } | { readonly ok: false; readonly error: unknown }> {
+  try {
+    const result = await getService().getGemstoneByGemRef(gemRef);
+    return { ok: true, value: result.value };
+  } catch (error) {
+    return { ok: false, error };
+  }
+}
+

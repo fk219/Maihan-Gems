@@ -10,6 +10,7 @@
  */
 import { StorefrontHeader } from '../../components/layout/StorefrontHeader.js';
 import { StorefrontFooter } from '../../components/layout/StorefrontFooter.js';
+import { AiConciergeDrawer } from '../../components/ai/AiConciergeDrawer.js';
 
 export default function StorefrontLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +18,8 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
       <StorefrontHeader />
       {children}
       <StorefrontFooter />
+      <AiConciergeDrawer />
     </>
   );
 }
+
