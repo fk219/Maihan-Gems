@@ -88,7 +88,7 @@ describe('Compatibility Evaluator (INV-01, INV-02, INV-03, Rules)', () => {
   it('enforces INV-01: requires stone to be present', () => {
     const res = evaluateCompatibility({ settingId: 'setting-ring-1', jewelleryType: 'RING' }, null, dummyRules);
     expect(res.status).toBe('INCOMPATIBLE');
-    expect(res.ruleDetails[0].rule).toBe('INV-01');
+    expect(res.ruleDetails[0]?.rule).toBe('INV-01');
   });
 
   it('enforces INV-02: pair attached to non-EARRINGS is INCOMPATIBLE', () => {
@@ -98,7 +98,7 @@ describe('Compatibility Evaluator (INV-01, INV-02, INV-03, Rules)', () => {
       dummyRules,
     );
     expect(res.status).toBe('INCOMPATIBLE');
-    expect(res.ruleDetails[0].rule).toBe('INV-02');
+    expect(res.ruleDetails[0]?.rule).toBe('INV-02');
   });
 
   it('enforces INV-03: single stone attached to EARRINGS is INCOMPATIBLE', () => {
@@ -108,7 +108,7 @@ describe('Compatibility Evaluator (INV-01, INV-02, INV-03, Rules)', () => {
       dummyRules,
     );
     expect(res.status).toBe('INCOMPATIBLE');
-    expect(res.ruleDetails[0].rule).toBe('INV-03');
+    expect(res.ruleDetails[0]?.rule).toBe('INV-03');
   });
 
   it('returns COMPATIBLE when matching an ALLOW rule', () => {
@@ -118,8 +118,8 @@ describe('Compatibility Evaluator (INV-01, INV-02, INV-03, Rules)', () => {
       dummyRules,
     );
     expect(res.status).toBe('COMPATIBLE');
-    expect(res.ruleDetails[0].outcome).toBe('PASS');
-    expect(res.ruleDetails[0].message).toContain('Solitaire setting accepts');
+    expect(res.ruleDetails[0]?.outcome).toBe('PASS');
+    expect(res.ruleDetails[0]?.message).toContain('Solitaire setting accepts');
   });
 
   it('returns INCOMPATIBLE when matching a DENY rule (DENY beats ALLOW)', () => {
@@ -129,8 +129,8 @@ describe('Compatibility Evaluator (INV-01, INV-02, INV-03, Rules)', () => {
       dummyRules,
     );
     expect(res.status).toBe('INCOMPATIBLE');
-    expect(res.ruleDetails[0].outcome).toBe('FAIL');
-    expect(res.ruleDetails[0].message).toContain('cannot accommodate Heart shape');
+    expect(res.ruleDetails[0]?.outcome).toBe('FAIL');
+    expect(res.ruleDetails[0]?.message).toContain('cannot accommodate Heart shape');
   });
 
   it('returns UNKNOWN when no rule matches (never assumes false compatibility)', () => {
@@ -140,7 +140,7 @@ describe('Compatibility Evaluator (INV-01, INV-02, INV-03, Rules)', () => {
       dummyRules,
     );
     expect(res.status).toBe('UNKNOWN');
-    expect(res.ruleDetails[0].message).toContain('No empirical compatibility rule');
+    expect(res.ruleDetails[0]?.message).toContain('No empirical compatibility rule');
   });
 });
 

@@ -163,6 +163,17 @@ export {
   getOrderRefunds,
   getRefund,
 } from './commerce/refund-repository.js';
+export {
+  createDyoConfiguration,
+  getDyoConfigurationByShortCode,
+  getDyoConfigurationById,
+  loadSettingCompatibilityRules,
+  validateDyoConfiguration,
+  createDyoPriceQuote,
+  findCompatibleSettingsForStone,
+  type DyoConfigurationRow,
+  type CreateDyoConfigurationInput,
+} from './dyo/dyo-repository.js';
 export type { CatalogQueryPort } from '@maihan/contracts';
 
 
