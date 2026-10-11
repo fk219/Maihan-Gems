@@ -196,6 +196,15 @@ export const AI_ROUTES: readonly RouteDefinition[] = [
   { id: 'aiGetConversationHandler', method: 'GET', path: '/ai/conversations/{conversationKey}' },
 ];
 
+export const WHATSAPP_ROUTES: readonly RouteDefinition[] = [
+  { id: 'whatsappVerificationHandler', method: 'GET', path: '/api/v1/webhooks/whatsapp' },
+  { id: 'whatsappVerificationHandler', method: 'GET', path: '/webhooks/whatsapp' },
+  { id: 'whatsappWebhookHandler', method: 'POST', path: '/api/v1/webhooks/whatsapp' },
+  { id: 'whatsappWebhookHandler', method: 'POST', path: '/webhooks/whatsapp' },
+  { id: 'whatsappSendTemplateHandler', method: 'POST', path: '/api/v1/whatsapp/send-template' },
+  { id: 'whatsappSendTemplateHandler', method: 'POST', path: '/whatsapp/send-template' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
@@ -208,6 +217,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...DYO_ROUTES,
   ...CERTIFICATE_ROUTES,
   ...AI_ROUTES,
+  ...WHATSAPP_ROUTES,
 ];
 
 export type RouteLookup =

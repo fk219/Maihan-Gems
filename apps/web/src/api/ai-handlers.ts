@@ -24,7 +24,7 @@ import {
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
-function getDb(ctx: RouteContext): any {
+export function getDb(ctx: RouteContext): any {
   const db = ctx.db || (ctx.service as any)?.port?.db;
   if (!db) {
     throw new ContractError('INTERNAL', 'Database connection not available for AI operations.');
@@ -32,7 +32,7 @@ function getDb(ctx: RouteContext): any {
   return (db as any).pool || db;
 }
 
-async function parseBody(request?: Request): Promise<unknown> {
+export async function parseBody(request?: Request): Promise<unknown> {
   if (!request) return {};
   try {
     const text = await request.text();
@@ -43,7 +43,7 @@ async function parseBody(request?: Request): Promise<unknown> {
   }
 }
 
-function buildToolServices(ctx: RouteContext): ToolServices {
+export function buildToolServices(ctx: RouteContext): ToolServices {
   const db = getDb(ctx);
   const catalogService = ctx.service;
 

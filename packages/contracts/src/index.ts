@@ -43,3 +43,4 @@ export * from './dto/commerce/favorites.js';
 export * from './dto/commerce/addon.js';
 export * from './dto/commerce/discount.js';
 export * from './dto/commerce/refund.js';
+export * from './dto/whatsapp/index.js';

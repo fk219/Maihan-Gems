@@ -61,6 +61,11 @@ import {
   aiGetConversationHandler,
 } from './ai-handlers.js';
 import {
+  whatsappVerificationHandler,
+  whatsappWebhookHandler,
+  whatsappSendTemplateHandler,
+} from './whatsapp-handlers.js';
+import {
   errorResponse,
   newRequestId,
   newTraceId,
@@ -158,6 +163,12 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       aiGetConversationHandler,
     };
 
+    const WHATSAPP_HANDLERS: Record<string, any> = {
+      whatsappVerificationHandler,
+      whatsappWebhookHandler,
+      whatsappSendTemplateHandler,
+    };
+
     const handler =
       HANDLERS[lookup.route.id] ??
       SEARCH_HANDLERS[lookup.route.id] ??
@@ -169,7 +180,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       REFUND_HANDLERS[lookup.route.id] ??
       DYO_HANDLERS[lookup.route.id] ??
       CERTIFICATE_HANDLERS[lookup.route.id] ??
-      AI_HANDLERS[lookup.route.id];
+      AI_HANDLERS[lookup.route.id] ??
+      WHATSAPP_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }
@@ -197,6 +209,10 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
         ? { 'Cache-Control': 'private, no-store' }
         : applyCacheHeaders(outcome.cache, lookup.route.surface);
 
-    return successResponse(outcome.body, outcome.status, ids, { ...cacheHeaders, ...rateHeaders });
+    return successResponse(outcome.body, outcome.status, ids, {
+      ...cacheHeaders,
+      ...rateHeaders,
+      ...(outcome.headers ?? {}),
+    });
   };
 }

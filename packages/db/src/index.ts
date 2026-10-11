@@ -201,5 +201,11 @@ export {
   type ConversationRow,
   type MessageRow,
 } from './ai/ai-repository.js';
-
-
+export {
+  recordWhatsAppReceipt,
+  markWebhookProcessed,
+  findCustomerByPhone,
+  resolveWhatsAppConversation,
+  checkMarketingOptIn,
+  type CustomerPhoneMatch,
+} from './whatsapp/whatsapp-repository.js';

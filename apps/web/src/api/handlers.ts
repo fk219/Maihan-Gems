@@ -33,6 +33,8 @@ export interface HandlerOutcome {
   readonly body: unknown;
   /** Present whenever a catalogue service call answered; drives Task 10 headers. */
   readonly cache?: CacheInfo;
+  /** Custom extra headers (e.g. content-type override) */
+  readonly headers?: Record<string, string>;
 }
 
 export type RouteHandler = (ctx: RouteContext) => Promise<HandlerOutcome>;

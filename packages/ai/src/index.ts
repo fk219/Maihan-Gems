@@ -49,3 +49,7 @@ export * from './orchestrator/types.js';
 export { AiOrchestrator } from './orchestrator/orchestrator.js';
 
 export * from './eval/eval-suites.js';
+
+export * from './whatsapp/types.js';
+export { formatForWhatsApp, splitWhatsAppMessage } from './whatsapp/formatter.js';
+export { toolsFor, assertSharedBrainToolParity } from './whatsapp/tools.js';

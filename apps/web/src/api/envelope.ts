@@ -151,5 +151,15 @@ export function successResponse(
       },
     });
   }
+  if (headers['content-type']?.includes('text/plain') || headers['Content-Type']?.includes('text/plain')) {
+    return new Response(String(body), {
+      status,
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+        [TRACE_HEADER]: ids.traceId,
+        ...headers,
+      },
+    });
+  }
   return jsonResponse(body, status, { [TRACE_HEADER]: ids.traceId, ...headers });
 }
