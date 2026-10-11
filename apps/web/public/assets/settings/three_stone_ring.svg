@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <radialGradient id="triBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#FAFAF8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="goldShank" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5E8C0"/>
+      <stop offset="40%" stop-color="#E8C96A"/>
+      <stop offset="80%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#8B6914"/>
+    </linearGradient>
+    <linearGradient id="emeraldCenter" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EE7B7"/>
+      <stop offset="50%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="diamondSide" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#CBD5E1"/>
+    </linearGradient>
+    <filter id="triShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#8b6914" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <circle cx="200" cy="200" r="180" fill="url(#triBg)"/>
+
+  <g filter="url(#triShadow)">
+    <ellipse cx="200" cy="235" rx="105" ry="105" fill="none" stroke="url(#goldShank)" stroke-width="20"/>
+
+    <!-- Left Side Stone (Trilliant / Round Diamond) -->
+    <ellipse cx="145" cy="110" rx="24" ry="24" fill="url(#diamondSide)" stroke="url(#goldShank)" stroke-width="4"/>
+    <!-- Right Side Stone -->
+    <ellipse cx="255" cy="110" rx="24" ry="24" fill="url(#diamondSide)" stroke="url(#goldShank)" stroke-width="4"/>
+
+    <!-- Center Majestic Stone (Emerald Cut / Cushion) -->
+    <rect x="170" y="70" width="60" height="75" rx="12" fill="url(#emeraldCenter)" stroke="url(#goldShank)" stroke-width="5"/>
+
+    <!-- Corner Claws -->
+    <circle cx="170" cy="72" r="4.5" fill="#F5E8C0"/>
+    <circle cx="230" cy="72" r="4.5" fill="#F5E8C0"/>
+    <circle cx="170" cy="143" r="4.5" fill="#F5E8C0"/>
+    <circle cx="230" cy="143" r="4.5" fill="#F5E8C0"/>
+  </g>
+</svg>

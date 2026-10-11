@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <radialGradient id="paraibaBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0891B2" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#FAFAF8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="paraibaGlow" cx="42%" cy="38%" r="58%">
+      <stop offset="0%" stop-color="#67E8F9"/>
+      <stop offset="35%" stop-color="#06B6D4"/>
+      <stop offset="70%" stop-color="#0891B2"/>
+      <stop offset="100%" stop-color="#164E63"/>
+    </radialGradient>
+    <linearGradient id="goldGleam" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5E8C0"/>
+      <stop offset="50%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#8B6914"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#164e63" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <circle cx="200" cy="200" r="180" fill="url(#paraibaBg)"/>
+
+  <g filter="url(#shadow)">
+    <!-- Pear Cut Base -->
+    <path d="M200 60 C235 120 310 200 310 260 C310 320 260 345 200 345 C140 345 90 320 90 260 C90 200 165 120 200 60 Z" fill="url(#paraibaGlow)"/>
+
+    <!-- Pear Table -->
+    <path d="M200 120 C220 160 260 210 260 250 C260 290 230 305 200 305 C170 305 140 290 140 250 C140 210 180 160 200 120 Z" fill="#0891B2" opacity="0.6"/>
+
+    <!-- Brilliant Facets -->
+    <polygon points="200,60 180,120 220,120" fill="#A5F3FC" opacity="0.8"/>
+    <polygon points="90,260 140,250 140,290 120,320" fill="#0E7490" opacity="0.75"/>
+    <polygon points="310,260 260,250 260,290 280,320" fill="#155E75" opacity="0.8"/>
+    <polygon points="200,345 170,305 230,305" fill="#164E63" opacity="0.85"/>
+
+    <!-- Electric Specular Glint -->
+    <ellipse cx="195" cy="180" rx="20" ry="30" fill="#CFFAFE" opacity="0.65"/>
+
+    <!-- Prongs -->
+    <circle cx="200" cy="62" r="6" fill="url(#goldGleam)"/>
+    <circle cx="95" cy="265" r="6" fill="url(#goldGleam)"/>
+    <circle cx="305" cy="265" r="6" fill="url(#goldGleam)"/>
+    <circle cx="150" cy="335" r="6" fill="url(#goldGleam)"/>
+    <circle cx="250" cy="335" r="6" fill="url(#goldGleam)"/>
+  </g>
+</svg>

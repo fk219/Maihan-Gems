@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500" width="100%" height="100%">
+  <defs>
+    <radialGradient id="heroAtmosphere" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.2"/>
+      <stop offset="40%" stop-color="#FAFAF8" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
+    </radialGradient>
+    <radialGradient id="sapphireMasterGlow" cx="40%" cy="35%" r="55%">
+      <stop offset="0%" stop-color="#93C5FD"/>
+      <stop offset="25%" stop-color="#3B82F6"/>
+      <stop offset="60%" stop-color="#1D4ED8"/>
+      <stop offset="90%" stop-color="#1E3A8A"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </radialGradient>
+    <linearGradient id="goldMount" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFBEB"/>
+      <stop offset="30%" stop-color="#F5E8C0"/>
+      <stop offset="60%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#8B6914"/>
+    </linearGradient>
+    <filter id="royalShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#0f172a" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <!-- Background Halo -->
+  <rect width="600" height="500" rx="24" fill="url(#heroAtmosphere)"/>
+
+  <!-- Geometry of Masterpiece Ring & Ceylon Cushion Sapphire -->
+  <g filter="url(#royalShadow)" transform="translate(300, 260)">
+    <!-- 18K Gold Cathedral Ring Shank in Perspective -->
+    <ellipse cx="0" cy="50" rx="140" ry="110" fill="none" stroke="url(#goldMount)" stroke-width="26"/>
+    <ellipse cx="0" cy="50" rx="125" ry="98" fill="none" stroke="#8B6914" stroke-width="3" opacity="0.45"/>
+
+    <!-- Micro-Pavé Diamonds on Shank Shoulders -->
+    <g fill="#FFFFFF" stroke="#C9A84C" stroke-width="1.5">
+      <circle cx="-100" cy="2" r="4.5"/>
+      <circle cx="-80" cy="-14" r="5"/>
+      <circle cx="-58" cy="-28" r="5.5"/>
+      <circle cx="100" cy="2" r="4.5"/>
+      <circle cx="80" cy="-14" r="5"/>
+      <circle cx="58" cy="-28" r="5.5"/>
+    </g>
+
+    <!-- Under-Gallery Basket & Filigree -->
+    <path d="M-65 -45 C-40 -15 40 -15 65 -45" fill="none" stroke="url(#goldMount)" stroke-width="12" stroke-linecap="round"/>
+    <path d="M-45 -35 L0 -10 L45 -35" fill="none" stroke="url(#goldMount)" stroke-width="6"/>
+
+    <!-- Magnificent 4.82 ct Royal Cushion Sapphire -->
+    <g transform="translate(0, -90)">
+      <!-- Girdle Base -->
+      <path d="M-90 -55 C-50 -68 50 -68 90 -55 C135 -20 135 45 90 80 C50 95 -50 95 -90 80 C-135 45 -135 -20 -90 -55 Z" fill="url(#sapphireMasterGlow)"/>
+
+      <!-- Crown Facets -->
+      <polygon points="-65,-35 65,-35 85,15 50,60 -50,60 -85,15" fill="#3B82F6" opacity="0.6"/>
+      <polygon points="-50,-25 50,-25 65,15 35,50 -35,50 -65,15" fill="#60A5FA" opacity="0.45"/>
+
+      <!-- Triangular Star & Kite Facets -->
+      <polygon points="-90,-55 -65,-35 -85,15 -130,-15" fill="#BFDBFE" opacity="0.75"/>
+      <polygon points="90,-55 65,-35 85,15 130,-15" fill="#2563EB" opacity="0.8"/>
+      <polygon points="-65,-35 0,-50 65,-35 0,-25" fill="#DBEAFE" opacity="0.85"/>
+      <polygon points="-50,60 0,82 50,60 0,50" fill="#1E3A8A" opacity="0.9"/>
+      <polygon points="-85,15 -50,60 -90,80 -130,35" fill="#1D4ED8" opacity="0.85"/>
+      <polygon points="85,15 50,60 90,80 130,35" fill="#1E40AF" opacity="0.85"/>
+
+      <!-- Optical Dispersion Flash -->
+      <polygon points="-25,-10 25,-10 15,25 -15,25" fill="#EFF6FF" opacity="0.75"/>
+
+      <!-- Master Goldsmith Corner Double Prongs -->
+      <circle cx="-82" cy="-45" r="7" fill="url(#goldMount)"/>
+      <circle cx="-70" cy="-56" r="6" fill="url(#goldMount)"/>
+      <circle cx="82" cy="-45" r="7" fill="url(#goldMount)"/>
+      <circle cx="70" cy="-56" r="6" fill="url(#goldMount)"/>
+      <circle cx="-82" cy="70" r="7" fill="url(#goldMount)"/>
+      <circle cx="-70" cy="78" r="6" fill="url(#goldMount)"/>
+      <circle cx="82" cy="70" r="7" fill="url(#goldMount)"/>
+      <circle cx="70" cy="78" r="6" fill="url(#goldMount)"/>
+    </g>
+  </g>
+</svg>

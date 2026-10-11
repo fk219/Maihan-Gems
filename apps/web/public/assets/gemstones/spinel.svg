@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <radialGradient id="spinelBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#DB2777" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#FAFAF8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="spinelGlow" cx="45%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#F472B6"/>
+      <stop offset="35%" stop-color="#EC4899"/>
+      <stop offset="70%" stop-color="#BE185D"/>
+      <stop offset="100%" stop-color="#500724"/>
+    </radialGradient>
+    <linearGradient id="goldGleam" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5E8C0"/>
+      <stop offset="50%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#8B6914"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#500724" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <circle cx="200" cy="200" r="180" fill="url(#spinelBg)"/>
+
+  <g filter="url(#shadow)">
+    <!-- Cushion Spinel Base -->
+    <path d="M110 80 C150 72 250 72 290 80 C340 120 340 280 290 320 C250 328 150 328 110 320 C60 280 60 120 110 80 Z" fill="url(#spinelGlow)"/>
+
+    <!-- Facets -->
+    <polygon points="140,120 260,120 280,180 260,260 140,260 120,180" fill="#DB2777" opacity="0.6"/>
+    <polygon points="160,140 240,140 250,180 240,240 160,240 150,180" fill="#F472B6" opacity="0.45"/>
+
+    <polygon points="110,80 140,120 120,180 60,150" fill="#FBCFE8" opacity="0.75"/>
+    <polygon points="290,80 260,120 280,180 340,150" fill="#BE185D" opacity="0.7"/>
+    <polygon points="110,320 140,260 120,180 60,250" fill="#831843" opacity="0.75"/>
+    <polygon points="290,320 260,260 280,180 340,250" fill="#500724" opacity="0.8"/>
+
+    <!-- Center Glint -->
+    <polygon points="180,155 220,155 205,190 195,190" fill="#FDF2F8" opacity="0.7"/>
+
+    <circle cx="95" cy="95" r="6" fill="url(#goldGleam)"/>
+    <circle cx="305" cy="95" r="6" fill="url(#goldGleam)"/>
+    <circle cx="95" cy="305" r="6" fill="url(#goldGleam)"/>
+    <circle cx="305" cy="305" r="6" fill="url(#goldGleam)"/>
+  </g>
+</svg>

@@ -50,6 +50,61 @@ const CHROMATIC_COLOURS = [
   { slug: 'purple', name: 'Royal Purple', gradient: 'radial-gradient(circle at 35% 35%, #C084FC 0%, #7C3AED 50%, #3B0764 100%)' },
 ];
 
+/** Curated gemstone specimen collections with verified vector artwork */
+const VAULT_COLLECTIONS = [
+  {
+    slug: 'sapphire',
+    title: 'Ceylon Royal Sapphires',
+    provenance: 'Sri Lanka & Kashmir · Natural Unheated',
+    description: 'Vivid royal blue, cornflower, and sunset padparadscha corundum crystals.',
+    image: '/assets/gemstones/sapphire.svg',
+    href: '/search?q=sapphire',
+    spec: '3.42 ct · Cushion Cut · GRS Certified',
+  },
+  {
+    slug: 'emerald',
+    title: 'Muzo & Panjshir Emeralds',
+    provenance: 'Colombia & Afghanistan · Natural Beryl',
+    description: 'Deep crystalline forest green beryls with verified traditional treatment disclosure.',
+    image: '/assets/gemstones/emerald.svg',
+    href: '/search?q=emerald',
+    spec: '2.85 ct · Emerald Cut · GIA Certified',
+  },
+  {
+    slug: 'ruby',
+    title: "Burmese Pigeon's Blood Rubies",
+    provenance: 'Mogok, Myanmar · Untreated Corundum',
+    description: 'Rare fluorescent crimson corundum specimens possessing supreme saturation.',
+    image: '/assets/gemstones/ruby.svg',
+    href: '/search?q=ruby',
+    spec: '2.14 ct · Oval Brilliant · SSEF Verified',
+  },
+  {
+    slug: 'paraiba',
+    title: 'Paraíba & Exotic Minerals',
+    provenance: 'Brazil & Mozambique · Copper-Bearing',
+    description: 'Electric neon-cyan tourmalines, cobalt spinels, and vivid tsavorite garnets.',
+    image: '/assets/gemstones/tourmaline.svg',
+    href: '/search?q=tourmaline',
+    spec: '1.92 ct · Pear Cut · Gübelin Certified',
+  },
+];
+
+/** Selects appropriate master jewelry setting illustration based on type & style */
+function getSettingImage(jewelleryType: string, styleLabel: string | null): string {
+  if (jewelleryType.toUpperCase() === 'EARRINGS') {
+    return '/assets/settings/stud_earrings.svg';
+  }
+  const s = (styleLabel ?? '').toLowerCase();
+  if (s.includes('halo')) {
+    return '/assets/settings/halo_ring.svg';
+  }
+  if (s.includes('three') || s.includes('trilogy') || s.includes('side')) {
+    return '/assets/settings/three_stone_ring.svg';
+  }
+  return '/assets/settings/solitaire_ring.svg';
+}
+
 export default async function HomePage() {
   const service = catalogServer();
 
@@ -63,106 +118,418 @@ export default async function HomePage() {
       <section
         className="storefront-section bg-warm-alabaster"
         style={{
-          paddingTop: '5.5rem',
-          paddingBottom: '6rem',
+          paddingTop: '4.5rem',
+          paddingBottom: '5.5rem',
           backgroundImage:
             'radial-gradient(circle at 50% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 65%)',
         }}
         aria-label="Hero Introduction"
       >
-        <div className="storefront-section__container" style={{ textAlign: 'center' }}>
-          <span className="section-eyebrow section-eyebrow--dark">Natural Mineralogy &amp; Master Goldsmith Atelier</span>
-          <h1
-            className="section-title"
-            style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4.25rem)',
-              maxWidth: '960px',
-              margin: '0 auto 1.5rem auto',
-              color: '#1a1a18',
-            }}
-          >
-            Fine Natural Gemstones <span className="text-gold-gradient">&amp; Master Atelier Mountings</span>
-          </h1>
-          <p
-            className="storefront-section__subtitle"
-            style={{
-              color: '#4a4740',
-              maxWidth: '740px',
-              margin: '0 auto 2.5rem auto',
-              fontSize: 'clamp(1rem, 1.25vw, 1.15rem)',
-              lineHeight: 1.8,
-            }}
-          >
-            Direct discovery of 100% natural, earth-mined loose gemstones and precision-engineered
-            fine jewellery settings. Authenticated under uncompromising gemmological standards.
-          </p>
+        <div className="storefront-section__container">
+          <div className="hero-grid">
+            {/* Left Column: Brand Statement & Discovery */}
+            <div>
+              <span className="section-eyebrow section-eyebrow--dark">
+                Natural Mineralogy &amp; Master Goldsmith Atelier
+              </span>
+              <h1
+                className="section-title"
+                style={{
+                  fontSize: 'clamp(2.25rem, 4.2vw, 3.75rem)',
+                  lineHeight: 1.15,
+                  margin: '0 0 1.25rem 0',
+                  color: '#1a1a18',
+                }}
+              >
+                Rare Earth Gemstones <span className="text-gold-gradient">&amp; Haute Atelier Mountings</span>
+              </h1>
+              <p
+                className="storefront-section__subtitle"
+                style={{
+                  color: '#4a4740',
+                  maxWidth: '580px',
+                  margin: '0 0 2rem 0',
+                  fontSize: '1rem',
+                  lineHeight: 1.8,
+                }}
+              >
+                Direct custody of 100% natural, untreated earth-mined gemstones and precision-engineered
+                fine jewellery settings. Swiss Private Banking precision combined with modern Dubai luxury.
+              </p>
 
-          {/* Integrated Search Discovery Form */}
-          <div style={{ maxWidth: '680px', margin: '0 auto 2.5rem auto' }}>
-            <form action="/search" method="GET" className="search-bar-form" role="search">
-              <input
-                type="search"
-                name="q"
-                placeholder="Search by variety (e.g. sapphire, emerald), shape, metal, or SKU..."
-                className="search-input"
-                aria-label="Search gemstones and fine settings catalogue"
-              />
-              <button type="submit" className="btn-primary">
-                Search
-              </button>
-            </form>
+              {/* Integrated Search Discovery Form */}
+              <div style={{ maxWidth: '580px', marginBottom: '1.25rem' }}>
+                <form action="/search" method="GET" className="search-bar-form" role="search">
+                  <input
+                    type="search"
+                    name="q"
+                    placeholder="Search by variety (e.g. sapphire, emerald), shape, metal, or SKU..."
+                    className="search-input"
+                    aria-label="Search gemstones and fine settings catalogue"
+                  />
+                  <button type="submit" className="btn-primary">
+                    Search
+                  </button>
+                </form>
+
+                {/* Quick Discovery Pills */}
+                <div className="search-pills-row">
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.15em',
+                      color: '#8a867e',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Popular:
+                  </span>
+                  <Link href="/search?q=sapphire" className="search-pill-link">
+                    Ceylon Sapphires
+                  </Link>
+                  <Link href="/search?q=emerald" className="search-pill-link">
+                    Colombian Emeralds
+                  </Link>
+                  <Link href="/search?q=ruby" className="search-pill-link">
+                    Burmese Rubies
+                  </Link>
+                  <Link href="/settings" className="search-pill-link">
+                    18K Mountings
+                  </Link>
+                  <Link href="/design-your-own" className="search-pill-link">
+                    Bespoke Atelier
+                  </Link>
+                </div>
+              </div>
+
+              {/* Core Action Navigation Links */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  flexWrap: 'wrap',
+                  marginTop: '2rem',
+                }}
+              >
+                <Link href="/search" className="btn-primary">
+                  Explore Gemstone Vault
+                </Link>
+                <Link href="/settings" className="btn-outline">
+                  Browse Atelier Mountings
+                </Link>
+                <Link href="/design-your-own" className="btn-outline">
+                  Design Your Own
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Column: 1-of-1 Vault Masterpiece Showcase */}
+            <div className="hero-showcase-card">
+              <div className="hero-showcase-image">
+                <img
+                  src="/assets/hero/atelier_hero_gem.svg"
+                  alt="4.82 ct Vivid Royal Blue Ceylon Cushion Sapphire in 18K Yellow Gold Cathedral Ring Mount"
+                  loading="eager"
+                  width="500"
+                  height="375"
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    right: '1rem',
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    color: '#8a867e',
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    padding: '0.3rem 0.65rem',
+                    borderRadius: '9999px',
+                    border: '1px solid rgba(201, 168, 76, 0.25)',
+                  }}
+                >
+                  1-of-1 Vault
+                </div>
+              </div>
+
+              <div>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-gold-dark)',
+                    display: 'block',
+                    marginBottom: '0.35rem',
+                  }}
+                >
+                  Ceylon, Sri Lanka · Natural Unheated
+                </span>
+                <h3
+                  style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: '1.45rem',
+                    fontWeight: 600,
+                    color: '#1a1a18',
+                    margin: '0 0 0.5rem 0',
+                    lineHeight: 1.25,
+                  }}
+                >
+                  4.82 Carat Royal Blue Cushion Sapphire
+                </h3>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '12px',
+                    color: '#4a4740',
+                    marginBottom: '1.25rem',
+                  }}
+                >
+                  <span>Cushion Cut</span>
+                  <span aria-hidden="true" style={{ color: 'rgba(201, 168, 76, 0.6)' }}>
+                    ·
+                  </span>
+                  <span className="font-mono tabular-nums">10.42 × 8.85 mm</span>
+                  <span aria-hidden="true" style={{ color: 'rgba(201, 168, 76, 0.6)' }}>
+                    ·
+                  </span>
+                  <span>GRS Certified</span>
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingTop: '0.85rem',
+                    borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+                  }}
+                >
+                  <div>
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.15em',
+                        color: '#8a867e',
+                        display: 'block',
+                      }}
+                    >
+                      Masterpiece In Stock
+                    </span>
+                    <span
+                      className="font-mono"
+                      style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1a1a18' }}
+                    >
+                      Private Vault
+                    </span>
+                  </div>
+                  <Link
+                    href="/search?q=sapphire"
+                    className="btn-primary"
+                    style={{ padding: '0.6rem 1.2rem', fontSize: '11px' }}
+                  >
+                    Inspect Specimen →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 2: INFINITE MARQUEE TICKER ── */}
+      <aside className="marquee-container" aria-label="Maihan Gems core values marquee">
+        <div className="marquee-track">
+          <div className="marquee-content">
+            <span>100% Earth-Mined Natural Gemstones</span>
+            <span className="marquee-dot">✦</span>
+            <span>Swiss &amp; Dubai Private Vault Custody</span>
+            <span className="marquee-dot">✦</span>
+            <span>GIA &amp; GRS Laboratory Verified</span>
+            <span className="marquee-dot">✦</span>
+            <span>Transparent Treatment Disclosure</span>
+            <span className="marquee-dot">✦</span>
+            <span>Master Goldsmith Mountings in 18K &amp; Platinum</span>
+            <span className="marquee-dot">✦</span>
+            <span>Bespoke Atelier Craftsmanship</span>
+            <span className="marquee-dot">✦</span>
+            <span>Insured Worldwide Express Delivery</span>
+            <span className="marquee-dot">✦</span>
+          </div>
+          {/* Duplicated Track for Continuous Seamless Loop */}
+          <div className="marquee-content" aria-hidden="true">
+            <span>100% Earth-Mined Natural Gemstones</span>
+            <span className="marquee-dot">✦</span>
+            <span>Swiss &amp; Dubai Private Vault Custody</span>
+            <span className="marquee-dot">✦</span>
+            <span>GIA &amp; GRS Laboratory Verified</span>
+            <span className="marquee-dot">✦</span>
+            <span>Transparent Treatment Disclosure</span>
+            <span className="marquee-dot">✦</span>
+            <span>Master Goldsmith Mountings in 18K &amp; Platinum</span>
+            <span className="marquee-dot">✦</span>
+            <span>Bespoke Atelier Craftsmanship</span>
+            <span className="marquee-dot">✦</span>
+            <span>Insured Worldwide Express Delivery</span>
+            <span className="marquee-dot">✦</span>
+          </div>
+        </div>
+      </aside>
+
+      {/* ── SECTION 3: CURATED GEMSTONE VAULT COLLECTIONS ── */}
+      <section className="storefront-section bg-studio-white" aria-labelledby="collections-title">
+        <div className="storefront-section__container">
+          <div className="storefront-section__header">
+            <span className="section-eyebrow section-eyebrow--dark">Natural Mineral Treasures</span>
+            <h2
+              id="collections-title"
+              className="section-title"
+              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#1a1a18' }}
+            >
+              Curated Gemstone <span className="text-gold-gradient">Vault Collections</span>
+            </h2>
+            <p className="storefront-section__subtitle" style={{ color: '#4a4740' }}>
+              Direct-source untreated mineral treasures authenticated by premier international gemmological laboratories.
+            </p>
           </div>
 
-          {/* Core Action Navigation Links */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '1rem',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-            }}
-          >
+          <div className="grid-cards-4" style={{ marginBottom: '3rem' }}>
+            {VAULT_COLLECTIONS.map((c) => (
+              <div
+                key={c.slug}
+                className="luxury-card luxury-card--light"
+                style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}
+              >
+                <div
+                  style={{
+                    position: 'relative',
+                    aspectRatio: '1',
+                    background: '#FAFAF8',
+                    borderRadius: 'calc(var(--radius) - 4px)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '1.25rem',
+                    marginBottom: '1.25rem',
+                  }}
+                >
+                  <img
+                    src={c.image}
+                    alt={c.title}
+                    loading="lazy"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      objectFit: 'contain',
+                      transition: 'transform 0.5s ease',
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '0.75rem',
+                      right: '0.75rem',
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: '9px',
+                      fontWeight: 700,
+                      letterSpacing: '0.15em',
+                      textTransform: 'uppercase',
+                      color: '#8a867e',
+                    }}
+                  >
+                    Natural
+                  </div>
+                </div>
+
+                <span
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-gold-dark)',
+                    display: 'block',
+                    marginBottom: '0.35rem',
+                  }}
+                >
+                  {c.provenance}
+                </span>
+
+                <h3
+                  style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: '1.35rem',
+                    fontWeight: 600,
+                    color: '#1a1a18',
+                    margin: '0 0 0.5rem 0',
+                    lineHeight: 1.25,
+                  }}
+                >
+                  {c.title}
+                </h3>
+
+                <p
+                  style={{
+                    fontSize: '0.8125rem',
+                    color: '#4a4740',
+                    lineHeight: 1.5,
+                    margin: '0 0 1rem 0',
+                  }}
+                >
+                  {c.description}
+                </p>
+
+                <div
+                  style={{
+                    marginTop: 'auto',
+                    paddingTop: '0.75rem',
+                    borderTop: '1px solid rgba(0, 0, 0, 0.05)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span className="font-mono" style={{ fontSize: '11px', color: '#8a867e' }}>
+                    {c.spec}
+                  </span>
+                  <Link
+                    href={c.href}
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      color: 'var(--color-gold-dark)',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    Explore →
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
             <Link href="/search" className="btn-primary">
-              Intelligent Catalogue Search
-            </Link>
-            <Link href="/settings" className="btn-outline">
-              Browse Atelier Settings
-            </Link>
-            <Link href="/design-your-own" className="btn-outline">
-              Design Your Own
+              View All Loose Gemstones
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 2: MARQUEE TICKER (Solid Metallic Gold #C9A84C) ── */}
-      <aside
-        className="bg-gold-ticker"
-        style={{
-          padding: '1rem 1.5rem',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-        }}
-        aria-label="Maihan Gems core values marquee"
-      >
-        <div
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: '0.8125rem',
-            fontWeight: 800,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            textAlign: 'center',
-            color: '#08121e',
-          }}
-        >
-          100% Earth-Mined Natural Gemstones &nbsp;✦&nbsp; Master Goldsmith Mountings in 18K &amp; Platinum
-          &nbsp;✦&nbsp; Transparent Treatment Disclosure &nbsp;✦&nbsp; Hybrid Faceted Search &nbsp;✦&nbsp;
-          Precision Atelier Bench Craftsmanship &nbsp;✦&nbsp; Private Client Advisory
-        </div>
-      </aside>
-
-      {/* ── SECTION 3: ATELIER SETTINGS SHOWCASE (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
+      {/* ── SECTION 4: ATELIER SETTINGS SHOWCASE (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
       <section className="storefront-section bg-warm-alabaster" aria-labelledby="settings-title">
         <div className="storefront-section__container">
           <div className="storefront-section__header">
@@ -198,47 +565,82 @@ export default async function HomePage() {
                 <div
                   key={setting.design_code}
                   className="luxury-card luxury-card--light"
-                  style={{ padding: '2rem 1.75rem' }}
+                  style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}
                 >
                   <div
                     style={{
+                      position: 'relative',
+                      aspectRatio: '16/10',
+                      background: '#FAFAF8',
+                      borderRadius: 'calc(var(--radius) - 4px)',
+                      overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '1rem',
+                      justifyContent: 'center',
+                      padding: '1rem',
+                      marginBottom: '1.25rem',
                     }}
                   >
-                    <span
+                    <img
+                      src={getSettingImage(setting.jewellery_type, setting.style?.label ?? null)}
+                      alt={setting.name}
+                      loading="lazy"
                       style={{
-                        padding: '0.25rem 0.65rem',
-                        borderRadius: '9999px',
-                        background: 'rgba(201, 168, 76, 0.1)',
-                        border: '1px solid rgba(201, 168, 76, 0.25)',
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: '0.6875rem',
-                        fontWeight: 700,
-                        letterSpacing: '0.08em',
-                        textTransform: 'uppercase',
-                        color: 'var(--color-gold-dark)',
+                        maxWidth: '85%',
+                        maxHeight: '85%',
+                        objectFit: 'contain',
+                        transition: 'transform 0.4s ease',
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '0.75rem',
+                        left: '0.75rem',
                       }}
                     >
-                      {setting.jewellery_type.toLowerCase()}
-                    </span>
-                    <span
-                      className="font-mono"
-                      style={{ fontSize: '0.75rem', color: '#8a867e' }}
+                      <span
+                        style={{
+                          padding: '0.2rem 0.55rem',
+                          borderRadius: '9999px',
+                          background: 'rgba(255, 255, 255, 0.9)',
+                          border: '1px solid rgba(201, 168, 76, 0.3)',
+                          fontFamily: 'var(--font-sans)',
+                          fontSize: '0.625rem',
+                          fontWeight: 700,
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                          color: 'var(--color-gold-dark)',
+                        }}
+                      >
+                        {setting.jewellery_type.toLowerCase()}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '0.75rem',
+                        right: '0.75rem',
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '0.6875rem',
+                        color: '#8a867e',
+                        background: 'rgba(255, 255, 255, 0.85)',
+                        padding: '0.15rem 0.4rem',
+                        borderRadius: '4px',
+                      }}
                     >
                       {setting.design_code}
-                    </span>
+                    </div>
                   </div>
 
                   <h3
                     style={{
                       fontFamily: 'var(--font-serif)',
-                      fontSize: '1.5rem',
+                      fontSize: '1.35rem',
                       fontWeight: 600,
-                      margin: '0 0 0.5rem 0',
+                      margin: '0 0 0.4rem 0',
                       color: '#1a1a18',
+                      lineHeight: 1.25,
                     }}
                   >
                     {setting.name}
@@ -248,7 +650,7 @@ export default async function HomePage() {
                     style={{
                       fontSize: '0.8125rem',
                       color: '#4a4740',
-                      margin: '0 0 1.5rem 0',
+                      margin: '0 0 1.25rem 0',
                       lineHeight: 1.5,
                     }}
                   >
@@ -258,14 +660,26 @@ export default async function HomePage() {
                     available
                   </p>
 
-                  <div style={{ marginTop: 'auto' }}>
+                  <div
+                    style={{
+                      marginTop: 'auto',
+                      paddingTop: '0.75rem',
+                      borderTop: '1px solid rgba(0, 0, 0, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <span className="font-mono" style={{ fontSize: '11px', color: '#8a867e' }}>
+                      18K &amp; Platinum
+                    </span>
                     <Link
                       href={`/search?q=${setting.design_code}`}
                       style={{
                         fontFamily: 'var(--font-sans)',
-                        fontSize: '0.75rem',
+                        fontSize: '11px',
                         fontWeight: 700,
-                        letterSpacing: '0.06em',
+                        letterSpacing: '0.12em',
                         textTransform: 'uppercase',
                         color: 'var(--color-gold-dark)',
                         textDecoration: 'none',
@@ -301,7 +715,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── SECTION 4: BESPOKE ATELIER WORKFLOW (Crisp White #FFFFFF) ── */}
+      {/* ── SECTION 5: BESPOKE ATELIER WORKFLOW (Crisp White #FFFFFF) ── */}
       <section className="storefront-section bg-crisp-white" aria-labelledby="bespoke-workflow-title">
         <div className="storefront-section__container">
           <div className="storefront-section__header">
@@ -475,7 +889,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── SECTION 5: MINERALOGICAL DISCOVERY (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
+      {/* ── SECTION 6: MINERALOGICAL DISCOVERY (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
       <section className="storefront-section bg-warm-alabaster" aria-labelledby="discovery-title">
         <div className="storefront-section__container">
           <div className="storefront-section__header">
@@ -626,7 +1040,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── SECTION 6: GEMMOLOGICAL INTEGRITY (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
+      {/* ── SECTION 7: GEMMOLOGICAL INTEGRITY (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
       <section className="storefront-section bg-warm-alabaster" aria-labelledby="standards-title">
         <div className="storefront-section__container">
           <div className="storefront-section__header">
