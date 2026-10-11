@@ -37,6 +37,14 @@ export type MetalCode = (typeof METAL_CODES)[number];
 export const EVIDENCE_STATUSES = ['OBSERVED', 'EXTRACTED', 'PATTERN', 'INFERRED', 'UNKNOWN'] as const;
 export type EvidenceStatus = (typeof EVIDENCE_STATUSES)[number];
 
+/** Source of Truth section 8.3 — dyo_state. */
+export const DYO_STATES = ['DRAFT', 'VALIDATING', 'VALID', 'INCOMPATIBLE', 'PRICED', 'ADDED_TO_CART', 'ORDERED', 'EXPIRED'] as const;
+export type DyoState = (typeof DYO_STATES)[number];
+
+/** Source of Truth section 8.3 — compatibility_result. */
+export const COMPATIBILITY_RESULTS = ['COMPATIBLE', 'INCOMPATIBLE', 'UNKNOWN', 'REQUIRES_REVIEW'] as const;
+export type CompatibilityResult = (typeof COMPATIBILITY_RESULTS)[number];
+
 export function isProductKind(value: string): value is ProductKind {
   return (PRODUCT_KINDS as readonly string[]).includes(value);
 }
@@ -55,6 +63,14 @@ export function isMetalCode(value: string): value is MetalCode {
 
 export function isEvidenceStatus(value: string): value is EvidenceStatus {
   return (EVIDENCE_STATUSES as readonly string[]).includes(value);
+}
+
+export function isDyoState(value: string): value is DyoState {
+  return (DYO_STATES as readonly string[]).includes(value);
+}
+
+export function isCompatibilityResult(value: string): value is CompatibilityResult {
+  return (COMPATIBILITY_RESULTS as readonly string[]).includes(value);
 }
 
 export function parseProductKind(value: string): ProductKind {
@@ -79,5 +95,15 @@ export function parseMetalCode(value: string): MetalCode {
 
 export function parseEvidenceStatus(value: string): EvidenceStatus {
   if (!isEvidenceStatus(value)) throw new DomainError('INVALID_EVIDENCE_STATUS', `unknown evidence status: ${value}`);
+  return value;
+}
+
+export function parseDyoState(value: string): DyoState {
+  if (!isDyoState(value)) throw new DomainError('INVALID_DYO_STATE', `unknown DYO state: ${value}`);
+  return value;
+}
+
+export function parseCompatibilityResult(value: string): CompatibilityResult {
+  if (!isCompatibilityResult(value)) throw new DomainError('INVALID_COMPATIBILITY_RESULT', `unknown compatibility result: ${value}`);
   return value;
 }

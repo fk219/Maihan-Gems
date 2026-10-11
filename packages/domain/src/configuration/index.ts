@@ -5,3 +5,6 @@
 export * from './canonical-configuration.js';
 export * from './hash.js';
 export * from './slug.js';
+export * from './state-machine.js';
+export * from './compatibility-engine.js';
+export * from './pricing-calculator.js';
