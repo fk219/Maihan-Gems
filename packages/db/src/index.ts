@@ -209,3 +209,14 @@ export {
   checkMarketingOptIn,
   type CustomerPhoneMatch,
 } from './whatsapp/whatsapp-repository.js';
+export {
+  createWebarAsset,
+  findWebarAssetById,
+  findWebarAssetForProduct,
+  findWebarAssetForSetting,
+  createArHandoffToken,
+  redeemArHandoffToken,
+  validateWebarAssetBudgets,
+  type InsertWebarAssetParams,
+} from './webar/webar-repository.js';
+

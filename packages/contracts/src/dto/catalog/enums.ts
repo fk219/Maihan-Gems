@@ -70,6 +70,7 @@ export type CuttingStyle = (typeof CUTTING_STYLE_VALUES)[number];
 export const EvidenceStatusSchema = z.enum(EVIDENCE_STATUSES);
 export const ProductKindSchema = z.enum(PRODUCT_KINDS);
 export const JewelleryTypeSchema = z.enum(JEWELLERY_TYPES);
+export type JewelleryType = z.infer<typeof JewelleryTypeSchema>;
 export const GemstoneKindSchema = z.enum(GEMSTONE_KINDS);
 export const MetalCodeSchema = z.enum(METAL_CODES);
 export const ProductStateSchema = z.enum(PRODUCT_STATE_VALUES);
