@@ -1,3 +1,44 @@
+# PHASE 11 — WEBAR TRY-ON & 3D VIEWER COMPLETE (2026-10-12)
+
+- **Objective**: Implement authoritative Phase 11 — WebAR Try-On & 3D Viewer per `INITIAL_IMPLEMENTATION_PLAN.md` §18, `technical_design/21_WEBAR_ARCHITECTURE.md`, `ADR-004`, `ADR-011`, and `NFR-06`.
+- **Architectural Deliverables**:
+  1. **WebAR Contracts & Technical Budgets (`packages/contracts`)**:
+     - `packages/contracts/src/dto/webar/index.ts`:
+       - `WEBAR_BUDGETS`: Enforces strict polygon and byte caps per jewellery type (Ring: 60k tris / 1.8MB; Earrings: 50k tris / 1.5MB; Pendant: 40k tris / 1.2MB; Necklace: 90k tris / 2.6MB; max texture 1024px).
+       - `FitRuleSchema` & `FitRule`: Anchors proximal phalanx finger segment with scale and rotation offsets.
+       - DTO read models for `WebarAssetReadModel`, `CreateHandoffRequest`, `CreateHandoffResponse`, and `RedeemHandoffResponse`.
+  2. **Database Repository & Token Integrity (`packages/db`)**:
+     - `packages/db/src/webar/webar-repository.ts`:
+       - `validateWebarAssetBudgets()`: Enforces polygon, file size, and texture bounds.
+       - `createWebarAsset()`, `findWebarAssetById()`, `findWebarAssetForProduct()`, `findWebarAssetForSetting()`.
+       - `createArHandoffToken()`: Issues 10-minute expiry tokens storing only SHA-256 hash at rest.
+       - `redeemArHandoffToken()`: Atomic one-time consumption (`consumed_at IS NULL`), rejecting expired (`AR_HANDOFF_INVALID`) and replayed (`AR_HANDOFF_REPLAYED` / `IDEMPOTENCY_CONFLICT`) attempts.
+     - Tests: 7/7 passing in `packages/db/src/webar/webar-repository.spec.ts`.
+  3. **HTTP API Handlers (`apps/web/src/api`)**:
+     - `apps/web/src/api/webar-handlers.ts`:
+       - `GET /api/v1/webar/{assetId}`: Retrieves asset specification and CDN URLs.
+       - `POST /api/v1/ar/handoff`: Creates QR handoff token.
+       - `GET /api/v1/ar/handoff/{token}`: Redeems token and issues session.
+     - Routes registered in `apps/web/src/api/routes.ts` and `apps/web/src/api/index.ts`.
+     - Tests: 5/5 passing in `apps/web/src/api/webar.spec.ts`.
+  4. **Isolated 3D Viewer & Fallback Matrix (`apps/web/src/components/webar`)**:
+     - `ThreeDViewer.tsx`: WebGL2 rendering simulation with OrbitControls (drag to rotate, pinch/wheel to zoom, reset view), accessible ARIA labels, and graceful fallbacks when WebGL2 is absent.
+     - `WebArModal.tsx`:
+       - **Strict On-Demand Camera Privacy Boundary (NFR-06)**: Camera access is NEVER requested on page load or on 3D viewer open; triggered strictly on explicit click.
+       - **Zero Frame Upload**: Video frames processed in memory; zero bytes sent over the wire. MediaStream tracks cleanly terminated (`track.stop()`) on exit/unmount.
+       - **Fallback Matrix**: Permission denied $\to$ static 3D viewer; Hand lost $>3\text{s}$ $\to$ repositioning prompt; Desktop $\to$ QR handoff generation.
+     - `WebArLauncher.tsx`: Dynamic client island wrapper ensuring the WebAR bundle does not regress storefront bundle budgets (NFR-02).
+  5. **Storefront & Product Detail Integration**:
+     - `apps/web/src/app/(storefront)/ar/[assetId]/page.tsx`: Dedicated full-screen AR route.
+     - `apps/web/src/app/(storefront)/ar/handoff/[handoffToken]/page.tsx`: Redeems single-use handoff token and redirects to `/ar/{assetId}` or displays honest expiration.
+     - `apps/web/src/components/catalog/ProductDetailContent.tsx`: Integrated 3D/AR action when an approved model exists (omitted honestly when absent).
+- **Verification**:
+  - `pnpm -r run typecheck`: 0 errors across all 10 packages.
+  - `pnpm test`: 422 tests passing across monorepo (392 web tests, 15 db test suites).
+  - Next.js production build (`next build --webpack`): 100% successful.
+  - Initial JS bundle budget check (`pnpm --filter @maihan/web run check:budgets`): PASSED (Category 136.6 KB $\le$ 170 KB, Product 140.2 KB $\le$ 190 KB).
+  - Commits `5e43fd4`, `882f47a`, `3aaa95b` pushed to repository.
+
 # PHASE 10 — WHATSAPP CHANNEL ADAPTER & STOREFRONT AI CONCIERGE INTEGRATION COMPLETE (2026-10-11)
 
 - **Objective**: Implement authoritative Phase 10 — WhatsApp Channel Adapter scope per `INITIAL_IMPLEMENTATION_PLAN.md` §17 and `technical_design/20_WHATSAPP_ARCHITECTURE.md`, verify shared brain tool registry parity with web, integrate accessible luxury AI Concierge client island into the storefront, and resolve gemstone detail presentation fallback.
