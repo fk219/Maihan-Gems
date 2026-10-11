@@ -1,4 +1,40 @@
+# PHASE 10 — WHATSAPP CHANNEL ADAPTER & STOREFRONT AI CONCIERGE INTEGRATION COMPLETE (2026-10-11)
+
+- **Objective**: Implement authoritative Phase 10 — WhatsApp Channel Adapter scope per `INITIAL_IMPLEMENTATION_PLAN.md` §17 and `technical_design/20_WHATSAPP_ARCHITECTURE.md`, verify shared brain tool registry parity with web, integrate accessible luxury AI Concierge client island into the storefront, and resolve gemstone detail presentation fallback.
+- **Architectural Deliverables**:
+  1. **Phase 10 WhatsApp Channel Adapter (`packages/ai`, `packages/db`, `apps/web`)**:
+     - `packages/contracts/src/dto/whatsapp/index.ts`: WhatsApp webhook payloads and template request schemas.
+     - `packages/ai/src/whatsapp/`:
+       - `types.ts`: `ChannelCapabilities` (`WHATSAPP_CAPABILITIES` non-streaming, 4096-char cap vs `WEB_CAPABILITIES`).
+       - `formatter.ts`: `formatForWhatsApp()` formatting and `splitWhatsAppMessage()` 4000-char chunking with pagination markers.
+       - `tools.ts`: `toolsFor('WEB')` and `toolsFor('WHATSAPP')` resolving to identical 10 controlled tools. `assertSharedBrainToolParity()` asserts 10 tools and identical structural mutation safety across channels.
+     - `packages/db/src/whatsapp/whatsapp-repository.ts`:
+       - Direct SQL idempotency on `(provider, external_event_id)` against `webhook_receipts`.
+       - MSISDN normalization and customer lookup.
+       - Conversation resolution by thread key and `channel='WHATSAPP'`.
+       - Explicit `marketing_opt_in` consent checks.
+     - `apps/web/src/api/whatsapp-handlers.ts`:
+       - `GET /api/v1/webhooks/whatsapp`: Meta webhook hub.challenge verification.
+       - `POST /api/v1/webhooks/whatsapp`: Raw body HMAC signature verification (`X-Hub-Signature-256`), deduplication, AI Orchestrator execution with `surface='whatsapp'`, response chunking and interaction logging.
+       - `POST /api/v1/whatsapp/send-template`: Enforces marketing opt-in consent (403 when not opted in).
+     - Test suite: 10/10 tests passing in `apps/web/src/api/whatsapp.spec.ts`.
+  2. **Storefront AI Concierge Client Island (`apps/web`)**:
+     - `apps/web/src/components/ai/AiConciergeDrawer.tsx`: Accessible luxury client island (`role="dialog"`, `aria-modal="true"`, focus trap, Escape key handling, WCAG 2.2 AA compliant).
+     - Live SSE streaming client consuming `/api/v1/ai/chat` (`stream: true`), parsing typed events (`delta`, `citation`, `response`), rendering interactive suggestion chips and grounded references.
+     - Styled with Swiss Private Banking & Dubai luxury theme tokens in `theme-styles.ts`.
+     - Integrated into `StorefrontLayout.tsx`.
+  3. **Product Detail & Gemstone Presentation Experience**:
+     - `apps/web/src/lib/gemstone-adapter.ts`: Direct adapter bridging inventory `GemstoneDetailReadModel` to `ProductDetailReadModel` preserving all gemmological specifications, origins, cuts, and exact provenance evidence.
+     - `apps/web/src/lib/catalog-server.ts`: Exported `loadGemstoneDetail()` data seam.
+     - `apps/web/src/app/(storefront)/products/[productSlug]/page.tsx`: Resolves published product detail or falls back cleanly to gemstone detail (e.g. `K1324`, `PR5681`), rendering rich luxury detail views with zero 404s for verified loose stone inventory.
+- **Verification**:
+  - `pnpm -r run typecheck`: 0 errors across all workspace packages.
+  - `pnpm test`: Monorepo test suite clean (382 web tests passing).
+  - Next.js production build (`next build --webpack`): 100% successful.
+  - Commits `4088d49`, `b79c028`, `4eacb5e` pushed to `origin/main`.
+
 # PHASE 9 — AI CONCIERGE & ORCHESTRATION COMPLETE (2026-10-11)
+
 
 - **Objective**: Implement authoritative Phase 9 — AI Concierge & Orchestration scope per `INITIAL_IMPLEMENTATION_PLAN.md` §16 and `technical_design/18_AI_ORCHESTRATION_ARCHITECTURE.md`.
 - **Architectural Deliverables**:
