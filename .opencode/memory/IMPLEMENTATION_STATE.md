@@ -1,3 +1,23 @@
+# PHASE 12 — STAGE B: CMS BLOCKS, RENDERERS, PAGE LIFECYCLE WIRED (2026-10-12)
+
+- **Recovery fix (commit 3ef9257):** the previous session's Stage B CMS
+  handlers (`apps/web/src/api/admin/cms-handlers.ts`) failed to compile
+  (`authorizeAdmin` called with an extra argument) and were never routable.
+  Fixed the arity call, registered `CMS_ADMIN_ROUTES` (nine endpoints) in the
+  API router and added the revisions-list endpoint + route wiring tests.
+- **Renderers (commit c9d25c6):** one Server Component renderer per
+  `content_block_type` (all 20 values) with an allow-list markdown pipeline
+  (no stored-markup HTML injection; approved-asset references rendered
+  honestly). 9 renderer tests.
+- **Verified:** `tsc -b` 0 errors; tests — domain auth 12✓, contracts 43✓
+  (incl. 20-type block registry), db CMS lifecycle 8✓, web 416✓ / 21 skipped
+  (incl. 3 route-wiring + 9 renderer tests).
+- **Next Phase 12 work:** Stage C — Global Task 4 (navigation/redirects
+  admin incl. 44,218-row bulk import) and Global Task 5 (SEO metadata
+  management) per plan §19; then catalogue admin (GT 6/13), trust console
+  (GT 3 expansion, GT 7, 10), migration console (GT 8, 9), AI console
+  (GT 11), RBAC/audit DB-level gate (GT 12 BYPASSRLS wiring).
+
 # PHASE 12 — PRODUCTION OBSERVABILITY, ALERTS & OPERATIONAL HARDENING COMPLETE (2026-10-12)
 
 - **API testing reference (2026-10-12):** Added a route-derived API inventory,

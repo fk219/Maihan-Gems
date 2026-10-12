@@ -6,9 +6,9 @@ Authority: `INITIAL_IMPLEMENTATION_PLAN.md` §19 (Phase 12 — Admin + CMS),
 
 | Phase 12 task (plan §19) | Requirement source | Implementation surface | Tests | Status |
 |---|---|---|---|---|
-| 1. Typed CMS blocks + 20 renderers | td22 block catalogue; enum `content_block_type` (0002_enums.sql, 20 values) | `packages/contracts/dto/cms/blocks.ts` + `apps/web` renderers | schema + renderer snapshot tests | 🔲 planned (Stage B) |
-| 2. Page revisions DRAFT→IN_REVIEW→PUBLISHED→ARCHIVED | §19 task 2; doc 23 §7 versioning | `packages/db/src/cms/*`, `apps/web` approval API | transition/concurrency/audit tests | 🔲 planned (Stage B) |
-| 3. Two-person approval for trust content | §19 task 3; doc 23 §8 rule 3 | `TWO_PERSON_MODULES` + approval service | self-approval rejection tests | 🔲 planned (Stage E) |
+| 1. Typed CMS blocks + 20 renderers | td22 block catalogue; enum `content_block_type` (0002_enums.sql, 20 values) | `packages/contracts/dto/cms/blocks.ts` + `apps/web/src/components/cms/block-renderers.tsx` | schema (contracts 43✓) + renderer tests (9✓) | ✅ Stage B (commits f5eec9c, 3ef9257, c9d25c6) |
+| 2. Page revisions DRAFT→IN_REVIEW→PUBLISHED→ARCHIVED | §19 task 2; doc 23 §7 versioning | `packages/db/src/cms/cms-repository.ts` + `apps/web/src/api/admin/cms-handlers.ts` (+ route table 3ef9257) | lifecycle repo tests 8✓ (self-approval, version conflict, transitions) | ✅ Stage B (commits f5eec9c, 3ef9257) |
+| 3. Two-person approval for trust content | §19 task 3; doc 23 §8 rule 3 | `TWO_PERSON_MODULES` (domain) + `decideRevision` self-approval rejection + approve scope gate (content:approve = CONTENT_PUBLISHER up) | self-approval rejection tests (db 8✓, web admin 11✓) | ✅ Stage B (content pages scope; module-wide extension pending with Stage E surfaces) |
 | 4. Navigation + redirects admin, 44,218 bulk import | §19 task 4; doc 34 | admin API over `navigations`/`redirects` | loop/conflict/uniqueness tests | 🔲 planned (Stage C) |
 | 5. SEO metadata management | §19 task 5 | admin API over `seo_metadata` | validation tests | 🔲 planned (Stage C) |
 | 6. Catalogue admin: bulk edit, preview, undo | §19 task 6; doc 23 §6 | admin API over catalogue repos | preview-staleness/invariant tests | 🔲 planned (Stage D) |
