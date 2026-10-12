@@ -11,14 +11,14 @@ Authority: `INITIAL_IMPLEMENTATION_PLAN.md` §19 (Phase 12 — Admin + CMS),
 | 3. Two-person approval for trust content | §19 task 3; doc 23 §8 rule 3 | `TWO_PERSON_MODULES` (domain) + `decideRevision` self-approval rejection + approve scope gate (content:approve = CONTENT_PUBLISHER up) | self-approval rejection tests (db 8✓, web admin 11✓) | ✅ Stage B (content pages scope; module-wide extension pending with Stage E surfaces) |
 | 4. Navigation + redirects admin, 44,218 bulk import | §19 task 4; doc 34 | `packages/db/src/cms/{navigation,redirect}-repository.ts` + `apps/web/src/api/admin/catalog-structure-handlers.ts` (+ routes) | 9 validation tests + 8 handler/authz tests | ✅ Stage C (commits 1f29752, 11cefb8) — existing 44,218 rows preserved; bulk import all-or-nothing |
 | 5. SEO metadata management | §19 task 5 | `packages/db/src/cms/seo-repository.ts` (+ GT4-commit handler surface) | 6 validation-ordering tests | ✅ Stage C (commit 11cefb8) |
-| 6. Catalogue admin: bulk edit, preview, undo | §19 task 6; doc 23 §6 | admin API over catalogue repos | preview-staleness/invariant tests | 🔲 planned (Stage D) |
+| 6. Catalogue admin: bulk edit, preview, undo | §19 task 6; doc 23 §6 | `packages/db/src/catalog/bulk-operations-repository.ts` + `apps/web/src/api/admin/bulk-handlers.ts` | 4 pure tests + DB-backed lifecycle (skips w/o DB) + authz tests | ✅ Stage D (commit 404af8c) |
 | 7. Derived-reference approval queue | §19 task 7; SoT §133–144 (V18 subset rules) | admin API over `products` derived class | INV-08 + per-row approval tests | 🔲 planned (Stage E) |
 | 8. Migration console: batches/counts/conflicts/quarantine | §19 task 8; td33 §4 | admin API over `import_batches`/`staging_conflicts` | visibility/authorisation tests | 🔲 planned (Stage E) |
 | 9. Conflict resolution UI, never silent overwrite | §19 task 9 | admin API resolution endpoints | non-overwrite tests | 🔲 planned (Stage E) |
 | 10. Certificate review queue + anomaly triage | §19 task 10; td17 state machine | admin API over cert repos; thin slice per R-17 | state-machine/authorisation tests | 🔲 planned (Stage E) |
 | 11. AI console: conversations/tool audit/guardrails/evals | §19 task 11; td18 | admin API over `@maihan/db ai` tables | redaction + no-write-path tests | 🔲 planned (Stage F) |
 | 12. RBAC ten roles + BYPASSRLS admin + audit | §19 task 12; doc 23 §3/§4 | **`@maihan/domain/auth/roles.ts`, `contracts/dto/admin/*`, `apps/web/api/admin/{authz,audit}.ts`** | **policy-matrix + role-injection + audit-redaction tests** | ✅ Stage A (GT-A1..A3) |
-| 13. Bulk ops: preview, approval, audit, bounded undo | §19 task 13; doc 23 §6–7 | admin API bulk endpoints | undo-window tests | 🔲 planned (Stage D) |
+| 13. Bulk ops: preview, approval, audit, bounded undo | §19 task 13; doc 23 §6–7 | same bulk repo surface (preview token/apply/revert) | staleness + dual-approval + confirmation + undo tests | ✅ Stage D (commit 404af8c) |
 
 ## Stage A — implemented and verified (commands + results)
 

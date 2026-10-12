@@ -1,3 +1,20 @@
+# PHASE 12 — STAGE D: CATALOGUE BULK ADMIN COMPLETE (2026-10-12)
+
+- **GT 6 + 13 commit `404af8c`:** bulk-operations repository implementing
+  doc 23 §6–§10 — preview token bound to source versions (PREVIEW_STALE),
+  dual approval above the 50-product threshold, typed confirmation for
+  destructive applies, one audit row per affected entity, bounded 30-day
+  undo with honest skip-on-stale. Closed field whitelist: state/price/
+  identity fields are never bulk-editable. Three admin routes
+  (products/bulk/{preview,apply,revert}) behind authorizeAdmin; CATALOG_
+  MANAGER holds bulk, CONTENT_EDITOR/READ_ONLY_ANALYST denied (tests).
+- **Verified:** db 101✓ / 50 skipped, web 424✓ / 21 skipped, tsc 0 errors.
+- **Next Phase 12 work:** Stage E — GT 7 derived-reference approval queue
+  (the exact 221 failed-fetch subset + broader derived class), GT 8
+  migration console, GT 9 conflict-resolution surface, GT 10 certificate
+  review; then Stage F (GT 11 AI console) and Stage G (GT 12 DB-level
+  BYPASSRLS/append-only-audit verification + module-wide two-person rule).
+
 # PHASE 12 — STAGE C: NAVIGATION, REDIRECTS, SEO ADMIN COMPLETE (2026-10-12)
 
 - **GT 4 commit `1f29752`:** navigation repository (item-tree validation,
