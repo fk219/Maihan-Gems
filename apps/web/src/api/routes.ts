@@ -214,6 +214,15 @@ export const WEBAR_ROUTES: readonly RouteDefinition[] = [
   { id: 'redeemArHandoffHandler', method: 'GET', path: '/ar/handoff/{token}' },
 ];
 
+export const HEALTH_ROUTES: readonly RouteDefinition[] = [
+  { id: 'healthLiveHandler', method: 'GET', path: '/api/v1/health/live' },
+  { id: 'healthLiveHandler', method: 'GET', path: '/health/live' },
+  { id: 'healthReadyHandler', method: 'GET', path: '/api/v1/health/ready' },
+  { id: 'healthReadyHandler', method: 'GET', path: '/health/ready' },
+  { id: 'metricsHandler', method: 'GET', path: '/api/v1/health/metrics' },
+  { id: 'metricsHandler', method: 'GET', path: '/metrics' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
@@ -228,6 +237,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...AI_ROUTES,
   ...WHATSAPP_ROUTES,
   ...WEBAR_ROUTES,
+  ...HEALTH_ROUTES,
 ];
 
 export type RouteLookup =

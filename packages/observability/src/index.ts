@@ -1,20 +1,18 @@
 /**
- * packages/observability — tracing, logging, metric registry.
+ * packages/observability/src/index.ts
  *
- * Owns: tracer, logger, metric name registry.
- * Must never contain: business logic.
+ * packages/observability — production tracing, logging, metric registry, Sentry client, and SLO evaluation.
  *
- * Span naming convention: `<package>.<module>.<operation>`, for example
- * `db.catalog.getProductBySlug` (technical_design/03).
- *
- * Metric labels must never contain user id, email, SKU or URL — cardinality
- * control is a hard rule (technical_design/01, Observability). PII never
- * reaches logs, metric labels, event payloads, embeddings or model context
- * beyond the minimum required (AGENTS.md 10).
- *
- * Phase 1 Task 1 scope: workspace skeleton only. The OpenTelemetry SDK and
- * exporter are approved Phase 1 dependencies (SKILL_MATRIX_AND_TOOLING.md 14.1)
- * but are NOT installed here: a tracer with no instrumented code to trace, and
- * the collector is still unprovisioned.
+ * Conforms to:
+ * - technical_design/28_OBSERVABILITY_ARCHITECTURE.md
+ * - INITIAL_IMPLEMENTATION_PLAN.md §19 / §27 / §28
+ * - NFR-01 through NFR-15
+ * - AGENTS.md §8 (Zero direct DB mutation by AI) and §10 (Zero PII in logs, metric labels, or spans)
  */
-export {};
+
+export * from './tracing/context.js';
+export * from './tracing/tracer.js';
+export * from './logging/logger.js';
+export * from './metrics/registry.js';
+export * from './error/sentry.js';
+export * from './slo/evaluator.js';

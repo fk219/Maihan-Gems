@@ -1,3 +1,46 @@
+# PHASE 12 — PRODUCTION OBSERVABILITY, ALERTS & OPERATIONAL HARDENING COMPLETE (2026-10-12)
+
+- **Objective**: Implement authoritative Phase 12 — Production Observability, Alerts & Operational Hardening per `technical_design/28_OBSERVABILITY_ARCHITECTURE.md`, `INITIAL_IMPLEMENTATION_PLAN.md` §19/§27/§28, `ADR-001`–`ADR-021`, and `NFR-01`–`NFR-15`.
+- **Architectural Deliverables**:
+  1. **OpenTelemetry-Compliant Tracing & W3C TraceContext (`packages/observability`)**:
+     - `src/tracing/context.ts`: Complete W3C Level 1 TraceContext parsing, formatting, and header extraction/injection (`traceparent`, `tracestate`, `x-trace-id`).
+     - `src/tracing/tracer.ts`: In-memory OpenTelemetry tracer provider, `SpanImpl`, `InMemorySpanExporter`, and `withSpan()` execution lifecycle helper with automatic exception and duration tracking.
+     - Cardinality guard: Statement shape/hash only for DB spans, route template only for HTTP spans, no bound parameter values or customer secrets.
+  2. **Structured JSON Logging with PII Scrubbing (`packages/observability`)**:
+     - `src/logging/logger.ts`: High-performance structured logger with `trace_id`, `span_id`, `request_id`, `actor_type`, and `event` (`domain.action`).
+     - Proactive multi-layer PII sanitization: Recursively scrubs emails, phone numbers, credit card sequences, authentication tokens, passwords, and raw biometric/camera frames.
+  3. **Prometheus-Compatible Metrics & Strict Cardinality Protection (`packages/observability`)**:
+     - `src/metrics/registry.ts`: Type-safe `Counter`, `Gauge`, and `Histogram` instruments with percentile computation (p95).
+     - Automated cardinality check: Throws `CardinalityViolationError` if high-cardinality keys (`user_id`, `email`, `sku`, `url`, `token`, etc.) are attached to metric labels.
+  4. **Sentry Error Reporting & Client Boundary (`packages/observability`)**:
+     - `src/error/sentry.ts`: Sentry client with data minimization, sanitization, bounded breadcrumbs ring buffer, and non-blocking failure semantics.
+     - `src/error/client.ts`: Isomorphic/Browser-safe error capturing facade (`captureClientError`), ensuring zero Node-specific runtime code enters client bundles (preserving PG-5 bundle budgets).
+     - Route error boundaries: Root error boundary (`apps/web/src/app/error.tsx`) and catalog route boundaries (`CatalogErrorView.tsx`) wired with Sentry capture and luxury customer recovery fallbacks.
+  5. **Production SLO Definitions & Alert Evaluator (`packages/observability`)**:
+     - `src/slo/evaluator.ts`: Authoritative production SLOs:
+       - `SLO-AVAIL-01`: Storefront & API Availability $\ge 99.9\%$ (Alert `ALERT-P1-AVAILABILITY-DROP`)
+       - `SLO-LAT-01`: Catalog Query Latency p95 $\le 400\text{ms}$ (Alert `ALERT-P2-CATALOG-LATENCY-BREACH`)
+       - `SLO-AI-GROUNDING`: AI Concierge Grounded Ratio $\ge 0.60$ (Alert `ALERT-P1-AI-GROUNDING-COLLAPSE`)
+       - `SLO-WHATSAPP-DELIVERY`: WhatsApp Webhook Success Rate $\ge 99.0\%$ (Alert `ALERT-P1-WHATSAPP-WEBHOOK-FAILURES`)
+       - `SLO-DB-CONN`: Database Pool Wait p95 $\le 50\text{ms}$ (Alert `ALERT-P1-DB-CONNECTIVITY-TIMEOUT`)
+     - `AlertEvaluator`: Sliding-window evaluation transitioning alerts from `FIRING` to `RESOLVED`.
+  6. **Health Probes & Metrics Exposition (`apps/web`)**:
+     - `GET /api/v1/health/live`: Process liveness probe returning 200 and uptime.
+     - `GET /api/v1/health/ready`: Dependency readiness probe inspecting database pool connectivity and memory health.
+     - `GET /api/v1/health/metrics`: Prometheus/OpenMetrics formatted endpoint for low-cardinality metric scraping.
+  7. **Operational Runbooks (`docs/runbooks/`)**:
+     - `RB-01-ELEVATED-ERROR-RATE.md`: Triage, Sentry trace investigation, and mitigation for availability drops.
+     - `RB-02-HIGH-LATENCY-REGRESSION.md`: Diagnostics for slow query and facet regression.
+     - `RB-03-DATABASE-CONNECTIVITY-TIMEOUT.md`: Neon compute resumption, connection pooling, and lock triage.
+     - `RB-04-AI-PROVIDER-OUTAGE-FAILOVER.md`: Handling grounding collapse and model gateway provider fallback.
+     - `RB-05-WHATSAPP-WEBHOOK-FAILURES.md`: Signature verification, raw body integrity, and idempotency recovery.
+     - `RB-06-SLO-ERROR-BUDGET-BURN.md`: Error budget policy, burn rate thresholds, and freeze protocols.
+- **Verification**:
+  - Workspace typecheck (`pnpm -r run typecheck`): 0 errors across all 10 packages.
+  - Test suite (`pnpm test`): 438 passing tests across monorepo (12 observability tests, 396 web tests, 30 db/contracts tests).
+  - Next.js production build (`pnpm --filter @maihan/web run build`): 100% successful.
+  - Storefront bundle budgets (`pnpm --filter @maihan/web run check:budgets`): PASSED (Category 138.0 KB $\le$ 170 KB, Product 141.6 KB $\le$ 190 KB).
+
 # PHASE 11 — WEBAR TRY-ON & 3D VIEWER COMPLETE (2026-10-12)
 
 - **Objective**: Implement authoritative Phase 11 — WebAR Try-On & 3D Viewer per `INITIAL_IMPLEMENTATION_PLAN.md` §18, `technical_design/21_WEBAR_ARCHITECTURE.md`, `ADR-004`, `ADR-011`, and `NFR-06`.

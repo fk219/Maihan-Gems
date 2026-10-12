@@ -71,6 +71,11 @@ import {
   redeemArHandoffHandler,
 } from './webar-handlers.js';
 import {
+  healthLiveHandler,
+  healthReadyHandler,
+  metricsHandler,
+} from './health-handlers.js';
+import {
   errorResponse,
   newRequestId,
   newTraceId,
@@ -180,6 +185,12 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       redeemArHandoffHandler,
     };
 
+    const HEALTH_HANDLERS: Record<string, any> = {
+      healthLiveHandler,
+      healthReadyHandler,
+      metricsHandler,
+    };
+
     const handler =
       HANDLERS[lookup.route.id] ??
       SEARCH_HANDLERS[lookup.route.id] ??
@@ -193,7 +204,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       CERTIFICATE_HANDLERS[lookup.route.id] ??
       AI_HANDLERS[lookup.route.id] ??
       WHATSAPP_HANDLERS[lookup.route.id] ??
-      WEBAR_HANDLERS[lookup.route.id];
+      WEBAR_HANDLERS[lookup.route.id] ??
+      HEALTH_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }

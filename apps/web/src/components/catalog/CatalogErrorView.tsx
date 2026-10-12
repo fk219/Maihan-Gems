@@ -14,6 +14,7 @@
  */
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { captureClientError } from '@maihan/observability/client';
 
 import { ErrorState } from '../design-system/ErrorState.js';
 
@@ -30,7 +31,15 @@ export function CatalogErrorView({ error, reset, backHref, backLabel }: CatalogE
     // The digest goes to the console for support correlation; the UI never
     // shows it (doc 08: "never a bare message", no implementation details).
     console.error(error.digest ?? 'catalog-error');
-  }, [error]);
+    try {
+      captureClientError(error, {
+        tags: { error_boundary: 'catalog_route', digest: error.digest ?? 'unknown' },
+        extra: { backHref },
+      });
+    } catch {
+      // Non-blocking observability
+    }
+  }, [error, backHref]);
 
   return (
     <ErrorState title="Something went wrong loading this page." recovery={

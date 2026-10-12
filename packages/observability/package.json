@@ -9,10 +9,22 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/error/client.d.ts",
+      "default": "./dist/error/client.js"
     }
   },
   "scripts": {
     "build": "tsc -b",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@maihan/contracts": "workspace:*",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "vitest": "5.0.3"
   }
 }

@@ -47,6 +47,7 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: the root of the listed app route tree; every group inherits <html>/<body> from it (not drawn as an explicit line in the SoT chart, implied as the tree root)',
     storefront: false,
     group: 'app-root',
+    extraFiles: ['src/app/error.tsx'],
   },
   // ── (storefront) group ────────────────────────────────────────────────────
   {
