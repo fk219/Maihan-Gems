@@ -276,3 +276,11 @@ export {
   classifyDerivedRows,
   isFailedFetchDerivedRow,
 } from './cms/trust-console-repository.js';
+export {
+  createAiConsoleRepository,
+  type AiConsoleRepository,
+  type ConsoleConversationRow,
+  type ConsoleToolCallRow,
+  type ConsoleGuardrailRow,
+  type ConsoleEvalRow,
+} from './ai/ai-console-repository.js';

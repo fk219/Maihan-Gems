@@ -242,6 +242,13 @@ export const STRUCTURE_ADMIN_ROUTES: readonly RouteDefinition[] = [
   { id: 'saveSeoHandler', method: 'PATCH', path: '/api/v1/admin/seo' },
 ];
 
+export const AI_CONSOLE_ROUTES: readonly RouteDefinition[] = [
+  { id: 'aiConsoleConversationsHandler', method: 'GET', path: '/api/v1/admin/ai/conversations' },
+  { id: 'aiConsoleToolCallsHandler', method: 'GET', path: '/api/v1/admin/ai/tool-calls' },
+  { id: 'aiConsoleGuardrailsHandler', method: 'GET', path: '/api/v1/admin/ai/guardrails' },
+  { id: 'aiConsoleEvaluationsHandler', method: 'GET', path: '/api/v1/admin/ai/evaluations' },
+];
+
 export const TRUST_ADMIN_ROUTES: readonly RouteDefinition[] = [
   { id: 'listMigrationBatchesHandler', method: 'GET', path: '/api/v1/admin/migration/batches' },
   { id: 'listConflictsHandler', method: 'GET', path: '/api/v1/admin/migration/conflicts' },
@@ -289,6 +296,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...STRUCTURE_ADMIN_ROUTES,
   ...BULK_ADMIN_ROUTES,
   ...TRUST_ADMIN_ROUTES,
+  ...AI_CONSOLE_ROUTES,
 ];
 
 export type RouteLookup =

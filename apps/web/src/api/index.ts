@@ -107,6 +107,12 @@ import {
   certificateReviewHandler,
 } from './admin/trust-console-handlers.js';
 import {
+  aiConsoleConversationsHandler,
+  aiConsoleToolCallsHandler,
+  aiConsoleGuardrailsHandler,
+  aiConsoleEvaluationsHandler,
+} from './admin/ai-console-handlers.js';
+import {
   healthLiveHandler,
   healthReadyHandler,
   metricsHandler,
@@ -261,6 +267,13 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       certificateReviewHandler,
     };
 
+    const AI_CONSOLE_HANDLERS: Record<string, any> = {
+      aiConsoleConversationsHandler,
+      aiConsoleToolCallsHandler,
+      aiConsoleGuardrailsHandler,
+      aiConsoleEvaluationsHandler,
+    };
+
     const HEALTH_HANDLERS: Record<string, any> = {
       healthLiveHandler,
       healthReadyHandler,
@@ -285,7 +298,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       ADMIN_CMS_HANDLERS[lookup.route.id] ??
       STRUCTURE_HANDLERS[lookup.route.id] ??
       BULK_HANDLERS[lookup.route.id] ??
-      TRUST_HANDLERS[lookup.route.id];
+      TRUST_HANDLERS[lookup.route.id] ??
+      AI_CONSOLE_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }
