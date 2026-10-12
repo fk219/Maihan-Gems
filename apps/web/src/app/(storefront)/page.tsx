@@ -18,7 +18,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { catalogServer } from '../../lib/catalog-server.js';
+import { getSettings } from '../../lib/storefront-data.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,11 +106,8 @@ function getSettingImage(jewelleryType: string, styleLabel: string | null): stri
 }
 
 export default async function HomePage() {
-  const service = catalogServer();
-
-  // Load live reference settings (doc 10: settings are not publication-gated)
-  const settingsRes = await service.listSettings({ limit: 6 });
-  const settings = settingsRes.value.items;
+  // Load live reference settings from storefront schema (migration 0019)
+  const settings = await getSettings(6);
 
   return (
     <main className="storefront-home" id="main-content">
@@ -516,7 +513,7 @@ export default async function HomePage() {
           {settings.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem 0' }}>
               <p style={{ color: '#4a4740', marginBottom: '1.5rem' }}>
-                Explore over 950 master mountings in our complete atelier catalogue.
+                Explore our complete atelier catalogue.
               </p>
               <Link href="/settings" className="btn-primary">
                 View All Settings
@@ -526,7 +523,7 @@ export default async function HomePage() {
             <div className="grid-cards-3" style={{ marginBottom: '3.5rem' }}>
               {settings.map((setting) => (
                 <div
-                  key={setting.design_code}
+                  key={setting.id}
                   className="luxury-card luxury-card--light"
                   style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}
                 >
@@ -545,8 +542,8 @@ export default async function HomePage() {
                     }}
                   >
                     <img
-                      src={getSettingImage(setting.jewellery_type, setting.style?.label ?? null)}
-                      alt={setting.name}
+                      src={getSettingImage(setting.setting_for, setting.style ? setting.style.join(', ') : null)}
+                      alt={setting.title}
                       loading="lazy"
                       style={{
                         maxWidth: '85%',
@@ -567,7 +564,7 @@ export default async function HomePage() {
                           padding: '0.2rem 0.55rem',
                           borderRadius: '9999px',
                           background: 'rgba(255, 255, 255, 0.9)',
-                          border: '1px solid rgba(201, 168, 76, 0.3)',
+                          border: '1px solid rgba(184, 152, 64, 0.3)',
                           fontFamily: 'var(--font-sans)',
                           fontSize: '0.625rem',
                           fontWeight: 700,
@@ -576,7 +573,7 @@ export default async function HomePage() {
                           color: 'var(--color-gold-dark)',
                         }}
                       >
-                        {setting.jewellery_type.toLowerCase()}
+                        {setting.setting_for}
                       </span>
                     </div>
                     <div
@@ -592,7 +589,7 @@ export default async function HomePage() {
                         borderRadius: '4px',
                       }}
                     >
-                      {setting.design_code}
+                      {setting.sku}
                     </div>
                   </div>
 
@@ -606,7 +603,7 @@ export default async function HomePage() {
                       lineHeight: 1.25,
                     }}
                   >
-                    {setting.name}
+                    {setting.title}
                   </h3>
 
                   <p
@@ -617,10 +614,9 @@ export default async function HomePage() {
                       lineHeight: 1.5,
                     }}
                   >
-                    {setting.style !== null ? setting.style.label : 'Classic Master Setting'}
+                    {setting.style && setting.style.length > 0 ? setting.style.join(', ') : 'Classic Master Setting'}
                     {' · '}
-                    {setting.variant_count} metal option{setting.variant_count === 1 ? '' : 's'}{' '}
-                    available
+                    18K &amp; Platinum options
                   </p>
 
                   <div
@@ -634,10 +630,10 @@ export default async function HomePage() {
                     }}
                   >
                     <span className="font-mono" style={{ fontSize: '11px', color: '#8a867e' }}>
-                      18K &amp; Platinum
+                      From ${setting.price.toLocaleString()}
                     </span>
                     <Link
-                      href={`/search?q=${setting.design_code}`}
+                      href={`/search?q=${setting.sku}`}
                       style={{
                         fontFamily: 'var(--font-sans)',
                         fontSize: '11px',
@@ -651,8 +647,7 @@ export default async function HomePage() {
                         gap: '0.35rem',
                       }}
                     >
-                      <span>Explore Mounting</span>
-                      <span>→</span>
+                      <span>View Details</span>
                     </Link>
                   </div>
                 </div>
