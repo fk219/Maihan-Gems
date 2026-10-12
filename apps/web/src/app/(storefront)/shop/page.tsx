@@ -2,7 +2,7 @@
  * Simple shop page using the new storefront schema
  */
 import Link from 'next/link';
-import { getStorefrontRepository } from '@/lib/db';
+import { getStorefrontRepository } from '../../lib/db';
 
 export default async function ShopPage({
   searchParams,

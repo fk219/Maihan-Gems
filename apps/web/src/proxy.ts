@@ -19,7 +19,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { createRedirectResolver } from './lib/redirects.js';
-import { GENERATED_REDIRECT_ROWS } from './lib/redirects-rows.generated.js';
+import { GENERATED_REDIRECT_ROWS } from './lib/redirects-rows.generated';
 
 const resolver = createRedirectResolver(GENERATED_REDIRECT_ROWS);
 

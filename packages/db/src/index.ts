@@ -232,4 +232,5 @@ export {
 } from './cms/cms-repository.js';
 export type { CmsRepository } from './cms/cms-repository.js';
 export { StorefrontRepository, type StorefrontProduct, type ProductListQuery } from './storefront/storefront-repository.js';
+export { SimpleStorefrontRepository, type SimpleProduct } from './storefront/storefront-repository-simple.js';
 

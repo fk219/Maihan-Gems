@@ -1,7 +1,6 @@
 /**
  * Demo storefront page - standalone without layout dependencies
  */
-import Link from 'next/link';
 import { getStorefrontRepository } from '../../lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -9,9 +8,9 @@ export const dynamic = 'force-dynamic';
 export default async function DemoStorefrontPage() {
   const repo = getStorefrontRepository();
   
-  const gemstones = await repo.listProducts({ kind: 'gemstone', limit: 8 });
-  const jewelry = await repo.listProducts({ kind: 'jewelry', limit: 6 });
-  const settings = await repo.listProducts({ kind: 'setting', limit: 6 });
+  const gemstones = await repo.listProducts('gemstone', 8);
+  const jewelry = await repo.listProducts('jewelry', 6);
+  const settings = await repo.listProducts('setting', 6);
 
   return (
     <html lang="en">

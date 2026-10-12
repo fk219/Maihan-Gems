@@ -2,7 +2,7 @@
  * Database connection and repository factory for the storefront
  * Re-exports from @maihan/db to avoid direct postgres/drizzle dependencies in web
  */
-import { createPool, createCatalogDatabase, StorefrontRepository } from '@maihan/db';
+import { createPool, createCatalogDatabase, SimpleStorefrontRepository } from '@maihan/db';
 
 const databaseUrl = process.env['DATABASE_URL'] || process.env['NEXT_PUBLIC_DATABASE_URL'];
 if (!databaseUrl) {
@@ -10,13 +10,13 @@ if (!databaseUrl) {
 }
 
 const pool = createPool(databaseUrl);
-const db = createCatalogDatabase(pool) as any; // Cast to any for StorefrontRepository
+const db = createCatalogDatabase(pool) as any;
 
-let repoInstance: StorefrontRepository | null = null;
+let repoInstance: SimpleStorefrontRepository | null = null;
 
-export function getStorefrontRepository(): StorefrontRepository {
+export function getStorefrontRepository(): SimpleStorefrontRepository {
   if (!repoInstance) {
-    repoInstance = new StorefrontRepository(db);
+    repoInstance = new SimpleStorefrontRepository(db);
   }
   return repoInstance;
 }
