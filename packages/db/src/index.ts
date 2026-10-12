@@ -258,3 +258,12 @@ export {
   SeoConflictError,
   SEO_ENTITY_KINDS,
 } from './cms/seo-repository.js';
+export {
+  createBulkOperationsRepository,
+  type BulkOperationsRepository,
+  type BulkPreview,
+  type BulkChange,
+  BulkOperationError,
+  BULK_EDITABLE_FIELDS,
+  BULK_DUAL_APPROVAL_THRESHOLD,
+} from './catalog/bulk-operations-repository.js';
