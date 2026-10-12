@@ -1,3 +1,26 @@
+# PHASE 12 — STAGE C: NAVIGATION, REDIRECTS, SEO ADMIN COMPLETE (2026-10-12)
+
+- **GT 4 commit `1f29752`:** navigation repository (item-tree validation,
+  https/internal-only hrefs, optimistic concurrency, audit) + redirect
+  repository (path/status/target validation, REDIRECT_EXISTS on duplicate,
+  update-with-expected guard, all-or-nothing bulk import); nine admin routes
+  registered behind authorizeAdmin; 17 db+web tests.
+- **GT 5 commit `11cefb8`:** SEO metadata repository/validation over the
+  locked `seo_metadata` table (enum kinds verbatim, SERP bounds, canonical
+  path internals, robots token whitelist); 6 validation-ordering tests;
+  HTTP handlers shared the GT4 route surface.
+- **Verified:** db suite 97 passed / 49 skipped (DB-dependent skips: no
+  Postgres server in this environment); web suite 422 passed / 21 skipped;
+  tsc -b 0 errors in both packages. The 44,218 migration redirect rows
+  untouched; no silent overwrites anywhere.
+- **Next Phase 12 work:** Stage D — Global Task 6 (catalogue admin: bulk
+  edit, preview, undo) and Global Task 13 (bulk operations with approval +
+  bounded undo); then Stage E (GT 7 derived approvals incl. the exact 221
+  failed-fetch subset, GT 8 migration console, GT 9 conflict resolution UI,
+  GT 10 certificate review), Stage F (GT 11 AI console), Stage G (GT 12
+  DB-level BYPASSRLS/append-only-audit verification, module-wide two-person
+  rule for trust content).
+
 # PHASE 12 — STAGE B: CMS BLOCKS, RENDERERS, PAGE LIFECYCLE WIRED (2026-10-12)
 
 - **Recovery fix (commit 3ef9257):** the previous session's Stage B CMS
