@@ -291,3 +291,22 @@ Fix the memory file.**
 6. Update `.opencode/memory/IMPLEMENTATION_STATE.md` when you complete meaningful work.
 7. Stage explicit paths. Never `git add .`.
 8. When in doubt about a source fact, say `[UNKNOWN]` and ask. Do not guess.
+
+---
+
+## Cursor Cloud specific instructions
+
+Cloud Agents boot a local PostgreSQL 16 cluster with pgvector on `127.0.0.1:5433`, database `maihan_dev`. The throwaway role and password are the ones already published in `compose.yaml` (`postgres` / `maihan_local_dev_only`). That is the same URL CI uses. `shared_preload_libraries` includes `pg_stat_statements` so migration `0001` can create the optional extension. Redis is not required; an absent `REDIS_URL` bypasses the cache.
+
+```bash
+export DATABASE_URL="postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev"
+export MAIHAN_ENV=local
+export API_PORT=3001
+```
+
+- Run `pnpm run build` (`tsc -b`) before the storefront or the catalogue API. Workspace packages export compiled `dist/`.
+- Storefront (port 3000): `pnpm --filter @maihan/web exec next dev --webpack --hostname 0.0.0.0 --port 3000`. Do not pass `--hostname` through `pnpm dev --`; Next.js treats the extra `--` as a project directory.
+- Catalogue API (port 3001): `API_PORT=3001 pnpm --filter @maihan/web run start`. Port 3000 belongs to the storefront.
+- Schema and reference vocabulary: `pnpm --filter @maihan/db run migrate`, then `pnpm --filter @maihan/db run seed`. Both are idempotent.
+- `naturalgemstones/` is not in git. Domain corpus tests skip when that archive is absent.
+- `pnpm run schema-fidelity` migrates a scratch database and drops it. `pnpm --filter @maihan/domain run test`, `pnpm --filter @maihan/db run test`, and `pnpm --filter @maihan/contracts run test` are the checks that match this environment.
