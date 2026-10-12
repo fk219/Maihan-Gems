@@ -1,3 +1,39 @@
+# PHASE 12 — ADMIN + CMS ALL 13 GLOBAL TASKS COMMITTED (2026-10-12)
+
+- **Stage E commit `81841f8`:** trust console — GT 7 derived-reference
+  approval queue (exact 221 failed-fetch subset distinguished by V18
+  attribute shape; approvals never populate attributes; approval is a
+  curation flag, never a state promotion), GT 8 migration console
+  (import_batches + staging_conflicts visibility), GT 9 explicit-side
+  conflict resolution (both sides always retained — no silent overwrite),
+  GT 10 anomaly-sorted certificate review (INV-07: only APPROVE promotes
+  verification_status). 7 routes; MIGRATION_ENGINEER / TRUST_REVIEWER
+  RBAC proven with cross-role denials.
+- **Stage F commit `c4fc66f`:** read-only AI console (GT 11) —
+  conversations/tool-call audit (DENY filter)/guardrail events/evaluation
+  runs; structural no-write guard proven by surface inspection (ADR-003).
+- **Stage G commit `b13640b`:** DB-level security evidence (GT 12
+  closure) — migration-sourced assertions: 6 RLS tables each with ≥1
+  policy, BYPASSRLS documented as a separate audited admin role,
+  audit_logs/domain_events append-only, two-person modules exactly
+  {content, derived_approvals, certificates}, ten roles intact.
+  Live-DB grant inspection remains pending Postgres availability
+  (documented limitation, same as DB-backed suites).
+- **Cumulative Phase 12 commits:** Stage A `124b759` (RBAC foundation),
+  Stage B `f5eec9c`/`3ef9257`/`c9d25c6` (CMS repo/routes/renderers),
+  Stage C `1f29752`/`11cefb8` (nav+redirects, SEO), Stage D `404af8c`
+  (bulk edit preview/approval/undo), Stage E `81841f8`, Stage F
+  `c4fc66f`, Stage G `b13640b`.
+- **Verified totals this session:** db suite 115 passed / 50 skipped
+  (DB-backed suites skip without a Postgres server; docker daemon
+  unavailable in this environment), web suite 431 passed / 21 skipped,
+  tsc green across db and web. Catalogue untouched: 9,900 products all
+  DRAFT; 44,218 migration redirects read-only.
+- **Remaining (post-Phase-12 plan items):** Phase 13 (§20) performance/
+  security/observability gates — NOT started per assignment scope.
+  Live-DB verification of RLS grants and a full browser walkthrough of
+  the admin routes remain when a database/dev environment is available.
+
 # PHASE 12 — STAGE D: CATALOGUE BULK ADMIN COMPLETE (2026-10-12)
 
 - **GT 6 + 13 commit `404af8c`:** bulk-operations repository implementing
