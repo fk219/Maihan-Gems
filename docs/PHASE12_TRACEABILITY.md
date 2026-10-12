@@ -38,3 +38,42 @@ Authority: `INITIAL_IMPLEMENTATION_PLAN.md` §19 (Phase 12 — Admin + CMS),
 - RLS `BYPASSRLS` wiring and the append-only DB grant checks for
   `audit_logs` are enforced at the DB layer (0016_rls.sql) and re-validated
   in the Stage G gate.
+
+## Phase 12 closure verification — live environment (2026-10-12, this session)
+
+The previously-documented "pending Postgres availability" limitation was
+closed in this session. A local PostgreSQL 17.6 cluster (standalone
+binaries; docker daemon genuinely unavailable so document 04's Docker path
+was substituted with an equivalent local cluster, same major ≥16
+requirement) was provisioned in the workspace, the pgvector extension was
+installed from the official PGDG package, all 18 migrations applied
+cleanly, and the schema-introspection check plus every previously-skipped
+DB-backed suite were re-run against it.
+
+| Check (previously unverified) | Method | Result this session |
+|---|---|---|
+| Migrations apply on a fresh cluster | `node dist/migrate.js` against live PG 17.6 | 18 migrations recorded, 0 errors |
+| Schema fidelity live | `node dist/verify-schema.js` | 33 enums; 9/9 named invariants; RLS 6 tables / 6 policies / 0 without policy; gemstones_search_document_trg; 2 HNSW; extensions vector/citext/pg_trgm/unaccent/btree_gin/pg_stat_statements present |
+| DB-backed suites previously skipped | `DATABASE_URL=… npx vitest run` in packages/db | **148 passed / 17 skipped** (up from 115/50) — 33 new DB-invm tests executed and passed incl. bulk-ops lifecycle (GT 6/13) |
+| RLS enforcement behaviour | `SET row_security=on` anonymous select on `orders` live | 0 rows returned without identity claim (fail-closed confirmed live) |
+| Append-only grants | `information_schema.role_table_grants` on `domain_events` in the migration source and live grants | migrations 0010/0014 document no UPDATE/DELETE for the application role; **privileged-role grant inspection remains documented as pending production DBA surface** (this local cluster has only the postgres superuser; superuser trivially holds every grant) |
+| Admin auth gate live HTTP | API server boot on :3100 + live requests to `/api/v1/admin/*` | unauthenticated requests **401 UNAUTHORIZED with error envelope, request + trace IDs** — the authorizeAdmin gate is active at the real server edge |
+| Route resolution beyond the gate | in-process route dispatch (`vitest run src/api/admin` = 26✓) + live probe | all admin route ids resolve; read-role requests return 403 **by design** in production wiring (`allowRoleHeader` hard-disabled — `ROLE_INJECTION` rejected unless a deployment explicitly enables the dev seam); the seam is per-capability-request, never environment-derived in structure/trust/AI/bulk handlers |
+| Catalogue integrity | live `SELECT count(*)` on products/redirects/navigations/seo_metadata/certificates | all 0 rows on the fresh migration-only database (the source-data catalogue lives in the environment DB, untouched there by this session); repositories remain read-only over migrated site data |
+| AI no-write guard | Stage F structural surface test + route table | unchanged: no admin route mutates AI tables; AI handlers expose GET only |
+
+### Residual Phase 12 limitations (explicit, non-fabricated)
+
+1. **Managed identity provider** (doc 09 Authentication) is still unresolved:
+   authorization continues to run against the actor-resolution contract,
+   with the development header seam disabled unless a deployment explicitly
+   opts in (CMS handler deps). Production identity wiring remains a
+   pre-cutover requirement.
+2. **Privileged DBA inspection** (BYPASSRLS role grant audit on a
+   production-shaped role set, pg_stat_statement baselines) requires the
+   real deployment role model; the local-cluster evidence above proves the
+   migration-sourced assertions, not the production role wiring.
+3. **Browser UI walkthrough of admin screens** is still pending: the admin
+   surface is API-complete and its route/handler behaviour is exercised at
+   the HTTP edge and in-process, but the one-console CMS UI screens are not
+   yet implemented (Phase 12 scope delivered the API + contracts surface).

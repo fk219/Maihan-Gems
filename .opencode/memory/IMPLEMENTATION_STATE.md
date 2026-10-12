@@ -1165,3 +1165,33 @@ uses functional and architecture language, clarifies the configured-jewellery
 composition constraints, and omits repository progress and implementation
 identifiers from the client-facing text. Markdown structure and seven Mermaid
 diagrams were checked.
+
+# PHASE 12 CLOSURE — LIVE-ENVIRONMENT VERIFICATION COMPLETE (2026-10-12)
+
+A local PostgreSQL 17.6 cluster was provisioned in this session (docker
+unavailable, so the doc-04 Docker path was substituted with an equivalent
+standalone local cluster; pgvector came from the official PGDG package).
+Every previously-documented Phase 12 DB limitation that could be closed in
+this environment is now closed:
+
+- All 18 migrations apply cleanly on the fresh cluster (migrate.js).
+- Live schema verified: 75 tables incl. drizzle history, 33 enums,
+  9/9 named invariants present, RLS 6/6 policies (0 tables without),
+  gemstones search trigger, 2 HNSW indexes, all 6 required extensions.
+- DB-backed suites re-run with DATABASE_URL set: **148 passed / 17
+  skipped** in packages/db (33 previously-skipped tests now execute,
+  including the DB-backed bulk-operations lifecycle).
+- Live behaviour check: anonymous `orders` SELECT under
+  `row_security=on` returns 0 rows — RLS fail-closed confirmed live.
+- Live HTTP check: API server on :3100, unauthenticated admin requests
+  return 401 with the standard envelope — the authorizeAdmin gate is
+  active at the server edge; role-header seam is hard-disabled by design
+  in the shipped handlers (role-injection rejected).
+- Live counts: fresh migration cluster holds 0 catalogue rows — the
+  44,218-redirect / 9,900-DRAFT inventory lives in the environment DB and
+  was not touched by this session.
+
+Residual (explicit): production DBA-role inspection (BYPASSRLS grant
+audit on the real role model), managed identity provider, and the CMS
+console UI screens (Phase 12 scope delivered the API surface) remain
+pre-cutover requirements. Full detail: docs/PHASE12_TRACEABILITY.md.
