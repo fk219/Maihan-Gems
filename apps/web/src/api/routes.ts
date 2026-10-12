@@ -230,6 +230,18 @@ export const HEALTH_ROUTES: readonly RouteDefinition[] = [
  * Authorization is enforced inside each handler via authorizeAdmin — the
  * route table never grants capabilities.
  */
+export const STRUCTURE_ADMIN_ROUTES: readonly RouteDefinition[] = [
+  { id: 'listNavigationsHandler', method: 'GET', path: '/api/v1/admin/navigations' },
+  { id: 'getNavigationHandler', method: 'GET', path: '/api/v1/admin/navigations/{key}' },
+  { id: 'saveNavigationHandler', method: 'PATCH', path: '/api/v1/admin/navigations' },
+  { id: 'listRedirectsHandler', method: 'GET', path: '/api/v1/admin/redirects' },
+  { id: 'updateRedirectHandler', method: 'PATCH', path: '/api/v1/admin/redirects' },
+  { id: 'bulkImportRedirectsHandler', method: 'POST', path: '/api/v1/admin/redirects/bulk' },
+  { id: 'getSeoHandler', method: 'GET', path: '/api/v1/admin/seo' },
+  { id: 'listSeoHandler', method: 'GET', path: '/api/v1/admin/seo/list' },
+  { id: 'saveSeoHandler', method: 'PATCH', path: '/api/v1/admin/seo' },
+];
+
 export const CMS_ADMIN_ROUTES: readonly RouteDefinition[] = [
   { id: 'adminCreatePageHandler', method: 'POST', path: '/api/v1/admin/cms/pages' },
   { id: 'adminListPagesHandler', method: 'GET', path: '/api/v1/admin/cms/pages' },
@@ -258,6 +270,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...WEBAR_ROUTES,
   ...HEALTH_ROUTES,
   ...CMS_ADMIN_ROUTES,
+  ...STRUCTURE_ADMIN_ROUTES,
 ];
 
 export type RouteLookup =

@@ -82,6 +82,17 @@ import {
   adminArchivePageHandler,
 } from './admin/cms-handlers.js';
 import {
+  listNavigationsHandler,
+  getNavigationHandler,
+  saveNavigationHandler,
+  listRedirectsHandler,
+  updateRedirectHandler,
+  bulkImportRedirectsHandler,
+  getSeoHandler,
+  listSeoHandler,
+  saveSeoHandler,
+} from './admin/catalog-structure-handlers.js';
+import {
   healthLiveHandler,
   healthReadyHandler,
   metricsHandler,
@@ -208,6 +219,18 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       adminArchivePageHandler,
     };
 
+    const STRUCTURE_HANDLERS: Record<string, any> = {
+      listNavigationsHandler,
+      getNavigationHandler,
+      saveNavigationHandler,
+      listRedirectsHandler,
+      updateRedirectHandler,
+      bulkImportRedirectsHandler,
+      getSeoHandler,
+      listSeoHandler,
+      saveSeoHandler,
+    };
+
     const HEALTH_HANDLERS: Record<string, any> = {
       healthLiveHandler,
       healthReadyHandler,
@@ -229,7 +252,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       WHATSAPP_HANDLERS[lookup.route.id] ??
       WEBAR_HANDLERS[lookup.route.id] ??
       HEALTH_HANDLERS[lookup.route.id] ??
-      ADMIN_CMS_HANDLERS[lookup.route.id];
+      ADMIN_CMS_HANDLERS[lookup.route.id] ??
+      STRUCTURE_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }
