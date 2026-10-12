@@ -5,7 +5,7 @@ import { Pool } from 'pg';
 import { storefrontSeed } from './storefront-seed.js';
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env['DATABASE_URL'],
 });
 
 async function runSeed() {
@@ -52,25 +52,25 @@ async function runSeed() {
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
       `, [
         productId,
-        gem.quantity_type || 'single',
-        gem.piece_count || 1,
-        gem.stone_type,
-        gem.variety || null,
-        gem.origin_type,
-        gem.carat_total || null,
-        gem.length_mm || null,
-        gem.width_mm || null,
-        gem.depth_mm || null,
-        gem.shape || null,
-        gem.cut_style || null,
-        gem.color_hue || null,
-        gem.color_trade || null,
-        gem.color_intensity || null,
-        gem.clarity_grade || null,
-        gem.treatment_status || null,
-        gem.treatment_details || null,
-        gem.origin_country || null,
-        gem.origin_region || null,
+        (gem as any).quantity_type || 'single',
+        (gem as any).piece_count || 1,
+        (gem as any).stone_type,
+        (gem as any).variety || null,
+        (gem as any).origin_type,
+        (gem as any).carat_total || null,
+        (gem as any).length_mm || null,
+        (gem as any).width_mm || null,
+        (gem as any).depth_mm || null,
+        (gem as any).shape || null,
+        (gem as any).cut_style || null,
+        (gem as any).color_hue || null,
+        (gem as any).color_trade || null,
+        (gem as any).color_intensity || null,
+        (gem as any).clarity_grade || null,
+        (gem as any).treatment_status || null,
+        null, // treatment_details
+        (gem as any).origin_country || null,
+        (gem as any).origin_region || null,
       ]);
       
       // Create variant and price
@@ -136,9 +136,9 @@ async function runSeed() {
         setting.prong_count || null,
         setting.shank_profile || null,
         setting.band_width_mm || null,
-        setting.ring_size_min || null,
-        setting.ring_size_max || null,
-        setting.price_excludes_center !== false,
+        null, // ring_size_min
+        null, // ring_size_max
+        true, // price_excludes_center
       ]);
       
       // Insert accepts rules
@@ -152,8 +152,8 @@ async function runSeed() {
           `, [
             productId,
             rule.shape,
-            rule.minCarat || null,
-            rule.maxCarat || null,
+            rule.min_carat || null,
+            rule.max_carat || null,
             null, // min_mm
             null, // max_mm
             null, // stone_types
