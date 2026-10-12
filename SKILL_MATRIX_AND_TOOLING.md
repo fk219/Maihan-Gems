@@ -1128,7 +1128,7 @@ Introducing any of these requires a new ADR **superseding** the named decision.
 | Tailwind CSS | **NOT APPROVED** |
 | Any CSS framework | **NOT APPROVED** |
 | Any state-management library (Redux, Zustand, Jotai, MobX) | **NOT APPROVED.** Not required by any authoritative document; React Server Components plus URL state cover the identified needs |
-| Any component or utility kit beyond the ADR-022 outcome | **NOT APPROVED** |
+| Any component or utility kit beyond the ADR-022 outcome | **NOT APPROVED**, except Agentation 3.1.2 as development-only feedback tooling under ADR-025 |
 | Any ORM or query builder beyond Drizzle | **REJECTED** |
 | Any event broker beyond the outbox | **REJECTED** |
 | Any authentication library or provider | **NOT APPROVED.** The source auth mechanism is `[UNKNOWN]`; Phase 6 needs a decision |
@@ -1199,6 +1199,7 @@ Every item in Section 13, plus:
 |---|---|
 | ~~Any test runner, E2E driver, load tool, property-testing library, accessibility auditor, secret scanner, PII scanner~~ **ADR-021 ACCEPTED 2026-10-07** for the runner + E2E driver (Vitest/Playwright). The load-test tool, property-testing extensions, accessibility auditor, secret and PII scanners remain individual installation decisions | ADR-021 (partially resolved as above) |
 | Any component, CSS or state-management library | ADR-022 |
+| Agentation visual-feedback component, development-only | ADR-025 (accepted 2026-10-12) |
 | Any AI evaluation framework | ADR-023 |
 | Any provenance or lineage framework | ADR-024 |
 | Any technology in the rejected list | New ADR superseding the referenced decision |
@@ -1208,9 +1209,9 @@ Every item in Section 13, plus:
 | Scope | What belongs | Rationale |
 |---|---|---|
 | `dependencies` | Zod, the Redis client, the OTel SDK, Drizzle ORM, and integration SDKs in their own modules | Required at runtime |
-| `devDependencies` | TypeScript, pnpm tooling, ESLint and plugins, Drizzle Kit, test tooling once approved, Lighthouse tooling once approved, load tooling once approved | Build-time or test-time only |
+| `devDependencies` | TypeScript, pnpm tooling, ESLint and plugins, Drizzle Kit, approved test tooling, Lighthouse tooling once approved, load tooling once approved, Agentation for local development only | Build-time or test-time only |
 | `tools/migrate` only | Migration-only libraries, for example a streaming JSONL parser if one proves necessary | Must never reach a runtime bundle |
-| Never in a production bundle | Test runners, E2E drivers, load tools, axe-core, Playwright, Cypress, any seeding library, `tools/migrate` itself, any devDependency of `apps/web` | Bundle budget PG-5 and the AR bundle isolation requirement |
+| Never in a production bundle | Test runners, E2E drivers, load tools, axe-core, Playwright, Cypress, Agentation, any seeding library, `tools/migrate` itself, any devDependency of `apps/web` | Bundle budget PG-5 and the AR bundle isolation requirement |
 | Never in any bundle | Secret values, the evidence package, migration staging data | Security and evidence integrity |
 
 ### 14.5 Bundle budget enforcement

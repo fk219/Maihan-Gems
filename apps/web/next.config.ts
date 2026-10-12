@@ -34,7 +34,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  webpack(config) {
+  webpack(config, { dev }) {
     // `.js` -> `.ts`/`.tsx` (and `.mjs`/`.cjs` equivalents) so source written
     // for Node ESM output also resolves inside the Next bundler.
     config.resolve = config.resolve ?? {};
@@ -44,6 +44,12 @@ const nextConfig: NextConfig = {
       '.mjs': ['.mts', '.mjs'],
       '.cjs': ['.cts', '.cjs'],
     };
+    if (!dev) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'agentation$': false,
+      };
+    }
     return config;
   },
 };

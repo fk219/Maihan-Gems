@@ -1,5 +1,18 @@
 # PHASE 12 — PRODUCTION OBSERVABILITY, ALERTS & OPERATIONAL HARDENING COMPLETE (2026-10-12)
 
+- **API testing reference (2026-10-12):** Added a route-derived API inventory,
+  cURL guide, Postman collection/environment, and loopback-only read-only
+  PowerShell smoke test under `docs/api/` and `scripts/`. The 143 API route
+  registrations and two sitemap routes are documented; no full live API run
+  was possible in this environment, so this does not change implementation
+  phase or completion status.
+
+- **Developer tooling — Agentation (2026-10-12):** ADR-025 accepted by explicit
+  user authorization. Agentation 3.1.2 is installed as an `apps/web`
+  development dependency, loaded through a client-only development overlay,
+  and aliased out of production webpack builds. No MCP server or annotation
+  endpoint is configured.
+
 - **Objective**: Implement authoritative Phase 12 — Production Observability, Alerts & Operational Hardening per `technical_design/28_OBSERVABILITY_ARCHITECTURE.md`, `INITIAL_IMPLEMENTATION_PLAN.md` §19/§27/§28, `ADR-001`–`ADR-021`, and `NFR-01`–`NFR-15`.
 - **Architectural Deliverables**:
   1. **OpenTelemetry-Compliant Tracing & W3C TraceContext (`packages/observability`)**:

@@ -220,4 +220,15 @@ export {
   type InsertWebarAssetParams,
   type DbClient,
 } from './webar/webar-repository.js';
+export {
+  createCmsRepository,
+  TRUST_BEARING_KINDS,
+  CmsConflictError,
+  type CmsRepository as CmsRepositoryApi,
+  type PageRow,
+  type RevisionRow,
+  type PageWorkflowState,
+  type AuditWriter,
+} from './cms/cms-repository.js';
+export type { CmsRepository } from './cms/cms-repository.js';
 

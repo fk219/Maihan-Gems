@@ -2,7 +2,7 @@
  * packages/db — schema-fidelity assertion (Phase 1 Task 5).
  *
  * INITIAL_IMPLEMENTATION_PLAN.md section 36 task 5:
- *   "Assert schema fidelity in CI: 74 tables, 33 enums, 94 FKs, 591 CHECK,
+ *   "Assert schema fidelity in CI: 75 tables (74 locked + 0018 expansion), 33 enums, 94 FKs, 591 CHECK,
  *    263 indexes, 9 named invariant constraints, 6 RLS policies with 0
  *    policy-less tables, 2 HNSW indexes, 1 trigger, 1 view, 2 functions."
  * Done when: "Introspection test green against a fresh database."

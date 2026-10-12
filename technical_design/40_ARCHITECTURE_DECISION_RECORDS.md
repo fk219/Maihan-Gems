@@ -34,6 +34,7 @@
 | 022 | Design-system primitives are built in-repo, not adopted | Proposed |
 | 023 | AI evaluation harness is first-party, versioned against the prompt registry | Proposed |
 | 024 | Field-level provenance is a first-class relational table, not a framework | Proposed |
+| 025 | Agentation is development-only visual feedback tooling | Accepted |
 
 ---
 
@@ -306,6 +307,17 @@ never part of this decision and remains open.
 - **Consequences:** A gate asserts 100% provenance coverage over all migrated rows, so an unmigrated field fails the build rather than shipping unlabelled. `evidence_status` is queryable directly, which is what makes gate V15 (no publication from `UNKNOWN` price evidence) a simple filter.
 - **Evidence:** charter section 33.5, NFR-08; the requirement that "where did this value come from?" be answerable for every migrated field.
 - **Status:** Proposed; requires approval before implementation.
+
+---
+
+**ADR-025 - Agentation is development-only visual feedback tooling**
+- **Context:** Developers need a local way to capture visual feedback from the in-progress web application. The locked stack does not include a browser annotation tool.
+- **Alternatives:** (a) copy feedback manually into an agent; (b) adopt Agentation as an optional local development overlay; (c) expose annotation collection in the application runtime.
+- **Decision:** Accept Agentation 3.1.2 as an `apps/web` development dependency. Load its client component only in `NODE_ENV=development`; alias the package out of production webpack builds. Do not configure an endpoint or MCP server by default.
+- **Reason:** The overlay supports local visual review without adding a storefront feature or changing the locked production stack. Client-only lazy loading keeps the DOM-dependent package out of server rendering, and the production alias prevents the package from entering emitted bundles.
+- **Consequences:** The annotation toolbar is available during local development only. Agentation reads page DOM when used; annotations remain local unless a developer explicitly configures an endpoint. The package must not be used to collect or transmit customer data, and storefront production bundle budgets must continue to pass.
+- **Evidence:** User authorization on 2026-10-12; package documentation supplied with the request; package version and license metadata verified from the installed package.
+- **Status:** Accepted by explicit user authorization (2026-10-12).
 
 ---
 

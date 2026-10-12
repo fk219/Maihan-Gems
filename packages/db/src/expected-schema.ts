@@ -9,7 +9,7 @@
  *
  * The aggregate counts are the locked architecture numbers (AGENTS.md section 7;
  * INITIAL_IMPLEMENTATION_PLAN.md section 36 task 5):
- *   74 tables, 33 enums, 94 FKs, 591 CHECK-class constraints, 263 indexes,
+ *   75 tables (74 locked + the 0018 CMS review-ledger expansion), 33 enums, 95 FKs, 595 CHECK-class constraints, 266 indexes,
  *   9 named invariant constraints, 6 RLS tables with 6 policies and
  *   0 policy-less tables, 2 HNSW indexes, 1 trigger, 1 view, 2 functions.
  *
@@ -129,7 +129,9 @@ export const EXPECTED_TABLES: readonly string[] = [
   'treatments',
   'verification_events',
   'webar_assets',
-  'webhook_receipts'
+  'webhook_receipts',
+  // Phase 12 Stage B expansion (0018): the CMS review ledger.
+  'page_review_state'
 ];
 
 /** The 33 enum types with their exact member sets. */
@@ -222,6 +224,7 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'knowledge_documents_variety_id_fkey',
   'messages_conversation_id_fkey',
   'order_events_order_id_fkey',
+  'page_review_state_revision_id_fkey',
   'order_items_configuration_id_fkey',
   'order_items_order_id_fkey',
   'order_items_product_id_fkey',
@@ -299,16 +302,16 @@ export const EXPECTED_VECTOR_COLUMNS: readonly string[] = ['knowledge_chunks.emb
 
 /** Aggregate counts — the locked architecture numbers. */
 export const EXPECTED_COUNTS = {
-  tables: 74,
+  tables: 75,
   enums: 33,
-  primary_key: 74,
-  foreign_key: 94,
+  primary_key: 75,
+  foreign_key: 95,
   unique: 59,
-  check: 28,
-  not_null_columns: 563,
+  check: 29,
+  not_null_columns: 566,
   /** check + not_null_columns: the documented "591 CHECK". */
-  check_class_total: 591,
-  indexes: 263,
+  check_class_total: 595,
+  indexes: 266,
   hnsw: 2,
   vector_columns: 2,
   triggers: 1,

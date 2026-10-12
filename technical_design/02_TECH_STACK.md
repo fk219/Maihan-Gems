@@ -34,6 +34,17 @@ Fix the exact technology set, its role, and the boundary each one occupies, so t
 | AR assets | Draco-compressed GLB, KTX2 textures | - | Geometry and textures | R2 + CDN |
 | Observability | OpenTelemetry + Sentry-compatible error reporting | - | Traces, metrics, logs, errors | `packages/observability` |
 
+## Development-only tooling
+
+| Activity | Tool | Version | Package | Boundary |
+|---|---|---|---|---|
+| Visual feedback and browser annotations | Agentation | 3.1.2 | `apps/web` devDependency | Loaded only in development; no configured endpoint or MCP server |
+
+Agentation is approved by ADR-025 solely for local development feedback. Its
+browser component reads page DOM to create annotations; annotations remain
+local unless a developer explicitly configures an endpoint. It is not part of
+the storefront design system or production runtime.
+
 ## Explicitly NOT in the stack
 
 | Rejected | Reason |
@@ -95,7 +106,7 @@ ai         <- contracts, domain
 
 ## Validation rules
 
-1. Any new runtime dependency requires an ADR and an entry in this document.
+1. Any new runtime or development dependency requires an ADR and an entry in this document.
 2. `packages/domain` may declare only Zod (if types need runtime parsing) and nothing else.
 3. No provider SDK may be imported outside `packages/ai` (AI providers), `integrations` (WhatsApp, payments) and `packages/db`.
 4. Browser-only libraries (MediaPipe, Three.js) may not be imported by any server bundle; the AR route enforces `ssr: false`.
