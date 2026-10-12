@@ -62,7 +62,7 @@ function gate(
   deps: CmsHandlerDeps = {},
 ): { actor: import('@maihan/contracts').AdminActor } | { failure: Response } {
   const headers = ctx.request?.headers ?? new Headers();
-  const decision = authorizeAdmin(headers, request, { allowRoleHeader: deps.allowRoleHeader });
+  const decision = authorizeAdmin(headers, { ...request, allowRoleHeader: deps.allowRoleHeader });
   if (decision.ok) return { actor: decision.actor };
   return { failure: authzFailureResponse(decision.status, ctx.ids) };
 }
