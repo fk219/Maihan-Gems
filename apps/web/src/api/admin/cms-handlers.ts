@@ -59,10 +59,9 @@ export interface CmsHandlerDeps {
 function gate(
   ctx: RouteContext,
   request: CapabilityRequest,
-  deps: CmsHandlerDeps = {},
 ): { actor: import('@maihan/contracts').AdminActor } | { failure: Response } {
   const headers = ctx.request?.headers ?? new Headers();
-  const decision = authorizeAdmin(headers, request, { allowRoleHeader: deps.allowRoleHeader });
+  const decision = authorizeAdmin(headers, request);
   if (decision.ok) return { actor: decision.actor };
   return { failure: authzFailureResponse(decision.status, ctx.ids) };
 }
@@ -81,7 +80,7 @@ function cmsRepo(ctx: RouteContext): CmsRepository {
 }
 
 export async function adminCreatePageHandler(ctx: RouteContext, deps: CmsHandlerDeps = {}): Promise<HandlerOutcome> {
-  const g = gate(ctx, { module: 'content', action: 'write', allowRoleHeader: deps.allowRoleHeader }, deps);
+  const g = gate(ctx, { module: 'content', action: 'write', allowRoleHeader: deps.allowRoleHeader });
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const parsed = CreatePageSchema.safeParse(await ctx.request?.json());
   if (!parsed.success) {
@@ -104,7 +103,7 @@ export async function adminCreatePageHandler(ctx: RouteContext, deps: CmsHandler
 }
 
 export async function adminListPagesHandler(ctx: RouteContext, deps: CmsHandlerDeps = {}): Promise<HandlerOutcome> {
-  const g = gate(ctx, { module: 'content', action: 'list', allowRoleHeader: deps.allowRoleHeader }, deps);
+  const g = gate(ctx, { module: 'content', action: 'list', allowRoleHeader: deps.allowRoleHeader });
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const repo = cmsRepo(ctx);
   const stateParam = ctx.url.searchParams.get('state');
@@ -117,7 +116,7 @@ export async function adminListPagesHandler(ctx: RouteContext, deps: CmsHandlerD
 }
 
 export async function adminGetPageHandler(ctx: RouteContext, deps: CmsHandlerDeps = {}): Promise<HandlerOutcome> {
-  const g = gate(ctx, { module: 'content', action: 'read', allowRoleHeader: deps.allowRoleHeader }, deps);
+  const g = gate(ctx, { module: 'content', action: 'read', allowRoleHeader: deps.allowRoleHeader });
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const repo = cmsRepo(ctx);
   const pageId = ctx.params['pageId'] ?? '';
@@ -127,8 +126,19 @@ export async function adminGetPageHandler(ctx: RouteContext, deps: CmsHandlerDep
   return { status: 200, body: { data: { ...page, revisions } } };
 }
 
+export async function adminListPageRevisionsHandler(ctx: RouteContext): Promise<HandlerOutcome> {
+  const g = gate(ctx, { module: 'content', action: 'read' });
+  if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
+  const repo = cmsRepo(ctx);
+  const pageId = ctx.params['pageId'] ?? '';
+  const page = await repo.getPage(pageId);
+  if (page === null) return { status: 404, body: { code: 'NOT_FOUND', message: 'Page not found' } };
+  const revisions = await repo.listRevisions(pageId);
+  return { status: 200, body: { data: revisions, meta: { pageId, count: revisions.length } } };
+}
+
 export async function adminUpdateBlocksHandler(ctx: RouteContext, deps: CmsHandlerDeps = {}): Promise<HandlerOutcome> {
-  const g = gate(ctx, { module: 'content', action: 'write', allowRoleHeader: deps.allowRoleHeader }, deps);
+  const g = gate(ctx, { module: 'content', action: 'write', allowRoleHeader: deps.allowRoleHeader });
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const parsed = UpdateBlocksSchema.safeParse(await ctx.request?.json());
   const pageId = ctx.params['pageId'] ?? '';
@@ -160,7 +170,7 @@ export async function adminUpdateBlocksHandler(ctx: RouteContext, deps: CmsHandl
 }
 
 export async function adminSubmitForReviewHandler(ctx: RouteContext, deps: CmsHandlerDeps = {}): Promise<HandlerOutcome> {
-  const g = gate(ctx, { module: 'content', action: 'write', allowRoleHeader: deps.allowRoleHeader }, deps);
+  const g = gate(ctx, { module: 'content', action: 'write', allowRoleHeader: deps.allowRoleHeader });
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const repo = cmsRepo(ctx);
   const revisionId = ctx.params['revisionId'] ?? '';
@@ -174,7 +184,7 @@ export async function adminSubmitForReviewHandler(ctx: RouteContext, deps: CmsHa
 
 export async function adminDecideRevisionHandler(ctx: RouteContext, deps: CmsHandlerDeps = {}): Promise<HandlerOutcome> {
   // Approval action: CONTENT_PUBLISHER and up only (doc 23 §3 scope).
-  const g = gate(ctx, { module: 'content', action: 'approve', allowRoleHeader: deps.allowRoleHeader }, deps);
+  const g = gate(ctx, { module: 'content', action: 'approve', allowRoleHeader: deps.allowRoleHeader });
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const parsed = DecideSchema.safeParse(await ctx.request?.json());
   if (!parsed.success) {
@@ -199,7 +209,7 @@ export async function adminDecideRevisionHandler(ctx: RouteContext, deps: CmsHan
 }
 
 export async function adminPublishPageHandler(ctx: RouteContext, deps: CmsHandlerDeps = {}): Promise<HandlerOutcome> {
-  const g = gate(ctx, { module: 'content', action: 'publish', allowRoleHeader: deps.allowRoleHeader }, deps);
+  const g = gate(ctx, { module: 'content', action: 'publish', allowRoleHeader: deps.allowRoleHeader });
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const repo = cmsRepo(ctx);
   const pageId = ctx.params['pageId'] ?? '';
@@ -213,7 +223,7 @@ export async function adminPublishPageHandler(ctx: RouteContext, deps: CmsHandle
 }
 
 export async function adminArchivePageHandler(ctx: RouteContext, deps: CmsHandlerDeps = {}): Promise<HandlerOutcome> {
-  const g = gate(ctx, { module: 'content', action: 'write', allowRoleHeader: deps.allowRoleHeader }, deps);
+  const g = gate(ctx, { module: 'content', action: 'write', allowRoleHeader: deps.allowRoleHeader });
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const repo = cmsRepo(ctx);
   try {

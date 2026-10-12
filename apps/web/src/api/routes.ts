@@ -223,6 +223,25 @@ export const HEALTH_ROUTES: readonly RouteDefinition[] = [
   { id: 'metricsHandler', method: 'GET', path: '/metrics' },
 ];
 
+
+/**
+ * Phase 12 — leave the admin surface on the same router so the ONE lookup,
+ * the one envelope and the one error pipeline apply to admin routes too.
+ * Authorization is enforced inside each handler via authorizeAdmin — the
+ * route table never grants capabilities.
+ */
+export const CMS_ADMIN_ROUTES: readonly RouteDefinition[] = [
+  { id: 'adminCreatePageHandler', method: 'POST', path: '/api/v1/admin/cms/pages' },
+  { id: 'adminListPagesHandler', method: 'GET', path: '/api/v1/admin/cms/pages' },
+  { id: 'adminGetPageHandler', method: 'GET', path: '/api/v1/admin/cms/pages/{pageId}' },
+  { id: 'adminListPageRevisionsHandler', method: 'GET', path: '/api/v1/admin/cms/pages/{pageId}/revisions' },
+  { id: 'adminUpdateBlocksHandler', method: 'PATCH', path: '/api/v1/admin/cms/pages/{pageId}/blocks' },
+  { id: 'adminSubmitForReviewHandler', method: 'POST', path: '/api/v1/admin/cms/revisions/{revisionId}/submit' },
+  { id: 'adminDecideRevisionHandler', method: 'POST', path: '/api/v1/admin/cms/revisions/{revisionId}/decide' },
+  { id: 'adminPublishPageHandler', method: 'POST', path: '/api/v1/admin/cms/pages/{pageId}/publish' },
+  { id: 'adminArchivePageHandler', method: 'POST', path: '/api/v1/admin/cms/pages/{pageId}/archive' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
@@ -238,6 +257,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...WHATSAPP_ROUTES,
   ...WEBAR_ROUTES,
   ...HEALTH_ROUTES,
+  ...CMS_ADMIN_ROUTES,
 ];
 
 export type RouteLookup =

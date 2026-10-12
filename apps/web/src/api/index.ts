@@ -71,6 +71,17 @@ import {
   redeemArHandoffHandler,
 } from './webar-handlers.js';
 import {
+  adminCreatePageHandler,
+  adminListPagesHandler,
+  adminGetPageHandler,
+  adminListPageRevisionsHandler,
+  adminUpdateBlocksHandler,
+  adminSubmitForReviewHandler,
+  adminDecideRevisionHandler,
+  adminPublishPageHandler,
+  adminArchivePageHandler,
+} from './admin/cms-handlers.js';
+import {
   healthLiveHandler,
   healthReadyHandler,
   metricsHandler,
@@ -185,6 +196,18 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       redeemArHandoffHandler,
     };
 
+    const ADMIN_CMS_HANDLERS: Record<string, any> = {
+      adminCreatePageHandler,
+      adminListPagesHandler,
+      adminGetPageHandler,
+      adminListPageRevisionsHandler,
+      adminUpdateBlocksHandler,
+      adminSubmitForReviewHandler,
+      adminDecideRevisionHandler,
+      adminPublishPageHandler,
+      adminArchivePageHandler,
+    };
+
     const HEALTH_HANDLERS: Record<string, any> = {
       healthLiveHandler,
       healthReadyHandler,
@@ -205,7 +228,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       AI_HANDLERS[lookup.route.id] ??
       WHATSAPP_HANDLERS[lookup.route.id] ??
       WEBAR_HANDLERS[lookup.route.id] ??
-      HEALTH_HANDLERS[lookup.route.id];
+      HEALTH_HANDLERS[lookup.route.id] ??
+      ADMIN_CMS_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }
