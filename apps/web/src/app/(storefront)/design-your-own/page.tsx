@@ -49,8 +49,8 @@ const PLACEHOLDER_GEMSTONES = [
 ];
 
 export default function DesignYourOwnPage() {
-  const selectedSetting = PLACEHOLDER_SETTINGS[0];
-  const selectedGemstone = PLACEHOLDER_GEMSTONES[0];
+  const selectedSetting = PLACEHOLDER_SETTINGS[0]!;
+  const selectedGemstone = PLACEHOLDER_GEMSTONES[0]!;
   const totalPrice = selectedSetting.price + selectedGemstone.price;
 
   return (

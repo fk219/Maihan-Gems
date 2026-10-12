@@ -56,9 +56,9 @@ export default async function ProductPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug: _slug } = await params;
   
-  const product = PLACEHOLDER_PRODUCT; // TODO: Fetch from database
+  const product = PLACEHOLDER_PRODUCT; // TODO: Fetch from database by slug
 
   if (!product) {
     notFound();

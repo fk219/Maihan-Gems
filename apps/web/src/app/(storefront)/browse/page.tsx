@@ -68,7 +68,7 @@ export default async function BrowsePage({
   const params = await searchParams;
   const query = params.q || '';
   const stoneFilter = params.stone || 'All';
-  const shapeFilter = params.shape || 'All';
+  // const shapeFilter = params.shape || 'All'; // TODO: Use for filtering
 
   return (
     <main className="min-h-screen bg-[#FAFAF8]">

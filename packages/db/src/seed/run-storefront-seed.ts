@@ -152,11 +152,11 @@ async function runSeed() {
           `, [
             productId,
             rule.shape,
-            rule.min_carat || null,
-            rule.max_carat || null,
-            rule.min_mm || null,
-            rule.max_mm || null,
-            rule.stone_types || null,
+            rule.minCarat || null,
+            rule.maxCarat || null,
+            null, // min_mm
+            null, // max_mm
+            null, // stone_types
           ]);
         }
       }
@@ -227,8 +227,8 @@ async function runSeed() {
         jewelry.ring_size || null,
         jewelry.ring_size_system || null,
         jewelry.chain_length_cm || null,
-        jewelry.chain_width_mm || null,
-        jewelry.setting_id || null,
+        null, // chain_width_mm
+        null, // setting_id
       ]);
       
       // Create variant and price
