@@ -98,6 +98,15 @@ import {
   bulkRevertHandler,
 } from './admin/bulk-handlers.js';
 import {
+  listMigrationBatchesHandler,
+  listConflictsHandler,
+  resolveConflictHandler,
+  listDerivedRefsHandler,
+  decideDerivedRefHandler,
+  certificateQueueHandler,
+  certificateReviewHandler,
+} from './admin/trust-console-handlers.js';
+import {
   healthLiveHandler,
   healthReadyHandler,
   metricsHandler,
@@ -242,6 +251,16 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       bulkRevertHandler,
     };
 
+    const TRUST_HANDLERS: Record<string, any> = {
+      listMigrationBatchesHandler,
+      listConflictsHandler,
+      resolveConflictHandler,
+      listDerivedRefsHandler,
+      decideDerivedRefHandler,
+      certificateQueueHandler,
+      certificateReviewHandler,
+    };
+
     const HEALTH_HANDLERS: Record<string, any> = {
       healthLiveHandler,
       healthReadyHandler,
@@ -265,7 +284,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       HEALTH_HANDLERS[lookup.route.id] ??
       ADMIN_CMS_HANDLERS[lookup.route.id] ??
       STRUCTURE_HANDLERS[lookup.route.id] ??
-      BULK_HANDLERS[lookup.route.id];
+      BULK_HANDLERS[lookup.route.id] ??
+      TRUST_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }

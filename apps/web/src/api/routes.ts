@@ -242,6 +242,16 @@ export const STRUCTURE_ADMIN_ROUTES: readonly RouteDefinition[] = [
   { id: 'saveSeoHandler', method: 'PATCH', path: '/api/v1/admin/seo' },
 ];
 
+export const TRUST_ADMIN_ROUTES: readonly RouteDefinition[] = [
+  { id: 'listMigrationBatchesHandler', method: 'GET', path: '/api/v1/admin/migration/batches' },
+  { id: 'listConflictsHandler', method: 'GET', path: '/api/v1/admin/migration/conflicts' },
+  { id: 'resolveConflictHandler', method: 'PATCH', path: '/api/v1/admin/migration/conflicts/resolve' },
+  { id: 'listDerivedRefsHandler', method: 'GET', path: '/api/v1/admin/derived-refs' },
+  { id: 'decideDerivedRefHandler', method: 'PATCH', path: '/api/v1/admin/derived-refs/decision' },
+  { id: 'certificateQueueHandler', method: 'GET', path: '/api/v1/admin/certificates/queue' },
+  { id: 'certificateReviewHandler', method: 'PATCH', path: '/api/v1/admin/certificates/review' },
+];
+
 export const BULK_ADMIN_ROUTES: readonly RouteDefinition[] = [
   { id: 'bulkPreviewHandler', method: 'POST', path: '/api/v1/admin/products/bulk/preview' },
   { id: 'bulkApplyHandler', method: 'POST', path: '/api/v1/admin/products/bulk/apply' },
@@ -278,6 +288,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CMS_ADMIN_ROUTES,
   ...STRUCTURE_ADMIN_ROUTES,
   ...BULK_ADMIN_ROUTES,
+  ...TRUST_ADMIN_ROUTES,
 ];
 
 export type RouteLookup =

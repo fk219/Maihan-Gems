@@ -267,3 +267,12 @@ export {
   BULK_EDITABLE_FIELDS,
   BULK_DUAL_APPROVAL_THRESHOLD,
 } from './catalog/bulk-operations-repository.js';
+export {
+  createTrustConsoleRepository,
+  type TrustConsoleRepository,
+  type ImportBatchRow,
+  type ConflictRow,
+  TrustConsoleError,
+  classifyDerivedRows,
+  isFailedFetchDerivedRow,
+} from './cms/trust-console-repository.js';
