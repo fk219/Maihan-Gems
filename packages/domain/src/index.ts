@@ -33,4 +33,5 @@ export * from './commerce/cart.js';
 export * from './commerce/inventory.js';
 export * from './commerce/order.js';
 export * from './certificate/index.js';
+export * from './auth/roles.js';
 

@@ -46,3 +46,12 @@ export * from './dto/commerce/refund.js';
 export * from './dto/whatsapp/index.js';
 export * from './dto/webar/index.js';
 export * from './dto/observability/index.js';
+export * from './dto/admin/roles.js';
+export {
+  AdminRoleSchema,
+  ADMIN_ACTOR_HEADERS,
+  ActorResolutionError,
+  resolveAdminActor,
+  type AdminActor,
+  type ActorResolutionEnv,
+} from './dto/admin/actor.js';
