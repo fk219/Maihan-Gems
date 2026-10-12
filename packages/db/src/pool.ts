@@ -23,5 +23,6 @@ export function createPool(databaseUrl: string, options: CreatePoolOptions = {})
     connectionString: databaseUrl,
     max: options.max ?? 10,
     statement_timeout: options.statementTimeoutMs ?? 5000,
+    ssl: false, // Disable SSL for local development
   });
 }

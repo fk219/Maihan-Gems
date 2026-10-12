@@ -231,4 +231,5 @@ export {
   type AuditWriter,
 } from './cms/cms-repository.js';
 export type { CmsRepository } from './cms/cms-repository.js';
+export { StorefrontRepository, type StorefrontProduct, type ProductListQuery } from './storefront/storefront-repository.js';
 
