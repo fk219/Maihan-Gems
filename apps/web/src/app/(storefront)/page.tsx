@@ -118,28 +118,28 @@ export default async function HomePage() {
       <section
         className="storefront-section bg-warm-alabaster"
         style={{
-          paddingTop: '4.5rem',
-          paddingBottom: '5.5rem',
+          paddingTop: '5rem',
+          paddingBottom: '6rem',
           backgroundImage:
-            'radial-gradient(circle at 50% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 65%)',
+            'radial-gradient(circle at 50% 20%, rgba(184, 152, 64, 0.05) 0%, transparent 65%)',
         }}
         aria-label="Hero Introduction"
       >
         <div className="storefront-section__container">
           <div className="hero-grid">
             {/* Left Column: Brand Statement & Discovery */}
-            <div>
+            <div style={{ maxWidth: '580px' }}>
               <span className="section-eyebrow section-eyebrow--dark">
                 Natural Mineralogy &amp; Master Atelier
               </span>
               <h1
                 className="section-title"
                 style={{
-                  fontSize: 'clamp(2.5rem, 4.5vw, 4rem)',
-                  lineHeight: 1.1,
-                  margin: '0 0 1.25rem 0',
+                  fontSize: 'clamp(2.75rem, 5vw, 4.5rem)',
+                  lineHeight: 1.05,
+                  margin: '0 0 1.75rem 0',
                   color: '#1a1a18',
-                  letterSpacing: '-0.02em',
+                  letterSpacing: '-0.025em',
                 }}
               >
                 Rare Earth Gemstones <span className="text-gold-gradient">&amp; Haute Mountings</span>
@@ -148,65 +148,30 @@ export default async function HomePage() {
                 className="storefront-section__subtitle"
                 style={{
                   color: '#4a4740',
-                  maxWidth: '540px',
-                  margin: '0 0 2rem 0',
-                  fontSize: '1.05rem',
-                  lineHeight: 1.7,
+                  maxWidth: '500px',
+                  margin: '0 0 3rem 0',
+                  fontSize: '1.0625rem',
+                  lineHeight: 1.75,
                 }}
               >
                 100% natural, untreated earth-mined gemstones and precision-cast 18K gold and platinum
                 mountings. Handcrafted to order in our private atelier.
               </p>
 
-              {/* Integrated Search Discovery Form */}
-              <div style={{ maxWidth: '540px', marginBottom: '1.5rem' }}>
-                <form action="/search" method="GET" className="search-bar-form" role="search">
-                  <input
-                    type="search"
-                    name="q"
-                    placeholder="Search by mineral, cut, metal, or SKU..."
-                    className="search-input"
-                    aria-label="Search gemstones and fine settings catalogue"
-                  />
-                  <button type="submit" className="btn-primary">
-                    Search
-                  </button>
-                </form>
-
-                {/* Quick Discovery Pills */}
-                <div className="search-pills-row" style={{ marginTop: '0.85rem' }}>
-                  <Link href="/search?q=sapphire" className="search-pill-link">
-                    Sapphires
-                  </Link>
-                  <Link href="/search?q=emerald" className="search-pill-link">
-                    Emeralds
-                  </Link>
-                  <Link href="/search?q=ruby" className="search-pill-link">
-                    Rubies
-                  </Link>
-                  <Link href="/settings" className="search-pill-link">
-                    18K Mountings
-                  </Link>
-                  <Link href="/design-your-own" className="search-pill-link">
-                    Atelier Configurator
-                  </Link>
-                </div>
-              </div>
-
-              {/* Core Action Navigation Links */}
+              {/* Simplified Primary Actions */}
               <div
                 style={{
                   display: 'flex',
-                  gap: '1rem',
+                  gap: '1.25rem',
                   flexWrap: 'wrap',
-                  marginTop: '1.5rem',
+                  alignItems: 'center',
                 }}
               >
                 <Link href="/search" className="btn-primary">
-                  Explore Vault
+                  Explore Collection
                 </Link>
                 <Link href="/design-your-own" className="btn-outline">
-                  Design Your Own →
+                  Bespoke Atelier
                 </Link>
               </div>
             </div>
@@ -332,44 +297,55 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── SECTION 2: INFINITE MARQUEE TICKER ── */}
-      <aside className="marquee-container" aria-label="Maihan Gems core values marquee">
-        <div className="marquee-track">
-          <div className="marquee-content">
-            <span>100% Earth-Mined Natural Gemstones</span>
-            <span className="marquee-dot">✦</span>
-            <span>Swiss &amp; Dubai Private Vault Custody</span>
-            <span className="marquee-dot">✦</span>
-            <span>GIA &amp; GRS Laboratory Verified</span>
-            <span className="marquee-dot">✦</span>
-            <span>Transparent Treatment Disclosure</span>
-            <span className="marquee-dot">✦</span>
-            <span>Master Goldsmith Mountings in 18K &amp; Platinum</span>
-            <span className="marquee-dot">✦</span>
-            <span>Bespoke Atelier Craftsmanship</span>
-            <span className="marquee-dot">✦</span>
-            <span>Insured Worldwide Express Delivery</span>
-            <span className="marquee-dot">✦</span>
-          </div>
-          {/* Duplicated Track for Continuous Seamless Loop */}
-          <div className="marquee-content" aria-hidden="true">
-            <span>100% Earth-Mined Natural Gemstones</span>
-            <span className="marquee-dot">✦</span>
-            <span>Swiss &amp; Dubai Private Vault Custody</span>
-            <span className="marquee-dot">✦</span>
-            <span>GIA &amp; GRS Laboratory Verified</span>
-            <span className="marquee-dot">✦</span>
-            <span>Transparent Treatment Disclosure</span>
-            <span className="marquee-dot">✦</span>
-            <span>Master Goldsmith Mountings in 18K &amp; Platinum</span>
-            <span className="marquee-dot">✦</span>
-            <span>Bespoke Atelier Craftsmanship</span>
-            <span className="marquee-dot">✦</span>
-            <span>Insured Worldwide Express Delivery</span>
-            <span className="marquee-dot">✦</span>
+      {/* ── SECTION 2: TRUST PILLARS (Subtle, Elegant) ── */}
+      <section style={{ 
+        padding: '2.5rem 0', 
+        borderTop: '1px solid rgba(184, 152, 64, 0.12)',
+        borderBottom: '1px solid rgba(184, 152, 64, 0.12)',
+        background: 'rgba(250, 250, 248, 0.5)'
+      }}>
+        <div className="storefront-section__container">
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+            gap: '2rem',
+            textAlign: 'center'
+          }}>
+            <div>
+              <div style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#8A867E', marginBottom: '0.5rem' }}>
+                100% Earth-Mined
+              </div>
+              <div style={{ fontSize: '0.875rem', color: '#4A4740', lineHeight: 1.5 }}>
+                Natural Gemstones
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#8A867E', marginBottom: '0.5rem' }}>
+                Laboratory Verified
+              </div>
+              <div style={{ fontSize: '0.875rem', color: '#4A4740', lineHeight: 1.5 }}>
+                GIA &amp; Gübelin
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#8A867E', marginBottom: '0.5rem' }}>
+                Master Craftsmanship
+              </div>
+              <div style={{ fontSize: '0.875rem', color: '#4A4740', lineHeight: 1.5 }}>
+                18K &amp; Platinum
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#8A867E', marginBottom: '0.5rem' }}>
+                Insured Delivery
+              </div>
+              <div style={{ fontSize: '0.875rem', color: '#4A4740', lineHeight: 1.5 }}>
+                Worldwide
+              </div>
+            </div>
           </div>
         </div>
-      </aside>
+      </section>
 
       {/* ── SECTION 3: CURATED GEMSTONE VAULT COLLECTIONS ── */}
       <section className="storefront-section bg-studio-white" aria-labelledby="collections-title">
