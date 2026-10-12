@@ -127,6 +127,13 @@
       "when": 1791158400017,
       "tag": "0018_cms_review_expansion",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791158400018,
+      "tag": "0019_storefront_schema",
+      "breakpoints": true
     }
   ]
 }
