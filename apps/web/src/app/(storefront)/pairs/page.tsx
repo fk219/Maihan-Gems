@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Matched pairs | Maihan Gems' };
 
 export default async function PairsPage() {
-  const products = await listProducts({ kind: 'gemstone', quantityType: 'pair', limit: 32 });
+  const products = await listProducts({ kind: 'gemstone', quantityType: 'pair', limit: 48 });
   return (
     <CollectionPage
       kicker="Earrings and suites"

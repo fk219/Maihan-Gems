@@ -247,7 +247,8 @@ export function fallbackMoney(html: string): MoneyOffer | null {
   const ogAmount = html.match(/<meta[^>]+property=["']og:price:amount["'][^>]+content=["']([^"']+)["']/i);
   const ogCur = html.match(/<meta[^>]+property=["']og:price:currency["'][^>]+content=["']([^"']+)["']/i);
   const item = html.match(/itemprop=["']price["'][^>]+content=["']([^"']+)["']/i);
-  const amount = parseMoney(ogAmount?.[1]) ?? parseMoney(item?.[1]);
+  const jsonPrice = html.match(/"price"\s*:\s*"?(?:USD\s*)?([\d,]+(?:\.\d+)?)"?/i);
+  const amount = parseMoney(ogAmount?.[1]) ?? parseMoney(item?.[1]) ?? parseMoney(jsonPrice?.[1]);
   if (!amount) return null;
   return { amount, currency: (ogCur?.[1] ?? 'USD').toUpperCase() };
 }
@@ -382,4 +383,86 @@ export function toUsd(amount: number, currency: string, fx: { AED: number; THB: 
   if (c === 'AED' && fx.AED > 0) return amount / fx.AED;
   if (c === 'THB' && fx.THB > 0) return amount / fx.THB;
   return amount;
+}
+
+/** Showcase slots: 3–6 live listings per category, no bulk crawl. */
+export const SHOWCASE_TARGETS: Record<string, number> = {
+  'sapphire-blue': 4,
+  'sapphire-pink': 3,
+  'sapphire-yellow': 3,
+  'sapphire-padparadscha': 3,
+  ruby: 4,
+  emerald: 3,
+  spinel: 3,
+  tourmaline: 3,
+  paraiba_tourmaline: 3,
+  aquamarine: 3,
+  morganite: 3,
+  tanzanite: 3,
+  garnet: 3,
+  alexandrite: 3,
+  topaz: 3,
+  opal: 3,
+  diamond: 3,
+  pairs: 4,
+  'jewelry-ring': 4,
+  'jewelry-earrings': 4,
+  'jewelry-pendant': 4,
+  'jewelry-necklace': 3,
+  'jewelry-bracelet': 3,
+  'setting-ring': 4,
+  'setting-pendant': 3,
+  'setting-earrings': 3,
+};
+
+const GARNET_TYPES = new Set(['garnet', 'tsavorite_garnet', 'demantoid_garnet', 'spessartite_garnet']);
+
+export function assignShowcaseCategory(input: {
+  url: string;
+  kind?: CatalogKind;
+  stoneType?: string | null;
+  colorHue?: string | null;
+  variety?: string | null;
+  quantityType?: string | null;
+  jewelryType?: string | null;
+  settingFor?: string | null;
+}): string | null {
+  const url = input.url.toLowerCase();
+  const blob = `${url} ${input.stoneType ?? ''} ${input.colorHue ?? ''} ${input.variety ?? ''} ${input.jewelryType ?? ''} ${input.settingFor ?? ''}`;
+  if (isSkippableUrl(input.url)) return null;
+  if (input.quantityType === 'pair' || /pair|[-/]pr\d+/.test(blob)) return 'pairs';
+  if (input.kind === 'setting' || /setting/.test(url) || /[-/]js\d+/.test(url)) {
+    if (/earring/.test(blob)) return 'setting-earrings';
+    if (/pendant|necklace/.test(blob)) return 'setting-pendant';
+    return 'setting-ring';
+  }
+  if (input.kind === 'jewelry' || /[-/]j\d+/.test(url) || /\/(products|shop)\//.test(url)) {
+    const jt = input.jewelryType ?? jewelryTypeFrom(blob);
+    if (jt === 'earrings') return 'jewelry-earrings';
+    if (jt === 'pendant') return 'jewelry-pendant';
+    if (jt === 'necklace') return 'jewelry-necklace';
+    if (jt === 'bracelet') return 'jewelry-bracelet';
+    return 'jewelry-ring';
+  }
+  if (/padparadscha/.test(blob)) return 'sapphire-padparadscha';
+  if (/paraiba|paraíba/.test(blob)) return 'paraiba_tourmaline';
+  const stone = (input.stoneType ?? detectStone(blob) ?? '').toLowerCase();
+  if (stone === 'sapphire' || /sapphire/.test(url)) {
+    if (/pink/.test(blob)) return 'sapphire-pink';
+    if (/yellow/.test(blob)) return 'sapphire-yellow';
+    return 'sapphire-blue';
+  }
+  if (stone === 'ruby' || /(^|\/)ruby/.test(url)) return 'ruby';
+  if (stone === 'emerald' || /emerald/.test(url)) return 'emerald';
+  if (stone === 'spinel' || /spinel/.test(url)) return 'spinel';
+  if (stone === 'tourmaline' || stone === 'rubellite' || /tourmaline|rubellite/.test(url)) return 'tourmaline';
+  if (stone === 'aquamarine' || /aquamarine/.test(url)) return 'aquamarine';
+  if (stone === 'morganite' || /morganite/.test(url)) return 'morganite';
+  if (stone === 'tanzanite' || /tanzanite/.test(url)) return 'tanzanite';
+  if (GARNET_TYPES.has(stone) || /garnet/.test(url)) return 'garnet';
+  if (stone === 'alexandrite' || /alexandrite/.test(url)) return 'alexandrite';
+  if (stone === 'topaz' || /topaz/.test(url)) return 'topaz';
+  if (stone === 'opal' || /opal/.test(url)) return 'opal';
+  if (stone === 'diamond' || /diamond/.test(url)) return 'diamond';
+  return null;
 }

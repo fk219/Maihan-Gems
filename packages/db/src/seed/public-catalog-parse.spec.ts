@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  assignShowcaseCategory,
   classifyUrl,
   extractJsonLdProducts,
   offerFromJsonLd,
@@ -89,5 +90,23 @@ describe('public catalog parse', () => {
     expect(toUsd(367.25, 'AED', { AED: 3.6725, THB: 34.5 })).toBeCloseTo(100, 4);
     expect(toUsd(3450, 'THB', { AED: 3.6725, THB: 34.5 })).toBeCloseTo(100, 4);
     expect(toUsd(100, 'USD', { AED: 3.6725, THB: 34.5 })).toBe(100);
+  });
+
+  it('assigns showcase categories from public URLs without mixing stones', () => {
+    expect(assignShowcaseCategory({
+      url: 'https://naturalgemstones.com/sapphire/1.6ct-ceylon-oval-blue-sapphire-k1/',
+    })).toBe('sapphire-blue');
+    expect(assignShowcaseCategory({
+      url: 'https://naturalgemstones.com/padparadscha-sapphire/2.1ct-pink-orange-k2/',
+    })).toBe('sapphire-padparadscha');
+    expect(assignShowcaseCategory({
+      url: 'https://naturalgemstones.com/spinel/1.75ct-burma-fancy-pink-spinel-k16466/',
+    })).toBe('spinel');
+    expect(assignShowcaseCategory({
+      url: 'https://naturalgemstones.com/kunzite-pairs/14.25ct-afghan-oval-kunzite-pair-pr12858/',
+    })).toBe('pairs');
+    expect(assignShowcaseCategory({
+      url: 'https://naturalgemstones.com/gemstone-ring-settings/18k-rose-gold-pave-ring-setting-js1618r18/',
+    })).toBe('setting-ring');
   });
 });

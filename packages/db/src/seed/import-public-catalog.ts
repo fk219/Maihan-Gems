@@ -1,5 +1,5 @@
 /**
- * Import public catalog listings into the storefront schema.
+ * Showcase catalog import — a few high-quality public listings per category.
  *
  * Respects robots.txt, honours Crawl-delay, never copies marketing copy,
  * and stores source_url + source_vendor on every media row.
@@ -10,7 +10,8 @@
 import { Pool } from 'pg';
 
 import {
-  classifyUrl,
+  SHOWCASE_TARGETS,
+  assignShowcaseCategory,
   extractJsonLdProducts,
   fallbackImages,
   fallbackMoney,
@@ -25,8 +26,9 @@ import {
 } from './public-catalog-parse.js';
 
 const UA = 'MaihanGemsImporter/1.0 (+https://github.com/fk219/Maihan-Gems; catalog-import)';
-const TARGET = Number(process.env['IMPORT_LIMIT'] ?? '220');
 const DEFAULT_DELAY_MS = 2100;
+const MAIHAN_VENDOR = '00000000-0000-0000-0000-000000000001';
+const CANDIDATES_PER_SLOT = 6;
 
 type SourceMode = 'html' | 'shopify-json' | 'skip';
 
@@ -37,7 +39,6 @@ interface Source {
   origin: string;
   sitemapIndex: string;
   mode: SourceMode;
-  cap: number;
 }
 
 const SOURCES: Source[] = [
@@ -48,7 +49,6 @@ const SOURCES: Source[] = [
     origin: 'https://naturalgemstones.com',
     sitemapIndex: 'https://naturalgemstones.com/sitemap-index.xml',
     mode: 'html',
-    cap: 90,
   },
   {
     slug: 'natural-sapphire-company',
@@ -57,7 +57,6 @@ const SOURCES: Source[] = [
     origin: 'https://www.thenaturalsapphirecompany.com',
     sitemapIndex: 'https://www.thenaturalsapphirecompany.com/sitemap-index.xml',
     mode: 'html',
-    cap: 32,
   },
   {
     slug: 'natural-ruby-company',
@@ -66,7 +65,6 @@ const SOURCES: Source[] = [
     origin: 'https://www.thenaturalrubycompany.com',
     sitemapIndex: 'https://www.thenaturalrubycompany.com/sitemap-index.xml',
     mode: 'html',
-    cap: 24,
   },
   {
     slug: 'emeralds-com',
@@ -75,7 +73,6 @@ const SOURCES: Source[] = [
     origin: 'https://www.emeralds.com',
     sitemapIndex: 'https://www.emeralds.com/sitemap-index.xml',
     mode: 'html',
-    cap: 24,
   },
   {
     slug: 'glorious-diamonds',
@@ -84,7 +81,6 @@ const SOURCES: Source[] = [
     origin: 'https://www.gloriousdiamonds.net',
     sitemapIndex: 'https://www.gloriousdiamonds.net/sitemap.xml',
     mode: 'skip',
-    cap: 0,
   },
   {
     slug: 'thai-gem-centre',
@@ -93,7 +89,6 @@ const SOURCES: Source[] = [
     origin: 'https://www.thaigemcentregroup.com',
     sitemapIndex: 'https://www.thaigemcentregroup.com/sitemap.xml',
     mode: 'skip',
-    cap: 0,
   },
   {
     slug: 'gems-pavilion',
@@ -102,7 +97,6 @@ const SOURCES: Source[] = [
     origin: 'https://gemspavilion.com',
     sitemapIndex: 'https://gemspavilion.com/wp-sitemap.xml',
     mode: 'skip',
-    cap: 0,
   },
   {
     slug: 'kavant-sharart',
@@ -111,7 +105,6 @@ const SOURCES: Source[] = [
     origin: 'https://www.kavantandsharart.com',
     sitemapIndex: 'https://www.kavantandsharart.com/sitemap.xml',
     mode: 'shopify-json',
-    cap: 12,
   },
   {
     slug: 'pattaraphan',
@@ -120,7 +113,6 @@ const SOURCES: Source[] = [
     origin: 'https://www.pattaraphan.com',
     sitemapIndex: 'https://www.pattaraphan.com/sitemap_index.xml',
     mode: 'html',
-    cap: 12,
   },
   {
     slug: 'nineteen-atelier',
@@ -129,7 +121,6 @@ const SOURCES: Source[] = [
     origin: 'https://nineteenatelier.com',
     sitemapIndex: 'https://nineteenatelier.com/sitemap.xml',
     mode: 'shopify-json',
-    cap: 10,
   },
   {
     slug: 'temple-and-grace',
@@ -138,7 +129,6 @@ const SOURCES: Source[] = [
     origin: 'https://www.templeandgrace.co.th',
     sitemapIndex: 'https://www.templeandgrace.co.th/sitemap.xml',
     mode: 'skip',
-    cap: 0,
   },
   {
     slug: 'above-diamond',
@@ -147,7 +137,6 @@ const SOURCES: Source[] = [
     origin: 'https://abovediamond.com',
     sitemapIndex: 'https://abovediamond.com/sitemap.xml',
     mode: 'skip',
-    cap: 0,
   },
   {
     slug: 'ananta-jewelry',
@@ -156,37 +145,13 @@ const SOURCES: Source[] = [
     origin: 'https://anantajewelry.com',
     sitemapIndex: 'https://anantajewelry.com/sitemap.xml',
     mode: 'skip',
-    cap: 0,
   },
-];
-
-const BUCKETS: Array<{ name: string; test: (url: string) => boolean; take: number }> = [
-  { name: 'sapphire-loose', test: (u) => /sapphire/i.test(u) && /k\d+/i.test(u) && !/pair|ring|earring|pendant|setting/i.test(u), take: 28 },
-  { name: 'ruby-loose', test: (u) => /ruby/i.test(u) && /k\d+/i.test(u) && !/pair|ring|earring|pendant/i.test(u), take: 22 },
-  { name: 'emerald-loose', test: (u) => /emerald/i.test(u) && /k\d+/i.test(u) && !/pair|ring|earring|pendant/i.test(u), take: 20 },
-  { name: 'spinel-loose', test: (u) => /spinel/i.test(u) && /k\d+/i.test(u) && !/pair|ring/i.test(u), take: 18 },
-  { name: 'tourmaline-loose', test: (u) => /tourmaline|paraiba|rubellite/i.test(u) && /k\d+/i.test(u) && !/pair|ring/i.test(u), take: 22 },
-  { name: 'pairs', test: (u) => /pair|[-/]pr\d+/i.test(u) && Boolean(skuFromUrl(u)), take: 18 },
-  { name: 'rings', test: (u) => /ring/i.test(u) && /[-/]j\d+/i.test(u) && !/js\d+/i.test(u), take: 24 },
-  { name: 'earrings', test: (u) => /earring/i.test(u) && /[-/]j\d+/i.test(u), take: 14 },
-  { name: 'pendants', test: (u) => /pendant|necklace/i.test(u) && /[-/]j\d+/i.test(u), take: 14 },
-  { name: 'settings', test: (u) => /setting/i.test(u) || /[-/]js\d+/i.test(u), take: 20 },
-  { name: 'shop-pages', test: (u) => /\/(product|products|shop)\//i.test(u) && !isSkippableUrl(u), take: 16 },
-  { name: 'other-sku', test: (u) => Boolean(skuFromUrl(u)), take: 24 },
 ];
 
 interface RobotsRules {
   delayMs: number;
   disallows: string[];
   fetchable: boolean;
-}
-
-interface Counts {
-  fetched: number;
-  inserted: number;
-  skipped: number;
-  byVendor: Map<string, number>;
-  byKind: Map<string, number>;
 }
 
 const delayState = new Map<string, Promise<void>>();
@@ -254,28 +219,9 @@ function allowed(url: string, rules: RobotsRules): boolean {
 }
 
 function locTags(xml: string): string[] {
-  return [...xml.matchAll(/<loc>\s*([^<]+)\s*<\/loc>/gi)].map((m) => decodeXmlLoc(m[1]!.trim()));
-}
-
-function decodeXmlLoc(text: string): string {
-  return text.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-}
-
-function sampleUrls(urls: string[]): string[] {
-  const picked: string[] = [];
-  const used = new Set<string>();
-  for (const bucket of BUCKETS) {
-    const matches = urls.filter((u) => bucket.test(u) && !used.has(u) && !isSkippableUrl(u));
-    const step = Math.max(1, Math.floor(matches.length / Math.max(bucket.take, 1)));
-    let taken = 0;
-    for (let i = 0; i < matches.length && taken < bucket.take; i += step) {
-      const url = matches[i]!;
-      used.add(url);
-      picked.push(url);
-      taken += 1;
-    }
-  }
-  return picked;
+  return [...xml.matchAll(/<loc>\s*([^<]+)\s*<\/loc>/gi)].map((m) =>
+    m[1]!.trim().replace(/&amp;/g, '&'),
+  );
 }
 
 function pickSitemapFiles(indexLocs: string[], indexUrl: string): string[] {
@@ -287,26 +233,28 @@ function pickSitemapFiles(indexLocs: string[], indexUrl: string): string[] {
     .sort((a, b) => a.n - b.n);
   if (numbered.length >= 6) {
     const pickAt = (ratio: number) => numbered[Math.min(numbered.length - 1, Math.floor(numbered.length * ratio))]!.url;
-    return [...new Set([
-      pickAt(0.15),
-      pickAt(0.28),
-      pickAt(0.42),
-      pickAt(0.52),
-      pickAt(0.55),
-      pickAt(0.80),
-      pickAt(0.92),
-    ])];
+    return [...new Set([pickAt(0.12), pickAt(0.28), pickAt(0.52), pickAt(0.55), pickAt(0.82)])];
   }
-  const productish = sitemapFiles.filter((u) => /product/i.test(u) && !/category|tag|cat/i.test(u));
-  if (productish.length > 0) return productish.slice(0, 6);
-  return sitemapFiles.slice(0, 6);
+  const productish = sitemapFiles.filter((u) => /product/i.test(u) && !/tag|cat/i.test(u));
+  return (productish.length > 0 ? productish : sitemapFiles).slice(0, 4);
+}
+
+async function loadRobots(source: Source): Promise<RobotsRules> {
+  const robotsRes = await fetch(`${source.origin}/robots.txt`, {
+    headers: { 'User-Agent': UA },
+    redirect: 'follow',
+  }).catch(() => null);
+  if (robotsRes && robotsRes.status === 403) {
+    return { delayMs: DEFAULT_DELAY_MS, disallows: ['/'], fetchable: false };
+  }
+  if (robotsRes && robotsRes.ok) return parseRobots(await robotsRes.text());
+  return { delayMs: DEFAULT_DELAY_MS, disallows: [], fetchable: true };
 }
 
 async function collectSourceUrls(source: Source, rules: RobotsRules): Promise<string[]> {
   const index = await fetchText(source.sitemapIndex, Math.min(rules.delayMs, 800));
   if (!index || !index.includes('<loc')) return [];
-  const locs = locTags(index);
-  const files = pickSitemapFiles(locs, source.sitemapIndex);
+  const files = pickSitemapFiles(locTags(index), source.sitemapIndex);
   const urls: string[] = [];
   for (const file of files) {
     if (!allowed(file, rules)) continue;
@@ -330,6 +278,66 @@ async function ensureVendor(pool: Pool, source: Source): Promise<string> {
     [source.slug, source.displayName, source.country, `Public catalog imported from ${source.origin}`],
   );
   return inserted.rows[0]!.id;
+}
+
+async function wipeImportedCatalog(pool: Pool): Promise<void> {
+  await pool.query('BEGIN');
+  try {
+    await pool.query(`
+      DELETE FROM media_links
+      WHERE entity_type = 'product'
+        AND entity_id IN (SELECT id FROM products WHERE vendor_id <> $1)
+    `, [MAIHAN_VENDOR]);
+    await pool.query(`DELETE FROM media WHERE vendor_id <> $1`, [MAIHAN_VENDOR]);
+    await pool.query(`
+      DELETE FROM designs
+      WHERE setting_product_id IN (SELECT id FROM products WHERE vendor_id <> $1)
+         OR gemstone_product_id IN (SELECT id FROM products WHERE vendor_id <> $1)
+    `, [MAIHAN_VENDOR]);
+    await pool.query(`DELETE FROM certificates WHERE vendor_id <> $1`, [MAIHAN_VENDOR]);
+    await pool.query(`DELETE FROM products WHERE vendor_id <> $1`, [MAIHAN_VENDOR]);
+    await pool.query('COMMIT');
+  } catch (error) {
+    await pool.query('ROLLBACK');
+    throw error;
+  }
+}
+
+async function existingSlotCounts(pool: Pool): Promise<Map<string, number>> {
+  const counts = new Map<string, number>(Object.keys(SHOWCASE_TARGETS).map((k) => [k, 0]));
+  const rows = await pool.query<{
+    url: string | null;
+    kind: string;
+    stone_type: string | null;
+    color_hue: string | null;
+    variety: string | null;
+    quantity_type: string | null;
+    jewelry_type: string | null;
+    setting_for: string | null;
+  }>(`
+    SELECT p.slug AS url, p.kind::text AS kind,
+           gd.stone_type, gd.color_hue, gd.variety, gd.quantity_type,
+           jd.jewelry_type, sd.setting_for
+    FROM products p
+    LEFT JOIN gemstone_details gd ON gd.product_id = p.id
+    LEFT JOIN jewelry_details jd ON jd.product_id = p.id
+    LEFT JOIN setting_details sd ON sd.product_id = p.id
+    WHERE p.status = 'active'
+  `);
+  for (const row of rows.rows) {
+    const cat = assignShowcaseCategory({
+      url: row.url ?? '',
+      kind: row.kind as ParsedListing['kind'],
+      stoneType: row.stone_type,
+      colorHue: row.color_hue,
+      variety: row.variety,
+      quantityType: row.quantity_type,
+      jewelryType: row.jewelry_type,
+      settingFor: row.setting_for,
+    });
+    if (cat && counts.has(cat)) counts.set(cat, (counts.get(cat) ?? 0) + 1);
+  }
+  return counts;
 }
 
 async function insertProduct(
@@ -468,7 +476,6 @@ function listingFromPage(url: string, html: string): { parsed: ParsedListing; mo
     extraText: html.slice(0, 8000),
     productType: typeof json['category'] === 'string' ? json['category'] : null,
   });
-  if (isSkippableUrl(url)) return null;
   return { parsed, money, imageUrl };
 }
 
@@ -481,11 +488,66 @@ interface ShopifyProduct {
   images?: Array<{ src?: string }>;
 }
 
-function shopifyKind(product: ShopifyProduct): CatalogKind {
-  const blob = `${product.title ?? ''} ${product.product_type ?? ''} ${Array.isArray(product.tags) ? product.tags.join(' ') : product.tags ?? ''}`;
-  if (/setting|mount/i.test(blob)) return 'setting';
-  if (/earring|pendant|necklace|ring|bracelet|brooch/i.test(blob)) return 'jewelry';
-  return classifyUrl(product.handle ? `https://example.com/products/${product.handle}` : 'https://example.com/x');
+function neededRemaining(filled: Map<string, number>): Set<string> {
+  const needed = new Set<string>();
+  for (const [cat, target] of Object.entries(SHOWCASE_TARGETS)) {
+    if ((filled.get(cat) ?? 0) < target) needed.add(cat);
+  }
+  return needed;
+}
+
+function takeCandidates(urls: string[], needed: Set<string>): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  for (const url of urls) {
+    const cat = assignShowcaseCategory({ url });
+    if (!cat || !needed.has(cat)) continue;
+    const list = out.get(cat) ?? [];
+    if (list.length >= CANDIDATES_PER_SLOT) continue;
+    list.push(url);
+    out.set(cat, list);
+  }
+  return out;
+}
+
+async function importCandidates(
+  pool: Pool,
+  source: Source,
+  vendorId: string,
+  rules: RobotsRules,
+  fx: { AED: number; THB: number },
+  filled: Map<string, number>,
+  candidates: Map<string, string[]>,
+): Promise<number> {
+  let inserted = 0;
+  for (const [cat, urls] of candidates) {
+    const target = SHOWCASE_TARGETS[cat] ?? 0;
+    for (const url of urls) {
+      if ((filled.get(cat) ?? 0) >= target) break;
+      if (!allowed(url, rules)) continue;
+      const html = await fetchText(url, rules.delayMs);
+      if (!html) continue;
+      const listing = listingFromPage(url, html);
+      if (!listing) continue;
+      const liveCat = assignShowcaseCategory({
+        url,
+        kind: listing.parsed.kind,
+        stoneType: listing.parsed.stoneType,
+        colorHue: listing.parsed.colorHue,
+        quantityType: listing.parsed.quantityType,
+        jewelryType: listing.parsed.jewelryType,
+        settingFor: listing.parsed.settingFor,
+      }) ?? cat;
+      if ((filled.get(liveCat) ?? 0) >= (SHOWCASE_TARGETS[liveCat] ?? 0)) continue;
+      const usd = toUsd(listing.money.amount, listing.money.currency, fx);
+      const ok = await insertProduct(pool, vendorId, source, url, listing.parsed, usd, listing.imageUrl, fx);
+      if (ok) {
+        filled.set(liveCat, (filled.get(liveCat) ?? 0) + 1);
+        inserted += 1;
+        process.stdout.write(`  + ${liveCat} ${listing.parsed.sku} ${listing.parsed.title.slice(0, 42)}\n`);
+      }
+    }
+  }
+  return inserted;
 }
 
 async function importShopify(
@@ -494,35 +556,30 @@ async function importShopify(
   vendorId: string,
   rules: RobotsRules,
   fx: { AED: number; THB: number },
-  counts: Counts,
-): Promise<void> {
+  filled: Map<string, number>,
+): Promise<number> {
   const feedUrl = `${source.origin}/products.json?limit=250`;
-  if (!allowed(feedUrl, rules) && !allowed(`${source.origin}/products/`, rules)) {
-    console.log(`  robots blocks shopify feed`);
-    return;
-  }
+  if (!allowed(feedUrl, rules) && !allowed(`${source.origin}/products/`, rules)) return 0;
   const body = await fetchText(feedUrl, Math.min(rules.delayMs, 800));
-  if (!body) return;
+  if (!body) return 0;
   let payload: { products?: ShopifyProduct[] };
   try {
     payload = JSON.parse(body) as { products?: ShopifyProduct[] };
   } catch {
-    console.warn(`  shopify json parse failed`);
-    return;
+    return 0;
   }
-  const products = payload.products ?? [];
-  let insertedHere = 0;
-  for (const product of products) {
-    if (counts.inserted >= TARGET || insertedHere >= source.cap) break;
+  let inserted = 0;
+  for (const product of payload.products ?? []) {
+    const needed = neededRemaining(filled);
+    if (needed.size === 0) break;
     const handle = product.handle ?? '';
     const url = `${source.origin}/products/${handle}`;
     const imageUrl = pickPrimaryImage((product.images ?? []).map((i) => i.src ?? '').filter(Boolean));
     const price = Number(product.variants?.[0]?.price ?? 0);
     if (!handle || !imageUrl || !(price > 0) || /gift/i.test(product.title ?? '')) continue;
-    const extra = [
-      product.product_type,
-      Array.isArray(product.tags) ? product.tags.join(' ') : product.tags,
-    ].filter(Boolean).join(' ');
+    const extra = [product.product_type, Array.isArray(product.tags) ? product.tags.join(' ') : product.tags]
+      .filter(Boolean)
+      .join(' ');
     const parsed = parseListing({
       url,
       jsonName: product.title,
@@ -531,108 +588,29 @@ async function importShopify(
       extraText: extra,
       productType: product.product_type,
     });
-    parsed.kind = shopifyKind(product);
-    if (parsed.kind === 'jewelry') {
-      const jt = /earring/i.test(extra + product.title) ? 'earrings'
-        : /pendant/i.test(extra + product.title) ? 'pendant'
-          : /necklace/i.test(extra + product.title) ? 'necklace'
-            : /bracelet/i.test(extra + product.title) ? 'bracelet'
-              : 'ring';
-      parsed.jewelryType = jt;
-    }
-    const usd = toUsd(price, 'USD', fx);
-    const ok = await insertProduct(pool, vendorId, source, url, parsed, usd, imageUrl, fx);
-    counts.fetched += 1;
+    parsed.kind = /setting|mount/i.test(extra) ? 'setting' : 'jewelry';
+    const jt = /earring/i.test(`${extra} ${product.title}`) ? 'earrings'
+      : /pendant/i.test(`${extra} ${product.title}`) ? 'pendant'
+        : /necklace/i.test(`${extra} ${product.title}`) ? 'necklace'
+          : /bracelet/i.test(`${extra} ${product.title}`) ? 'bracelet'
+            : 'ring';
+    if (parsed.kind === 'jewelry') parsed.jewelryType = jt;
+    const cat = assignShowcaseCategory({
+      url,
+      kind: parsed.kind,
+      stoneType: parsed.stoneType,
+      jewelryType: parsed.jewelryType,
+      settingFor: parsed.settingFor,
+    });
+    if (!cat || !needed.has(cat)) continue;
+    const ok = await insertProduct(pool, vendorId, source, url, parsed, toUsd(price, 'USD', fx), imageUrl, fx);
     if (ok) {
-      counts.inserted += 1;
-      insertedHere += 1;
-      counts.byVendor.set(source.displayName, (counts.byVendor.get(source.displayName) ?? 0) + 1);
-      counts.byKind.set(parsed.kind, (counts.byKind.get(parsed.kind) ?? 0) + 1);
-      process.stdout.write(`  + ${parsed.sku} ${parsed.kind} ${parsed.title.slice(0, 48)}\n`);
-    } else {
-      counts.skipped += 1;
+      filled.set(cat, (filled.get(cat) ?? 0) + 1);
+      inserted += 1;
+      process.stdout.write(`  + ${cat} ${parsed.sku} ${parsed.title.slice(0, 42)}\n`);
     }
   }
-}
-
-async function importHtmlSource(
-  pool: Pool,
-  source: Source,
-  vendorId: string,
-  rules: RobotsRules,
-  fx: { AED: number; THB: number },
-  counts: Counts,
-): Promise<void> {
-  let urls: string[] = [];
-  try {
-    urls = await collectSourceUrls(source, rules);
-  } catch (error) {
-    console.warn(`sitemap failed:`, (error as Error).message);
-  }
-  const selected = sampleUrls(urls).slice(0, source.cap * 3);
-  console.log(`  urls ${urls.length}, sampled ${selected.length}, delay ${rules.delayMs}ms`);
-  let insertedHere = 0;
-  for (const url of selected) {
-    if (counts.inserted >= TARGET || insertedHere >= source.cap) break;
-    if (!allowed(url, rules)) {
-      counts.skipped += 1;
-      continue;
-    }
-    const html = await fetchText(url, rules.delayMs);
-    counts.fetched += 1;
-    if (!html) {
-      counts.skipped += 1;
-      continue;
-    }
-    const listing = listingFromPage(url, html);
-    if (!listing) {
-      counts.skipped += 1;
-      continue;
-    }
-    const usd = toUsd(listing.money.amount, listing.money.currency, fx);
-    const ok = await insertProduct(pool, vendorId, source, url, listing.parsed, usd, listing.imageUrl, fx);
-    if (ok) {
-      counts.inserted += 1;
-      insertedHere += 1;
-      counts.byVendor.set(source.displayName, (counts.byVendor.get(source.displayName) ?? 0) + 1);
-      counts.byKind.set(listing.parsed.kind, (counts.byKind.get(listing.parsed.kind) ?? 0) + 1);
-      process.stdout.write(`  + ${listing.parsed.sku} ${listing.parsed.kind} ${listing.parsed.title.slice(0, 48)}\n`);
-    } else {
-      counts.skipped += 1;
-    }
-  }
-}
-
-async function importSource(
-  pool: Pool,
-  source: Source,
-  fx: { AED: number; THB: number },
-  counts: Counts,
-): Promise<void> {
-  console.log(`\n→ ${source.displayName}`);
-  const vendorId = await ensureVendor(pool, source);
-  if (source.mode === 'skip') {
-    console.log('  vendor recorded, crawl skipped (robots/challenge/no public catalog feed)');
-    return;
-  }
-  const robotsRes = await fetch(`${source.origin}/robots.txt`, {
-    headers: { 'User-Agent': UA },
-    redirect: 'follow',
-  }).catch(() => null);
-  let rules: RobotsRules = { delayMs: DEFAULT_DELAY_MS, disallows: [], fetchable: true };
-  if (robotsRes && robotsRes.status === 403) {
-    console.log('  robots.txt 403 — skip crawl, vendor recorded');
-    return;
-  }
-  if (robotsRes && robotsRes.ok) {
-    const body = await robotsRes.text();
-    rules = parseRobots(body);
-  }
-  if (source.mode === 'shopify-json') {
-    await importShopify(pool, source, vendorId, rules, fx, counts);
-    return;
-  }
-  await importHtmlSource(pool, source, vendorId, rules, fx, counts);
+  return inserted;
 }
 
 async function main(): Promise<void> {
@@ -641,6 +619,13 @@ async function main(): Promise<void> {
   const pool = new Pool({ connectionString: databaseUrl, max: 8 });
   await pool.query(`ALTER TABLE media ADD COLUMN IF NOT EXISTS source_url TEXT`);
   await pool.query(`ALTER TABLE media ADD COLUMN IF NOT EXISTS source_vendor TEXT`);
+
+  console.log('Resetting previous dealer imports (Maihan house seed kept)...');
+  await wipeImportedCatalog(pool);
+
+  for (const source of SOURCES) {
+    await ensureVendor(pool, source);
+  }
 
   const fxRows = await pool.query<{ quote: string; rate: string }>(`
     SELECT DISTINCT ON (quote) quote, rate
@@ -656,33 +641,38 @@ async function main(): Promise<void> {
     if (quote === 'THB' && rate > 0) fx.THB = rate;
   }
 
-  const counts: Counts = {
-    fetched: 0,
-    inserted: 0,
-    skipped: 0,
-    byVendor: new Map<string, number>(),
-    byKind: new Map<string, number>(),
-  };
+  const filled = await existingSlotCounts(pool);
+  console.log('Slots after house seed:', Object.fromEntries(filled));
+  let inserted = 0;
 
-  // Serial per host (politeDelay already serialises a host); run sources sequentially
-  // so crawl-delay on the NGC family is never overlapped with itself.
   for (const source of SOURCES) {
-    if (counts.inserted >= TARGET) {
-      await ensureVendor(pool, source);
+    const needed = neededRemaining(filled);
+    if (needed.size === 0) break;
+    console.log(`\n→ ${source.displayName} (need ${[...needed].join(', ')})`);
+    const vendorId = await ensureVendor(pool, source);
+    if (source.mode === 'skip') {
+      console.log('  vendor recorded, no public catalog crawl');
       continue;
     }
-    await importSource(pool, source, fx, counts);
+    const rules = await loadRobots(source);
+    if (!rules.fetchable) {
+      console.log('  robots.txt blocks crawl');
+      continue;
+    }
+    if (source.mode === 'shopify-json') {
+      inserted += await importShopify(pool, source, vendorId, rules, fx, filled);
+      continue;
+    }
+    const urls = await collectSourceUrls(source, rules);
+    const candidates = takeCandidates(urls, neededRemaining(filled));
+    const queued = [...candidates.values()].reduce((n, list) => n + list.length, 0);
+    console.log(`  urls ${urls.length}, queued ${queued} across ${candidates.size} categories`);
+    inserted += await importCandidates(pool, source, vendorId, rules, fx, filled, candidates);
   }
 
   await pool.end();
-  console.log('\nImport complete');
-  console.log(JSON.stringify({
-    fetched: counts.fetched,
-    inserted: counts.inserted,
-    skipped: counts.skipped,
-    byVendor: Object.fromEntries(counts.byVendor),
-    byKind: Object.fromEntries(counts.byKind),
-  }, null, 2));
+  console.log('\nShowcase import complete');
+  console.log(JSON.stringify({ inserted, slots: Object.fromEntries(filled) }, null, 2));
 }
 
 main().catch((error) => {

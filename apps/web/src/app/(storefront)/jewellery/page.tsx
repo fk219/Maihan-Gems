@@ -12,7 +12,7 @@ export default async function JewelleryPage({
   searchParams: Promise<{ type?: string }>;
 }) {
   const { type } = await searchParams;
-  const products = await listProducts({ kind: 'jewelry', jewelryType: type, limit: 32 });
+  const products = await listProducts({ kind: 'jewelry', jewelryType: type, limit: 48 });
   return (
     <CollectionPage
       kicker="Finished pieces"
