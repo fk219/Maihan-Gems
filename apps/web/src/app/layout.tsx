@@ -10,6 +10,7 @@
  */
 import { organizationJsonLdPayload } from '../lib/jsonld.js';
 import { JsonLd } from '../components/seo/JsonLd.js';
+import { AgentationOverlay } from '../components/development/AgentationOverlay.js';
 import './globals.css';
 import { MAIHAN_THEME_CSS } from '../lib/theme-styles.js';
 
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             the base (sitemap, product canonicals) still fail loudly. */}
         {organizationJsonLdPayload() !== null && <JsonLd payload={organizationJsonLdPayload() as string} />}
         {children}
+        <AgentationOverlay />
       </body>
     </html>
   );

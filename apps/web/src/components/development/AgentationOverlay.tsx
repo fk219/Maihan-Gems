@@ -15,5 +15,5 @@ export function AgentationOverlay() {
 
   if (process.env.NODE_ENV !== 'development' || Agentation === null) return null;
 
-  return <Agentation />;
+  return <Agentation appName="Maihan Gems" />;
 }
