@@ -20,7 +20,7 @@ export default async function StorefrontLayout({ children }: { children: React.R
           Catalogue database is empty or not set up. Run: docker compose up -d, then pnpm storefront:db:setup
         </p>
       ) : null}
-      {children}
+      <div className="ngc-pages">{children}</div>
       <StorefrontFooter />
     </StorefrontProvider>
   );

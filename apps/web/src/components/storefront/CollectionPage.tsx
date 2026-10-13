@@ -29,8 +29,13 @@ export function CollectionPage({
   chips?: ReactNode;
 }) {
   return (
-    <main className="lx-section">
+    <main className="lx-section ngc-page">
       <div className="lx-wrap">
+        <nav className="lx-crumb" aria-label="Breadcrumb">
+          <Link href="/">Home</Link>
+          <span aria-hidden="true">/</span>
+          <span>{title}</span>
+        </nav>
         <span className="lx-kicker">{kicker}</span>
         <h1 className="lx-h2">{title}</h1>
         {lede ? <p className="lx-lede">{lede}</p> : null}

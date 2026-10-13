@@ -1645,4 +1645,12 @@
 .ngc-footer h2, .ngc-footer h3 { font-family: var(--font-serif); font-weight: 500; color: #E8C96A; margin: 0 0 0.5rem; }
 .ngc-footer a { display: block; color: inherit; text-decoration: none; margin: 0.25rem 0; }
 .ngc-footer__legal { text-align: center; font-size: 0.78rem; opacity: 0.8; margin: 1.5rem 0 0; }
+.ngc-pages { background: #fff; color: #1a1408; }
+.ngc-pages .lx-section { background: #fff; }
+.ngc-pages .lx-card,
+.ngc-pages .lx-filters,
+.ngc-pages .lx-pdp__media,
+.ngc-pages .lx-dossier > div { border-radius: 12px; }
+.ngc-pages .lx-btn--solid,
+.ngc-pages .lx-filter__list button.is-on { background: var(--gold-gradient); color: #1a1408; }
 
