@@ -1719,6 +1719,49 @@
 .ngc-more { color: #8B6914; }
 .ngc-help { padding: 3rem 0; text-align: center; }
 .ngc-help .ngc-hero__actions { justify-content: center; }
+.home-hero { padding: 3.5rem 1.25rem 2rem; max-width: 80rem; margin: 0 auto; }
+.home-hero__kicker { letter-spacing: 0.18em; text-transform: uppercase; color: #8B6914; font-size: 0.75rem; margin: 0; }
+.home-hero h1 { font-family: var(--font-serif); font-weight: 500; font-size: clamp(2.6rem, 5vw, 4.4rem); margin: 0.3rem 0 1.4rem; max-width: 16ch; }
+.home-hero__grid { display: grid; gap: 1rem; }
+@media (min-width: 900px) { .home-hero__grid { grid-template-columns: 1fr 1fr; } }
+.home-journey { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 1rem; align-items: center; min-height: 16rem; border-radius: 12px; overflow: hidden; background: #f7f3ea; text-decoration: none; color: #1a1408; border: 1px solid #eadfbe; }
+.home-journey img { width: 100%; height: 100%; object-fit: cover; min-height: 16rem; }
+.home-journey div, .home-journey--search { padding: 1.25rem; }
+.home-journey span { letter-spacing: 0.14em; color: #8B6914; font-size: 0.75rem; }
+.home-journey h2 { font-family: var(--font-serif); font-weight: 500; font-size: 2rem; margin: 0.3rem 0; }
+.home-journey p { margin: 0 0 0.8rem; color: #5c5346; }
+.home-journey--search { display: flex; flex-direction: column; justify-content: center; background: #1a1408; color: #f7f1e4; border: 0; }
+.home-journey--search p { color: #e6dcc4; }
+.home-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-end; margin-bottom: 0.8rem; }
+.home-head h2 { margin: 0; }
+.home-head p { margin: 0; max-width: 28rem; color: #5c5346; }
+.marquee { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.4rem; }
+.marquee__scroller { overflow: hidden; }
+.marquee__track { display: flex; width: max-content; }
+.marquee__item { width: 8.5rem; text-align: center; text-decoration: none; color: #1a1408; padding: 0.4rem; }
+.marquee__item img { width: 5.5rem; height: 5.5rem; object-fit: contain; }
+.marquee__item span { display: block; font-size: 0.82rem; }
+.marquee__arrow { width: 2.4rem; height: 2.4rem; border-radius: 12px; border: 1px solid #eadfbe; background: #fff; cursor: pointer; font-size: 1.4rem; }
+.home-pack { background: #f6f3ee; }
+.home-pack__row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(16rem, 22rem); gap: 0.8rem; overflow-x: auto; padding-bottom: 0.4rem; }
+.home-pack__row figure { margin: 0; border-radius: 12px; overflow: hidden; background: #fff; }
+.home-pack__row img { width: 100%; height: 18rem; object-fit: cover; display: block; }
+.home-types { background: #f3f0ea; padding: 3rem 1.25rem; text-align: center; }
+.home-types h2 { font-family: var(--font-serif); font-weight: 500; font-size: 2.4rem; margin: 0 0 1.5rem; }
+.home-types__row { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+.home-type { width: 9rem; text-decoration: none; color: #1a1408; }
+.home-type span { display: grid; place-items: center; background: #f7f4ee; aspect-ratio: 1; margin-bottom: 0.6rem; }
+.home-type img { width: 78%; height: 78%; object-fit: contain; }
+.home-footer { background: #14110d; color: #f7f1e4; padding: 3.5rem 1.5rem 1.5rem; }
+.home-footer__top, .home-footer__grid { max-width: 80rem; margin: 0 auto; }
+.home-footer__top { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-end; border-bottom: 1px solid rgba(232, 201, 106, 0.35); padding-bottom: 1.5rem; }
+.home-footer__top p { letter-spacing: 0.16em; text-transform: uppercase; color: #E8C96A; margin: 0 0 0.4rem; font-size: 0.75rem; }
+.home-footer__top h2 { margin: 0; font-family: var(--font-serif); font-weight: 500; font-size: clamp(2rem, 4vw, 3.2rem); }
+.home-footer__top a { color: #f7f1e4; text-decoration: none; }
+.home-footer__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1.5rem; padding: 1.5rem 0; }
+.home-footer h3 { margin: 0 0 0.6rem; color: #E8C96A; font-weight: 500; font-family: var(--font-serif); }
+.home-footer a { display: block; color: inherit; text-decoration: none; margin: 0.25rem 0; }
+.home-footer__legal { max-width: 80rem; margin: 0 auto; opacity: 0.7; font-size: 0.78rem; }
 .ngc-footer { background: #1a1408; color: #f7f1e4; padding: 2.5rem 0 1.5rem; }
 .ngc-footer__grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
 .ngc-footer h2, .ngc-footer h3 { font-family: var(--font-serif); font-weight: 500; color: #E8C96A; margin: 0 0 0.5rem; }

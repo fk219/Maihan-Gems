@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { HeroSearch } from '../../components/storefront/HeroSearch.js';
+import { StoneMarquee } from '../../components/storefront/StoneMarquee.js';
 import { NGC_MEDIA, NGC_STONE_TILES } from '../../lib/ngc-home.js';
 
 export const dynamic = 'force-dynamic';
@@ -21,50 +22,54 @@ const PACKAGING = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
 export default function HomePage() {
   return (
     <main id="main-content" className="ngc-home">
-      <section className="ngc-hero" aria-label="Create your dream design">
-        <img
-          className="ngc-hero__photo"
-          src={media('/images/hi-res-webp/landingPage/home/hero/woman@2x.webp')}
-          alt="Gemstone jewelry"
-        />
-        <div className="ngc-hero__card">
-          <h1>Create Your Dream Design</h1>
-          <p>
-            Experience the joy of creating bespoke gemstone jewelry with our design-your-own service,
-            where your dreams become reality through personalized craftsmanship.
-          </p>
-          <HeroSearch />
-          <div className="ngc-hero__actions">
-            <Link className="ngc-btn" href="/design-your-own">Design your own</Link>
-            <Link className="ngc-btn ngc-btn--ghost" href="/browse">Shop gemstones</Link>
+      <section className="home-hero" aria-label="Start here">
+        <p className="home-hero__kicker">Two ways in</p>
+        <h1>Design the piece, or describe it.</h1>
+        <div className="home-hero__grid">
+          <Link href="/design-your-own" className="home-journey">
+            <img src="/media/jew-sapphire-ring.jpg" alt="" />
+            <div>
+              <span>01</span>
+              <h2>Design your own jewellery</h2>
+              <p>Choose a setting, a stone it will hold, then metal and size.</p>
+            </div>
+          </Link>
+          <div className="home-journey home-journey--search">
+            <div>
+              <span>02</span>
+              <h2>Ask in plain English</h2>
+              <p>Find a stone, a setting, or a finished piece. Open it, compare it, or add it to your bag.</p>
+            </div>
+            <HeroSearch />
           </div>
         </div>
       </section>
 
       <section className="ngc-block" aria-labelledby="shop-gems">
         <div className="ngc-wrap">
-          <h2 id="shop-gems">Shop Gemstones</h2>
-          <p className="ngc-lede">
-            Explore our diverse selection of semi precious gemstones to match your unique style and preferences.
-          </p>
-          <div className="ngc-stones">
-            {NGC_STONE_TILES.map((stone) => (
-              <Link key={stone.href} href={stone.href} className="ngc-stone">
-                <img src={media(stone.img)} alt={stone.name} />
-                <span>{stone.name}</span>
-              </Link>
-            ))}
+          <div className="home-head">
+            <h2 id="shop-gems">Shop Gemstones</h2>
+            <p>One continuous row. It moves on its own, and stops when you point at it or use the arrows.</p>
           </div>
         </div>
+        <StoneMarquee
+          tiles={NGC_STONE_TILES.map((stone) => ({
+            name: stone.name,
+            href: stone.href,
+            img: media(stone.img),
+          }))}
+        />
       </section>
 
-      <section className="ngc-block ngc-block--tint" aria-labelledby="jewelry">
+      <section className="ngc-block home-pack" aria-labelledby="packaging">
         <div className="ngc-wrap">
-          <h2 id="jewelry">Gemstone Jewelry</h2>
-          <p className="ngc-lede">Beauty is in the details. Packaging, reports, and documentation travel with every piece.</p>
-          <div className="ngc-pack">
+          <div className="home-head">
+            <h2 id="packaging">Presentation</h2>
+            <p>Boxes, pouches, and reports that travel with the piece.</p>
+          </div>
+          <div className="home-pack__row">
             {PACKAGING.map((item) => (
-              <figure key={item.src} className="ngc-pack__card">
+              <figure key={item.src}>
                 <img src={item.src} alt={item.alt} />
               </figure>
             ))}
@@ -72,24 +77,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="ngc-block" aria-labelledby="dyo">
-        <div className="ngc-wrap">
-          <h2 id="dyo">Design Your Own Gemstone Jewelry</h2>
-          <Link className="ngc-more" href="/design-your-own">How does it work?</Link>
-          <div className="ngc-dyo">
-            <Link href="/settings?for=ring" className="ngc-dyo__card">
-              <img src={media('/images/hi-res-webp/details/ring@2x.webp')} alt="" />
-              <span>Rings</span>
+      <section className="home-types" aria-labelledby="jewelry">
+        <h2 id="jewelry">Gemstone Jewelry</h2>
+        <div className="home-types__row">
+          {[
+            ['Rings', '/jewellery?type=ring', '/media/jew-sapphire-ring.jpg'],
+            ['Earrings', '/jewellery?type=earrings', '/media/jew-sapphire-studs.jpg'],
+            ['Necklaces & Pendants', '/jewellery?type=pendant', '/media/jew-sapphire-pendant.jpg'],
+            ['Bracelets', '/jewellery?type=bracelet', '/media/jew-tennis-bracelet.jpg'],
+            ["Men's Rings", '/jewellery?type=ring', '/media/jew-ruby-ring.jpg'],
+          ].map(([label, href, src]) => (
+            <Link key={label} href={href} className="home-type">
+              <span><img src={src} alt="" /></span>
+              {label}
             </Link>
-            <Link href="/settings?for=earrings" className="ngc-dyo__card">
-              <img src={media('/images/hi-res-webp/mainMenu/settings/dyo-jewelry@2x.webp')} alt="" />
-              <span>Earrings</span>
-            </Link>
-            <Link href="/settings?for=bracelet" className="ngc-dyo__card">
-              <img src={media('/images/hi-res-webp/mainMenu/settingsType/bracelets@2x.webp')} alt="" />
-              <span>Bracelets</span>
-            </Link>
-          </div>
+          ))}
         </div>
       </section>
 
