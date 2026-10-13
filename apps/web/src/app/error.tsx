@@ -37,40 +37,16 @@ export default function GlobalError({
         title="We encountered an unexpected disruption"
         recovery={
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem' }}>
-            <button
-              type="button"
-              onClick={reset}
-              className="button button--primary"
-              style={{
-                padding: '0.75rem 1.75rem',
-                backgroundColor: '#0F172A',
-                color: '#FFFFFF',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
+            <button type="button" onClick={reset} className="btn-primary">
               Try Again
             </button>
-            <Link
-              href="/"
-              className="button button--secondary"
-              style={{
-                padding: '0.75rem 1.75rem',
-                backgroundColor: '#F8FAFC',
-                color: '#0F172A',
-                border: '1px solid #E2E8F0',
-                borderRadius: '6px',
-                textDecoration: 'none',
-                display: 'inline-block',
-              }}
-            >
+            <Link href="/" className="btn-secondary">
               Return to Storefront
             </Link>
           </div>
         }
       >
-        <p style={{ color: '#64748B', lineHeight: '1.6' }}>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 'var(--leading-body)' }}>
           Our atelier systems have logged this event for investigation. Please retry or return to exploring gemstones.
         </p>
       </ErrorState>

@@ -165,7 +165,7 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
       {facets.labs.length > 0 ? (
       <section className="lx-filter">
         <h3>Lab</h3>
-        <FacetChecks values={facets.labs} selected={state.labs} onToggle={(v) => patch({ labs: toggleValue(state.labs, v) })} />
+        <FacetChecks values={facets.labs} selected={state.labs} onToggle={(v) => toggle('labs', v)} />
       </section>
       ) : null}
     </aside>

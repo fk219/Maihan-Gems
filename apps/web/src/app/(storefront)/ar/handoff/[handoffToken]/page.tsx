@@ -78,7 +78,7 @@ export default async function ArHandoffPage({ params }: PageProps) {
         <a
           href="/"
           style={{
-            backgroundColor: '#d4af37',
+            backgroundColor: '#C9A84C',
             color: '#09090b',
             padding: '0.75rem 1.5rem',
             borderRadius: '6px',

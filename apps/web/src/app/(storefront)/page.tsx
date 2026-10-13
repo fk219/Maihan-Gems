@@ -44,7 +44,7 @@ export default async function HomePage() {
               <img src={COLLECTION_TILES.gemstones} alt="" />
               <div className="lx-tile__veil" />
               <div className="lx-tile__copy">
-                <span className="lx-kicker" style={{ color: '#e8c96a' }}>Loose stones</span>
+                <span className="lx-kicker">Loose stones</span>
                 <h3>Gemstones</h3>
                 <p>Sapphires, rubies, emeralds and more</p>
               </div>
@@ -53,7 +53,7 @@ export default async function HomePage() {
               <img src={COLLECTION_TILES.pairs} alt="" />
               <div className="lx-tile__veil" />
               <div className="lx-tile__copy">
-                <span className="lx-kicker" style={{ color: '#e8c96a' }}>Earrings</span>
+                <span className="lx-kicker">Earrings</span>
                 <h3>Matched pairs</h3>
                 <p>Kept together for colour and cut</p>
               </div>
@@ -62,7 +62,7 @@ export default async function HomePage() {
               <img src={COLLECTION_TILES.jewellery} alt="" />
               <div className="lx-tile__veil" />
               <div className="lx-tile__copy">
-                <span className="lx-kicker" style={{ color: '#e8c96a' }}>Finished pieces</span>
+                <span className="lx-kicker">Finished pieces</span>
                 <h3>Jewellery</h3>
                 <p>Rings, earrings, pendants</p>
               </div>
@@ -71,7 +71,7 @@ export default async function HomePage() {
               <img src={COLLECTION_TILES.dyo} alt="" />
               <div className="lx-tile__veil" />
               <div className="lx-tile__copy">
-                <span className="lx-kicker" style={{ color: '#e8c96a' }}>Atelier</span>
+                <span className="lx-kicker">Atelier</span>
                 <h3>Design Your Own</h3>
                 <p>Setting first, or stone first</p>
               </div>
@@ -94,7 +94,7 @@ export default async function HomePage() {
       </section>
 
       {pairs.length > 0 ? (
-        <section className="lx-section" style={{ background: '#fff' }} aria-labelledby="featured-pairs">
+        <section className="lx-section lx-section--studio" aria-labelledby="featured-pairs">
           <div className="lx-wrap">
             <div className="lx-section__head">
               <div>
@@ -108,7 +108,7 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <section className="lx-section" style={{ background: '#fff' }} aria-labelledby="featured-settings">
+      <section className="lx-section lx-section--studio" aria-labelledby="featured-settings">
         <div className="lx-wrap">
           <div className="lx-section__head">
             <div>

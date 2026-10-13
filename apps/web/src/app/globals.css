@@ -30,6 +30,19 @@
     --hairline-border: rgba(201, 168, 76, 0.15);
     --subtle-divider: rgba(0, 0, 0, 0.06);
 
+    /* Design.md §5.3 / §5.4 — component surfaces */
+    --media-canvas: #F7F7F5;
+    --card-border: rgba(201, 168, 76, 0.12);
+    --card-border-hover: rgba(201, 168, 76, 0.35);
+    --btn-secondary-border: rgba(201, 168, 76, 0.3);
+    --gold-separator: rgba(201, 168, 76, 0.5);
+    --search-border: rgba(201, 168, 76, 0.25);
+    --focus-ring: rgba(201, 168, 76, 0.2);
+    --wordmark-divider: rgba(201, 168, 76, 0.4);
+    --gold-hover-wash: rgba(201, 168, 76, 0.04);
+    --card-split: rgba(0, 0, 0, 0.05);
+    --header-canvas: rgba(250, 250, 248, 0.95);
+
     /* Aliases used by existing sheets — same Design.md values */
     --color-gold: #C9A84C;
     --color-gold-light: #E8C96A;
@@ -39,6 +52,7 @@
     --color-navy-deep: #08121E;
     --color-navy-mid: #0D1B2A;
     --color-off-white: #FAFAF8;
+    --color-gold-pale: #E8C96A;
 
     /* Design.md §2.2 — Gemstone Accent Spectrum */
     --gem-sapphire: #1E3A8A;
@@ -172,17 +186,24 @@
   }
 
   h1 {
-    font-size: clamp(2.5rem, 4.5vw, 4rem);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-size: var(--text-h1);
+    line-height: var(--leading-h1);
+    letter-spacing: var(--tracking-h1);
+    font-weight: 500;
   }
 
   h2 {
-    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    font-size: var(--text-h2);
+    line-height: var(--leading-h2);
+    letter-spacing: var(--tracking-h2);
+    font-weight: 500;
   }
 
   h3 {
-    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    font-size: var(--text-h3);
+    line-height: var(--leading-h3);
+    letter-spacing: 0;
+    font-weight: 600;
   }
 
   /* Tabular Numerals for Data */
@@ -202,16 +223,16 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(250, 250, 248, 0.95);
+    background: var(--header-canvas);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--hairline-border);
     transition: all 400ms var(--ease-luxury);
   }
 
   .site-header__container {
-    max-width: 1600px;
+    max-width: var(--content-max);
     margin: 0 auto;
-    padding: 0 var(--space-container);
+    padding: 0 var(--container-pad);
     height: 5rem;
     display: flex;
     align-items: center;
@@ -306,24 +327,28 @@
   }
 
   .site-header__cta-btn {
-    padding: 0.75rem 1.75rem;
+    padding: 0.625rem 1.25rem;
     font-family: var(--font-sans);
-    font-size: 0.6875rem;
+    font-size: var(--text-button);
     font-weight: 600;
-    letter-spacing: 0.18em;
+    letter-spacing: var(--tracking-button);
     text-transform: uppercase;
-    color: var(--text-primary);
-    background: rgba(184, 152, 64, 0.08);
-    border: 1px solid var(--gold);
+    color: var(--studio-white);
+    background: var(--gold-gradient);
+    border: none;
     border-radius: var(--radius);
     text-decoration: none;
+    box-shadow: var(--shadow-gold);
+    cursor: pointer;
     transition: all 400ms var(--ease-luxury);
     white-space: nowrap;
   }
 
   .site-header__cta-btn:hover {
-    background: rgba(184, 152, 64, 0.15);
-    border-color: var(--gold-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-gold-hover);
+    filter: brightness(1.04);
+    color: var(--studio-white);
   }
 }
 
@@ -387,12 +412,13 @@
   /* Section Title */
   .section-title {
     font-family: var(--font-serif);
-    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    font-size: var(--text-h1);
     font-weight: 500;
-    letter-spacing: -0.015em;
-    line-height: 1.15;
+    letter-spacing: var(--tracking-h1);
+    line-height: var(--leading-h1);
     margin: 0 0 1rem 0;
     color: var(--text-primary);
+    text-wrap: balance;
   }
 
   .section-title .text-gold-gradient {
@@ -416,18 +442,20 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @layer components {
-  .luxury-card {
+  .luxury-card,
+  .premium-card {
     background: var(--studio-white);
-    border: 1px solid var(--hairline-border);
+    border: 1px solid var(--card-border);
     border-radius: var(--radius);
     transition: all 400ms var(--ease-luxury);
     box-shadow: var(--shadow-rest);
   }
 
-  .luxury-card:hover {
-    border-color: rgba(201, 168, 76, 0.35);
-    box-shadow: var(--shadow-hover);
-    transform: translateY(-3px);
+  .luxury-card:hover,
+  .premium-card:hover {
+    border-color: var(--card-border-hover);
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-4px);
   }
 
   .luxury-card--light {
@@ -496,7 +524,7 @@
   .hero-showcase-image {
     position: relative;
     aspect-ratio: 4/3;
-    background: linear-gradient(135deg, #F7F7F5 0%, var(--warm-alabaster) 100%);
+    background: var(--media-canvas);
     border-radius: calc(var(--radius) - 4px);
     display: flex;
     align-items: center;
@@ -552,18 +580,18 @@
     color: #FFFFFF;
   }
 
-  /* Secondary Outline Button */
+  /* Design.md §5.2 — Alabaster & Gold Outline Button (Secondary) */
   .btn-outline,
   .btn-secondary {
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--text-button);
     font-weight: 600;
-    letter-spacing: 0.18em;
+    letter-spacing: var(--tracking-button);
     text-transform: uppercase;
-    padding: 1.125rem 2.75rem;
+    padding: 1rem 2.2rem;
     color: var(--text-primary);
-    background: transparent;
-    border: 1.5px solid rgba(184, 152, 64, 0.25);
+    background: var(--studio-white);
+    border: 1px solid var(--btn-secondary-border);
     border-radius: var(--radius);
     display: inline-flex;
     align-items: center;
@@ -572,13 +600,14 @@
     text-decoration: none;
     cursor: pointer;
     white-space: nowrap;
-    transition: all 400ms var(--ease-luxury);
+    transition: all 0.4s var(--ease-luxury);
   }
 
   .btn-outline:hover,
   .btn-secondary:hover {
-    background: rgba(184, 152, 64, 0.04);
+    background: var(--gold-hover-wash);
     border-color: var(--gold);
+    transform: translateY(-1px);
   }
 }
 
@@ -593,16 +622,16 @@
     align-items: center;
     gap: 0.5rem;
     background: var(--studio-white);
-    border: 1px solid var(--hairline-border);
+    border: 1px solid var(--search-border);
     border-radius: var(--radius);
     padding: 0.25rem 0.25rem 0.25rem 1.25rem;
-    transition: all 300ms ease;
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+    transition: all var(--duration-hover) var(--ease-luxury);
+    box-shadow: var(--shadow-search);
   }
 
   .search-bar-form:focus-within {
     border-color: var(--gold);
-    box-shadow: 0 4px 20px -2px rgba(201, 168, 76, 0.15);
+    box-shadow: 0 0 0 2px var(--focus-ring);
   }
 
   .search-input {
@@ -784,11 +813,31 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @layer utilities {
-  .text-gold-gradient {
-    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+  .text-gold-gradient,
+  .gold-gradient-text {
+    background: var(--gold-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    color: var(--text-secondary);
+    line-height: 1;
+    display: block;
+  }
+
+  .section-container {
+    max-width: var(--content-max);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--container-pad);
+    padding-right: var(--container-pad);
   }
 
   .tabular-nums {
@@ -917,8 +966,19 @@
     }
   }
 
+  @keyframes silkFadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .silk-enter {
-    animation: silk-fade-up 1200ms var(--ease-luxury) forwards;
+    animation: silkFadeUp var(--duration-enter) var(--ease-luxury) forwards;
   }
 
   /* Reduce motion preferences */

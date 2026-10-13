@@ -103,16 +103,13 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
               </p>
               <button
                 type="button"
-                className="lx-search__box"
-                style={{ display: 'inline-flex', padding: 0 }}
+                className="lx-btn lx-btn--solid"
                 onClick={() => {
                   addToBag(item);
                   setOpen(false);
                 }}
               >
-                <span style={{ padding: '0.9rem 1.4rem', letterSpacing: '0.16em', textTransform: 'uppercase', fontSize: '0.68rem', background: '#08121e', color: '#fff' }}>
-                  Add to bag
-                </span>
+                Add to bag
               </button>
               <p style={{ marginTop: '1rem' }}>
                 <button type="button" className="lx-text-btn" onClick={() => setCompared(toggleCompare(item))}>

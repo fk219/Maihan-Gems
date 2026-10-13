@@ -54,7 +54,7 @@ export function ArClientView({ assetId }: { assetId: string }) {
           height: '100vh',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#d4af37',
+          color: '#C9A84C',
         }}
       >
         <span>Retrieving 3D Model Specification...</span>
@@ -80,7 +80,7 @@ export function ArClientView({ assetId }: { assetId: string }) {
           href="/"
           style={{
             display: 'inline-block',
-            backgroundColor: '#d4af37',
+            backgroundColor: '#C9A84C',
             color: '#09090b',
             padding: '0.75rem 1.5rem',
             borderRadius: '6px',
