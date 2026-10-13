@@ -85,11 +85,18 @@ export async function importNgcResearch(client: PoolClient): Promise<{ upserted:
 
   for (const product of products) {
     const kind = dbKind(product.kind);
-    const slug = product.slug.toLowerCase();
+    let slug = product.slug.toLowerCase();
     const found = await client.query<{ id: string }>(
-      `SELECT id FROM products WHERE sku = $1 OR public_code = $1 OR slug = $2 LIMIT 1`,
-      [product.id, slug],
+      `SELECT id FROM products WHERE sku = $1 OR public_code = $1 LIMIT 1`,
+      [product.id],
     );
+    if (!found.rows[0]) {
+      const taken = await client.query(
+        `SELECT 1 FROM products WHERE slug = $1 LIMIT 1`,
+        [slug],
+      );
+      if ((taken.rowCount ?? 0) > 0) slug = `${slug}-${product.id.toLowerCase()}`;
+    }
     let productId = found.rows[0]?.id;
     if (!productId) {
       const inserted = await client.query<{ id: string }>(

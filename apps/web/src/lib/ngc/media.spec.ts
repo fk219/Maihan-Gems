@@ -12,6 +12,16 @@ import type { NgcMediaItem } from './types.js';
 describe('Cloudinary delivery', () => {
   it('stores public_id under maihan/products/<id>/<file> and renders f_auto,q_auto', () => {
     expect(cloudinaryPublicId('K11733', 'stone.jpg')).toBe('maihan/products/K11733/stone.jpg');
+    expect(
+      cloudinaryPublicId(
+        'JS1231Y18-K2653',
+        '01_image_view-01.jpg',
+        'media/JS1231Y18-K2653/setting_JS1231/01_image_view-01.jpg',
+      ),
+    ).toBe('maihan/products/JS1231Y18-K2653/setting_JS1231/01_image_view-01.jpg');
+    expect(
+      cloudinaryPublicId('JS1231Y18-K2653', 'spin360.mp4', 'media/JS1231Y18-K2653/stone_K2653/spin360'),
+    ).toBe('maihan/products/JS1231Y18-K2653/stone_K2653/spin360.mp4');
     expect(cloudinaryDeliveryUrl('maihan/products/K11733/stone.jpg', 'image')).toBe(
       'https://res.cloudinary.com/o1zwhvbi/image/upload/f_auto,q_auto/maihan/products/K11733/stone.jpg',
     );
@@ -29,6 +39,18 @@ describe('Cloudinary delivery', () => {
       'https://res.cloudinary.com/o1zwhvbi/image/upload/f_auto,q_auto/v1791916341/maihan/products/K11733/stone.jpg',
     );
     expect(withAutoTransform(withAutoTransform(raw, 'image'), 'image')).toContain('/upload/f_auto,q_auto/');
+  });
+
+  it('keeps setting/stone subfolders and maps spin360 dirs to spin360.mp4', () => {
+    const spin: NgcMediaItem = {
+      kind: 'spin360',
+      order: 5,
+      localPath: 'media/JS1231Y18-K2653/setting_JS1231/spin360',
+      fileName: 'spin360.mp4',
+    };
+    const attached = attachCloudinary('JS1231Y18-K2653', spin);
+    expect(attached.cloudinaryPublicId).toBe('maihan/products/JS1231Y18-K2653/setting_JS1231/spin360.mp4');
+    expect(attached.secureUrl).toContain('/video/upload/f_auto,q_auto/maihan/products/JS1231Y18-K2653/setting_JS1231/spin360.mp4');
   });
 
   it('prefers Cloudinary over the original NGC URL', () => {

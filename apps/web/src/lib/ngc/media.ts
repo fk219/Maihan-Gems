@@ -15,12 +15,46 @@ function cloudName(): string {
 export function resourceTypeFor(kind: string | null | undefined, fileName: string | null | undefined): CloudinaryResource {
   const name = (fileName ?? '').toLowerCase();
   if (kind === 'spin360' || kind === 'video' || name.endsWith('.mp4') || name.endsWith('.webm')) return 'video';
-  if (kind === 'scan_3d_srn' || name.endsWith('.srn') || name.endsWith('.glb') || name.endsWith('.usdz')) return 'raw';
+  if (
+    kind === 'scan_3d_srn' ||
+    name.endsWith('.srn') ||
+    name.endsWith('.glb') ||
+    name.endsWith('.usdz') ||
+    name.endsWith('.pdf')
+  ) {
+    return 'raw';
+  }
   return 'image';
 }
 
-export function cloudinaryPublicId(productId: string, fileName: string): string {
-  return `maihan/products/${productId}/${fileName}`;
+/** Path under maihan/products/<id>/, including setting_ and stone_ subfolders. */
+export function relativeCloudinaryFile(
+  productId: string,
+  fileName: string | null | undefined,
+  localPath?: string | null,
+): string {
+  const fallback = fileName && fileName.length > 0 ? fileName : 'spin360.mp4';
+  const raw = (localPath ?? '').replace(/\\/g, '/').replace(/^\/+/, '');
+  const prefix = `media/${productId}/`;
+  let rel = '';
+  if (raw.startsWith(prefix)) rel = raw.slice(prefix.length);
+  else if (raw) {
+    const parts = raw.split('/').filter(Boolean);
+    const idIndex = parts.indexOf(productId);
+    if (idIndex >= 0) rel = parts.slice(idIndex + 1).join('/');
+  }
+  if (!rel) return fallback;
+  if (rel === 'spin360' || rel.endsWith('/spin360')) return rel.replace(/spin360$/, 'spin360.mp4');
+  if (!rel.includes('.')) return `${rel.replace(/\/$/, '')}/${fallback}`;
+  return rel;
+}
+
+export function cloudinaryPublicId(
+  productId: string,
+  fileName: string,
+  localPath?: string | null,
+): string {
+  return `maihan/products/${productId}/${relativeCloudinaryFile(productId, fileName, localPath)}`;
 }
 
 /** Public delivery URL. Images/videos get f_auto,q_auto; raw scans do not. */
@@ -46,7 +80,7 @@ export function attachCloudinary(productId: string, item: NgcMediaItem): NgcMedi
     return { ...item, cloudinaryResourceType: resource, secureUrl };
   }
   if (item.kind === 'spin360') {
-    const publicId = cloudinaryPublicId(productId, 'spin360.mp4');
+    const publicId = cloudinaryPublicId(productId, item.fileName ?? 'spin360.mp4', item.localPath);
     return {
       ...item,
       fileName: item.fileName ?? 'spin360.mp4',
@@ -58,7 +92,7 @@ export function attachCloudinary(productId: string, item: NgcMediaItem): NgcMedi
   const fileName = item.fileName && item.fileName.length > 3 ? item.fileName : null;
   if (!fileName) return item;
   const resource = resourceTypeFor(item.kind, fileName);
-  const publicId = cloudinaryPublicId(productId, fileName);
+  const publicId = cloudinaryPublicId(productId, fileName, item.localPath);
   return {
     ...item,
     cloudinaryPublicId: publicId,

@@ -95,8 +95,35 @@ function mapMediaKind(type) {
 function resourceTypeFor(kind, fileName) {
   const name = String(fileName ?? '').toLowerCase();
   if (kind === 'spin360' || kind === 'video' || name.endsWith('.mp4') || name.endsWith('.webm')) return 'video';
-  if (kind === 'scan_3d_srn' || name.endsWith('.srn') || name.endsWith('.glb') || name.endsWith('.usdz')) return 'raw';
+  if (
+    kind === 'scan_3d_srn' ||
+    name.endsWith('.srn') ||
+    name.endsWith('.glb') ||
+    name.endsWith('.usdz') ||
+    name.endsWith('.pdf')
+  ) {
+    return 'raw';
+  }
   return 'image';
+}
+
+function relativeCloudinaryFile(productId, fileName, localPath) {
+  const fallback = fileName && String(fileName).length > 0 ? fileName : 'spin360.mp4';
+  const raw = String(localPath ?? '')
+    .replace(/\\/g, '/')
+    .replace(/^\/+/, '');
+  const prefix = `media/${productId}/`;
+  let rel = '';
+  if (raw.startsWith(prefix)) rel = raw.slice(prefix.length);
+  else if (raw) {
+    const parts = raw.split('/').filter(Boolean);
+    const idIndex = parts.indexOf(productId);
+    if (idIndex >= 0) rel = parts.slice(idIndex + 1).join('/');
+  }
+  if (!rel) return fallback;
+  if (rel === 'spin360' || rel.endsWith('/spin360')) return rel.replace(/spin360$/, 'spin360.mp4');
+  if (!rel.includes('.')) return `${rel.replace(/\/$/, '')}/${fallback}`;
+  return rel;
 }
 
 function deliveryUrl(publicId, resource) {
@@ -111,7 +138,7 @@ function withAutoTransform(secureUrl, resource) {
   return secureUrl.replace('/upload/', '/upload/f_auto,q_auto/');
 }
 
-function cloudinaryFor(productId, kind, fileName, mapped) {
+function cloudinaryFor(productId, kind, fileName, mapped, localPath) {
   if (mapped?.cloudinary_public_id) {
     const resource = mapped.cloudinary_resource_type || resourceTypeFor(kind, fileName);
     const publicId = mapped.cloudinary_public_id;
@@ -121,17 +148,18 @@ function cloudinaryFor(productId, kind, fileName, mapped) {
       secureUrl: withAutoTransform(mapped.secure_url, resource) || deliveryUrl(publicId, resource),
     };
   }
+  const rel = relativeCloudinaryFile(productId, kind === 'spin360' ? fileName || 'spin360.mp4' : fileName, localPath);
   if (kind === 'spin360') {
-    const publicId = `maihan/products/${productId}/spin360.mp4`;
+    const publicId = `maihan/products/${productId}/${rel}`;
     return {
       cloudinaryPublicId: publicId,
       cloudinaryResourceType: 'video',
       secureUrl: deliveryUrl(publicId, 'video'),
     };
   }
-  if (!fileName) return {};
-  const resource = resourceTypeFor(kind, fileName);
-  const publicId = `maihan/products/${productId}/${fileName}`;
+  if (!fileName && !rel) return {};
+  const resource = resourceTypeFor(kind, fileName || rel);
+  const publicId = `maihan/products/${productId}/${rel}`;
   return {
     cloudinaryPublicId: publicId,
     cloudinaryResourceType: resource,
@@ -195,7 +223,7 @@ function compileMedia(product, mappedProduct) {
         framesCount: item.frames_count ?? 0,
         localPath: item.local_dir ?? null,
         fileName: 'spin360.mp4',
-        ...cloudinaryFor(product.id, 'spin360', 'spin360.mp4', mapped),
+        ...cloudinaryFor(product.id, 'spin360', 'spin360.mp4', mapped, item.local_dir ?? item.local_path),
       });
       continue;
     }
@@ -215,7 +243,7 @@ function compileMedia(product, mappedProduct) {
       fileName,
       thumbnail: item.thumbnailUrl ?? null,
       variants: item.variants ?? null,
-      ...cloudinaryFor(product.id, kind, fileName, mapped),
+      ...cloudinaryFor(product.id, kind, fileName, mapped, item.local_path ?? item.local_dir),
     });
   }
   return { media, spin, sarinPath };
