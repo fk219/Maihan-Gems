@@ -40,6 +40,13 @@ const ENVELOPE_FAILURE_REASON: Record<CursorEnvelopeFailure, string> = {
   SCHEMA_MISMATCH: 'payload-not-a-schema-member',
 };
 
+function envelopeFailureReason(code: string): string {
+  if (code === 'NOT_A_TOKEN' || code === 'MALFORMED_PAYLOAD' || code === 'SCHEMA_MISMATCH') {
+    return ENVELOPE_FAILURE_REASON[code];
+  }
+  return ENVELOPE_FAILURE_REASON.SCHEMA_MISMATCH;
+}
+
 /**
  * Structural + semantic cursor validation for the products listing.
  *
@@ -53,7 +60,7 @@ export function validateProductCursor(
   if (token === undefined || token === null || token === '') return null;
   const decoded = tryDecodeProductCursor(token);
   if (typeof decoded === 'string') {
-    throw invalidCursorError(ENVELOPE_FAILURE_REASON[decoded]);
+    throw invalidCursorError(envelopeFailureReason(decoded));
   }
   if (decoded.s !== request.sortKey || decoded.d !== request.direction) {
     throw invalidCursorError('sort-shape-mismatch');
@@ -68,7 +75,7 @@ export function validateSettingCursor(token: string | null | undefined): Setting
   if (typeof decoded === 'string') {
     // Reuse the product error — same closed code, settings-shaped field.
     throw new ContractError('VALIDATION_FAILED', 'Invalid or incompatible page cursor.', [
-      { field: 'cursor', reason: ENVELOPE_FAILURE_REASON[decoded] },
+      { field: 'cursor', reason: envelopeFailureReason(decoded) },
     ]);
   }
   return decoded;

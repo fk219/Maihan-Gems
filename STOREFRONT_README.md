@@ -26,7 +26,7 @@ docker compose up -d
 # 2. Set environment variable
 export DATABASE_URL="postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev"
 
-# 3. Storefront schema + seed (do NOT use migrate.js for storefront-only dev)
+# 3. Storefront schema + seed (uses tsx — no full @maihan/db compile; do NOT use migrate.js for storefront-only dev)
 cd /workspace
 pnpm install
 pnpm storefront:db:setup

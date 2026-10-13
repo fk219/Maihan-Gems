@@ -60,6 +60,11 @@ export function validateWebarAssetBudgets(params: {
   const budget = WEBAR_BUDGETS[params.jewelleryType];
   const violations: string[] = [];
 
+  if (budget === undefined) {
+    violations.push(`No WebAR budget defined for jewellery type ${params.jewelleryType}`);
+    return { valid: false, violations };
+  }
+
   if (params.polyCount && params.polyCount > budget.maxTriangles) {
     violations.push(`Polygon count (${params.polyCount}) exceeds budget for ${params.jewelleryType} (${budget.maxTriangles})`);
   }

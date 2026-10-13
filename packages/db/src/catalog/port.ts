@@ -273,8 +273,8 @@ export function createCatalogQueryPort(db: CatalogDatabase): CatalogQueryPort {
         settingStyle: f.style,
       });
       const styleIds = f.style
-        .map((slug) => whitelist.settingStyle.get(slug)?.id)
-        .filter((id): id is string => id !== undefined);
+        .map((slug: string) => whitelist.settingStyle.get(slug)?.id)
+        .filter((id: string | undefined): id is string => id !== undefined);
 
       const limit = clampLimit(parsed.limit, PRODUCT_CURSOR_MAX_LIMIT);
       const cursor = validateSettingCursor(parsed.cursor);
@@ -375,7 +375,7 @@ export function createCatalogQueryPort(db: CatalogDatabase): CatalogQueryPort {
       }
       const variants = await findSettingVariantsForDesigns(db, [String(row['id'])]);
       const design = mapSettingDesign(row, variants as unknown as Record<string, unknown>[]);
-      const variant = design.variants.find((v) => v.sku === sku);
+      const variant = design.variants.find((v: { sku: string }) => v.sku === sku);
       if (variant === undefined) {
         throw contractNotFound('SETTING_VARIANT_NOT_FOUND', 'sku', sku);
       }

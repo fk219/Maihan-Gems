@@ -399,7 +399,7 @@ export async function updateCartItemQuantity(
   assertValidQuantity(input.quantity);
 
   const cart = await getCartByToken(db, cartToken);
-  const targetItem = cart.items.find((item) => item.id === itemId);
+  const targetItem = cart.items.find((item: CartItemDto) => item.id === itemId);
   if (targetItem === undefined) {
     throw new ContractError('VALIDATION_FAILED', `Cart item with id "${itemId}" does not exist in cart.`);
   }

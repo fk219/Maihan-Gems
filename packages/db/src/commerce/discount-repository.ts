@@ -19,6 +19,8 @@ import {
   type ValidateDiscountResultDto,
 } from '@maihan/contracts';
 
+type DiscountLineItem = NonNullable<ValidateDiscountInput['items']>[number];
+
 interface DiscountRow {
   id: string;
   code: string | null;
@@ -208,7 +210,7 @@ export async function validateDiscount(
   const scope = discount.scope;
   if (scope.products && scope.products.length > 0 && input.items && input.items.length > 0) {
     const hasMatchingProduct = input.items.some(
-      (item) => item.product_id && scope.products!.includes(item.product_id),
+      (item: DiscountLineItem) => item.product_id && scope.products!.includes(item.product_id),
     );
     if (!hasMatchingProduct) {
       throw new ContractError('DISCOUNT_INVALID', 'Discount code does not apply to items in your cart.');
@@ -216,7 +218,7 @@ export async function validateDiscount(
   }
   if (scope.varieties && scope.varieties.length > 0 && input.items && input.items.length > 0) {
     const hasMatchingVariety = input.items.some(
-      (item) => item.variety && scope.varieties!.includes(item.variety),
+      (item: DiscountLineItem) => item.variety && scope.varieties!.includes(item.variety),
     );
     if (!hasMatchingVariety) {
       throw new ContractError('DISCOUNT_INVALID', 'Discount code does not apply to gemstone varieties in your cart.');
