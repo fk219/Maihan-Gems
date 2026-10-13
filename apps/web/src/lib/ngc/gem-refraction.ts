@@ -20,21 +20,21 @@ export function createStudioEnvMap(): THREE.CanvasTexture {
   canvas.height = height;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('studio env canvas');
-  ctx.fillStyle = '#05050a';
+  ctx.fillStyle = '#12121a';
   ctx.fillRect(0, 0, width, height);
   const panel = (u0: number, v0: number, u1: number, v1: number, fill: string) => {
     ctx.fillStyle = fill;
     ctx.fillRect(u0 * width, v0 * height, (u1 - u0) * width, (v1 - v0) * height);
   };
-  panel(0.3, 0.1, 0.7, 0.32, '#ffffff');
-  panel(0.4, 0.04, 0.6, 0.1, '#ffffff');
-  panel(0.06, 0.2, 0.16, 0.34, '#f4f4f8');
-  panel(0.84, 0.22, 0.94, 0.36, '#fff1d6');
-  panel(0.47, 0.16, 0.51, 0.21, '#ffffff');
-  panel(0.18, 0.12, 0.205, 0.155, '#ffffff');
-  panel(0.78, 0.11, 0.805, 0.145, '#ffffff');
-  panel(0.62, 0.08, 0.64, 0.11, '#ffffff');
-  panel(0.36, 0.07, 0.38, 0.1, '#ffffff');
+  panel(0.12, 0.04, 0.88, 0.42, '#f2f2f6');
+  panel(0.32, 0.08, 0.68, 0.3, '#ffffff');
+  panel(0.46, 0.15, 0.52, 0.22, '#ffffff');
+  panel(0.16, 0.1, 0.2, 0.15, '#ffffff');
+  panel(0.8, 0.1, 0.84, 0.15, '#ffffff');
+  panel(0.6, 0.06, 0.63, 0.1, '#ffffff');
+  panel(0.08, 0.2, 0.14, 0.3, '#ffffff');
+  panel(0.86, 0.22, 0.93, 0.32, '#fff4e0');
+  panel(0.0, 0.68, 1, 1, '#08080e');
   const texture = new THREE.CanvasTexture(canvas);
   texture.mapping = THREE.EquirectangularReflectionMapping;
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -146,7 +146,7 @@ export function createGemRefractionMaterial(options: {
       vec3 envSample(vec3 rayDirection) {
         vec3 c = texture(envMap, gemEquirect(rayDirection)).rgb;
         float luma = dot(c, vec3(0.333));
-        return c * mix(0.55, 1.85, smoothstep(0.12, 0.9, luma));
+        return c * mix(1.0, 1.75, smoothstep(0.35, 0.95, luma));
       }
 
       vec3 totalInternalReflection(vec3 incomingDirection, vec3 normal, float rayIor, inout float pathLength) {
@@ -197,14 +197,18 @@ export function createGemRefractionMaterial(options: {
         }
 
         float pathLength = clamp(pathG, 0.0, 1.15);
-        vec3 beer = max(exp(-(vec3(1.0) - color) * pathLength * absorption), vec3(0.42));
-        vec3 body = transmitted * mix(color, vec3(1.0), 0.48) * beer;
+        vec3 beer = max(exp(-(vec3(1.0) - color) * pathLength * absorption), vec3(0.6));
+        float win = dot(transmitted, vec3(0.333));
+        vec3 tint = mix(color, vec3(1.0), 0.28);
+        vec3 dim = color * 0.5;
+        vec3 lit = transmitted * tint * beer;
+        vec3 body = mix(dim, lit, smoothstep(0.18, 0.62, win));
         vec3 viewDir = safeNormalize(cameraPosition - vWorldPosition, vec3(0.0, 0.0, 1.0));
         vec3 reflected = envSample(reflect(-viewDir, normal));
         float f = pow(1.0 - max(dot(viewDir, normal), 0.0), 5.0) * fresnel;
-        vec3 pixel = mix(body, reflected, f);
+        vec3 pixel = mix(body, mix(reflected * tint, reflected, 0.75), f);
         pixel = max(pixel, vec3(0.0));
-        if (any(isnan(pixel))) pixel = color * 0.6;
+        if (any(isnan(pixel))) pixel = color * 0.7;
         gl_FragColor = vec4(pixel, 1.0);
 
         #include <tonemapping_fragment>
