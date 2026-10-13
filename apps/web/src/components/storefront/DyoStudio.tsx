@@ -10,6 +10,7 @@ import {
   compatibleSettings,
   compatibleStones,
   pairingCaption,
+  settingSeatLabel,
   stoneFitStatus,
 } from '../../lib/dyo-compat.js';
 import { productImage } from '../../lib/storefront-images.js';
@@ -137,7 +138,7 @@ export function DyoStudio({
     { name: '18K Yellow Gold' as const, color: '#C9A84C' },
     { name: '18K White Gold' as const, color: '#FAFAF8' },
     { name: '18K Rose Gold' as const, color: '#EA580C' },
-    { name: 'Platinum' as const, color: '#8A867E' },
+    { name: 'Platinum' as const, color: '#D7D8DC' },
   ];
 
   return (
@@ -229,6 +230,36 @@ export function DyoStudio({
                   </div>
                 </>
               ) : null}
+              <p className="atelier__kicker">Your pairing</p>
+              <div className="atelier__picks">
+                <article className="atelier-card">
+                  <span className="atelier-card__media">{settingImage ? <img src={settingImage} alt="" /> : <span />}</span>
+                  <span className="atelier-card__kicker">{setting?.settingFor ?? 'Setting'}</span>
+                  <strong>{setting ? settingSeatLabel(setting.title, setting.settingFor) : 'Setting'}</strong>
+                  <em>{setting ? formatMoney(setting.priceUsd, currency, rates) : '—'}</em>
+                </article>
+                <article className="atelier-card">
+                  <span className="atelier-card__media">{stoneImage ? <img src={stoneImage} alt="" /> : <span />}</span>
+                  <span className="atelier-card__kicker">{[stone?.caratTotal ? `${stone.caratTotal} ct` : null, stone?.shape].filter(Boolean).join(' · ') || 'Stone'}</span>
+                  <strong>{stone?.title ?? 'Stone'}</strong>
+                  <em>{stone ? formatMoney(stone.priceUsd, currency, rates) : '—'}</em>
+                </article>
+              </div>
+              <dl className="atelier__totals">
+                <div><dt>Setting</dt><dd>{setting ? formatMoney(setting.priceUsd, currency, rates) : '—'}</dd></div>
+                <div><dt>Stone</dt><dd>{stone ? formatMoney(stone.priceUsd, currency, rates) : '—'}</dd></div>
+                <div className="is-total"><dt>{metal}{setting?.settingFor === 'ring' ? ` · US ${size}` : ''}</dt><dd>{formatMoney(total, currency, rates)}</dd></div>
+              </dl>
+              {accept ? <p className="atelier__note">Accepts {accept}</p> : null}
+              {fit === 'needs_review' ? (
+                <p className="atelier__note">
+                  This pairing sits near the seat’s size band. A jeweller will review the prongs before the piece is made.
+                </p>
+              ) : null}
+              {fit === 'fits' ? <p className="atelier__fit">Compatible — shape and carat sit inside the seat.</p> : null}
+              <button type="button" className="atelier__bag" disabled={!setting || !stone} onClick={reserve}>
+                {reserved ? 'Held in your bag' : 'Add to bag'}
+              </button>
             </div>
           ) : null}
         </section>
@@ -252,17 +283,17 @@ export function DyoStudio({
                       }
                     : null
                 }
-                label={stone && setting ? `${stone.title} in ${setting.title}` : 'Studio preview'}
+                label={
+                  stone && setting
+                    ? `${stone.title} in a ${settingSeatLabel(setting.title, setting.settingFor)}`
+                    : 'Studio preview'
+                }
               />
             ) : (
               <p>Select a setting</p>
             )}
           </div>
           <p className="atelier__caption">{caption}</p>
-          <div className="atelier__thumbs">
-            <figure>{settingImage ? <img src={settingImage} alt="" /> : <span />}<figcaption>{setting?.title ?? 'Setting'}</figcaption></figure>
-            <figure>{stoneImage ? <img src={stoneImage} alt="" /> : <span />}<figcaption>{stone?.title ?? 'Stone'}</figcaption></figure>
-          </div>
           <p className="atelier__kicker">Metal</p>
           <div className="atelier__metals">
             {swatches.map((item) => (
@@ -272,21 +303,6 @@ export function DyoStudio({
               </button>
             ))}
           </div>
-          <dl>
-            <div><dt>Setting</dt><dd>{setting ? formatMoney(setting.priceUsd, currency, rates) : '—'}</dd></div>
-            <div><dt>Stone</dt><dd>{stone ? formatMoney(stone.priceUsd, currency, rates) : '—'}</dd></div>
-            <div className="is-total"><dt>{metal}{setting?.settingFor === 'ring' ? ` · US ${size}` : ''}</dt><dd>{formatMoney(total, currency, rates)}</dd></div>
-          </dl>
-          {accept ? <p className="atelier__note">Accepts {accept}</p> : null}
-          {fit === 'needs_review' ? (
-            <p className="atelier__note">
-              This pairing sits near the seat’s size band. A jeweller will review the prongs before the piece is made.
-            </p>
-          ) : null}
-          {fit === 'fits' ? <p className="atelier__fit">Compatible — shape and carat sit inside the seat.</p> : null}
-          <button type="button" className="atelier__bag" disabled={!setting || !stone} onClick={reserve}>
-            {reserved ? 'Held in your bag' : 'Add to bag'}
-          </button>
           <button type="button" className="atelier__try" disabled={!setting || !stone} onClick={() => setTryOn(true)}>
             Virtual try-on
           </button>

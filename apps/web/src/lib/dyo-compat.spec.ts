@@ -5,6 +5,7 @@ import {
   compatibleStones,
   pairingCaption,
   settingAcceptsStone,
+  settingSeatLabel,
   stoneFitStatus,
 } from './dyo-compat.js';
 import type { SettingForDyo, StorefrontCard } from './storefront-types.js';
@@ -96,5 +97,25 @@ describe('DYO compatibility', () => {
     expect(text.toLowerCase()).toContain('atelier preview');
     expect(text.toLowerCase()).toContain('sapphire');
     expect(text).toContain('not a photograph');
+  });
+
+  it('names the live metal, not the catalogue metal on the setting SKU', () => {
+    expect(settingSeatLabel('Platinum 950 Solitaire Setting_Ring JS31', 'ring')).toBe(
+      'solitaire ring setting',
+    );
+    const text = pairingCaption(
+      setting({ title: 'Platinum 950 Solitaire Setting_Ring JS31' }),
+      stone({
+        title: '1.31 Ct Violetish Blue Tanzanite',
+        stoneType: 'Tanzanite',
+        shape: 'Round',
+        caratTotal: 1.31,
+        originCountry: 'Tanzania',
+      }),
+      '18K Yellow Gold',
+    );
+    expect(text).toContain('18K Yellow Gold');
+    expect(text.toLowerCase()).toContain('solitaire ring setting');
+    expect(text.toLowerCase()).not.toContain('platinum');
   });
 });

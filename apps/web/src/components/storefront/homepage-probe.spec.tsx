@@ -5,8 +5,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { AxeBuilder } from '../../lib/axe-builder.js';
-import { StorefrontProvider } from './StorefrontProvider.js';
 import { DEFAULT_FX } from '../../lib/currency.js';
+import { storefrontBySlug } from '../../lib/ngc/storefronts.js';
+import { StorefrontProvider } from './StorefrontProvider.js';
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: () => undefined, replace: () => undefined, prefetch: () => undefined }),
@@ -62,5 +63,23 @@ describe('homepage redesign', () => {
     expect(blocking, blocking.map((v) => `${v.id}: ${v.nodes.length} nodes`).join('; ')).toEqual([]);
 
     container.remove();
+  });
+
+  it('photographs each sister house with its own stone', async () => {
+    const cases = [
+      ['sapphire', '/media/jew-sapphire-ring.jpg', '/media/stone-sapphire.jpg'],
+      ['ruby', '/media/jew-ruby-ring.jpg', '/media/stone-ruby.jpg'],
+      ['emerald', '/media/jew-emerald-necklace.jpg', '/media/stone-emerald.jpg'],
+    ] as const;
+    for (const [slug, main, small] of cases) {
+      const page = await HomePage({ brand: storefrontBySlug(slug) });
+      const html = renderToStaticMarkup(
+        createElement(StorefrontProvider, { rates: DEFAULT_FX, children: page }),
+      );
+      const container = document.createElement('div');
+      container.innerHTML = html;
+      expect(container.querySelector('.mgh-hero__img-main')?.getAttribute('src'), slug).toBe(main);
+      expect(container.querySelector('.mgh-hero__img-small')?.getAttribute('src'), slug).toBe(small);
+    }
   });
 });

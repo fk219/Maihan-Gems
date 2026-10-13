@@ -29,4 +29,17 @@ describe('faceted gem geometry', () => {
     expect(buildFacetedGem('princess').facetCount).toBeGreaterThan(16);
     expect(buildFacetedGem('trillion').facetCount).toBeGreaterThan(10);
   });
+
+  it('centres the lattice on the origin so the stone sits in frame', () => {
+    const mesh = buildFacetedGem('round');
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (let i = 1; i < mesh.positions.length; i += 3) {
+      minY = Math.min(minY, mesh.positions[i]!);
+      maxY = Math.max(maxY, mesh.positions[i]!);
+    }
+    expect(Math.abs(minY + maxY)).toBeLessThan(0.02);
+    expect(maxY).toBeGreaterThan(0.2);
+    expect(minY).toBeLessThan(-0.2);
+  });
 });

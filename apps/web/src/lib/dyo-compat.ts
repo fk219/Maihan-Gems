@@ -45,6 +45,27 @@ export function stoneFitStatus(setting: SettingForDyo, stone: StorefrontCard): C
   return 'fits';
 }
 
+const METAL_LEAD =
+  /^(?:(?:18|14)\s*k(?:arat)?(?:\s+(?:yellow|white|rose))?\s*gold|platinum(?:\s*\d+)?|palladium|yellow gold|white gold|rose gold)[\s,]*/i;
+const SKU_TAIL = /\s+[A-Z]{1,3}\d+[A-Z0-9]*$/i;
+
+/** Seat name without the catalogue metal or SKU, so live metal can be named once. */
+export function settingSeatLabel(title: string, settingFor?: string | null): string {
+  let text = title.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+  for (let i = 0; i < 3; i += 1) {
+    const next = text.replace(METAL_LEAD, '').trim();
+    if (next === text) break;
+    text = next;
+  }
+  text = text.replace(SKU_TAIL, '').trim().toLowerCase();
+  text = text.replace(/\s+setting\s+/g, ' ').replace(/\s+setting$/i, '').trim();
+  const seat = (settingFor ?? '').replace(/_/g, ' ').toLowerCase();
+  if (!text && !seat) return 'setting';
+  if (seat && (text === seat || text.includes(seat))) return `${text} setting`.replace(/\s+/g, ' ').trim();
+  if (seat) return `${text} ${seat} setting`.replace(/\s+/g, ' ').trim();
+  return `${text} setting`.replace(/\s+/g, ' ').trim();
+}
+
 export function pairingCaption(
   setting: SettingForDyo | null,
   stone: StorefrontCard | null,
@@ -56,7 +77,7 @@ export function pairingCaption(
   if (setting && !stone) {
     const seat = setting.accepts[0];
     const band = seat ? `, cut for a ${seat.shape} of ${seat.minCarat ?? 0}–${seat.maxCarat ?? '∞'} ct` : '';
-    return `A ${setting.title} in ${metal}${band}. Select a compatible stone to seat it.`;
+    return `A ${settingSeatLabel(setting.title, setting.settingFor)} in ${metal}${band}. Select a compatible stone to seat it.`;
   }
   if (!setting && stone) {
     const facts = [stone.caratTotal ? `${stone.caratTotal} ct` : null, stone.shape, stone.originCountry]
@@ -68,5 +89,6 @@ export function pairingCaption(
   const ct = stone!.caratTotal ? `${stone!.caratTotal} ct ` : '';
   const shape = stone!.shape ? `${stone!.shape.toLowerCase()} ` : '';
   const type = (stone!.stoneType ?? 'gem').toLowerCase();
-  return `Atelier preview: a ${ct}${shape}${type}${origin} seated in ${setting!.title} (${metal}). Procedural studio render from the pairing — not a photograph of a finished jewel.`;
+  const seat = settingSeatLabel(setting!.title, setting!.settingFor);
+  return `Atelier preview: a ${ct}${shape}${type}${origin} seated in a ${seat} in ${metal}. Procedural studio render from the pairing — not a photograph of a finished jewel.`;
 }

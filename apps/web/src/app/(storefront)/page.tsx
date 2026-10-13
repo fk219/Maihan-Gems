@@ -175,18 +175,16 @@ export default async function HomePage({
   const href = (path: string) => withPrefix(path, prefix);
   const sister = Boolean(brand.defaultStone);
   const gems = gemsFor(brand.defaultStone);
-  const heroMain =
+  const sisterHero =
     brand.defaultStone === 'ruby'
-      ? '/media/jew-ruby-ring.jpg'
+      ? { main: '/media/jew-ruby-ring.jpg', small: '/media/stone-ruby.jpg' }
       : brand.defaultStone === 'emerald'
-        ? '/media/jew-sapphire-pendant.jpg'
-        : '/media/jew-ruby-ring.jpg';
-  const heroSmall =
-    brand.defaultStone === 'ruby'
-      ? '/media/stone-ruby.jpg'
-      : brand.defaultStone === 'emerald'
-        ? '/media/stone-emerald.jpg'
-        : '/media/stone-sapphire-pair.jpg';
+        ? { main: '/media/jew-emerald-necklace.jpg', small: '/media/stone-emerald.jpg' }
+        : brand.defaultStone === 'sapphire'
+          ? { main: '/media/jew-sapphire-ring.jpg', small: '/media/stone-sapphire.jpg' }
+          : { main: '/media/jew-sapphire-ring.jpg', small: '/media/stone-sapphire-pair.jpg' };
+  const heroMain = sisterHero.main;
+  const heroSmall = sisterHero.small;
 
   return (
     <main id="main-content" className="mgh">

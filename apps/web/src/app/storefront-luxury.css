@@ -1715,7 +1715,7 @@
 .atelier__steps .is-on button { background: var(--navy-deep); color: var(--warm-white); }
 .atelier__steps .is-on span, .atelier__steps .is-done span { background: var(--gold-gradient); color: var(--studio-white); }
 .atelier__layout { display: grid; gap: 1.25rem; }
-@media (min-width: 980px) { .atelier__layout { grid-template-columns: minmax(0, 1.6fr) 320px; align-items: start; } }
+@media (min-width: 980px) { .atelier__layout { grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.9fr); align-items: start; } }
 .atelier__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.85rem; }
 .atelier-card { display: flex; flex-direction: column; text-align: left; border: 1px solid var(--hairline-border); border-radius: 12px; background: var(--studio-white); padding: 0; cursor: pointer; overflow: hidden; color: var(--text-primary); }
 .atelier-card:hover { border-color: #C9A84C; transform: translateY(-2px); }
@@ -1725,7 +1725,14 @@
 .atelier-card__kicker { display: block; padding: 0.7rem 0.8rem 0; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
 .atelier-card strong { padding: 0.2rem 0.8rem 0; font-family: var(--font-serif); font-weight: 500; font-size: 1.05rem; }
 .atelier-card em { padding: 0.35rem 0.8rem 0.85rem; font-style: normal; color: #8B6914; }
-.atelier__finish { display: grid; gap: 0.7rem; }
+.atelier__finish { display: grid; gap: 0.7rem; align-content: start; }
+.atelier__picks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; }
+.atelier__picks .atelier-card { cursor: default; }
+.atelier__picks .atelier-card:hover { transform: none; }
+.atelier__totals { margin: 0.15rem 0 0; }
+.atelier__totals div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.4rem 0; font-size: 0.95rem; }
+.atelier__totals .is-total { border-top: 1px solid var(--hairline-border); margin-top: 0.25rem; padding-top: 0.65rem; font-weight: 600; }
+.atelier__finish .atelier__bag { max-width: 24rem; }
 .atelier__metals, .atelier__sizes { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .atelier__metals button, .atelier__sizes button { border: 1px solid var(--hairline-border); background: var(--studio-white); border-radius: 12px; padding: 0.55rem 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; }
 .atelier__metals button.is-on, .atelier__sizes button.is-on { border-color: #C9A84C; background: var(--warm-white); }

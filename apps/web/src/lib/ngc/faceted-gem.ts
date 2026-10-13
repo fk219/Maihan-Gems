@@ -73,6 +73,28 @@ class FacetBag {
         positions.push(...ordered[0]!, ...ordered[i]!, ...ordered[i + 1]!);
       }
     }
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    let minZ = Infinity;
+    let maxZ = -Infinity;
+    for (let i = 0; i < positions.length; i += 3) {
+      minX = Math.min(minX, positions[i]!);
+      maxX = Math.max(maxX, positions[i]!);
+      minY = Math.min(minY, positions[i + 1]!);
+      maxY = Math.max(maxY, positions[i + 1]!);
+      minZ = Math.min(minZ, positions[i + 2]!);
+      maxZ = Math.max(maxZ, positions[i + 2]!);
+    }
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    const cz = (minZ + maxZ) / 2;
+    for (let i = 0; i < positions.length; i += 3) {
+      positions[i]! -= cx;
+      positions[i + 1]! -= cy;
+      positions[i + 2]! -= cz;
+    }
     return { positions: new Float32Array(positions), facetCount: this.facets.length, shape };
   }
 }

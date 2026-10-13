@@ -1,3 +1,14 @@
+# GEM COLOUR, REALISTIC DYO RING, SISTER HEROES (2026-10-13)
+
+K11733 3D: tanzanite body `#5A2FE0` / attenuation `#2A1078`, short Beer-law
+distance, remaining albedo, iridescence + Three.js-scale fire, high-contrast
+PMREM, centred lattice, larger table-up framing. DYO ring: ~2mm comfort-fit
+band tapering to a 4/6-prong claw head, jewellery metal PBR (yellow/white/rose
+gold, platinum). Caption uses `settingSeatLabel` so live metal is named once
+(no “Platinum 950 … (18K Yellow Gold)”). Finish step fills the left column with
+pairing cards, price breakdown and Add to bag. Sister heroes: sapphire ring +
+stone, ruby ring + stone, emerald necklace + stone.
+
 # FACETED GEM + LANDINGS + DYO + SISTERS (2026-10-13)
 
 Loose-stone 3D is a real faceted lattice (`faceted-gem.ts`): round brilliant 57

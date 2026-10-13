@@ -26,12 +26,12 @@ export function swatchFor(name: string): string {
 
 /**
  * Hex for the procedural 3D stone. Named NGC colours such as "Violetish Blue"
- * are not CSS colours — Three.js would render them white. Map to Design.md gem
- * accents where they fit, and to a close gem hue otherwise.
+ * are not CSS colours — Three.js would render them white. Tanzanite uses the
+ * saturated violet-blue of the K11733 vault photo, not a washed navy swatch.
  */
 export function gemHexFor(color: string | null | undefined, stoneType?: string | null): string {
   const text = `${color ?? ''} ${stoneType ?? ''}`.toLowerCase();
-  if (text.includes('tanzanite') || text.includes('violet')) return '#3B4BB8';
+  if (text.includes('tanzanite') || text.includes('violet')) return '#5A2FE0';
   if (text.includes('paraiba') || text.includes('neon')) return '#06B6D4';
   if (text.includes('emerald') || (text.includes('green') && !text.includes('bluish'))) return '#065F46';
   if (text.includes('ruby') || text.includes('red')) return '#991B1B';
@@ -49,6 +49,32 @@ export function gemHexFor(color: string | null | undefined, stoneType?: string |
   return '#1E3A8A';
 }
 
+/**
+ * Beer's-law body colour for MeshPhysicalMaterial. Darker and more saturated
+ * than the albedo so a short attenuationDistance reads as gem, not glass.
+ */
+export function gemAttenuationHex(color: string | null | undefined, stoneType?: string | null): string {
+  const text = `${color ?? ''} ${stoneType ?? ''}`.toLowerCase();
+  if (text.includes('tanzanite') || text.includes('violet') || (color ?? '').toUpperCase() === '#5A2FE0') {
+    return '#2A1078';
+  }
+  if (text.includes('paraiba') || text.includes('neon')) return '#0E7490';
+  if (text.includes('emerald') || (text.includes('green') && !text.includes('bluish'))) return '#022C22';
+  if (text.includes('ruby') || text.includes('red')) return '#4A0510';
+  if (text.includes('padparadscha') || text.includes('peach') || text.includes('pink') || text.includes('pad')) {
+    return '#9A3412';
+  }
+  if (text.includes('yellow') || text.includes('citrine') || text.includes('heliodor')) return '#92400E';
+  if (text.includes('orange') || text.includes('spessart')) return '#9A3412';
+  if (text.includes('white') || text.includes('colorless')) return '#E7E5E4';
+  if (text.includes('black')) return '#020617';
+  if (text.includes('bluish green') || text.includes('teal')) return '#155E75';
+  if (text.includes('blue') || text.includes('sapphire') || text.includes('spinel')) return '#0B1F66';
+  if (text.includes('purple') || text.includes('amethyst')) return '#1E1B4B';
+  if (text.includes('brown') || text.includes('cognac')) return '#3F2A0A';
+  return '#0B1F66';
+}
+
 /** Refractive index for MeshPhysicalMaterial. Tanzanite is ~1.69–1.70. */
 export function gemIor(stoneType?: string | null): number {
   const text = (stoneType ?? '').toLowerCase();
@@ -63,12 +89,13 @@ export function gemIor(stoneType?: string | null): number {
   return 1.7;
 }
 
+/** Three.js MeshPhysicalMaterial.dispersion is a 0–1 fire intensity, not Abbe. */
 export function gemDispersion(stoneType?: string | null): number {
   const text = (stoneType ?? '').toLowerCase();
-  if (text.includes('diamond')) return 0.044;
-  if (text.includes('zircon')) return 0.038;
-  if (text.includes('tanzanite')) return 0.03;
-  if (text.includes('sapphire') || text.includes('ruby')) return 0.018;
-  if (text.includes('emerald')) return 0.014;
-  return 0.02;
+  if (text.includes('diamond')) return 0.85;
+  if (text.includes('zircon')) return 0.7;
+  if (text.includes('tanzanite')) return 0.55;
+  if (text.includes('sapphire') || text.includes('ruby')) return 0.28;
+  if (text.includes('emerald')) return 0.16;
+  return 0.32;
 }
