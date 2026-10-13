@@ -20,6 +20,8 @@ export type GemShapeId =
 
 export interface FacetedGemMesh {
   readonly positions: Float32Array;
+  readonly indices: Uint32Array;
+  readonly vertexCount: number;
   readonly facetCount: number;
   readonly shape: GemShapeId;
 }
@@ -64,11 +66,7 @@ class FacetBag {
   mesh(shape: GemShapeId): FacetedGemMesh {
     const positions: number[] = [];
     for (const poly of this.facets) {
-      const origin = poly[0]!;
-      const ab = sub(poly[1]!, origin);
-      const ac = sub(poly[2]!, origin);
-      const n = cross(ab, ac);
-      const ordered = n[1] < 0 || (Math.abs(n[1]) < 1e-6 && n[2] < 0) ? [...poly].reverse() : poly;
+      const ordered = makeOutward(poly);
       for (let i = 1; i < ordered.length - 1; i += 1) {
         positions.push(...ordered[0]!, ...ordered[i]!, ...ordered[i + 1]!);
       }
@@ -95,8 +93,67 @@ class FacetBag {
       positions[i + 1]! -= cy;
       positions[i + 2]! -= cz;
     }
-    return { positions: new Float32Array(positions), facetCount: this.facets.length, shape };
+    const welded = weld(positions);
+    return {
+      positions: welded.positions,
+      indices: welded.indices,
+      vertexCount: welded.positions.length / 3,
+      facetCount: this.facets.length,
+      shape,
+    };
   }
+}
+
+/** Flip winding so the facet normal points away from the gem centre. */
+function makeOutward(poly: Vec[]): Vec[] {
+  const n = cross(sub(poly[1]!, poly[0]!), sub(poly[2]!, poly[0]!));
+  let cx = 0;
+  let cy = 0;
+  let cz = 0;
+  for (const v of poly) {
+    cx += v[0];
+    cy += v[1];
+    cz += v[2];
+  }
+  const inv = 1 / poly.length;
+  const dot = n[0] * cx * inv + n[1] * cy * inv + n[2] * cz * inv;
+  return dot < 0 ? [...poly].reverse() : poly;
+}
+
+function weld(positions: number[]): { positions: Float32Array; indices: Uint32Array } {
+  const map = new Map<string, number>();
+  const unique: number[] = [];
+  const indices: number[] = [];
+  for (let i = 0; i < positions.length; i += 3) {
+    const key = `${Math.round(positions[i]! * 1e5)}|${Math.round(positions[i + 1]! * 1e5)}|${Math.round(positions[i + 2]! * 1e5)}`;
+    let index = map.get(key);
+    if (index === undefined) {
+      index = unique.length / 3;
+      map.set(key, index);
+      unique.push(positions[i]!, positions[i + 1]!, positions[i + 2]!);
+    }
+    indices.push(index);
+  }
+  return { positions: new Float32Array(unique), indices: new Uint32Array(indices) };
+}
+
+/** Every undirected edge belongs to exactly two triangles. */
+export function meshIsWatertight(mesh: FacetedGemMesh): boolean {
+  const counts = new Map<string, number>();
+  for (let i = 0; i < mesh.indices.length; i += 3) {
+    const a = mesh.indices[i]!;
+    const b = mesh.indices[i + 1]!;
+    const c = mesh.indices[i + 2]!;
+    for (const [u, v] of [
+      [a, b],
+      [b, c],
+      [c, a],
+    ] as const) {
+      const key = u < v ? `${u}-${v}` : `${v}-${u}`;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+  }
+  return [...counts.values()].every((n) => n === 2);
 }
 
 function mapXZ(verts: Vec[], fn: (x: number, z: number) => [number, number]): Vec[] {
@@ -111,23 +168,21 @@ function brilliant(map?: (x: number, z: number) => [number, number]): FacetBag {
   const tableR = 0.285;
   const crownH = 0.152;
   const pavH = 0.43;
-  const girdleH = 0.02;
-  const tableY = girdleH / 2 + crownH;
-  const girdleUp = girdleH / 2;
-  const girdleDn = -girdleH / 2;
-  const pavY = girdleDn - pavH;
-  const starY = girdleUp + crownH * 0.55;
+  const tableY = crownH;
+  const pavY = -pavH;
+  const starY = crownH * 0.55;
   const starR = 0.39;
-  const pavBreak = girdleDn - pavH * 0.38;
+  const pavBreak = -pavH * 0.38;
 
   const apply = (v: Vec[]): Vec[] => (map ? mapXZ(v, map) : v);
   const T = apply(ring(8, tableR, tableY, Math.PI / 8));
   const S = apply(ring(8, starR, starY, 0));
-  const BZ = apply(ring(8, R, girdleUp, Math.PI / 8));
-  const UG = apply(ring(8, R, girdleUp, 0));
-  const LD = apply(ring(8, R, girdleDn, Math.PI / 8));
-  const LM = apply(ring(8, R, girdleDn, 0));
-  const P = apply(ring(8, 0.22, pavBreak, Math.PI / 8));
+  const BZ = apply(ring(8, R, 0, Math.PI / 8));
+  const UG = apply(ring(8, R, 0, 0));
+  const LD = BZ;
+  const LM = UG;
+  // Pavilion break sits on the upper-girdle azimuth so each main kite points at a bezel.
+  const P = apply(ring(8, 0.22, pavBreak, 0));
   const culet: Vec = [0, pavY, 0];
   const bag = new FacetBag();
 
@@ -138,9 +193,9 @@ function brilliant(map?: (x: number, z: number) => [number, number]): FacetBag {
     bag.push([T[i]!, S[i]!, BZ[i]!, S[n]!]);
     bag.push([S[i]!, UG[i]!, BZ[i]!]);
     bag.push([S[n]!, UG[n]!, BZ[i]!]);
-    bag.push([culet, P[i]!, P[n]!]);
+    bag.push([culet, P[i]!, LD[i]!, P[n]!]);
     bag.push([P[i]!, LD[i]!, LM[i]!]);
-    bag.push([P[i]!, LM[n]!, LD[i]!]);
+    bag.push([P[n]!, LM[n]!, LD[i]!]);
   }
   return bag;
 }
@@ -179,8 +234,7 @@ function stepCut(corners: number, stretchX: number, stretchZ: number): FacetBag 
   const levels: Array<{ y: number; rx: number; rz: number }> = [
     { y: 0.16, rx: 0.28 * stretchX, rz: 0.22 * stretchZ },
     { y: 0.09, rx: 0.38 * stretchX, rz: 0.3 * stretchZ },
-    { y: 0.02, rx: 0.48 * stretchX, rz: 0.38 * stretchZ },
-    { y: -0.02, rx: 0.5 * stretchX, rz: 0.4 * stretchZ },
+    { y: 0, rx: 0.5 * stretchX, rz: 0.4 * stretchZ },
     { y: -0.14, rx: 0.36 * stretchX, rz: 0.28 * stretchZ },
     { y: -0.28, rx: 0.22 * stretchX, rz: 0.16 * stretchZ },
     { y: -0.4, rx: 0.08 * stretchX, rz: 0.06 * stretchZ },
@@ -202,8 +256,7 @@ function princess(): FacetBag {
   const bag = new FacetBag();
   const T = ring(4, 0.28, 0.16, Math.PI / 4);
   const C = ring(4, 0.42, 0.07, Math.PI / 4);
-  const G = ring(4, 0.5, 0.02, Math.PI / 4);
-  const Gd = ring(4, 0.5, -0.02, Math.PI / 4);
+  const G = ring(4, 0.5, 0, Math.PI / 4);
   const P = ring(4, 0.22, -0.22, Math.PI / 4);
   const culet: Vec = [0, -0.42, 0];
   bag.push(T);
@@ -211,8 +264,7 @@ function princess(): FacetBag {
     const n = (i + 1) % 4;
     bag.push([T[i]!, T[n]!, C[n]!, C[i]!]);
     bag.push([C[i]!, C[n]!, G[n]!, G[i]!]);
-    bag.push([G[i]!, G[n]!, Gd[n]!, Gd[i]!]);
-    bag.push([Gd[i]!, Gd[n]!, P[n]!, P[i]!]);
+    bag.push([G[i]!, G[n]!, P[n]!, P[i]!]);
     bag.push([P[i]!, P[n]!, culet]);
   }
   return bag;
@@ -221,16 +273,14 @@ function princess(): FacetBag {
 function trillion(): FacetBag {
   const bag = new FacetBag();
   const T = ring(3, 0.26, 0.14, Math.PI / 6);
-  const G = ring(3, 0.5, 0.02, Math.PI / 6);
-  const Gd = ring(3, 0.5, -0.02, Math.PI / 6);
+  const G = ring(3, 0.5, 0, Math.PI / 6);
   const P = ring(3, 0.2, -0.24, Math.PI / 6);
   const culet: Vec = [0, -0.4, 0];
   bag.push(T);
   for (let i = 0; i < 3; i += 1) {
     const n = (i + 1) % 3;
     bag.push([T[i]!, T[n]!, G[n]!, G[i]!]);
-    bag.push([G[i]!, G[n]!, Gd[n]!, Gd[i]!]);
-    bag.push([Gd[i]!, Gd[n]!, P[n]!, P[i]!]);
+    bag.push([G[i]!, G[n]!, P[n]!, P[i]!]);
     bag.push([P[i]!, P[n]!, culet]);
   }
   return bag;

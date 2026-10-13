@@ -58,52 +58,47 @@ export function JewelryConfiguratorCanvas({
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 0.86;
-      renderer.shadowMap.enabled = true;
+      renderer.toneMappingExposure = 1.12;
+      renderer.shadowMap.enabled = mode === 'mounted';
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       host.appendChild(renderer.domElement);
 
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x1a0840);
-      const card = (w: number, h: number, color: number, pos: [number, number, number], look = true) => {
+      envScene.background = new THREE.Color(0x050508);
+      const card = (w: number, h: number, color: number, pos: [number, number, number]) => {
         const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color }));
         mesh.position.set(...pos);
-        if (look) mesh.lookAt(0, 0.2, 0);
+        mesh.lookAt(0, 0.12, 0);
         envScene.add(mesh);
       };
-      card(1.4, 1.4, 0xfff4dd, [2.8, 4.4, 3.6]);
-      card(3.6, 5, 0xc9a84c, [5.0, 2.2, 1.2]);
-      card(2.8, 4, 0x5b21b6, [-4.4, 2.0, 2.4]);
-      card(1.1, 1.1, 0xffffff, [-1.6, 3.2, 4.6]);
-      card(10, 10, 0x12062c, [0, -4.2, 0]);
+      card(9.2, 6.4, 0xffffff, [0.6, 4.4, 6.2]);
+      card(4.8, 3.4, 0xf4f0ff, [-0.4, 6.4, 1.2]);
+      card(3.2, 4.2, 0xffe4b5, [5.4, 2.6, 2.2]);
+      card(3.6, 4.4, 0x6d28d9, [-5.2, 2.1, -0.6]);
+      card(14, 14, 0x06060b, [0, -6.2, 0]);
       const pmrem = new THREE.PMREMGenerator(renderer);
-      const env = pmrem.fromScene(envScene, 0.04).texture;
+      const env = pmrem.fromScene(envScene, 0.02).texture;
       scene.environment = env;
-      scene.environmentIntensity = 1.15;
+      scene.environmentIntensity = 1.7;
 
-      const key = new THREE.DirectionalLight(0xfff1d6, 1.55);
-      key.position.set(2.8, 5.4, 3.4);
-      key.castShadow = true;
-      key.shadow.mapSize.set(1024, 1024);
-      key.shadow.camera.near = 0.5;
-      key.shadow.camera.far = 12;
-      key.shadow.radius = 4;
+      scene.add(new THREE.HemisphereLight(0xf5f3ff, 0x12081f, 0.16));
+      const key = new THREE.DirectionalLight(0xfff8f0, 0.42);
+      key.position.set(2.4, 4.6, 3.2);
+      if (mode === 'mounted') {
+        key.castShadow = true;
+        key.shadow.mapSize.set(1024, 1024);
+        key.shadow.camera.near = 0.5;
+        key.shadow.camera.far = 12;
+        key.shadow.radius = 6;
+      }
       scene.add(key);
-      scene.add(new THREE.DirectionalLight(0xc4b5fd, 0.7).translateX(-2.8).translateY(2.2).translateZ(2.6));
-      const sparkA = new THREE.PointLight(0xffffff, 1.4, 2.8, 2);
-      sparkA.position.set(0.62, 0.9, 1.15);
-      scene.add(sparkA);
-      const sparkB = new THREE.PointLight(0xe8c96a, 1.1, 2.6, 2);
-      sparkB.position.set(-0.75, 0.35, 0.95);
-      scene.add(sparkB);
-      scene.add(new THREE.AmbientLight(0x2a1078, 0.22));
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enablePan = false;
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
       controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.7;
+      controls.autoRotateSpeed = 0.32;
       if (mode === 'stone') {
         controls.target.set(0, 0, 0);
         controls.minDistance = 1.6;
@@ -131,29 +126,26 @@ export function JewelryConfiguratorCanvas({
 
       function gemMaterial(color: string) {
         const ior = gemIor(stone?.stoneType);
-        const body = new THREE.Color(color);
         return new THREE.MeshPhysicalMaterial({
-          color: body,
-          emissive: body,
-          emissiveIntensity: 0.38,
+          color,
           metalness: 0,
-          roughness: 0.14,
-          transmission: 0.08,
-          thickness: mode === 'stone' ? 2.2 : 1.1,
+          roughness: 0.018,
+          transmission: 0.84,
+          thickness: mode === 'stone' ? 1.05 : 0.55,
           ior,
           dispersion: gemDispersion(stone?.stoneType),
           attenuationColor: new THREE.Color(gemAttenuationHex(color, stone?.stoneType)),
-          attenuationDistance: 0.08,
+          attenuationDistance: 0.48,
           clearcoat: 1,
-          clearcoatRoughness: 0.03,
+          clearcoatRoughness: 0.035,
           specularIntensity: 1,
-          specularColor: body,
-          iridescence: 0.22,
-          iridescenceIOR: 1.45,
-          iridescenceThicknessRange: [140, 360],
-          envMapIntensity: 1.25,
+          specularColor: 0xf3eaff,
+          iridescence: 0.32,
+          iridescenceIOR: 1.35,
+          iridescenceThicknessRange: [140, 420],
+          envMapIntensity: 1.85,
           flatShading: true,
-          side: THREE.DoubleSide,
+          side: THREE.FrontSide,
         });
       }
 
@@ -165,41 +157,16 @@ export function JewelryConfiguratorCanvas({
         const built = buildFacetedGem(shapeId, aspect);
         const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.BufferAttribute(built.positions, 3));
+        geometry.setIndex(new THREE.BufferAttribute(built.indices, 1));
         geometry.computeVertexNormals();
-        const body = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#3A12C2'));
-        body.scale.setScalar(scale);
-        if (mode === 'stone') body.rotation.x = -0.32;
-        body.castShadow = true;
-        body.name = 'center_stone';
-        const glints: number[] = [];
-        for (let i = 0; i < built.positions.length; i += 9) {
-          const ax = (built.positions[i]! + built.positions[i + 3]! + built.positions[i + 6]!) / 3;
-          const ay = (built.positions[i + 1]! + built.positions[i + 4]! + built.positions[i + 7]!) / 3;
-          const az = (built.positions[i + 2]! + built.positions[i + 5]! + built.positions[i + 8]!) / 3;
-          glints.push(ax * 1.03, ay * 1.03, az * 1.03);
-        }
-        const sparkleGeo = new THREE.BufferGeometry();
-        sparkleGeo.setAttribute('position', new THREE.Float32BufferAttribute(glints, 3));
-        const sparkle = new THREE.Points(
-          sparkleGeo,
-          new THREE.PointsMaterial({
-            color: 0xfff6e8,
-            size: 0.016,
-            transparent: true,
-            opacity: 0.9,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            sizeAttenuation: true,
-          }),
-        );
-        sparkle.scale.setScalar(scale);
-        sparkle.rotation.copy(body.rotation);
-        sparkle.name = 'center_stone_sparkle';
-        sparkle.renderOrder = 3;
+        const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#7A3AE8'));
+        mesh.scale.setScalar(scale);
+        if (mode === 'stone') mesh.rotation.x = -0.32;
+        mesh.castShadow = mode === 'mounted';
+        mesh.name = 'center_stone';
         const group = new THREE.Group();
         group.name = 'center_stone';
-        group.add(body);
-        group.add(sparkle);
+        group.add(mesh);
         return group;
       }
 
@@ -225,15 +192,40 @@ export function JewelryConfiguratorCanvas({
             }
           }
         }
-        const shadow = new THREE.Mesh(
-          new THREE.CircleGeometry(mode === 'stone' ? 0.95 : 1.15, 48),
-          new THREE.ShadowMaterial({ opacity: 0.3 }),
-        );
-        shadow.rotation.x = -Math.PI / 2;
-        shadow.position.y = mode === 'stone' ? -0.55 : -0.95;
-        shadow.receiveShadow = true;
-        assembly.add(shadow);
+        if (mode === 'mounted') {
+          const shadow = new THREE.Mesh(
+            new THREE.CircleGeometry(0.55, 48),
+            new THREE.ShadowMaterial({ opacity: 0.12 }),
+          );
+          shadow.rotation.x = -Math.PI / 2;
+          shadow.position.y = -0.95;
+          shadow.receiveShadow = true;
+          assembly.add(shadow);
+        }
         if (mode === 'stone') {
+          const stamp = document.createElement('canvas');
+          stamp.width = 128;
+          stamp.height = 128;
+          const ctx = stamp.getContext('2d');
+          if (ctx) {
+            const glow = ctx.createRadialGradient(64, 64, 6, 64, 64, 58);
+            glow.addColorStop(0, 'rgba(18, 12, 36, 0.2)');
+            glow.addColorStop(0.45, 'rgba(18, 12, 36, 0.08)');
+            glow.addColorStop(1, 'rgba(18, 12, 36, 0)');
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, 128, 128);
+          }
+          const blob = new THREE.Mesh(
+            new THREE.PlaneGeometry(1.05, 1.05),
+            new THREE.MeshBasicMaterial({
+              map: new THREE.CanvasTexture(stamp),
+              transparent: true,
+              depthWrite: false,
+            }),
+          );
+          blob.rotation.x = -Math.PI / 2;
+          blob.position.y = -0.56;
+          assembly.add(blob);
           assembly.add(stoneMesh());
         } else {
           if (!root) root = proceduralRing();
@@ -282,10 +274,9 @@ export function JewelryConfiguratorCanvas({
         renderer.domElement.remove();
         scene.traverse((node: import('three').Object3D) => {
           const mesh = node as import('three').Mesh;
-          const points = node as import('three').Points;
-          if (mesh.isMesh || points.isPoints) {
-            (mesh.geometry ?? points.geometry)?.dispose();
-            const material = mesh.material ?? points.material;
+          if (mesh.isMesh) {
+            mesh.geometry?.dispose();
+            const material = mesh.material;
             if (Array.isArray(material)) material.forEach((item) => item.dispose());
             else material?.dispose();
           }
