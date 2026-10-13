@@ -86,16 +86,16 @@ export function JewelryConfiguratorCanvas({
       controls.enablePan = false;
       if (mode === 'stone') {
         controls.target.set(0, 0, 0);
-        controls.minDistance = 0.9;
-        controls.maxDistance = 3.2;
+        controls.minDistance = 1.6;
+        controls.maxDistance = 4.2;
         controls.autoRotate = true;
         controls.autoRotateSpeed = 1.4;
-        camera.position.set(0.55, 0.45, 1.55);
+        camera.position.set(0.4, 0.32, 2.35);
       } else {
-        controls.target.set(0, 0.08, 0);
-        controls.minDistance = 1.35;
-        controls.maxDistance = 3.6;
-        camera.position.set(1.15, 0.95, 1.7);
+        controls.target.set(0, 0.12, 0);
+        controls.minDistance = 1.8;
+        controls.maxDistance = 4.4;
+        camera.position.set(1.55, 1.15, 2.35);
       }
 
       const assembly = new THREE.Group();
@@ -132,9 +132,10 @@ export function JewelryConfiguratorCanvas({
 
       function stoneScale(): number {
         const length = stone?.lengthMm && stone.lengthMm > 0 ? stone.lengthMm : null;
-        if (length) return Math.max(0.22, Math.min(length / 10, 1.8));
-        const carat = stone?.carat ?? 1;
-        return Math.max(0.22, Math.min(0.65 * Math.cbrt(carat), 1.8));
+        const raw = length
+          ? Math.max(0.18, Math.min(length / 10, 1.6))
+          : Math.max(0.18, Math.min(0.65 * Math.cbrt(stone?.carat ?? 1), 1.6));
+        return mode === 'mounted' ? Math.min(raw, 0.36) : Math.min(raw, 0.72);
       }
 
       function stoneMesh() {
@@ -211,13 +212,6 @@ export function JewelryConfiguratorCanvas({
           }
         }
         if (mode === 'stone') {
-          const ground = new THREE.Mesh(
-            new THREE.CircleGeometry(1.15, 48),
-            new THREE.MeshBasicMaterial({ color: 0xefefea, transparent: true, opacity: 0.9 }),
-          );
-          ground.rotation.x = -Math.PI / 2;
-          ground.position.y = -0.55;
-          assembly.add(ground);
           assembly.add(stoneMesh());
         } else {
           if (!root) root = proceduralRing();

@@ -93,9 +93,11 @@ describe('gallery posters and studio pad', () => {
     ],
   } as Pick<NgcProduct, 'id' | 'media'> as NgcProduct;
 
-  it('pads catalogue stills onto the Design.md canvas', () => {
+  it('pads catalogue stills onto the Design.md canvas and cuts the studio backdrop', () => {
     const url = 'https://res.cloudinary.com/o1zwhvbi/image/upload/f_auto,q_auto/maihan/products/K10010/stone.jpg';
+    expect(withStudioPad(url, 'image')).toContain('e_background_removal');
     expect(withStudioPad(url, 'image')).toContain('c_pad,b_rgb:F7F7F5,w_900,h_900');
+    expect(withStudioPad(url, 'lifestyle_image')).not.toContain('e_background_removal');
   });
 
   it('builds a so_0 JPEG poster for Cloudinary videos', () => {

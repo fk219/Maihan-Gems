@@ -157,21 +157,26 @@ export function catalogImageSrc(product: NgcProduct, item?: NgcMediaItem): strin
   return withStudioPad(displayMediaUrl(product.id, media), media.kind);
 }
 
+const STUDIO_PAD = 'c_pad,b_rgb:F7F7F5,w_900,h_900';
+const STUDIO_CUTOUT = `e_background_removal,${STUDIO_PAD}`;
+
 /** Neutral Design.md pad so black-studio and white-studio photos share one surface. */
 export function withStudioPad(url: string, kind?: string): string {
   if (!url.includes('res.cloudinary.com')) return url;
-  if (url.includes('b_rgb:')) return url;
+  if (url.includes('b_rgb:') || url.includes('e_background_removal')) return url;
   const playableVideo =
     (kind === 'video' || kind === 'spin360' || url.includes('/video/upload/')) && !url.includes('so_0');
   if (playableVideo) return url;
+  const cutout = kind === 'image';
+  const pad = cutout ? STUDIO_CUTOUT : STUDIO_PAD;
   if (url.includes('/upload/so_0,f_jpg,q_auto/')) {
-    return url.replace('/upload/so_0,f_jpg,q_auto/', '/upload/so_0,f_jpg,q_auto,c_pad,b_rgb:F7F7F5,w_900,h_900/');
+    return url.replace('/upload/so_0,f_jpg,q_auto/', `/upload/so_0,f_jpg,q_auto,${STUDIO_PAD}/`);
   }
   if (url.includes('/upload/f_auto,q_auto/')) {
-    return url.replace('/upload/f_auto,q_auto/', '/upload/f_auto,q_auto,c_pad,b_rgb:F7F7F5,w_900,h_900/');
+    return url.replace('/upload/f_auto,q_auto/', `/upload/${pad},f_auto,q_auto/`);
   }
   if (url.includes('/image/upload/')) {
-    return url.replace('/image/upload/', '/image/upload/c_pad,b_rgb:F7F7F5,w_900,h_900/');
+    return url.replace('/image/upload/', `/image/upload/${pad}/`);
   }
   return url;
 }
@@ -203,7 +208,7 @@ export function galleryPoster(product: NgcProduct, item: NgcMediaItem): string {
     const match =
       (token ? thumbs.find((row) => mediaToken(row) === token) : undefined) ??
       thumbs.find((row) => row.title && row.title === item.title);
-    if (match) return withStudioPad(displayMediaUrl(product.id, match), 'image');
+    if (match) return withStudioPad(displayMediaUrl(product.id, match), match.kind);
     const videoUrl = displayMediaUrl(product.id, item);
     return withStudioPad(cloudinaryVideoPoster(videoUrl));
   }
