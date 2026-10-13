@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: 'Gemstones | Maihan Gems' };
 
 export default async function BrowsePage() {
   const [products, stones] = await Promise.all([
-    listProducts({ kind: 'gemstone', limit: 48 }),
+    listProducts({ kind: 'gemstone', limit: 96 }),
     listStoneTypes(),
   ]);
   return (

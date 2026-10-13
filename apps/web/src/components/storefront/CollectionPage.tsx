@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 
-import { ProductGrid } from './LuxuryProductCard.js';
 import type { StorefrontCard } from '../../lib/storefront-types.js';
+import { CollectionBrowser } from './CollectionFilters.js';
 
 const FACET_LINKS = [
   { suffix: '', label: 'Stones' },
@@ -44,11 +44,8 @@ export function CollectionPage({
           </nav>
         ) : null}
         {chips ? <nav className="lx-facets" aria-label="Stone types">{chips}</nav> : null}
-        <p className="lx-card__specs" style={{ margin: '1.5rem 0 2rem' }}>
-          {products.length} piece{products.length === 1 ? '' : 's'}
-        </p>
         {products.length > 0 ? (
-          <ProductGrid products={products} />
+          <CollectionBrowser products={products} />
         ) : (
           <p className="lx-empty-copy">Nothing in this drawer just now. Browse another facet or the vault menu.</p>
         )}

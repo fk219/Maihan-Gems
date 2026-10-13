@@ -29,7 +29,7 @@ export async function loadCollectionView(rawSlug: string | undefined): Promise<C
         kind: 'gemstone',
         stoneType: parsed.stoneType,
         quantityType: 'pair',
-        limit: 32,
+        limit: 64,
       }),
     };
   }
@@ -46,7 +46,7 @@ export async function loadCollectionView(rawSlug: string | undefined): Promise<C
       products = await listProducts({
         kind: 'jewelry',
         jewelryType: parsed.jewelryType,
-        limit: 32,
+        limit: 64,
       });
     }
     return {
@@ -66,7 +66,7 @@ export async function loadCollectionView(rawSlug: string | undefined): Promise<C
       lede: `Mountings ready to receive a ${name.toLowerCase()}.`,
       stoneType: parsed.stoneType,
       stoneSlug: parsed.stoneSlug,
-      products: await listProducts({ kind: 'setting', limit: 32 }),
+      products: await listProducts({ kind: 'setting', limit: 64 }),
     };
   }
 
@@ -76,6 +76,6 @@ export async function loadCollectionView(rawSlug: string | undefined): Promise<C
     lede: `Natural ${name.toLowerCase()} from the vault.`,
     stoneType: parsed.stoneType,
     stoneSlug: parsed.stoneSlug,
-    products: await listProducts({ kind: 'gemstone', stoneType: parsed.stoneType, limit: 32 }),
+    products: await listProducts({ kind: 'gemstone', stoneType: parsed.stoneType, limit: 64 }),
   };
 }

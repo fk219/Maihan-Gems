@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-import { addToBag, isCompared, isFav, toggleCompare, toggleFav } from '../../lib/atelier-store.js';
+import { addToBag, getBag, isCompared, isFav, subscribeAtelier, toggleCompare, toggleFav } from '../../lib/atelier-store.js';
 import { cardSpecs, cardToAtelier } from '../../lib/atelier-item.js';
 import { formatMoney } from '../../lib/currency.js';
 import { productImage } from '../../lib/storefront-images.js';
@@ -26,11 +26,17 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
   });
   const [fav, setFav] = useState(false);
   const [compared, setCompared] = useState(false);
+  const [held, setHeld] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    setFav(isFav(product.id));
-    setCompared(isCompared(product.id));
+    const sync = () => {
+      setFav(isFav(product.id));
+      setCompared(isCompared(product.id));
+      setHeld(getBag().some((item) => item.id === product.id));
+    };
+    sync();
+    return subscribeAtelier(sync);
   }, [product.id]);
 
   const item = cardToAtelier(product);
@@ -66,6 +72,21 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
           </h3>
           <div className="lx-card__specs">{cardSpecs(product)}</div>
           <div className="lx-card__price">{formatMoney(product.priceUsd, currency, rates)}</div>
+          <div className="lx-card__actions">
+            <button
+              type="button"
+              className="lx-text-btn"
+              onClick={() => {
+                addToBag(item);
+                setHeld(true);
+              }}
+            >
+              {held ? 'Held in bag' : 'Add to bag'}
+            </button>
+            <button type="button" className="lx-text-btn" onClick={() => setCompared(toggleCompare(item))}>
+              {compared ? 'In compare' : 'Compare'}
+            </button>
+          </div>
         </div>
       </article>
 
@@ -108,9 +129,15 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
   );
 }
 
-export function ProductGrid({ products }: { products: StorefrontCard[] }) {
+export function ProductGrid({
+  products,
+  view = 'grid',
+}: {
+  products: StorefrontCard[];
+  view?: 'grid' | 'list';
+}) {
   return (
-    <div className="lx-grid">
+    <div className={`lx-grid${view === 'list' ? ' is-list' : ''}`}>
       {products.map((product) => (
         <LuxuryProductCard key={product.id} product={product} />
       ))}
