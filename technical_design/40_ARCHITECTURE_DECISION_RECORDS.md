@@ -35,6 +35,7 @@
 | 023 | AI evaluation harness is first-party, versioned against the prompt registry | Proposed |
 | 024 | Field-level provenance is a first-class relational table, not a framework | Proposed |
 | 025 | Agentation is development-only visual feedback tooling | Accepted |
+| 026 | Gem preview uses three-mesh-bvh refraction, not MeshPhysicalMaterial | Accepted |
 
 ---
 
@@ -318,6 +319,17 @@ never part of this decision and remains open.
 - **Consequences:** The annotation toolbar is available during local development only. Agentation reads page DOM when used; annotations remain local unless a developer explicitly configures an endpoint. The package must not be used to collect or transmit customer data, and storefront production bundle budgets must continue to pass.
 - **Evidence:** User authorization on 2026-10-12; package documentation supplied with the request; package version and license metadata verified from the installed package.
 - **Status:** Accepted by explicit user authorization (2026-10-12).
+
+---
+
+**ADR-026 - Gem preview uses three-mesh-bvh refraction, not MeshPhysicalMaterial**
+- **Context:** Loose-stone and DYO 3D previews must look like cut gems (internal reflection, fire, absorption), not matte PBR plastic. Three.js is already the approved WebGL renderer (ADR-004, tech stack row 20). MeshPhysicalMaterial transmission cannot model bounce-limited total internal reflection.
+- **Alternatives:** (a) keep hand-tuned MeshPhysicalMaterial lights; (b) add `@react-three/drei` + R3F for `MeshRefractionMaterial`; (c) add `three-mesh-bvh` only and port the diamond / MeshRefractionMaterial shader into `apps/web`.
+- **Decision:** Depend on `three-mesh-bvh` 0.8.3 in `apps/web` (peer: Three.js ≥ 0.159). Implement a generic BVH refraction material in-repo. Do not add React Three Fiber or drei. Load the package only from the client configurator. Stone colour is Beer's-law absorption. IOR, bounce count (4) and chromatic aberration come from stone type. Geometry stays the procedural 57-facet brilliant (and warps / step cuts) for every shape.
+- **Reason:** The user explicitly required a ray-traced internal-reflection gem. `three-mesh-bvh` is the library behind drei's MeshRefractionMaterial and the canonical diamond example; adding only that package avoids an unapproved R3F rewrite. It is a browser-only companion to approved Three.js, not a new rendering stack.
+- **Consequences:** Gem preview requires WebGL2 (`isampler2D` / `usampler2D`). Antialiasing is off on this canvas because edge interpolation breaks BVH entry rays. `three-mesh-bvh` stays out of any server bundle.
+- **Evidence:** Explicit user request 2026-10-13; three-mesh-bvh MIT; drei MeshRefractionMaterial and gkjohnson diamond example as the shader approach.
+- **Status:** Accepted by explicit user authorization (2026-10-13).
 
 ---
 

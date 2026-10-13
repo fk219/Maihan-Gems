@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { gemAttenuationHex, gemDispersion, gemHexFor, gemIor } from './colors.js';
+import { gemAttenuationHex, gemDispersion, gemHexFor, gemIor, gemRefractionParams } from './colors.js';
 
 describe('gemHexFor', () => {
   it('maps named NGC colours to hex so Three.js does not render white', () => {
@@ -16,10 +16,21 @@ describe('gemHexFor', () => {
     expect(gemAttenuationHex('#6B32E6')).toBe('#3A1578');
   });
 
-  it('uses tanzanite RI ~1.7 rather than diamond 2.42', () => {
-    expect(gemIor('Tanzanite')).toBe(1.7);
+  it('uses tanzanite RI ~1.69 rather than diamond 2.42', () => {
+    expect(gemIor('Tanzanite')).toBe(1.69);
     expect(gemIor('Diamond')).toBe(2.42);
     expect(gemDispersion('Tanzanite')).toBeGreaterThan(gemDispersion('Emerald'));
     expect(gemDispersion('Tanzanite')).toBeGreaterThan(0.2);
+  });
+});
+
+describe('gemRefractionParams', () => {
+  it('traces 3–5 internal bounces with tanzanite IOR and chromatic fire', () => {
+    const params = gemRefractionParams('Tanzanite');
+    expect(params.ior).toBe(1.69);
+    expect(params.bounces).toBeGreaterThanOrEqual(3);
+    expect(params.bounces).toBeLessThanOrEqual(5);
+    expect(params.aberrationStrength).toBeGreaterThan(0.01);
+    expect(params.absorption).toBeGreaterThan(1);
   });
 });

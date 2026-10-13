@@ -53,6 +53,7 @@ approved. `DEFERRED` = deliberately postponed.
 | Meta WhatsApp Cloud API for the WhatsApp channel. | ACCEPTED | `technical_design/02` |
 | WebAR is **client-side only**. Camera frames never leave the device. | ACCEPTED | ADR-004 |
 | MediaPipe HandLandmarker for tracking; Three.js + WebGL2 for rendering; Draco GLB and KTX2 for assets. | ACCEPTED | `technical_design/02`, ADR-004 |
+| Gem 3D preview uses `three-mesh-bvh` internal-reflection (not MeshPhysicalMaterial; not R3F/drei). | ACCEPTED | ADR-026 |
 
 ---
 

@@ -83,7 +83,7 @@ export function gemAttenuationHex(color: string | null | undefined, stoneType?: 
   return '#0B1F66';
 }
 
-/** Refractive index for MeshPhysicalMaterial. Tanzanite is ~1.69–1.70. */
+/** Refractive index. Tanzanite is 1.69. */
 export function gemIor(stoneType?: string | null): number {
   const text = (stoneType ?? '').toLowerCase();
   if (text.includes('diamond')) return 2.42;
@@ -91,13 +91,13 @@ export function gemIor(stoneType?: string | null): number {
   if (text.includes('sapphire') || text.includes('ruby') || text.includes('corundum')) return 1.77;
   if (text.includes('garnet') || text.includes('tsavorite') || text.includes('spessart')) return 1.74;
   if (text.includes('spinel')) return 1.72;
-  if (text.includes('tanzanite')) return 1.7;
+  if (text.includes('tanzanite')) return 1.69;
   if (text.includes('topaz') || text.includes('tourmaline') || text.includes('paraiba')) return 1.64;
   if (text.includes('emerald') || text.includes('beryl') || text.includes('aqua') || text.includes('morganite')) return 1.58;
   return 1.7;
 }
 
-/** Three.js MeshPhysicalMaterial.dispersion is a 0–1 fire intensity, not Abbe. */
+/** Chromatic-fire intensity mapped into MeshRefractionMaterial aberration (0–1). */
 export function gemDispersion(stoneType?: string | null): number {
   const text = (stoneType ?? '').toLowerCase();
   if (text.includes('diamond')) return 0.85;
@@ -106,4 +106,22 @@ export function gemDispersion(stoneType?: string | null): number {
   if (text.includes('sapphire') || text.includes('ruby')) return 0.28;
   if (text.includes('emerald')) return 0.16;
   return 0.32;
+}
+
+/** BVH refraction uniforms derived from stone type. Generic across the catalogue. */
+export function gemRefractionParams(stoneType?: string | null): {
+  readonly ior: number;
+  readonly bounces: number;
+  readonly aberrationStrength: number;
+  readonly absorption: number;
+} {
+  const text = (stoneType ?? '').toLowerCase();
+  const colorless =
+    text.includes('diamond') || text.includes('white') || text.includes('colorless');
+  return {
+    ior: gemIor(stoneType),
+    bounces: 4,
+    aberrationStrength: Math.min(0.04, 0.006 + gemDispersion(stoneType) * 0.028),
+    absorption: colorless ? 0.28 : 2.15,
+  };
 }

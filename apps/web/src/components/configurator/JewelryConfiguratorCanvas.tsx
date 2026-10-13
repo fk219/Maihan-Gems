@@ -3,12 +3,12 @@
 /**
  * Client-only assembled jewellery / loose-stone viewer.
  * Authority: technical_design/02 (Three.js + WebGL2, browser only) and
- * technical_design/21 (PBR, no SSR). Loose stones use faceted gem geometry.
+ * technical_design/21 (PBR, no SSR). Stones use BVH gem refraction (ADR-026).
  */
 import { useEffect, useRef } from 'react';
 
-import { gemAttenuationHex, gemDispersion, gemIor } from '../../lib/ngc/colors.js';
-import { buildFacetedGem, parseGemShape } from '../../lib/ngc/faceted-gem.js';
+import { gemHexFor } from '../../lib/ngc/colors.js';
+import { parseGemShape } from '../../lib/ngc/faceted-gem.js';
 import { buildRealisticSetting, metalMaterial } from './preview-ring.js';
 
 export type MetalFinish = 'YELLOW_GOLD' | 'WHITE_GOLD' | 'ROSE_GOLD' | 'PLATINUM';
@@ -49,16 +49,19 @@ export function JewelryConfiguratorCanvas({
       const THREE = await import('three');
       const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
       const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+      const { buildGemGeometry, createGemRefractionMaterial, createStudioEnvMap, syncGemRefraction } = await import(
+        '../../lib/ngc/gem-refraction.js'
+      );
       if (disposed || !hostRef.current) return;
 
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0xf7f7f5);
       const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 40);
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+      const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.28;
+      renderer.toneMappingExposure = 1.12;
       renderer.shadowMap.enabled = mode === 'mounted';
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.domElement.style.width = '100%';
@@ -66,44 +69,21 @@ export function JewelryConfiguratorCanvas({
       renderer.domElement.style.display = 'block';
       host.appendChild(renderer.domElement);
 
-      const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x08080c);
-      const card = (w: number, h: number, color: number, pos: [number, number, number]) => {
-        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color }));
-        mesh.position.set(...pos);
-        mesh.lookAt(0, 0.08, 0);
-        envScene.add(mesh);
-      };
-      card(10, 7, 0xffffff, [0.8, 4.6, 6.4]);
-      card(5.4, 3.8, 0xf5f3ff, [-1.2, 6.8, 1.4]);
-      card(3.6, 4.4, 0xffe7c2, [5.6, 2.4, 2.4]);
-      card(4.2, 5, 0x7c3aed, [-5.4, 2.2, -0.4]);
-      card(16, 16, 0x07070c, [0, -6.4, 0]);
-      const pmrem = new THREE.PMREMGenerator(renderer);
-      const env = pmrem.fromScene(envScene, 0.04).texture;
-      scene.environment = env;
-      scene.environmentIntensity = 1.55;
+      const envMap = createStudioEnvMap();
+      const gemMaterials: import('three').ShaderMaterial[] = [];
+      const drawingBuffer = new THREE.Vector2();
 
-      scene.add(new THREE.HemisphereLight(0xf5f3ff, 0x1e1b4b, 0.22));
-      const key = new THREE.DirectionalLight(0xfff7ee, 1.7);
-      key.position.set(3.1, 4.8, 3.8);
       if (mode === 'mounted') {
+        scene.add(new THREE.HemisphereLight(0xf5f3ff, 0x1a1a1a, 0.45));
+        const key = new THREE.DirectionalLight(0xfff7ee, 1.15);
+        key.position.set(2.8, 4.2, 3.4);
         key.castShadow = true;
         key.shadow.mapSize.set(1024, 1024);
         key.shadow.camera.near = 0.5;
         key.shadow.camera.far = 12;
         key.shadow.radius = 6;
+        scene.add(key);
       }
-      scene.add(key);
-      const fill = new THREE.DirectionalLight(0xddd6fe, 0.95);
-      fill.position.set(-3.8, 2.4, 2.6);
-      scene.add(fill);
-      const rim = new THREE.DirectionalLight(0xa78bfa, 1.25);
-      rim.position.set(-2.4, 1.6, -3.6);
-      scene.add(rim);
-      const zenith = new THREE.DirectionalLight(0xffffff, 1.15);
-      zenith.position.set(0.6, 5.4, 0.8);
-      scene.add(zenith);
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enablePan = false;
@@ -136,42 +116,20 @@ export function JewelryConfiguratorCanvas({
         return Math.min(physical * 1.42, 1.02);
       }
 
-      function gemMaterial(color: string) {
-        const ior = gemIor(stone?.stoneType);
-        return new THREE.MeshPhysicalMaterial({
-          color,
-          metalness: 0,
-          roughness: 0.045,
-          transmission: 0.38,
-          thickness: mode === 'stone' ? 0.8 : 0.5,
-          ior,
-          dispersion: gemDispersion(stone?.stoneType),
-          attenuationColor: new THREE.Color(gemAttenuationHex(color, stone?.stoneType)),
-          attenuationDistance: 0.55,
-          clearcoat: 1,
-          clearcoatRoughness: 0.05,
-          specularIntensity: 1,
-          specularColor: 0xf3eaff,
-          iridescence: 0.22,
-          iridescenceIOR: 1.35,
-          iridescenceThicknessRange: [180, 380],
-          envMapIntensity: 1.35,
-          flatShading: true,
-          side: THREE.FrontSide,
-        });
-      }
-
       function stoneMesh() {
         const scale = stoneScale();
-        const shapeId = parseGemShape(stone?.shape);
         const aspect =
           stone?.lengthMm && stone?.widthMm && stone.widthMm > 0 ? stone.lengthMm / stone.widthMm : 1;
-        const built = buildFacetedGem(shapeId, aspect);
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.BufferAttribute(built.positions, 3));
-        geometry.setIndex(new THREE.BufferAttribute(built.indices, 1));
-        geometry.computeVertexNormals();
-        const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#6B32E6'));
+        const built = buildGemGeometry(stone?.shape, aspect);
+        const absorption = gemHexFor(stone?.color, stone?.stoneType);
+        const material = createGemRefractionMaterial({
+          envMap,
+          geometry: built.geometry,
+          absorptionColor: absorption,
+          stoneType: stone?.stoneType,
+        });
+        gemMaterials.push(material);
+        const mesh = new THREE.Mesh(built.geometry, material);
         mesh.scale.setScalar(scale);
         if (mode === 'stone') mesh.rotation.x = -0.2;
         mesh.castShadow = mode === 'mounted';
@@ -189,6 +147,7 @@ export function JewelryConfiguratorCanvas({
 
       async function mount() {
         assembly.clear();
+        gemMaterials.length = 0;
         let root: import('three').Object3D | null = null;
         if (glbUrl && mode !== 'stone') {
           const cached = cache.get(glbUrl);
@@ -221,8 +180,8 @@ export function JewelryConfiguratorCanvas({
           const ctx = stamp.getContext('2d');
           if (ctx) {
             const glow = ctx.createRadialGradient(64, 64, 6, 64, 64, 58);
-            glow.addColorStop(0, 'rgba(18, 12, 36, 0.2)');
-            glow.addColorStop(0.45, 'rgba(18, 12, 36, 0.08)');
+            glow.addColorStop(0, 'rgba(18, 12, 36, 0.18)');
+            glow.addColorStop(0.45, 'rgba(18, 12, 36, 0.07)');
             glow.addColorStop(1, 'rgba(18, 12, 36, 0)');
             ctx.fillStyle = glow;
             ctx.fillRect(0, 0, 128, 128);
@@ -263,6 +222,8 @@ export function JewelryConfiguratorCanvas({
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
         renderer.setSize(width, height, false);
+        renderer.getDrawingBufferSize(drawingBuffer);
+        for (const material of gemMaterials) syncGemRefraction(material, camera, drawingBuffer);
       };
       resize();
       const observer = new ResizeObserver(resize);
@@ -272,6 +233,8 @@ export function JewelryConfiguratorCanvas({
       const loop = () => {
         frame = requestAnimationFrame(loop);
         controls.update();
+        renderer.getDrawingBufferSize(drawingBuffer);
+        for (const material of gemMaterials) syncGemRefraction(material, camera, drawingBuffer);
         renderer.render(scene, camera);
       };
       loop();
@@ -280,8 +243,7 @@ export function JewelryConfiguratorCanvas({
         cancelAnimationFrame(frame);
         observer.disconnect();
         controls.dispose();
-        env.dispose();
-        pmrem.dispose();
+        envMap.dispose();
         renderer.dispose();
         renderer.domElement.remove();
         scene.traverse((node: import('three').Object3D) => {

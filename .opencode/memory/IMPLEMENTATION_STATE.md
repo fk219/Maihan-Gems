@@ -1,11 +1,10 @@
-# K11733 3D — WATERTIGHT VIOLET STUDIO GEM (2026-10-13)
+# K11733 3D — BVH REFRACTION GEM (2026-10-13)
 
-Round brilliant lattice is manifold: knife-edge girdle with shared vertices,
-pavilion mains as kites pointing at bezels, outward-facing FrontSide normals.
-Tanzanite albedo `#6B32E6` / attenuation `#3A1578` (vault-photo violet-blue, not
-navy). Studio PMREM plus key/fill/rim lights drive per-facet contrast; the
-canvas fills the 3D stage so the stone is framed, not cropped. Additive
-sparkle points and stone-mode PCF shadows are gone. Slow auto-rotate. DYO ring: ~2mm comfort-fit
+Loose-stone 3D uses a watertight 57-facet brilliant and a three-mesh-bvh
+internal-reflection shader (ADR-026): 4 bounces, IOR 1.69, chromatic
+aberration, Beer's-law absorption from the stone colour, studio equirect
+HDRI. No hand-tuned scene lights on the gem. Generic for every shape/colour.
+Slow auto-rotate, small contact stamp. DYO ring: ~2mm comfort-fit
 band tapering to a 4/6-prong claw head, jewellery metal PBR (yellow/white/rose
 gold, platinum). Caption uses `settingSeatLabel` so live metal is named once
 (no “Platinum 950 … (18K Yellow Gold)”). Finish step fills the left column with
