@@ -23,6 +23,22 @@ import { GENERATED_REDIRECT_ROWS } from './lib/redirects-rows.generated';
 
 const resolver = createRedirectResolver(GENERATED_REDIRECT_ROWS);
 const SISTERS = new Set(['sapphire', 'ruby', 'emerald']);
+const NGC_LISTINGS = new Set([
+  'natural-gemstones',
+  'all-natural-gemstones',
+  'natural-gemstone-pairs',
+  'gemstone-rings',
+  'all-gemstone-rings',
+  'gemstone-earrings',
+  'gemstone-necklaces-pendants',
+  'gemstone-bracelets-bangles',
+  'mens-gemstone-rings',
+  'gemstone-ring-settings',
+  'mens-gemstone-ring-settings',
+  'gemstone-earring-settings',
+  'gemstone-necklace-pendant-settings',
+  'gemstone-bracelet-settings',
+]);
 
 function withStorefront(request: NextRequest, slug: string): Headers {
   const headers = new Headers(request.headers);
@@ -49,6 +65,15 @@ export function proxy(request: NextRequest): NextResponse {
   // NGC research storefront serves source-shaped product URLs on
   // /[variety]/[slug]; do not 301 those away to /products/{stripped-slug}.
   if (isNgcCanonicalProductPath(pathname)) {
+    return NextResponse.next({ request: { headers: withStorefront(request, 'maihan') } });
+  }
+
+  const segments = pathname.split('/').filter(Boolean);
+  const listing = segments[0] ?? '';
+  if (
+    segments.length === 1 &&
+    (NGC_LISTINGS.has(listing) || /-(?:gemstones|gemstone-pairs|gemstone-rings)$/.test(listing))
+  ) {
     return NextResponse.next({ request: { headers: withStorefront(request, 'maihan') } });
   }
 
