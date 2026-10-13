@@ -428,7 +428,7 @@ export function assignShowcaseCategory(input: {
   settingFor?: string | null;
 }): string | null {
   const url = input.url.toLowerCase();
-  const blob = `${url} ${input.stoneType ?? ''} ${input.colorHue ?? ''} ${input.variety ?? ''} ${input.jewelryType ?? ''} ${input.settingFor ?? ''}`;
+  const blob = `${url} ${input.stoneType ?? ''} ${input.colorHue ?? ''} ${input.variety ?? ''} ${input.jewelryType ?? ''} ${input.settingFor ?? ''}`.toLowerCase();
   if (isSkippableUrl(input.url)) return null;
   if (input.quantityType === 'pair' || /pair|[-/]pr\d+/.test(blob)) return 'pairs';
   if (input.kind === 'setting' || /setting/.test(url) || /[-/]js\d+/.test(url)) {
@@ -448,9 +448,10 @@ export function assignShowcaseCategory(input: {
   if (/paraiba|paraíba/.test(blob)) return 'paraiba_tourmaline';
   const stone = (input.stoneType ?? detectStone(blob) ?? '').toLowerCase();
   if (stone === 'sapphire' || /sapphire/.test(url)) {
-    if (/pink/.test(blob)) return 'sapphire-pink';
+    if (/pink/.test(blob) && !/yellow|orange/.test(blob)) return 'sapphire-pink';
     if (/yellow/.test(blob)) return 'sapphire-yellow';
-    return 'sapphire-blue';
+    if (/blue|cornflower|royal/.test(blob)) return 'sapphire-blue';
+    return null;
   }
   if (stone === 'ruby') return 'ruby';
   if (stone === 'emerald') return 'emerald';

@@ -111,5 +111,15 @@ describe('public catalog parse', () => {
     expect(assignShowcaseCategory({
       url: 'https://naturalgemstones.com/tourmaline/13.96ct-mozambique-emerald-cut-red-tourmaline-k8734/',
     })).toBe('tourmaline');
+    expect(assignShowcaseCategory({
+      url: 'sap-002',
+      kind: 'gemstone',
+      stoneType: 'sapphire',
+      colorHue: 'pink-orange',
+      variety: 'Padparadscha',
+    })).toBe('sapphire-padparadscha');
+    expect(assignShowcaseCategory({
+      url: 'https://naturalgemstones.com/sapphire/11.77ct-brazilian-oval-red-sapphire-k8735/',
+    })).toBeNull();
   });
 });
