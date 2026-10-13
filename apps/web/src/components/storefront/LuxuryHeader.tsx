@@ -258,6 +258,7 @@ export function LuxuryHeader({ stones: _stones }: LuxuryHeaderProps) {
         </nav>
         <div className="ngc-tools">
           <select
+            className="ngc-currency"
             aria-label="Currency"
             value={currency}
             onChange={(e) => setCurrency(e.target.value as StorefrontCurrency)}
@@ -266,11 +267,23 @@ export function LuxuryHeader({ stones: _stones }: LuxuryHeaderProps) {
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
-          <Link href="/search" aria-label="Search">Search</Link>
-          <Link href="/favorites" aria-label="Favorites">Fav{favCount > 0 ? ` ${favCount}` : ''}</Link>
-          <Link href="/compare" aria-label="Compare">Compare</Link>
-          <Link href="/cart" aria-label="Cart">Cart{bagCount > 0 ? ` ${bagCount}` : ''}</Link>
-          <Link href="/account" aria-label="Account">Account</Link>
+          <Link href="/search" className="ngc-iconbtn" aria-label="Search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4 4" /></svg>
+          </Link>
+          <Link href="/favorites" className="ngc-iconbtn" aria-label={favCount > 0 ? `Favourites, ${favCount}` : 'Favourites'}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19s-7-4.4-7-9a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 4.6-7 9-7 9z" /></svg>
+            {favCount > 0 ? <em>{favCount}</em> : null}
+          </Link>
+          <Link href="/compare" className="ngc-iconbtn" aria-label="Compare">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M12 9v11M17 13v7" /></svg>
+          </Link>
+          <Link href="/cart" className="ngc-iconbtn" aria-label={bagCount > 0 ? `Bag, ${bagCount}` : 'Bag'}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z" /><path d="M9 8V7a3 3 0 0 1 6 0v1" /></svg>
+            {bagCount > 0 ? <em>{bagCount}</em> : null}
+          </Link>
+          <Link href="/account" className="ngc-iconbtn" aria-label="Account">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" /><path d="M5 19c1.4-3 3.8-4.5 7-4.5S17.6 16 19 19" /></svg>
+          </Link>
         </div>
       </div>
       {drawer ? (

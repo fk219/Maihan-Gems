@@ -37,7 +37,7 @@ export function DyoStudio({
 }) {
   const { currency, rates } = useStorefront();
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [settingId, setSettingId] = useState<string | null>(settings[0]?.id ?? null);
+  const [settingId, setSettingId] = useState<string | null>(null);
   const [stoneId, setStoneId] = useState<string | null>(null);
   const [metal, setMetal] = useState<(typeof METALS)[number]>('18K Yellow Gold');
   const [size, setSize] = useState('6.5');
@@ -49,6 +49,18 @@ export function DyoStudio({
   const total = (setting?.priceUsd ?? 0) + (stone?.priceUsd ?? 0);
   const settingImage = setting ? imageFor(setting) : '';
   const stoneImage = stone ? imageFor(stone) : '';
+  const finishedImage = setting && stone
+    ? productImage({
+        kind: 'jewelry',
+        jewelryType: setting.settingFor,
+        settingFor: setting.settingFor,
+        stoneType: stone.stoneType,
+        title: `${stone.title} ${setting.title}`,
+        colorHue: stone.colorHue,
+        variety: stone.variety,
+        quantityType: stone.quantityType,
+      })
+    : settingImage;
 
   const accept = setting?.accepts.map((r) => `${r.shape} ${r.minCarat ?? 0}–${r.maxCarat ?? '∞'}ct`).join(' · ');
   const compositionId = setting && stone ? `dyo-${setting.id}-${stone.id}` : null;
@@ -92,7 +104,12 @@ export function DyoStudio({
           const n = (i + 1) as 1 | 2 | 3;
           return (
             <li key={label} className={step === n ? 'is-on' : step > n ? 'is-done' : ''}>
-              <button type="button" onClick={() => setStep(n)} disabled={n === 2 && !setting} className="lx-steps__btn">
+              <button
+                type="button"
+                onClick={() => setStep(n)}
+                disabled={(n === 2 && !setting) || (n === 3 && !stone)}
+                className="lx-steps__btn"
+              >
                 <span>{n}</span>
                 {label}
               </button>
@@ -104,6 +121,9 @@ export function DyoStudio({
       <div className="lx-dyo__grid">
         <div className="lx-dyo__stage">
           {step === 1 ? (
+            settings.length === 0 ? (
+              <p className="lx-lede">No settings are in the catalogue yet.</p>
+            ) : (
             <div className="lx-dyo__choices">
               {settings.map((item) => (
                 <button
@@ -119,6 +139,7 @@ export function DyoStudio({
                 </button>
               ))}
             </div>
+            )
           ) : null}
 
           {step === 2 ? (
@@ -173,9 +194,21 @@ export function DyoStudio({
         <aside className="lx-preview">
           <span className="lx-kicker">Live preview</span>
           <div className="lx-preview__frame">
-            {setting ? <img src={settingImage} alt={setting.title} className="is-setting" /> : null}
-            {stone ? <img src={stoneImage} alt={stone.title} className="is-stone" /> : null}
-            {!setting ? <p>Choose a setting to begin.</p> : null}
+            {finishedImage ? (
+              <img src={finishedImage} alt={stone ? `${stone.title} in ${setting?.title}` : setting?.title} className="is-finished" />
+            ) : (
+              <p>Choose a setting to begin.</p>
+            )}
+          </div>
+          <div className="lx-preview__pair">
+            <figure>
+              {settingImage ? <img src={settingImage} alt="" /> : <span>Setting</span>}
+              <figcaption>{setting?.title ?? 'Setting'}</figcaption>
+            </figure>
+            <figure>
+              {stoneImage ? <img src={stoneImage} alt="" /> : <span>Stone</span>}
+              <figcaption>{stone?.title ?? 'Stone'}</figcaption>
+            </figure>
           </div>
           <dl className="lx-summary__rows">
             <div>
