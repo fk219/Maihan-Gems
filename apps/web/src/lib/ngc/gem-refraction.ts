@@ -20,25 +20,26 @@ export function createStudioEnvMap(): THREE.CanvasTexture {
   canvas.height = height;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('studio env canvas');
-  ctx.fillStyle = '#07070c';
+  ctx.fillStyle = '#05050a';
   ctx.fillRect(0, 0, width, height);
   const panel = (u0: number, v0: number, u1: number, v1: number, fill: string) => {
     ctx.fillStyle = fill;
     ctx.fillRect(u0 * width, v0 * height, (u1 - u0) * width, (v1 - v0) * height);
   };
-  panel(0.28, 0.08, 0.72, 0.34, '#ffffff');
-  panel(0.36, 0.02, 0.64, 0.1, '#ffffff');
-  panel(0.04, 0.16, 0.24, 0.42, '#f7f5ff');
-  panel(0.76, 0.18, 0.96, 0.46, '#ffe7c2');
-  panel(0.44, 0.14, 0.56, 0.26, '#ffffff');
-  panel(0.12, 0.1, 0.18, 0.18, '#ffffff');
-  panel(0.82, 0.1, 0.9, 0.2, '#fff8ee');
-  panel(0.0, 0.7, 1, 1, '#16161c');
+  panel(0.3, 0.1, 0.7, 0.32, '#ffffff');
+  panel(0.4, 0.04, 0.6, 0.1, '#ffffff');
+  panel(0.06, 0.2, 0.16, 0.34, '#f4f4f8');
+  panel(0.84, 0.22, 0.94, 0.36, '#fff1d6');
+  panel(0.47, 0.16, 0.51, 0.21, '#ffffff');
+  panel(0.18, 0.12, 0.205, 0.155, '#ffffff');
+  panel(0.78, 0.11, 0.805, 0.145, '#ffffff');
+  panel(0.62, 0.08, 0.64, 0.11, '#ffffff');
+  panel(0.36, 0.07, 0.38, 0.1, '#ffffff');
   const texture = new THREE.CanvasTexture(canvas);
   texture.mapping = THREE.EquirectangularReflectionMapping;
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.generateMipmaps = true;
-  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.generateMipmaps = false;
+  texture.minFilter = THREE.LinearFilter;
   texture.magFilter = THREE.LinearFilter;
   texture.needsUpdate = true;
   return texture;
@@ -92,13 +93,15 @@ export function createGemRefractionMaterial(options: {
       color: { value: new THREE.Color(options.absorptionColor) },
       absorption: { value: params.absorption },
       aberrationStrength: { value: params.aberrationStrength },
-      fresnel: { value: 0.85 },
+      fresnel: { value: 0.55 },
     },
     vertexShader: /* glsl */ `
       varying vec3 vWorldPosition;
+      varying vec3 vWorldNormal;
       void main() {
         vec4 world = modelMatrix * vec4(position, 1.0);
         vWorldPosition = world.xyz;
+        vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
         gl_Position = projectionMatrix * viewMatrix * world;
       }
     `,
@@ -113,6 +116,7 @@ export function createGemRefractionMaterial(options: {
       ${BVHShaderGLSL.bvh_ray_functions}
 
       varying vec3 vWorldPosition;
+      varying vec3 vWorldNormal;
       uniform sampler2D envMap;
       uniform float bounces;
       uniform BVH bvh;
@@ -127,23 +131,33 @@ export function createGemRefractionMaterial(options: {
       uniform float aberrationStrength;
       uniform float fresnel;
 
+      vec3 safeNormalize(vec3 v, vec3 fallback) {
+        float len = length(v);
+        return len > 1e-5 ? v / len : fallback;
+      }
+
       vec2 gemEquirect(vec3 dir) {
-        float u = atan(dir.z, dir.x) * RECIPROCAL_PI2 + 0.5;
-        float v = asin(clamp(dir.y, -1.0, 1.0)) * RECIPROCAL_PI + 0.5;
-        return vec2(u, v);
+        vec3 d = safeNormalize(dir, vec3(0.0, 1.0, 0.0));
+        float u = atan(d.z, d.x) * RECIPROCAL_PI2 + 0.5;
+        float v = asin(clamp(d.y, -1.0, 1.0)) * RECIPROCAL_PI + 0.5;
+        return clamp(vec2(u, v), vec2(0.002), vec2(0.998));
       }
 
       vec3 envSample(vec3 rayDirection) {
-        return texture(envMap, gemEquirect(normalize(rayDirection))).rgb;
+        vec3 c = texture(envMap, gemEquirect(rayDirection)).rgb;
+        float luma = dot(c, vec3(0.333));
+        return c * mix(0.55, 1.85, smoothstep(0.12, 0.9, luma));
       }
 
       vec3 totalInternalReflection(vec3 incomingDirection, vec3 normal, float rayIor, inout float pathLength) {
-        vec3 rayOrigin = vWorldPosition;
-        vec3 rayDirection = incomingDirection;
-        rayDirection = refract(rayDirection, normal, 1.0 / rayIor);
-        rayOrigin = vWorldPosition + rayDirection * RAY_OFFSET;
+        vec3 rayDirection = refract(incomingDirection, normal, 1.0 / rayIor);
+        if (dot(rayDirection, rayDirection) < 1e-8) {
+          pathLength = 0.0;
+          return reflect(incomingDirection, normal);
+        }
+        vec3 rayOrigin = vWorldPosition + rayDirection * RAY_OFFSET;
         rayOrigin = (modelMatrixInverse * vec4(rayOrigin, 1.0)).xyz;
-        rayDirection = normalize((modelMatrixInverse * vec4(rayDirection, 0.0)).xyz);
+        rayDirection = safeNormalize((modelMatrixInverse * vec4(rayDirection, 0.0)).xyz, vec3(0.0, -1.0, 0.0));
 
         for (float i = 0.0; i < 8.0; i++) {
           if (i >= bounces) break;
@@ -153,50 +167,45 @@ export function createGemRefractionMaterial(options: {
           float side = 1.0;
           float dist = 0.0;
           bvhIntersectFirstHit(bvh, rayOrigin, rayDirection, faceIndices, faceNormal, barycoord, side, dist);
-          pathLength += max(dist, 0.0);
+          if (dist < 1e-5 || dist > 4.0) break;
+          pathLength += dist;
           vec3 hitPos = rayOrigin + rayDirection * dist;
           vec3 refractedDirection = refract(rayDirection, faceNormal, rayIor);
-          if (length(refractedDirection) != 0.0) {
+          if (dot(refractedDirection, refractedDirection) > 1e-8) {
             rayDirection = refractedDirection;
             break;
           }
           rayDirection = reflect(rayDirection, faceNormal);
           rayOrigin = hitPos + rayDirection * RAY_OFFSET;
         }
-        return normalize((modelMatrixWorld * vec4(rayDirection, 0.0)).xyz);
+        return safeNormalize((modelMatrixWorld * vec4(rayDirection, 0.0)).xyz, incomingDirection);
       }
 
       void main() {
-        vec3 fdx = dFdx(vWorldPosition);
-        vec3 fdy = dFdy(vWorldPosition);
-        vec3 normal = normalize(cross(fdx, fdy));
-        vec3 rayDirection = normalize(vWorldPosition - cameraPosition);
+        vec3 geo = cross(dFdx(vWorldPosition), dFdy(vWorldPosition));
+        vec3 normal = length(geo) > 1e-8 ? normalize(geo) : safeNormalize(vWorldNormal, vec3(0.0, 1.0, 0.0));
+        vec3 rayDirection = safeNormalize(vWorldPosition - cameraPosition, vec3(0.0, 0.0, -1.0));
         if (dot(normal, rayDirection) > 0.0) normal = -normal;
 
         float pathG = 0.0;
         vec3 dirG = totalInternalReflection(rayDirection, normal, max(ior, 1.0), pathG);
-        float pathR = 0.0;
-        float pathB = 0.0;
-        vec3 dirR;
-        vec3 dirB;
-        if (aberrationStrength > 0.0001) {
-          dirR = totalInternalReflection(rayDirection, normal, max(ior * (1.0 - aberrationStrength), 1.0), pathR);
-          dirB = totalInternalReflection(rayDirection, normal, max(ior * (1.0 + aberrationStrength), 1.0), pathB);
-        } else {
-          dirR = dirG;
-          dirB = dirG;
-          pathR = pathG;
-          pathB = pathG;
+        vec3 transmitted = envSample(dirG);
+        if (aberrationStrength > 0.0002) {
+          vec3 dirR = safeNormalize(dirG + vec3(aberrationStrength, 0.0, 0.0), dirG);
+          vec3 dirB = safeNormalize(dirG - vec3(aberrationStrength, 0.0, 0.0), dirG);
+          transmitted = vec3(envSample(dirR).r, transmitted.g, envSample(dirB).b);
         }
 
-        vec3 transmitted = vec3(envSample(dirR).r, envSample(dirG).g, envSample(dirB).b);
-        float pathLength = max((pathR + pathG + pathB) / 3.0, 0.45);
-        vec3 beer = exp(-(vec3(1.0) - color) * pathLength * absorption);
-        vec3 body = transmitted * mix(color, vec3(1.0), 0.16) * beer;
-        vec3 viewDir = normalize(cameraPosition - vWorldPosition);
+        float pathLength = clamp(pathG, 0.0, 1.15);
+        vec3 beer = max(exp(-(vec3(1.0) - color) * pathLength * absorption), vec3(0.42));
+        vec3 body = transmitted * mix(color, vec3(1.0), 0.48) * beer;
+        vec3 viewDir = safeNormalize(cameraPosition - vWorldPosition, vec3(0.0, 0.0, 1.0));
         vec3 reflected = envSample(reflect(-viewDir, normal));
         float f = pow(1.0 - max(dot(viewDir, normal), 0.0), 5.0) * fresnel;
-        gl_FragColor = vec4(mix(body, reflected * mix(color, vec3(1.0), 0.5), f), 1.0);
+        vec3 pixel = mix(body, reflected, f);
+        pixel = max(pixel, vec3(0.0));
+        if (any(isnan(pixel))) pixel = color * 0.6;
+        gl_FragColor = vec4(pixel, 1.0);
 
         #include <tonemapping_fragment>
         #include <colorspace_fragment>

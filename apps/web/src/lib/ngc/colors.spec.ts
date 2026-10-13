@@ -25,12 +25,14 @@ describe('gemHexFor', () => {
 });
 
 describe('gemRefractionParams', () => {
-  it('traces 3–5 internal bounces with tanzanite IOR and chromatic fire', () => {
+  it('traces 3–5 internal bounces with tanzanite IOR and light chromatic fire', () => {
     const params = gemRefractionParams('Tanzanite');
     expect(params.ior).toBe(1.69);
     expect(params.bounces).toBeGreaterThanOrEqual(3);
     expect(params.bounces).toBeLessThanOrEqual(5);
-    expect(params.aberrationStrength).toBeGreaterThan(0.01);
-    expect(params.absorption).toBeGreaterThan(0.4);
+    expect(params.aberrationStrength).toBeGreaterThan(0);
+    expect(params.aberrationStrength).toBeLessThan(0.006);
+    expect(params.absorption).toBeGreaterThan(0.1);
+    expect(params.absorption).toBeLessThan(0.35);
   });
 });

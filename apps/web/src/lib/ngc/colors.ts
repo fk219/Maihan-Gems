@@ -121,7 +121,7 @@ export function gemRefractionParams(stoneType?: string | null): {
   return {
     ior: gemIor(stoneType),
     bounces: 4,
-    aberrationStrength: Math.min(0.04, 0.006 + gemDispersion(stoneType) * 0.028),
-    absorption: colorless ? 0.12 : 0.88,
+    aberrationStrength: Math.min(0.0035, 0.0008 + gemDispersion(stoneType) * 0.0024),
+    absorption: colorless ? 0.05 : 0.22,
   };
 }

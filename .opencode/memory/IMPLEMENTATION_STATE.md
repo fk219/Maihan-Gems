@@ -1,11 +1,10 @@
 # K11733 3D — BVH REFRACTION GEM (2026-10-13)
 
 Loose-stone 3D uses a watertight 57-facet brilliant and a three-mesh-bvh
-internal-reflection shader (ADR-026): world/inverse matrices passed as
-uniforms (fragment GLSL has no modelMatrix), 4 bounces, IOR 1.69, chromatic
-aberration, Beer's-law absorption from the stone colour, studio equirect
-HDRI. No hand-tuned scene lights on the gem. Generic for every shape/colour.
-Slow auto-rotate, small contact stamp. DYO ring: ~2mm comfort-fit
+internal-reflection shader (ADR-026): light Beer's-law absorption so the body
+glows violet-blue, tiny fast chroma (no extra IOR bounces), high-contrast
+studio equirect without mipmaps for crisp white sparkles. 4 bounces, IOR 1.69.
+Generic for every shape/colour. Slow auto-rotate, small contact stamp. DYO ring: ~2mm comfort-fit
 band tapering to a 4/6-prong claw head, jewellery metal PBR (yellow/white/rose
 gold, platinum). Caption uses `settingSeatLabel` so live metal is named once
 (no “Platinum 950 … (18K Yellow Gold)”). Finish step fills the left column with
