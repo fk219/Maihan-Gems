@@ -1576,3 +1576,73 @@
   gap: 0.65rem;
   margin-top: 0.85rem;
 }
+
+/* Natural Gemstones layout, Maihan gold + 12px corners */
+.ngc-header { position: sticky; top: 0; z-index: 90; background: #fff; border-bottom: 1px solid #eadfbe; }
+.ngc-top { background: var(--gold-gradient); color: #1a1408; font-size: 0.78rem; }
+.ngc-top__inner, .ngc-bar, .ngc-wrap { max-width: 80rem; margin: 0 auto; padding-left: 1.25rem; padding-right: 1.25rem; }
+.ngc-top__inner { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: center; min-height: 2rem; }
+.ngc-top a { color: inherit; text-decoration: none; }
+.ngc-bar { display: flex; align-items: center; gap: 1rem; min-height: 4.5rem; }
+.ngc-logo { font-family: var(--font-serif); font-size: 1.6rem; letter-spacing: 0.14em; text-decoration: none; color: #1a1408; display: flex; flex-direction: column; line-height: 1; }
+.ngc-logo small { letter-spacing: 0.28em; font-size: 0.62rem; color: #8B6914; }
+.ngc-nav { display: none; flex: 1; gap: 0.15rem; align-items: stretch; }
+.ngc-nav__item { position: static; }
+.ngc-nav__link { display: flex; align-items: center; height: 4.5rem; padding: 0 0.55rem; text-decoration: none; color: #1a1408; font-size: 0.82rem; letter-spacing: 0.04em; }
+.ngc-nav__item.is-open .ngc-nav__link { color: #8B6914; }
+.ngc-drop { position: absolute; left: 0; right: 0; background: #fff; border-bottom: 3px solid #C9A84C; box-shadow: 0 16px 40px rgba(26,20,8,0.08); display: flex; gap: 2rem; padding: 1.25rem 8vw 1.5rem; border-radius: 0 0 12px 12px; }
+.ngc-drop[hidden] { display: none; }
+.ngc-drop__title { margin: 0 0 0.6rem; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8B6914; }
+.ngc-drop ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.ngc-drop a { display: flex; align-items: center; gap: 0.55rem; text-decoration: none; color: #1a1408; border-radius: 12px; padding: 0.25rem 0.4rem; }
+.ngc-drop a:hover { background: #fbf6ea; }
+.ngc-drop img { width: 36px; height: 36px; object-fit: contain; border-radius: 12px; background: #f7f1e4; }
+.ngc-tools { margin-left: auto; display: flex; align-items: center; gap: 0.65rem; font-size: 0.78rem; }
+.ngc-tools a, .ngc-tools select { color: #1a1408; text-decoration: none; border-radius: 12px; border: 1px solid #eadfbe; background: #fff; padding: 0.35rem 0.55rem; }
+.ngc-burger { display: flex; flex-direction: column; gap: 4px; background: none; border: 0; padding: 0.4rem; }
+.ngc-burger span { display: block; width: 18px; height: 2px; background: #1a1408; border-radius: 12px; }
+.ngc-drawer { display: grid; gap: 0.75rem; padding: 1rem 1.25rem 1.5rem; background: #fff; border-top: 1px solid #eadfbe; }
+.ngc-drawer a { display: block; text-decoration: none; color: #1a1408; font-weight: 600; }
+.ngc-drawer__sub { font-weight: 400 !important; padding-left: 0.75rem; color: #5c5346 !important; }
+@media (min-width: 1100px) {
+  .ngc-nav { display: flex; }
+  .ngc-burger { display: none; }
+  .ngc-drawer { display: none; }
+}
+.ngc-home h2 { font-family: var(--font-serif); font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 500; margin: 0 0 0.4rem; }
+.ngc-lede { max-width: 42rem; color: #5c5346; margin: 0 0 1.25rem; }
+.ngc-block { padding: 3rem 0; }
+.ngc-block--tint { background: #fbf6ea; }
+.ngc-hero { position: relative; min-height: 32rem; display: grid; align-items: center; }
+.ngc-hero__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ngc-hero__card { position: relative; margin: 2rem; max-width: 34rem; background: rgba(255,255,255,0.92); border-radius: 12px; padding: 1.75rem; box-shadow: 0 12px 40px rgba(26,20,8,0.12); }
+.ngc-hero__card h1 { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 500; margin: 0 0 0.6rem; }
+.ngc-hero__actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
+.ngc-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 2.6rem; padding: 0 1.1rem; border-radius: 12px; background: var(--gold-gradient); color: #1a1408; text-decoration: none; font-weight: 600; }
+.ngc-btn--ghost { background: #fff; border: 1px solid #C9A84C; }
+.ngc-stones { display: grid; grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); gap: 0.75rem; }
+.ngc-stone { display: grid; justify-items: center; gap: 0.35rem; text-align: center; text-decoration: none; color: #1a1408; background: #fff; border-radius: 12px; padding: 0.6rem; border: 1px solid #f0e6cc; }
+.ngc-stone img { width: 72px; height: 72px; object-fit: contain; }
+.ngc-stone:hover { border-color: #C9A84C; }
+.ngc-pack, .ngc-dyo, .ngc-videos, .ngc-showroom { display: grid; gap: 0.75rem; }
+.ngc-pack { grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
+.ngc-pack__card, .ngc-dyo__card, .ngc-video { border-radius: 12px; overflow: hidden; background: #fff; border: 1px solid #f0e6cc; }
+.ngc-pack__card img, .ngc-dyo__card img, .ngc-video img, .ngc-showroom img { width: 100%; height: 180px; object-fit: cover; display: block; }
+.ngc-dyo, .ngc-videos, .ngc-showroom { grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+.ngc-dyo__card { text-decoration: none; color: #1a1408; font-weight: 600; }
+.ngc-dyo__card span, .ngc-video span:last-child { display: block; padding: 0.65rem 0.8rem; }
+.ngc-video { position: relative; text-decoration: none; color: #1a1408; }
+.ngc-play { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%); width: 3rem; height: 3rem; border-radius: 12px; display: grid; place-items: center; background: var(--gold-gradient); }
+.ngc-trust { padding: 2rem 0; background: #1a1408; color: #f7f1e4; }
+.ngc-trust__grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+.ngc-trust article { border-radius: 12px; border: 1px solid rgba(201,168,76,0.45); padding: 1rem 1.1rem; }
+.ngc-trust h3 { margin: 0 0 0.35rem; font-family: var(--font-serif); font-weight: 500; color: #E8C96A; }
+.ngc-more { color: #8B6914; }
+.ngc-help { padding: 3rem 0; text-align: center; }
+.ngc-help .ngc-hero__actions { justify-content: center; }
+.ngc-footer { background: #1a1408; color: #f7f1e4; padding: 2.5rem 0 1.5rem; }
+.ngc-footer__grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+.ngc-footer h2, .ngc-footer h3 { font-family: var(--font-serif); font-weight: 500; color: #E8C96A; margin: 0 0 0.5rem; }
+.ngc-footer a { display: block; color: inherit; text-decoration: none; margin: 0.25rem 0; }
+.ngc-footer__legal { text-align: center; font-size: 0.78rem; opacity: 0.8; margin: 1.5rem 0 0; }
+

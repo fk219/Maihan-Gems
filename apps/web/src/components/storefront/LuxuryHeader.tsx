@@ -3,83 +3,261 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { displayStoneName, stoneTypeToSlug } from '../../lib/search-parser.js';
 import { CURRENCIES, type StorefrontCurrency } from '../../lib/currency.js';
+import { NGC_MEDIA } from '../../lib/ngc-home.js';
 import { useStorefront } from './StorefrontProvider.js';
 
 export interface LuxuryHeaderProps {
   readonly stones: readonly { stoneType: string; pairCount: number }[];
 }
 
-export function LuxuryHeader({ stones }: LuxuryHeaderProps) {
+interface NavLink {
+  readonly label: string;
+  readonly href: string;
+  readonly img?: string;
+}
+
+interface NavColumn {
+  readonly title: string;
+  readonly links: readonly NavLink[];
+}
+
+interface NavGroup {
+  readonly id: string;
+  readonly label: string;
+  readonly href: string;
+  readonly columns: readonly NavColumn[];
+}
+
+const IMG = (path: string) => `${NGC_MEDIA}${path}`;
+
+const GROUPS: readonly NavGroup[] = [
+  {
+    id: 'gemstones',
+    label: 'Gemstones',
+    href: '/browse',
+    columns: [
+      {
+        title: 'Shop Gemstones by Type',
+        links: [
+          { label: 'Garnet', href: '/garnet', img: '/images/normal/mainMenu/stones/garnet.png' },
+          { label: 'Moonstone', href: '/moonstone', img: '/images/normal/mainMenu/stones/moonstone.png' },
+          { label: 'Quartz', href: '/quartz', img: '/images/normal/mainMenu/stones/quartz.png' },
+          { label: 'Spinel', href: '/spinel', img: '/images/normal/mainMenu/stones/spinel.png' },
+          { label: 'Tourmaline', href: '/tourmaline', img: '/images/normal/mainMenu/stones/tourmaline.png' },
+          { label: 'View More', href: '/browse' },
+        ],
+      },
+      {
+        title: 'Shop Gemstones by Color',
+        links: [
+          { label: 'Blue', href: '/colour/blue' },
+          { label: 'Green', href: '/colour/green' },
+          { label: 'Pink', href: '/colour/pink' },
+          { label: 'Purple', href: '/colour/purple' },
+          { label: 'Yellow', href: '/colour/yellow' },
+          { label: 'View More', href: '/browse' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'dyo',
+    label: 'Design Your Own',
+    href: '/design-your-own',
+    columns: [
+      {
+        title: 'Create Your Dream Design',
+        links: [
+          { label: 'Start with a Gemstone', href: '/browse' },
+          { label: 'Start with a Setting', href: '/settings' },
+          { label: 'How it works', href: '/design-your-own' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'rings',
+    label: 'Rings',
+    href: '/jewellery?type=ring',
+    columns: [
+      {
+        title: 'Shop Rings by Gemstone',
+        links: [
+          { label: 'Garnet rings', href: '/garnet' },
+          { label: 'Moonstone rings', href: '/moonstone' },
+          { label: 'Opal rings', href: '/opal' },
+          { label: 'Spinel rings', href: '/spinel' },
+          { label: 'Tanzanite rings', href: '/tanzanite' },
+          { label: 'Tourmaline rings', href: '/tourmaline' },
+          { label: 'All rings', href: '/jewellery?type=ring' },
+        ],
+      },
+      {
+        title: 'Shop Ring Settings by Style',
+        links: [
+          { label: 'Solitaire', href: '/settings?for=ring' },
+          { label: 'Halo', href: '/settings?for=ring' },
+          { label: 'Pavé', href: '/settings?for=ring' },
+          { label: 'Three stone', href: '/settings?for=ring' },
+          { label: 'Antique', href: '/settings?for=ring' },
+          { label: 'All settings', href: '/settings?for=ring' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'jewelry',
+    label: 'Jewelry',
+    href: '/jewellery',
+    columns: [
+      {
+        title: 'Shop Jewelry by Type',
+        links: [
+          { label: 'Rings', href: '/jewellery?type=ring' },
+          { label: 'Earrings', href: '/jewellery?type=earrings' },
+          { label: 'Necklaces & Pendants', href: '/jewellery?type=pendant' },
+          { label: 'Bracelets & Bangles', href: '/jewellery?type=bracelet' },
+          { label: "Men's Rings", href: '/jewellery?type=ring' },
+        ],
+      },
+      {
+        title: 'Popular Gemstones',
+        links: [
+          { label: 'Amethyst', href: '/amethyst' },
+          { label: 'Aquamarine', href: '/aquamarine' },
+          { label: 'Opal', href: '/opal' },
+          { label: 'Tanzanite', href: '/tanzanite' },
+          { label: 'Topaz', href: '/topaz' },
+          { label: 'Tourmaline', href: '/tourmaline' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'pairs',
+    label: 'Gemstone Pairs',
+    href: '/pairs',
+    columns: [
+      {
+        title: 'Matched pairs',
+        links: [
+          { label: 'All pairs', href: '/pairs' },
+          { label: 'Tourmaline pairs', href: '/tourmaline' },
+          { label: 'Garnet pairs', href: '/garnet' },
+          { label: 'Spinel pairs', href: '/spinel' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    href: '/settings',
+    columns: [
+      {
+        title: 'Shop Settings by Type',
+        links: [
+          { label: 'Rings', href: '/settings?for=ring', img: '/images/normal/mainMenu/settingsType/rings.png' },
+          { label: "Men's Rings", href: '/settings?for=ring', img: '/images/normal/mainMenu/settingsType/mens-rings.png' },
+          { label: 'Earrings', href: '/settings?for=earrings', img: '/images/normal/mainMenu/settingsType/earrings.png' },
+          { label: 'Necklaces & Pendants', href: '/settings?for=pendant', img: '/images/normal/mainMenu/settingsType/necklaces-pendants.png' },
+          { label: 'Bracelets', href: '/settings?for=bracelet', img: '/images/normal/mainMenu/settingsType/bracelets.png' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'education',
+    label: 'Education',
+    href: '/education',
+    columns: [
+      {
+        title: 'Learn',
+        links: [
+          { label: 'Beginner’s guide', href: '/education' },
+          { label: 'Gemstone types', href: '/varieties' },
+          { label: 'Mining', href: '/education' },
+          { label: 'Blog', href: '/blog' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'about',
+    label: 'About',
+    href: '/about',
+    columns: [
+      {
+        title: 'The house',
+        links: [
+          { label: 'About us', href: '/about' },
+          { label: 'Showroom', href: '/showrooms' },
+          { label: 'Contact', href: '/contact' },
+          { label: 'FAQ', href: '/policy/shipping' },
+        ],
+      },
+    ],
+  },
+];
+
+export function LuxuryHeader({ stones: _stones }: LuxuryHeaderProps) {
   const { currency, setCurrency, bagCount, favCount } = useStorefront();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<string | null>(null);
+  const [drawer, setDrawer] = useState(false);
 
   return (
-    <header className="lx-header">
-      <div className="lx-header__bar">
-        <button className="lx-icon lx-burger" type="button" aria-label="Menu" onClick={() => setOpen((v) => !v)}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
+    <header className="ngc-header">
+      <div className="ngc-top">
+        <div className="ngc-top__inner">
+          <span>Showroom appointment · Mon–Fri 10:00–18:00</span>
+          <a href="tel:+12128049994">USA +1-212-804-9994</a>
+          <Link href="/showrooms">Make appointment</Link>
+          <Link href="/contact">Contact us</Link>
+        </div>
+      </div>
+      <div className="ngc-bar">
+        <button className="ngc-burger" type="button" aria-label="Menu" onClick={() => setDrawer((v) => !v)}>
+          <span />
+          <span />
+          <span />
         </button>
-
-        <Link href="/" className="lx-brand" aria-label="Maihan Gems">
-          <span className="lx-brand__mark">MAIHAN</span>
-          <span className="lx-brand__sub">Gems</span>
+        <Link href="/" className="ngc-logo" aria-label="Maihan Gems">
+          MAIHAN
+          <small>Gems</small>
         </Link>
-
-        <nav className="lx-nav" aria-label="Primary">
-          <div className="lx-nav__item">
-            <Link className="lx-nav__link" href="/browse">Gemstones</Link>
-            <div className="lx-mega">
-              <Link href="/browse">All gemstones</Link>
-              {stones.map((s) => (
-                <Link key={s.stoneType} href={`/${stoneTypeToSlug(s.stoneType)}`}>
-                  {displayStoneName(s.stoneType)}
-                </Link>
-              ))}
+        <nav className="ngc-nav" aria-label="Primary" onMouseLeave={() => setOpen(null)}>
+          {GROUPS.map((group) => (
+            <div
+              key={group.id}
+              className={`ngc-nav__item${open === group.id ? ' is-open' : ''}`}
+              onMouseEnter={() => setOpen(group.id)}
+            >
+              <Link href={group.href} className="ngc-nav__link" onClick={() => setOpen(null)}>
+                {group.label}
+              </Link>
+              <div className="ngc-drop" hidden={open !== group.id}>
+                {group.columns.map((col) => (
+                  <div key={col.title} className="ngc-drop__col">
+                    <p className="ngc-drop__title">{col.title}</p>
+                    <ul>
+                      {col.links.map((link) => (
+                        <li key={link.label}>
+                          <Link href={link.href} onClick={() => setOpen(null)}>
+                            {link.img ? <img src={IMG(link.img)} alt="" width={36} height={36} /> : null}
+                            <span>{link.label}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="lx-nav__item">
-            <Link className="lx-nav__link" href="/pairs">Pairs</Link>
-            <div className="lx-mega">
-              <Link href="/pairs">All matched pairs</Link>
-              {stones.filter((s) => s.pairCount > 0).map((s) => (
-                <Link key={s.stoneType} href={`/${stoneTypeToSlug(s.stoneType)}-pairs`}>
-                  {displayStoneName(s.stoneType)} pairs
-                </Link>
-              ))}
-            </div>
-          </div>
-          <div className="lx-nav__item">
-            <Link className="lx-nav__link" href="/jewellery">Jewellery</Link>
-            <div className="lx-mega">
-              <Link href="/jewellery">All jewellery</Link>
-              <Link href="/jewellery?type=ring">Rings</Link>
-              <Link href="/jewellery?type=earrings">Earrings</Link>
-              <Link href="/jewellery?type=pendant">Pendants</Link>
-              <Link href="/jewellery?type=bracelet">Bracelets</Link>
-              <Link href="/jewellery?type=necklace">Necklaces</Link>
-            </div>
-          </div>
-          <div className="lx-nav__item">
-            <Link className="lx-nav__link" href="/settings">Settings</Link>
-            <div className="lx-mega">
-              <Link href="/settings">All settings</Link>
-              <Link href="/settings?for=ring">Ring settings</Link>
-              <Link href="/settings?for=earrings">Earring settings</Link>
-              <Link href="/settings?for=pendant">Pendant settings</Link>
-              <Link href="/design-your-own">Design your own</Link>
-            </div>
-          </div>
-          <Link className="lx-nav__link" href="/design-your-own">Design Your Own</Link>
-          <Link className="lx-nav__link" href="/about">About</Link>
+          ))}
         </nav>
-
-        <div className="lx-tools">
+        <div className="ngc-tools">
           <select
-            className="lx-fx"
             aria-label="Currency"
             value={currency}
             onChange={(e) => setCurrency(e.target.value as StorefrontCurrency)}
@@ -88,46 +266,27 @@ export function LuxuryHeader({ stones }: LuxuryHeaderProps) {
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
-          <Link href="/search" className="lx-icon" aria-label="Search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <circle cx="11" cy="11" r="7" />
-              <path d="M20 20l-3.5-3.5" />
-            </svg>
-          </Link>
-          <Link href="/compare" className="lx-icon" aria-label="Compare">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <path d="M6 4v16M12 8v12M18 12v8" />
-            </svg>
-          </Link>
-          <Link href="/favorites" className="lx-icon" aria-label="Favourites">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.6-7 10-7 10z" />
-            </svg>
-            {favCount > 0 ? <span className="lx-badge">{favCount}</span> : null}
-          </Link>
-          <Link href="/cart" className="lx-icon" aria-label="Bag">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <path d="M6 8h12l-1 13H7L6 8z" />
-              <path d="M9 8V7a3 3 0 0 1 6 0v1" />
-            </svg>
-            {bagCount > 0 ? <span className="lx-badge">{bagCount}</span> : null}
-          </Link>
+          <Link href="/search" aria-label="Search">Search</Link>
+          <Link href="/favorites" aria-label="Favorites">Fav{favCount > 0 ? ` ${favCount}` : ''}</Link>
+          <Link href="/compare" aria-label="Compare">Compare</Link>
+          <Link href="/cart" aria-label="Cart">Cart{bagCount > 0 ? ` ${bagCount}` : ''}</Link>
+          <Link href="/account" aria-label="Account">Account</Link>
         </div>
       </div>
-
-      <div className={`lx-drawer${open ? ' is-open' : ''}`}>
-        <Link href="/browse" onClick={() => setOpen(false)}>Gemstones</Link>
-        <Link href="/pairs" onClick={() => setOpen(false)}>Pairs</Link>
-        <Link href="/jewellery" onClick={() => setOpen(false)}>Jewellery</Link>
-        <Link href="/settings" onClick={() => setOpen(false)}>Settings</Link>
-        <Link href="/design-your-own" onClick={() => setOpen(false)}>Design Your Own</Link>
-        <Link href="/about" onClick={() => setOpen(false)}>About</Link>
-        {stones.slice(0, 8).map((s) => (
-          <Link key={s.stoneType} href={`/${stoneTypeToSlug(s.stoneType)}`} onClick={() => setOpen(false)}>
-            {displayStoneName(s.stoneType)}
-          </Link>
-        ))}
-      </div>
+      {drawer ? (
+        <div className="ngc-drawer">
+          {GROUPS.map((group) => (
+            <div key={group.id}>
+              <Link href={group.href} onClick={() => setDrawer(false)}>{group.label}</Link>
+              {group.columns.flatMap((col) => col.links).slice(0, 4).map((link) => (
+                <Link key={link.label} href={link.href} className="ngc-drawer__sub" onClick={() => setDrawer(false)}>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : null}
     </header>
   );
 }
