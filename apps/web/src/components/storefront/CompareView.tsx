@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   getCompare,
   removeFromCompare,
-  seedListIfEmpty,
   subscribeAtelier,
   type AtelierItem,
 } from '../../lib/atelier-store.js';
@@ -38,7 +37,6 @@ function cell(item: AtelierItem, key: (typeof ROWS)[number]['key'], currency: 'U
 }
 
 export function CompareView({
-  demoItems,
   forceEmpty = false,
 }: {
   demoItems: AtelierItem[];
@@ -52,9 +50,9 @@ export function CompareView({
       setItems([]);
       return;
     }
-    setItems(seedListIfEmpty('compare', demoItems.slice(0, 3)));
+    setItems(getCompare());
     return subscribeAtelier(() => setItems(getCompare()));
-  }, [demoItems, forceEmpty]);
+  }, [forceEmpty]);
 
   const columns = useMemo(() => items.slice(0, 4), [items]);
 

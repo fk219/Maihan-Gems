@@ -7,7 +7,6 @@ import {
   addToBag,
   getFavs,
   removeFav,
-  seedListIfEmpty,
   subscribeAtelier,
   type AtelierItem,
 } from '../../lib/atelier-store.js';
@@ -17,7 +16,6 @@ import { useStorefront } from './StorefrontProvider.js';
 import { VaultEmpty } from './VaultEmpty.js';
 
 export function FavoritesView({
-  demoItems,
   forceEmpty = false,
 }: {
   demoItems: AtelierItem[];
@@ -31,9 +29,9 @@ export function FavoritesView({
       setItems([]);
       return;
     }
-    setItems(seedListIfEmpty('favs', demoItems));
+    setItems(getFavs());
     return subscribeAtelier(() => setItems(getFavs()));
-  }, [demoItems, forceEmpty]);
+  }, [forceEmpty]);
 
   if (items.length === 0) {
     return (

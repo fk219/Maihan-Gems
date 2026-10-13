@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { addToBag } from '../../lib/atelier-store.js';
+import { addToBag, getBag, subscribeAtelier } from '../../lib/atelier-store.js';
 import { cardToAtelier } from '../../lib/atelier-item.js';
 import { formatMoney } from '../../lib/currency.js';
 import { compatibleStones } from '../../lib/dyo-compat.js';
@@ -51,6 +51,15 @@ export function DyoStudio({
   const stoneImage = stone ? imageFor(stone) : '';
 
   const accept = setting?.accepts.map((r) => `${r.shape} ${r.minCarat ?? 0}–${r.maxCarat ?? '∞'}ct`).join(' · ');
+  const compositionId = setting && stone ? `dyo-${setting.id}-${stone.id}` : null;
+
+  useEffect(() => {
+    const sync = () => {
+      if (compositionId) setReserved(getBag().some((row) => row.id === compositionId));
+    };
+    sync();
+    return subscribeAtelier(sync);
+  }, [compositionId]);
 
   function chooseSetting(id: string) {
     setSettingId(id);

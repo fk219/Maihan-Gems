@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   getBag,
   removeFromBag,
-  seedListIfEmpty,
   subscribeAtelier,
   type AtelierItem,
 } from '../../lib/atelier-store.js';
@@ -16,7 +15,6 @@ import { useStorefront } from './StorefrontProvider.js';
 import { VaultEmpty } from './VaultEmpty.js';
 
 export function BagView({
-  demoItems,
   forceEmpty = false,
 }: {
   demoItems: AtelierItem[];
@@ -30,9 +28,9 @@ export function BagView({
       setItems([]);
       return;
     }
-    setItems(seedListIfEmpty('bag', demoItems));
+    setItems(getBag());
     return subscribeAtelier(() => setItems(getBag()));
-  }, [demoItems, forceEmpty]);
+  }, [forceEmpty]);
 
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.priceUsd, 0), [items]);
   const duty = subtotal * 0.05;

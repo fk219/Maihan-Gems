@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { addToBag, isCompared, isFav, toggleCompare, toggleFav, type AtelierItem } from '../../lib/atelier-store.js';
+import { addToBag, getBag, isCompared, isFav, subscribeAtelier, toggleCompare, toggleFav, type AtelierItem } from '../../lib/atelier-store.js';
 import { formatMoney } from '../../lib/currency.js';
 import { useStorefront } from './StorefrontProvider.js';
 
@@ -13,8 +13,13 @@ export function ProductActions({ item }: { item: AtelierItem }) {
   const [held, setHeld] = useState(false);
 
   useEffect(() => {
-    setFav(isFav(item.id));
-    setCompared(isCompared(item.id));
+    const sync = () => {
+      setFav(isFav(item.id));
+      setCompared(isCompared(item.id));
+      setHeld(getBag().some((row) => row.id === item.id));
+    };
+    sync();
+    return subscribeAtelier(sync);
   }, [item.id]);
 
   return (
