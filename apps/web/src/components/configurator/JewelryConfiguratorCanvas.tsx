@@ -64,19 +64,18 @@ export function JewelryConfiguratorCanvas({
       host.appendChild(renderer.domElement);
 
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x1a1230);
+      envScene.background = new THREE.Color(0x1a0840);
       const card = (w: number, h: number, color: number, pos: [number, number, number], look = true) => {
         const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color }));
         mesh.position.set(...pos);
         if (look) mesh.lookAt(0, 0.2, 0);
         envScene.add(mesh);
       };
-      card(3.2, 3.2, 0xfff8ee, [0, 5.8, 2.2]);
-      card(4.4, 6, 0xe8c96a, [4.8, 2.6, 1.6]);
-      card(3.6, 5, 0xffd7a8, [-4.6, 2.4, -1.0]);
-      card(3.4, 4.6, 0x2a1078, [-3.2, 1.6, 3.4]);
-      card(2.4, 2.4, 0xffffff, [1.8, 3.8, 4.2]);
-      card(10, 10, 0x16121f, [0, -4.2, 0]);
+      card(1.4, 1.4, 0xfff4dd, [2.8, 4.4, 3.6]);
+      card(3.6, 5, 0xc9a84c, [5.0, 2.2, 1.2]);
+      card(2.8, 4, 0x5b21b6, [-4.4, 2.0, 2.4]);
+      card(1.1, 1.1, 0xffffff, [-1.6, 3.2, 4.6]);
+      card(10, 10, 0x12062c, [0, -4.2, 0]);
       const pmrem = new THREE.PMREMGenerator(renderer);
       const env = pmrem.fromScene(envScene, 0.04).texture;
       scene.environment = env;
@@ -91,15 +90,12 @@ export function JewelryConfiguratorCanvas({
       key.shadow.radius = 4;
       scene.add(key);
       scene.add(new THREE.DirectionalLight(0xc4b5fd, 0.7).translateX(-2.8).translateY(2.2).translateZ(2.6));
-      const sparkA = new THREE.PointLight(0xffffff, 2.8, 3.4, 2);
+      const sparkA = new THREE.PointLight(0xffffff, 1.4, 2.8, 2);
       sparkA.position.set(0.62, 0.9, 1.15);
       scene.add(sparkA);
-      const sparkB = new THREE.PointLight(0xe8c96a, 1.9, 3.2, 2);
+      const sparkB = new THREE.PointLight(0xe8c96a, 1.1, 2.6, 2);
       sparkB.position.set(-0.75, 0.35, 0.95);
       scene.add(sparkB);
-      const sparkC = new THREE.PointLight(0xffffff, 1.6, 2.6, 2);
-      sparkC.position.set(0.15, -0.2, 1.35);
-      scene.add(sparkC);
       scene.add(new THREE.AmbientLight(0x2a1078, 0.22));
 
       const controls = new OrbitControls(camera, renderer.domElement);
@@ -135,45 +131,29 @@ export function JewelryConfiguratorCanvas({
 
       function gemMaterial(color: string) {
         const ior = gemIor(stone?.stoneType);
+        const body = new THREE.Color(color);
         return new THREE.MeshPhysicalMaterial({
-          color,
+          color: body,
+          emissive: body,
+          emissiveIntensity: 0.38,
           metalness: 0,
-          roughness: 0.045,
-          transmission: 0.58,
-          thickness: mode === 'stone' ? 1.15 : 0.62,
+          roughness: 0.14,
+          transmission: 0.08,
+          thickness: mode === 'stone' ? 2.2 : 1.1,
           ior,
           dispersion: gemDispersion(stone?.stoneType),
           attenuationColor: new THREE.Color(gemAttenuationHex(color, stone?.stoneType)),
-          attenuationDistance: mode === 'stone' ? 0.09 : 0.07,
+          attenuationDistance: 0.08,
           clearcoat: 1,
-          clearcoatRoughness: 0.06,
+          clearcoatRoughness: 0.03,
           specularIntensity: 1,
-          specularColor: new THREE.Color(color),
-          iridescence: 0.16,
-          iridescenceIOR: 1.4,
-          iridescenceThicknessRange: [180, 380],
-          envMapIntensity: 1.05,
+          specularColor: body,
+          iridescence: 0.22,
+          iridescenceIOR: 1.45,
+          iridescenceThicknessRange: [140, 360],
+          envMapIntensity: 1.25,
           flatShading: true,
-          side: THREE.FrontSide,
-        });
-      }
-
-      function sparkleMaterial() {
-        return new THREE.MeshPhysicalMaterial({
-          color: 0xffffff,
-          metalness: 0,
-          roughness: 0.06,
-          transparent: true,
-          opacity: 0.28,
-          transmission: 0,
-          envMapIntensity: 3.6,
-          clearcoat: 1,
-          clearcoatRoughness: 0.02,
-          specularIntensity: 1,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-          flatShading: true,
-          side: THREE.FrontSide,
+          side: THREE.DoubleSide,
         });
       }
 
@@ -191,8 +171,28 @@ export function JewelryConfiguratorCanvas({
         if (mode === 'stone') body.rotation.x = -0.32;
         body.castShadow = true;
         body.name = 'center_stone';
-        const sparkle = new THREE.Mesh(geometry, sparkleMaterial());
-        sparkle.scale.setScalar(scale * 1.004);
+        const glints: number[] = [];
+        for (let i = 0; i < built.positions.length; i += 9) {
+          const ax = (built.positions[i]! + built.positions[i + 3]! + built.positions[i + 6]!) / 3;
+          const ay = (built.positions[i + 1]! + built.positions[i + 4]! + built.positions[i + 7]!) / 3;
+          const az = (built.positions[i + 2]! + built.positions[i + 5]! + built.positions[i + 8]!) / 3;
+          glints.push(ax * 1.03, ay * 1.03, az * 1.03);
+        }
+        const sparkleGeo = new THREE.BufferGeometry();
+        sparkleGeo.setAttribute('position', new THREE.Float32BufferAttribute(glints, 3));
+        const sparkle = new THREE.Points(
+          sparkleGeo,
+          new THREE.PointsMaterial({
+            color: 0xfff6e8,
+            size: 0.016,
+            transparent: true,
+            opacity: 0.9,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            sizeAttenuation: true,
+          }),
+        );
+        sparkle.scale.setScalar(scale);
         sparkle.rotation.copy(body.rotation);
         sparkle.name = 'center_stone_sparkle';
         sparkle.renderOrder = 3;
@@ -282,9 +282,10 @@ export function JewelryConfiguratorCanvas({
         renderer.domElement.remove();
         scene.traverse((node: import('three').Object3D) => {
           const mesh = node as import('three').Mesh;
-          if (mesh.isMesh) {
-            mesh.geometry?.dispose();
-            const material = mesh.material;
+          const points = node as import('three').Points;
+          if (mesh.isMesh || points.isPoints) {
+            (mesh.geometry ?? points.geometry)?.dispose();
+            const material = mesh.material ?? points.material;
             if (Array.isArray(material)) material.forEach((item) => item.dispose());
             else material?.dispose();
           }
