@@ -1,14 +1,8 @@
 'use client';
 
-export interface AtelierItem {
-  id: string;
-  slug: string;
-  title: string;
-  kind: string;
-  priceUsd: number;
-  image: string;
-  specs?: string;
-}
+import type { AtelierItem } from './atelier-item.js';
+
+export type { AtelierItem } from './atelier-item.js';
 
 const KEYS = {
   bag: 'maihan_bag',
@@ -64,12 +58,36 @@ export function removeFromBag(id: string): void {
   write(KEYS.bag, getBag().filter((b) => b.id !== id));
 }
 
+export function clearBag(): void {
+  write(KEYS.bag, []);
+}
+
 export function toggleCompare(item: AtelierItem): boolean {
   const list = getCompare();
   const exists = list.some((c) => c.id === item.id);
   const next = exists ? list.filter((c) => c.id !== item.id) : [...list, item].slice(-4);
   write(KEYS.compare, next);
   return !exists;
+}
+
+export function isCompared(id: string): boolean {
+  return getCompare().some((c) => c.id === id);
+}
+
+export function removeFromCompare(id: string): void {
+  write(KEYS.compare, getCompare().filter((c) => c.id !== id));
+}
+
+export function removeFav(id: string): void {
+  write(KEYS.favs, getFavs().filter((f) => f.id !== id));
+}
+
+export function seedListIfEmpty(key: 'bag' | 'favs' | 'compare', items: AtelierItem[]): AtelierItem[] {
+  const storageKey = KEYS[key];
+  const current = read<AtelierItem[]>(storageKey, []);
+  if (current.length > 0) return current;
+  write(storageKey, items);
+  return items;
 }
 
 export function subscribeAtelier(listener: () => void): () => void {

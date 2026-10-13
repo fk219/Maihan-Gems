@@ -3,34 +3,12 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-import { addToBag, isFav, toggleFav, type AtelierItem } from '../../lib/atelier-store.js';
+import { addToBag, isCompared, isFav, toggleCompare, toggleFav } from '../../lib/atelier-store.js';
+import { cardSpecs, cardToAtelier } from '../../lib/atelier-item.js';
 import { formatMoney } from '../../lib/currency.js';
 import { productImage } from '../../lib/storefront-images.js';
 import type { StorefrontCard } from '../../lib/storefront-types.js';
 import { useStorefront } from './StorefrontProvider.js';
-
-function specs(product: StorefrontCard): string {
-  const parts: string[] = [];
-  if (product.caratTotal) parts.push(`${product.caratTotal} ct`);
-  if (product.shape) parts.push(product.shape.replace(/_/g, ' '));
-  if (product.originCountry) parts.push(product.originCountry);
-  if (product.settingFor) parts.push(product.settingFor);
-  if (product.jewelryType) parts.push(product.jewelryType);
-  if (product.metalColor) parts.push(product.metalColor);
-  return parts.join(' · ');
-}
-
-function toItem(product: StorefrontCard, image: string): AtelierItem {
-  return {
-    id: product.id,
-    slug: product.slug,
-    title: product.title,
-    kind: product.kind,
-    priceUsd: product.priceUsd,
-    image,
-    specs: specs(product),
-  };
-}
 
 export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
   const { currency, rates } = useStorefront();
@@ -43,13 +21,15 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
     title: product.title,
   });
   const [fav, setFav] = useState(false);
+  const [compared, setCompared] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     setFav(isFav(product.id));
+    setCompared(isCompared(product.id));
   }, [product.id]);
 
-  const item = toItem(product, image);
+  const item = cardToAtelier(product);
 
   return (
     <>
@@ -80,7 +60,7 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
           <h3 className="lx-card__title">
             <Link href={`/product/${product.slug}`}>{product.title}</Link>
           </h3>
-          <div className="lx-card__specs">{specs(product)}</div>
+          <div className="lx-card__specs">{cardSpecs(product)}</div>
           <div className="lx-card__price">{formatMoney(product.priceUsd, currency, rates)}</div>
         </div>
       </article>
@@ -92,7 +72,7 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
             <div className="lx-modal__copy">
               <p className="lx-kicker">{product.kind}</p>
               <h3 className="lx-h2" style={{ fontSize: '2rem' }}>{product.title}</h3>
-              <p className="lx-card__specs">{specs(product)}</p>
+              <p className="lx-card__specs">{cardSpecs(product)}</p>
               <p className="lx-card__price" style={{ fontSize: '1.15rem', margin: '1rem 0 1.4rem' }}>
                 {formatMoney(product.priceUsd, currency, rates)}
               </p>
@@ -110,6 +90,10 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
                 </span>
               </button>
               <p style={{ marginTop: '1rem' }}>
+                <button type="button" className="lx-text-btn" onClick={() => setCompared(toggleCompare(item))}>
+                  {compared ? 'Remove from compare' : 'Add to compare'}
+                </button>
+                {' · '}
                 <Link href={`/product/${product.slug}`}>View full details</Link>
               </p>
             </div>
