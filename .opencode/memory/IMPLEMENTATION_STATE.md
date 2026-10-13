@@ -1,7 +1,7 @@
 # GEM COLOUR, REALISTIC DYO RING, SISTER HEROES (2026-10-13)
 
-K11733 3D: tanzanite body `#3A12C2` / attenuation `#14044A`, FrontSide (no
-white rim), short Beer-law distance, additive sparkle coat + point lights. DYO ring: ~2mm comfort-fit
+K11733 3D: tanzanite body `#3A12C2` / attenuation `#14044A`, low transmission
+so the table is not a white window, emissive fill, facet point sparkles. DYO ring: ~2mm comfort-fit
 band tapering to a 4/6-prong claw head, jewellery metal PBR (yellow/white/rose
 gold, platinum). Caption uses `settingSeatLabel` so live metal is named once
 (no “Platinum 950 … (18K Yellow Gold)”). Finish step fills the left column with
