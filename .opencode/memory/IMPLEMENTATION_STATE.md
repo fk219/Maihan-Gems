@@ -3,10 +3,14 @@
 Compiled `docs/research/ngc/` (443 products) to `apps/web/src/data/ngc-catalog.json`.
 Storefront overlay + seed (`0021_ngc_research_schema.sql`, `import-ngc-research.ts`)
 upserts the research catalogue. Product media delivery is Cloudinary cloud
-`o1zwhvbi`: public_id `maihan/products/<id>/<file>`, render with `f_auto,q_auto`.
-The gzipped mapping URL returns Cloudinary "Untrusted File Access" for raw JSON;
-public_ids are derived from that convention and live image/video/srn/spin360.mp4
-URLs were verified. Silk & Stone colours are Design.md tokens only.
+`o1zwhvbi`: public_id `maihan/products/<id>/<relative-file>`, render with
+`f_auto,q_auto` (raw `.srn` has no transform). The gzipped mapping URL
+(`products.cloudinary.json.gz`) still returns Cloudinary "Untrusted File Access"
+for raw JSON, so public_ids are derived from the live folder layout, including
+DYO `setting_*` / `stone_*` subfolders and `spin360.mp4`. Local seed: 443 NGC
+products, 7,072 media rows with `cloudinary_public_id` and `secure_url`. Two
+GIA PDFs stay 401 on raw delivery (same untrusted-file policy). Silk & Stone
+colours are Design.md tokens only.
 
 # SHOWCASE CATALOG IMPORT (2026-10-13)
 
