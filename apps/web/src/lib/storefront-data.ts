@@ -9,7 +9,71 @@ import type { SettingAcceptRule, SettingForDyo, StorefrontCard } from './storefr
 
 export type { SettingAcceptRule, SettingForDyo, StorefrontCard } from './storefront-types.js';
 
-const pool = createPool(process.env['DATABASE_URL'] ?? '');
+/** Local throwaway credential from compose.yaml. Not a secret. */
+const LOCAL_DATABASE_URL = 'postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev';
+
+function resolveDatabaseUrl(): string {
+  const configured = process.env['DATABASE_URL']?.trim() ?? '';
+  if (!configured || configured.includes('<SECRET>') || configured.includes('<user>')) return LOCAL_DATABASE_URL;
+  return configured;
+}
+
+const pool = createPool(resolveDatabaseUrl());
+
+const FALLBACK_FX: FxRates = { USD: 1, AED: 3.6725, THB: 34.5 };
+
+let catalogueOffline = false;
+
+/** True after a storefront read could not reach Postgres. Resets on the next successful read. */
+export function isCatalogueOffline(): boolean {
+  return catalogueOffline;
+}
+
+function databaseUnavailable(error: unknown): boolean {
+  const seen = new Set<unknown>();
+  const walk = (value: unknown): boolean => {
+    if (!value || typeof value !== 'object' || seen.has(value)) return false;
+    seen.add(value);
+    const code = (value as { code?: string }).code;
+    if (
+      code === 'ECONNREFUSED' ||
+      code === 'ENOTFOUND' ||
+      code === 'ETIMEDOUT' ||
+      code === 'EAI_AGAIN' ||
+      code === 'ECONNRESET' ||
+      code === '3D000' ||
+      code === '28P01' ||
+      code === '57P01' ||
+      code === '42P01'
+    ) {
+      return true;
+    }
+    const nested = (value as { errors?: unknown }).errors;
+    if (Array.isArray(nested) && nested.some(walk)) return true;
+    const message = value instanceof Error ? value.message : String((value as { message?: string }).message ?? '');
+    return (
+      message.includes('ECONNREFUSED') ||
+      message.includes('password authentication failed') ||
+      message.includes('does not exist')
+    );
+  };
+  return walk(error);
+}
+
+async function withCatalogue<T>(fallback: T, run: () => Promise<T>): Promise<T> {
+  try {
+    const value = await run();
+    catalogueOffline = false;
+    return value;
+  } catch (error) {
+    if (!databaseUnavailable(error)) throw error;
+    catalogueOffline = true;
+    console.warn(
+      '[storefront] catalogue unavailable (connection or schema). Try: docker compose up -d && pnpm storefront:db:setup',
+    );
+    return fallback;
+  }
+}
 
 
 export interface StoneTypeRow {
@@ -88,24 +152,27 @@ const SELECT = `
 `;
 
 export async function getFxRates(): Promise<FxRates> {
-  const result = await pool.query<{ quote: string; rate: string }>(`
-    SELECT DISTINCT ON (quote) quote, rate
-    FROM fx_rates
-    WHERE base = 'USD' AND quote IN ('AED', 'THB')
-    ORDER BY quote, fetched_at DESC
-  `);
-  const rates: FxRates = { USD: 1, AED: 3.6725, THB: 34.5 };
-  for (const row of result.rows) {
-    const quote = row.quote.trim();
-    const rate = Number(row.rate);
-    if ((quote === 'AED' || quote === 'THB') && Number.isFinite(rate) && rate > 0) {
-      rates[quote] = rate;
+  return withCatalogue({ ...FALLBACK_FX }, async () => {
+    const result = await pool.query<{ quote: string; rate: string }>(`
+      SELECT DISTINCT ON (quote) quote, rate
+      FROM fx_rates
+      WHERE base = 'USD' AND quote IN ('AED', 'THB')
+      ORDER BY quote, fetched_at DESC
+    `);
+    const rates: FxRates = { ...FALLBACK_FX };
+    for (const row of result.rows) {
+      const quote = row.quote.trim();
+      const rate = Number(row.rate);
+      if ((quote === 'AED' || quote === 'THB') && Number.isFinite(rate) && rate > 0) {
+        rates[quote] = rate;
+      }
     }
-  }
-  return rates;
+    return rates;
+  });
 }
 
 export async function listStoneTypes(): Promise<StoneTypeRow[]> {
+  return withCatalogue([], async () => {
   const result = await pool.query<{ stone_type: string; count: string; pair_count: string }>(`
     SELECT gd.stone_type,
            COUNT(*)::text AS count,
@@ -121,6 +188,7 @@ export async function listStoneTypes(): Promise<StoneTypeRow[]> {
     count: Number(row.count),
     pairCount: Number(row.pair_count),
   }));
+  });
 }
 
 export interface ProductListFilters {
@@ -173,8 +241,10 @@ export async function listProducts(filters: ProductListFilters = {}): Promise<St
 
   const limit = push(params, filters.limit ?? 24);
   const sql = `${SELECT} WHERE ${clauses.join(' AND ')} ORDER BY pp.amount DESC NULLS LAST, p.created_at LIMIT ${limit}`;
-  const result = await pool.query(sql, params);
-  return result.rows.map((row) => mapRow(row as Record<string, unknown>));
+  return withCatalogue([], async () => {
+    const result = await pool.query(sql, params);
+    return result.rows.map((row) => mapRow(row as Record<string, unknown>));
+  });
 }
 
 export async function getFeaturedHome(): Promise<{
@@ -191,9 +261,11 @@ export async function getFeaturedHome(): Promise<{
 }
 
 export async function getProductBySlug(slug: string): Promise<StorefrontCard | null> {
-  const result = await pool.query(`${SELECT} WHERE p.slug = $1 AND p.status = 'active' LIMIT 1`, [slug]);
-  const row = result.rows[0];
-  return row ? mapRow(row as Record<string, unknown>) : null;
+  return withCatalogue(null, async () => {
+    const result = await pool.query(`${SELECT} WHERE p.slug = $1 AND p.status = 'active' LIMIT 1`, [slug]);
+    const row = result.rows[0];
+    return row ? mapRow(row as Record<string, unknown>) : null;
+  });
 }
 
 export async function searchStorefront(query: string, limit = 12): Promise<{
@@ -250,8 +322,11 @@ export async function searchStorefront(query: string, limit = 12): Promise<{
       pp.amount DESC NULLS LAST
     LIMIT ${limitSlot}
   `;
-  const result = await pool.query(sql, params);
-  return { parsed, items: result.rows.map((row) => mapRow(row as Record<string, unknown>)) };
+  const found = await withCatalogue([] as StorefrontCard[], async () => {
+    const result = await pool.query(sql, params);
+    return result.rows.map((row) => mapRow(row as Record<string, unknown>));
+  });
+  return { parsed, items: found };
 }
 
 export async function listSettingsForDyo(limit = 16): Promise<SettingForDyo[]> {
@@ -261,19 +336,30 @@ export async function listSettingsForDyo(limit = 16): Promise<SettingForDyo[]> {
     limit,
   });
   if (settings.length === 0) return [];
-  const result = await pool.query<{
-    setting_product_id: string;
-    shape: string;
-    min_carat: string | null;
-    max_carat: string | null;
-  }>(
-    `SELECT setting_product_id::text, shape, min_carat::text, max_carat::text
-     FROM setting_accepts
-     WHERE setting_product_id = ANY($1::uuid[])`,
-    [settings.map((s) => s.id)],
+  const acceptRows = await withCatalogue(
+    [] as {
+      setting_product_id: string;
+      shape: string;
+      min_carat: string | null;
+      max_carat: string | null;
+    }[],
+    async () => {
+      const result = await pool.query<{
+        setting_product_id: string;
+        shape: string;
+        min_carat: string | null;
+        max_carat: string | null;
+      }>(
+        `SELECT setting_product_id::text, shape, min_carat::text, max_carat::text
+         FROM setting_accepts
+         WHERE setting_product_id = ANY($1::uuid[])`,
+        [settings.map((s) => s.id)],
+      );
+      return result.rows;
+    },
   );
   const bySetting = new Map<string, SettingAcceptRule[]>();
-  for (const row of result.rows) {
+  for (const row of acceptRows) {
     const list = bySetting.get(row.setting_product_id) ?? [];
     list.push({
       shape: row.shape,

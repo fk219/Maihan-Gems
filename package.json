@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "pnpm --filter @maihan/web run dev",
+    "storefront:db:setup": "pnpm --filter @maihan/db run build && node packages/db/dist/run-storefront-schema.js && node packages/db/dist/seed/run-storefront-seed.js",
     "start": "pnpm --filter @maihan/web run start:web",
     "build": "tsc -b",
     "typecheck": "tsc -b",

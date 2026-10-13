@@ -20,25 +20,18 @@ All pages currently use **placeholder data**. To see real data:
 ### Option A: Local PostgreSQL
 
 ```bash
-# 1. Start Postgres
-docker run -d -p 5432:5432 \
-  -e POSTGRES_PASSWORD=password \
-  -e POSTGRES_DB=maihan_dev \
-  postgres:16
+# 1. Start Postgres (repo compose — port 5433)
+docker compose up -d
 
 # 2. Set environment variable
-export DATABASE_URL="postgresql://postgres:password@localhost:5432/maihan_dev"
+export DATABASE_URL="postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev"
 
-# 3. Run migrations
+# 3. Storefront schema + seed (do NOT use migrate.js for storefront-only dev)
 cd /workspace
 pnpm install
-pnpm --filter @maihan/db run build
-node packages/db/dist/migrate.js
+pnpm storefront:db:setup
 
-# 4. Seed data
-node packages/db/dist/seed/run-storefront-seed.js
-
-# 5. Start dev server
+# 4. Start dev server
 pnpm dev
 ```
 
@@ -49,11 +42,9 @@ pnpm dev
 # 2. Copy DATABASE_URL from dashboard
 export DATABASE_URL="postgresql://...@...neon.tech/..."
 
-# 3. Run migrations & seed
+# 3. Storefront schema + seed
 pnpm install
-pnpm --filter @maihan/db run build
-node packages/db/dist/migrate.js
-node packages/db/dist/seed/run-storefront-seed.js
+pnpm storefront:db:setup
 
 # 4. Start dev server
 pnpm dev
@@ -73,7 +64,7 @@ apps/web/
 
 packages/db/
   migrations/
-    0019_storefront_schema.sql    ← New schema
+    ../storefront-migrations/0019_storefront_schema.sql
   src/seed/
     storefront-seed.ts            ← 75+ products
     run-storefront-seed.ts        ← Seed script
