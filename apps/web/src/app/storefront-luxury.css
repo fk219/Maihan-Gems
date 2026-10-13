@@ -1745,6 +1745,17 @@
 @media (max-width: 800px) {
   .cfg { grid-template-columns: 1fr; }
 }
+.vto { position: fixed; inset: 0; z-index: 90; background: rgba(20, 16, 12, 0.55); display: grid; place-items: center; padding: 1rem; }
+.vto__panel { width: min(920px, 100%); background: #fff; border-radius: 12px; padding: 1rem 1.1rem 1.25rem; }
+.vto__bar { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 0.75rem; }
+.vto__bar h2 { margin: 0; font-family: var(--font-serif); font-weight: 500; font-size: 1.8rem; }
+.vto__close { border-radius: 12px; border: 1px solid #eadfbe; background: #fff; padding: 0.4rem 0.75rem; cursor: pointer; }
+.vto__video { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.vto__intro { display: grid; gap: 1rem; }
+.vto__intro img { border-radius: 12px; background: #fff; }
+.vto__stage { position: relative; border-radius: 12px; overflow: hidden; background: #111; }
+.vto__gl { width: 100%; height: min(68vh, 560px); }
+.vto__status { margin: 0.65rem 0 0; color: #5c5346; }
 .ngc-offline {
   margin: 0;
   text-align: center;

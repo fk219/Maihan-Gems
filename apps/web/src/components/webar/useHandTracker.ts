@@ -80,13 +80,7 @@ class OneEuro {
 
 async function createLandmarker(): Promise<Landmarker | null> {
   try {
-    const specifier = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.17/+esm';
-    const vision = (await import(/* webpackIgnore: true */ specifier)) as {
-      FilesetResolver: { forVisionTasks: (path: string) => Promise<unknown> };
-      HandLandmarker: {
-        createFromOptions: (fileset: unknown, options: unknown) => Promise<Landmarker>;
-      };
-    };
+    const vision = await import('@mediapipe/tasks-vision');
     const files = await vision.FilesetResolver.forVisionTasks(
       'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.17/wasm',
     );
@@ -99,7 +93,8 @@ async function createLandmarker(): Promise<Landmarker | null> {
       runningMode: 'VIDEO',
       numHands: 1,
     });
-  } catch {
+  } catch (error) {
+    console.error('Hand tracking failed to start', error);
     return null;
   }
 }

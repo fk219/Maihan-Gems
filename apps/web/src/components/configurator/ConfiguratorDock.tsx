@@ -22,10 +22,20 @@ const METALS: readonly { id: MetalFinish; label: string; swatch: string }[] = [
   { id: 'PLATINUM', label: 'Platinum', swatch: '#C5C8D0' },
 ];
 
-export function ConfiguratorDock() {
-  const [metal, setMetal] = useState<MetalFinish>('YELLOW_GOLD');
-  const [carat, setCarat] = useState(1.5);
-  const [tryOn, setTryOn] = useState(false);
+const METAL_IDS: readonly MetalFinish[] = ['YELLOW_GOLD', 'WHITE_GOLD', 'ROSE_GOLD', 'PLATINUM'];
+
+export function ConfiguratorDock({
+  initialTryOn = false,
+  initialMetal = 'YELLOW_GOLD',
+  initialCarat = 1.5,
+}: {
+  readonly initialTryOn?: boolean;
+  readonly initialMetal?: MetalFinish;
+  readonly initialCarat?: number;
+}) {
+  const [metal, setMetal] = useState<MetalFinish>(METAL_IDS.includes(initialMetal) ? initialMetal : 'YELLOW_GOLD');
+  const [carat, setCarat] = useState(initialCarat);
+  const [tryOn, setTryOn] = useState(initialTryOn);
   const metalLabel = METALS.find((item) => item.id === metal)?.label ?? 'Yellow gold';
 
   return (
@@ -72,7 +82,7 @@ export function ConfiguratorDock() {
           Virtual try-on
         </button>
       </aside>
-      <TryOn open={tryOn} onClose={() => setTryOn(false)} assetId="preview" metal={metal} />
+      <TryOn open={tryOn} onClose={() => setTryOn(false)} metal={metal} carat={carat} />
     </section>
   );
 }
