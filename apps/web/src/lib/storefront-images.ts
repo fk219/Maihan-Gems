@@ -11,7 +11,7 @@ const STONE_IMAGES: Record<string, string> = {
   ruby: U('photo-1611591437281-460bfbe1220a'),
   emerald: U('photo-1515562141207-7a88fb7ce338'),
   paraiba_tourmaline: U('photo-1573408301185-9146fe634ad0'),
-  alexandrite: U('photo-1603561596117-0b2f2d1762b7'),
+  alexandrite: U('photo-1601121141461-9d6647bca1ed'),
   spinel: U('photo-1601121141461-9d6647bca1ed'),
   tanzanite: U('photo-1535632066927-ab7c9ab60908'),
   aquamarine: U('photo-1599643478518-a784e5dc4c8f'),

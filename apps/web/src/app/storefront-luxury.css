@@ -819,6 +819,112 @@
   margin: 1.2rem 0 1.4rem;
 }
 
+.lx-favs {
+  list-style: none;
+  margin: 2.4rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 800px) {
+  .lx-favs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.lx-fav {
+  background: #fff;
+  border: 1px solid rgba(184, 152, 64, 0.12);
+}
+
+.lx-fav__media {
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #efece6;
+}
+
+.lx-fav__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lx-fav__body {
+  padding: 1.1rem 1.15rem 1.3rem;
+}
+
+.lx-fav__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.lx-compare {
+  margin-top: 2.4rem;
+}
+
+.lx-compare__scroll {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid rgba(184, 152, 64, 0.14);
+}
+
+.lx-spec {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.lx-spec th,
+.lx-spec td {
+  padding: 0.85rem 1.1rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(184, 152, 64, 0.12);
+  font-size: 0.86rem;
+}
+
+.lx-spec thead th {
+  background: #fafaf8;
+  font-weight: 400;
+  min-width: 180px;
+}
+
+.lx-spec tbody th {
+  color: #8a867e;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.66rem;
+  font-weight: 600;
+  width: 9rem;
+}
+
+.lx-spec__thumb {
+  display: block;
+  height: 140px;
+  overflow: hidden;
+  background: #efece6;
+  margin-bottom: 0.75rem;
+}
+
+.lx-spec__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lx-spec__name {
+  display: block;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.15rem;
+  color: #1a1a18;
+  text-decoration: none;
+  margin-bottom: 0.55rem;
+}
+
 .lx-search-page {
   padding: 3.5rem 0 5rem;
 }

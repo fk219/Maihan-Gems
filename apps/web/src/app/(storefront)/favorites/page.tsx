@@ -1,51 +1,29 @@
-/**
- * apps/web/src/app/(storefront)/favorites/page.tsx
- *
- * `/favorites` — wishlist. SoT 12.2 `favorites/page.tsx`.
- */
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
-import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
-import { EmptyState } from '../../../components/design-system/EmptyState.js';
+import { FavoritesView } from '../../../components/storefront/FavoritesView.js';
+import { cardToAtelier } from '../../../lib/atelier-item.js';
+import { listProducts } from '../../../lib/storefront-data.js';
 
+export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
-  title: 'Curated Vault Favorites | Maihan Gems',
-  description: 'Your saved 1-of-1 untreated gemstones and bespoke setting favorites.',
+  title: 'Favourites | Maihan Gems',
+  description: 'Saved stones, pairs and mountings from the private vault.',
 };
 
-export default function FavoritesPage() {
+export default async function FavoritesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ empty?: string }>;
+}) {
+  const { empty } = await searchParams;
+  const products = await listProducts({ kind: 'gemstone', limit: 3 });
   return (
-    <main className="page favorites-page">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Vault Favorites' },
-        ]}
-      />
-
-      <span className="page-eyebrow">Client Private Portfolio</span>
-      <h1>Your Curated Vault</h1>
-      <p className="page-subtitle">
-        Save and monitor 1-of-1 earth-mined loose gemstones, matched suites, and bespoke goldsmith settings.
-      </p>
-
-      <div className="vault-shell">
-        <EmptyState
-          title="Your Vault Wishlist is currently empty."
-          action={
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Link href="/varieties" className="btn-primary">
-                Explore Loose Gemstones
-              </Link>
-              <Link href="/design-your-own" className="btn-secondary">
-                Configure Bespoke Atelier
-              </Link>
-            </div>
-          }
-        >
-          Add rare certified gems or master mountings to your vault to monitor availability and request private salon viewings.
-        </EmptyState>
+    <main className="lx-section">
+      <div className="lx-wrap">
+        <span className="lx-kicker">Client portfolio</span>
+        <h1 className="lx-h2">Favourites</h1>
+        <p className="lx-lede">A private shortlist of pieces you are watching.</p>
+        <FavoritesView demoItems={products.map(cardToAtelier)} forceEmpty={empty === '1'} />
       </div>
     </main>
   );
