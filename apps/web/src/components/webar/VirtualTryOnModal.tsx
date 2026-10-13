@@ -28,10 +28,7 @@ export function VirtualTryOnModal({
   const streamRef = useRef<MediaStream | null>(null);
   const [videoNode, setVideoNode] = useState<HTMLVideoElement | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const shareUrl =
-    typeof window === 'undefined'
-      ? ''
-      : `${window.location.origin}/design-your-own?tryon=1&metal=${metal}&carat=${carat}`;
+  const [shareUrl, setShareUrl] = useState('');
 
   useEffect(() => {
     if (!open) {
@@ -41,6 +38,11 @@ export function VirtualTryOnModal({
       setMessage(null);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    setShareUrl(`${window.location.origin}/design-your-own?tryon=1&metal=${metal}&carat=${carat}`);
+  }, [open, metal, carat]);
 
   useEffect(() => {
     if (!open) return;
