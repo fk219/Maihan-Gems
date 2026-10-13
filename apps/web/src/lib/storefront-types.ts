@@ -26,8 +26,16 @@ export interface StorefrontCard {
   metalType: string | null;
   metalColor: string | null;
   imageUrl: string | null;
+  hoverImageUrl?: string | null;
   vendorName: string | null;
   certificateLab: string | null;
+  colorIntensity?: string | null;
+  clarity?: string | null;
+  cut?: string | null;
+  cuttingStyle?: string | null;
+  lengthMm?: number | null;
+  widthMm?: number | null;
+  availability?: string | null;
 }
 
 export interface SettingForDyo extends StorefrontCard {

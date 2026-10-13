@@ -1,3 +1,16 @@
+# NGC STOREFRONT PREMIUM BRIEF (2026-10-13)
+
+Contact details on the storefront now come from `STOREFRONT_CONTACT` in
+`packages/config` (placeholders, not NGC NYC / +1-212-804-9994). Currency is a
+Design.md 12px pill dropdown. Catalogue cards use a full-width auto-fill grid,
+cover imagery with hover swap, and an icon compare control. Filters render
+features.md facets with styled checkboxes, shape icons, colour swatches and
+counts. Gemstones / Settings / Jewellery hubs and stone pages (including
+Tanzanite) have navy heroes plus a CTA into the catalogue. PDP gallery is a
+thumbnail rail (photos, video, 360, certificates) with hover zoom; description,
+certificate and shipping/returns sit below details. Agentation overlay only
+loads when `NEXT_PUBLIC_AGENTATION=1`.
+
 # NGC RESEARCH STOREFRONT + CLOUDINARY MEDIA (2026-10-13)
 
 Compiled `docs/research/ngc/` (443 products) to `apps/web/src/data/ngc-catalog.json`.

@@ -20,6 +20,8 @@
  * ADR — SKILL_MATRIX_AND_TOOLING.md §13).
  */
 
+export { STOREFRONT_CONTACT } from './storefront.js';
+
 export interface RuntimeConfig {
   /** PostgreSQL connection string — the source of truth (ADR-002). */
   readonly databaseUrl: string;

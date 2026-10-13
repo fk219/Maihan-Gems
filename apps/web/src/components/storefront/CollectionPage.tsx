@@ -20,6 +20,8 @@ export function CollectionPage({
   products,
   stoneSlug,
   chips,
+  cta,
+  heroImage,
 }: {
   kicker: string;
   title: string;
@@ -27,33 +29,50 @@ export function CollectionPage({
   products: StorefrontCard[];
   stoneSlug?: string;
   chips?: ReactNode;
+  cta?: { href: string; label: string };
+  heroImage?: string | null;
 }) {
   return (
-    <main className="lx-section ngc-page">
-      <div className="lx-wrap">
-        <nav className="lx-crumb" aria-label="Breadcrumb">
-          <Link href="/">Home</Link>
-          <span aria-hidden="true">/</span>
-          <span>{title}</span>
-        </nav>
-        <span className="lx-kicker">{kicker}</span>
-        <h1 className="lx-h2">{title}</h1>
-        {lede ? <p className="lx-lede">{lede}</p> : null}
-        {stoneSlug ? (
-          <nav className="lx-facets" aria-label="Collection facets">
-            {FACET_LINKS.map((link) => (
-              <Link key={link.suffix || 'stone'} href={`/${stoneSlug}${link.suffix}`}>
-                {link.label}
-              </Link>
-            ))}
+    <main className="ngc-page">
+      <header className="lx-page-hero">
+        {heroImage ? <img className="lx-page-hero__photo" src={heroImage} alt="" /> : null}
+        <div className="lx-page-hero__veil" />
+        <div className="lx-wrap lx-page-hero__copy">
+          <nav className="lx-crumb lx-crumb--on-hero" aria-label="Breadcrumb">
+            <Link href="/">Home</Link>
+            <span aria-hidden="true">/</span>
+            <span>{title}</span>
           </nav>
-        ) : null}
-        {chips ? <nav className="lx-facets" aria-label="Stone types">{chips}</nav> : null}
-        {products.length > 0 ? (
-          <CollectionBrowser products={products} />
-        ) : (
-          <p className="lx-empty-copy">Nothing in this drawer just now. Browse another facet or the vault menu.</p>
-        )}
+          <span className="lx-kicker">{kicker}</span>
+          <h1 className="lx-h1">{title}</h1>
+          {lede ? <p className="lx-lede">{lede}</p> : null}
+          {cta ? (
+            <p>
+              <Link href={cta.href} className="lx-btn lx-btn--solid">
+                {cta.label}
+              </Link>
+            </p>
+          ) : null}
+        </div>
+      </header>
+      <div className="lx-section">
+        <div className="lx-wrap lx-wrap--wide">
+          {stoneSlug ? (
+            <nav className="lx-facets" aria-label="Collection facets">
+              {FACET_LINKS.map((link) => (
+                <Link key={link.suffix || 'stone'} href={`/${stoneSlug}${link.suffix}`}>
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          ) : null}
+          {chips ? <nav className="lx-facets" aria-label="Stone types">{chips}</nav> : null}
+          {products.length > 0 ? (
+            <CollectionBrowser products={products} />
+          ) : (
+            <p className="lx-empty-copy">Nothing in this drawer just now. Browse another facet or the vault menu.</p>
+          )}
+        </div>
       </div>
     </main>
   );

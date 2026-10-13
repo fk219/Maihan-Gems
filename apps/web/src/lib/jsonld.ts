@@ -22,6 +22,7 @@
  *     element or inject markup.
  *   - Builders are pure and deterministic for identical input.
  */
+import { STOREFRONT_CONTACT } from '@maihan/config';
 import type { ProductDetailReadModel } from '@maihan/contracts';
 
 import { siteBaseUrl } from './sitemap.js';
@@ -58,18 +59,15 @@ export function absoluteUrl(base: string, path: string): string {
 // ─── Organization ─────────────────────────────────────────────────────────────
 
 /**
- * Observed source organization identity, verbatim SoT §4 evidence:
- * `LocalBusiness` with 608 5th Avenue, 11th Floor Penthouse, New York, NY
- * 10020; +1-212-804-9994. Emitted as schema.org `Organization` (SoT 12.8).
- * No fields beyond the observed evidence are added.
+ * Public Maihan identity for storefront JSON-LD. NGC source contact details
+ * are not copied onto the rebuild.
  */
 export const ORGANIZATION_EVIDENCE = {
-  name: 'Maihan Gems',
-  streetAddress: '608 5th Avenue, 11th Floor Penthouse',
-  addressLocality: 'New York',
-  addressRegion: 'NY',
-  postalCode: '10020',
-  telephone: '+1-212-804-9994',
+  name: STOREFRONT_CONTACT.brand,
+  telephone: STOREFRONT_CONTACT.phoneDisplay.replace(/\s+/g, ''),
+  streetAddress: STOREFRONT_CONTACT.addressLine,
+  addressLocality: STOREFRONT_CONTACT.city,
+  addressRegion: STOREFRONT_CONTACT.region,
 } as const;
 
 /**
@@ -103,8 +101,7 @@ export function organizationNode(base: string): Record<string, unknown> {
           streetAddress: a.streetAddress,
           addressLocality: a.addressLocality,
           addressRegion: a.addressRegion,
-          postalCode: a.postalCode,
-          addressCountry: 'US',
+          addressCountry: 'AE',
         },
       },
     ],

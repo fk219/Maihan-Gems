@@ -1,3 +1,4 @@
+import { STOREFRONT_CONTACT } from '@maihan/config';
 import Link from 'next/link';
 
 export function StorefrontFooter() {
@@ -37,9 +38,10 @@ export function StorefrontFooter() {
         </div>
         <div>
           <h3>Visit</h3>
-          <p>608 5th Avenue, 11th Floor<br />New York, NY 10020</p>
-          <p>Mon–Fri, 10:00–18:00 ET</p>
-          <a href="tel:+12128049994">+1 212 804 9994</a>
+          <p>{STOREFRONT_CONTACT.addressLine}</p>
+          <p>{STOREFRONT_CONTACT.hours}</p>
+          <a href={STOREFRONT_CONTACT.phoneHref}>{STOREFRONT_CONTACT.phoneDisplay}</a>
+          <a href={`mailto:${STOREFRONT_CONTACT.email}`}>{STOREFRONT_CONTACT.email}</a>
         </div>
       </div>
       <p className="home-footer__legal">

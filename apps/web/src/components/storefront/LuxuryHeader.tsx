@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { CURRENCIES, type StorefrontCurrency } from '../../lib/currency.js';
+import { STOREFRONT_CONTACT } from '@maihan/config';
+
 import { COLOR_SWATCH } from '../../lib/ngc/colors.js';
 import type { StorefrontBrand } from '../../lib/ngc/types.js';
 import { NGC_MEDIA } from '../../lib/ngc-home.js';
+import { CurrencySwitcher } from './CurrencySwitcher.js';
 import { useStorefront } from './StorefrontProvider.js';
 
 export interface LuxuryHeaderProps {
@@ -190,7 +192,7 @@ function MenuPanel({ id, close }: { id: NavId; close: () => void }) {
 }
 
 export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
-  const { currency, setCurrency, bagCount, favCount } = useStorefront();
+  const { bagCount, favCount } = useStorefront();
   const [open, setOpen] = useState<string | null>(null);
   const [drawer, setDrawer] = useState(false);
 
@@ -198,8 +200,8 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
     <header className="ngc-header">
       <div className="ngc-top">
         <div className="ngc-top__inner">
-          <span>Showroom appointment · Mon–Fri 10:00–18:00</span>
-          <a href="tel:+12128049994">USA +1-212-804-9994</a>
+          <span>{STOREFRONT_CONTACT.appointmentLabel} · {STOREFRONT_CONTACT.hours}</span>
+          <a href={STOREFRONT_CONTACT.phoneHref}>{STOREFRONT_CONTACT.phoneDisplay}</a>
           <Link href="/showrooms">Make appointment</Link>
           <Link href="/contact">Contact us</Link>
         </div>
@@ -232,16 +234,7 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
           <Link href="/design-your-own" className="ngc-cta">
             Bespoke Atelier
           </Link>
-          <select
-            className="ngc-currency"
-            aria-label="Currency"
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value as StorefrontCurrency)}
-          >
-            {CURRENCIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
+          <CurrencySwitcher />
           <Link href="/search" className="ngc-iconbtn" aria-label="Search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4 4" /></svg>
           </Link>

@@ -43,8 +43,16 @@ describe('collection-filters', () => {
 
   it('builds facets from the collection', () => {
     const facets = facetsFromProducts(products);
-    expect(facets.shapes).toEqual(['cushion', 'oval', 'pear']);
-    expect(facets.colours).toEqual(['blue', 'pink', 'yellow']);
+    expect(facets.shapes).toEqual([
+      { value: 'cushion', count: 1 },
+      { value: 'oval', count: 1 },
+      { value: 'pear', count: 1 },
+    ]);
+    expect(facets.colours).toEqual([
+      { value: 'blue', count: 1 },
+      { value: 'pink', count: 1 },
+      { value: 'yellow', count: 1 },
+    ]);
     expect(facets.carat.min).toBe(0.8);
     expect(facets.price.max).toBe(2000);
   });

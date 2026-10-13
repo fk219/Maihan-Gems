@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { CategoryLanding } from '../../../components/storefront/CategoryLanding.js';
-import { CollectionBrowser } from '../../../components/storefront/CollectionFilters.js';
 import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
 import { landingView } from '../../../lib/ngc/landing.js';
 import { parseLandingSlug } from '../../../lib/ngc/routes.js';
@@ -26,7 +25,7 @@ export default async function VarietyPage({ params }: PageProps) {
   const view = landingView(varietySlug);
   if (!parsed || !view) notFound();
 
-  if (!view.showCatalog || view.tiles.length > 8) {
+  if (!view.showCatalog) {
     return (
       <CategoryLanding
         kicker={view.kicker}
@@ -35,11 +34,8 @@ export default async function VarietyPage({ params }: PageProps) {
         cta={view.cta}
         tiles={view.tiles}
         colours={view.colours}
-      >
-        {view.showCatalog && view.products.length > 0 ? (
-          <CollectionBrowser products={view.products} />
-        ) : null}
-      </CategoryLanding>
+        heroImage={view.heroImage}
+      />
     );
   }
 
@@ -50,6 +46,8 @@ export default async function VarietyPage({ params }: PageProps) {
       lede={view.lede}
       products={view.products}
       stoneSlug={parsed.type === 'stone' ? parsed.slug : undefined}
+      cta={view.cta}
+      heroImage={view.heroImage}
     />
   );
 }

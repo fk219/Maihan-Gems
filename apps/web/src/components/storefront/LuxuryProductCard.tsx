@@ -24,6 +24,7 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
     quantityType: product.quantityType,
     imageUrl: product.imageUrl,
   });
+  const hover = product.hoverImageUrl && product.hoverImageUrl !== image ? product.hoverImageUrl : null;
   const [fav, setFav] = useState(false);
   const [compared, setCompared] = useState(false);
   const [held, setHeld] = useState(false);
@@ -47,6 +48,7 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
         <div className="lx-card__media">
           <Link href={`/product/${product.slug}`}>
             <img src={image} alt={product.title} />
+            {hover ? <img src={hover} alt="" className="lx-card__hover" /> : null}
           </Link>
           <button
             type="button"
@@ -56,6 +58,16 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill={fav ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7">
               <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.6-7 10-7 10z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className={`lx-compare-icon${compared ? ' is-on' : ''}`}
+            aria-label={compared ? 'Remove from compare' : 'Add to compare'}
+            onClick={() => setCompared(toggleCompare(item))}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+              <path d="M7 4v16M12 9v11M17 13v7" />
             </svg>
           </button>
           <button type="button" className="lx-quick" onClick={() => setOpen(true)}>
@@ -83,9 +95,9 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
             >
               {held ? 'Held in bag' : 'Add to bag'}
             </button>
-            <button type="button" className="lx-text-btn" onClick={() => setCompared(toggleCompare(item))}>
-              {compared ? 'In compare' : 'Compare'}
-            </button>
+            <Link href={`/product/${product.slug}`} className="lx-text-btn lx-card__view">
+              View
+            </Link>
           </div>
         </div>
       </article>

@@ -52,12 +52,20 @@ function cardKind(kind: NgcKind): StorefrontCard['kind'] {
   return 'gemstone';
 }
 
+function productCardSlug(product: NgcProduct): string {
+  const id = product.id.toLowerCase();
+  if (product.slug.toLowerCase().includes(id) || product.path.toLowerCase().includes(id)) {
+    return product.slug;
+  }
+  return id;
+}
+
 export function toStorefrontCard(product: NgcProduct): StorefrontCard {
   const pair = product.kind === 'stone_pair';
   return {
     id: product.id,
     sku: product.id,
-    slug: product.slug,
+    slug: productCardSlug(product),
     title: product.title,
     kind: cardKind(product.kind),
     description: product.descriptionHtml.replace(/<[^>]+>/g, ' ').slice(0, 400) || null,
@@ -76,14 +84,30 @@ export function toStorefrontCard(product: NgcProduct): StorefrontCard {
     metalType: product.metalName,
     metalColor: product.metalName,
     imageUrl: catalogImageSrc(product) || null,
+    hoverImageUrl:
+      catalogImageSrc(
+        product,
+        product.media.find((m) => m.kind === 'lifestyle_image') ??
+          product.media.find((m) => m.kind === 'image' && m.order > 1),
+      ) || null,
     vendorName: 'Maihan Gems',
     certificateLab: product.lab,
+    colorIntensity: product.colorIntensity,
+    clarity: product.clarity,
+    cut: product.cut,
+    cuttingStyle: product.cuttingStyle,
+    lengthMm: product.lengthMm,
+    widthMm: product.widthMm,
+    availability: product.availability,
   };
 }
 
 export function productHref(product: NgcProduct): string {
-  if (product.path && product.path !== '/') return product.path.startsWith('/') ? product.path : `/${product.path}`;
-  return `/product/${product.slug}`;
+  const id = product.id.toLowerCase();
+  if (product.path && product.path !== '/' && product.path.toLowerCase().includes(id)) {
+    return product.path.startsWith('/') ? product.path : `/${product.path}`;
+  }
+  return `/product/${productCardSlug(product)}`;
 }
 
 function idFromSlug(slug: string): string | null {

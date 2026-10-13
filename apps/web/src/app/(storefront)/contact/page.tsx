@@ -6,6 +6,7 @@
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { STOREFRONT_CONTACT } from '@maihan/config';
 
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
 
@@ -34,25 +35,25 @@ export default function ContactPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
           <div style={{ padding: '1.75rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
             <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>Direct Line</span>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', margin: '0 0 0.5rem 0' }}>Dubai Flagship Atelier</h2>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', margin: '0 0 0.5rem 0' }}>{STOREFRONT_CONTACT.appointmentLabel}</h2>
             <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-              DIFC Gate Village, Building 3, Level 4<br />
-              Dubai, United Arab Emirates<br />
+              {STOREFRONT_CONTACT.addressLine}<br />
+              {STOREFRONT_CONTACT.city}, {STOREFRONT_CONTACT.region}<br />
+              {STOREFRONT_CONTACT.hours}<br />
               <strong className="font-mono" style={{ color: 'var(--gold-dark)', display: 'block', marginTop: '0.5rem' }}>
-                +971 4 800 GEMS
+                {STOREFRONT_CONTACT.phoneDisplay}
               </strong>
+              <a href={`mailto:${STOREFRONT_CONTACT.email}`} style={{ display: 'block', marginTop: '0.35rem', color: 'var(--gold-dark)' }}>
+                {STOREFRONT_CONTACT.email}
+              </a>
             </p>
           </div>
 
           <div style={{ padding: '1.75rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
-            <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>European Salon</span>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', margin: '0 0 0.5rem 0' }}>Geneva Salon Privé</h2>
+            <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>Appointments</span>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', margin: '0 0 0.5rem 0' }}>Private viewing</h2>
             <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-              Rue du Rhône 42, 1204 Genève<br />
-              Switzerland<br />
-              <strong className="font-mono" style={{ color: 'var(--gold-dark)', display: 'block', marginTop: '0.5rem' }}>
-                +41 22 700 8820
-              </strong>
+              Showroom visits are by appointment. Write or call using the placeholders above until the house publishes live contact details.
             </p>
           </div>
         </div>

@@ -75,15 +75,15 @@ describe('absoluteUrl', () => {
   });
 });
 
-describe('organizationNode — observed evidence only', () => {
-  it('carries exactly the observed SoT identity', () => {
+describe('organizationNode — storefront identity from config', () => {
+  it('carries the Maihan placeholders, not NGC contact details', () => {
     const org = organizationNode(BASE);
     expect(org['@type']).toBe('Organization');
     expect(org['name']).toBe(ORGANIZATION_EVIDENCE.name);
     expect(org['url']).toBe(`${BASE}/`);
     const contact = org['contactPoint'] as Array<Record<string, unknown>>;
     expect(contact).toHaveLength(1);
-    expect(contact[0]!['telephone']).toBe('+1-212-804-9994');
+    expect(contact[0]!['telephone']).toBe(ORGANIZATION_EVIDENCE.telephone);
     // No invented fields: no logo, no sameAs, no openingHours, no geo.
     const keys = Object.keys(org);
     expect(keys.sort()).toEqual(['@type', 'contactPoint', 'name', 'url']);
