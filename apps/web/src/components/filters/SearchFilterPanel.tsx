@@ -108,7 +108,7 @@ export function SearchFilterPanel({ facets, searchParams }: SearchFilterPanelPro
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '10px',
-                            color: '#08121e',
+                            color: 'var(--navy-deep)',
                             fontWeight: 'bold',
                           }}
                           aria-hidden="true"

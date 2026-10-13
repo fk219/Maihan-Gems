@@ -171,7 +171,7 @@ export function WebArModal({
         ctx.beginPath();
         ctx.ellipse(0, 0, 36 * ringScale, 16 * ringScale, 0.1, 0, 2 * Math.PI);
         ctx.lineWidth = 8 * ringScale;
-        ctx.strokeStyle = '#d4af37';
+        ctx.strokeStyle = '#C9A84C';
         ctx.shadowColor = 'rgba(212, 175, 55, 0.6)';
         ctx.shadowBlur = 12;
         ctx.stroke();
@@ -305,7 +305,7 @@ export function WebArModal({
                 type="button"
                 onClick={requestCameraAccess}
                 style={{
-                  backgroundColor: '#d4af37',
+                  backgroundColor: '#C9A84C',
                   color: '#09090b',
                   fontWeight: 600,
                   fontSize: '0.95rem',

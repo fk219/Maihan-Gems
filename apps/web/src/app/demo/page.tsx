@@ -27,7 +27,7 @@ export default async function DemoStorefrontPage() {
         fontFamily: 'Montserrat, sans-serif',
       }}>
         {/* Header */}
-        <header className="border-b border-[#E5E5E5] bg-[#08121E] text-white">
+        <header className="border-b border-[rgba(201,168,76,0.15)] bg-[#08121E] text-white">
           <div className="container mx-auto px-6 py-8">
             <h1 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="text-5xl font-light tracking-wide">
               Maihan Gems
@@ -44,7 +44,7 @@ export default async function DemoStorefrontPage() {
             <h2 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="text-6xl font-light">
               Discover Earth's Finest
             </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg font-light leading-relaxed text-gray-300">
+            <p className="mx-auto mt-6 max-w-2xl text-lg font-light leading-relaxed text-[#8A867E]">
               Explore our curated collection of 100% natural, earth-mined gemstones,
               each certified for authenticity and accompanied by master atelier settings
               crafted in 18K gold and platinum.
@@ -69,7 +69,7 @@ export default async function DemoStorefrontPage() {
                         className="h-full w-full object-cover transition-transform group-hover:scale-105"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-gray-300">
+                      <div className="flex h-full items-center justify-center text-[#8A867E]">
                         <svg className="h-24 w-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -81,7 +81,7 @@ export default async function DemoStorefrontPage() {
                       {product.title}
                     </h3>
                     {product.stone_type && (
-                      <p className="mt-1 text-sm text-[#64748B]">{product.stone_type}</p>
+                      <p className="mt-1 text-sm text-[#8A867E]">{product.stone_type}</p>
                     )}
                     {product.weight_ct && (
                       <p className="mt-1 text-sm font-medium text-[#475569]">{product.weight_ct} ct</p>
@@ -125,7 +125,7 @@ export default async function DemoStorefrontPage() {
                       {product.title}
                     </h3>
                     {product.setting_type && (
-                      <p className="mt-1 text-sm text-[#94A3B8]">{product.setting_type}</p>
+                      <p className="mt-1 text-sm text-[#8A867E]">{product.setting_type}</p>
                     )}
                     {product.regional_price > 0 && (
                       <p style={{ fontFamily: 'JetBrains Mono, monospace' }} className="mt-3 text-base font-medium text-[#C9A84C]">
@@ -156,7 +156,7 @@ export default async function DemoStorefrontPage() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-gray-300">
+                      <div className="flex h-full items-center justify-center text-[#8A867E]">
                         No Image
                       </div>
                     )}
@@ -166,7 +166,7 @@ export default async function DemoStorefrontPage() {
                       {product.title}
                     </h3>
                     {product.jewelry_type && (
-                      <p className="mt-1 text-sm text-[#64748B]">{product.jewelry_type}</p>
+                      <p className="mt-1 text-sm text-[#8A867E]">{product.jewelry_type}</p>
                     )}
                     {product.regional_price > 0 && (
                       <p style={{ fontFamily: 'JetBrains Mono, monospace' }} className="mt-3 text-lg font-medium text-[#C9A84C]">
@@ -181,7 +181,7 @@ export default async function DemoStorefrontPage() {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-[#E5E5E5] bg-[#08121E] py-12 text-white">
+        <footer className="border-t border-[rgba(201,168,76,0.15)] bg-[#08121E] py-12 text-white">
           <div className="container mx-auto px-6 text-center">
             <p className="text-sm font-light text-gray-400">
               © 2026 Maihan Gems. All rights reserved.

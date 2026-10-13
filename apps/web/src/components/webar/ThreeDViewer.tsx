@@ -110,7 +110,7 @@ export function ThreeDViewer({
       ctx.lineWidth = 14 * zoom;
       const rimGrad = ctx.createLinearGradient(-radX, -radY, radX, radY);
       rimGrad.addColorStop(0, '#f9e4a8');
-      rimGrad.addColorStop(0.3, '#d4af37');
+      rimGrad.addColorStop(0.3, '#C9A84C');
       rimGrad.addColorStop(0.6, '#aa820a');
       rimGrad.addColorStop(0.85, '#f9e4a8');
       rimGrad.addColorStop(1, '#664d00');
@@ -272,7 +272,7 @@ export function ThreeDViewer({
             justifyContent: 'center',
             backgroundColor: 'rgba(10, 10, 12, 0.85)',
             zIndex: 10,
-            color: '#d4af37',
+            color: '#C9A84C',
           }}
         >
           <div
@@ -280,7 +280,7 @@ export function ThreeDViewer({
               width: '40px',
               height: '40px',
               border: '3px solid #27272a',
-              borderTopColor: '#d4af37',
+              borderTopColor: '#C9A84C',
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
               marginBottom: '1rem',
@@ -390,7 +390,7 @@ export function ThreeDViewer({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                backgroundColor: '#d4af37',
+                backgroundColor: '#C9A84C',
                 color: '#09090b',
                 fontWeight: 600,
                 fontSize: '0.85rem',
