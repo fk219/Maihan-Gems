@@ -4,61 +4,52 @@
  * Authoritative CSS theme specification for Maihan Gems, derived verbatim from
  * Design.md (Swiss Private Banking precision combined with modern Dubai luxury).
  *
- * Rules honoured:
- *   - Obsidian Navy palette: #08121E (deep), #0D1B2A (primary), #132234 (mid)
- *   - Master Gold palette: #C9A84C (gold), #E8C96A (light), #8B6914 (dark), #F5E8C0 (pale)
- *   - Alternating background cadence: Obsidian -> Gold -> Navy -> White -> Midnight -> Ivory -> Deep
- *   - Hairline gold precision borders: 1px rgba(201, 168, 76, 0.20) with top accent
- *   - Monospace tabular numerals: tabular-nums lining-nums font-mono
- *   - Shimmer animation on primary action buttons
- *   - Zero external framework dependency: pure CSS variables and classes
+ * Tokens match Design.md §2–§7 exactly. Do not invent palettes, radii or fonts.
  */
 
 export const MAIHAN_THEME_CSS = `
 :root {
-  --color-gold: #c9a84c;
-  --color-gold-light: #f3dfa2;
-  --color-gold-dark: #8a6a1f;
-  --color-gold-pale: #f3dfa2;
-  --color-gold-ultra: #fbf5e6;
-  --gold-gradient: linear-gradient(135deg, #8A6A1F, #C9A84C, #F3DFA2, #C9A84C);
-  --gold-glow: 0 12px 32px -12px rgba(201, 168, 76, 0.55);
-  --radius-card: 20px;
-  --radius-image: 18px;
-  --radius-control: 999px;
-  --radius-menu: 20px;
-
-  --color-navy: #0d1b2a;
-  --color-navy-mid: #132234;
-  --color-navy-light: #1c2e3f;
-  --color-navy-deep: #08121e;
-  --color-navy-midnight: #080d19;
-
-  --color-off-white: #fafaf8;
-  --color-mid-grey: #e8e4dc;
-  --color-champagne-border: #e8e1ce;
-
-  /* Silk & Stone Design System Aliases */
-  --gold: #c9a84c;
-  --gold-light: #e8c96a;
-  --gold-dark: #8b6914;
-  --navy: #0d1b2a;
-  --navy-deep: #08121e;
-  --warm-white: #fafaf8;
-
-  --text-primary: #1a1a18;
-  --text-secondary: #4a4740;
-  --text-muted: #8a867e;
-
-  --radius: 20px;
-
-  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Outfit', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-
-  --shadow-gold: 0 10px 25px -5px rgba(201, 168, 76, 0.3), 0 8px 10px -6px rgba(201, 168, 76, 0.3);
-  --shadow-gold-sm: 0 4px 14px rgba(201, 168, 76, 0.4);
+  --warm-white: #FAFAF8;
+  --warm-alabaster: #FAFAF8;
+  --studio-white: #FFFFFF;
+  --navy-deep: #08121E;
+  --deep-midnight: #08121E;
+  --navy: #0D1B2A;
+  --atelier-navy: #0D1B2A;
+  --gold: #C9A84C;
+  --imperial-gold: #C9A84C;
+  --gold-light: #E8C96A;
+  --gold-dark: #8B6914;
+  --text-primary: #1A1A18;
+  --text-secondary: #4A4740;
+  --text-muted: #8A867E;
+  --hairline-border: rgba(201, 168, 76, 0.15);
+  --subtle-divider: rgba(0, 0, 0, 0.06);
+  --gold-gradient: linear-gradient(135deg, #E8C96A 0%, #C9A84C 50%, #8B6914 100%);
+  --color-gold: #C9A84C;
+  --color-gold-light: #E8C96A;
+  --color-gold-dark: #8B6914;
+  --color-navy: #0D1B2A;
+  --color-navy-deep: #08121E;
+  --color-navy-mid: #0D1B2A;
+  --color-off-white: #FAFAF8;
+  --radius: 12px;
+  --radius-card: 12px;
+  --radius-image: 0px;
+  --radius-control: 12px;
+  --radius-menu: 12px;
+  --radius-inner: 8px;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --shadow-rest: 0 4px 20px -4px rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 30px 60px -15px rgba(139, 105, 20, 0.08);
+  --shadow-card-hover: 0 24px 48px -12px rgba(139, 105, 20, 0.08);
+  --shadow-gold: 0 4px 15px -2px rgba(201, 168, 76, 0.25);
+  --shadow-gold-hover: 0 12px 24px -4px rgba(201, 168, 76, 0.35);
+  --gold-glow: 0 12px 24px -4px rgba(201, 168, 76, 0.35);
+  --ease-luxury: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 *, *::before, *::after {
@@ -153,26 +144,26 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(90deg, #c9a84c 0%, #e8c96a 50%, #c9a84c 100%);
-  color: #08121e;
+  background: linear-gradient(135deg, #E8C96A 0%, #C9A84C 50%, #8B6914 100%);
+  color: #FFFFFF;
   font-family: var(--font-sans);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   border: none;
-  border-radius: 0.75rem;
-  padding: 0.75rem 1.5rem;
-  box-shadow: 0 10px 25px -5px rgba(201, 168, 76, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  padding: 1rem 2.2rem;
+  box-shadow: 0 4px 15px -2px rgba(201, 168, 76, 0.25);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   text-decoration: none;
   white-space: nowrap;
 }
 .btn-primary:hover {
   transform: translateY(-2px);
-  filter: brightness(1.05);
-  box-shadow: 0 14px 28px -5px rgba(201, 168, 76, 0.45);
-  color: #08121e;
+  filter: brightness(1.04);
+  box-shadow: 0 12px 24px -4px rgba(201, 168, 76, 0.35);
+  color: #FFFFFF;
 }
 .btn-primary::after {
   content: '';
@@ -988,7 +979,7 @@ body {
   color: var(--text-secondary);
   background: #ffffff;
   border: 1px solid rgba(201, 168, 76, 0.2);
-  border-radius: 9999px;
+  border-radius: 12px;
   padding: 0.3rem 0.75rem;
   text-decoration: none;
   transition: all 0.2s ease;
@@ -1039,7 +1030,7 @@ body {
   gap: 0.4rem;
   background: rgba(201, 168, 76, 0.1);
   border: 1px solid rgba(201, 168, 76, 0.25);
-  border-radius: 9999px;
+  border-radius: 12px;
   padding: 0.25rem 0.65rem;
   font-size: 0.75rem;
   font-family: var(--font-sans);

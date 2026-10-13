@@ -12,56 +12,117 @@
 
 @layer base {
   :root {
-    /* Silk & Stone Core Palette (60-30-10 rule) */
+    /* Design.md §2.1 — Core Neutral & Metal Tokens */
+    --warm-white: #FAFAF8;
     --warm-alabaster: #FAFAF8;
     --studio-white: #FFFFFF;
+    --navy-deep: #08121E;
     --deep-midnight: #08121E;
+    --navy: #0D1B2A;
     --atelier-navy: #0D1B2A;
-    
-    /* Imperial Gold System — gradient, not a flat chip */
     --gold: #C9A84C;
-    --gold-light: #F3DFA2;
-    --gold-dark: #8A6A1F;
-    --color-gold: #C9A84C;
-    --color-gold-light: #F3DFA2;
-    --color-gold-dark: #8A6A1F;
-    --gold-mid: #C9A84C;
-    --gold-pale: #F3DFA2;
-    --gold-gradient: linear-gradient(135deg, #8A6A1F, #C9A84C, #F3DFA2, #C9A84C);
-    --gold-gradient-border: linear-gradient(135deg, rgba(138, 106, 31, 0.9), rgba(201, 168, 76, 0.7), rgba(243, 223, 162, 0.95), rgba(201, 168, 76, 0.7));
-    --gold-glow: 0 12px 32px -12px rgba(201, 168, 76, 0.55);
-
-    --radius-card: 20px;
-    --radius-image: 18px;
-    --radius-control: 999px;
-    --radius-menu: 20px;
-    
-    /* Text Hierarchy */
+    --imperial-gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --gold-dark: #8B6914;
     --text-primary: #1A1A18;
     --text-secondary: #4A4740;
     --text-muted: #8A867E;
-    
-    /* Hairline Borders & Dividers */
     --hairline-border: rgba(201, 168, 76, 0.15);
     --subtle-divider: rgba(0, 0, 0, 0.06);
-    
-    /* Typography Stack */
-    --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+
+    /* Aliases used by existing sheets — same Design.md values */
+    --color-gold: #C9A84C;
+    --color-gold-light: #E8C96A;
+    --color-gold-dark: #8B6914;
+    --gold-mid: #C9A84C;
+    --color-navy: #0D1B2A;
+    --color-navy-deep: #08121E;
+    --color-navy-mid: #0D1B2A;
+    --color-off-white: #FAFAF8;
+
+    /* Design.md §2.2 — Gemstone Accent Spectrum */
+    --gem-sapphire: #1E3A8A;
+    --gem-sapphire-deep: #0F172A;
+    --gem-sapphire-light: #3B82F6;
+    --gem-ruby: #991B1B;
+    --gem-ruby-deep: #450A0A;
+    --gem-ruby-light: #EF4444;
+    --gem-emerald: #065F46;
+    --gem-emerald-deep: #022C22;
+    --gem-emerald-light: #10B981;
+    --gem-padparadscha: #EA580C;
+    --gem-padparadscha-deep: #7C2D12;
+    --gem-padparadscha-light: #FB923C;
+    --gem-canary: #D97706;
+    --gem-canary-deep: #78350F;
+    --gem-canary-light: #FBBF24;
+    --gem-paraiba: #0891B2;
+    --gem-paraiba-deep: #164E63;
+    --gem-paraiba-light: #06B6D4;
+
+    /* Design.md §5.2 / §7 — brushed gold gradient */
+    --gold-gradient: linear-gradient(135deg, #E8C96A 0%, #C9A84C 50%, #8B6914 100%);
+
+    /* Design.md §3.1 — Typography */
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
     --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, monospace;
-    
-    /* Spatial System - Increased for Luxury Breathing Room */
-    --radius: 20px;
-    --space-section: 8rem;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-body: var(--font-sans);
+
+    /* Design.md §3.2 — Type scale */
+    --text-hero: clamp(2.75rem, 5vw, 4.5rem);
+    --text-h1: clamp(2.25rem, 4vw, 3rem);
+    --text-h2: clamp(1.5rem, 2.5vw, 1.875rem);
+    --text-h3: clamp(1.25rem, 1.5vw, 1.375rem);
+    --text-eyebrow: 0.6875rem;
+    --text-body-lg: 1rem;
+    --text-body: 0.9375rem;
+    --text-micro: 0.75rem;
+    --text-button: 0.6875rem;
+    --text-tabular: 0.875rem;
+    --tracking-hero: -0.02em;
+    --tracking-h1: -0.015em;
+    --tracking-h2: -0.01em;
+    --tracking-eyebrow: 0.25em;
+    --tracking-body: 0.01em;
+    --tracking-micro: 0.08em;
+    --tracking-button: 0.2em;
+    --leading-hero: 1.05;
+    --leading-h1: 1.15;
+    --leading-h2: 1.2;
+    --leading-h3: 1.3;
+    --leading-body: 1.8;
+    --leading-micro: 1.4;
+
+    /* Design.md §4.1 — Spacing */
+    --content-max: 80rem;
+    --container-pad: 1.5rem;
+    --container-pad-lg: 3rem;
+    --space-section: clamp(4rem, 8vw, 6rem);
     --space-container: clamp(1.5rem, 5vw, 3rem);
-    
-    /* Luxury Motion Curve */
-    --ease-luxury: cubic-bezier(0.16, 1, 0.3, 1);
-    
-    /* Elevation Shadows */
+
+    /* Design.md §4.2 — Radius 12px, nested inner 8px. No 999px pills. */
+    --radius: 12px;
+    --radius-card: 12px;
+    --radius-image: 0px;
+    --radius-control: 12px;
+    --radius-menu: 12px;
+    --radius-inner: 8px;
+
+    /* Design.md §4.2 — Elevation */
     --shadow-rest: 0 4px 20px -4px rgba(0, 0, 0, 0.03);
     --shadow-hover: 0 30px 60px -15px rgba(139, 105, 20, 0.08);
+    --shadow-card-hover: 0 24px 48px -12px rgba(139, 105, 20, 0.08);
     --shadow-gold: 0 4px 15px -2px rgba(201, 168, 76, 0.25);
+    --shadow-gold-hover: 0 12px 24px -4px rgba(201, 168, 76, 0.35);
+    --shadow-search: 0 10px 30px -5px rgba(201, 168, 76, 0.08);
+    --gold-glow: 0 12px 24px -4px rgba(201, 168, 76, 0.35);
+
+    /* Design.md §6.1 — Motion */
+    --ease-luxury: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-luxury: 500ms;
+    --duration-hover: 300ms;
+    --duration-enter: 1200ms;
   }
 
   /* Mobile Refinements */
@@ -461,33 +522,34 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @layer components {
-  /* Primary Gold Button - Refined Luxury Style */
+  /* Design.md §5.2 — Brushed Gold Button (Primary) */
   .btn-primary {
+    background: var(--gold-gradient);
+    color: #FFFFFF;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.18em;
+    font-size: var(--text-button);
     text-transform: uppercase;
-    padding: 1.125rem 2.75rem;
-    color: var(--text-primary);
-    background: linear-gradient(135deg, rgba(212, 174, 94, 0.15) 0%, rgba(184, 152, 64, 0.12) 100%);
-    border: 1.5px solid var(--gold);
+    letter-spacing: var(--tracking-button);
+    padding: 1rem 2.2rem;
     border-radius: var(--radius);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    text-decoration: none;
+    box-shadow: var(--shadow-gold);
+    border: none;
     cursor: pointer;
     white-space: nowrap;
-    transition: all 400ms var(--ease-luxury);
+    text-decoration: none;
+    transition: all 0.4s var(--ease-luxury);
   }
 
   .btn-primary:hover {
-    background: linear-gradient(135deg, rgba(212, 174, 94, 0.25) 0%, rgba(184, 152, 64, 0.20) 100%);
-    border-color: var(--gold-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px -4px rgba(184, 152, 64, 0.15);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-gold-hover);
+    filter: brightness(1.04);
+    color: #FFFFFF;
   }
 
   /* Secondary Outline Button */
@@ -580,7 +642,7 @@
     padding: 0.35rem 0.85rem;
     background: var(--studio-white);
     border: 1px solid var(--subtle-divider);
-    border-radius: 9999px;
+    border-radius: var(--radius);
     transition: all 300ms ease;
   }
 
