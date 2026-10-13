@@ -195,14 +195,14 @@ export function LuxuryHeader({ stones: _stones }: LuxuryHeaderProps) {
         </div>
       </div>
       <div className="ngc-bar">
-        <button className="ngc-burger" type="button" aria-label="Menu" onClick={() => setDrawer((v) => !v)}>
+        <button className="ngc-burger" type="button" aria-label="Menu" aria-expanded={drawer} onClick={() => setDrawer((v) => !v)}>
           <span />
           <span />
           <span />
         </button>
         <Link href="/" className="ngc-logo" aria-label="Maihan Gems">
-          MAIHAN
-          <small>Gems</small>
+          <span className="ngc-logo__word">MAIHAN</span>
+          <span className="ngc-logo__sub">GEMS · Atelier</span>
         </Link>
         <nav className="ngc-nav" aria-label="Primary" onMouseLeave={() => setOpen(null)}>
           {NAV.map((item) => (
@@ -219,6 +219,9 @@ export function LuxuryHeader({ stones: _stones }: LuxuryHeaderProps) {
           ))}
         </nav>
         <div className="ngc-tools">
+          <Link href="/design-your-own" className="ngc-cta">
+            Bespoke Atelier
+          </Link>
           <select
             className="ngc-currency"
             aria-label="Currency"
@@ -253,6 +256,9 @@ export function LuxuryHeader({ stones: _stones }: LuxuryHeaderProps) {
           {NAV.map((item) => (
             <Link key={item.id} href={item.href} onClick={() => setDrawer(false)}>{item.label}</Link>
           ))}
+          <Link href="/design-your-own" className="ngc-drawer__cta" onClick={() => setDrawer(false)}>
+            Bespoke Atelier
+          </Link>
         </div>
       ) : null}
     </header>

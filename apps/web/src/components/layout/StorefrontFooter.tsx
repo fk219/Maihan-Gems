@@ -9,7 +9,9 @@ export function StorefrontFooter() {
           <p>Maihan Gems</p>
           <h2>Natural stones, set with care.</h2>
         </div>
-        <a href="tel:+12128049994">+1 212 804 9994</a>
+        <Link href="/design-your-own" className="home-footer__cta">
+          Design Your Own
+        </Link>
       </div>
       <div className="home-footer__grid">
         <div>
@@ -27,12 +29,22 @@ export function StorefrontFooter() {
           <Link href="/compare">Compare</Link>
         </div>
         <div>
+          <h3>The house</h3>
+          <Link href="/about">About us</Link>
+          <Link href="/education">Education</Link>
+          <Link href="/account">Account</Link>
+          <Link href="/search">Vault search</Link>
+        </div>
+        <div>
           <h3>Visit</h3>
           <p>608 5th Avenue, 11th Floor<br />New York, NY 10020</p>
           <p>Mon–Fri, 10:00–18:00 ET</p>
+          <a href="tel:+12128049994">+1 212 804 9994</a>
         </div>
       </div>
-      <p className="home-footer__legal">© {year} Maihan Gems. Unverified specifications are never shown as certified facts.</p>
+      <p className="home-footer__legal">
+        © {year} Maihan Gems. Unverified specifications are never shown as certified facts.
+      </p>
     </footer>
   );
 }

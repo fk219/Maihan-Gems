@@ -2,7 +2,8 @@
  * Simple shop page using the new storefront schema
  */
 import Link from 'next/link';
-import { getStorefrontRepository } from '../../lib/db';
+import { getStorefrontRepository } from '../../../lib/db';
+import type { SimpleProduct } from '@maihan/db';
 
 export default async function ShopPage({
   searchParams,
@@ -11,13 +12,8 @@ export default async function ShopPage({
 }) {
   const repo = getStorefrontRepository();
   const kind = searchParams.kind as 'gemstone' | 'jewelry' | 'setting' | undefined;
-  const regionCode = searchParams.region || 'USD';
 
-  const products = await repo.listProducts({
-    kind,
-    limit: 24,
-    region_code: regionCode,
-  });
+  const products = await repo.listProducts(kind, 24);
 
   return (
     <div className="lx-section" style={{ background: 'var(--warm-alabaster)' }}>
@@ -42,21 +38,12 @@ export default async function ShopPage({
         </div>
 
         <div className="lx-grid" style={{ marginTop: '2rem' }}>
-          {products.map((product: any) => (
+          {products.map((product: SimpleProduct) => (
             <Link key={product.id} href={`/shop/${product.slug}`} className="lx-card">
-              <div className="lx-card__media">
-                {product.primary_image ? (
-                  <img src={product.primary_image} alt={product.title} />
-                ) : null}
-              </div>
+              <div className="lx-card__media" />
               <div className="lx-card__body">
                 <h3 className="lx-card__title">{product.title}</h3>
                 {product.description ? <p className="lx-card__specs">{product.description}</p> : null}
-                {product.regional_price > 0 ? (
-                  <p className="lx-card__price">
-                    {product.regional_currency} {product.regional_price.toLocaleString()}
-                  </p>
-                ) : null}
                 <p className="lx-card__meta">
                   {[product.stone_type, product.jewelry_type].filter(Boolean).join(' · ')}
                 </p>
