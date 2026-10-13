@@ -58,32 +58,31 @@ export function JewelryConfiguratorCanvas({
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.0;
+      renderer.toneMappingExposure = 0.86;
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       host.appendChild(renderer.domElement);
 
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0xf4f1ea);
+      envScene.background = new THREE.Color(0x1a1230);
       const card = (w: number, h: number, color: number, pos: [number, number, number], look = true) => {
         const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color }));
         mesh.position.set(...pos);
         if (look) mesh.lookAt(0, 0.2, 0);
         envScene.add(mesh);
       };
-      card(12, 8, 0xffffff, [0, 6.4, 0]);
-      card(5, 7, 0xfff4dd, [5.2, 2.4, 2.8]);
-      card(4.2, 6, 0xe8c96a, [-4.8, 2.2, -1.2]);
-      card(4, 5.5, 0x4c1d95, [-3.4, 1.8, 3.6]);
-      card(6, 4, 0xfafaf8, [0.6, 1.4, 5.2]);
-      card(5, 5, 0xffd7a8, [3.8, 3.6, -3.2]);
-      card(10, 10, 0xdedad3, [0, -4.2, 0]);
+      card(3.2, 3.2, 0xfff8ee, [0, 5.8, 2.2]);
+      card(4.4, 6, 0xe8c96a, [4.8, 2.6, 1.6]);
+      card(3.6, 5, 0xffd7a8, [-4.6, 2.4, -1.0]);
+      card(3.4, 4.6, 0x2a1078, [-3.2, 1.6, 3.4]);
+      card(2.4, 2.4, 0xffffff, [1.8, 3.8, 4.2]);
+      card(10, 10, 0x16121f, [0, -4.2, 0]);
       const pmrem = new THREE.PMREMGenerator(renderer);
-      const env = pmrem.fromScene(envScene, 0.02).texture;
+      const env = pmrem.fromScene(envScene, 0.04).texture;
       scene.environment = env;
-      scene.environmentIntensity = 1.75;
+      scene.environmentIntensity = 1.15;
 
-      const key = new THREE.DirectionalLight(0xfff4dd, 2.35);
+      const key = new THREE.DirectionalLight(0xfff1d6, 1.55);
       key.position.set(2.8, 5.4, 3.4);
       key.castShadow = true;
       key.shadow.mapSize.set(1024, 1024);
@@ -91,9 +90,17 @@ export function JewelryConfiguratorCanvas({
       key.shadow.camera.far = 12;
       key.shadow.radius = 4;
       scene.add(key);
-      scene.add(new THREE.DirectionalLight(0xfafaf8, 0.85).translateX(-2.8).translateY(2.2).translateZ(2.6));
-      scene.add(new THREE.DirectionalLight(0xc4b5fd, 0.55).translateX(0.4).translateY(-0.6).translateZ(-2.4));
-      scene.add(new THREE.AmbientLight(0xf7f7f5, 0.16));
+      scene.add(new THREE.DirectionalLight(0xc4b5fd, 0.7).translateX(-2.8).translateY(2.2).translateZ(2.6));
+      const sparkA = new THREE.PointLight(0xffffff, 2.8, 3.4, 2);
+      sparkA.position.set(0.62, 0.9, 1.15);
+      scene.add(sparkA);
+      const sparkB = new THREE.PointLight(0xe8c96a, 1.9, 3.2, 2);
+      sparkB.position.set(-0.75, 0.35, 0.95);
+      scene.add(sparkB);
+      const sparkC = new THREE.PointLight(0xffffff, 1.6, 2.6, 2);
+      sparkC.position.set(0.15, -0.2, 1.35);
+      scene.add(sparkC);
+      scene.add(new THREE.AmbientLight(0x2a1078, 0.22));
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enablePan = false;
@@ -128,27 +135,45 @@ export function JewelryConfiguratorCanvas({
 
       function gemMaterial(color: string) {
         const ior = gemIor(stone?.stoneType);
-        const scale = stoneScale();
         return new THREE.MeshPhysicalMaterial({
           color,
           metalness: 0,
-          roughness: 0.012,
-          transmission: 0.88,
-          thickness: mode === 'stone' ? 0.85 : 0.48,
+          roughness: 0.045,
+          transmission: 0.58,
+          thickness: mode === 'stone' ? 1.15 : 0.62,
           ior,
           dispersion: gemDispersion(stone?.stoneType),
           attenuationColor: new THREE.Color(gemAttenuationHex(color, stone?.stoneType)),
-          attenuationDistance: mode === 'stone' ? 0.22 : 0.14,
+          attenuationDistance: mode === 'stone' ? 0.09 : 0.07,
           clearcoat: 1,
-          clearcoatRoughness: 0.015,
+          clearcoatRoughness: 0.06,
           specularIntensity: 1,
           specularColor: new THREE.Color(color),
-          iridescence: 0.48,
-          iridescenceIOR: 1.35,
-          iridescenceThicknessRange: [120, 420],
-          envMapIntensity: 2.45,
+          iridescence: 0.16,
+          iridescenceIOR: 1.4,
+          iridescenceThicknessRange: [180, 380],
+          envMapIntensity: 1.05,
           flatShading: true,
-          side: THREE.DoubleSide,
+          side: THREE.FrontSide,
+        });
+      }
+
+      function sparkleMaterial() {
+        return new THREE.MeshPhysicalMaterial({
+          color: 0xffffff,
+          metalness: 0,
+          roughness: 0.06,
+          transparent: true,
+          opacity: 0.28,
+          transmission: 0,
+          envMapIntensity: 3.6,
+          clearcoat: 1,
+          clearcoatRoughness: 0.02,
+          specularIntensity: 1,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          flatShading: true,
+          side: THREE.FrontSide,
         });
       }
 
@@ -161,14 +186,20 @@ export function JewelryConfiguratorCanvas({
         const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.BufferAttribute(built.positions, 3));
         geometry.computeVertexNormals();
-        const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#5A2FE0'));
-        mesh.scale.setScalar(scale);
-        if (mode === 'stone') mesh.rotation.x = -0.32;
-        mesh.castShadow = true;
-        mesh.name = 'center_stone';
+        const body = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#3A12C2'));
+        body.scale.setScalar(scale);
+        if (mode === 'stone') body.rotation.x = -0.32;
+        body.castShadow = true;
+        body.name = 'center_stone';
+        const sparkle = new THREE.Mesh(geometry, sparkleMaterial());
+        sparkle.scale.setScalar(scale * 1.004);
+        sparkle.rotation.copy(body.rotation);
+        sparkle.name = 'center_stone_sparkle';
+        sparkle.renderOrder = 3;
         const group = new THREE.Group();
         group.name = 'center_stone';
-        group.add(mesh);
+        group.add(body);
+        group.add(sparkle);
         return group;
       }
 
