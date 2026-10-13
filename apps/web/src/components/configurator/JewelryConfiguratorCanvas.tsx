@@ -101,9 +101,9 @@ export function JewelryConfiguratorCanvas({
       const rim = new THREE.DirectionalLight(0xa78bfa, 1.25);
       rim.position.set(-2.4, 1.6, -3.6);
       scene.add(rim);
-      const spark = new THREE.DirectionalLight(0xffffff, 1.15);
-      spark.position.set(0.6, 5.4, 0.8);
-      scene.add(spark);
+      const zenith = new THREE.DirectionalLight(0xffffff, 1.15);
+      zenith.position.set(0.6, 5.4, 0.8);
+      scene.add(zenith);
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enablePan = false;

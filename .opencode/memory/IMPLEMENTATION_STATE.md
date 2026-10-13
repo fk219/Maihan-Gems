@@ -2,7 +2,7 @@
 
 Round brilliant lattice is manifold: knife-edge girdle with shared vertices,
 pavilion mains as kites pointing at bezels, outward-facing FrontSide normals.
-Tanzanite albedo `#8A4AE8` / attenuation `#4C1A8C` (vault-photo violet, not
+Tanzanite albedo `#6B32E6` / attenuation `#3A1578` (vault-photo violet-blue, not
 navy). Studio PMREM plus key/fill/rim lights drive per-facet contrast; the
 canvas fills the 3D stage so the stone is framed, not cropped. Additive
 sparkle points and stone-mode PCF shadows are gone. Slow auto-rotate. DYO ring: ~2mm comfort-fit
