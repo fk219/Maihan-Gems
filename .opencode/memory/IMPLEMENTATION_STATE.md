@@ -1,7 +1,8 @@
 # K11733 3D — BVH REFRACTION GEM (2026-10-13)
 
 Loose-stone 3D uses a watertight 57-facet brilliant and a three-mesh-bvh
-internal-reflection shader (ADR-026): 4 bounces, IOR 1.69, chromatic
+internal-reflection shader (ADR-026): world/inverse matrices passed as
+uniforms (fragment GLSL has no modelMatrix), 4 bounces, IOR 1.69, chromatic
 aberration, Beer's-law absorption from the stone colour, studio equirect
 HDRI. No hand-tuned scene lights on the gem. Generic for every shape/colour.
 Slow auto-rotate, small contact stamp. DYO ring: ~2mm comfort-fit
