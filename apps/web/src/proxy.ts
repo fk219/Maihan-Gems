@@ -22,12 +22,40 @@ import { createRedirectResolver } from './lib/redirects.js';
 import { GENERATED_REDIRECT_ROWS } from './lib/redirects-rows.generated';
 
 const resolver = createRedirectResolver(GENERATED_REDIRECT_ROWS);
+const SISTERS = new Set(['sapphire', 'ruby', 'emerald']);
+
+function withStorefront(request: NextRequest, slug: string): Headers {
+  const headers = new Headers(request.headers);
+  headers.set('x-maihan-storefront', slug);
+  return headers;
+}
+
+function isNgcCanonicalProductPath(pathname: string): boolean {
+  const last = pathname.split('/').filter(Boolean).pop() ?? '';
+  return /(?:-k\d+|-pr\d+|-j\d+|js\d+[a-z0-9]*-k\d+)$/i.test(last);
+}
 
 export function proxy(request: NextRequest): NextResponse {
   const { pathname, search } = request.nextUrl;
-  const decision = resolver.resolve(pathname, search);
+  const first = pathname.split('/').filter(Boolean)[0] ?? '';
 
-  if (decision === null) return NextResponse.next();
+  if (SISTERS.has(first)) {
+    const rest = pathname.slice(first.length + 1) || '/';
+    const url = request.nextUrl.clone();
+    url.pathname = rest === '' || rest === '/' ? '/' : rest;
+    return NextResponse.rewrite(url, { request: { headers: withStorefront(request, first) } });
+  }
+
+  // NGC research storefront serves source-shaped product URLs on
+  // /[variety]/[slug]; do not 301 those away to /products/{stripped-slug}.
+  if (isNgcCanonicalProductPath(pathname)) {
+    return NextResponse.next({ request: { headers: withStorefront(request, 'maihan') } });
+  }
+
+  const decision = resolver.resolve(pathname, search);
+  if (decision === null) {
+    return NextResponse.next({ request: { headers: withStorefront(request, 'maihan') } });
+  }
 
   if (decision.status === 410) {
     // A URL with no equivalent and no useful replacement: honest removal,
@@ -51,5 +79,5 @@ export function proxy(request: NextRequest): NextResponse {
  * the resolver, which returns `next()` unless the path is a real legacy URL.
  */
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|media/|api/).*)'],
 };
