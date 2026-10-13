@@ -250,6 +250,9 @@ export function DyoStudio({
                 <div><dt>Stone</dt><dd>{stone ? formatMoney(stone.priceUsd, currency, rates) : '—'}</dd></div>
                 <div className="is-total"><dt>{metal}{setting?.settingFor === 'ring' ? ` · US ${size}` : ''}</dt><dd>{formatMoney(total, currency, rates)}</dd></div>
               </dl>
+              <button type="button" className="atelier__bag" disabled={!setting || !stone} onClick={reserve}>
+                {reserved ? 'Held in your bag' : 'Add to bag'}
+              </button>
               {accept ? <p className="atelier__note">Accepts {accept}</p> : null}
               {fit === 'needs_review' ? (
                 <p className="atelier__note">
@@ -257,9 +260,6 @@ export function DyoStudio({
                 </p>
               ) : null}
               {fit === 'fits' ? <p className="atelier__fit">Compatible — shape and carat sit inside the seat.</p> : null}
-              <button type="button" className="atelier__bag" disabled={!setting || !stone} onClick={reserve}>
-                {reserved ? 'Held in your bag' : 'Add to bag'}
-              </button>
             </div>
           ) : null}
         </section>

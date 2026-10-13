@@ -12,8 +12,8 @@ describe('gemHexFor', () => {
   });
 
   it('uses a darker tanzanite body colour for Beer-law attenuation', () => {
-    expect(gemAttenuationHex('Violetish Blue', 'Tanzanite')).toBe('#2A1078');
-    expect(gemAttenuationHex('#5A2FE0')).toBe('#2A1078');
+    expect(gemAttenuationHex('Violetish Blue', 'Tanzanite')).toBe('#3A148C');
+    expect(gemAttenuationHex('#5A2FE0')).toBe('#3A148C');
   });
 
   it('uses tanzanite RI ~1.7 rather than diamond 2.42', () => {

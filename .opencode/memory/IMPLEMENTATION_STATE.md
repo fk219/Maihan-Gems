@@ -1,6 +1,6 @@
 # GEM COLOUR, REALISTIC DYO RING, SISTER HEROES (2026-10-13)
 
-K11733 3D: tanzanite body `#5A2FE0` / attenuation `#2A1078`, short Beer-law
+K11733 3D: tanzanite body `#5A2FE0` / attenuation `#3A148C`, short Beer-law
 distance, remaining albedo, iridescence + Three.js-scale fire, high-contrast
 PMREM, centred lattice, larger table-up framing. DYO ring: ~2mm comfort-fit
 band tapering to a 4/6-prong claw head, jewellery metal PBR (yellow/white/rose

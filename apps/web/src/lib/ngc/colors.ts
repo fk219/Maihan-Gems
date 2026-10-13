@@ -56,7 +56,7 @@ export function gemHexFor(color: string | null | undefined, stoneType?: string |
 export function gemAttenuationHex(color: string | null | undefined, stoneType?: string | null): string {
   const text = `${color ?? ''} ${stoneType ?? ''}`.toLowerCase();
   if (text.includes('tanzanite') || text.includes('violet') || (color ?? '').toUpperCase() === '#5A2FE0') {
-    return '#2A1078';
+    return '#3A148C';
   }
   if (text.includes('paraiba') || text.includes('neon')) return '#0E7490';
   if (text.includes('emerald') || (text.includes('green') && !text.includes('bluish'))) return '#022C22';

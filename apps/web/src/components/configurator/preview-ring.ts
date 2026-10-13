@@ -61,7 +61,7 @@ function prongClaw(
   const group = new THREE.Group();
   const x = Math.cos(angle) * radius;
   const z = Math.sin(angle) * radius;
-  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.014, height, 10), finish);
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.012, height, 10), finish);
   shaft.position.set(x, galleryY + height * 0.35, z);
   shaft.lookAt(0, galleryY + height + 0.04, 0);
   shaft.rotateX(Math.PI / 2);
@@ -95,18 +95,18 @@ export function buildRealisticSetting(
   group.add(band);
 
   const galleryY = major + 0.02;
-  const gallery = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.016, 12, 48), finish);
+  const gallery = new THREE.Mesh(new THREE.TorusGeometry(0.092, 0.012, 12, 48), finish);
   gallery.position.y = galleryY;
   gallery.castShadow = true;
   group.add(gallery);
 
-  const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, 0.04, 24), finish);
-  seat.position.y = galleryY - 0.02;
+  const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.03, 24), finish);
+  seat.position.y = galleryY - 0.018;
   group.add(seat);
 
   for (let i = 0; i < prongCount; i += 1) {
     const angle = (i / prongCount) * Math.PI * 2 + Math.PI / prongCount;
-    group.add(prongClaw(THREE, finish, angle, 0.105, galleryY, 0.16));
+    group.add(prongClaw(THREE, finish, angle, 0.098, galleryY, 0.2));
   }
 
   const socket = new THREE.Object3D();

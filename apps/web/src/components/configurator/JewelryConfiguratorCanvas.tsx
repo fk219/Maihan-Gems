@@ -58,13 +58,13 @@ export function JewelryConfiguratorCanvas({
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 0.92;
+      renderer.toneMappingExposure = 1.0;
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       host.appendChild(renderer.domElement);
 
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x1a1528);
+      envScene.background = new THREE.Color(0xf4f1ea);
       const card = (w: number, h: number, color: number, pos: [number, number, number], look = true) => {
         const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color }));
         mesh.position.set(...pos);
@@ -74,14 +74,14 @@ export function JewelryConfiguratorCanvas({
       card(12, 8, 0xffffff, [0, 6.4, 0]);
       card(5, 7, 0xfff4dd, [5.2, 2.4, 2.8]);
       card(4.2, 6, 0xe8c96a, [-4.8, 2.2, -1.2]);
-      card(4, 5.5, 0x2a1078, [-3.4, 1.8, 3.6]);
+      card(4, 5.5, 0x4c1d95, [-3.4, 1.8, 3.6]);
       card(6, 4, 0xfafaf8, [0.6, 1.4, 5.2]);
       card(5, 5, 0xffd7a8, [3.8, 3.6, -3.2]);
-      card(10, 10, 0x121018, [0, -4.2, 0]);
+      card(10, 10, 0xdedad3, [0, -4.2, 0]);
       const pmrem = new THREE.PMREMGenerator(renderer);
       const env = pmrem.fromScene(envScene, 0.02).texture;
       scene.environment = env;
-      scene.environmentIntensity = 1.95;
+      scene.environmentIntensity = 1.75;
 
       const key = new THREE.DirectionalLight(0xfff4dd, 2.35);
       key.position.set(2.8, 5.4, 3.4);
@@ -103,14 +103,14 @@ export function JewelryConfiguratorCanvas({
       controls.autoRotateSpeed = 0.7;
       if (mode === 'stone') {
         controls.target.set(0, 0, 0);
-        controls.minDistance = 1.15;
-        controls.maxDistance = 3.4;
-        camera.position.set(0.38, 0.52, 1.48);
+        controls.minDistance = 1.6;
+        controls.maxDistance = 4.2;
+        camera.position.set(0.52, 0.58, 2.28);
       } else {
-        controls.target.set(0, 0.72, 0);
-        controls.minDistance = 2.1;
-        controls.maxDistance = 5.2;
-        camera.position.set(1.55, 1.15, 2.35);
+        controls.target.set(0, 0.22, 0);
+        controls.minDistance = 3.2;
+        controls.maxDistance = 7;
+        camera.position.set(2.45, 1.65, 3.35);
       }
 
       const assembly = new THREE.Group();
@@ -122,8 +122,8 @@ export function JewelryConfiguratorCanvas({
         const physical = length
           ? Math.max(0.18, Math.min(length / 10, 1.6))
           : Math.max(0.18, Math.min(0.65 * Math.cbrt(stone?.carat ?? 1), 1.6));
-        if (mode === 'mounted') return Math.min(physical * 0.34, 0.26);
-        return Math.min(physical * 1.9, 1.55);
+        if (mode === 'mounted') return Math.min(physical * 0.48, 0.34);
+        return Math.min(physical * 1.28, 1.05);
       }
 
       function gemMaterial(color: string) {
@@ -133,12 +133,12 @@ export function JewelryConfiguratorCanvas({
           color,
           metalness: 0,
           roughness: 0.012,
-          transmission: 0.84,
-          thickness: mode === 'stone' ? 1.05 : 0.52,
+          transmission: 0.88,
+          thickness: mode === 'stone' ? 0.85 : 0.48,
           ior,
           dispersion: gemDispersion(stone?.stoneType),
           attenuationColor: new THREE.Color(gemAttenuationHex(color, stone?.stoneType)),
-          attenuationDistance: mode === 'stone' ? Math.max(0.1, 0.11 * scale) : 0.09,
+          attenuationDistance: mode === 'stone' ? 0.22 : 0.14,
           clearcoat: 1,
           clearcoatRoughness: 0.015,
           specularIntensity: 1,
@@ -163,7 +163,7 @@ export function JewelryConfiguratorCanvas({
         geometry.computeVertexNormals();
         const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#5A2FE0'));
         mesh.scale.setScalar(scale);
-        if (mode === 'stone') mesh.rotation.x = -0.55;
+        if (mode === 'stone') mesh.rotation.x = -0.32;
         mesh.castShadow = true;
         mesh.name = 'center_stone';
         const group = new THREE.Group();
