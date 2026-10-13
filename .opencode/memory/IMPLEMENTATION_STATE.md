@@ -1,3 +1,13 @@
+# SHOWCASE CATALOG IMPORT (2026-10-13)
+
+Stopped the bulk dealer crawl. `packages/db/src/seed/import-public-catalog.ts`
+now fills **3–6 listings per showcase category** (robots.txt, Crawl-delay 2s,
+rewritten descriptions, `media.source_url` / `source_vendor`). House Maihan
+seed kept. Live rows come from NGC, Natural Sapphire Company, Natural Ruby
+Company, Emeralds.com and Kavant & Sharart. Remaining Bangkok dealers are
+vendor records only (no public catalog feed). Storefront `/product/` paths
+that end in an S-SKU are no longer 410'd. Local DB: **98 active products**.
+
 # PHASE 12 — PRODUCTION OBSERVABILITY, ALERTS & OPERATIONAL HARDENING COMPLETE (2026-10-12)
 
 - **API testing reference (2026-10-12):** Added a route-derived API inventory,
