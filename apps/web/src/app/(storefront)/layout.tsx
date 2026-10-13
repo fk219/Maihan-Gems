@@ -16,7 +16,7 @@ export default async function StorefrontLayout({ children }: { children: React.R
     <StorefrontProvider rates={rates} initialCurrency={initialCurrency}>
       <StorefrontHeader />
       {offline ? (
-        <p className="lx-kicker" style={{ textAlign: 'center', padding: '1rem 1.5rem' }}>
+        <p className="ngc-offline">
           Catalogue database is empty or not set up. Run: docker compose up -d, then pnpm storefront:db:setup
         </p>
       ) : null}

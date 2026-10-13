@@ -52,6 +52,7 @@ export function JewelryConfiguratorCanvas({
       const THREE = await import('three');
       const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
       const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+      const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
       if (disposed || !hostRef.current) return;
 
       const scene = new THREE.Scene();
@@ -62,20 +63,27 @@ export function JewelryConfiguratorCanvas({
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
       host.appendChild(renderer.domElement);
 
-      scene.add(new THREE.AmbientLight(0xfff6e8, 0.55));
-      const key = new THREE.DirectionalLight(0xfff4d8, 2.2);
-      key.position.set(2.2, 3.4, 2.6);
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+      scene.environment = env;
+
+      scene.add(new THREE.AmbientLight(0xfff8ee, 0.35));
+      const key = new THREE.DirectionalLight(0xfff6e4, 1.4);
+      key.position.set(2.4, 4.2, 3.2);
       scene.add(key);
-      const rim = new THREE.DirectionalLight(0xc9d4ff, 0.8);
-      rim.position.set(-2.4, 1.2, -1.6);
-      scene.add(rim);
+      const fill = new THREE.DirectionalLight(0xffe7b8, 0.7);
+      fill.position.set(-2.2, 1.6, 2.4);
+      scene.add(fill);
 
       const controls = new OrbitControls(camera, renderer.domElement);
+      controls.target.set(0, 0.08, 0);
       controls.enablePan = false;
-      controls.minDistance = 1.2;
-      controls.maxDistance = 4.2;
+      controls.minDistance = 1.35;
+      controls.maxDistance = 3.6;
+      camera.position.set(1.15, 0.95, 1.7);
 
       const assembly = new THREE.Group();
       scene.add(assembly);
@@ -86,9 +94,9 @@ export function JewelryConfiguratorCanvas({
           color,
           metalness: 0,
           roughness: 0.04,
-          transmission: 0.92,
-          thickness: 0.6,
-          ior: 2.4,
+          transmission: 0.55,
+          thickness: 0.45,
+          ior: 2.15,
           clearcoat: 1,
           clearcoatRoughness: 0.05,
           attenuationColor: new THREE.Color(color),
@@ -102,20 +110,22 @@ export function JewelryConfiguratorCanvas({
           color: spec.color,
           metalness: 1,
           roughness: spec.roughness,
-          envMapIntensity: 1.2,
+          envMapIntensity: 1.35,
+          clearcoat: 0.35,
+          clearcoatRoughness: 0.2,
         });
       }
 
       function stoneMesh() {
         const carat = stone?.carat ?? 1;
-        const scale = 0.18 + Math.min(carat, 8) * 0.035;
+        const scale = 0.28 + Math.min(carat, 8) * 0.04;
         const shape = (stone?.shape ?? 'round').toLowerCase();
         const geometry =
           shape.includes('emerald') || shape.includes('radiant')
             ? new THREE.BoxGeometry(scale * 1.15, scale * 0.72, scale * 0.85)
             : shape.includes('pear') || shape.includes('marquise')
               ? new THREE.SphereGeometry(scale * 0.55, 24, 16)
-              : new THREE.OctahedronGeometry(scale * 0.55, 0);
+              : new THREE.OctahedronGeometry(scale * 0.62, 1);
         const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#7ec8e3'));
         mesh.name = 'center_stone';
         return mesh;
@@ -123,16 +133,22 @@ export function JewelryConfiguratorCanvas({
 
       function proceduralRing() {
         const group = new THREE.Group();
-        const band = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.07, 32, 96), metalMaterial());
+        const band = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.085, 48, 128), metalMaterial());
         band.rotation.x = Math.PI / 2;
         group.add(band);
-        const head = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.16, 16), metalMaterial());
+        const head = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.11, 0.18, 24), metalMaterial());
         head.name = 'socket_head';
-        head.position.y = 0.16;
+        head.position.y = 0.18;
         group.add(head);
+        for (let i = 0; i < 4; i += 1) {
+          const prong = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.022, 0.22, 8), metalMaterial());
+          const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
+          prong.position.set(Math.cos(angle) * 0.11, 0.32, Math.sin(angle) * 0.11);
+          group.add(prong);
+        }
         const socket = new THREE.Object3D();
         socket.name = 'socket_center_stone';
-        socket.position.y = 0.28;
+        socket.position.y = 0.34;
         group.add(socket);
         return group;
       }
@@ -192,6 +208,8 @@ export function JewelryConfiguratorCanvas({
         cancelAnimationFrame(frame);
         observer.disconnect();
         controls.dispose();
+        env.dispose();
+        pmrem.dispose();
         renderer.dispose();
         renderer.domElement.remove();
         scene.traverse((node: import('three').Object3D) => {

@@ -1654,3 +1654,104 @@
 .ngc-pages .lx-btn--solid,
 .ngc-pages .lx-filter__list button.is-on { background: var(--gold-gradient); color: #1a1408; }
 
+.cfg {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.7fr);
+  gap: 1.25rem;
+  margin: 1.5rem 0 2.5rem;
+  align-items: stretch;
+}
+.cfg__stage {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #eadfbe;
+  background: #f7f3ea;
+  min-height: 440px;
+}
+.cfg__stage > div { height: 100% !important; min-height: 440px; border-radius: 0; }
+.cfg__caption {
+  position: absolute;
+  left: 1rem;
+  bottom: 0.85rem;
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a7b62;
+}
+.cfg__panel {
+  border-radius: 12px;
+  border: 1px solid #eadfbe;
+  background: #fff;
+  padding: 1.35rem 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.cfg__kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8B6914;
+}
+.cfg__panel h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 2rem;
+}
+.cfg__meta { margin: 0 0 0.6rem; color: #5c5346; }
+.cfg__label { margin: 0.4rem 0; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8a7b62; }
+.cfg__metals { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.cfg__metals button {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 12px;
+  border: 1px solid #eadfbe;
+  background: #fff;
+  padding: 0.55rem 0.65rem;
+  cursor: pointer;
+  color: #1a1408;
+  font-size: 0.85rem;
+}
+.cfg__metals button span {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgba(26, 20, 8, 0.18);
+  flex-shrink: 0;
+}
+.cfg__metals button.is-on {
+  border-color: #C9A84C;
+  background: #fbf6ea;
+  box-shadow: inset 0 0 0 1px #C9A84C;
+}
+.cfg__carat { display: grid; gap: 0.45rem; margin-top: 0.8rem; color: #1a1408; }
+.cfg__carat span { display: flex; justify-content: space-between; font-size: 0.85rem; }
+.cfg__carat input { accent-color: #C9A84C; width: 100%; }
+.cfg__try {
+  margin-top: auto;
+  border: 0;
+  border-radius: 12px;
+  min-height: 2.8rem;
+  cursor: pointer;
+  font-weight: 600;
+  color: #1a1408;
+  background: var(--gold-gradient);
+}
+@media (max-width: 800px) {
+  .cfg { grid-template-columns: 1fr; }
+}
+.ngc-offline {
+  margin: 0;
+  text-align: center;
+  padding: 0.55rem 1.25rem;
+  background: #fbf6ea;
+  color: #8B6914;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
