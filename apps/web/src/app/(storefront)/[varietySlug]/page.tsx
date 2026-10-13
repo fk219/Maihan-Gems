@@ -2,33 +2,37 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
-import { listProducts, listStoneTypes } from '../../../lib/storefront-data.js';
-import { displayStoneName, slugToStoneType } from '../../../lib/search-parser.js';
+import { loadCollectionView } from '../../../lib/collection-route.js';
+import { displayStoneName, parseCollectionSlug } from '../../../lib/search-parser.js';
 
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: Promise<{ varietySlug: string }>;
+  params: Promise<{ varietySlug?: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { varietySlug } = await params;
-  return { title: `${displayStoneName(slugToStoneType(varietySlug))} | Maihan Gems` };
+  const parsed = parseCollectionSlug(varietySlug);
+  if (!parsed) return { title: 'Collection | Maihan Gems' };
+  const name = displayStoneName(parsed.stoneType);
+  if (parsed.mode === 'pairs') return { title: `${name} pairs | Maihan Gems` };
+  if (parsed.mode === 'jewelry') return { title: `${name} ${parsed.formLabel} | Maihan Gems` };
+  if (parsed.mode === 'settings') return { title: `${name} settings | Maihan Gems` };
+  return { title: `${name} | Maihan Gems` };
 }
 
 export default async function VarietyPage({ params }: PageProps) {
   const { varietySlug } = await params;
-  const stoneType = slugToStoneType(varietySlug);
-  const stones = await listStoneTypes();
-  if (!stones.some((s) => s.stoneType === stoneType)) notFound();
-  const products = await listProducts({ kind: 'gemstone', stoneType, limit: 32 });
-  const name = displayStoneName(stoneType);
+  const view = await loadCollectionView(varietySlug);
+  if (!view) notFound();
   return (
     <CollectionPage
-      kicker="Loose stones"
-      title={name}
-      lede={`Natural ${name.toLowerCase()} from the vault.`}
-      products={products}
+      kicker={view.kicker}
+      title={view.title}
+      lede={view.lede}
+      products={view.products}
+      stoneSlug={view.stoneSlug}
     />
   );
 }

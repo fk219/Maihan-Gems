@@ -185,11 +185,85 @@ export function parseSearchQuery(input: string): ParsedSearch {
 }
 
 export function stoneTypeToSlug(stoneType: string): string {
-  return stoneType.replace(/_/g, '-');
+  return (stoneType ?? '').replace(/_/g, '-');
 }
 
 export function slugToStoneType(slug: string): string {
-  return slug.replace(/-/g, '_');
+  return (slug ?? '').replace(/-/g, '_');
+}
+
+export const COLLECTION_FORM_SUFFIXES = [
+  'pairs',
+  'earrings',
+  'pendants',
+  'bracelets',
+  'necklaces',
+  'rings',
+  'settings',
+] as const;
+
+export type CollectionFormSuffix = (typeof COLLECTION_FORM_SUFFIXES)[number];
+
+export type ParsedCollectionSlug =
+  | {
+      readonly mode: 'stone';
+      readonly slug: string;
+      readonly stoneSlug: string;
+      readonly stoneType: string;
+    }
+  | {
+      readonly mode: 'pairs';
+      readonly slug: string;
+      readonly stoneSlug: string;
+      readonly stoneType: string;
+    }
+  | {
+      readonly mode: 'jewelry';
+      readonly slug: string;
+      readonly stoneSlug: string;
+      readonly stoneType: string;
+      readonly jewelryType: 'ring' | 'earrings' | 'pendant' | 'bracelet' | 'necklace';
+      readonly formLabel: string;
+    }
+  | {
+      readonly mode: 'settings';
+      readonly slug: string;
+      readonly stoneSlug: string;
+      readonly stoneType: string;
+    };
+
+const JEWELRY_FORMS: Record<
+  Exclude<CollectionFormSuffix, 'pairs' | 'settings'>,
+  { jewelryType: 'ring' | 'earrings' | 'pendant' | 'bracelet' | 'necklace'; formLabel: string }
+> = {
+  earrings: { jewelryType: 'earrings', formLabel: 'earrings' },
+  pendants: { jewelryType: 'pendant', formLabel: 'pendants' },
+  bracelets: { jewelryType: 'bracelet', formLabel: 'bracelets' },
+  necklaces: { jewelryType: 'necklace', formLabel: 'necklaces' },
+  rings: { jewelryType: 'ring', formLabel: 'rings' },
+};
+
+export function parseCollectionSlug(raw: string | undefined | null): ParsedCollectionSlug | null {
+  const slug = (raw ?? '').trim().toLowerCase().replace(/^\/+|\/+$/g, '');
+  if (!slug) return null;
+
+  for (const suffix of COLLECTION_FORM_SUFFIXES) {
+    const token = `-${suffix}`;
+    if (slug.endsWith(token) && slug.length > token.length) {
+      const stoneSlug = slug.slice(0, -token.length);
+      const stoneType = slugToStoneType(stoneSlug);
+      if (suffix === 'pairs') {
+        return { mode: 'pairs', slug, stoneSlug, stoneType };
+      }
+      if (suffix === 'settings') {
+        return { mode: 'settings', slug, stoneSlug, stoneType };
+      }
+      const form = JEWELRY_FORMS[suffix];
+      return { mode: 'jewelry', slug, stoneSlug, stoneType, ...form };
+    }
+  }
+
+  return { mode: 'stone', slug, stoneSlug: slug, stoneType: slugToStoneType(slug) };
 }
 
 export function displayStoneName(stoneType: string): string {

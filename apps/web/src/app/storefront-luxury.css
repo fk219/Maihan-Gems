@@ -618,6 +618,40 @@
   font-weight: 400;
 }
 
+.lx-lede {
+  max-width: 640px;
+  color: #4a4740;
+  margin: 1rem 0 0;
+  line-height: 1.7;
+}
+
+.lx-facets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 1.6rem 0 0;
+}
+
+.lx-facets a {
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #4a4740;
+  border: 1px solid rgba(184, 152, 64, 0.28);
+  padding: 0.45rem 0.75rem;
+}
+
+.lx-facets a:hover {
+  color: #1a1a18;
+  border-color: #b89840;
+}
+
+.lx-empty-copy {
+  color: #4a4740;
+  max-width: 36rem;
+}
+
 .lx-search-page {
   padding: 3.5rem 0 5rem;
 }
