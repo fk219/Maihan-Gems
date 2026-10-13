@@ -1,25 +1,17 @@
-/**
- * apps/web/src/app/(storefront)/layout.tsx
- *
- * The storefront group layout.
- *
- * SoT 12.2 comment: "header, mega menu, footer, chat launcher" — the header
- * with the mega menu lands here (Task 9). The chat launcher is a Phase 7
- * surface (post-MVP) and the footer arrives with content phases; both slots
- * are intentionally empty until their phase, not stubbed with fake chrome.
- */
+import '../storefront-luxury.css';
+
 import { StorefrontHeader } from '../../components/layout/StorefrontHeader.js';
 import { StorefrontFooter } from '../../components/layout/StorefrontFooter.js';
-import { AiConciergeDrawer } from '../../components/ai/AiConciergeDrawer.js';
+import { StorefrontProvider } from '../../components/storefront/StorefrontProvider.js';
+import { getFxRates } from '../../lib/storefront-data.js';
 
-export default function StorefrontLayout({ children }: { children: React.ReactNode }) {
+export default async function StorefrontLayout({ children }: { children: React.ReactNode }) {
+  const rates = await getFxRates();
   return (
-    <>
+    <StorefrontProvider rates={rates}>
       <StorefrontHeader />
       {children}
       <StorefrontFooter />
-      <AiConciergeDrawer />
-    </>
+    </StorefrontProvider>
   );
 }
-

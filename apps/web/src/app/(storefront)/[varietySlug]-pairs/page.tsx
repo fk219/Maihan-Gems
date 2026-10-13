@@ -1,95 +1,27 @@
-/**
- * apps/web/src/app/(storefront)/[varietySlug]-pairs/page.tsx
- *
- * `/tsavorite-garnet-pairs` — matched-pair variety listing (Task 3). Same
- * ONE-dynamic-route shape as the variety page, filtered to STONE_PAIR via
- * the Phase 3 port's `kind` filter. No per-variety page exists.
- */
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { catalogServer } from '../../../lib/catalog-server.js';
-import { listingBasePath, listingQuery, productItems, type ListingParams } from '../../../lib/catalog-view.js';
-import { ProductCard } from '../../../components/catalog/ProductCard.js';
-import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
-import { EmptyState } from '../../../components/design-system/EmptyState.js';
-import { Pagination } from '../../../components/design-system/Pagination.js';
+import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
+import { listProducts, listStoneTypes } from '../../../lib/storefront-data.js';
+import { displayStoneName, slugToStoneType } from '../../../lib/search-parser.js';
 
-// Route segment config. Catalog views render per request from the cached
-// CatalogQueryService (doc 12.3: Server-rendered, cacheable, no per-user
-// state); there is deliberately no build-time catalogue, so Next must not
-// prerender this route (it would otherwise invoke the page with empty params
-// during `next build`). Runtime caching stays in the service, not in Next.
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: Promise<{ varietySlug: string }>;
-  searchParams: Promise<ListingParams>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { varietySlug } = await params;
-  return { title: `${varietySlug.replace(/-/g, ' ')} pairs | Maihan Gems` };
+  return { title: `${displayStoneName(slugToStoneType(varietySlug))} pairs | Maihan Gems` };
 }
 
-export default async function VarietyPairsIndexPage({ params, searchParams }: PageProps) {
+export default async function VarietyPairsPage({ params }: PageProps) {
   const { varietySlug } = await params;
-  const urlParams = await searchParams;
-  const query = listingQuery(urlParams);
-  const service = catalogServer();
-
-  const taxonomy = (await service.getTaxonomy()).value;
-  const variety = taxonomy.varieties.find((v) => v.slug === varietySlug);
-  if (variety === undefined || variety.state !== 'ACTIVE') notFound();
-
-  const result = (
-    await service.listProducts({
-      ...query,
-      filters: { variety: [varietySlug], kind: ['STONE_PAIR'] },
-    })
-  ).value;
-  const items = productItems(result);
-
-  return (
-    <main className="page variety-pairs-page">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: variety.display_name, href: `/${varietySlug}` },
-          { label: 'Pairs' },
-        ]}
-      />
-      <span className="page-eyebrow">Matched Earring Suites</span>
-      <h1>{variety.display_name} Pairs</h1>
-      <p className="page-subtitle">
-        Strictly matched natural gemstone pairs curated for balance, color saturation, and dimensional optical harmony.
-      </p>
-      <p className="result-count">
-        {items.length === 0 ? 'No pairs currently listed.' : `${items.length} pair${items.length === 1 ? '' : 's'} listed`}
-      </p>
-
-      {items.length === 0 ? (
-        <EmptyState
-          title={`No ${variety.display_name} pairs are currently listed.`}
-          action={<Link href={`/${varietySlug}`}>Browse all {variety.display_name}</Link>}
-        />
-      ) : (
-        <ul className="product-grid">
-          {items.map((product) => (
-            <li key={product.slug}>
-              <ProductCard product={product.summary} />
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <Pagination
-        basePath={listingBasePath(`/${varietySlug}-pairs`, urlParams)}
-        previousCursor={null}
-        nextCursor={result.meta.next_cursor}
-        hasNext={result.meta.has_more}
-      />
-    </main>
-  );
+  const stoneType = slugToStoneType(varietySlug);
+  const stones = await listStoneTypes();
+  if (!stones.some((s) => s.stoneType === stoneType)) notFound();
+  const products = await listProducts({ kind: 'gemstone', stoneType, quantityType: 'pair', limit: 32 });
+  const name = displayStoneName(stoneType);
+  return <CollectionPage kicker="Matched pairs" title={`${name} pairs`} products={products} />;
 }
