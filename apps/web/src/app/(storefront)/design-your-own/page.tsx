@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { ConfiguratorDock } from '../../../components/configurator/ConfiguratorDock.js';
 import { DyoStudio } from '../../../components/storefront/DyoStudio.js';
 import { listProducts, listSettingsForDyo } from '../../../lib/storefront-data.js';
 
@@ -23,6 +24,7 @@ export default async function DesignYourOwnPage() {
         <p className="lx-lede">
           Three steps: a ring, pendant or earring mounting, a stone the head will take, then metal and size. Combined price follows your currency.
         </p>
+        <ConfiguratorDock />
         <DyoStudio settings={settings} stones={stones} />
       </div>
     </main>
