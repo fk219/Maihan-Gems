@@ -11,195 +11,173 @@ export interface LuxuryHeaderProps {
   readonly stones: readonly { stoneType: string; pairCount: number }[];
 }
 
-interface NavLink {
-  readonly label: string;
-  readonly href: string;
-  readonly img?: string;
-}
-
-interface NavColumn {
-  readonly title: string;
-  readonly links: readonly NavLink[];
-}
-
-interface NavGroup {
-  readonly id: string;
-  readonly label: string;
-  readonly href: string;
-  readonly columns: readonly NavColumn[];
-}
-
 const IMG = (path: string) => `${NGC_MEDIA}${path}`;
 
-const GROUPS: readonly NavGroup[] = [
-  {
-    id: 'gemstones',
-    label: 'Gemstones',
-    href: '/browse',
-    columns: [
-      {
-        title: 'Shop Gemstones by Type',
-        links: [
-          { label: 'Garnet', href: '/garnet', img: '/images/normal/mainMenu/stones/garnet.png' },
-          { label: 'Moonstone', href: '/moonstone', img: '/images/normal/mainMenu/stones/moonstone.png' },
-          { label: 'Quartz', href: '/quartz', img: '/images/normal/mainMenu/stones/quartz.png' },
-          { label: 'Spinel', href: '/spinel', img: '/images/normal/mainMenu/stones/spinel.png' },
-          { label: 'Tourmaline', href: '/tourmaline', img: '/images/normal/mainMenu/stones/tourmaline.png' },
-          { label: 'View More', href: '/browse' },
-        ],
-      },
-      {
-        title: 'Shop Gemstones by Color',
-        links: [
-          { label: 'Blue', href: '/colour/blue' },
-          { label: 'Green', href: '/colour/green' },
-          { label: 'Pink', href: '/colour/pink' },
-          { label: 'Purple', href: '/colour/purple' },
-          { label: 'Yellow', href: '/colour/yellow' },
-          { label: 'View More', href: '/browse' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'dyo',
-    label: 'Design Your Own',
-    href: '/design-your-own',
-    columns: [
-      {
-        title: 'Create Your Dream Design',
-        links: [
-          { label: 'Start with a Gemstone', href: '/browse' },
-          { label: 'Start with a Setting', href: '/settings' },
-          { label: 'How it works', href: '/design-your-own' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'rings',
-    label: 'Rings',
-    href: '/jewellery?type=ring',
-    columns: [
-      {
-        title: 'Shop Rings by Gemstone',
-        links: [
-          { label: 'Garnet rings', href: '/garnet' },
-          { label: 'Moonstone rings', href: '/moonstone' },
-          { label: 'Opal rings', href: '/opal' },
-          { label: 'Spinel rings', href: '/spinel' },
-          { label: 'Tanzanite rings', href: '/tanzanite' },
-          { label: 'Tourmaline rings', href: '/tourmaline' },
-          { label: 'All rings', href: '/jewellery?type=ring' },
-        ],
-      },
-      {
-        title: 'Shop Ring Settings by Style',
-        links: [
-          { label: 'Solitaire', href: '/settings?for=ring' },
-          { label: 'Halo', href: '/settings?for=ring' },
-          { label: 'Pavé', href: '/settings?for=ring' },
-          { label: 'Three stone', href: '/settings?for=ring' },
-          { label: 'Antique', href: '/settings?for=ring' },
-          { label: 'All settings', href: '/settings?for=ring' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'jewelry',
-    label: 'Jewelry',
-    href: '/jewellery',
-    columns: [
-      {
-        title: 'Shop Jewelry by Type',
-        links: [
-          { label: 'Rings', href: '/jewellery?type=ring' },
-          { label: 'Earrings', href: '/jewellery?type=earrings' },
-          { label: 'Necklaces & Pendants', href: '/jewellery?type=pendant' },
-          { label: 'Bracelets & Bangles', href: '/jewellery?type=bracelet' },
-          { label: "Men's Rings", href: '/jewellery?type=ring' },
-        ],
-      },
-      {
-        title: 'Popular Gemstones',
-        links: [
-          { label: 'Amethyst', href: '/amethyst' },
-          { label: 'Aquamarine', href: '/aquamarine' },
-          { label: 'Opal', href: '/opal' },
-          { label: 'Tanzanite', href: '/tanzanite' },
-          { label: 'Topaz', href: '/topaz' },
-          { label: 'Tourmaline', href: '/tourmaline' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'pairs',
-    label: 'Gemstone Pairs',
-    href: '/pairs',
-    columns: [
-      {
-        title: 'Matched pairs',
-        links: [
-          { label: 'All pairs', href: '/pairs' },
-          { label: 'Tourmaline pairs', href: '/tourmaline' },
-          { label: 'Garnet pairs', href: '/garnet' },
-          { label: 'Spinel pairs', href: '/spinel' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    href: '/settings',
-    columns: [
-      {
-        title: 'Shop Settings by Type',
-        links: [
-          { label: 'Rings', href: '/settings?for=ring', img: '/images/normal/mainMenu/settingsType/rings.png' },
-          { label: "Men's Rings", href: '/settings?for=ring', img: '/images/normal/mainMenu/settingsType/mens-rings.png' },
-          { label: 'Earrings', href: '/settings?for=earrings', img: '/images/normal/mainMenu/settingsType/earrings.png' },
-          { label: 'Necklaces & Pendants', href: '/settings?for=pendant', img: '/images/normal/mainMenu/settingsType/necklaces-pendants.png' },
-          { label: 'Bracelets', href: '/settings?for=bracelet', img: '/images/normal/mainMenu/settingsType/bracelets.png' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'education',
-    label: 'Education',
-    href: '/education',
-    columns: [
-      {
-        title: 'Learn',
-        links: [
-          { label: 'Beginner’s guide', href: '/education' },
-          { label: 'Gemstone types', href: '/varieties' },
-          { label: 'Mining', href: '/education' },
-          { label: 'Blog', href: '/blog' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'about',
-    label: 'About',
-    href: '/about',
-    columns: [
-      {
-        title: 'The house',
-        links: [
-          { label: 'About us', href: '/about' },
-          { label: 'Showroom', href: '/showrooms' },
-          { label: 'Contact', href: '/contact' },
-          { label: 'FAQ', href: '/policy/shipping' },
-        ],
-      },
-    ],
-  },
+const NAV = [
+  { id: 'dyo', label: 'Design Your Own', href: '/design-your-own' },
+  { id: 'gemstones', label: 'Gemstones', href: '/browse' },
+  { id: 'jewellery', label: 'Jewellery', href: '/jewellery' },
+  { id: 'settings', label: 'Settings', href: '/settings' },
+] as const;
+
+type NavId = (typeof NAV)[number]['id'];
+
+function Tile({ href, label, img, close }: { href: string; label: string; img?: string; close: () => void }) {
+  return (
+    <Link href={href} className="mega-tile" onClick={close}>
+      <span>{img ? <img src={IMG(img)} alt="" /> : <b>{label.slice(0, 1)}</b>}</span>
+      {label}
+    </Link>
+  );
+}
+
+function More({ href, close }: { href: string; close: () => void }) {
+  return <Link href={href} className="mega-more" onClick={close}>View More</Link>;
+}
+
+function Promo({ close }: { close: () => void }) {
+  return (
+    <Link href="/design-your-own" className="mega-promo" onClick={close}>
+      <img src="/media/jew-sapphire-ring.jpg" alt="" />
+      <div>
+        <p>Design Your Own</p>
+        <strong>Unique jewellery</strong>
+        <ol>
+          <li>Start with a Setting</li>
+          <li>Select a Gemstone</li>
+          <li>Review Your Design</li>
+        </ol>
+        <em>Start designing</em>
+      </div>
+    </Link>
+  );
+}
+
+const STONE = (slug: string) => `/images/normal/mainMenu/stones/${slug}.png`;
+const SETTING = (slug: string) => `/images/normal/mainMenu/settingsType/${slug}.png`;
+
+const GEM_COLORS: readonly { label: string; hex: string; href: string }[] = [
+  { label: 'Bi Color', hex: '#7eb6d6', href: '/browse' },
+  { label: 'Blue', hex: '#3b6fd8', href: '/colour/blue' },
+  { label: 'Brown', hex: '#8a5a32', href: '/browse' },
+  { label: 'Color Change', hex: '#7a4ea3', href: '/browse' },
+  { label: 'Green', hex: '#3d8c4a', href: '/colour/green' },
+  { label: 'Grey', hex: '#8d8d8d', href: '/browse' },
+  { label: 'Multi Color', hex: '#e07a3d', href: '/browse' },
+  { label: 'Orange', hex: '#e07a20', href: '/browse' },
+  { label: 'Peach', hex: '#e7a08a', href: '/browse' },
+  { label: 'Pink', hex: '#e48bb5', href: '/colour/pink' },
+  { label: 'Purple', hex: '#7a4bd0', href: '/colour/purple' },
+  { label: 'Red', hex: '#d23b3b', href: '/browse' },
+  { label: 'White', hex: '#f4f4f4', href: '/browse' },
+  { label: 'Yellow', hex: '#e2c04a', href: '/colour/yellow' },
 ];
+
+function MenuPanel({ id, close }: { id: NavId; close: () => void }) {
+  if (id === 'dyo') {
+    return (
+      <div className="mega-panel">
+        <div className="mega-split">
+          <Link href="/browse" onClick={close}><span>◇</span> Start with a Gemstone</Link>
+          <span className="mega-or">or</span>
+          <Link href="/settings" onClick={close}><span>○</span> Start with a Setting</Link>
+          <button type="button" aria-label="Close menu" onClick={close}>×</button>
+        </div>
+        <div className="mega-cols">
+          <div>
+            <p>Shop Gemstones by Type</p>
+            <div className="mega-tiles">
+              {([['Garnet', 'garnet'], ['Moonstone', 'moonstone'], ['Quartz', 'quartz'], ['Spinel', 'spinel'], ['Tourmaline', 'tourmaline']] as const).map(([label, slug]) => (
+                <Tile key={slug} href={`/${slug}`} label={label} img={STONE(slug)} close={close} />
+              ))}
+              <More href="/browse" close={close} />
+            </div>
+            <p>Shop Gemstones by Color</p>
+            <div className="mega-tiles">
+              {['Blue', 'Green', 'Pink', 'Purple', 'Yellow'].map((label) => (
+                <Tile key={label} href={`/colour/${label.toLowerCase()}`} label={label} img={`/images/normal/mainMenu/stoneColor/${label.toLowerCase()}.png`} close={close} />
+              ))}
+              <More href="/browse" close={close} />
+            </div>
+          </div>
+          <div>
+            <p>Shop Settings by Type</p>
+            <div className="mega-tiles">
+              <Tile href="/settings?for=ring" label="Rings" img={SETTING('rings')} close={close} />
+              <Tile href="/settings?for=ring" label="Men's Rings" img={SETTING('mens-rings')} close={close} />
+              <Tile href="/settings?for=earrings" label="Earrings" img={SETTING('earrings')} close={close} />
+              <Tile href="/settings?for=pendant" label="Necklaces & Pendants" img={SETTING('necklaces-pendants')} close={close} />
+              <Tile href="/settings?for=bracelet" label="Bracelets" img={SETTING('bracelets')} close={close} />
+            </div>
+            <p>Shop Ring Settings by Style</p>
+            <div className="mega-styles">
+              {['Antique', 'Halo', 'Pave', 'Solitaire', 'Three Stone', 'Wedding Set'].map((label) => (
+                <Link key={label} href="/settings?for=ring" onClick={close}>{label}</Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (id === 'gemstones') {
+    const types = ['Amethyst', 'Aquamarine', 'Alexandrite', 'Citrine', 'Coral', 'Garnet', 'Kunzite', 'Moonstone', 'Opal', 'Spinel', 'Tanzanite', 'Topaz', 'Tourmaline', 'Turquoise', 'Zircon'];
+    return (
+      <div className="mega-panel mega-panel--stones">
+        <button type="button" className="mega-x" aria-label="Close menu" onClick={close}>×</button>
+        <div>
+          <p>Shop Gemstones by Type</p>
+          <div className="mega-tiles">
+            {types.map((label) => (
+              <Tile key={label} href={`/${label.toLowerCase().replace(/ /g, '-')}`} label={label} img={STONE(label.toLowerCase().replace(/ /g, '-'))} close={close} />
+            ))}
+            <More href="/browse" close={close} />
+          </div>
+        </div>
+        <div>
+          <p>Shop Gemstones by Color</p>
+          <ul className="mega-colors">
+            {GEM_COLORS.map((color) => (
+              <li key={color.label}><Link href={color.href} onClick={close}><i style={{ background: color.hex }} />{color.label}</Link></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  const jewellery = id === 'jewellery';
+  const tiles: readonly (readonly [string, string, string])[] = jewellery
+    ? [
+        ['Rings', '/jewellery?type=ring', 'rings'],
+        ['Earrings', '/jewellery?type=earrings', 'earrings'],
+        ['Necklaces & Pendants', '/jewellery?type=pendant', 'necklaces-pendants'],
+        ['Bracelets & Bangles', '/jewellery?type=bracelet', 'bracelets'],
+        ["Men's Rings", '/jewellery?type=ring', 'mens-rings'],
+      ]
+    : [
+        ['Rings', '/settings?for=ring', 'rings'],
+        ["Men's Rings", '/settings?for=ring', 'mens-rings'],
+        ['Earrings', '/settings?for=earrings', 'earrings'],
+        ['Necklaces & Pendants', '/settings?for=pendant', 'necklaces-pendants'],
+        ['Bracelets', '/settings?for=bracelet', 'bracelets'],
+      ];
+  return (
+    <div className="mega-panel mega-panel--shop">
+      <button type="button" className="mega-x" aria-label="Close menu" onClick={close}>×</button>
+      <div>
+        <p>{jewellery ? 'Shop Jewellery by Type' : 'Shop Settings by Type'}</p>
+        <div className="mega-tiles mega-tiles--wide">
+          {tiles.map(([label, href, slug]) => (
+            <Tile key={label} href={href} label={label} img={SETTING(slug)} close={close} />
+          ))}
+        </div>
+      </div>
+      <Promo close={close} />
+    </div>
+  );
+}
 
 export function LuxuryHeader({ stones: _stones }: LuxuryHeaderProps) {
   const { currency, setCurrency, bagCount, favCount } = useStorefront();
@@ -227,32 +205,16 @@ export function LuxuryHeader({ stones: _stones }: LuxuryHeaderProps) {
           <small>Gems</small>
         </Link>
         <nav className="ngc-nav" aria-label="Primary" onMouseLeave={() => setOpen(null)}>
-          {GROUPS.map((group) => (
+          {NAV.map((item) => (
             <div
-              key={group.id}
-              className={`ngc-nav__item${open === group.id ? ' is-open' : ''}`}
-              onMouseEnter={() => setOpen(group.id)}
+              key={item.id}
+              className={`ngc-nav__item${open === item.id ? ' is-open' : ''}`}
+              onMouseEnter={() => setOpen(item.id)}
             >
-              <Link href={group.href} className="ngc-nav__link" onClick={() => setOpen(null)}>
-                {group.label}
+              <Link href={item.href} className="ngc-nav__link" onClick={() => setOpen(null)}>
+                {item.label}
               </Link>
-              <div className="ngc-drop" hidden={open !== group.id}>
-                {group.columns.map((col) => (
-                  <div key={col.title} className="ngc-drop__col">
-                    <p className="ngc-drop__title">{col.title}</p>
-                    <ul>
-                      {col.links.map((link) => (
-                        <li key={link.label}>
-                          <Link href={link.href} onClick={() => setOpen(null)}>
-                            {link.img ? <img src={IMG(link.img)} alt="" width={36} height={36} /> : null}
-                            <span>{link.label}</span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
+              {open === item.id ? <MenuPanel id={item.id} close={() => setOpen(null)} /> : null}
             </div>
           ))}
         </nav>
@@ -288,15 +250,8 @@ export function LuxuryHeader({ stones: _stones }: LuxuryHeaderProps) {
       </div>
       {drawer ? (
         <div className="ngc-drawer">
-          {GROUPS.map((group) => (
-            <div key={group.id}>
-              <Link href={group.href} onClick={() => setDrawer(false)}>{group.label}</Link>
-              {group.columns.flatMap((col) => col.links).slice(0, 4).map((link) => (
-                <Link key={link.label} href={link.href} className="ngc-drawer__sub" onClick={() => setDrawer(false)}>
-                  {link.label}
-                </Link>
-              ))}
-            </div>
+          {NAV.map((item) => (
+            <Link key={item.id} href={item.href} onClick={() => setDrawer(false)}>{item.label}</Link>
           ))}
         </div>
       ) : null}
