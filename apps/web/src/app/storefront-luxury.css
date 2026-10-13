@@ -2960,8 +2960,9 @@
 }
 
 .ngc-gallery__stage {
-  min-height: 32rem;
-  aspect-ratio: 4 / 5;
+  min-height: 28rem;
+  aspect-ratio: 1;
+  max-height: 40rem;
   background: var(--media-canvas);
   border-radius: 12px;
   overflow: hidden;

@@ -18,6 +18,65 @@ import { ProductActions } from './ProductActions.js';
 import { LuxuryProductCard } from './LuxuryProductCard.js';
 import { useStorefront } from './StorefrontProvider.js';
 
+function specRows(
+  spec: {
+    stoneType: string | null;
+    weightCt: number | null;
+    lengthMm: number | null;
+    widthMm: number | null;
+    depthMm: number | null;
+    color: string | null;
+    colorIntensity: string | null;
+    clarity: string | null;
+    shape: string | null;
+    cut: string | null;
+    cuttingStyle: string | null;
+    enhancement: string | null;
+    origin: string | null;
+    lab: string | null;
+    pricePerCt: number | null;
+  },
+  prefix: string,
+  perCarat: string,
+): Array<{ label: string; values: string[] }> {
+  const dim = [spec.lengthMm, spec.widthMm, spec.depthMm].filter((n) => n != null && n > 0).join(' / ');
+  return [
+    { label: prefix ? `${prefix} stone type` : 'Stone type', values: [spec.stoneType ?? ''] },
+    { label: prefix ? `${prefix} dimensions (MM)` : 'Dimensions (MM)', values: [dim] },
+    { label: prefix ? `${prefix} weight` : 'Weight', values: [spec.weightCt ? `${spec.weightCt} Ct.` : ''] },
+    { label: prefix ? `${prefix} color` : 'Color', values: [spec.color ?? ''] },
+    { label: prefix ? `${prefix} color intensity` : 'Color intensity', values: [spec.colorIntensity ?? ''] },
+    { label: prefix ? `${prefix} clarity` : 'Clarity', values: [spec.clarity ?? ''] },
+    { label: prefix ? `${prefix} shape` : 'Shape', values: [spec.shape ?? ''] },
+    { label: prefix ? `${prefix} cut` : 'Cut', values: [spec.cut ?? ''] },
+    { label: prefix ? `${prefix} cutting style` : 'Cutting style', values: [spec.cuttingStyle ?? ''] },
+    { label: prefix ? `${prefix} enhancements` : 'Enhancements', values: [spec.enhancement ?? ''] },
+    { label: prefix ? `${prefix} origin` : 'Origin', values: [spec.origin ?? ''] },
+    { label: prefix ? `${prefix} lab` : 'Lab', values: [spec.lab ?? ''] },
+    { label: prefix ? `${prefix} per carat` : 'Per carat price', values: [perCarat] },
+  ];
+}
+
+function detailRows(product: NgcProduct, perCarat: string): Array<{ label: string; values: readonly string[] }> {
+  if (product.detailsTable.length > 1) {
+    return product.detailsTable.filter((row) => row.values.some(Boolean));
+  }
+  const rows: Array<{ label: string; values: string[] }> = [
+    { label: 'Item ID', values: [product.id] },
+    { label: 'Metal', values: [product.metalName ?? ''] },
+    { label: 'Style', values: [...product.styles] },
+  ];
+  if (product.centerStones.length > 0) {
+    rows.push(...specRows(product.centerStones[0]!, 'Center', perCarat));
+  } else {
+    rows.push(...specRows(product, '', perCarat));
+  }
+  if (product.sideStones[0]) {
+    rows.push(...specRows(product.sideStones[0], 'Side', ''));
+  }
+  return rows.filter((row) => row.values.some(Boolean));
+}
+
 function tryOnMode(product: NgcProduct): 'hand' | 'ear' | 'neck' | 'room' {
   if (product.kind === 'stone_pair' || product.settingType === 'earring' || product.jewelryType === 'earring') return 'ear';
   if (product.jewelryType === 'pendant' || product.jewelryType === 'necklace' || product.settingType === 'pendant_necklace') return 'neck';
@@ -295,21 +354,7 @@ export function ProductStudio({
         <section className="ngc-details">
           <h2 className="lx-h3">Product details</h2>
           <dl className="lx-dossier">
-            {(product.detailsTable.length > 0 ? product.detailsTable : [
-              { label: 'Item ID', values: [product.id] },
-              { label: 'Dimensions (MM)', values: [[product.lengthMm, product.widthMm, product.depthMm].filter(Boolean).join(' / ')] },
-              { label: 'Weight', values: [product.weightCt ? `${product.weightCt} Ct.` : ''] },
-              { label: 'Color', values: [product.color ?? ''] },
-              { label: 'Color intensity', values: [product.colorIntensity ?? ''] },
-              { label: 'Clarity', values: [product.clarity ?? ''] },
-              { label: 'Shape', values: [product.shape ?? ''] },
-              { label: 'Cut', values: [product.cut ?? ''] },
-              { label: 'Cutting style', values: [product.cuttingStyle ?? ''] },
-              { label: 'Enhancements', values: [product.enhancement ?? ''] },
-              { label: 'Origin', values: [product.origin ?? ''] },
-              { label: 'Lab', values: [product.lab ?? ''] },
-              { label: 'Per carat price', values: [product.pricePerCt ? formatMoney(product.pricePerCt, currency, rates) : ''] },
-            ]).filter((row) => row.values.some(Boolean)).map((row) => (
+            {detailRows(product, product.pricePerCt ? formatMoney(product.pricePerCt, currency, rates) : '').map((row) => (
               <div key={row.label}>
                 <dt>{row.label}</dt>
                 <dd>{row.values.join(' · ')}</dd>
