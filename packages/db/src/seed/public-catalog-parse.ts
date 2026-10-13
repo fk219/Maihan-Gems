@@ -40,7 +40,7 @@ const STONE_ALIASES: Array<[RegExp, string]> = [
   [/spessartite|mandarin/i, 'spessartite_garnet'],
   [/sapphire/i, 'sapphire'],
   [/ruby/i, 'ruby'],
-  [/emerald/i, 'emerald'],
+  [/emerald(?!-cut)/i, 'emerald'],
   [/spinel/i, 'spinel'],
   [/tanzanite/i, 'tanzanite'],
   [/aquamarine/i, 'aquamarine'],
@@ -155,7 +155,10 @@ function detectColor(text: string): string | null {
     'peach', 'white', 'black', 'teal', 'neon',
   ];
   for (const color of colors) {
-    if (blob.includes(color)) return color;
+    const re = color.includes(' ')
+      ? new RegExp(color.replace(' ', '[\\s-]'))
+      : new RegExp(`(?:^|[^a-z])${color}(?:[^a-z]|$)`);
+    if (re.test(blob)) return color;
   }
   return null;
 }
@@ -306,7 +309,14 @@ export function parseListing(input: {
   const metalType = /platinum/i.test(blob) ? 'platinum' : /silver/i.test(blob) ? 'silver' : metalPurity ? 'gold' : null;
 
   const carat = detectCarat(blob);
-  const stoneType = detectStone(url) ?? detectStone(`${input.jsonName ?? ''} ${input.imageUrl ?? ''}`) ?? detectStone(blob);
+  let pathStone: string | null = null;
+  try {
+    const seg = new URL(url).pathname.split('/').filter(Boolean)[0] ?? '';
+    pathStone = detectStone(seg.replace(/-/g, ' ')) ?? detectStone(seg);
+  } catch {
+    pathStone = null;
+  }
+  const stoneType = pathStone ?? detectStone(url) ?? detectStone(`${input.jsonName ?? ''} ${input.imageUrl ?? ''}`) ?? detectStone(blob);
   const origin = detectOrigin(blob);
   const shape = detectShape(blob);
   const color = detectColor(blob);

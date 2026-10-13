@@ -233,6 +233,9 @@ function pickSitemapFiles(indexLocs: string[], indexUrl: string): string[] {
     .sort((a, b) => a.n - b.n);
   if (numbered.length >= 6) {
     const pickAt = (ratio: number) => numbered[Math.min(numbered.length - 1, Math.floor(numbered.length * ratio))]!.url;
+    const extras = numbered
+      .filter((x) => [2, 3, 4, 12, 15, 20].includes(x.n))
+      .map((x) => x.url);
     return [...new Set([
       pickAt(0.08),
       pickAt(0.12),
@@ -241,6 +244,7 @@ function pickSitemapFiles(indexLocs: string[], indexUrl: string): string[] {
       pickAt(0.52),
       pickAt(0.55),
       pickAt(0.82),
+      ...extras,
     ])];
   }
   const productish = sitemapFiles.filter((u) => /product/i.test(u) && !/tag|cat/i.test(u));

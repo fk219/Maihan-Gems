@@ -131,5 +131,16 @@ describe('public catalog parse', () => {
       extraText: 'Sapphire Ruby Emerald Tourmaline mega menu copy',
     });
     expect(parsed.stoneType).toBe('topaz');
+    const morganite = parseListing({
+      url: 'https://naturalgemstones.com/morganite/29.75ct-brazilian-emerald-cut-pink-morganite-k5724/',
+      jsonName: '29.75 Ct. Pink Morganite from Brazil',
+    });
+    expect(morganite.stoneType).toBe('morganite');
+    expect(assignShowcaseCategory({
+      url: morganite.slug,
+      kind: 'gemstone',
+      stoneType: morganite.stoneType,
+      colorHue: morganite.colorHue,
+    })).toBe('morganite');
   });
 });
