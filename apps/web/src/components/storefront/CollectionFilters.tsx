@@ -31,14 +31,14 @@ function FacetChecks({
     <ul className="lx-filter__list">
       {values.map((value) => (
         <li key={value}>
-          <label>
-            <input
-              type="checkbox"
-              checked={selected.includes(value)}
-              onChange={() => onToggle(value)}
-            />
+          <button
+            type="button"
+            className={selected.includes(value) ? 'is-on' : ''}
+            aria-pressed={selected.includes(value)}
+            onClick={() => onToggle(value)}
+          >
             {value}
-          </label>
+          </button>
         </li>
       ))}
     </ul>
@@ -53,6 +53,9 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
   const visible = useMemo(() => applyCatalogFilters(products, state), [products, state]);
 
   const patch = (partial: Partial<CatalogFilterState>) => setState((prev) => ({ ...prev, ...partial }));
+  const toggle = (key: 'shapes' | 'colours' | 'origins' | 'treatments' | 'labs', value: string) => {
+    setState((prev) => ({ ...prev, [key]: toggleValue(prev[key], value) }));
+  };
 
   const filters = (
     <aside className={`lx-filters${open ? ' is-open' : ''}`} aria-label="Collection filters">
@@ -66,7 +69,7 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
       {facets.shapes.length > 0 ? (
       <section className="lx-filter">
         <h3>Shape</h3>
-        <FacetChecks values={facets.shapes} selected={state.shapes} onToggle={(v) => patch({ shapes: toggleValue(state.shapes, v) })} />
+        <FacetChecks values={facets.shapes} selected={state.shapes} onToggle={(v) => toggle('shapes', v)} />
       </section>
       ) : null}
 
@@ -80,7 +83,10 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
             step={0.1}
             value={state.minCarat}
             aria-label="Minimum carat"
-            onChange={(e) => patch({ minCarat: Math.min(Number(e.target.value), state.maxCarat) })}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              setState((prev) => ({ ...prev, minCarat: Math.min(n, prev.maxCarat) }));
+            }}
           />
           <input
             type="range"
@@ -89,7 +95,10 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
             step={0.1}
             value={state.maxCarat}
             aria-label="Maximum carat"
-            onChange={(e) => patch({ maxCarat: Math.max(Number(e.target.value), state.minCarat) })}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              setState((prev) => ({ ...prev, maxCarat: Math.max(n, prev.minCarat) }));
+            }}
           />
           <div className="lx-filter__vals">
             <span>{state.minCarat.toFixed(1)} ct</span>
@@ -108,7 +117,10 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
             step={50}
             value={state.minPrice}
             aria-label="Minimum price"
-            onChange={(e) => patch({ minPrice: Math.min(Number(e.target.value), state.maxPrice) })}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              setState((prev) => ({ ...prev, minPrice: Math.min(n, prev.maxPrice) }));
+            }}
           />
           <input
             type="range"
@@ -117,7 +129,10 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
             step={50}
             value={state.maxPrice}
             aria-label="Maximum price"
-            onChange={(e) => patch({ maxPrice: Math.max(Number(e.target.value), state.minPrice) })}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              setState((prev) => ({ ...prev, maxPrice: Math.max(n, prev.minPrice) }));
+            }}
           />
           <div className="lx-filter__vals">
             <span>{state.minPrice.toLocaleString('en-US')}</span>
@@ -129,21 +144,21 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
       {facets.colours.length > 0 ? (
       <section className="lx-filter">
         <h3>Colour</h3>
-        <FacetChecks values={facets.colours} selected={state.colours} onToggle={(v) => patch({ colours: toggleValue(state.colours, v) })} />
+        <FacetChecks values={facets.colours} selected={state.colours} onToggle={(v) => toggle('colours', v)} />
       </section>
       ) : null}
 
       {facets.origins.length > 0 ? (
       <section className="lx-filter">
         <h3>Origin</h3>
-        <FacetChecks values={facets.origins} selected={state.origins} onToggle={(v) => patch({ origins: toggleValue(state.origins, v) })} />
+        <FacetChecks values={facets.origins} selected={state.origins} onToggle={(v) => toggle('origins', v)} />
       </section>
       ) : null}
 
       {facets.treatments.length > 0 ? (
       <section className="lx-filter">
         <h3>Treatment</h3>
-        <FacetChecks values={facets.treatments} selected={state.treatments} onToggle={(v) => patch({ treatments: toggleValue(state.treatments, v) })} />
+        <FacetChecks values={facets.treatments} selected={state.treatments} onToggle={(v) => toggle('treatments', v)} />
       </section>
       ) : null}
 

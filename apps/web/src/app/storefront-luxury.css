@@ -1355,14 +1355,24 @@
   overflow-y: auto;
 }
 
-.lx-filter__list label {
+.lx-filter__list button {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
   font-size: var(--text-micro);
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 0.25rem 0;
+  padding: 0.3rem 0.45rem;
+}
+
+.lx-filter__list button.is-on {
+  background: var(--gold-gradient);
+  color: #FFFFFF;
 }
 
 .lx-crumb {
