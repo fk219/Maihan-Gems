@@ -53,7 +53,7 @@ export function JewelryConfiguratorCanvas({
 
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0xf7f7f5);
-      const camera = new THREE.PerspectiveCamera(28, 1, 0.05, 40);
+      const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 40);
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -84,8 +84,8 @@ export function JewelryConfiguratorCanvas({
       scene.environment = env;
       scene.environmentIntensity = 1.55;
 
-      scene.add(new THREE.HemisphereLight(0xf5f3ff, 0x1e1b4b, 0.32));
-      const key = new THREE.DirectionalLight(0xfff7ee, 2.15);
+      scene.add(new THREE.HemisphereLight(0xf5f3ff, 0x1e1b4b, 0.22));
+      const key = new THREE.DirectionalLight(0xfff7ee, 1.7);
       key.position.set(3.1, 4.8, 3.8);
       if (mode === 'mounted') {
         key.castShadow = true;
@@ -101,6 +101,9 @@ export function JewelryConfiguratorCanvas({
       const rim = new THREE.DirectionalLight(0xa78bfa, 1.25);
       rim.position.set(-2.4, 1.6, -3.6);
       scene.add(rim);
+      const spark = new THREE.DirectionalLight(0xffffff, 1.15);
+      spark.position.set(0.6, 5.4, 0.8);
+      scene.add(spark);
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enablePan = false;
@@ -109,10 +112,10 @@ export function JewelryConfiguratorCanvas({
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.4;
       if (mode === 'stone') {
-        controls.target.set(0, 0, 0);
-        controls.minDistance = 2.3;
+        controls.target.set(0, 0.02, 0);
+        controls.minDistance = 2.2;
         controls.maxDistance = 5.4;
-        camera.position.set(1.15, 1.25, 3.35);
+        camera.position.set(0.42, 2.35, 1.95);
       } else {
         controls.target.set(0, 0.22, 0);
         controls.minDistance = 3.2;
@@ -130,7 +133,7 @@ export function JewelryConfiguratorCanvas({
           ? Math.max(0.18, Math.min(length / 10, 1.6))
           : Math.max(0.18, Math.min(0.65 * Math.cbrt(stone?.carat ?? 1), 1.6));
         if (mode === 'mounted') return Math.min(physical * 0.48, 0.34);
-        return Math.min(physical * 1.08, 0.86);
+        return Math.min(physical * 1.42, 1.02);
       }
 
       function gemMaterial(color: string) {
@@ -138,15 +141,15 @@ export function JewelryConfiguratorCanvas({
         return new THREE.MeshPhysicalMaterial({
           color,
           metalness: 0,
-          roughness: 0.06,
-          transmission: 0.42,
-          thickness: mode === 'stone' ? 0.85 : 0.5,
+          roughness: 0.045,
+          transmission: 0.38,
+          thickness: mode === 'stone' ? 0.8 : 0.5,
           ior,
           dispersion: gemDispersion(stone?.stoneType),
           attenuationColor: new THREE.Color(gemAttenuationHex(color, stone?.stoneType)),
           attenuationDistance: 0.55,
           clearcoat: 1,
-          clearcoatRoughness: 0.08,
+          clearcoatRoughness: 0.05,
           specularIntensity: 1,
           specularColor: 0xf3eaff,
           iridescence: 0.22,
@@ -168,9 +171,9 @@ export function JewelryConfiguratorCanvas({
         geometry.setAttribute('position', new THREE.BufferAttribute(built.positions, 3));
         geometry.setIndex(new THREE.BufferAttribute(built.indices, 1));
         geometry.computeVertexNormals();
-        const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#8A4AE8'));
+        const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#6B32E6'));
         mesh.scale.setScalar(scale);
-        if (mode === 'stone') mesh.rotation.x = -0.48;
+        if (mode === 'stone') mesh.rotation.x = -0.2;
         mesh.castShadow = mode === 'mounted';
         mesh.name = 'center_stone';
         const group = new THREE.Group();
