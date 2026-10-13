@@ -64,8 +64,12 @@ export default async function ProductPage({
   return (
     <main className="lx-section">
       <div className="lx-wrap">
-        <nav className="lx-card__specs" style={{ marginBottom: '1.5rem' }}>
-          <Link href="/">Home</Link> · <Link href="/browse">Vault</Link> · {product.title}
+        <nav className="lx-crumb" aria-label="Breadcrumb">
+          <Link href="/">Home</Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/browse">Vault</Link>
+          <span aria-hidden="true">·</span>
+          <span>{product.title}</span>
         </nav>
         <div className="lx-pdp">
           <div className="lx-pdp__media">

@@ -32,14 +32,12 @@ function FacetChecks({
       {values.map((value) => (
         <li key={value}>
           <label>
-            <span>
-              <input
-                type="checkbox"
-                checked={selected.includes(value)}
-                onChange={() => onToggle(value)}
-              />{' '}
-              {value}
-            </span>
+            <input
+              type="checkbox"
+              checked={selected.includes(value)}
+              onChange={() => onToggle(value)}
+            />
+            {value}
           </label>
         </li>
       ))}
