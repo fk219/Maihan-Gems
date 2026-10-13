@@ -5,9 +5,9 @@ import 'server-only';
 import { createPool } from '@maihan/db';
 
 import { parseSearchQuery, type ParsedSearch } from './search-parser.js';
-import type { StorefrontCard } from './storefront-types.js';
+import type { SettingAcceptRule, SettingForDyo, StorefrontCard } from './storefront-types.js';
 
-export type { StorefrontCard } from './storefront-types.js';
+export type { SettingAcceptRule, SettingForDyo, StorefrontCard } from './storefront-types.js';
 
 const pool = createPool(process.env['DATABASE_URL'] ?? '');
 
@@ -230,6 +230,36 @@ export async function searchStorefront(query: string, limit = 12): Promise<{
   `;
   const result = await pool.query(sql, params);
   return { parsed, items: result.rows.map((row) => mapRow(row as Record<string, unknown>)) };
+}
+
+export async function listSettingsForDyo(limit = 16): Promise<SettingForDyo[]> {
+  const settings = await listProducts({ kind: 'setting', limit });
+  if (settings.length === 0) return [];
+  const result = await pool.query<{
+    setting_product_id: string;
+    shape: string;
+    min_carat: string | null;
+    max_carat: string | null;
+  }>(
+    `SELECT setting_product_id::text, shape, min_carat::text, max_carat::text
+     FROM setting_accepts
+     WHERE setting_product_id = ANY($1::uuid[])`,
+    [settings.map((s) => s.id)],
+  );
+  const bySetting = new Map<string, SettingAcceptRule[]>();
+  for (const row of result.rows) {
+    const list = bySetting.get(row.setting_product_id) ?? [];
+    list.push({
+      shape: row.shape,
+      minCarat: num(row.min_carat),
+      maxCarat: num(row.max_carat),
+    });
+    bySetting.set(row.setting_product_id, list);
+  }
+  return settings.map((setting) => ({
+    ...setting,
+    accepts: bySetting.get(setting.id) ?? [],
+  }));
 }
 
 /** Legacy helpers used by the previous home page. */

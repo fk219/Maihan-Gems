@@ -1,3 +1,9 @@
+export interface SettingAcceptRule {
+  shape: string;
+  minCarat: number | null;
+  maxCarat: number | null;
+}
+
 export interface StorefrontCard {
   id: string;
   sku: string;
@@ -19,4 +25,8 @@ export interface StorefrontCard {
   style: string[] | null;
   metalType: string | null;
   metalColor: string | null;
+}
+
+export interface SettingForDyo extends StorefrontCard {
+  accepts: SettingAcceptRule[];
 }
