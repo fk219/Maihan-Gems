@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import { headers } from 'next/headers';
 import Link from 'next/link';
 
 import { HeroSearch } from '../../components/storefront/HeroSearch.js';
 import { NGC_MEDIA } from '../../lib/ngc-home.js';
-import { storefrontBySlug, withPrefix } from '../../lib/ngc/storefronts.js';
+import { currentStorefront } from '../../lib/ngc/current-storefront.js';
+import { withPrefix } from '../../lib/ngc/storefronts.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -165,8 +165,12 @@ function gemsFor(stone: string | null) {
   );
 }
 
-export default async function HomePage() {
-  const brand = storefrontBySlug((await headers()).get('x-maihan-storefront'));
+export default async function HomePage({
+  brand: brandProp,
+}: {
+  brand?: Awaited<ReturnType<typeof currentStorefront>>;
+} = {}) {
+  const brand = brandProp ?? (await currentStorefront());
   const prefix = brand.pathPrefix;
   const href = (path: string) => withPrefix(path, prefix);
   const sister = Boolean(brand.defaultStone);

@@ -16,6 +16,7 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('next/headers', () => ({
   headers: async () => new Headers(),
+  cookies: async () => ({ get: () => undefined }),
 }));
 
 const HomePage = (await import('../../app/(storefront)/page.js')).default;

@@ -1034,6 +1034,17 @@ html:not([data-agentation]) iframe[src*="agentation"] {
   overflow: hidden !important;
 }
 
+/* Next.js 16 "1 Issue" / N badge lives in a shadow portal. Hide the host. */
+nextjs-portal,
+[data-nextjs-dev-overlay],
+[data-nextjs-dialog-overlay],
+[data-nextjs-dev-tools-button],
+#next-logo {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 @media print {
-  [class*="agentation"], [id*="agentation"] { display: none !important; }
+  [class*="agentation"], [id*="agentation"], nextjs-portal { display: none !important; }
 }

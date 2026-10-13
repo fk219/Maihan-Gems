@@ -46,6 +46,20 @@ function withStorefront(request: NextRequest, slug: string): Headers {
   return headers;
 }
 
+function stampStorefront(response: NextResponse, slug: string): NextResponse {
+  response.cookies.set('maihan_storefront', slug, { path: '/', sameSite: 'lax' });
+  return response;
+}
+
+function resolveHouse(request: NextRequest, first: string): string {
+  if (SISTERS.has(first)) return first;
+  const fromQuery = request.nextUrl.searchParams.get('__sf');
+  if (fromQuery && SISTERS.has(fromQuery)) return fromQuery;
+  const hinted = request.headers.get('x-maihan-storefront');
+  if (hinted && SISTERS.has(hinted)) return hinted;
+  return 'maihan';
+}
+
 function isNgcCanonicalProductPath(pathname: string): boolean {
   const last = pathname.split('/').filter(Boolean).pop() ?? '';
   return /(?:-k\d+|-pr\d+|-j\d+|js\d+[a-z0-9]*-k\d+)$/i.test(last);
@@ -54,18 +68,32 @@ function isNgcCanonicalProductPath(pathname: string): boolean {
 export function proxy(request: NextRequest): NextResponse {
   const { pathname, search } = request.nextUrl;
   const first = pathname.split('/').filter(Boolean)[0] ?? '';
+  const house = resolveHouse(request, first);
 
   if (SISTERS.has(first)) {
     const rest = pathname.slice(first.length + 1) || '/';
+    if (rest === '/' || rest === '') {
+      return stampStorefront(
+        NextResponse.next({ request: { headers: withStorefront(request, first) } }),
+        first,
+      );
+    }
     const url = request.nextUrl.clone();
-    url.pathname = rest === '' || rest === '/' ? '/' : rest;
-    return NextResponse.rewrite(url, { request: { headers: withStorefront(request, first) } });
+    url.pathname = rest;
+    url.searchParams.set('__sf', first);
+    return stampStorefront(
+      NextResponse.rewrite(url, { request: { headers: withStorefront(request, first) } }),
+      first,
+    );
   }
 
   // NGC research storefront serves source-shaped product URLs on
   // /[variety]/[slug]; do not 301 those away to /products/{stripped-slug}.
   if (isNgcCanonicalProductPath(pathname)) {
-    return NextResponse.next({ request: { headers: withStorefront(request, 'maihan') } });
+    return stampStorefront(
+      NextResponse.next({ request: { headers: withStorefront(request, house) } }),
+      house,
+    );
   }
 
   const segments = pathname.split('/').filter(Boolean);
@@ -74,12 +102,18 @@ export function proxy(request: NextRequest): NextResponse {
     segments.length === 1 &&
     (NGC_LISTINGS.has(listing) || /-(?:gemstones|gemstone-pairs|gemstone-rings)$/.test(listing))
   ) {
-    return NextResponse.next({ request: { headers: withStorefront(request, 'maihan') } });
+    return stampStorefront(
+      NextResponse.next({ request: { headers: withStorefront(request, house) } }),
+      house,
+    );
   }
 
   const decision = resolver.resolve(pathname, search);
   if (decision === null) {
-    return NextResponse.next({ request: { headers: withStorefront(request, 'maihan') } });
+    return stampStorefront(
+      NextResponse.next({ request: { headers: withStorefront(request, house) } }),
+      house,
+    );
   }
 
   if (decision.status === 410) {

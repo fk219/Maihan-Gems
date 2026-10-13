@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 import { STOREFRONT_CONTACT } from '@maihan/config';
 
 import { COLOR_SWATCH } from '../../lib/ngc/colors.js';
-import { withPrefix } from '../../lib/ngc/storefronts.js';
+import { SISTER_SLUGS, storefrontBySlug, withPrefix } from '../../lib/ngc/storefronts.js';
 import type { StorefrontBrand } from '../../lib/ngc/types.js';
 import { NGC_MEDIA } from '../../lib/ngc-home.js';
 import { CurrencySwitcher } from './CurrencySwitcher.js';
@@ -196,7 +197,11 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
   const { bagCount, favCount } = useStorefront();
   const [open, setOpen] = useState<string | null>(null);
   const [drawer, setDrawer] = useState(false);
-  const prefix = brand?.pathPrefix ?? '';
+  const pathname = usePathname() ?? '';
+  const first = pathname.split('/').filter(Boolean)[0] ?? '';
+  const fromPath = (SISTER_SLUGS as readonly string[]).includes(first) ? storefrontBySlug(first) : null;
+  const house = fromPath ?? brand;
+  const prefix = house?.pathPrefix ?? '';
   const href = (path: string) => withPrefix(path, prefix);
 
   return (
@@ -215,9 +220,9 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
           <span />
           <span />
         </button>
-        <Link href={href('/')} className="ngc-logo" aria-label={brand?.name ?? 'Maihan Gems'}>
-          <span className="ngc-logo__word">{brand?.wordmark ?? 'MAIHAN'}</span>
-          <span className="ngc-logo__sub">{brand?.kicker ?? 'GEMS · Atelier'}</span>
+        <Link href={href('/')} className="ngc-logo" aria-label={house?.name ?? 'Maihan Gems'}>
+          <span className="ngc-logo__word">{house?.wordmark ?? 'MAIHAN'}</span>
+          <span className="ngc-logo__sub">{house?.kicker ?? 'GEMS · Atelier'}</span>
         </Link>
         <nav className="ngc-nav" aria-label="Primary" onMouseLeave={() => setOpen(null)}>
           {NAV.map((item) => (

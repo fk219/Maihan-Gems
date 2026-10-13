@@ -1,12 +1,12 @@
 import { STOREFRONT_CONTACT } from '@maihan/config';
-import { headers } from 'next/headers';
 import Link from 'next/link';
 
-import { storefrontBySlug, withPrefix } from '../../lib/ngc/storefronts.js';
+import { currentStorefront } from '../../lib/ngc/current-storefront.js';
+import { withPrefix } from '../../lib/ngc/storefronts.js';
 
 export async function StorefrontFooter() {
   const year = new Date().getFullYear();
-  const brand = storefrontBySlug((await headers()).get('x-maihan-storefront'));
+  const brand = await currentStorefront();
   const href = (path: string) => withPrefix(path, brand.pathPrefix);
   return (
     <footer className="home-footer">

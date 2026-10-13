@@ -16,6 +16,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 vi.mock('next/headers', () => ({
   headers: async () => new Headers(),
+  cookies: async () => ({ get: () => undefined }),
 }));
 import { StorefrontProvider } from '../components/storefront/StorefrontProvider.js';
 import { DEFAULT_FX } from './currency.js';

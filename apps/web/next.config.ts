@@ -34,6 +34,8 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Next 16 still mounts a shadow-DOM "Issue" chip unless this is false AND
+  // the nextjs-portal host is CSS-hidden in globals.css.
   devIndicators: false,
   webpack(config, { dev }) {
     // `.js` -> `.ts`/`.tsx` (and `.mjs`/`.cjs` equivalents) so source written

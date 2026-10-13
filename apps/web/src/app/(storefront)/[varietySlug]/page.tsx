@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import { CategoryLanding } from '../../../components/storefront/CategoryLanding.js';
 import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
 import { LuxuryProductCard } from '../../../components/storefront/LuxuryProductCard.js';
+import { currentStorefront } from '../../../lib/ngc/current-storefront.js';
 import { landingView } from '../../../lib/ngc/landing.js';
 import { parseLandingSlug } from '../../../lib/ngc/routes.js';
-import { cardMatchesBrand, storefrontBySlug } from '../../../lib/ngc/storefronts.js';
+import { cardMatchesBrand, SISTER_SLUGS, storefrontBySlug } from '../../../lib/ngc/storefronts.js';
+import HomePage from '../page.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,10 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { varietySlug } = await params;
+  if (varietySlug && (SISTER_SLUGS as readonly string[]).includes(varietySlug)) {
+    const house = storefrontBySlug(varietySlug);
+    return { title: house.name, description: house.lede };
+  }
   const view = landingView(varietySlug);
   return { title: view ? `${view.title} | Maihan Gems` : 'Collection | Maihan Gems' };
 }
@@ -25,10 +30,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function VarietyPage({ params, searchParams }: PageProps) {
   const { varietySlug } = await params;
   const query = searchParams ? await searchParams : {};
+  if (varietySlug && (SISTER_SLUGS as readonly string[]).includes(varietySlug) && !query.style) {
+    return HomePage({ brand: storefrontBySlug(varietySlug) });
+  }
   const parsed = parseLandingSlug(varietySlug);
   const view = landingView(varietySlug);
   if (!parsed || !view) notFound();
-  const brand = storefrontBySlug((await headers()).get('x-maihan-storefront'));
+  const brand = await currentStorefront();
   const style = query.style;
   let products = view.products;
   if (brand.defaultStone) {

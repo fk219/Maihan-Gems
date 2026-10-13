@@ -40,6 +40,7 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('next/headers', () => ({
   headers: async () => new Headers(),
+  cookies: async () => ({ get: () => undefined }),
 }));
 
 import { setCatalogServiceForTest } from './catalog-server.js';
