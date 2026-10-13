@@ -36,6 +36,10 @@ export default async function ProductPage({
     settingFor: product.settingFor,
     style: product.style,
     title: product.title,
+    colorHue: product.colorHue,
+    variety: product.variety,
+    quantityType: product.quantityType,
+    imageUrl: product.imageUrl,
   });
 
   const related = (

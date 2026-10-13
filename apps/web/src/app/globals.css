@@ -6,8 +6,6 @@
  * Zero-Pill Rule: No rounded badge tags. Unboxed metadata with typographic separators.
  */
 
-@import "tailwindcss";
-
 /* ═══════════════════════════════════════════════════════════════════════════
    1. DESIGN TOKENS & COLOR PALETTE
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -20,13 +18,23 @@
     --deep-midnight: #08121E;
     --atelier-navy: #0D1B2A;
     
-    /* Imperial Gold System - Refined for Luxury */
-    --gold: #B89840;
-    --gold-light: #D4AE5E;
-    --gold-dark: #8B7635;
-    --color-gold: #B89840;
-    --color-gold-light: #D4AE5E;
-    --color-gold-dark: #8B7635;
+    /* Imperial Gold System — gradient, not a flat chip */
+    --gold: #C9A84C;
+    --gold-light: #F3DFA2;
+    --gold-dark: #8A6A1F;
+    --color-gold: #C9A84C;
+    --color-gold-light: #F3DFA2;
+    --color-gold-dark: #8A6A1F;
+    --gold-mid: #C9A84C;
+    --gold-pale: #F3DFA2;
+    --gold-gradient: linear-gradient(135deg, #8A6A1F, #C9A84C, #F3DFA2, #C9A84C);
+    --gold-gradient-border: linear-gradient(135deg, rgba(138, 106, 31, 0.9), rgba(201, 168, 76, 0.7), rgba(243, 223, 162, 0.95), rgba(201, 168, 76, 0.7));
+    --gold-glow: 0 12px 32px -12px rgba(201, 168, 76, 0.55);
+
+    --radius-card: 20px;
+    --radius-image: 18px;
+    --radius-control: 999px;
+    --radius-menu: 20px;
     
     /* Text Hierarchy */
     --text-primary: #1A1A18;
@@ -43,7 +51,7 @@
     --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, monospace;
     
     /* Spatial System - Increased for Luxury Breathing Room */
-    --radius: 12px;
+    --radius: 20px;
     --space-section: 8rem;
     --space-container: clamp(1.5rem, 5vw, 3rem);
     

@@ -11,6 +11,7 @@ import {
   subscribeAtelier,
   type AtelierItem,
 } from '../../lib/atelier-store.js';
+import { itemImage } from '../../lib/atelier-item.js';
 import { formatMoney } from '../../lib/currency.js';
 import { useStorefront } from './StorefrontProvider.js';
 import { VaultEmpty } from './VaultEmpty.js';
@@ -53,7 +54,7 @@ export function FavoritesView({
       {items.map((item) => (
         <li key={item.id} className="lx-fav">
           <Link href={`/product/${item.slug}`} className="lx-fav__media">
-            <img src={item.image} alt={item.title} />
+            <img src={itemImage(item)} alt={item.title} />
           </Link>
           <div className="lx-fav__body">
             <p className="lx-card__meta">{item.originCountry ?? item.kind}</p>

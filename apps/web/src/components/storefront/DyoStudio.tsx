@@ -21,6 +21,10 @@ function imageFor(product: StorefrontCard): string {
     settingFor: product.settingFor,
     style: product.style,
     title: product.title,
+    colorHue: product.colorHue,
+    variety: product.variety,
+    quantityType: product.quantityType,
+    imageUrl: product.imageUrl,
   });
 }
 

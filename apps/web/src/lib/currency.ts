@@ -20,17 +20,29 @@ export function detectCurrencyFromLocale(): StorefrontCurrency {
   return 'USD';
 }
 
+export function parseCurrency(value: string | null | undefined): StorefrontCurrency | null {
+  if (value === 'USD' || value === 'AED' || value === 'THB') return value;
+  return null;
+}
+
+function rateFor(currency: StorefrontCurrency, rates: Record<string, number> = DEFAULT_FX): number {
+  const raw = Number(rates[currency]);
+  if (Number.isFinite(raw) && raw > 0) return raw;
+  return DEFAULT_FX[currency] ?? 1;
+}
+
 export function convertAmount(usd: number, currency: StorefrontCurrency, rates = DEFAULT_FX): number {
-  return usd * (rates[currency] ?? 1);
+  return usd * rateFor(currency, rates);
 }
 
 export function formatMoney(usd: number, currency: StorefrontCurrency, rates = DEFAULT_FX): string {
   const amount = convertAmount(usd, currency, rates);
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: amount >= 1000 ? 0 : 2,
+  const digits = amount >= 1000 ? 0 : 2;
+  const number = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
   }).format(amount);
+  return `${currency} ${number}`;
 }
 
 export const CURRENCY_COOKIE = 'maihan_currency';

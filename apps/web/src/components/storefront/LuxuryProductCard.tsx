@@ -19,6 +19,10 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
     settingFor: product.settingFor,
     style: product.style,
     title: product.title,
+    colorHue: product.colorHue,
+    variety: product.variety,
+    quantityType: product.quantityType,
+    imageUrl: product.imageUrl,
   });
   const [fav, setFav] = useState(false);
   const [compared, setCompared] = useState(false);

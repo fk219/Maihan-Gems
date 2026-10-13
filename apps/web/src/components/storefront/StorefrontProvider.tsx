@@ -6,6 +6,7 @@ import {
   CURRENCY_COOKIE,
   DEFAULT_FX,
   detectCurrencyFromLocale,
+  parseCurrency,
   type StorefrontCurrency,
 } from '../../lib/currency.js';
 import { getBag, getFavs, subscribeAtelier } from '../../lib/atelier-store.js';
@@ -29,19 +30,21 @@ function readCookie(name: string): string | null {
 export function StorefrontProvider({
   children,
   rates,
+  initialCurrency = 'USD',
 }: {
   children: React.ReactNode;
   rates: Record<StorefrontCurrency, number>;
+  initialCurrency?: StorefrontCurrency;
 }) {
-  const [currency, setCurrencyState] = useState<StorefrontCurrency>('USD');
+  const [currency, setCurrencyState] = useState<StorefrontCurrency>(initialCurrency);
   const [bagCount, setBagCount] = useState(0);
   const [favCount, setFavCount] = useState(0);
 
   useEffect(() => {
-    const cookie = readCookie(CURRENCY_COOKIE);
-    if (cookie === 'USD' || cookie === 'AED' || cookie === 'THB') {
+    const cookie = parseCurrency(readCookie(CURRENCY_COOKIE));
+    if (cookie) {
       setCurrencyState(cookie);
-    } else {
+    } else if (!initialCurrency || initialCurrency === 'USD') {
       setCurrencyState(detectCurrencyFromLocale());
     }
     const sync = () => {
@@ -54,7 +57,7 @@ export function StorefrontProvider({
 
   const setCurrency = (next: StorefrontCurrency) => {
     setCurrencyState(next);
-    document.cookie = `${CURRENCY_COOKIE}=${next}; path=/; max-age=31536000`;
+    document.cookie = `${CURRENCY_COOKIE}=${next}; path=/; max-age=31536000; SameSite=Lax`;
   };
 
   const value = useMemo(

@@ -12,7 +12,15 @@ export default async function SettingsPage({
   searchParams: Promise<{ for?: string }>;
 }) {
   const { for: settingFor } = await searchParams;
-  const products = await listProducts({ kind: 'setting', settingFor, limit: 32 });
+  const allowed = settingFor === 'ring' || settingFor === 'pendant' || settingFor === 'earrings'
+    ? settingFor
+    : undefined;
+  const products = await listProducts({
+    kind: 'setting',
+    settingFor: allowed,
+    settingForIn: allowed ? undefined : ['ring', 'pendant', 'earrings'],
+    limit: 32,
+  });
   return (
     <CollectionPage
       kicker="Atelier mountings"

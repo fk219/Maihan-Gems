@@ -10,6 +10,7 @@ import {
   subscribeAtelier,
   type AtelierItem,
 } from '../../lib/atelier-store.js';
+import { itemImage } from '../../lib/atelier-item.js';
 import { formatMoney } from '../../lib/currency.js';
 import { useStorefront } from './StorefrontProvider.js';
 import { VaultEmpty } from './VaultEmpty.js';
@@ -56,7 +57,7 @@ export function BagView({
         {items.map((item) => (
           <li key={item.id} className="lx-bag__line">
             <Link href={`/product/${item.slug}`} className="lx-bag__thumb">
-              <img src={item.image} alt={item.title} />
+              <img src={itemImage(item)} alt={item.title} />
             </Link>
             <div className="lx-bag__copy">
               <p className="lx-card__meta">{item.kind}</p>

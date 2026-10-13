@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { HeroSearch } from '../../components/storefront/HeroSearch.js';
 import { ProductGrid } from '../../components/storefront/LuxuryProductCard.js';
 import { getFeaturedHome, listProducts } from '../../lib/storefront-data.js';
-import { HERO_IMAGE } from '../../lib/storefront-images.js';
+import { COLLECTION_TILES, HERO_IMAGE } from '../../lib/storefront-images.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +41,7 @@ export default async function HomePage() {
         <div className="lx-wrap">
           <div className="lx-collections">
             <Link href="/browse" className="lx-tile">
-              <img src="https://images.unsplash.com/photo-1611955167811-4711904bb9f8?auto=format&fit=crop&w=1200&q=80" alt="" />
+              <img src={COLLECTION_TILES.gemstones} alt="" />
               <div className="lx-tile__veil" />
               <div className="lx-tile__copy">
                 <span className="lx-kicker" style={{ color: '#e8c96a' }}>Loose stones</span>
@@ -50,7 +50,7 @@ export default async function HomePage() {
               </div>
             </Link>
             <Link href="/pairs" className="lx-tile">
-              <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=1200&q=80" alt="" />
+              <img src={COLLECTION_TILES.pairs} alt="" />
               <div className="lx-tile__veil" />
               <div className="lx-tile__copy">
                 <span className="lx-kicker" style={{ color: '#e8c96a' }}>Earrings</span>
@@ -59,7 +59,7 @@ export default async function HomePage() {
               </div>
             </Link>
             <Link href="/jewellery" className="lx-tile">
-              <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1200&q=80" alt="" />
+              <img src={COLLECTION_TILES.jewellery} alt="" />
               <div className="lx-tile__veil" />
               <div className="lx-tile__copy">
                 <span className="lx-kicker" style={{ color: '#e8c96a' }}>Finished pieces</span>
@@ -68,7 +68,7 @@ export default async function HomePage() {
               </div>
             </Link>
             <Link href="/design-your-own" className="lx-tile">
-              <img src="https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=1200&q=80" alt="" />
+              <img src={COLLECTION_TILES.dyo} alt="" />
               <div className="lx-tile__veil" />
               <div className="lx-tile__copy">
                 <span className="lx-kicker" style={{ color: '#e8c96a' }}>Atelier</span>

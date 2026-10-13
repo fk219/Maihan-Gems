@@ -10,6 +10,7 @@ import {
   subscribeAtelier,
   type AtelierItem,
 } from '../../lib/atelier-store.js';
+import { itemImage } from '../../lib/atelier-item.js';
 import { formatMoney } from '../../lib/currency.js';
 import { useStorefront } from './StorefrontProvider.js';
 import { VaultEmpty } from './VaultEmpty.js';
@@ -81,7 +82,7 @@ export function CompareView({
               {columns.map((item) => (
                 <th key={item.id} scope="col">
                   <Link href={`/product/${item.slug}`} className="lx-spec__thumb">
-                    <img src={item.image} alt="" />
+                    <img src={itemImage(item)} alt="" />
                   </Link>
                   <Link href={`/product/${item.slug}`} className="lx-spec__name">{item.title}</Link>
                   <button type="button" className="lx-text-btn" onClick={() => removeFromCompare(item.id)}>

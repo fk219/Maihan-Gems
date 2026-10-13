@@ -52,6 +52,9 @@ function mapRow(row: Record<string, unknown>): StorefrontCard {
     style: Array.isArray(row['style']) ? (row['style'] as string[]) : null,
     metalType: (row['metal_type'] as string | null) ?? null,
     metalColor: (row['metal_color'] as string | null) ?? null,
+    imageUrl: (row['image_url'] as string | null) ?? null,
+    vendorName: (row['vendor_name'] as string | null) ?? null,
+    certificateLab: (row['certificate_lab'] as string | null) ?? null,
   };
 }
 
@@ -62,8 +65,21 @@ const SELECT = `
     gd.stone_type, gd.variety, gd.carat_total, gd.shape, gd.color_hue,
     gd.origin_country, gd.treatment_status, gd.quantity_type,
     jd.jewelry_type, jd.metal_type, jd.metal_color,
-    sd.setting_for, sd.style
+    sd.setting_for, sd.style,
+    v.display_name AS vendor_name,
+    (SELECT m.url
+       FROM media_links ml
+       JOIN media m ON m.id = ml.media_id
+      WHERE ml.entity_type = 'product' AND ml.entity_id = p.id AND ml.role = 'primary'
+      ORDER BY ml.position
+      LIMIT 1) AS image_url,
+    (SELECT c.lab
+       FROM certificate_links cl
+       JOIN certificates c ON c.id = cl.certificate_id
+      WHERE cl.product_id = p.id
+      LIMIT 1) AS certificate_lab
   FROM products p
+  LEFT JOIN vendors v ON v.id = p.vendor_id
   LEFT JOIN gemstone_details gd ON gd.product_id = p.id
   LEFT JOIN jewelry_details jd ON jd.product_id = p.id
   LEFT JOIN setting_details sd ON sd.product_id = p.id
@@ -80,8 +96,10 @@ export async function getFxRates(): Promise<FxRates> {
   `);
   const rates: FxRates = { USD: 1, AED: 3.6725, THB: 34.5 };
   for (const row of result.rows) {
-    if (row.quote === 'AED' || row.quote === 'THB') {
-      rates[row.quote] = Number(row.rate);
+    const quote = row.quote.trim();
+    const rate = Number(row.rate);
+    if ((quote === 'AED' || quote === 'THB') && Number.isFinite(rate) && rate > 0) {
+      rates[quote] = rate;
     }
   }
   return rates;
@@ -119,6 +137,7 @@ export interface ProductListFilters {
   minPriceUsd?: number;
   maxPriceUsd?: number;
   titleContains?: string;
+  settingForIn?: string[];
   limit?: number;
 }
 
@@ -136,6 +155,9 @@ export async function listProducts(filters: ProductListFilters = {}): Promise<St
   if (filters.quantityType) clauses.push(`gd.quantity_type = ${push(params, filters.quantityType)}`);
   if (filters.jewelryType) clauses.push(`jd.jewelry_type = ${push(params, filters.jewelryType)}`);
   if (filters.settingFor) clauses.push(`sd.setting_for = ${push(params, filters.settingFor)}`);
+  if (filters.settingForIn?.length) {
+    clauses.push(`sd.setting_for = ANY(${push(params, filters.settingForIn)}::text[])`);
+  }
   if (filters.shape) clauses.push(`gd.shape ILIKE ${push(params, `%${filters.shape.replace(/_/g, ' ')}%`)}`);
   if (filters.origin) {
     const a = push(params, `%${filters.origin}%`);
@@ -162,7 +184,7 @@ export async function getFeaturedHome(): Promise<{
 }> {
   const [gemstones, settings, jewelry] = await Promise.all([
     listProducts({ kind: 'gemstone', limit: 8 }),
-    listProducts({ kind: 'setting', limit: 6 }),
+    listProducts({ kind: 'setting', settingForIn: ['ring', 'pendant', 'earrings'], limit: 6 }),
     listProducts({ kind: 'jewelry', limit: 8 }),
   ]);
   return { gemstones, settings, jewelry };
@@ -233,7 +255,11 @@ export async function searchStorefront(query: string, limit = 12): Promise<{
 }
 
 export async function listSettingsForDyo(limit = 16): Promise<SettingForDyo[]> {
-  const settings = await listProducts({ kind: 'setting', limit });
+  const settings = await listProducts({
+    kind: 'setting',
+    settingForIn: ['ring', 'pendant', 'earrings'],
+    limit,
+  });
   if (settings.length === 0) return [];
   const result = await pool.query<{
     setting_product_id: string;

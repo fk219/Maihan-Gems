@@ -1,4 +1,82 @@
-/* Maihan Gems — luxury storefront layer (Cartier / Tiffany / Graff) */
+/* Maihan Gems — luxury storefront layer. Tokens live in globals.css. */
+
+.lx-btn--solid,
+.lx-search__box button,
+.lx-badge,
+.lx-facets a.is-on,
+.lx-card__price,
+.lx-pdp-price,
+.lx-kicker {
+  background-image: var(--gold-gradient, linear-gradient(135deg, #8A6A1F, #C9A84C, #F3DFA2, #C9A84C));
+}
+
+.lx-btn--solid,
+.lx-search__box button {
+  color: #08121e;
+  border: 0;
+}
+
+.lx-kicker,
+.lx-card__price,
+.lx-pdp-price {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.lx-card,
+.lx-tile,
+.lx-modal__panel,
+.lx-mega,
+.lx-instant,
+.lx-empty,
+.lx-pdp__media,
+.lx-bag__thumb,
+.lx-fav__media,
+.lx-preview__frame {
+  border-radius: var(--radius-card, 20px);
+}
+
+.lx-card__media,
+.lx-card__media img,
+.lx-tile img,
+.lx-pdp__media img,
+.lx-modal__panel img,
+.lx-pick img {
+  border-radius: var(--radius-image, 18px);
+}
+
+.lx-btn,
+.lx-search__box,
+.lx-search__box input,
+.lx-search__box button,
+.lx-fx,
+.lx-facets a,
+.lx-facets span,
+.lx-heart,
+.lx-quick,
+.lx-icon {
+  border-radius: var(--radius-control, 999px);
+}
+
+.lx-mega,
+.lx-instant,
+.lx-drawer {
+  border-radius: var(--radius-menu, 20px);
+}
+
+.lx-card {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    var(--gold-gradient, linear-gradient(135deg, #8A6A1F, #C9A84C, #F3DFA2, #C9A84C)) border-box;
+}
+
+.lx-card:hover {
+  box-shadow: var(--gold-glow, 0 12px 32px -12px rgba(201, 168, 76, 0.55));
+}
+
+/* Maihan Gems — luxury storefront layer */
 
 .lx-header {
   position: sticky;

@@ -17,10 +17,16 @@
 export const MAIHAN_THEME_CSS = `
 :root {
   --color-gold: #c9a84c;
-  --color-gold-light: #e8c96a;
-  --color-gold-dark: #8b6914;
-  --color-gold-pale: #f5e8c0;
+  --color-gold-light: #f3dfa2;
+  --color-gold-dark: #8a6a1f;
+  --color-gold-pale: #f3dfa2;
   --color-gold-ultra: #fbf5e6;
+  --gold-gradient: linear-gradient(135deg, #8A6A1F, #C9A84C, #F3DFA2, #C9A84C);
+  --gold-glow: 0 12px 32px -12px rgba(201, 168, 76, 0.55);
+  --radius-card: 20px;
+  --radius-image: 18px;
+  --radius-control: 999px;
+  --radius-menu: 20px;
 
   --color-navy: #0d1b2a;
   --color-navy-mid: #132234;
@@ -44,7 +50,7 @@ export const MAIHAN_THEME_CSS = `
   --text-secondary: #4a4740;
   --text-muted: #8a867e;
 
-  --radius: 12px;
+  --radius: 20px;
 
   --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --font-sans: 'Outfit', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

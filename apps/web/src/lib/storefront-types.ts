@@ -25,6 +25,9 @@ export interface StorefrontCard {
   style: string[] | null;
   metalType: string | null;
   metalColor: string | null;
+  imageUrl: string | null;
+  vendorName: string | null;
+  certificateLab: string | null;
 }
 
 export interface SettingForDyo extends StorefrontCard {

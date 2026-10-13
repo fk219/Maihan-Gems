@@ -45,6 +45,10 @@ export function cardToAtelier(product: StorefrontCard): AtelierItem {
       settingFor: product.settingFor,
       style: product.style,
       title: product.title,
+      colorHue: product.colorHue,
+      variety: product.variety,
+      quantityType: product.quantityType,
+      imageUrl: product.imageUrl,
     }),
     specs: cardSpecs(product),
     stoneType: product.stoneType,
@@ -57,4 +61,16 @@ export function cardToAtelier(product: StorefrontCard): AtelierItem {
     metalColor: product.metalColor,
     settingFor: product.settingFor,
   };
+}
+
+export function itemImage(item: AtelierItem): string {
+  return productImage({
+    kind: item.kind,
+    stoneType: item.stoneType,
+    jewelryType: item.jewelryType,
+    settingFor: item.settingFor,
+    title: item.title,
+    colorHue: item.colorHue,
+    imageUrl: item.image,
+  });
 }

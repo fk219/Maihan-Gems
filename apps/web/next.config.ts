@@ -34,6 +34,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  devIndicators: false,
   webpack(config, { dev }) {
     // `.js` -> `.ts`/`.tsx` (and `.mjs`/`.cjs` equivalents) so source written
     // for Node ESM output also resolves inside the Next bundler.
