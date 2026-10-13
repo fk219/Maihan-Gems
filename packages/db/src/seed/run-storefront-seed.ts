@@ -12,6 +12,12 @@ async function runSeed() {
   const client = await pool.connect();
   
   try {
+    const existing = await client.query<{ n: number }>('SELECT COUNT(*)::int AS n FROM products');
+    if ((existing.rows[0]?.n ?? 0) > 0) {
+      console.log('✓ Storefront seed skipped (products table already populated).\n');
+      return;
+    }
+
     await client.query('BEGIN');
     console.log('🌱 Seeding storefront data...\n');
 
