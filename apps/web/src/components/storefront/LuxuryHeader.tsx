@@ -4,20 +4,23 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import { CURRENCIES, type StorefrontCurrency } from '../../lib/currency.js';
+import { COLOR_SWATCH } from '../../lib/ngc/colors.js';
+import type { StorefrontBrand } from '../../lib/ngc/types.js';
 import { NGC_MEDIA } from '../../lib/ngc-home.js';
 import { useStorefront } from './StorefrontProvider.js';
 
 export interface LuxuryHeaderProps {
   readonly stones: readonly { stoneType: string; pairCount: number }[];
+  readonly brand?: StorefrontBrand;
 }
 
 const IMG = (path: string) => `${NGC_MEDIA}${path}`;
 
 const NAV = [
   { id: 'dyo', label: 'Design Your Own', href: '/design-your-own' },
-  { id: 'gemstones', label: 'Gemstones', href: '/browse' },
-  { id: 'jewellery', label: 'Jewellery', href: '/jewellery' },
-  { id: 'settings', label: 'Settings', href: '/settings' },
+  { id: 'gemstones', label: 'Gemstones', href: '/natural-gemstones' },
+  { id: 'jewellery', label: 'Jewellery', href: '/gemstone-rings' },
+  { id: 'settings', label: 'Settings', href: '/gemstone-ring-settings' },
 ] as const;
 
 type NavId = (typeof NAV)[number]['id'];
@@ -56,22 +59,29 @@ function Promo({ close }: { close: () => void }) {
 const STONE = (slug: string) => `/images/normal/mainMenu/stones/${slug}.png`;
 const SETTING = (slug: string) => `/images/normal/mainMenu/settingsType/${slug}.png`;
 
-const GEM_COLORS: readonly { label: string; hex: string; href: string }[] = [
-  { label: 'Bi Color', hex: '#7eb6d6', href: '/browse' },
-  { label: 'Blue', hex: '#3b6fd8', href: '/colour/blue' },
-  { label: 'Brown', hex: '#8a5a32', href: '/browse' },
-  { label: 'Color Change', hex: '#7a4ea3', href: '/browse' },
-  { label: 'Green', hex: '#3d8c4a', href: '/colour/green' },
-  { label: 'Grey', hex: '#8d8d8d', href: '/browse' },
-  { label: 'Multi Color', hex: '#e07a3d', href: '/browse' },
-  { label: 'Orange', hex: '#e07a20', href: '/browse' },
-  { label: 'Peach', hex: '#e7a08a', href: '/browse' },
-  { label: 'Pink', hex: '#e48bb5', href: '/colour/pink' },
-  { label: 'Purple', hex: '#7a4bd0', href: '/colour/purple' },
-  { label: 'Red', hex: '#d23b3b', href: '/browse' },
-  { label: 'White', hex: '#f4f4f4', href: '/browse' },
-  { label: 'Yellow', hex: '#e2c04a', href: '/colour/yellow' },
-];
+const GEM_COLORS: readonly { label: string; hex: string; href: string }[] = (
+  [
+    'Bi Color',
+    'Black',
+    'Blue',
+    'Brown',
+    'Color Change',
+    'Green',
+    'Grey',
+    'Multi Color',
+    'Orange',
+    'Peach',
+    'Pink',
+    'Purple',
+    'Red',
+    'White',
+    'Yellow',
+  ] as const
+).map((label) => ({
+  label,
+  hex: COLOR_SWATCH[label] ?? '#C9A84C',
+  href: `/${label.toLowerCase().replace(/\s+/g, '-')}-gemstones`,
+}));
 
 function MenuPanel({ id, close }: { id: NavId; close: () => void }) {
   if (id === 'dyo') {
@@ -90,14 +100,14 @@ function MenuPanel({ id, close }: { id: NavId; close: () => void }) {
               {([['Garnet', 'garnet'], ['Moonstone', 'moonstone'], ['Quartz', 'quartz'], ['Spinel', 'spinel'], ['Tourmaline', 'tourmaline']] as const).map(([label, slug]) => (
                 <Tile key={slug} href={`/${slug}`} label={label} img={STONE(slug)} close={close} />
               ))}
-              <More href="/browse" close={close} />
+              <More href="/natural-gemstones" close={close} />
             </div>
             <p>Shop Gemstones by Color</p>
             <div className="mega-tiles">
               {['Blue', 'Green', 'Pink', 'Purple', 'Yellow'].map((label) => (
                 <Tile key={label} href={`/colour/${label.toLowerCase()}`} label={label} img={`/images/normal/mainMenu/stoneColor/${label.toLowerCase()}.png`} close={close} />
               ))}
-              <More href="/browse" close={close} />
+              <More href="/natural-gemstones" close={close} />
             </div>
           </div>
           <div>
@@ -179,7 +189,7 @@ function MenuPanel({ id, close }: { id: NavId; close: () => void }) {
   );
 }
 
-export function LuxuryHeader({ stones: _stones }: LuxuryHeaderProps) {
+export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
   const { currency, setCurrency, bagCount, favCount } = useStorefront();
   const [open, setOpen] = useState<string | null>(null);
   const [drawer, setDrawer] = useState(false);
@@ -201,8 +211,8 @@ export function LuxuryHeader({ stones: _stones }: LuxuryHeaderProps) {
           <span />
         </button>
         <Link href="/" className="ngc-logo" aria-label="Maihan Gems">
-          <span className="ngc-logo__word">MAIHAN</span>
-          <span className="ngc-logo__sub">GEMS · Atelier</span>
+          <span className="ngc-logo__word">{brand?.wordmark ?? 'MAIHAN'}</span>
+          <span className="ngc-logo__sub">{brand?.kicker ?? 'GEMS · Atelier'}</span>
         </Link>
         <nav className="ngc-nav" aria-label="Primary" onMouseLeave={() => setOpen(null)}>
           {NAV.map((item) => (

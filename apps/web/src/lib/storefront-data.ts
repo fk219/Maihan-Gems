@@ -4,6 +4,14 @@
 import 'server-only';
 import { createPool } from '@maihan/db';
 
+import {
+  findNgcProduct,
+  ngcCards,
+  ngcStoneTypeRows,
+  settingsForDyo,
+  toStorefrontCard,
+  type NgcListFilter,
+} from './ngc/catalog.js';
 import { parseSearchQuery, type ParsedSearch } from './search-parser.js';
 import type { SettingAcceptRule, SettingForDyo, StorefrontCard } from './storefront-types.js';
 
@@ -171,7 +179,45 @@ export async function getFxRates(): Promise<FxRates> {
   });
 }
 
+function ngcListFilters(filters: ProductListFilters): NgcListFilter {
+  const kind =
+    filters.kind === 'setting'
+      ? 'setting'
+      : filters.kind === 'jewelry'
+        ? (['jewelry', 'dyo_composite'] as const)
+        : filters.kind === 'gemstone'
+          ? filters.quantityType === 'pair'
+            ? 'stone_pair'
+            : filters.quantityType === 'single'
+              ? 'loose_stone'
+              : (['loose_stone', 'stone_pair'] as const)
+          : undefined;
+  return {
+    kind: kind as NgcListFilter['kind'],
+    stoneSlug: filters.stoneType?.replace(/_/g, '-'),
+    jewelryType: filters.jewelryType,
+    settingType: filters.settingFor === 'earrings' ? 'earring' : filters.settingFor,
+    pairs: filters.quantityType === 'pair',
+    query: filters.titleContains,
+    limit: filters.limit,
+  };
+}
+
+function mergeCards(primary: StorefrontCard[], extra: StorefrontCard[], limit: number): StorefrontCard[] {
+  const seen = new Set(primary.map((row) => row.sku.toUpperCase()));
+  const out = [...primary];
+  for (const row of extra) {
+    if (seen.has(row.sku.toUpperCase())) continue;
+    seen.add(row.sku.toUpperCase());
+    out.push(row);
+    if (out.length >= limit) break;
+  }
+  return out.slice(0, limit);
+}
+
 export async function listStoneTypes(): Promise<StoneTypeRow[]> {
+  const fromNgc = ngcStoneTypeRows();
+  if (fromNgc.length > 0) return fromNgc;
   return withCatalogue([], async () => {
   const result = await pool.query<{ stone_type: string; count: string; pair_count: string }>(`
     SELECT gd.stone_type,
@@ -239,12 +285,15 @@ export async function listProducts(filters: ProductListFilters = {}): Promise<St
   if (filters.maxPriceUsd !== undefined) clauses.push(`pp.amount <= ${push(params, filters.maxPriceUsd)}`);
   if (filters.titleContains) clauses.push(`p.title ILIKE ${push(params, `%${filters.titleContains}%`)}`);
 
-  const limit = push(params, filters.limit ?? 24);
-  const sql = `${SELECT} WHERE ${clauses.join(' AND ')} ORDER BY pp.amount DESC NULLS LAST, p.created_at LIMIT ${limit}`;
-  return withCatalogue([], async () => {
+  const limit = filters.limit ?? 24;
+  const fromNgc = ngcCards(ngcListFilters({ ...filters, limit: 500 }));
+  const sql = `${SELECT} WHERE ${clauses.join(' AND ')} ORDER BY pp.amount DESC NULLS LAST, p.created_at LIMIT ${push(params, limit)}`;
+  const fromDb = await withCatalogue([] as StorefrontCard[], async () => {
     const result = await pool.query(sql, params);
     return result.rows.map((row) => mapRow(row as Record<string, unknown>));
   });
+  if (fromNgc.length > 0) return mergeCards(fromNgc, fromDb, limit);
+  return fromDb;
 }
 
 export async function getFeaturedHome(): Promise<{
@@ -261,6 +310,8 @@ export async function getFeaturedHome(): Promise<{
 }
 
 export async function getProductBySlug(slug: string): Promise<StorefrontCard | null> {
+  const ngc = findNgcProduct(slug);
+  if (ngc) return toStorefrontCard(ngc);
   return withCatalogue(null, async () => {
     const result = await pool.query(`${SELECT} WHERE p.slug = $1 AND p.status = 'active' LIMIT 1`, [slug]);
     const row = result.rows[0];
@@ -326,10 +377,13 @@ export async function searchStorefront(query: string, limit = 12): Promise<{
     const result = await pool.query(sql, params);
     return result.rows.map((row) => mapRow(row as Record<string, unknown>));
   });
-  return { parsed, items: found };
+  const fromNgc = ngcCards({ query: parsed.raw || remainder, limit });
+  return { parsed, items: mergeCards(fromNgc, found, limit) };
 }
 
 export async function listSettingsForDyo(limit = 16): Promise<SettingForDyo[]> {
+  const fromNgc = settingsForDyo(limit);
+  if (fromNgc.length > 0) return fromNgc;
   const settings = await listProducts({
     kind: 'setting',
     settingForIn: ['ring', 'pendant', 'earrings'],

@@ -49,8 +49,8 @@ export function TryOnScene({
 
       const pmrem = new THREE.PMREMGenerator(renderer);
       scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-      scene.add(new THREE.AmbientLight(0xfff6ea, 0.65));
-      const key = new THREE.DirectionalLight(0xfff4d2, 1.6);
+      scene.add(new THREE.AmbientLight(0xfafaf8, 0.65));
+      const key = new THREE.DirectionalLight(0xe8c96a, 1.6);
       key.position.set(1, 2, 3);
       scene.add(key);
 
@@ -64,7 +64,7 @@ export function TryOnScene({
       screen.scale.x = -1;
       scene.add(screen);
 
-      const ring = buildProceduralRing(THREE, { metal, carat, color: '#9fd4ea', occluder: true });
+      const ring = buildProceduralRing(THREE, { metal, carat, color: '#0891B2', occluder: true });
       ring.visible = false;
       scene.add(ring);
 

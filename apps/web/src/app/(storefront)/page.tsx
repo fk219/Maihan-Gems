@@ -26,7 +26,7 @@ const GEMS: readonly { name: string; href: string; img: string }[] = [
   { name: 'Aquamarine', href: '/aquamarine', img: '/media/stone-aquamarine.jpg' },
   { name: 'Morganite', href: '/morganite', img: '/media/stone-morganite.jpg' },
   { name: 'Pearl', href: '/pearl', img: '/media/stone-pearl.jpg' },
-  { name: 'Explore All', href: '/browse', img: '/media/stone-diamond.jpg' },
+  { name: 'Explore All', href: '/all-natural-gemstones', img: '/media/stone-diamond.jpg' },
 ];
 
 const JEWELLERY: readonly { label: string; href: string; img: string }[] = [
@@ -162,10 +162,10 @@ export default function HomePage() {
               from the vault — or design your own, from the stone up.
             </p>
             <div className="mgh-hero__actions">
-              <Link href="/browse" className="mgh-btn mgh-btn--gold">
+              <Link href="/natural-gemstones" className="mgh-btn mgh-btn--gold">
                 Shop Gemstones
               </Link>
-              <Link href="/jewellery" className="mgh-btn mgh-btn--ghost">
+              <Link href="/gemstone-rings" className="mgh-btn mgh-btn--ghost">
                 Gemstone Jewellery
               </Link>
               <Link href="/design-your-own" className="mgh-btn mgh-btn--outline-dark">
@@ -195,7 +195,7 @@ export default function HomePage() {
                 status and laboratory papers.
               </p>
             </div>
-            <Link href="/browse" className="mgh-link">Browse all varieties →</Link>
+            <Link href="/natural-gemstones" className="mgh-link">View all gemstones →</Link>
           </div>
           <div className="mgh-gems__grid">
             {GEMS.map((gem) => (
@@ -221,7 +221,7 @@ export default function HomePage() {
                 Ready-to-ship jewels set by master goldsmiths — or the same pieces, made yours.
               </p>
             </div>
-            <Link href="/jewellery" className="mgh-link mgh-link--light">View all jewellery →</Link>
+            <Link href="/gemstone-rings" className="mgh-link mgh-link--light">View all jewellery →</Link>
           </div>
           <div className="mgh-jewellery__grid">
             {JEWELLERY.map((item) => (
@@ -230,6 +230,33 @@ export default function HomePage() {
                 <span className="mgh-jew__label">
                   {item.label} <em aria-hidden="true">→</em>
                 </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Settings */}
+      <section className="mgh-section mgh-gems" aria-labelledby="mgh-set-h">
+        <div className="mgh-wrap">
+          <div className="mgh-head">
+            <div>
+              <p className="mgh-eyebrow">Mountings</p>
+              <h2 id="mgh-set-h" className="mgh-h2">Settings</h2>
+              <p className="mgh-lede">Ring, earring, pendant and bracelet seats, waiting for a stone.</p>
+            </div>
+            <Link href="/gemstone-ring-settings" className="mgh-link">View all settings →</Link>
+          </div>
+          <div className="mgh-jewellery__grid">
+            {[
+              { label: 'Ring settings', href: '/gemstone-ring-settings', img: '/media/setting-ring.jpg' },
+              { label: 'Earring settings', href: '/gemstone-earring-settings', img: '/media/setting-earrings.jpg' },
+              { label: 'Pendant settings', href: '/gemstone-necklace-pendant-settings', img: '/media/setting-pendant.jpg' },
+              { label: 'Bracelet settings', href: '/gemstone-bracelet-settings', img: '/media/setting-ring.jpg' },
+            ].map((item) => (
+              <Link key={item.href} href={item.href} className="mgh-jew">
+                <img src={item.img} alt="" />
+                <span className="mgh-jew__label">{item.label} <em aria-hidden="true">→</em></span>
               </Link>
             ))}
           </div>

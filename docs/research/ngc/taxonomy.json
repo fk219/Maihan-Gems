@@ -1,0 +1,7633 @@
+{
+ "source": "https://www.naturalgemstones.com",
+ "captured_at": "2026-10-13 (Asia/Dubai)",
+ "top_level": {
+  "Gemstones": {
+   "landing": "https://www.naturalgemstones.com/natural-gemstones/",
+   "all": "https://www.naturalgemstones.com/all-natural-gemstones/",
+   "pairs_landing": "https://www.naturalgemstones.com/natural-gemstone-pairs/",
+   "types": [
+    {
+     "name": "Tanzanite",
+     "slug": "tanzanite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 286,
+      "pair": 76,
+      "ring": 15,
+      "earring": 8,
+      "necklace": 10,
+      "pendant": 3,
+      "bracelet": 5,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/tanzanite/",
+      "pairs": "https://www.naturalgemstones.com/tanzanite-pairs/",
+      "rings": "https://www.naturalgemstones.com/tanzanite-rings/"
+     },
+     "api_total_loose": 286,
+     "api_total_pairs": 76,
+     "captured_loose": [
+      "K11733",
+      "K11736"
+     ],
+     "captured_pairs": [
+      "PR10171",
+      "PR10173"
+     ],
+     "children": []
+    },
+    {
+     "name": "Tourmaline",
+     "slug": "tourmaline",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 2082,
+      "pair": 144,
+      "ring": 647,
+      "earring": 34,
+      "necklace": 34,
+      "pendant": 87,
+      "bracelet": 50,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/tourmaline/",
+      "pairs": "https://www.naturalgemstones.com/tourmaline-pairs/",
+      "rings": "https://www.naturalgemstones.com/tourmaline-rings/"
+     },
+     "api_total_loose": 1833,
+     "api_total_pairs": 126,
+     "captured_loose": [
+      "K11304",
+      "K11321"
+     ],
+     "captured_pairs": [
+      "PR10795",
+      "PR10797"
+     ],
+     "children": [
+      {
+       "name": "Chrome Tourmaline",
+       "slug": "chrome-tourmaline",
+       "parent": "Tourmaline",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/chrome-tourmaline/",
+        "pairs": "https://www.naturalgemstones.com/chrome-tourmaline-pairs/",
+        "rings": "https://www.naturalgemstones.com/chrome-tourmaline-rings/"
+       },
+       "api_total_loose": 55,
+       "api_total_pairs": 2,
+       "captured_loose": [
+        "K14670",
+        "K2974"
+       ],
+       "captured_pairs": [
+        "PR6448",
+        "PR6449"
+       ],
+       "children": []
+      },
+      {
+       "name": "Rubellite Tourmaline",
+       "slug": "rubellite-tourmaline",
+       "parent": "Tourmaline",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/rubellite-tourmaline/",
+        "pairs": "https://www.naturalgemstones.com/rubellite-tourmaline-pairs/",
+        "rings": "https://www.naturalgemstones.com/rubellite-tourmaline-rings/"
+       },
+       "api_total_loose": 139,
+       "api_total_pairs": 12,
+       "captured_loose": [
+        "K2661",
+        "K3206"
+       ],
+       "captured_pairs": [
+        "PR13542",
+        "PR13543"
+       ],
+       "children": []
+      },
+      {
+       "name": "Paraiba Tourmaline",
+       "slug": "paraiba-tourmaline",
+       "parent": "Tourmaline",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/paraiba-tourmaline/",
+        "pairs": "https://www.naturalgemstones.com/paraiba-tourmaline-pairs/",
+        "rings": "https://www.naturalgemstones.com/paraiba-tourmaline-rings/"
+       },
+       "api_total_loose": 79,
+       "api_total_pairs": 13,
+       "captured_loose": [
+        "K12327",
+        "K12328"
+       ],
+       "captured_pairs": [
+        "PR11691",
+        "PR11753"
+       ],
+       "children": []
+      }
+     ]
+    },
+    {
+     "name": "Chrome Tourmaline",
+     "slug": "chrome-tourmaline",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 55,
+      "pair": 2,
+      "ring": 155,
+      "earring": 22,
+      "necklace": 6,
+      "pendant": 28,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/chrome-tourmaline/",
+      "pairs": "https://www.naturalgemstones.com/chrome-tourmaline-pairs/",
+      "rings": "https://www.naturalgemstones.com/chrome-tourmaline-rings/"
+     },
+     "api_total_loose": 55,
+     "api_total_pairs": 2,
+     "captured_loose": [
+      "K14670",
+      "K2974"
+     ],
+     "captured_pairs": [
+      "PR6448",
+      "PR6449"
+     ],
+     "children": []
+    },
+    {
+     "name": "Rubellite Tourmaline",
+     "slug": "rubellite-tourmaline",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 136,
+      "pair": 12,
+      "ring": 3,
+      "earring": 1,
+      "necklace": 6,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/rubellite-tourmaline/",
+      "pairs": "https://www.naturalgemstones.com/rubellite-tourmaline-pairs/",
+      "rings": "https://www.naturalgemstones.com/rubellite-tourmaline-rings/"
+     },
+     "api_total_loose": 139,
+     "api_total_pairs": 12,
+     "captured_loose": [
+      "K2661",
+      "K3206"
+     ],
+     "captured_pairs": [
+      "PR13542",
+      "PR13543"
+     ],
+     "children": []
+    },
+    {
+     "name": "Paraiba Tourmaline",
+     "slug": "paraiba-tourmaline",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 79,
+      "pair": 12,
+      "ring": 7,
+      "earring": 3,
+      "necklace": 1,
+      "pendant": 1,
+      "bracelet": 2,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/paraiba-tourmaline/",
+      "pairs": "https://www.naturalgemstones.com/paraiba-tourmaline-pairs/",
+      "rings": "https://www.naturalgemstones.com/paraiba-tourmaline-rings/"
+     },
+     "api_total_loose": 79,
+     "api_total_pairs": 13,
+     "captured_loose": [
+      "K12327",
+      "K12328"
+     ],
+     "captured_pairs": [
+      "PR11691",
+      "PR11753"
+     ],
+     "children": []
+    },
+    {
+     "name": "Garnet",
+     "slug": "garnet",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 3305,
+      "pair": 343,
+      "ring": 897,
+      "earring": 16,
+      "necklace": 62,
+      "pendant": 142,
+      "bracelet": 23,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/garnet/",
+      "pairs": "https://www.naturalgemstones.com/garnet-pairs/",
+      "rings": "https://www.naturalgemstones.com/garnet-rings/"
+     },
+     "api_total_loose": 1198,
+     "api_total_pairs": 198,
+     "captured_loose": [
+      "K14981",
+      "K14983"
+     ],
+     "captured_pairs": [
+      "PR11132",
+      "PR11138"
+     ],
+     "children": [
+      {
+       "name": "Demantoid Garnet",
+       "slug": "demantoid-garnet",
+       "parent": "Garnet",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/demantoid-garnet/",
+        "pairs": "https://www.naturalgemstones.com/demantoid-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/demantoid-garnet-rings/"
+       },
+       "api_total_loose": 130,
+       "api_total_pairs": 12,
+       "captured_loose": [
+        "K6398",
+        "K6400"
+       ],
+       "captured_pairs": [
+        "PR8809",
+        "PR13523"
+       ],
+       "children": []
+      },
+      {
+       "name": "Rhodolite Garnet",
+       "slug": "rhodolite-garnet",
+       "parent": "Garnet",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/rhodolite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/rhodolite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/rhodolite-garnet-rings/"
+       },
+       "api_total_loose": 716,
+       "api_total_pairs": 37,
+       "captured_loose": [
+        "K11590",
+        "K11592"
+       ],
+       "captured_pairs": [
+        "PR8660",
+        "PR8661"
+       ],
+       "children": []
+      },
+      {
+       "name": "Tsavorite Garnet",
+       "slug": "tsavorite-garnet",
+       "parent": "Garnet",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/tsavorite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/tsavorite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/tsavorite-garnet-rings/"
+       },
+       "api_total_loose": 614,
+       "api_total_pairs": 60,
+       "captured_loose": [
+        "K5770",
+        "K5771"
+       ],
+       "captured_pairs": [
+        "PR10091",
+        "PR7703"
+       ],
+       "children": []
+      },
+      {
+       "name": "Mali Garnet",
+       "slug": "mali-garnet",
+       "parent": "Garnet",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/mali-garnet/",
+        "pairs": "https://www.naturalgemstones.com/mali-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/mali-garnet-rings/"
+       },
+       "api_total_loose": 16,
+       "api_total_pairs": 0,
+       "captured_loose": [
+        "K14701",
+        "K16454"
+       ],
+       "captured_pairs": [],
+       "children": []
+      },
+      {
+       "name": "Spessartite Garnet",
+       "slug": "spessartite-garnet",
+       "parent": "Garnet",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/spessartite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/spessartite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/spessartite-garnet-rings/"
+       },
+       "api_total_loose": 108,
+       "api_total_pairs": 15,
+       "captured_loose": [
+        "K12990",
+        "K13954"
+       ],
+       "captured_pairs": [
+        "PR8606",
+        "PR8718"
+       ],
+       "children": []
+      },
+      {
+       "name": "Grossular Garnet",
+       "slug": "grossular-garnet",
+       "parent": "Garnet",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/grossular-garnet/",
+        "pairs": "https://www.naturalgemstones.com/grossular-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/grossular-garnet-rings/"
+       },
+       "api_total_loose": 23,
+       "api_total_pairs": 0,
+       "captured_loose": [
+        "K10044",
+        "K14431"
+       ],
+       "captured_pairs": [],
+       "children": []
+      },
+      {
+       "name": "Andradite Garnet",
+       "slug": "andradite-garnet",
+       "parent": "Garnet",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/andradite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/andradite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/andradite-garnet-rings/"
+       },
+       "api_total_loose": 8,
+       "api_total_pairs": 0,
+       "captured_loose": [
+        "K11510",
+        "K17948"
+       ],
+       "captured_pairs": [],
+       "children": []
+      },
+      {
+       "name": "Hessonite Garnet",
+       "slug": "hessonite-garnet",
+       "parent": "Garnet",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/hessonite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/hessonite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/hessonite-garnet-rings/"
+       },
+       "api_total_loose": 351,
+       "api_total_pairs": 6,
+       "captured_loose": [
+        "K11397",
+        "K11399"
+       ],
+       "captured_pairs": [
+        "PR13529",
+        "PR15241"
+       ],
+       "children": []
+      },
+      {
+       "name": "Malaya Garnet",
+       "slug": "malaya-garnet",
+       "parent": "Garnet",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/malaya-garnet/",
+        "pairs": "https://www.naturalgemstones.com/malaya-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/malaya-garnet-rings/"
+       },
+       "api_total_loose": 75,
+       "api_total_pairs": 4,
+       "captured_loose": [
+        "K14465",
+        "K14466"
+       ],
+       "captured_pairs": [
+        "PR11923",
+        "PR13703"
+       ],
+       "children": []
+      },
+      {
+       "name": "Almandine Garnet",
+       "slug": "almandine-garnet",
+       "parent": "Garnet",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/almandine-garnet/",
+        "pairs": "https://www.naturalgemstones.com/almandine-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/almandine-garnet-rings/"
+       },
+       "api_total_loose": 95,
+       "api_total_pairs": 15,
+       "captured_loose": [
+        "K10046",
+        "K11617"
+       ],
+       "captured_pairs": [
+        "PR11939",
+        "PR11941"
+       ],
+       "children": []
+      }
+     ]
+    },
+    {
+     "name": "Demantoid Garnet",
+     "slug": "demantoid-garnet",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 130,
+      "pair": 12,
+      "ring": 69,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 7,
+      "bracelet": 11,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/demantoid-garnet/",
+      "pairs": "https://www.naturalgemstones.com/demantoid-garnet-pairs/",
+      "rings": "https://www.naturalgemstones.com/demantoid-garnet-rings/"
+     },
+     "api_total_loose": 130,
+     "api_total_pairs": 12,
+     "captured_loose": [
+      "K6398",
+      "K6400"
+     ],
+     "captured_pairs": [
+      "PR8809",
+      "PR13523"
+     ],
+     "children": []
+    },
+    {
+     "name": "Rhodolite Garnet",
+     "slug": "rhodolite-garnet",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 716,
+      "pair": 37,
+      "ring": 4,
+      "earring": 2,
+      "necklace": 1,
+      "pendant": 23,
+      "bracelet": 4,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/rhodolite-garnet/",
+      "pairs": "https://www.naturalgemstones.com/rhodolite-garnet-pairs/",
+      "rings": "https://www.naturalgemstones.com/rhodolite-garnet-rings/"
+     },
+     "api_total_loose": 716,
+     "api_total_pairs": 37,
+     "captured_loose": [
+      "K11590",
+      "K11592"
+     ],
+     "captured_pairs": [
+      "PR8660",
+      "PR8661"
+     ],
+     "children": []
+    },
+    {
+     "name": "Tsavorite Garnet",
+     "slug": "tsavorite-garnet",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 611,
+      "pair": 57,
+      "ring": 5,
+      "earring": 4,
+      "necklace": 32,
+      "pendant": 1,
+      "bracelet": 1,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/tsavorite-garnet/",
+      "pairs": "https://www.naturalgemstones.com/tsavorite-garnet-pairs/",
+      "rings": "https://www.naturalgemstones.com/tsavorite-garnet-rings/"
+     },
+     "api_total_loose": 614,
+     "api_total_pairs": 60,
+     "captured_loose": [
+      "K5770",
+      "K5771"
+     ],
+     "captured_pairs": [
+      "PR10091",
+      "PR7703"
+     ],
+     "children": []
+    },
+    {
+     "name": "Mali Garnet",
+     "slug": "mali-garnet",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 16,
+      "pair": 0,
+      "ring": 2,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/mali-garnet/",
+      "pairs": "https://www.naturalgemstones.com/mali-garnet-pairs/",
+      "rings": "https://www.naturalgemstones.com/mali-garnet-rings/"
+     },
+     "api_total_loose": 16,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K14701",
+      "K16454"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Spessartite Garnet",
+     "slug": "spessartite-garnet",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 108,
+      "pair": 15,
+      "ring": 25,
+      "earring": 2,
+      "necklace": 1,
+      "pendant": 1,
+      "bracelet": 1,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/spessartite-garnet/",
+      "pairs": "https://www.naturalgemstones.com/spessartite-garnet-pairs/",
+      "rings": "https://www.naturalgemstones.com/spessartite-garnet-rings/"
+     },
+     "api_total_loose": 108,
+     "api_total_pairs": 15,
+     "captured_loose": [
+      "K12990",
+      "K13954"
+     ],
+     "captured_pairs": [
+      "PR8606",
+      "PR8718"
+     ],
+     "children": []
+    },
+    {
+     "name": "Grossular Garnet",
+     "slug": "grossular-garnet",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 23,
+      "pair": 0,
+      "ring": 57,
+      "earring": 0,
+      "necklace": 12,
+      "pendant": 15,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/grossular-garnet/",
+      "pairs": "https://www.naturalgemstones.com/grossular-garnet-pairs/",
+      "rings": "https://www.naturalgemstones.com/grossular-garnet-rings/"
+     },
+     "api_total_loose": 23,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K10044",
+      "K14431"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Zircon",
+     "slug": "zircon",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 823,
+      "pair": 58,
+      "ring": 2,
+      "earring": 0,
+      "necklace": 20,
+      "pendant": 1,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/zircon/",
+      "pairs": "https://www.naturalgemstones.com/zircon-pairs/",
+      "rings": "https://www.naturalgemstones.com/zircon-rings/"
+     },
+     "api_total_loose": 828,
+     "api_total_pairs": 58,
+     "captured_loose": [
+      "K10379",
+      "K10381"
+     ],
+     "captured_pairs": [
+      "PR12889",
+      "PR12890"
+     ],
+     "children": []
+    },
+    {
+     "name": "Aquamarine",
+     "slug": "aquamarine",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 892,
+      "pair": 64,
+      "ring": 6,
+      "earring": 9,
+      "necklace": 15,
+      "pendant": 5,
+      "bracelet": 8,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/aquamarine/",
+      "pairs": "https://www.naturalgemstones.com/aquamarine-pairs/",
+      "rings": "https://www.naturalgemstones.com/aquamarine-rings/"
+     },
+     "api_total_loose": 894,
+     "api_total_pairs": 65,
+     "captured_loose": [
+      "K10572",
+      "K10631"
+     ],
+     "captured_pairs": [
+      "PR6005",
+      "PR6273"
+     ],
+     "children": []
+    },
+    {
+     "name": "Beryl",
+     "slug": "beryl",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 1048,
+      "pair": 107,
+      "ring": 650,
+      "earring": 44,
+      "necklace": 51,
+      "pendant": 115,
+      "bracelet": 11,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/beryl/",
+      "pairs": "https://www.naturalgemstones.com/beryl-pairs/",
+      "rings": "https://www.naturalgemstones.com/beryl-rings/"
+     },
+     "api_total_loose": 42,
+     "api_total_pairs": 4,
+     "captured_loose": [
+      "K2323",
+      "K248"
+     ],
+     "captured_pairs": [
+      "PR8721",
+      "PR13533"
+     ],
+     "children": [
+      {
+       "name": "Aquamarine",
+       "slug": "aquamarine",
+       "parent": "Beryl",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/aquamarine/",
+        "pairs": "https://www.naturalgemstones.com/aquamarine-pairs/",
+        "rings": "https://www.naturalgemstones.com/aquamarine-rings/"
+       },
+       "api_total_loose": 894,
+       "api_total_pairs": 65,
+       "captured_loose": [
+        "K10572",
+        "K10631"
+       ],
+       "captured_pairs": [
+        "PR6005",
+        "PR6273"
+       ],
+       "children": []
+      },
+      {
+       "name": "Morganite",
+       "slug": "morganite",
+       "parent": "Beryl",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/morganite/",
+        "pairs": "https://www.naturalgemstones.com/morganite-pairs/",
+        "rings": "https://www.naturalgemstones.com/morganite-rings/"
+       },
+       "api_total_loose": 68,
+       "api_total_pairs": 28,
+       "captured_loose": [
+        "K14686",
+        "K14688"
+       ],
+       "captured_pairs": [
+        "PR10799",
+        "PR12674"
+       ],
+       "children": []
+      },
+      {
+       "name": "Goshenite",
+       "slug": "goshenite",
+       "parent": "Beryl",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/goshenite/",
+        "pairs": "https://www.naturalgemstones.com/goshenite-pairs/",
+        "rings": "https://www.naturalgemstones.com/goshenite-rings/"
+       },
+       "api_total_loose": 5,
+       "api_total_pairs": 1,
+       "captured_loose": [
+        "K16574",
+        "K16591"
+       ],
+       "captured_pairs": [
+        "PR13491"
+       ],
+       "children": []
+      },
+      {
+       "name": "Red Beryl",
+       "slug": "red-beryl",
+       "parent": "Beryl",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/red-beryl/",
+        "pairs": "https://www.naturalgemstones.com/red-beryl-pairs/",
+        "rings": "https://www.naturalgemstones.com/red-beryl-rings/"
+       },
+       "api_total_loose": 7,
+       "api_total_pairs": 1,
+       "captured_loose": [
+        "K25534",
+        "K25536"
+       ],
+       "captured_pairs": [
+        "PR14618"
+       ],
+       "children": []
+      },
+      {
+       "name": "Heliodor",
+       "slug": "heliodor",
+       "parent": "Beryl",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/heliodor/",
+        "pairs": "https://www.naturalgemstones.com/heliodor-pairs/",
+        "rings": "https://www.naturalgemstones.com/heliodor-rings/"
+       },
+       "api_total_loose": 35,
+       "api_total_pairs": 9,
+       "captured_loose": [
+        "K14691",
+        "K14692"
+       ],
+       "captured_pairs": [
+        "PR13485",
+        "PR13486"
+       ],
+       "children": []
+      }
+     ]
+    },
+    {
+     "name": "Morganite",
+     "slug": "morganite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 68,
+      "pair": 28,
+      "ring": 1,
+      "earring": 1,
+      "necklace": 3,
+      "pendant": 1,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/morganite/",
+      "pairs": "https://www.naturalgemstones.com/morganite-pairs/",
+      "rings": "https://www.naturalgemstones.com/morganite-rings/"
+     },
+     "api_total_loose": 68,
+     "api_total_pairs": 28,
+     "captured_loose": [
+      "K14686",
+      "K14688"
+     ],
+     "captured_pairs": [
+      "PR10799",
+      "PR12674"
+     ],
+     "children": []
+    },
+    {
+     "name": "Chrysoberyl",
+     "slug": "chrysoberyl",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 1214,
+      "pair": 30,
+      "ring": 426,
+      "earring": 15,
+      "necklace": 50,
+      "pendant": 140,
+      "bracelet": 3,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/chrysoberyl/",
+      "pairs": "https://www.naturalgemstones.com/chrysoberyl-pairs/",
+      "rings": "https://www.naturalgemstones.com/chrysoberyl-rings/"
+     },
+     "api_total_loose": 876,
+     "api_total_pairs": 6,
+     "captured_loose": [
+      "K11452",
+      "K11453"
+     ],
+     "captured_pairs": [
+      "PR11206",
+      "PR13665"
+     ],
+     "children": [
+      {
+       "name": "Alexandrite",
+       "slug": "alexandrite",
+       "parent": "Chrysoberyl",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/alexandrite/",
+        "pairs": "https://www.naturalgemstones.com/alexandrite-pairs/",
+        "rings": "https://www.naturalgemstones.com/alexandrite-rings/"
+       },
+       "api_total_loose": 346,
+       "api_total_pairs": 24,
+       "captured_loose": [
+        "K12373",
+        "K13116"
+       ],
+       "captured_pairs": [
+        "PR10856",
+        "PR11344"
+       ],
+       "children": []
+      }
+     ]
+    },
+    {
+     "name": "Alexandrite",
+     "slug": "alexandrite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 346,
+      "pair": 24,
+      "ring": 10,
+      "earring": 6,
+      "necklace": 1,
+      "pendant": 3,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/alexandrite/",
+      "pairs": "https://www.naturalgemstones.com/alexandrite-pairs/",
+      "rings": "https://www.naturalgemstones.com/alexandrite-rings/"
+     },
+     "api_total_loose": 346,
+     "api_total_pairs": 24,
+     "captured_loose": [
+      "K12373",
+      "K13116"
+     ],
+     "captured_pairs": [
+      "PR10856",
+      "PR11344"
+     ],
+     "children": []
+    },
+    {
+     "name": "Citrine",
+     "slug": "citrine",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 2226,
+      "pair": 1197,
+      "ring": 1,
+      "earring": 6,
+      "necklace": 2,
+      "pendant": 5,
+      "bracelet": 5,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/citrine/",
+      "pairs": "https://www.naturalgemstones.com/citrine-pairs/",
+      "rings": "https://www.naturalgemstones.com/citrine-rings/"
+     },
+     "api_total_loose": 2231,
+     "api_total_pairs": 1207,
+     "captured_loose": [
+      "K12681",
+      "K12687"
+     ],
+     "captured_pairs": [
+      "PR10034",
+      "PR10048"
+     ],
+     "children": []
+    },
+    {
+     "name": "Amethyst",
+     "slug": "amethyst",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 1124,
+      "pair": 260,
+      "ring": 2,
+      "earring": 5,
+      "necklace": 6,
+      "pendant": 73,
+      "bracelet": 6,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/amethyst/",
+      "pairs": "https://www.naturalgemstones.com/amethyst-pairs/",
+      "rings": "https://www.naturalgemstones.com/amethyst-rings/"
+     },
+     "api_total_loose": 1135,
+     "api_total_pairs": 266,
+     "captured_loose": [
+      "K15210",
+      "K16708"
+     ],
+     "captured_pairs": [
+      "PR6421",
+      "PR6422"
+     ],
+     "children": []
+    },
+    {
+     "name": "Topaz",
+     "slug": "topaz",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 546,
+      "pair": 168,
+      "ring": 122,
+      "earring": 13,
+      "necklace": 6,
+      "pendant": 15,
+      "bracelet": 3,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/topaz/",
+      "pairs": "https://www.naturalgemstones.com/topaz-pairs/",
+      "rings": "https://www.naturalgemstones.com/topaz-rings/"
+     },
+     "api_total_loose": 468,
+     "api_total_pairs": 166,
+     "captured_loose": [
+      "K10862",
+      "K10864"
+     ],
+     "captured_pairs": [
+      "PR6032",
+      "PR7834"
+     ],
+     "children": [
+      {
+       "name": "Imperial Topaz",
+       "slug": "imperial-topaz",
+       "parent": "Topaz",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/imperial-topaz/",
+        "pairs": "https://www.naturalgemstones.com/imperial-topaz-pairs/",
+        "rings": "https://www.naturalgemstones.com/imperial-topaz-rings/"
+       },
+       "api_total_loose": 7,
+       "api_total_pairs": 0,
+       "captured_loose": [
+        "K16508",
+        "K20061"
+       ],
+       "captured_pairs": [],
+       "children": []
+      },
+      {
+       "name": "Precious Topaz",
+       "slug": "precious-topaz",
+       "parent": "Topaz",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/precious-topaz/",
+        "pairs": "https://www.naturalgemstones.com/precious-topaz-pairs/",
+        "rings": "https://www.naturalgemstones.com/precious-topaz-rings/"
+       },
+       "api_total_loose": 74,
+       "api_total_pairs": 2,
+       "captured_loose": [
+        "K1173",
+        "K1175"
+       ],
+       "captured_pairs": [
+        "PR14703",
+        "PR14704"
+       ],
+       "children": []
+      }
+     ]
+    },
+    {
+     "name": "Apatite",
+     "slug": "apatite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 35,
+      "pair": 4,
+      "ring": 0,
+      "earring": 3,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/apatite/",
+      "pairs": "https://www.naturalgemstones.com/apatite-pairs/",
+      "rings": "https://www.naturalgemstones.com/apatite-rings/"
+     },
+     "api_total_loose": 35,
+     "api_total_pairs": 4,
+     "captured_loose": [
+      "K19546",
+      "K21426"
+     ],
+     "captured_pairs": [
+      "PR12846",
+      "PR12847"
+     ],
+     "children": []
+    },
+    {
+     "name": "Fluorite",
+     "slug": "fluorite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 15,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 1,
+      "pendant": 3,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/fluorite/",
+      "pairs": "https://www.naturalgemstones.com/fluorite-pairs/",
+      "rings": "https://www.naturalgemstones.com/fluorite-rings/"
+     },
+     "api_total_loose": 15,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K15365",
+      "K21157"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Spinel",
+     "slug": "spinel",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 2419,
+      "pair": 116,
+      "ring": 120,
+      "earring": 4,
+      "necklace": 61,
+      "pendant": 18,
+      "bracelet": 41,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/spinel/",
+      "pairs": "https://www.naturalgemstones.com/spinel-pairs/",
+      "rings": "https://www.naturalgemstones.com/spinel-rings/"
+     },
+     "api_total_loose": 2360,
+     "api_total_pairs": 113,
+     "captured_loose": [
+      "K12369",
+      "K13044"
+     ],
+     "captured_pairs": [
+      "PR11004",
+      "PR11005"
+     ],
+     "children": [
+      {
+       "name": "Cobalt Spinel",
+       "slug": "cobalt-spinel",
+       "parent": "Spinel",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/cobalt-spinel/",
+        "pairs": "https://www.naturalgemstones.com/cobalt-spinel-pairs/",
+        "rings": "https://www.naturalgemstones.com/cobalt-spinel-rings/"
+       },
+       "api_total_loose": 78,
+       "api_total_pairs": 3,
+       "captured_loose": [
+        "K11406",
+        "K11490"
+       ],
+       "captured_pairs": [
+        "PR13407",
+        "PR13408"
+       ],
+       "children": []
+      }
+     ]
+    },
+    {
+     "name": "Peridot",
+     "slug": "peridot",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 816,
+      "pair": 87,
+      "ring": 3,
+      "earring": 11,
+      "necklace": 3,
+      "pendant": 2,
+      "bracelet": 5,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/peridot/",
+      "pairs": "https://www.naturalgemstones.com/peridot-pairs/",
+      "rings": "https://www.naturalgemstones.com/peridot-rings/"
+     },
+     "api_total_loose": 818,
+     "api_total_pairs": 87,
+     "captured_loose": [
+      "K12991",
+      "K16251"
+     ],
+     "captured_pairs": [
+      "PR5996",
+      "PR6120"
+     ],
+     "children": []
+    },
+    {
+     "name": "Moonstone",
+     "slug": "moonstone",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 1327,
+      "pair": 52,
+      "ring": 239,
+      "earring": 1,
+      "necklace": 5,
+      "pendant": 21,
+      "bracelet": 3,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/moonstone/",
+      "pairs": "https://www.naturalgemstones.com/moonstone-pairs/",
+      "rings": "https://www.naturalgemstones.com/moonstone-rings/"
+     },
+     "api_total_loose": 1325,
+     "api_total_pairs": 52,
+     "captured_loose": [
+      "K12058",
+      "K16066"
+     ],
+     "captured_pairs": [
+      "PR13278",
+      "PR13279"
+     ],
+     "children": []
+    },
+    {
+     "name": "Kunzite",
+     "slug": "kunzite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 184,
+      "pair": 8,
+      "ring": 1,
+      "earring": 0,
+      "necklace": 12,
+      "pendant": 24,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/kunzite/",
+      "pairs": "https://www.naturalgemstones.com/kunzite-pairs/",
+      "rings": "https://www.naturalgemstones.com/kunzite-rings/"
+     },
+     "api_total_loose": 184,
+     "api_total_pairs": 8,
+     "captured_loose": [
+      "K12338",
+      "K12352"
+     ],
+     "captured_pairs": [
+      "PR12858",
+      "PR13508"
+     ],
+     "children": []
+    },
+    {
+     "name": "Chrome Diopside",
+     "slug": "chrome-diopside",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 11,
+      "pair": 0,
+      "ring": 45,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/chrome-diopside/",
+      "pairs": "https://www.naturalgemstones.com/chrome-diopside-pairs/",
+      "rings": "https://www.naturalgemstones.com/chrome-diopside-rings/"
+     },
+     "api_total_loose": 11,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K22270",
+      "K22271"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Scapolite",
+     "slug": "scapolite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 13,
+      "pair": 0,
+      "ring": 3,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/scapolite/",
+      "pairs": "https://www.naturalgemstones.com/scapolite-pairs/",
+      "rings": "https://www.naturalgemstones.com/scapolite-rings/"
+     },
+     "api_total_loose": 13,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K13082",
+      "K21796"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Onyx",
+     "slug": "onyx",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 1,
+      "pair": 0,
+      "ring": 1,
+      "earring": 0,
+      "necklace": 3,
+      "pendant": 2,
+      "bracelet": 1,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/onyx/",
+      "pairs": "https://www.naturalgemstones.com/onyx-pairs/",
+      "rings": "https://www.naturalgemstones.com/onyx-rings/"
+     },
+     "api_total_loose": 2,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K1551",
+      "K17557"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Coral",
+     "slug": "coral",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 218,
+      "pair": 166,
+      "ring": 7,
+      "earring": 0,
+      "necklace": 53,
+      "pendant": 0,
+      "bracelet": 4,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/coral/",
+      "pairs": "https://www.naturalgemstones.com/coral-pairs/",
+      "rings": "https://www.naturalgemstones.com/coral-rings/"
+     },
+     "api_total_loose": 409,
+     "api_total_pairs": 180,
+     "captured_loose": [
+      "K12031",
+      "K12034"
+     ],
+     "captured_pairs": [
+      "PR11017",
+      "PR11018"
+     ],
+     "children": []
+    },
+    {
+     "name": "Lapis",
+     "slug": "lapis",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 60,
+      "pair": 69,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 3,
+      "pendant": 0,
+      "bracelet": 1,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/lapis/",
+      "pairs": "https://www.naturalgemstones.com/lapis-pairs/",
+      "rings": "https://www.naturalgemstones.com/lapis-rings/"
+     },
+     "api_total_loose": 114,
+     "api_total_pairs": 128,
+     "captured_loose": [
+      "K2729",
+      "K2738"
+     ],
+     "captured_pairs": [
+      "PR6598",
+      "PR6600"
+     ],
+     "children": []
+    },
+    {
+     "name": "Turquoise",
+     "slug": "turquoise",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 99,
+      "pair": 20,
+      "ring": 117,
+      "earring": 3,
+      "necklace": 3,
+      "pendant": 6,
+      "bracelet": 2,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/turquoise/",
+      "pairs": "https://www.naturalgemstones.com/turquoise-pairs/",
+      "rings": "https://www.naturalgemstones.com/turquoise-rings/"
+     },
+     "api_total_loose": 99,
+     "api_total_pairs": 20,
+     "captured_loose": [
+      "K12522",
+      "K12523"
+     ],
+     "captured_pairs": [
+      "PR13578",
+      "PR13579"
+     ],
+     "children": []
+    },
+    {
+     "name": "Andradite Garnet",
+     "slug": "andradite-garnet",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 8,
+      "pair": 0,
+      "ring": 9,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/andradite-garnet/",
+      "pairs": "https://www.naturalgemstones.com/andradite-garnet-pairs/",
+      "rings": "https://www.naturalgemstones.com/andradite-garnet-rings/"
+     },
+     "api_total_loose": 8,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K11510",
+      "K17948"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Carnelian",
+     "slug": "carnelian",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 9,
+      "pair": 13,
+      "ring": 1,
+      "earring": 2,
+      "necklace": 1,
+      "pendant": 0,
+      "bracelet": 2,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/carnelian/",
+      "pairs": "https://www.naturalgemstones.com/carnelian-pairs/",
+      "rings": "https://www.naturalgemstones.com/carnelian-rings/"
+     },
+     "api_total_loose": 9,
+     "api_total_pairs": 14,
+     "captured_loose": [
+      "K18571",
+      "K18572"
+     ],
+     "captured_pairs": [
+      "PR12445",
+      "PR12446"
+     ],
+     "children": []
+    },
+    {
+     "name": "Sphene (Titanite)",
+     "slug": "sphene-titanite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 89,
+      "pair": 3,
+      "ring": 108,
+      "earring": 4,
+      "necklace": 11,
+      "pendant": 23,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/sphene-titanite/",
+      "pairs": "https://www.naturalgemstones.com/sphene-titanite-pairs/",
+      "rings": "https://www.naturalgemstones.com/sphene-titanite-rings/"
+     },
+     "api_total_loose": 89,
+     "api_total_pairs": 3,
+     "captured_loose": [
+      "K11250",
+      "K12025"
+     ],
+     "captured_pairs": [
+      "PR12374",
+      "PR6379"
+     ],
+     "children": []
+    },
+    {
+     "name": "Taaffeite",
+     "slug": "taaffeite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 3,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 3,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/taaffeite/",
+      "pairs": "https://www.naturalgemstones.com/taaffeite-pairs/",
+      "rings": "https://www.naturalgemstones.com/taaffeite-rings/"
+     },
+     "api_total_loose": 3,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K26006",
+      "K6134"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Hessonite Garnet",
+     "slug": "hessonite-garnet",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 343,
+      "pair": 5,
+      "ring": 37,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 2,
+      "bracelet": 2,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/hessonite-garnet/",
+      "pairs": "https://www.naturalgemstones.com/hessonite-garnet-pairs/",
+      "rings": "https://www.naturalgemstones.com/hessonite-garnet-rings/"
+     },
+     "api_total_loose": 351,
+     "api_total_pairs": 6,
+     "captured_loose": [
+      "K11397",
+      "K11399"
+     ],
+     "captured_pairs": [
+      "PR13529",
+      "PR15241"
+     ],
+     "children": []
+    },
+    {
+     "name": "Cobalt Spinel",
+     "slug": "cobalt-spinel",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 78,
+      "pair": 3,
+      "ring": 114,
+      "earring": 0,
+      "necklace": 12,
+      "pendant": 17,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/cobalt-spinel/",
+      "pairs": "https://www.naturalgemstones.com/cobalt-spinel-pairs/",
+      "rings": "https://www.naturalgemstones.com/cobalt-spinel-rings/"
+     },
+     "api_total_loose": 78,
+     "api_total_pairs": 3,
+     "captured_loose": [
+      "K11406",
+      "K11490"
+     ],
+     "captured_pairs": [
+      "PR13407",
+      "PR13408"
+     ],
+     "children": []
+    },
+    {
+     "name": "Andalusite",
+     "slug": "andalusite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 14,
+      "pair": 0,
+      "ring": 48,
+      "earring": 0,
+      "necklace": 10,
+      "pendant": 27,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/andalusite/",
+      "pairs": "https://www.naturalgemstones.com/andalusite-pairs/",
+      "rings": "https://www.naturalgemstones.com/andalusite-rings/"
+     },
+     "api_total_loose": 14,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K11571",
+      "K18769"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Jeremejevite",
+     "slug": "jeremejevite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 10,
+      "pair": 0,
+      "ring": 6,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/jeremejevite/",
+      "pairs": "https://www.naturalgemstones.com/jeremejevite-pairs/",
+      "rings": "https://www.naturalgemstones.com/jeremejevite-rings/"
+     },
+     "api_total_loose": 10,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K10010",
+      "K12039"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Phenakite",
+     "slug": "phenakite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 20,
+      "pair": 2,
+      "ring": 6,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 7,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/phenakite/",
+      "pairs": "https://www.naturalgemstones.com/phenakite-pairs/",
+      "rings": "https://www.naturalgemstones.com/phenakite-rings/"
+     },
+     "api_total_loose": 20,
+     "api_total_pairs": 2,
+     "captured_loose": [
+      "K12144",
+      "K12147"
+     ],
+     "captured_pairs": [
+      "PR9760",
+      "PR9761"
+     ],
+     "children": []
+    },
+    {
+     "name": "Ametrine",
+     "slug": "ametrine",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 216,
+      "pair": 3,
+      "ring": 50,
+      "earring": 3,
+      "necklace": 3,
+      "pendant": 5,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/ametrine/",
+      "pairs": "https://www.naturalgemstones.com/ametrine-pairs/",
+      "rings": "https://www.naturalgemstones.com/ametrine-rings/"
+     },
+     "api_total_loose": 216,
+     "api_total_pairs": 3,
+     "captured_loose": [
+      "K16125",
+      "K16126"
+     ],
+     "captured_pairs": [
+      "PR13409",
+      "PR13603"
+     ],
+     "children": []
+    },
+    {
+     "name": "Malaya Garnet",
+     "slug": "malaya-garnet",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 75,
+      "pair": 4,
+      "ring": 92,
+      "earring": 0,
+      "necklace": 6,
+      "pendant": 6,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/malaya-garnet/",
+      "pairs": "https://www.naturalgemstones.com/malaya-garnet-pairs/",
+      "rings": "https://www.naturalgemstones.com/malaya-garnet-rings/"
+     },
+     "api_total_loose": 75,
+     "api_total_pairs": 4,
+     "captured_loose": [
+      "K14465",
+      "K14466"
+     ],
+     "captured_pairs": [
+      "PR11923",
+      "PR13703"
+     ],
+     "children": []
+    },
+    {
+     "name": "Sinhalite",
+     "slug": "sinhalite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 22,
+      "pair": 0,
+      "ring": 57,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/sinhalite/",
+      "pairs": "https://www.naturalgemstones.com/sinhalite-pairs/",
+      "rings": "https://www.naturalgemstones.com/sinhalite-rings/"
+     },
+     "api_total_loose": 22,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K17392",
+      "K17944"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Iolite",
+     "slug": "iolite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 11,
+      "pair": 5,
+      "ring": 7,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/iolite/",
+      "pairs": "https://www.naturalgemstones.com/iolite-pairs/",
+      "rings": "https://www.naturalgemstones.com/iolite-rings/"
+     },
+     "api_total_loose": 11,
+     "api_total_pairs": 5,
+     "captured_loose": [
+      "K17917",
+      "K22098"
+     ],
+     "captured_pairs": [
+      "PR13534",
+      "PR15231"
+     ],
+     "children": []
+    },
+    {
+     "name": "Kyanite",
+     "slug": "kyanite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 19,
+      "pair": 0,
+      "ring": 3,
+      "earring": 2,
+      "necklace": 2,
+      "pendant": 0,
+      "bracelet": 1,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/kyanite/",
+      "pairs": "https://www.naturalgemstones.com/kyanite-pairs/",
+      "rings": "https://www.naturalgemstones.com/kyanite-rings/"
+     },
+     "api_total_loose": 19,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K18645",
+      "K18647"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Jade",
+     "slug": "jade",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 149,
+      "pair": 51,
+      "ring": 10,
+      "earring": 2,
+      "necklace": 2,
+      "pendant": 12,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/jade/",
+      "pairs": "https://www.naturalgemstones.com/jade-pairs/",
+      "rings": "https://www.naturalgemstones.com/jade-rings/"
+     },
+     "api_total_loose": 235,
+     "api_total_pairs": 74,
+     "captured_loose": [
+      "K1554",
+      "K1557"
+     ],
+     "captured_pairs": [
+      "PR12652",
+      "PR12653"
+     ],
+     "children": []
+    },
+    {
+     "name": "Agate",
+     "slug": "agate",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 77,
+      "pair": 2,
+      "ring": 5,
+      "earring": 5,
+      "necklace": 2,
+      "pendant": 0,
+      "bracelet": 5,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/agate/",
+      "pairs": "https://www.naturalgemstones.com/agate-pairs/",
+      "rings": "https://www.naturalgemstones.com/agate-rings/"
+     },
+     "api_total_loose": 77,
+     "api_total_pairs": 2,
+     "captured_loose": [
+      "K12541",
+      "K12542"
+     ],
+     "captured_pairs": [
+      "PR13241",
+      "PR9544"
+     ],
+     "children": []
+    },
+    {
+     "name": "Quartz",
+     "slug": "quartz",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 4314,
+      "pair": 1474,
+      "ring": 496,
+      "earring": 24,
+      "necklace": 61,
+      "pendant": 99,
+      "bracelet": 11,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/quartz/",
+      "pairs": "https://www.naturalgemstones.com/quartz-pairs/",
+      "rings": "https://www.naturalgemstones.com/quartz-rings/"
+     },
+     "api_total_loose": 177,
+     "api_total_pairs": 20,
+     "captured_loose": [
+      "K10723",
+      "K12350"
+     ],
+     "captured_pairs": [
+      "PR14566",
+      "PR14567"
+     ],
+     "children": [
+      {
+       "name": "Citrine",
+       "slug": "citrine",
+       "parent": "Quartz",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/citrine/",
+        "pairs": "https://www.naturalgemstones.com/citrine-pairs/",
+        "rings": "https://www.naturalgemstones.com/citrine-rings/"
+       },
+       "api_total_loose": 2231,
+       "api_total_pairs": 1207,
+       "captured_loose": [
+        "K12681",
+        "K12687"
+       ],
+       "captured_pairs": [
+        "PR10034",
+        "PR10048"
+       ],
+       "children": []
+      },
+      {
+       "name": "Amethyst",
+       "slug": "amethyst",
+       "parent": "Quartz",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/amethyst/",
+        "pairs": "https://www.naturalgemstones.com/amethyst-pairs/",
+        "rings": "https://www.naturalgemstones.com/amethyst-rings/"
+       },
+       "api_total_loose": 1135,
+       "api_total_pairs": 266,
+       "captured_loose": [
+        "K15210",
+        "K16708"
+       ],
+       "captured_pairs": [
+        "PR6421",
+        "PR6422"
+       ],
+       "children": []
+      },
+      {
+       "name": "Ametrine",
+       "slug": "ametrine",
+       "parent": "Quartz",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/ametrine/",
+        "pairs": "https://www.naturalgemstones.com/ametrine-pairs/",
+        "rings": "https://www.naturalgemstones.com/ametrine-rings/"
+       },
+       "api_total_loose": 216,
+       "api_total_pairs": 3,
+       "captured_loose": [
+        "K16125",
+        "K16126"
+       ],
+       "captured_pairs": [
+        "PR13409",
+        "PR13603"
+       ],
+       "children": []
+      },
+      {
+       "name": "Rutilated Quartz",
+       "slug": "rutilated-quartz",
+       "parent": "Quartz",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/rutilated-quartz/",
+        "pairs": "https://www.naturalgemstones.com/rutilated-quartz-pairs/",
+        "rings": "https://www.naturalgemstones.com/rutilated-quartz-rings/"
+       },
+       "api_total_loose": 78,
+       "api_total_pairs": 4,
+       "captured_loose": [
+        "K12628",
+        "K15977"
+       ],
+       "captured_pairs": [
+        "PR15018",
+        "PR15020"
+       ],
+       "children": []
+      },
+      {
+       "name": "Smoky Quartz",
+       "slug": "smoky-quartz",
+       "parent": "Quartz",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/smoky-quartz/",
+        "pairs": "https://www.naturalgemstones.com/smoky-quartz-pairs/",
+        "rings": "https://www.naturalgemstones.com/smoky-quartz-rings/"
+       },
+       "api_total_loose": 66,
+       "api_total_pairs": 4,
+       "captured_loose": [
+        "K15972",
+        "K15975"
+       ],
+       "captured_pairs": [
+        "PR14573",
+        "PR14574"
+       ],
+       "children": []
+      },
+      {
+       "name": "Rose Quartz",
+       "slug": "rose-quartz",
+       "parent": "Quartz",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/rose-quartz/",
+        "pairs": "https://www.naturalgemstones.com/rose-quartz-pairs/",
+        "rings": "https://www.naturalgemstones.com/rose-quartz-rings/"
+       },
+       "api_total_loose": 77,
+       "api_total_pairs": 0,
+       "captured_loose": [
+        "K15971",
+        "K15973"
+       ],
+       "captured_pairs": [],
+       "children": []
+      },
+      {
+       "name": "Prasiolite",
+       "slug": "prasiolite",
+       "parent": "Quartz",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/prasiolite/",
+        "pairs": "https://www.naturalgemstones.com/prasiolite-pairs/",
+        "rings": "https://www.naturalgemstones.com/prasiolite-rings/"
+       },
+       "api_total_loose": 361,
+       "api_total_pairs": 0,
+       "captured_loose": [
+        "K17580",
+        "K17581"
+       ],
+       "captured_pairs": [],
+       "children": []
+      }
+     ]
+    },
+    {
+     "name": "Rutilated Quartz",
+     "slug": "rutilated-quartz",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 77,
+      "pair": 4,
+      "ring": 8,
+      "earring": 0,
+      "necklace": 1,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/rutilated-quartz/",
+      "pairs": "https://www.naturalgemstones.com/rutilated-quartz-pairs/",
+      "rings": "https://www.naturalgemstones.com/rutilated-quartz-rings/"
+     },
+     "api_total_loose": 78,
+     "api_total_pairs": 4,
+     "captured_loose": [
+      "K12628",
+      "K15977"
+     ],
+     "captured_pairs": [
+      "PR15018",
+      "PR15020"
+     ],
+     "children": []
+    },
+    {
+     "name": "Smoky Quartz",
+     "slug": "smoky-quartz",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 66,
+      "pair": 2,
+      "ring": 4,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/smoky-quartz/",
+      "pairs": "https://www.naturalgemstones.com/smoky-quartz-pairs/",
+      "rings": "https://www.naturalgemstones.com/smoky-quartz-rings/"
+     },
+     "api_total_loose": 66,
+     "api_total_pairs": 4,
+     "captured_loose": [
+      "K15972",
+      "K15975"
+     ],
+     "captured_pairs": [
+      "PR14573",
+      "PR14574"
+     ],
+     "children": []
+    },
+    {
+     "name": "Rose Quartz",
+     "slug": "rose-quartz",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 75,
+      "pair": 0,
+      "ring": 33,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 2,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/rose-quartz/",
+      "pairs": "https://www.naturalgemstones.com/rose-quartz-pairs/",
+      "rings": "https://www.naturalgemstones.com/rose-quartz-rings/"
+     },
+     "api_total_loose": 77,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K15971",
+      "K15973"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Andesine",
+     "slug": "andesine",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 5,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/andesine/",
+      "pairs": "https://www.naturalgemstones.com/andesine-pairs/",
+      "rings": "https://www.naturalgemstones.com/andesine-rings/"
+     },
+     "api_total_loose": 5,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K25245",
+      "K25246"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Almandine Garnet",
+     "slug": "almandine-garnet",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 95,
+      "pair": 15,
+      "ring": 26,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/almandine-garnet/",
+      "pairs": "https://www.naturalgemstones.com/almandine-garnet-pairs/",
+      "rings": "https://www.naturalgemstones.com/almandine-garnet-rings/"
+     },
+     "api_total_loose": 95,
+     "api_total_pairs": 15,
+     "captured_loose": [
+      "K10046",
+      "K11617"
+     ],
+     "captured_pairs": [
+      "PR11939",
+      "PR11941"
+     ],
+     "children": []
+    },
+    {
+     "name": "Kornerupine",
+     "slug": "kornerupine",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 19,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/kornerupine/",
+      "pairs": "https://www.naturalgemstones.com/kornerupine-pairs/",
+      "rings": "https://www.naturalgemstones.com/kornerupine-rings/"
+     },
+     "api_total_loose": 19,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K11407",
+      "K11408"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Tiger's Eye",
+     "slug": "tigers-eye",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 152,
+      "pair": 17,
+      "ring": 3,
+      "earring": 2,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 1,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/tigers-eye/",
+      "pairs": "https://www.naturalgemstones.com/tigers-eye-pairs/",
+      "rings": "https://www.naturalgemstones.com/tigers-eye-rings/"
+     },
+     "api_total_loose": 156,
+     "api_total_pairs": 18,
+     "captured_loose": [
+      "K12629",
+      "K12631"
+     ],
+     "captured_pairs": [
+      "PR14476",
+      "PR14477"
+     ],
+     "children": []
+    },
+    {
+     "name": "Malachite",
+     "slug": "malachite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 26,
+      "pair": 4,
+      "ring": 0,
+      "earring": 2,
+      "necklace": 1,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/malachite/",
+      "pairs": "https://www.naturalgemstones.com/malachite-pairs/",
+      "rings": "https://www.naturalgemstones.com/malachite-rings/"
+     },
+     "api_total_loose": 31,
+     "api_total_pairs": 5,
+     "captured_loose": [
+      "K12509",
+      "K12511"
+     ],
+     "captured_pairs": [
+      "PR12651",
+      "PR12660"
+     ],
+     "children": []
+    },
+    {
+     "name": "Rhodochrosite",
+     "slug": "rhodochrosite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 1,
+      "pair": 1,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/rhodochrosite/",
+      "pairs": "https://www.naturalgemstones.com/rhodochrosite-pairs/",
+      "rings": "https://www.naturalgemstones.com/rhodochrosite-rings/"
+     },
+     "api_total_loose": 1,
+     "api_total_pairs": 2,
+     "captured_loose": [
+      "K3052"
+     ],
+     "captured_pairs": [
+      "PR14676",
+      "PR9543"
+     ],
+     "children": []
+    },
+    {
+     "name": "Imperial Topaz",
+     "slug": "imperial-topaz",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 7,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/imperial-topaz/",
+      "pairs": "https://www.naturalgemstones.com/imperial-topaz-pairs/",
+      "rings": "https://www.naturalgemstones.com/imperial-topaz-rings/"
+     },
+     "api_total_loose": 7,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K16508",
+      "K20061"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Prasiolite",
+     "slug": "prasiolite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 358,
+      "pair": 0,
+      "ring": 18,
+      "earring": 0,
+      "necklace": 2,
+      "pendant": 2,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/prasiolite/",
+      "pairs": "https://www.naturalgemstones.com/prasiolite-pairs/",
+      "rings": "https://www.naturalgemstones.com/prasiolite-rings/"
+     },
+     "api_total_loose": 361,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K17580",
+      "K17581"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Diopside",
+     "slug": "diopside",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 14,
+      "pair": 0,
+      "ring": 45,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 1,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/diopside/",
+      "pairs": "https://www.naturalgemstones.com/diopside-pairs/",
+      "rings": "https://www.naturalgemstones.com/diopside-rings/"
+     },
+     "api_total_loose": 3,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K21803",
+      "K21805"
+     ],
+     "captured_pairs": [],
+     "children": [
+      {
+       "name": "Chrome Diopside",
+       "slug": "chrome-diopside",
+       "parent": "Diopside",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/chrome-diopside/",
+        "pairs": "https://www.naturalgemstones.com/chrome-diopside-pairs/",
+        "rings": "https://www.naturalgemstones.com/chrome-diopside-rings/"
+       },
+       "api_total_loose": 11,
+       "api_total_pairs": 0,
+       "captured_loose": [
+        "K22270",
+        "K22271"
+       ],
+       "captured_pairs": [],
+       "children": []
+      }
+     ]
+    },
+    {
+     "name": "Hauyne",
+     "slug": "hauyne",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 6,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 2,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/hauyne/",
+      "pairs": "https://www.naturalgemstones.com/hauyne-pairs/",
+      "rings": "https://www.naturalgemstones.com/hauyne-rings/"
+     },
+     "api_total_loose": 6,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K21895",
+      "K21900"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Grandidierite",
+     "slug": "grandidierite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 45,
+      "pair": 1,
+      "ring": 10,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 2,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/grandidierite/",
+      "pairs": "https://www.naturalgemstones.com/grandidierite-pairs/",
+      "rings": "https://www.naturalgemstones.com/grandidierite-rings/"
+     },
+     "api_total_loose": 45,
+     "api_total_pairs": 1,
+     "captured_loose": [
+      "K22983",
+      "K22984"
+     ],
+     "captured_pairs": [
+      "PR13890"
+     ],
+     "children": []
+    },
+    {
+     "name": "Rhodonite",
+     "slug": "rhodonite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 5,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/rhodonite/",
+      "pairs": "https://www.naturalgemstones.com/rhodonite-pairs/",
+      "rings": "https://www.naturalgemstones.com/rhodonite-rings/"
+     },
+     "api_total_loose": 5,
+     "api_total_pairs": 0,
+     "captured_loose": [
+      "K21561",
+      "K21562"
+     ],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Goshenite",
+     "slug": "goshenite",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 5,
+      "pair": 1,
+      "ring": 12,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/goshenite/",
+      "pairs": "https://www.naturalgemstones.com/goshenite-pairs/",
+      "rings": "https://www.naturalgemstones.com/goshenite-rings/"
+     },
+     "api_total_loose": 5,
+     "api_total_pairs": 1,
+     "captured_loose": [
+      "K16574",
+      "K16591"
+     ],
+     "captured_pairs": [
+      "PR13491"
+     ],
+     "children": []
+    },
+    {
+     "name": "Red Beryl",
+     "slug": "red-beryl",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 7,
+      "pair": 1,
+      "ring": 1,
+      "earring": 1,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/red-beryl/",
+      "pairs": "https://www.naturalgemstones.com/red-beryl-pairs/",
+      "rings": "https://www.naturalgemstones.com/red-beryl-rings/"
+     },
+     "api_total_loose": 7,
+     "api_total_pairs": 1,
+     "captured_loose": [
+      "K25534",
+      "K25536"
+     ],
+     "captured_pairs": [
+      "PR14618"
+     ],
+     "children": []
+    },
+    {
+     "name": "Precious Topaz",
+     "slug": "precious-topaz",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 74,
+      "pair": 2,
+      "ring": 116,
+      "earring": 0,
+      "necklace": 3,
+      "pendant": 13,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/precious-topaz/",
+      "pairs": "https://www.naturalgemstones.com/precious-topaz-pairs/",
+      "rings": "https://www.naturalgemstones.com/precious-topaz-rings/"
+     },
+     "api_total_loose": 74,
+     "api_total_pairs": 2,
+     "captured_loose": [
+      "K1173",
+      "K1175"
+     ],
+     "captured_pairs": [
+      "PR14703",
+      "PR14704"
+     ],
+     "children": []
+    },
+    {
+     "name": "Heliodor",
+     "slug": "heliodor",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 35,
+      "pair": 9,
+      "ring": 3,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/heliodor/",
+      "pairs": "https://www.naturalgemstones.com/heliodor-pairs/",
+      "rings": "https://www.naturalgemstones.com/heliodor-rings/"
+     },
+     "api_total_loose": 35,
+     "api_total_pairs": 9,
+     "captured_loose": [
+      "K14691",
+      "K14692"
+     ],
+     "captured_pairs": [
+      "PR13485",
+      "PR13486"
+     ],
+     "children": []
+    },
+    {
+     "name": "Akoya Pearl",
+     "slug": "akoya-pearl",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 0,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/akoya-pearl/",
+      "pairs": "https://www.naturalgemstones.com/akoya-pearl-pairs/",
+      "rings": "https://www.naturalgemstones.com/akoya-pearl-rings/"
+     },
+     "api_total_loose": 0,
+     "api_total_pairs": 0,
+     "captured_loose": [],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Pearl",
+     "slug": "pearl",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 0,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/pearl/",
+      "pairs": "https://www.naturalgemstones.com/pearl-pairs/",
+      "rings": "https://www.naturalgemstones.com/pearl-rings/"
+     },
+     "api_total_loose": 0,
+     "api_total_pairs": 0,
+     "captured_loose": [],
+     "captured_pairs": [],
+     "children": [
+      {
+       "name": "Akoya Pearl",
+       "slug": "akoya-pearl",
+       "parent": "Pearl",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/akoya-pearl/",
+        "pairs": "https://www.naturalgemstones.com/akoya-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/akoya-pearl-rings/"
+       },
+       "api_total_loose": 0,
+       "api_total_pairs": 0,
+       "captured_loose": [],
+       "captured_pairs": [],
+       "children": []
+      },
+      {
+       "name": "South Sea Pearl",
+       "slug": "south-sea-pearl",
+       "parent": "Pearl",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/south-sea-pearl/",
+        "pairs": "https://www.naturalgemstones.com/south-sea-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/south-sea-pearl-rings/"
+       },
+       "api_total_loose": 0,
+       "api_total_pairs": 0,
+       "captured_loose": [],
+       "captured_pairs": [],
+       "children": []
+      },
+      {
+       "name": "Tahitian Pearl",
+       "slug": "tahitian-pearl",
+       "parent": "Pearl",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/tahitian-pearl/",
+        "pairs": "https://www.naturalgemstones.com/tahitian-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/tahitian-pearl-rings/"
+       },
+       "api_total_loose": 0,
+       "api_total_pairs": 0,
+       "captured_loose": [],
+       "captured_pairs": [],
+       "children": []
+      },
+      {
+       "name": "Edison Pearl",
+       "slug": "edison-pearl",
+       "parent": "Pearl",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/edison-pearl/",
+        "pairs": "https://www.naturalgemstones.com/edison-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/edison-pearl-rings/"
+       },
+       "api_total_loose": 0,
+       "api_total_pairs": 0,
+       "captured_loose": [],
+       "captured_pairs": [],
+       "children": []
+      },
+      {
+       "name": "Cortez Pearl",
+       "slug": "cortez-pearl",
+       "parent": "Pearl",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/cortez-pearl/",
+        "pairs": "https://www.naturalgemstones.com/cortez-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/cortez-pearl-rings/"
+       },
+       "api_total_loose": 0,
+       "api_total_pairs": 0,
+       "captured_loose": [],
+       "captured_pairs": [],
+       "children": []
+      }
+     ]
+    },
+    {
+     "name": "South Sea Pearl",
+     "slug": "south-sea-pearl",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 0,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/south-sea-pearl/",
+      "pairs": "https://www.naturalgemstones.com/south-sea-pearl-pairs/",
+      "rings": "https://www.naturalgemstones.com/south-sea-pearl-rings/"
+     },
+     "api_total_loose": 0,
+     "api_total_pairs": 0,
+     "captured_loose": [],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Tahitian Pearl",
+     "slug": "tahitian-pearl",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 0,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/tahitian-pearl/",
+      "pairs": "https://www.naturalgemstones.com/tahitian-pearl-pairs/",
+      "rings": "https://www.naturalgemstones.com/tahitian-pearl-rings/"
+     },
+     "api_total_loose": 0,
+     "api_total_pairs": 0,
+     "captured_loose": [],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Edison Pearl",
+     "slug": "edison-pearl",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 0,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/edison-pearl/",
+      "pairs": "https://www.naturalgemstones.com/edison-pearl-pairs/",
+      "rings": "https://www.naturalgemstones.com/edison-pearl-rings/"
+     },
+     "api_total_loose": 0,
+     "api_total_pairs": 0,
+     "captured_loose": [],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Cortez Pearl",
+     "slug": "cortez-pearl",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 0,
+      "pair": 0,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/cortez-pearl/",
+      "pairs": "https://www.naturalgemstones.com/cortez-pearl-pairs/",
+      "rings": "https://www.naturalgemstones.com/cortez-pearl-rings/"
+     },
+     "api_total_loose": 0,
+     "api_total_pairs": 0,
+     "captured_loose": [],
+     "captured_pairs": [],
+     "children": []
+    },
+    {
+     "name": "Bloodstone (Heliotrope)",
+     "slug": "bloodstone-heliotrope",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 8,
+      "pair": 1,
+      "ring": 0,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/bloodstone-heliotrope/",
+      "pairs": "https://www.naturalgemstones.com/bloodstone-heliotrope-pairs/",
+      "rings": "https://www.naturalgemstones.com/bloodstone-heliotrope-rings/"
+     },
+     "api_total_loose": 8,
+     "api_total_pairs": 1,
+     "captured_loose": [
+      "K21246",
+      "K21247"
+     ],
+     "captured_pairs": [
+      "PR13400"
+     ],
+     "children": []
+    },
+    {
+     "name": "Black Opal (Dark Opal)",
+     "slug": "black-opal-dark-opal",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 65,
+      "pair": 3,
+      "ring": 27,
+      "earring": 1,
+      "necklace": 1,
+      "pendant": 1,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/black-opal-dark-opal/",
+      "pairs": "https://www.naturalgemstones.com/black-opal-dark-opal-pairs/",
+      "rings": "https://www.naturalgemstones.com/black-opal-dark-opal-rings/"
+     },
+     "api_total_loose": 101,
+     "api_total_pairs": 3,
+     "captured_loose": [
+      "K10566",
+      "K2080"
+     ],
+     "captured_pairs": [
+      "PR5958",
+      "PR7390"
+     ],
+     "children": []
+    },
+    {
+     "name": "Opal",
+     "slug": "opal",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 441,
+      "pair": 92,
+      "ring": 141,
+      "earring": 8,
+      "necklace": 17,
+      "pendant": 35,
+      "bracelet": 2,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/opal/",
+      "pairs": "https://www.naturalgemstones.com/opal-pairs/",
+      "rings": "https://www.naturalgemstones.com/opal-rings/"
+     },
+     "api_total_loose": 0,
+     "api_total_pairs": 0,
+     "captured_loose": [],
+     "captured_pairs": [],
+     "children": [
+      {
+       "name": "Black Opal (Dark Opal)",
+       "slug": "black-opal-dark-opal",
+       "parent": "Opal",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/black-opal-dark-opal/",
+        "pairs": "https://www.naturalgemstones.com/black-opal-dark-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/black-opal-dark-opal-rings/"
+       },
+       "api_total_loose": 101,
+       "api_total_pairs": 3,
+       "captured_loose": [
+        "K10566",
+        "K2080"
+       ],
+       "captured_pairs": [
+        "PR5958",
+        "PR7390"
+       ],
+       "children": []
+      },
+      {
+       "name": "Crystal Opal (Jelly Opal)",
+       "slug": "crystal-opal-jelly-opal",
+       "parent": "Opal",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/crystal-opal-jelly-opal/",
+        "pairs": "https://www.naturalgemstones.com/crystal-opal-jelly-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/crystal-opal-jelly-opal-rings/"
+       },
+       "api_total_loose": 147,
+       "api_total_pairs": 10,
+       "captured_loose": [
+        "K11580",
+        "K12284"
+       ],
+       "captured_pairs": [
+        "PR5765",
+        "PR13568"
+       ],
+       "children": []
+      },
+      {
+       "name": "White Opal (Light Opal)",
+       "slug": "white-opal-light-opal",
+       "parent": "Opal",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/white-opal-light-opal/",
+        "pairs": "https://www.naturalgemstones.com/white-opal-light-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/white-opal-light-opal-rings/"
+       },
+       "api_total_loose": 291,
+       "api_total_pairs": 71,
+       "captured_loose": [
+        "K1600",
+        "K2070"
+       ],
+       "captured_pairs": [
+        "PR6549",
+        "PR6555"
+       ],
+       "children": []
+      },
+      {
+       "name": "Boulder Opal (Ironstone Opal)",
+       "slug": "boulder-opal-ironstone-opal",
+       "parent": "Opal",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal/",
+        "pairs": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal-rings/"
+       },
+       "api_total_loose": 86,
+       "api_total_pairs": 8,
+       "captured_loose": [
+        "K12747",
+        "K12750"
+       ],
+       "captured_pairs": [
+        "PR10207",
+        "PR13189"
+       ],
+       "children": []
+      },
+      {
+       "name": "Fire Opal (Flame Opal)",
+       "slug": "fire-opal-flame-opal",
+       "parent": "Opal",
+       "site_item_counts": {
+        "stone": 0,
+        "pair": 0,
+        "ring": 0,
+        "earring": 0,
+        "necklace": 0,
+        "pendant": 0,
+        "bracelet": 0,
+        "cufflink": 0,
+        "brooch": 0,
+        "weddingBand": 0
+       },
+       "urls": {
+        "loose": "https://www.naturalgemstones.com/fire-opal-flame-opal/",
+        "pairs": "https://www.naturalgemstones.com/fire-opal-flame-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/fire-opal-flame-opal-rings/"
+       },
+       "api_total_loose": 48,
+       "api_total_pairs": 3,
+       "captured_loose": [
+        "K10729",
+        "K11387"
+       ],
+       "captured_pairs": [
+        "PR13551",
+        "PR13552"
+       ],
+       "children": []
+      }
+     ]
+    },
+    {
+     "name": "Crystal Opal (Jelly Opal)",
+     "slug": "crystal-opal-jelly-opal",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 93,
+      "pair": 9,
+      "ring": 45,
+      "earring": 4,
+      "necklace": 8,
+      "pendant": 5,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/crystal-opal-jelly-opal/",
+      "pairs": "https://www.naturalgemstones.com/crystal-opal-jelly-opal-pairs/",
+      "rings": "https://www.naturalgemstones.com/crystal-opal-jelly-opal-rings/"
+     },
+     "api_total_loose": 147,
+     "api_total_pairs": 10,
+     "captured_loose": [
+      "K11580",
+      "K12284"
+     ],
+     "captured_pairs": [
+      "PR5765",
+      "PR13568"
+     ],
+     "children": []
+    },
+    {
+     "name": "White Opal (Light Opal)",
+     "slug": "white-opal-light-opal",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 217,
+      "pair": 70,
+      "ring": 32,
+      "earring": 3,
+      "necklace": 8,
+      "pendant": 6,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/white-opal-light-opal/",
+      "pairs": "https://www.naturalgemstones.com/white-opal-light-opal-pairs/",
+      "rings": "https://www.naturalgemstones.com/white-opal-light-opal-rings/"
+     },
+     "api_total_loose": 291,
+     "api_total_pairs": 71,
+     "captured_loose": [
+      "K1600",
+      "K2070"
+     ],
+     "captured_pairs": [
+      "PR6549",
+      "PR6555"
+     ],
+     "children": []
+    },
+    {
+     "name": "Boulder Opal (Ironstone Opal)",
+     "slug": "boulder-opal-ironstone-opal",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 24,
+      "pair": 7,
+      "ring": 27,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 6,
+      "bracelet": 0,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal/",
+      "pairs": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal-pairs/",
+      "rings": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal-rings/"
+     },
+     "api_total_loose": 86,
+     "api_total_pairs": 8,
+     "captured_loose": [
+      "K12747",
+      "K12750"
+     ],
+     "captured_pairs": [
+      "PR10207",
+      "PR13189"
+     ],
+     "children": []
+    },
+    {
+     "name": "Fire Opal (Flame Opal)",
+     "slug": "fire-opal-flame-opal",
+     "parent": null,
+     "site_item_counts": {
+      "stone": 42,
+      "pair": 3,
+      "ring": 10,
+      "earring": 0,
+      "necklace": 0,
+      "pendant": 0,
+      "bracelet": 2,
+      "cufflink": 0,
+      "brooch": 0,
+      "weddingBand": 0
+     },
+     "urls": {
+      "loose": "https://www.naturalgemstones.com/fire-opal-flame-opal/",
+      "pairs": "https://www.naturalgemstones.com/fire-opal-flame-opal-pairs/",
+      "rings": "https://www.naturalgemstones.com/fire-opal-flame-opal-rings/"
+     },
+     "api_total_loose": 48,
+     "api_total_pairs": 3,
+     "captured_loose": [
+      "K10729",
+      "K11387"
+     ],
+     "captured_pairs": [
+      "PR13551",
+      "PR13552"
+     ],
+     "children": []
+    }
+   ],
+   "flat_type_count": 82,
+   "color_categories": [
+    {
+     "name": "Bi Color",
+     "loose": "https://www.naturalgemstones.com/bi-color-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/bi-color-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/bi-color-gemstone-rings/"
+    },
+    {
+     "name": "Black",
+     "loose": "https://www.naturalgemstones.com/black-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/black-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/black-gemstone-rings/"
+    },
+    {
+     "name": "Blue",
+     "loose": "https://www.naturalgemstones.com/blue-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/blue-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/blue-gemstone-rings/"
+    },
+    {
+     "name": "Brown",
+     "loose": "https://www.naturalgemstones.com/brown-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/brown-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/brown-gemstone-rings/"
+    },
+    {
+     "name": "Color Change",
+     "loose": "https://www.naturalgemstones.com/color-change-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/color-change-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/color-change-gemstone-rings/"
+    },
+    {
+     "name": "Green",
+     "loose": "https://www.naturalgemstones.com/green-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/green-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/green-gemstone-rings/"
+    },
+    {
+     "name": "Grey",
+     "loose": "https://www.naturalgemstones.com/grey-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/grey-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/grey-gemstone-rings/"
+    },
+    {
+     "name": "Multi Color",
+     "loose": "https://www.naturalgemstones.com/multi-color-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/multi-color-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/multi-color-gemstone-rings/"
+    },
+    {
+     "name": "Orange",
+     "loose": "https://www.naturalgemstones.com/orange-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/orange-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/orange-gemstone-rings/"
+    },
+    {
+     "name": "Peach",
+     "loose": "https://www.naturalgemstones.com/peach-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/peach-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/peach-gemstone-rings/"
+    },
+    {
+     "name": "Pink",
+     "loose": "https://www.naturalgemstones.com/pink-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/pink-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/pink-gemstone-rings/"
+    },
+    {
+     "name": "Purple",
+     "loose": "https://www.naturalgemstones.com/purple-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/purple-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/purple-gemstone-rings/"
+    },
+    {
+     "name": "Red",
+     "loose": "https://www.naturalgemstones.com/red-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/red-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/red-gemstone-rings/"
+    },
+    {
+     "name": "White",
+     "loose": "https://www.naturalgemstones.com/white-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/white-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/white-gemstone-rings/"
+    },
+    {
+     "name": "Yellow",
+     "loose": "https://www.naturalgemstones.com/yellow-gemstones/",
+     "pairs": "https://www.naturalgemstones.com/yellow-gemstone-pairs/",
+     "rings": "https://www.naturalgemstones.com/yellow-gemstone-rings/"
+    }
+   ]
+  },
+  "Settings": {
+   "types": [
+    {
+     "name": "Ring Settings",
+     "url": "https://www.naturalgemstones.com/gemstone-ring-settings/",
+     "total_sku_rows": 8123,
+     "captured": [
+      "JS31",
+      "JS1124"
+     ],
+     "styles": [
+      {
+       "name": "Accent Stones",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=31",
+       "query": {
+        "category": "ring",
+        "styles": [
+         31
+        ]
+       },
+       "total": 1312,
+       "captured": [
+        "JS1274",
+        "JS1018"
+       ],
+       "note": null
+      },
+      {
+       "name": "Antique",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=32",
+       "query": {
+        "category": "ring",
+        "styles": [
+         32
+        ]
+       },
+       "total": 1085,
+       "captured": [
+        "JS1218",
+        "JS1038"
+       ],
+       "note": null
+      },
+      {
+       "name": "Bezel",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=84",
+       "query": {
+        "category": "ring",
+        "styles": [
+         84
+        ]
+       },
+       "total": 1960,
+       "captured": [
+        "JS1190",
+        "JS785"
+       ],
+       "note": null
+      },
+      {
+       "name": "Celtic",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=105",
+       "query": {
+        "category": "ring",
+        "styles": [
+         105
+        ]
+       },
+       "total": 196,
+       "captured": [
+        "JS1449",
+        "JS1295"
+       ],
+       "note": null
+      },
+      {
+       "name": "Drops",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=89",
+       "query": {
+        "category": "ring",
+        "styles": [
+         89
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Earring Jacket",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=121",
+       "query": {
+        "category": "ring",
+        "styles": [
+         121
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Floral",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=90",
+       "query": {
+        "category": "ring",
+        "styles": [
+         90
+        ]
+       },
+       "total": 486,
+       "captured": [
+        "JS1386",
+        "JS1320"
+       ],
+       "note": null
+      },
+      {
+       "name": "Flush Set",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=113",
+       "query": {
+        "category": "ring",
+        "styles": [
+         113
+        ]
+       },
+       "total": 838,
+       "captured": [
+        "JS1150",
+        "JS1407"
+       ],
+       "note": null
+      },
+      {
+       "name": "Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=30",
+       "query": {
+        "category": "ring",
+        "styles": [
+         30
+        ]
+       },
+       "total": 1577,
+       "captured": [
+        "JS1069",
+        "JS1040"
+       ],
+       "note": null
+      },
+      {
+       "name": "Hidden Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=122",
+       "query": {
+        "category": "ring",
+        "styles": [
+         122
+        ]
+       },
+       "total": 409,
+       "captured": [
+        "JS1221",
+        "JS1163"
+       ],
+       "note": null
+      },
+      {
+       "name": "Hoops",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=87",
+       "query": {
+        "category": "ring",
+        "styles": [
+         87
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Lady Diana",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=86",
+       "query": {
+        "category": "ring",
+        "styles": [
+         86
+        ]
+       },
+       "total": 320,
+       "captured": [
+        "JS1460",
+        "JS1125"
+       ],
+       "note": null
+      },
+      {
+       "name": "Men's",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=83",
+       "query": {
+        "category": "ring",
+        "styles": [
+         83
+        ]
+       },
+       "total": 913,
+       "captured": [
+        "JS1354",
+        "JS962"
+       ],
+       "note": null
+      },
+      {
+       "name": "Multi Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=112",
+       "query": {
+        "category": "ring",
+        "styles": [
+         112
+        ]
+       },
+       "total": 7,
+       "captured": [
+        "JS1888"
+       ],
+       "note": null
+      },
+      {
+       "name": "Pave",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=29",
+       "query": {
+        "category": "ring",
+        "styles": [
+         29
+        ]
+       },
+       "total": 2524,
+       "captured": [
+        "JS1457",
+        "JS1121"
+       ],
+       "note": null
+      },
+      {
+       "name": "Solitaire",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=109",
+       "query": {
+        "category": "ring",
+        "styles": [
+         109
+        ]
+       },
+       "total": 1500,
+       "captured": [
+        "JS1170",
+        "JS648"
+       ],
+       "note": null
+      },
+      {
+       "name": "Studs",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=27",
+       "query": {
+        "category": "ring",
+        "styles": [
+         27
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Three Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=28",
+       "query": {
+        "category": "ring",
+        "styles": [
+         28
+        ]
+       },
+       "total": 2531,
+       "captured": [
+        "JS1152",
+        "JS420"
+       ],
+       "note": null
+      },
+      {
+       "name": "Two Stone (toi et moi)",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=119",
+       "query": {
+        "category": "ring",
+        "styles": [
+         119
+        ]
+       },
+       "total": 112,
+       "captured": [
+        "JS1332",
+        "JS1394"
+       ],
+       "note": null
+      },
+      {
+       "name": "Vedic",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=82",
+       "query": {
+        "category": "ring",
+        "styles": [
+         82
+        ]
+       },
+       "total": 1005,
+       "captured": [
+        "JS964",
+        "JS631"
+       ],
+       "note": null
+      },
+      {
+       "name": "Wedding Set",
+       "url": "https://www.naturalgemstones.com/gemstone-ring-settings/?design-styles=33",
+       "query": {
+        "category": "ring",
+        "styles": [
+         33
+        ]
+       },
+       "total": 1167,
+       "captured": [
+        "JS1470",
+        "JS1595"
+       ],
+       "note": null
+      }
+     ]
+    },
+    {
+     "name": "Earring Settings",
+     "url": "https://www.naturalgemstones.com/gemstone-earring-settings/",
+     "total_sku_rows": 442,
+     "captured": [
+      "JS831",
+      "JS830"
+     ],
+     "styles": [
+      {
+       "name": "Accent Stones",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=31",
+       "query": {
+        "category": "earring",
+        "styles": [
+         31
+        ]
+       },
+       "total": 118,
+       "captured": [
+        "JS1132",
+        "JS1191"
+       ],
+       "note": null
+      },
+      {
+       "name": "Antique",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=32",
+       "query": {
+        "category": "earring",
+        "styles": [
+         32
+        ]
+       },
+       "total": 12,
+       "captured": [
+        "JS1851",
+        "JS473"
+       ],
+       "note": null
+      },
+      {
+       "name": "Bezel",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=84",
+       "query": {
+        "category": "earring",
+        "styles": [
+         84
+        ]
+       },
+       "total": 26,
+       "captured": [
+        "JS622",
+        "JS1864"
+       ],
+       "note": null
+      },
+      {
+       "name": "Celtic",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=105",
+       "query": {
+        "category": "earring",
+        "styles": [
+         105
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Drops",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=89",
+       "query": {
+        "category": "earring",
+        "styles": [
+         89
+        ]
+       },
+       "total": 195,
+       "captured": [
+        "JS1385",
+        "JS132"
+       ],
+       "note": null
+      },
+      {
+       "name": "Earring Jacket",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=121",
+       "query": {
+        "category": "earring",
+        "styles": [
+         121
+        ]
+       },
+       "total": 12,
+       "captured": [
+        "JS1564",
+        "JS1522"
+       ],
+       "note": null
+      },
+      {
+       "name": "Floral",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=90",
+       "query": {
+        "category": "earring",
+        "styles": [
+         90
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Flush Set",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=113",
+       "query": {
+        "category": "earring",
+        "styles": [
+         113
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=30",
+       "query": {
+        "category": "earring",
+        "styles": [
+         30
+        ]
+       },
+       "total": 200,
+       "captured": [
+        "JS1450",
+        "JS807"
+       ],
+       "note": null
+      },
+      {
+       "name": "Hidden Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=122",
+       "query": {
+        "category": "earring",
+        "styles": [
+         122
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Hoops",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=87",
+       "query": {
+        "category": "earring",
+        "styles": [
+         87
+        ]
+       },
+       "total": 34,
+       "captured": [
+        "JS1154",
+        "JS1155"
+       ],
+       "note": null
+      },
+      {
+       "name": "Lady Diana",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=86",
+       "query": {
+        "category": "earring",
+        "styles": [
+         86
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Men's",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=83",
+       "query": {
+        "category": "earring",
+        "styles": [
+         83
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Multi Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=112",
+       "query": {
+        "category": "earring",
+        "styles": [
+         112
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Pave",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=29",
+       "query": {
+        "category": "earring",
+        "styles": [
+         29
+        ]
+       },
+       "total": 142,
+       "captured": [
+        "JS1341",
+        "JS349"
+       ],
+       "note": null
+      },
+      {
+       "name": "Solitaire",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=109",
+       "query": {
+        "category": "earring",
+        "styles": [
+         109
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Studs",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=27",
+       "query": {
+        "category": "earring",
+        "styles": [
+         27
+        ]
+       },
+       "total": 146,
+       "captured": [
+        "JS112",
+        "JS118"
+       ],
+       "note": null
+      },
+      {
+       "name": "Three Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=28",
+       "query": {
+        "category": "earring",
+        "styles": [
+         28
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Two Stone (toi et moi)",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=119",
+       "query": {
+        "category": "earring",
+        "styles": [
+         119
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Vedic",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=82",
+       "query": {
+        "category": "earring",
+        "styles": [
+         82
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Wedding Set",
+       "url": "https://www.naturalgemstones.com/gemstone-earring-settings/?design-styles=33",
+       "query": {
+        "category": "earring",
+        "styles": [
+         33
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      }
+     ]
+    },
+    {
+     "name": "Necklace & Pendant Settings",
+     "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/",
+     "total_sku_rows": 1808,
+     "captured": [
+      "JS1416",
+      "JS130"
+     ],
+     "styles": [
+      {
+       "name": "Accent Stones",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=31",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         31
+        ]
+       },
+       "total": 539,
+       "captured": [
+        "JS1537",
+        "JS1390"
+       ],
+       "note": null
+      },
+      {
+       "name": "Antique",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=32",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         32
+        ]
+       },
+       "total": 142,
+       "captured": [
+        "JS1377",
+        "JS1178"
+       ],
+       "note": null
+      },
+      {
+       "name": "Bezel",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=84",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         84
+        ]
+       },
+       "total": 406,
+       "captured": [
+        "JS1247",
+        "JS1601"
+       ],
+       "note": null
+      },
+      {
+       "name": "Celtic",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=105",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         105
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Drops",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=89",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         89
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Earring Jacket",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=121",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         121
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Floral",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=90",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         90
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Flush Set",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=113",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         113
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=30",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         30
+        ]
+       },
+       "total": 515,
+       "captured": [
+        "JS1471",
+        "JS1181"
+       ],
+       "note": null
+      },
+      {
+       "name": "Hidden Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=122",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         122
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Hoops",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=87",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         87
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Lady Diana",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=86",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         86
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Men's",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=83",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         83
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Multi Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=112",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         112
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Pave",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=29",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         29
+        ]
+       },
+       "total": 569,
+       "captured": [
+        "JS1573",
+        "JS1472"
+       ],
+       "note": null
+      },
+      {
+       "name": "Solitaire",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=109",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         109
+        ]
+       },
+       "total": 639,
+       "captured": [
+        "JS85",
+        "JS1276"
+       ],
+       "note": null
+      },
+      {
+       "name": "Studs",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=27",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         27
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Three Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=28",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         28
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Two Stone (toi et moi)",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=119",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         119
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Vedic",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=82",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         82
+        ]
+       },
+       "total": 423,
+       "captured": [
+        "JS238",
+        "JS1417"
+       ],
+       "note": null
+      },
+      {
+       "name": "Wedding Set",
+       "url": "https://www.naturalgemstones.com/gemstone-necklace-pendant-settings/?design-styles=33",
+       "query": {
+        "category": "pendant",
+        "styles": [
+         33
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      }
+     ]
+    },
+    {
+     "name": "Bracelet Settings",
+     "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/",
+     "total_sku_rows": 99,
+     "captured": [
+      "JS1255",
+      "JS1256"
+     ],
+     "styles": [
+      {
+       "name": "Accent Stones",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=31",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         31
+        ]
+       },
+       "total": 53,
+       "captured": [
+        "JS1327",
+        "JS1329"
+       ],
+       "note": null
+      },
+      {
+       "name": "Antique",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=32",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         32
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Bezel",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=84",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         84
+        ]
+       },
+       "total": 74,
+       "captured": [
+        "JS1667",
+        "JS1726"
+       ],
+       "note": null
+      },
+      {
+       "name": "Celtic",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=105",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         105
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Drops",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=89",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         89
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Earring Jacket",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=121",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         121
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Floral",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=90",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         90
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Flush Set",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=113",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         113
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=30",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         30
+        ]
+       },
+       "total": 33,
+       "captured": [
+        "JS1328",
+        "JS1727"
+       ],
+       "note": null
+      },
+      {
+       "name": "Hidden Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=122",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         122
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Hoops",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=87",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         87
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Lady Diana",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=86",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         86
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Men's",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=83",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         83
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Multi Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=112",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         112
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Pave",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=29",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         29
+        ]
+       },
+       "total": 43,
+       "captured": [
+        "JS1668",
+        "JS1666"
+       ],
+       "note": null
+      },
+      {
+       "name": "Solitaire",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=109",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         109
+        ]
+       },
+       "total": 21,
+       "captured": [
+        "JS1603",
+        "JS1665"
+       ],
+       "note": null
+      },
+      {
+       "name": "Studs",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=27",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         27
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Three Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=28",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         28
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Two Stone (toi et moi)",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=119",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         119
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Vedic",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=82",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         82
+        ]
+       },
+       "total": 79,
+       "captured": [
+        "JS1605",
+        "JS1604"
+       ],
+       "note": null
+      },
+      {
+       "name": "Wedding Set",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelet-settings/?design-styles=33",
+       "query": {
+        "category": "bracelet",
+        "styles": [
+         33
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      }
+     ]
+    },
+    {
+     "name": "Men's Ring Settings",
+     "url": "https://www.naturalgemstones.com/mens-gemstone-ring-settings/",
+     "note": "Same as Ring Settings filtered by design style Men's (key 83)",
+     "styles": []
+    }
+   ],
+   "design_your_own": "https://www.naturalgemstones.com/custom-design-gemstone-rings-jewelry/"
+  },
+  "Jewelry": {
+   "landing_rings": "https://www.naturalgemstones.com/gemstone-rings/",
+   "all_rings": "https://www.naturalgemstones.com/all-gemstone-rings/",
+   "types": [
+    {
+     "name": "Rings",
+     "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+     "total": 7827,
+     "captured": [
+      "J11524",
+      "J11584"
+     ],
+     "styles": [
+      {
+       "name": "Accent Stones",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Accent Stones"
+        ]
+       },
+       "total": 1089,
+       "captured": [
+        "J12187",
+        "J12028"
+       ],
+       "note": null
+      },
+      {
+       "name": "Antique",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Antique"
+        ]
+       },
+       "total": 913,
+       "captured": [
+        "J10849",
+        "J11890"
+       ],
+       "note": null
+      },
+      {
+       "name": "Bead",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Bead"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Bezel",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Bezel"
+        ]
+       },
+       "total": 2390,
+       "captured": [
+        "J11799",
+        "J11402"
+       ],
+       "note": null
+      },
+      {
+       "name": "Celtic",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Celtic"
+        ]
+       },
+       "total": 190,
+       "captured": [
+        "JS1493Y18-K12897",
+        "JS1449PT-K5450"
+       ],
+       "note": "dyo_composite"
+      },
+      {
+       "name": "Drops",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Drops"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Earring Jacket",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Earring Jacket"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Floral",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Floral"
+        ]
+       },
+       "total": 852,
+       "captured": [
+        "J11180",
+        "J11584"
+       ],
+       "note": null
+      },
+      {
+       "name": "Flush Set",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Flush Set"
+        ]
+       },
+       "total": 838,
+       "captured": [
+        "JS1081Y18-K5686",
+        "JS1164W14-K7082"
+       ],
+       "note": "dyo_composite"
+      },
+      {
+       "name": "Halo",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Halo"
+        ]
+       },
+       "total": 757,
+       "captured": [
+        "J11469",
+        "J11602"
+       ],
+       "note": null
+      },
+      {
+       "name": "Hidden Halo",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Hidden Halo"
+        ]
+       },
+       "total": 235,
+       "captured": [
+        "JS1231Y18-K2653",
+        "JS1754W14-K2183"
+       ],
+       "note": "dyo_composite"
+      },
+      {
+       "name": "Hoops",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Hoops"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Lady Diana",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Lady Diana"
+        ]
+       },
+       "total": 197,
+       "captured": [
+        "JS1035Y18-K16369",
+        "JS1038W14-K13301"
+       ],
+       "note": "dyo_composite"
+      },
+      {
+       "name": "Men's",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Men's"
+        ]
+       },
+       "total": 1289,
+       "captured": [
+        "JS1567W14-K2821",
+        "JS1640Y14-K4862"
+       ],
+       "note": "dyo_composite"
+      },
+      {
+       "name": "Multi Stone",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Multi Stone"
+        ]
+       },
+       "total": 7,
+       "captured": [
+        "J10914",
+        "J10808"
+       ],
+       "note": null
+      },
+      {
+       "name": "Pave",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Pave"
+        ]
+       },
+       "total": 1933,
+       "captured": [
+        "J11463",
+        "J11042"
+       ],
+       "note": null
+      },
+      {
+       "name": "Solitaire",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Solitaire"
+        ]
+       },
+       "total": 3386,
+       "captured": [
+        "J12767",
+        "J12187"
+       ],
+       "note": null
+      },
+      {
+       "name": "Studs",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Studs"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Tennis/Line",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Tennis/Line"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Tennis/Riviere",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Tennis/Riviere"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Three Stone",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Three Stone"
+        ]
+       },
+       "total": 1443,
+       "captured": [
+        "J10753",
+        "J10032"
+       ],
+       "note": null
+      },
+      {
+       "name": "Two Stone (toi et moi)",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Two Stone (toi et moi)"
+        ]
+       },
+       "total": 73,
+       "captured": [
+        "J12757"
+       ],
+       "note": null
+      },
+      {
+       "name": "Vedic",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Vedic"
+        ]
+       },
+       "total": 1390,
+       "captured": [
+        "JS1717Y18-K24710",
+        "JS1488Y18-K24207"
+       ],
+       "note": "dyo_composite"
+      },
+      {
+       "name": "Wedding Set",
+       "url": "https://www.naturalgemstones.com/all-gemstone-rings/",
+       "query": {
+        "categories": [
+         "Ring"
+        ],
+        "styles": [
+         "Wedding Set"
+        ]
+       },
+       "total": 249,
+       "captured": [
+        "J10636"
+       ],
+       "note": null
+      }
+     ]
+    },
+    {
+     "name": "Earrings",
+     "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+     "total": 443,
+     "captured": [
+      "J11585",
+      "J11169"
+     ],
+     "styles": [
+      {
+       "name": "Accent Stones",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Accent Stones"
+        ]
+       },
+       "total": 102,
+       "captured": [
+        "J12379",
+        "J12338"
+       ],
+       "note": null
+      },
+      {
+       "name": "Antique",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Antique"
+        ]
+       },
+       "total": 1,
+       "captured": [
+        "JS1851R14-PR10249"
+       ],
+       "note": "dyo_composite"
+      },
+      {
+       "name": "Bead",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Bead"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Bezel",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Bezel"
+        ]
+       },
+       "total": 69,
+       "captured": [
+        "J10997",
+        "J10996"
+       ],
+       "note": null
+      },
+      {
+       "name": "Celtic",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Celtic"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Drops",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Drops"
+        ]
+       },
+       "total": 169,
+       "captured": [
+        "J11170",
+        "J11210"
+       ],
+       "note": null
+      },
+      {
+       "name": "Earring Jacket",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Earring Jacket"
+        ]
+       },
+       "total": 1,
+       "captured": [
+        "J11260"
+       ],
+       "note": null
+      },
+      {
+       "name": "Floral",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Floral"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Flush Set",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Flush Set"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Halo"
+        ]
+       },
+       "total": 109,
+       "captured": [
+        "J11209",
+        "J11203"
+       ],
+       "note": null
+      },
+      {
+       "name": "Hidden Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Hidden Halo"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Hoops",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Hoops"
+        ]
+       },
+       "total": 18,
+       "captured": [
+        "J10045",
+        "J10037"
+       ],
+       "note": null
+      },
+      {
+       "name": "Lady Diana",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Lady Diana"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Men's",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Men's"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Multi Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Multi Stone"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Pave",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Pave"
+        ]
+       },
+       "total": 78,
+       "captured": [
+        "J11259",
+        "J11261"
+       ],
+       "note": null
+      },
+      {
+       "name": "Solitaire",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Solitaire"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Studs",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Studs"
+        ]
+       },
+       "total": 211,
+       "captured": [
+        "J12755",
+        "J12418"
+       ],
+       "note": null
+      },
+      {
+       "name": "Tennis/Line",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Tennis/Line"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Tennis/Riviere",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Tennis/Riviere"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Three Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Three Stone"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Two Stone (toi et moi)",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Two Stone (toi et moi)"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Vedic",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Vedic"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Wedding Set",
+       "url": "https://www.naturalgemstones.com/gemstone-earrings/",
+       "query": {
+        "categories": [
+         "Earring"
+        ],
+        "styles": [
+         "Wedding Set"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      }
+     ]
+    },
+    {
+     "name": "Pendants",
+     "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+     "total": 1241,
+     "captured": [
+      "J11213",
+      "J10916"
+     ],
+     "styles": [
+      {
+       "name": "Accent Stones",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Accent Stones"
+        ]
+       },
+       "total": 301,
+       "captured": [
+        "J10972",
+        "J10908"
+       ],
+       "note": null
+      },
+      {
+       "name": "Antique",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Antique"
+        ]
+       },
+       "total": 48,
+       "captured": [
+        "J10916",
+        "J10972"
+       ],
+       "note": null
+      },
+      {
+       "name": "Bead",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Bead"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Bezel",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Bezel"
+        ]
+       },
+       "total": 261,
+       "captured": [
+        "J10850",
+        "J10880"
+       ],
+       "note": null
+      },
+      {
+       "name": "Celtic",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Celtic"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Drops",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Drops"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Earring Jacket",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Earring Jacket"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Floral",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Floral"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Flush Set",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Flush Set"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Halo"
+        ]
+       },
+       "total": 187,
+       "captured": [
+        "J11255",
+        "J10743"
+       ],
+       "note": null
+      },
+      {
+       "name": "Hidden Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Hidden Halo"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Hoops",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Hoops"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Lady Diana",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Lady Diana"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Men's",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Men's"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Multi Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Multi Stone"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Pave",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Pave"
+        ]
+       },
+       "total": 237,
+       "captured": [
+        "J11201",
+        "J11202"
+       ],
+       "note": null
+      },
+      {
+       "name": "Solitaire",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Solitaire"
+        ]
+       },
+       "total": 622,
+       "captured": [
+        "J12234",
+        "J12772"
+       ],
+       "note": null
+      },
+      {
+       "name": "Studs",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Studs"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Tennis/Line",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Tennis/Line"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Tennis/Riviere",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Tennis/Riviere"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Three Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Three Stone"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Two Stone (toi et moi)",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Two Stone (toi et moi)"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Vedic",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Vedic"
+        ]
+       },
+       "total": 179,
+       "captured": [
+        "JS1438W10-K315",
+        "JS238SL-K18808"
+       ],
+       "note": "dyo_composite"
+      },
+      {
+       "name": "Wedding Set",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Pendant"
+        ],
+        "styles": [
+         "Wedding Set"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      }
+     ]
+    },
+    {
+     "name": "Necklaces",
+     "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+     "total": 623,
+     "captured": [
+      "J11185",
+      "J11251"
+     ],
+     "styles": [
+      {
+       "name": "Accent Stones",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Accent Stones"
+        ]
+       },
+       "total": 151,
+       "captured": [
+        "J11280",
+        "J11388"
+       ],
+       "note": null
+      },
+      {
+       "name": "Antique",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Antique"
+        ]
+       },
+       "total": 9,
+       "captured": [
+        "J11248",
+        "J10108"
+       ],
+       "note": null
+      },
+      {
+       "name": "Bead",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Bead"
+        ]
+       },
+       "total": 3,
+       "captured": [
+        "J12428",
+        "J12526"
+       ],
+       "note": null
+      },
+      {
+       "name": "Bezel",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Bezel"
+        ]
+       },
+       "total": 227,
+       "captured": [
+        "J12568",
+        "J11274"
+       ],
+       "note": null
+      },
+      {
+       "name": "Celtic",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Celtic"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Drops",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Drops"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Earring Jacket",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Earring Jacket"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Floral",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Floral"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Flush Set",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Flush Set"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Halo"
+        ]
+       },
+       "total": 58,
+       "captured": [
+        "J11249",
+        "J11253"
+       ],
+       "note": null
+      },
+      {
+       "name": "Hidden Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Hidden Halo"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Hoops",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Hoops"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Lady Diana",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Lady Diana"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Men's",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Men's"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Multi Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Multi Stone"
+        ]
+       },
+       "total": 81,
+       "captured": [
+        "J10848",
+        "J10918"
+       ],
+       "note": null
+      },
+      {
+       "name": "Pave",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Pave"
+        ]
+       },
+       "total": 55,
+       "captured": [
+        "J11200",
+        "J11205"
+       ],
+       "note": null
+      },
+      {
+       "name": "Solitaire",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Solitaire"
+        ]
+       },
+       "total": 301,
+       "captured": [
+        "J10721",
+        "J12393"
+       ],
+       "note": null
+      },
+      {
+       "name": "Studs",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Studs"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Tennis/Line",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Tennis/Line"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Tennis/Riviere",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Tennis/Riviere"
+        ]
+       },
+       "total": 5,
+       "captured": [
+        "J12442",
+        "J12443"
+       ],
+       "note": null
+      },
+      {
+       "name": "Three Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Three Stone"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Two Stone (toi et moi)",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Two Stone (toi et moi)"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Vedic",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Vedic"
+        ]
+       },
+       "total": 187,
+       "captured": [
+        "JS1800SL-K24428",
+        "JS1434Y10-K13126"
+       ],
+       "note": "dyo_composite"
+      },
+      {
+       "name": "Wedding Set",
+       "url": "https://www.naturalgemstones.com/gemstone-necklaces-pendants/",
+       "query": {
+        "categories": [
+         "Necklace"
+        ],
+        "styles": [
+         "Wedding Set"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      }
+     ]
+    },
+    {
+     "name": "Bracelets & Bangles",
+     "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+     "total": 188,
+     "captured": [
+      "J11239",
+      "J11232"
+     ],
+     "styles": [
+      {
+       "name": "Accent Stones",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Accent Stones"
+        ]
+       },
+       "total": 51,
+       "captured": [
+        "J10206",
+        "J10208"
+       ],
+       "note": null
+      },
+      {
+       "name": "Antique",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Antique"
+        ]
+       },
+       "total": 1,
+       "captured": [
+        "J12494"
+       ],
+       "note": null
+      },
+      {
+       "name": "Bead",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Bead"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Bezel",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Bezel"
+        ]
+       },
+       "total": 135,
+       "captured": [
+        "J11980",
+        "J12113"
+       ],
+       "note": null
+      },
+      {
+       "name": "Celtic",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Celtic"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Drops",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Drops"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Earring Jacket",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Earring Jacket"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Floral",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Floral"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Flush Set",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Flush Set"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Halo"
+        ]
+       },
+       "total": 32,
+       "captured": [
+        "J10909",
+        "J11239"
+       ],
+       "note": null
+      },
+      {
+       "name": "Hidden Halo",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Hidden Halo"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Hoops",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Hoops"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Lady Diana",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Lady Diana"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Men's",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Men's"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Multi Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Multi Stone"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Pave",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Pave"
+        ]
+       },
+       "total": 49,
+       "captured": [
+        "J12271",
+        "J12309"
+       ],
+       "note": null
+      },
+      {
+       "name": "Solitaire",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Solitaire"
+        ]
+       },
+       "total": 49,
+       "captured": [
+        "JS1665W18-K3944",
+        "JS1665Y18-K600"
+       ],
+       "note": "dyo_composite"
+      },
+      {
+       "name": "Studs",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Studs"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Tennis/Line",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Tennis/Line"
+        ]
+       },
+       "total": 33,
+       "captured": [
+        "J11231",
+        "J11155"
+       ],
+       "note": null
+      },
+      {
+       "name": "Tennis/Riviere",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Tennis/Riviere"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Three Stone",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Three Stone"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Two Stone (toi et moi)",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Two Stone (toi et moi)"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Vedic",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Vedic"
+        ]
+       },
+       "total": 93,
+       "captured": [
+        "JS1668Y14-K15533",
+        "JS1604Y18-K7533"
+       ],
+       "note": "dyo_composite"
+      },
+      {
+       "name": "Wedding Set",
+       "url": "https://www.naturalgemstones.com/gemstone-bracelets-bangles/",
+       "query": {
+        "categories": [
+         "Bracelet"
+        ],
+        "styles": [
+         "Wedding Set"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      }
+     ]
+    },
+    {
+     "name": "Brooches",
+     "url": null,
+     "total": 1,
+     "captured": [
+      "J11446"
+     ],
+     "styles": [
+      {
+       "name": "Accent Stones",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Accent Stones"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Antique",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Antique"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Bead",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Bead"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Bezel",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Bezel"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Celtic",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Celtic"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Drops",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Drops"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Earring Jacket",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Earring Jacket"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Floral",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Floral"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Flush Set",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Flush Set"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Halo",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Halo"
+        ]
+       },
+       "total": 1,
+       "captured": [
+        "J11446"
+       ],
+       "note": null
+      },
+      {
+       "name": "Hidden Halo",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Hidden Halo"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Hoops",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Hoops"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Lady Diana",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Lady Diana"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Men's",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Men's"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Multi Stone",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Multi Stone"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Pave",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Pave"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Solitaire",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Solitaire"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Studs",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Studs"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Tennis/Line",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Tennis/Line"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Tennis/Riviere",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Tennis/Riviere"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Three Stone",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Three Stone"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Two Stone (toi et moi)",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Two Stone (toi et moi)"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Vedic",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Vedic"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      },
+      {
+       "name": "Wedding Set",
+       "url": null,
+       "query": {
+        "categories": [
+         "Brooch"
+        ],
+        "styles": [
+         "Wedding Set"
+        ]
+       },
+       "total": 0,
+       "captured": [],
+       "note": null
+      }
+     ]
+    },
+    {
+     "name": "Men's Rings",
+     "url": "https://www.naturalgemstones.com/mens-gemstone-rings/",
+     "note": "Rings filtered by style Men's",
+     "styles": []
+    }
+   ]
+  }
+ },
+ "note": "Ruby, sapphire, emerald are NOT sold on naturalgemstones.com (sister sites: thenaturalsapphirecompany.com, emeralds.com, rubies.com); /ruby/ returns 404."
+}

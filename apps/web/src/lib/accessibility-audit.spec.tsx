@@ -25,9 +25,18 @@ import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { beforeAll, afterEach, describe, expect, it } from 'vitest';
+import { beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
+import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { AxeBuilder } from './axe-builder.js';
+import { StorefrontProvider } from '../components/storefront/StorefrontProvider.js';
+import { DEFAULT_FX } from './currency.js';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: () => undefined, replace: () => undefined, prefetch: () => undefined }),
+  usePathname: () => '/',
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 import { setCatalogServiceForTest } from './catalog-server.js';
 import {
@@ -43,8 +52,8 @@ import type { TaxonomyReadModel } from '@maihan/contracts';
 
 import HomePage from '../app/(storefront)/page.js';
 import VarietyIndexPage from '../app/(storefront)/[varietySlug]/page.js';
-import VarietyPairsPage from '../app/(storefront)/[varietySlug]-pairs/page.js';
-import VarietyRingDetailPage from '../app/(storefront)/[varietySlug]-rings/[productSlug]/page.js';
+import VarietyPairsPage from '../app/(storefront)/[varietySlug]/page.js';
+import VarietyRingDetailPage from '../app/(storefront)/[varietySlug]/[productSlug]/page.js';
 import ProductDetailPage from '../app/(storefront)/products/[productSlug]/page.js';
 import ColourIndexPage from '../app/(storefront)/colour/[colourSlug]/page.js';
 import SettingsIndexPage from '../app/(storefront)/settings/page.js';
@@ -129,6 +138,10 @@ function fullPort(): FakeCatalogPort {
   return port;
 }
 
+function withStorefront(ui: React.ReactNode): React.ReactElement {
+  return createElement(StorefrontProvider, { rates: DEFAULT_FX, children: ui });
+}
+
 async function audit(name: string, ui: React.ReactElement): Promise<void> {
   // SSR the component and load the markup into a live container. The harness
   // mirrors what the root layout really ships: `<html lang="en">` and a
@@ -169,7 +182,7 @@ describe('Task 11 accessibility audit — representative templates (axe-core, cr
     port = fullPort();
     wire(port);
     const page = await HomePage();
-    await audit('home', page);
+    await audit('home', withStorefront(page));
   });
 
   it('mega menu (disclosure semantics, real links)', async () => {
@@ -181,49 +194,51 @@ describe('Task 11 accessibility audit — representative templates (axe-core, cr
     port = fullPort();
     wire(port);
     const page = await VarietyIndexPage({ params: Promise.resolve({ varietySlug: 'tsavorite-garnet' }), searchParams: Promise.resolve({}) });
-    await audit('variety listing', page);
+    await audit('variety listing', withStorefront(page));
   });
 
   it('colour listing with product cards', async () => {
     port = fullPort();
     wire(port);
     const page = await ColourIndexPage({ params: Promise.resolve({ colourSlug: 'green' }), searchParams: Promise.resolve({}) });
-    await audit('colour listing', page);
+    await audit('colour listing', withStorefront(page));
   });
 
   it('settings listing', async () => {
     port = fullPort();
     wire(port);
     const page = await SettingsIndexPage({ searchParams: Promise.resolve({}) });
-    await audit('settings listing', page);
+    await audit('settings listing', withStorefront(page));
   });
 
   it('varieties hub', async () => {
     port = fullPort();
     wire(port);
     const page = await VarietiesIndexPage();
-    await audit('varieties hub', page);
+    await audit('varieties hub', withStorefront(page));
   });
 
   it('product detail (canonical route)', async () => {
     port = fullPort();
     wire(port);
     const page = await ProductDetailPage({ params: Promise.resolve({ productSlug: 'tsavorite-1ct-round' }) });
-    await audit('product detail', page);
+    await audit('product detail', withStorefront(page));
   });
 
   it('ready-made detail (same renderer, second route)', async () => {
     port = fullPort();
     wire(port);
-    const page = await VarietyRingDetailPage({ params: Promise.resolve({ productSlug: 'tsavorite-1ct-round' }) });
-    await audit('ready-made detail', page);
+    const page = await VarietyRingDetailPage({
+      params: Promise.resolve({ varietySlug: 'tsavorite-garnet', productSlug: 'K5770' }),
+    });
+    await audit('ready-made detail', withStorefront(page));
   });
 
   it('pairs listing', async () => {
     port = fullPort();
     wire(port);
     const page = await VarietyPairsPage({ params: Promise.resolve({ varietySlug: 'tsavorite-garnet' }), searchParams: Promise.resolve({}) });
-    await audit('pairs listing', page);
+    await audit('pairs listing', withStorefront(page));
   });
 
   it('search page (empty result state)', async () => {
@@ -245,7 +260,7 @@ describe('Task 11 accessibility audit — representative templates (axe-core, cr
     });
     wire(port);
     const page = await SearchPage({ searchParams: Promise.resolve({}) });
-    await audit('search page', page);
+    await audit('search page', withStorefront(page));
   });
 
   it('not-found state', async () => {

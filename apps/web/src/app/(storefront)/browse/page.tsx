@@ -1,29 +1,21 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
-import { displayStoneName, stoneTypeToSlug } from '../../../lib/search-parser.js';
-import { listProducts, listStoneTypes } from '../../../lib/storefront-data.js';
+import { landingView } from '../../../lib/ngc/landing.js';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Gemstones | Maihan Gems' };
 
 export default async function BrowsePage() {
-  const [products, stones] = await Promise.all([
-    listProducts({ kind: 'gemstone', limit: 96 }),
-    listStoneTypes(),
-  ]);
+  const view = landingView('all-natural-gemstones');
+  if (!view) notFound();
   return (
     <CollectionPage
-      kicker="Loose stones"
-      title="Gemstones"
-      lede="Natural stones from the vault, listed as they were found and cut."
-      products={products}
-      chips={stones.map((s) => (
-        <Link key={s.stoneType} href={`/${stoneTypeToSlug(s.stoneType)}`}>
-          {displayStoneName(s.stoneType)}
-        </Link>
-      ))}
+      kicker={view.kicker}
+      title={view.title}
+      lede={view.lede}
+      products={view.products}
     />
   );
 }

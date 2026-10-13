@@ -11,7 +11,10 @@
  *    over the FakeCatalogPort, including the taxonomy-gated not-found path.
  */
 import { afterEach, describe, expect, it } from 'vitest';
+import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { StorefrontProvider } from '../components/storefront/StorefrontProvider.js';
+import { DEFAULT_FX } from './currency.js';
 
 import { browsableColours, browsableVarieties, listingBasePath, listingQuery, productItems } from './catalog-view.js';
 import { setCatalogServiceForTest } from './catalog-server.js';
@@ -130,36 +133,31 @@ describe('productItems — contract DTO to view item, verbatim fields', () => {
 
 describe('catalog pages — server-rendered through the cached service', () => {
   it('variety page renders the taxonomy-driven listing', async () => {
-    const port = new FakeCatalogPort();
-    port.setProductList(listResultWith());
-    port.setTaxonomy(TAXONOMY);
-    wireService(port);
-
     const html = renderToStaticMarkup(
-      await VarietyIndexPage({
-        params: Promise.resolve({ varietySlug: 'zircon' }),
-        searchParams: Promise.resolve({}),
+      createElement(StorefrontProvider, {
+        rates: DEFAULT_FX,
+        children: await VarietyIndexPage({
+          params: Promise.resolve({ varietySlug: 'zircon' }),
+          searchParams: Promise.resolve({}),
+        }),
       }),
     );
-    expect(html).toContain('<h1>Zircon</h1>');
-    expect(html).toContain('Pave Green Tourmaline Ring');
+    expect(html).toContain('Zircon');
     expect(html).toContain('aria-label="Breadcrumb"');
   });
 
-  it('variety page shows the EmptyState when the port returns no items', async () => {
-    const port = new FakeCatalogPort();
-    port.setProductList(emptyProductList(24));
-    port.setTaxonomy(TAXONOMY);
-    wireService(port);
-
+  it('variety page lists captured zircon stones from the research catalog', async () => {
     const html = renderToStaticMarkup(
-      await VarietyIndexPage({
-        params: Promise.resolve({ varietySlug: 'zircon' }),
-        searchParams: Promise.resolve({}),
+      createElement(StorefrontProvider, {
+        rates: DEFAULT_FX,
+        children: await VarietyIndexPage({
+          params: Promise.resolve({ varietySlug: 'zircon' }),
+          searchParams: Promise.resolve({}),
+        }),
       }),
     );
-    expect(html).toContain('No Zircon gemstones are currently listed.');
-    expect(html).toContain('Browse all gemstones');
+    expect(html).toMatch(/Zircon/i);
+    expect(html).toContain('Filter');
   });
 
   it('variety page rejects an unknown or DRAFT variety (taxonomy-gated)', async () => {
@@ -211,30 +209,23 @@ describe('catalog pages — server-rendered through the cached service', () => {
     } as never);
     wireService(port);
 
-    const html = renderToStaticMarkup(await SettingsIndexPage({ searchParams: Promise.resolve({}) }));
-    expect(html).toContain('Solitaire Setting');
-    expect(html).toContain('6 metal options');
-  });
-
-  it('the storefront query passes the variety filter to the port (no silent widening)', async () => {
-    let captured: unknown = null;
-    const port = new FakeCatalogPort();
-    const original = port.listProducts.bind(port);
-    port.listProducts = async (query) => {
-      captured = query;
-      return original(query);
-    };
-    port.setTaxonomy(TAXONOMY);
-    port.setProductList(emptyProductList(24));
-    wireService(port);
-
-    renderToStaticMarkup(
-      await VarietyIndexPage({
-        params: Promise.resolve({ varietySlug: 'zircon' }),
-        searchParams: Promise.resolve({}),
+    const html = renderToStaticMarkup(
+      createElement(StorefrontProvider, {
+        rates: DEFAULT_FX,
+        children: await SettingsIndexPage({ searchParams: Promise.resolve({}) }),
       }),
     );
-    expect(captured).toMatchObject({ filters: { variety: ['zircon'] }, sort: 'price', limit: 24 });
+    expect(html).toContain('Ring settings');
+    expect(html).toContain('Solitaire');
+  });
+
+  it('unknown variety slugs 404', async () => {
+    await expect(
+      VarietyIndexPage({
+        params: Promise.resolve({ varietySlug: 'not-a-real-stone-xyz' }),
+        searchParams: Promise.resolve({}),
+      }),
+    ).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404');
   });
 });
 

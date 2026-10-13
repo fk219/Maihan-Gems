@@ -1,0 +1,3940 @@
+{
+  "roots": [
+    {
+      "id": "gemstones",
+      "name": "Gemstones",
+      "slug": "natural-gemstones",
+      "all": "all-natural-gemstones",
+      "pairs": "natural-gemstone-pairs"
+    },
+    {
+      "id": "settings",
+      "name": "Settings",
+      "slug": "settings"
+    },
+    {
+      "id": "jewellery",
+      "name": "Jewellery",
+      "slug": "jewellery"
+    }
+  ],
+  "gemstones": [
+    {
+      "name": "Tanzanite",
+      "slug": "tanzanite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/tanzanite/",
+        "pairs": "https://www.naturalgemstones.com/tanzanite-pairs/",
+        "rings": "https://www.naturalgemstones.com/tanzanite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Tourmaline",
+      "slug": "tourmaline",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/tourmaline/",
+        "pairs": "https://www.naturalgemstones.com/tourmaline-pairs/",
+        "rings": "https://www.naturalgemstones.com/tourmaline-rings/"
+      },
+      "children": [
+        "chrome-tourmaline",
+        "rubellite-tourmaline",
+        "paraiba-tourmaline"
+      ]
+    },
+    {
+      "name": "Chrome Tourmaline",
+      "slug": "chrome-tourmaline",
+      "parent": "Tourmaline",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/chrome-tourmaline/",
+        "pairs": "https://www.naturalgemstones.com/chrome-tourmaline-pairs/",
+        "rings": "https://www.naturalgemstones.com/chrome-tourmaline-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Rubellite Tourmaline",
+      "slug": "rubellite-tourmaline",
+      "parent": "Tourmaline",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/rubellite-tourmaline/",
+        "pairs": "https://www.naturalgemstones.com/rubellite-tourmaline-pairs/",
+        "rings": "https://www.naturalgemstones.com/rubellite-tourmaline-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Paraiba Tourmaline",
+      "slug": "paraiba-tourmaline",
+      "parent": "Tourmaline",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/paraiba-tourmaline/",
+        "pairs": "https://www.naturalgemstones.com/paraiba-tourmaline-pairs/",
+        "rings": "https://www.naturalgemstones.com/paraiba-tourmaline-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Chrome Tourmaline",
+      "slug": "chrome-tourmaline",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/chrome-tourmaline/",
+        "pairs": "https://www.naturalgemstones.com/chrome-tourmaline-pairs/",
+        "rings": "https://www.naturalgemstones.com/chrome-tourmaline-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Rubellite Tourmaline",
+      "slug": "rubellite-tourmaline",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/rubellite-tourmaline/",
+        "pairs": "https://www.naturalgemstones.com/rubellite-tourmaline-pairs/",
+        "rings": "https://www.naturalgemstones.com/rubellite-tourmaline-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Paraiba Tourmaline",
+      "slug": "paraiba-tourmaline",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/paraiba-tourmaline/",
+        "pairs": "https://www.naturalgemstones.com/paraiba-tourmaline-pairs/",
+        "rings": "https://www.naturalgemstones.com/paraiba-tourmaline-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Garnet",
+      "slug": "garnet",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/garnet/",
+        "pairs": "https://www.naturalgemstones.com/garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/garnet-rings/"
+      },
+      "children": [
+        "demantoid-garnet",
+        "rhodolite-garnet",
+        "tsavorite-garnet",
+        "mali-garnet",
+        "spessartite-garnet",
+        "grossular-garnet",
+        "andradite-garnet",
+        "hessonite-garnet",
+        "malaya-garnet",
+        "almandine-garnet"
+      ]
+    },
+    {
+      "name": "Demantoid Garnet",
+      "slug": "demantoid-garnet",
+      "parent": "Garnet",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/demantoid-garnet/",
+        "pairs": "https://www.naturalgemstones.com/demantoid-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/demantoid-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Rhodolite Garnet",
+      "slug": "rhodolite-garnet",
+      "parent": "Garnet",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/rhodolite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/rhodolite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/rhodolite-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Tsavorite Garnet",
+      "slug": "tsavorite-garnet",
+      "parent": "Garnet",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/tsavorite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/tsavorite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/tsavorite-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Mali Garnet",
+      "slug": "mali-garnet",
+      "parent": "Garnet",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/mali-garnet/",
+        "pairs": "https://www.naturalgemstones.com/mali-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/mali-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Spessartite Garnet",
+      "slug": "spessartite-garnet",
+      "parent": "Garnet",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/spessartite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/spessartite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/spessartite-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Grossular Garnet",
+      "slug": "grossular-garnet",
+      "parent": "Garnet",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/grossular-garnet/",
+        "pairs": "https://www.naturalgemstones.com/grossular-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/grossular-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Andradite Garnet",
+      "slug": "andradite-garnet",
+      "parent": "Garnet",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/andradite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/andradite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/andradite-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Hessonite Garnet",
+      "slug": "hessonite-garnet",
+      "parent": "Garnet",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/hessonite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/hessonite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/hessonite-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Malaya Garnet",
+      "slug": "malaya-garnet",
+      "parent": "Garnet",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/malaya-garnet/",
+        "pairs": "https://www.naturalgemstones.com/malaya-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/malaya-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Almandine Garnet",
+      "slug": "almandine-garnet",
+      "parent": "Garnet",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/almandine-garnet/",
+        "pairs": "https://www.naturalgemstones.com/almandine-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/almandine-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Demantoid Garnet",
+      "slug": "demantoid-garnet",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/demantoid-garnet/",
+        "pairs": "https://www.naturalgemstones.com/demantoid-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/demantoid-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Rhodolite Garnet",
+      "slug": "rhodolite-garnet",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/rhodolite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/rhodolite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/rhodolite-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Tsavorite Garnet",
+      "slug": "tsavorite-garnet",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/tsavorite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/tsavorite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/tsavorite-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Mali Garnet",
+      "slug": "mali-garnet",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/mali-garnet/",
+        "pairs": "https://www.naturalgemstones.com/mali-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/mali-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Spessartite Garnet",
+      "slug": "spessartite-garnet",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/spessartite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/spessartite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/spessartite-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Grossular Garnet",
+      "slug": "grossular-garnet",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/grossular-garnet/",
+        "pairs": "https://www.naturalgemstones.com/grossular-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/grossular-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Zircon",
+      "slug": "zircon",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/zircon/",
+        "pairs": "https://www.naturalgemstones.com/zircon-pairs/",
+        "rings": "https://www.naturalgemstones.com/zircon-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Aquamarine",
+      "slug": "aquamarine",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/aquamarine/",
+        "pairs": "https://www.naturalgemstones.com/aquamarine-pairs/",
+        "rings": "https://www.naturalgemstones.com/aquamarine-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Beryl",
+      "slug": "beryl",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/beryl/",
+        "pairs": "https://www.naturalgemstones.com/beryl-pairs/",
+        "rings": "https://www.naturalgemstones.com/beryl-rings/"
+      },
+      "children": [
+        "aquamarine",
+        "morganite",
+        "goshenite",
+        "red-beryl",
+        "heliodor"
+      ]
+    },
+    {
+      "name": "Aquamarine",
+      "slug": "aquamarine",
+      "parent": "Beryl",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/aquamarine/",
+        "pairs": "https://www.naturalgemstones.com/aquamarine-pairs/",
+        "rings": "https://www.naturalgemstones.com/aquamarine-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Morganite",
+      "slug": "morganite",
+      "parent": "Beryl",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/morganite/",
+        "pairs": "https://www.naturalgemstones.com/morganite-pairs/",
+        "rings": "https://www.naturalgemstones.com/morganite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Goshenite",
+      "slug": "goshenite",
+      "parent": "Beryl",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/goshenite/",
+        "pairs": "https://www.naturalgemstones.com/goshenite-pairs/",
+        "rings": "https://www.naturalgemstones.com/goshenite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Red Beryl",
+      "slug": "red-beryl",
+      "parent": "Beryl",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/red-beryl/",
+        "pairs": "https://www.naturalgemstones.com/red-beryl-pairs/",
+        "rings": "https://www.naturalgemstones.com/red-beryl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Heliodor",
+      "slug": "heliodor",
+      "parent": "Beryl",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/heliodor/",
+        "pairs": "https://www.naturalgemstones.com/heliodor-pairs/",
+        "rings": "https://www.naturalgemstones.com/heliodor-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Morganite",
+      "slug": "morganite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/morganite/",
+        "pairs": "https://www.naturalgemstones.com/morganite-pairs/",
+        "rings": "https://www.naturalgemstones.com/morganite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Chrysoberyl",
+      "slug": "chrysoberyl",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/chrysoberyl/",
+        "pairs": "https://www.naturalgemstones.com/chrysoberyl-pairs/",
+        "rings": "https://www.naturalgemstones.com/chrysoberyl-rings/"
+      },
+      "children": [
+        "alexandrite"
+      ]
+    },
+    {
+      "name": "Alexandrite",
+      "slug": "alexandrite",
+      "parent": "Chrysoberyl",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/alexandrite/",
+        "pairs": "https://www.naturalgemstones.com/alexandrite-pairs/",
+        "rings": "https://www.naturalgemstones.com/alexandrite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Alexandrite",
+      "slug": "alexandrite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/alexandrite/",
+        "pairs": "https://www.naturalgemstones.com/alexandrite-pairs/",
+        "rings": "https://www.naturalgemstones.com/alexandrite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Citrine",
+      "slug": "citrine",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/citrine/",
+        "pairs": "https://www.naturalgemstones.com/citrine-pairs/",
+        "rings": "https://www.naturalgemstones.com/citrine-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Amethyst",
+      "slug": "amethyst",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/amethyst/",
+        "pairs": "https://www.naturalgemstones.com/amethyst-pairs/",
+        "rings": "https://www.naturalgemstones.com/amethyst-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Topaz",
+      "slug": "topaz",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/topaz/",
+        "pairs": "https://www.naturalgemstones.com/topaz-pairs/",
+        "rings": "https://www.naturalgemstones.com/topaz-rings/"
+      },
+      "children": [
+        "imperial-topaz",
+        "precious-topaz"
+      ]
+    },
+    {
+      "name": "Imperial Topaz",
+      "slug": "imperial-topaz",
+      "parent": "Topaz",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/imperial-topaz/",
+        "pairs": "https://www.naturalgemstones.com/imperial-topaz-pairs/",
+        "rings": "https://www.naturalgemstones.com/imperial-topaz-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Precious Topaz",
+      "slug": "precious-topaz",
+      "parent": "Topaz",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/precious-topaz/",
+        "pairs": "https://www.naturalgemstones.com/precious-topaz-pairs/",
+        "rings": "https://www.naturalgemstones.com/precious-topaz-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Apatite",
+      "slug": "apatite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/apatite/",
+        "pairs": "https://www.naturalgemstones.com/apatite-pairs/",
+        "rings": "https://www.naturalgemstones.com/apatite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Fluorite",
+      "slug": "fluorite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/fluorite/",
+        "pairs": "https://www.naturalgemstones.com/fluorite-pairs/",
+        "rings": "https://www.naturalgemstones.com/fluorite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Spinel",
+      "slug": "spinel",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/spinel/",
+        "pairs": "https://www.naturalgemstones.com/spinel-pairs/",
+        "rings": "https://www.naturalgemstones.com/spinel-rings/"
+      },
+      "children": [
+        "cobalt-spinel"
+      ]
+    },
+    {
+      "name": "Cobalt Spinel",
+      "slug": "cobalt-spinel",
+      "parent": "Spinel",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/cobalt-spinel/",
+        "pairs": "https://www.naturalgemstones.com/cobalt-spinel-pairs/",
+        "rings": "https://www.naturalgemstones.com/cobalt-spinel-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Peridot",
+      "slug": "peridot",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/peridot/",
+        "pairs": "https://www.naturalgemstones.com/peridot-pairs/",
+        "rings": "https://www.naturalgemstones.com/peridot-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Moonstone",
+      "slug": "moonstone",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/moonstone/",
+        "pairs": "https://www.naturalgemstones.com/moonstone-pairs/",
+        "rings": "https://www.naturalgemstones.com/moonstone-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Kunzite",
+      "slug": "kunzite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/kunzite/",
+        "pairs": "https://www.naturalgemstones.com/kunzite-pairs/",
+        "rings": "https://www.naturalgemstones.com/kunzite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Chrome Diopside",
+      "slug": "chrome-diopside",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/chrome-diopside/",
+        "pairs": "https://www.naturalgemstones.com/chrome-diopside-pairs/",
+        "rings": "https://www.naturalgemstones.com/chrome-diopside-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Scapolite",
+      "slug": "scapolite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/scapolite/",
+        "pairs": "https://www.naturalgemstones.com/scapolite-pairs/",
+        "rings": "https://www.naturalgemstones.com/scapolite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Onyx",
+      "slug": "onyx",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/onyx/",
+        "pairs": "https://www.naturalgemstones.com/onyx-pairs/",
+        "rings": "https://www.naturalgemstones.com/onyx-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Coral",
+      "slug": "coral",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/coral/",
+        "pairs": "https://www.naturalgemstones.com/coral-pairs/",
+        "rings": "https://www.naturalgemstones.com/coral-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Lapis",
+      "slug": "lapis",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/lapis/",
+        "pairs": "https://www.naturalgemstones.com/lapis-pairs/",
+        "rings": "https://www.naturalgemstones.com/lapis-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Turquoise",
+      "slug": "turquoise",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/turquoise/",
+        "pairs": "https://www.naturalgemstones.com/turquoise-pairs/",
+        "rings": "https://www.naturalgemstones.com/turquoise-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Andradite Garnet",
+      "slug": "andradite-garnet",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/andradite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/andradite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/andradite-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Carnelian",
+      "slug": "carnelian",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/carnelian/",
+        "pairs": "https://www.naturalgemstones.com/carnelian-pairs/",
+        "rings": "https://www.naturalgemstones.com/carnelian-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Sphene (Titanite)",
+      "slug": "sphene-titanite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/sphene-titanite/",
+        "pairs": "https://www.naturalgemstones.com/sphene-titanite-pairs/",
+        "rings": "https://www.naturalgemstones.com/sphene-titanite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Taaffeite",
+      "slug": "taaffeite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/taaffeite/",
+        "pairs": "https://www.naturalgemstones.com/taaffeite-pairs/",
+        "rings": "https://www.naturalgemstones.com/taaffeite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Hessonite Garnet",
+      "slug": "hessonite-garnet",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/hessonite-garnet/",
+        "pairs": "https://www.naturalgemstones.com/hessonite-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/hessonite-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Cobalt Spinel",
+      "slug": "cobalt-spinel",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/cobalt-spinel/",
+        "pairs": "https://www.naturalgemstones.com/cobalt-spinel-pairs/",
+        "rings": "https://www.naturalgemstones.com/cobalt-spinel-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Andalusite",
+      "slug": "andalusite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/andalusite/",
+        "pairs": "https://www.naturalgemstones.com/andalusite-pairs/",
+        "rings": "https://www.naturalgemstones.com/andalusite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Jeremejevite",
+      "slug": "jeremejevite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/jeremejevite/",
+        "pairs": "https://www.naturalgemstones.com/jeremejevite-pairs/",
+        "rings": "https://www.naturalgemstones.com/jeremejevite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Phenakite",
+      "slug": "phenakite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/phenakite/",
+        "pairs": "https://www.naturalgemstones.com/phenakite-pairs/",
+        "rings": "https://www.naturalgemstones.com/phenakite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Ametrine",
+      "slug": "ametrine",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/ametrine/",
+        "pairs": "https://www.naturalgemstones.com/ametrine-pairs/",
+        "rings": "https://www.naturalgemstones.com/ametrine-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Malaya Garnet",
+      "slug": "malaya-garnet",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/malaya-garnet/",
+        "pairs": "https://www.naturalgemstones.com/malaya-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/malaya-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Sinhalite",
+      "slug": "sinhalite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/sinhalite/",
+        "pairs": "https://www.naturalgemstones.com/sinhalite-pairs/",
+        "rings": "https://www.naturalgemstones.com/sinhalite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Iolite",
+      "slug": "iolite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/iolite/",
+        "pairs": "https://www.naturalgemstones.com/iolite-pairs/",
+        "rings": "https://www.naturalgemstones.com/iolite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Kyanite",
+      "slug": "kyanite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/kyanite/",
+        "pairs": "https://www.naturalgemstones.com/kyanite-pairs/",
+        "rings": "https://www.naturalgemstones.com/kyanite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Jade",
+      "slug": "jade",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/jade/",
+        "pairs": "https://www.naturalgemstones.com/jade-pairs/",
+        "rings": "https://www.naturalgemstones.com/jade-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Agate",
+      "slug": "agate",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/agate/",
+        "pairs": "https://www.naturalgemstones.com/agate-pairs/",
+        "rings": "https://www.naturalgemstones.com/agate-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Quartz",
+      "slug": "quartz",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/quartz/",
+        "pairs": "https://www.naturalgemstones.com/quartz-pairs/",
+        "rings": "https://www.naturalgemstones.com/quartz-rings/"
+      },
+      "children": [
+        "citrine",
+        "amethyst",
+        "ametrine",
+        "rutilated-quartz",
+        "smoky-quartz",
+        "rose-quartz",
+        "prasiolite"
+      ]
+    },
+    {
+      "name": "Citrine",
+      "slug": "citrine",
+      "parent": "Quartz",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/citrine/",
+        "pairs": "https://www.naturalgemstones.com/citrine-pairs/",
+        "rings": "https://www.naturalgemstones.com/citrine-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Amethyst",
+      "slug": "amethyst",
+      "parent": "Quartz",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/amethyst/",
+        "pairs": "https://www.naturalgemstones.com/amethyst-pairs/",
+        "rings": "https://www.naturalgemstones.com/amethyst-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Ametrine",
+      "slug": "ametrine",
+      "parent": "Quartz",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/ametrine/",
+        "pairs": "https://www.naturalgemstones.com/ametrine-pairs/",
+        "rings": "https://www.naturalgemstones.com/ametrine-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Rutilated Quartz",
+      "slug": "rutilated-quartz",
+      "parent": "Quartz",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/rutilated-quartz/",
+        "pairs": "https://www.naturalgemstones.com/rutilated-quartz-pairs/",
+        "rings": "https://www.naturalgemstones.com/rutilated-quartz-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Smoky Quartz",
+      "slug": "smoky-quartz",
+      "parent": "Quartz",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/smoky-quartz/",
+        "pairs": "https://www.naturalgemstones.com/smoky-quartz-pairs/",
+        "rings": "https://www.naturalgemstones.com/smoky-quartz-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Rose Quartz",
+      "slug": "rose-quartz",
+      "parent": "Quartz",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/rose-quartz/",
+        "pairs": "https://www.naturalgemstones.com/rose-quartz-pairs/",
+        "rings": "https://www.naturalgemstones.com/rose-quartz-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Prasiolite",
+      "slug": "prasiolite",
+      "parent": "Quartz",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/prasiolite/",
+        "pairs": "https://www.naturalgemstones.com/prasiolite-pairs/",
+        "rings": "https://www.naturalgemstones.com/prasiolite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Rutilated Quartz",
+      "slug": "rutilated-quartz",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/rutilated-quartz/",
+        "pairs": "https://www.naturalgemstones.com/rutilated-quartz-pairs/",
+        "rings": "https://www.naturalgemstones.com/rutilated-quartz-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Smoky Quartz",
+      "slug": "smoky-quartz",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/smoky-quartz/",
+        "pairs": "https://www.naturalgemstones.com/smoky-quartz-pairs/",
+        "rings": "https://www.naturalgemstones.com/smoky-quartz-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Rose Quartz",
+      "slug": "rose-quartz",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/rose-quartz/",
+        "pairs": "https://www.naturalgemstones.com/rose-quartz-pairs/",
+        "rings": "https://www.naturalgemstones.com/rose-quartz-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Andesine",
+      "slug": "andesine",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/andesine/",
+        "pairs": "https://www.naturalgemstones.com/andesine-pairs/",
+        "rings": "https://www.naturalgemstones.com/andesine-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Almandine Garnet",
+      "slug": "almandine-garnet",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/almandine-garnet/",
+        "pairs": "https://www.naturalgemstones.com/almandine-garnet-pairs/",
+        "rings": "https://www.naturalgemstones.com/almandine-garnet-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Kornerupine",
+      "slug": "kornerupine",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/kornerupine/",
+        "pairs": "https://www.naturalgemstones.com/kornerupine-pairs/",
+        "rings": "https://www.naturalgemstones.com/kornerupine-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Tiger's Eye",
+      "slug": "tigers-eye",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/tigers-eye/",
+        "pairs": "https://www.naturalgemstones.com/tigers-eye-pairs/",
+        "rings": "https://www.naturalgemstones.com/tigers-eye-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Malachite",
+      "slug": "malachite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/malachite/",
+        "pairs": "https://www.naturalgemstones.com/malachite-pairs/",
+        "rings": "https://www.naturalgemstones.com/malachite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Rhodochrosite",
+      "slug": "rhodochrosite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/rhodochrosite/",
+        "pairs": "https://www.naturalgemstones.com/rhodochrosite-pairs/",
+        "rings": "https://www.naturalgemstones.com/rhodochrosite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Imperial Topaz",
+      "slug": "imperial-topaz",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/imperial-topaz/",
+        "pairs": "https://www.naturalgemstones.com/imperial-topaz-pairs/",
+        "rings": "https://www.naturalgemstones.com/imperial-topaz-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Prasiolite",
+      "slug": "prasiolite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/prasiolite/",
+        "pairs": "https://www.naturalgemstones.com/prasiolite-pairs/",
+        "rings": "https://www.naturalgemstones.com/prasiolite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Diopside",
+      "slug": "diopside",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/diopside/",
+        "pairs": "https://www.naturalgemstones.com/diopside-pairs/",
+        "rings": "https://www.naturalgemstones.com/diopside-rings/"
+      },
+      "children": [
+        "chrome-diopside"
+      ]
+    },
+    {
+      "name": "Chrome Diopside",
+      "slug": "chrome-diopside",
+      "parent": "Diopside",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/chrome-diopside/",
+        "pairs": "https://www.naturalgemstones.com/chrome-diopside-pairs/",
+        "rings": "https://www.naturalgemstones.com/chrome-diopside-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Hauyne",
+      "slug": "hauyne",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/hauyne/",
+        "pairs": "https://www.naturalgemstones.com/hauyne-pairs/",
+        "rings": "https://www.naturalgemstones.com/hauyne-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Grandidierite",
+      "slug": "grandidierite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/grandidierite/",
+        "pairs": "https://www.naturalgemstones.com/grandidierite-pairs/",
+        "rings": "https://www.naturalgemstones.com/grandidierite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Rhodonite",
+      "slug": "rhodonite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/rhodonite/",
+        "pairs": "https://www.naturalgemstones.com/rhodonite-pairs/",
+        "rings": "https://www.naturalgemstones.com/rhodonite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Goshenite",
+      "slug": "goshenite",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/goshenite/",
+        "pairs": "https://www.naturalgemstones.com/goshenite-pairs/",
+        "rings": "https://www.naturalgemstones.com/goshenite-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Red Beryl",
+      "slug": "red-beryl",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/red-beryl/",
+        "pairs": "https://www.naturalgemstones.com/red-beryl-pairs/",
+        "rings": "https://www.naturalgemstones.com/red-beryl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Precious Topaz",
+      "slug": "precious-topaz",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/precious-topaz/",
+        "pairs": "https://www.naturalgemstones.com/precious-topaz-pairs/",
+        "rings": "https://www.naturalgemstones.com/precious-topaz-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Heliodor",
+      "slug": "heliodor",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/heliodor/",
+        "pairs": "https://www.naturalgemstones.com/heliodor-pairs/",
+        "rings": "https://www.naturalgemstones.com/heliodor-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Akoya Pearl",
+      "slug": "akoya-pearl",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/akoya-pearl/",
+        "pairs": "https://www.naturalgemstones.com/akoya-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/akoya-pearl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Pearl",
+      "slug": "pearl",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/pearl/",
+        "pairs": "https://www.naturalgemstones.com/pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/pearl-rings/"
+      },
+      "children": [
+        "akoya-pearl",
+        "south-sea-pearl",
+        "tahitian-pearl",
+        "edison-pearl",
+        "cortez-pearl"
+      ]
+    },
+    {
+      "name": "Akoya Pearl",
+      "slug": "akoya-pearl",
+      "parent": "Pearl",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/akoya-pearl/",
+        "pairs": "https://www.naturalgemstones.com/akoya-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/akoya-pearl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "South Sea Pearl",
+      "slug": "south-sea-pearl",
+      "parent": "Pearl",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/south-sea-pearl/",
+        "pairs": "https://www.naturalgemstones.com/south-sea-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/south-sea-pearl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Tahitian Pearl",
+      "slug": "tahitian-pearl",
+      "parent": "Pearl",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/tahitian-pearl/",
+        "pairs": "https://www.naturalgemstones.com/tahitian-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/tahitian-pearl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Edison Pearl",
+      "slug": "edison-pearl",
+      "parent": "Pearl",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/edison-pearl/",
+        "pairs": "https://www.naturalgemstones.com/edison-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/edison-pearl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Cortez Pearl",
+      "slug": "cortez-pearl",
+      "parent": "Pearl",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/cortez-pearl/",
+        "pairs": "https://www.naturalgemstones.com/cortez-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/cortez-pearl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "South Sea Pearl",
+      "slug": "south-sea-pearl",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/south-sea-pearl/",
+        "pairs": "https://www.naturalgemstones.com/south-sea-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/south-sea-pearl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Tahitian Pearl",
+      "slug": "tahitian-pearl",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/tahitian-pearl/",
+        "pairs": "https://www.naturalgemstones.com/tahitian-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/tahitian-pearl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Edison Pearl",
+      "slug": "edison-pearl",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/edison-pearl/",
+        "pairs": "https://www.naturalgemstones.com/edison-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/edison-pearl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Cortez Pearl",
+      "slug": "cortez-pearl",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/cortez-pearl/",
+        "pairs": "https://www.naturalgemstones.com/cortez-pearl-pairs/",
+        "rings": "https://www.naturalgemstones.com/cortez-pearl-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Bloodstone (Heliotrope)",
+      "slug": "bloodstone-heliotrope",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/bloodstone-heliotrope/",
+        "pairs": "https://www.naturalgemstones.com/bloodstone-heliotrope-pairs/",
+        "rings": "https://www.naturalgemstones.com/bloodstone-heliotrope-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Black Opal (Dark Opal)",
+      "slug": "black-opal-dark-opal",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/black-opal-dark-opal/",
+        "pairs": "https://www.naturalgemstones.com/black-opal-dark-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/black-opal-dark-opal-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Opal",
+      "slug": "opal",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/opal/",
+        "pairs": "https://www.naturalgemstones.com/opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/opal-rings/"
+      },
+      "children": [
+        "black-opal-dark-opal",
+        "crystal-opal-jelly-opal",
+        "white-opal-light-opal",
+        "boulder-opal-ironstone-opal",
+        "fire-opal-flame-opal"
+      ]
+    },
+    {
+      "name": "Black Opal (Dark Opal)",
+      "slug": "black-opal-dark-opal",
+      "parent": "Opal",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/black-opal-dark-opal/",
+        "pairs": "https://www.naturalgemstones.com/black-opal-dark-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/black-opal-dark-opal-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Crystal Opal (Jelly Opal)",
+      "slug": "crystal-opal-jelly-opal",
+      "parent": "Opal",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/crystal-opal-jelly-opal/",
+        "pairs": "https://www.naturalgemstones.com/crystal-opal-jelly-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/crystal-opal-jelly-opal-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "White Opal (Light Opal)",
+      "slug": "white-opal-light-opal",
+      "parent": "Opal",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/white-opal-light-opal/",
+        "pairs": "https://www.naturalgemstones.com/white-opal-light-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/white-opal-light-opal-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Boulder Opal (Ironstone Opal)",
+      "slug": "boulder-opal-ironstone-opal",
+      "parent": "Opal",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal/",
+        "pairs": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Fire Opal (Flame Opal)",
+      "slug": "fire-opal-flame-opal",
+      "parent": "Opal",
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/fire-opal-flame-opal/",
+        "pairs": "https://www.naturalgemstones.com/fire-opal-flame-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/fire-opal-flame-opal-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Crystal Opal (Jelly Opal)",
+      "slug": "crystal-opal-jelly-opal",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/crystal-opal-jelly-opal/",
+        "pairs": "https://www.naturalgemstones.com/crystal-opal-jelly-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/crystal-opal-jelly-opal-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "White Opal (Light Opal)",
+      "slug": "white-opal-light-opal",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/white-opal-light-opal/",
+        "pairs": "https://www.naturalgemstones.com/white-opal-light-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/white-opal-light-opal-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Boulder Opal (Ironstone Opal)",
+      "slug": "boulder-opal-ironstone-opal",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal/",
+        "pairs": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/boulder-opal-ironstone-opal-rings/"
+      },
+      "children": []
+    },
+    {
+      "name": "Fire Opal (Flame Opal)",
+      "slug": "fire-opal-flame-opal",
+      "parent": null,
+      "urls": {
+        "loose": "https://www.naturalgemstones.com/fire-opal-flame-opal/",
+        "pairs": "https://www.naturalgemstones.com/fire-opal-flame-opal-pairs/",
+        "rings": "https://www.naturalgemstones.com/fire-opal-flame-opal-rings/"
+      },
+      "children": []
+    }
+  ],
+  "colors": [
+    {
+      "name": "Bi Color",
+      "slug": "bi-color",
+      "loose": "/bi-color-gemstones",
+      "pairs": "/bi-color-gemstone-pairs",
+      "rings": "/bi-color-gemstone-rings"
+    },
+    {
+      "name": "Black",
+      "slug": "black",
+      "loose": "/black-gemstones",
+      "pairs": "/black-gemstone-pairs",
+      "rings": "/black-gemstone-rings"
+    },
+    {
+      "name": "Blue",
+      "slug": "blue",
+      "loose": "/blue-gemstones",
+      "pairs": "/blue-gemstone-pairs",
+      "rings": "/blue-gemstone-rings"
+    },
+    {
+      "name": "Brown",
+      "slug": "brown",
+      "loose": "/brown-gemstones",
+      "pairs": "/brown-gemstone-pairs",
+      "rings": "/brown-gemstone-rings"
+    },
+    {
+      "name": "Color Change",
+      "slug": "color-change",
+      "loose": "/color-change-gemstones",
+      "pairs": "/color-change-gemstone-pairs",
+      "rings": "/color-change-gemstone-rings"
+    },
+    {
+      "name": "Green",
+      "slug": "green",
+      "loose": "/green-gemstones",
+      "pairs": "/green-gemstone-pairs",
+      "rings": "/green-gemstone-rings"
+    },
+    {
+      "name": "Grey",
+      "slug": "grey",
+      "loose": "/grey-gemstones",
+      "pairs": "/grey-gemstone-pairs",
+      "rings": "/grey-gemstone-rings"
+    },
+    {
+      "name": "Multi Color",
+      "slug": "multi-color",
+      "loose": "/multi-color-gemstones",
+      "pairs": "/multi-color-gemstone-pairs",
+      "rings": "/multi-color-gemstone-rings"
+    },
+    {
+      "name": "Orange",
+      "slug": "orange",
+      "loose": "/orange-gemstones",
+      "pairs": "/orange-gemstone-pairs",
+      "rings": "/orange-gemstone-rings"
+    },
+    {
+      "name": "Peach",
+      "slug": "peach",
+      "loose": "/peach-gemstones",
+      "pairs": "/peach-gemstone-pairs",
+      "rings": "/peach-gemstone-rings"
+    },
+    {
+      "name": "Pink",
+      "slug": "pink",
+      "loose": "/pink-gemstones",
+      "pairs": "/pink-gemstone-pairs",
+      "rings": "/pink-gemstone-rings"
+    },
+    {
+      "name": "Purple",
+      "slug": "purple",
+      "loose": "/purple-gemstones",
+      "pairs": "/purple-gemstone-pairs",
+      "rings": "/purple-gemstone-rings"
+    },
+    {
+      "name": "Red",
+      "slug": "red",
+      "loose": "/red-gemstones",
+      "pairs": "/red-gemstone-pairs",
+      "rings": "/red-gemstone-rings"
+    },
+    {
+      "name": "White",
+      "slug": "white",
+      "loose": "/white-gemstones",
+      "pairs": "/white-gemstone-pairs",
+      "rings": "/white-gemstone-rings"
+    },
+    {
+      "name": "Yellow",
+      "slug": "yellow",
+      "loose": "/yellow-gemstones",
+      "pairs": "/yellow-gemstone-pairs",
+      "rings": "/yellow-gemstone-rings"
+    }
+  ],
+  "settings": [
+    {
+      "name": "Ring Settings",
+      "path": "/gemstone-ring-settings",
+      "styles": [
+        {
+          "name": "Accent Stones",
+          "query": {
+            "category": "ring",
+            "styles": [
+              31
+            ]
+          }
+        },
+        {
+          "name": "Antique",
+          "query": {
+            "category": "ring",
+            "styles": [
+              32
+            ]
+          }
+        },
+        {
+          "name": "Bezel",
+          "query": {
+            "category": "ring",
+            "styles": [
+              84
+            ]
+          }
+        },
+        {
+          "name": "Celtic",
+          "query": {
+            "category": "ring",
+            "styles": [
+              105
+            ]
+          }
+        },
+        {
+          "name": "Drops",
+          "query": {
+            "category": "ring",
+            "styles": [
+              89
+            ]
+          }
+        },
+        {
+          "name": "Earring Jacket",
+          "query": {
+            "category": "ring",
+            "styles": [
+              121
+            ]
+          }
+        },
+        {
+          "name": "Floral",
+          "query": {
+            "category": "ring",
+            "styles": [
+              90
+            ]
+          }
+        },
+        {
+          "name": "Flush Set",
+          "query": {
+            "category": "ring",
+            "styles": [
+              113
+            ]
+          }
+        },
+        {
+          "name": "Halo",
+          "query": {
+            "category": "ring",
+            "styles": [
+              30
+            ]
+          }
+        },
+        {
+          "name": "Hidden Halo",
+          "query": {
+            "category": "ring",
+            "styles": [
+              122
+            ]
+          }
+        },
+        {
+          "name": "Hoops",
+          "query": {
+            "category": "ring",
+            "styles": [
+              87
+            ]
+          }
+        },
+        {
+          "name": "Lady Diana",
+          "query": {
+            "category": "ring",
+            "styles": [
+              86
+            ]
+          }
+        },
+        {
+          "name": "Men's",
+          "query": {
+            "category": "ring",
+            "styles": [
+              83
+            ]
+          }
+        },
+        {
+          "name": "Multi Stone",
+          "query": {
+            "category": "ring",
+            "styles": [
+              112
+            ]
+          }
+        },
+        {
+          "name": "Pave",
+          "query": {
+            "category": "ring",
+            "styles": [
+              29
+            ]
+          }
+        },
+        {
+          "name": "Solitaire",
+          "query": {
+            "category": "ring",
+            "styles": [
+              109
+            ]
+          }
+        },
+        {
+          "name": "Studs",
+          "query": {
+            "category": "ring",
+            "styles": [
+              27
+            ]
+          }
+        },
+        {
+          "name": "Three Stone",
+          "query": {
+            "category": "ring",
+            "styles": [
+              28
+            ]
+          }
+        },
+        {
+          "name": "Two Stone (toi et moi)",
+          "query": {
+            "category": "ring",
+            "styles": [
+              119
+            ]
+          }
+        },
+        {
+          "name": "Vedic",
+          "query": {
+            "category": "ring",
+            "styles": [
+              82
+            ]
+          }
+        },
+        {
+          "name": "Wedding Set",
+          "query": {
+            "category": "ring",
+            "styles": [
+              33
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Earring Settings",
+      "path": "/gemstone-earring-settings",
+      "styles": [
+        {
+          "name": "Accent Stones",
+          "query": {
+            "category": "earring",
+            "styles": [
+              31
+            ]
+          }
+        },
+        {
+          "name": "Antique",
+          "query": {
+            "category": "earring",
+            "styles": [
+              32
+            ]
+          }
+        },
+        {
+          "name": "Bezel",
+          "query": {
+            "category": "earring",
+            "styles": [
+              84
+            ]
+          }
+        },
+        {
+          "name": "Celtic",
+          "query": {
+            "category": "earring",
+            "styles": [
+              105
+            ]
+          }
+        },
+        {
+          "name": "Drops",
+          "query": {
+            "category": "earring",
+            "styles": [
+              89
+            ]
+          }
+        },
+        {
+          "name": "Earring Jacket",
+          "query": {
+            "category": "earring",
+            "styles": [
+              121
+            ]
+          }
+        },
+        {
+          "name": "Floral",
+          "query": {
+            "category": "earring",
+            "styles": [
+              90
+            ]
+          }
+        },
+        {
+          "name": "Flush Set",
+          "query": {
+            "category": "earring",
+            "styles": [
+              113
+            ]
+          }
+        },
+        {
+          "name": "Halo",
+          "query": {
+            "category": "earring",
+            "styles": [
+              30
+            ]
+          }
+        },
+        {
+          "name": "Hidden Halo",
+          "query": {
+            "category": "earring",
+            "styles": [
+              122
+            ]
+          }
+        },
+        {
+          "name": "Hoops",
+          "query": {
+            "category": "earring",
+            "styles": [
+              87
+            ]
+          }
+        },
+        {
+          "name": "Lady Diana",
+          "query": {
+            "category": "earring",
+            "styles": [
+              86
+            ]
+          }
+        },
+        {
+          "name": "Men's",
+          "query": {
+            "category": "earring",
+            "styles": [
+              83
+            ]
+          }
+        },
+        {
+          "name": "Multi Stone",
+          "query": {
+            "category": "earring",
+            "styles": [
+              112
+            ]
+          }
+        },
+        {
+          "name": "Pave",
+          "query": {
+            "category": "earring",
+            "styles": [
+              29
+            ]
+          }
+        },
+        {
+          "name": "Solitaire",
+          "query": {
+            "category": "earring",
+            "styles": [
+              109
+            ]
+          }
+        },
+        {
+          "name": "Studs",
+          "query": {
+            "category": "earring",
+            "styles": [
+              27
+            ]
+          }
+        },
+        {
+          "name": "Three Stone",
+          "query": {
+            "category": "earring",
+            "styles": [
+              28
+            ]
+          }
+        },
+        {
+          "name": "Two Stone (toi et moi)",
+          "query": {
+            "category": "earring",
+            "styles": [
+              119
+            ]
+          }
+        },
+        {
+          "name": "Vedic",
+          "query": {
+            "category": "earring",
+            "styles": [
+              82
+            ]
+          }
+        },
+        {
+          "name": "Wedding Set",
+          "query": {
+            "category": "earring",
+            "styles": [
+              33
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Necklace & Pendant Settings",
+      "path": "/gemstone-necklace-pendant-settings",
+      "styles": [
+        {
+          "name": "Accent Stones",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              31
+            ]
+          }
+        },
+        {
+          "name": "Antique",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              32
+            ]
+          }
+        },
+        {
+          "name": "Bezel",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              84
+            ]
+          }
+        },
+        {
+          "name": "Celtic",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              105
+            ]
+          }
+        },
+        {
+          "name": "Drops",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              89
+            ]
+          }
+        },
+        {
+          "name": "Earring Jacket",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              121
+            ]
+          }
+        },
+        {
+          "name": "Floral",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              90
+            ]
+          }
+        },
+        {
+          "name": "Flush Set",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              113
+            ]
+          }
+        },
+        {
+          "name": "Halo",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              30
+            ]
+          }
+        },
+        {
+          "name": "Hidden Halo",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              122
+            ]
+          }
+        },
+        {
+          "name": "Hoops",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              87
+            ]
+          }
+        },
+        {
+          "name": "Lady Diana",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              86
+            ]
+          }
+        },
+        {
+          "name": "Men's",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              83
+            ]
+          }
+        },
+        {
+          "name": "Multi Stone",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              112
+            ]
+          }
+        },
+        {
+          "name": "Pave",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              29
+            ]
+          }
+        },
+        {
+          "name": "Solitaire",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              109
+            ]
+          }
+        },
+        {
+          "name": "Studs",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              27
+            ]
+          }
+        },
+        {
+          "name": "Three Stone",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              28
+            ]
+          }
+        },
+        {
+          "name": "Two Stone (toi et moi)",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              119
+            ]
+          }
+        },
+        {
+          "name": "Vedic",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              82
+            ]
+          }
+        },
+        {
+          "name": "Wedding Set",
+          "query": {
+            "category": "pendant",
+            "styles": [
+              33
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bracelet Settings",
+      "path": "/gemstone-bracelet-settings",
+      "styles": [
+        {
+          "name": "Accent Stones",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              31
+            ]
+          }
+        },
+        {
+          "name": "Antique",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              32
+            ]
+          }
+        },
+        {
+          "name": "Bezel",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              84
+            ]
+          }
+        },
+        {
+          "name": "Celtic",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              105
+            ]
+          }
+        },
+        {
+          "name": "Drops",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              89
+            ]
+          }
+        },
+        {
+          "name": "Earring Jacket",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              121
+            ]
+          }
+        },
+        {
+          "name": "Floral",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              90
+            ]
+          }
+        },
+        {
+          "name": "Flush Set",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              113
+            ]
+          }
+        },
+        {
+          "name": "Halo",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              30
+            ]
+          }
+        },
+        {
+          "name": "Hidden Halo",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              122
+            ]
+          }
+        },
+        {
+          "name": "Hoops",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              87
+            ]
+          }
+        },
+        {
+          "name": "Lady Diana",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              86
+            ]
+          }
+        },
+        {
+          "name": "Men's",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              83
+            ]
+          }
+        },
+        {
+          "name": "Multi Stone",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              112
+            ]
+          }
+        },
+        {
+          "name": "Pave",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              29
+            ]
+          }
+        },
+        {
+          "name": "Solitaire",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              109
+            ]
+          }
+        },
+        {
+          "name": "Studs",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              27
+            ]
+          }
+        },
+        {
+          "name": "Three Stone",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              28
+            ]
+          }
+        },
+        {
+          "name": "Two Stone (toi et moi)",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              119
+            ]
+          }
+        },
+        {
+          "name": "Vedic",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              82
+            ]
+          }
+        },
+        {
+          "name": "Wedding Set",
+          "query": {
+            "category": "bracelet",
+            "styles": [
+              33
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Men's Ring Settings",
+      "path": "/mens-gemstone-ring-settings",
+      "styles": []
+    }
+  ],
+  "jewellery": [
+    {
+      "name": "Rings",
+      "path": "/all-gemstone-rings",
+      "styles": [
+        {
+          "name": "Accent Stones",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Accent Stones"
+            ]
+          }
+        },
+        {
+          "name": "Antique",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Antique"
+            ]
+          }
+        },
+        {
+          "name": "Bead",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Bead"
+            ]
+          }
+        },
+        {
+          "name": "Bezel",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Bezel"
+            ]
+          }
+        },
+        {
+          "name": "Celtic",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Celtic"
+            ]
+          }
+        },
+        {
+          "name": "Drops",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Drops"
+            ]
+          }
+        },
+        {
+          "name": "Earring Jacket",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Earring Jacket"
+            ]
+          }
+        },
+        {
+          "name": "Floral",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Floral"
+            ]
+          }
+        },
+        {
+          "name": "Flush Set",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Flush Set"
+            ]
+          }
+        },
+        {
+          "name": "Halo",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hidden Halo",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Hidden Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hoops",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Hoops"
+            ]
+          }
+        },
+        {
+          "name": "Lady Diana",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Lady Diana"
+            ]
+          }
+        },
+        {
+          "name": "Men's",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Men's"
+            ]
+          }
+        },
+        {
+          "name": "Multi Stone",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Multi Stone"
+            ]
+          }
+        },
+        {
+          "name": "Pave",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Pave"
+            ]
+          }
+        },
+        {
+          "name": "Solitaire",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Solitaire"
+            ]
+          }
+        },
+        {
+          "name": "Studs",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Studs"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Line",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Tennis/Line"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Riviere",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Tennis/Riviere"
+            ]
+          }
+        },
+        {
+          "name": "Three Stone",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Three Stone"
+            ]
+          }
+        },
+        {
+          "name": "Two Stone (toi et moi)",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Two Stone (toi et moi)"
+            ]
+          }
+        },
+        {
+          "name": "Vedic",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Vedic"
+            ]
+          }
+        },
+        {
+          "name": "Wedding Set",
+          "query": {
+            "categories": [
+              "Ring"
+            ],
+            "styles": [
+              "Wedding Set"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Earrings",
+      "path": "/gemstone-earrings",
+      "styles": [
+        {
+          "name": "Accent Stones",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Accent Stones"
+            ]
+          }
+        },
+        {
+          "name": "Antique",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Antique"
+            ]
+          }
+        },
+        {
+          "name": "Bead",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Bead"
+            ]
+          }
+        },
+        {
+          "name": "Bezel",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Bezel"
+            ]
+          }
+        },
+        {
+          "name": "Celtic",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Celtic"
+            ]
+          }
+        },
+        {
+          "name": "Drops",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Drops"
+            ]
+          }
+        },
+        {
+          "name": "Earring Jacket",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Earring Jacket"
+            ]
+          }
+        },
+        {
+          "name": "Floral",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Floral"
+            ]
+          }
+        },
+        {
+          "name": "Flush Set",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Flush Set"
+            ]
+          }
+        },
+        {
+          "name": "Halo",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hidden Halo",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Hidden Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hoops",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Hoops"
+            ]
+          }
+        },
+        {
+          "name": "Lady Diana",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Lady Diana"
+            ]
+          }
+        },
+        {
+          "name": "Men's",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Men's"
+            ]
+          }
+        },
+        {
+          "name": "Multi Stone",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Multi Stone"
+            ]
+          }
+        },
+        {
+          "name": "Pave",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Pave"
+            ]
+          }
+        },
+        {
+          "name": "Solitaire",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Solitaire"
+            ]
+          }
+        },
+        {
+          "name": "Studs",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Studs"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Line",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Tennis/Line"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Riviere",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Tennis/Riviere"
+            ]
+          }
+        },
+        {
+          "name": "Three Stone",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Three Stone"
+            ]
+          }
+        },
+        {
+          "name": "Two Stone (toi et moi)",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Two Stone (toi et moi)"
+            ]
+          }
+        },
+        {
+          "name": "Vedic",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Vedic"
+            ]
+          }
+        },
+        {
+          "name": "Wedding Set",
+          "query": {
+            "categories": [
+              "Earring"
+            ],
+            "styles": [
+              "Wedding Set"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pendants",
+      "path": "/gemstone-necklaces-pendants",
+      "styles": [
+        {
+          "name": "Accent Stones",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Accent Stones"
+            ]
+          }
+        },
+        {
+          "name": "Antique",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Antique"
+            ]
+          }
+        },
+        {
+          "name": "Bead",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Bead"
+            ]
+          }
+        },
+        {
+          "name": "Bezel",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Bezel"
+            ]
+          }
+        },
+        {
+          "name": "Celtic",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Celtic"
+            ]
+          }
+        },
+        {
+          "name": "Drops",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Drops"
+            ]
+          }
+        },
+        {
+          "name": "Earring Jacket",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Earring Jacket"
+            ]
+          }
+        },
+        {
+          "name": "Floral",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Floral"
+            ]
+          }
+        },
+        {
+          "name": "Flush Set",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Flush Set"
+            ]
+          }
+        },
+        {
+          "name": "Halo",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hidden Halo",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Hidden Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hoops",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Hoops"
+            ]
+          }
+        },
+        {
+          "name": "Lady Diana",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Lady Diana"
+            ]
+          }
+        },
+        {
+          "name": "Men's",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Men's"
+            ]
+          }
+        },
+        {
+          "name": "Multi Stone",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Multi Stone"
+            ]
+          }
+        },
+        {
+          "name": "Pave",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Pave"
+            ]
+          }
+        },
+        {
+          "name": "Solitaire",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Solitaire"
+            ]
+          }
+        },
+        {
+          "name": "Studs",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Studs"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Line",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Tennis/Line"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Riviere",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Tennis/Riviere"
+            ]
+          }
+        },
+        {
+          "name": "Three Stone",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Three Stone"
+            ]
+          }
+        },
+        {
+          "name": "Two Stone (toi et moi)",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Two Stone (toi et moi)"
+            ]
+          }
+        },
+        {
+          "name": "Vedic",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Vedic"
+            ]
+          }
+        },
+        {
+          "name": "Wedding Set",
+          "query": {
+            "categories": [
+              "Pendant"
+            ],
+            "styles": [
+              "Wedding Set"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Necklaces",
+      "path": "/gemstone-necklaces-pendants",
+      "styles": [
+        {
+          "name": "Accent Stones",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Accent Stones"
+            ]
+          }
+        },
+        {
+          "name": "Antique",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Antique"
+            ]
+          }
+        },
+        {
+          "name": "Bead",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Bead"
+            ]
+          }
+        },
+        {
+          "name": "Bezel",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Bezel"
+            ]
+          }
+        },
+        {
+          "name": "Celtic",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Celtic"
+            ]
+          }
+        },
+        {
+          "name": "Drops",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Drops"
+            ]
+          }
+        },
+        {
+          "name": "Earring Jacket",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Earring Jacket"
+            ]
+          }
+        },
+        {
+          "name": "Floral",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Floral"
+            ]
+          }
+        },
+        {
+          "name": "Flush Set",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Flush Set"
+            ]
+          }
+        },
+        {
+          "name": "Halo",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hidden Halo",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Hidden Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hoops",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Hoops"
+            ]
+          }
+        },
+        {
+          "name": "Lady Diana",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Lady Diana"
+            ]
+          }
+        },
+        {
+          "name": "Men's",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Men's"
+            ]
+          }
+        },
+        {
+          "name": "Multi Stone",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Multi Stone"
+            ]
+          }
+        },
+        {
+          "name": "Pave",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Pave"
+            ]
+          }
+        },
+        {
+          "name": "Solitaire",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Solitaire"
+            ]
+          }
+        },
+        {
+          "name": "Studs",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Studs"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Line",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Tennis/Line"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Riviere",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Tennis/Riviere"
+            ]
+          }
+        },
+        {
+          "name": "Three Stone",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Three Stone"
+            ]
+          }
+        },
+        {
+          "name": "Two Stone (toi et moi)",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Two Stone (toi et moi)"
+            ]
+          }
+        },
+        {
+          "name": "Vedic",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Vedic"
+            ]
+          }
+        },
+        {
+          "name": "Wedding Set",
+          "query": {
+            "categories": [
+              "Necklace"
+            ],
+            "styles": [
+              "Wedding Set"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bracelets & Bangles",
+      "path": "/gemstone-bracelets-bangles",
+      "styles": [
+        {
+          "name": "Accent Stones",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Accent Stones"
+            ]
+          }
+        },
+        {
+          "name": "Antique",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Antique"
+            ]
+          }
+        },
+        {
+          "name": "Bead",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Bead"
+            ]
+          }
+        },
+        {
+          "name": "Bezel",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Bezel"
+            ]
+          }
+        },
+        {
+          "name": "Celtic",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Celtic"
+            ]
+          }
+        },
+        {
+          "name": "Drops",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Drops"
+            ]
+          }
+        },
+        {
+          "name": "Earring Jacket",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Earring Jacket"
+            ]
+          }
+        },
+        {
+          "name": "Floral",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Floral"
+            ]
+          }
+        },
+        {
+          "name": "Flush Set",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Flush Set"
+            ]
+          }
+        },
+        {
+          "name": "Halo",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hidden Halo",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Hidden Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hoops",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Hoops"
+            ]
+          }
+        },
+        {
+          "name": "Lady Diana",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Lady Diana"
+            ]
+          }
+        },
+        {
+          "name": "Men's",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Men's"
+            ]
+          }
+        },
+        {
+          "name": "Multi Stone",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Multi Stone"
+            ]
+          }
+        },
+        {
+          "name": "Pave",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Pave"
+            ]
+          }
+        },
+        {
+          "name": "Solitaire",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Solitaire"
+            ]
+          }
+        },
+        {
+          "name": "Studs",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Studs"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Line",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Tennis/Line"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Riviere",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Tennis/Riviere"
+            ]
+          }
+        },
+        {
+          "name": "Three Stone",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Three Stone"
+            ]
+          }
+        },
+        {
+          "name": "Two Stone (toi et moi)",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Two Stone (toi et moi)"
+            ]
+          }
+        },
+        {
+          "name": "Vedic",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Vedic"
+            ]
+          }
+        },
+        {
+          "name": "Wedding Set",
+          "query": {
+            "categories": [
+              "Bracelet"
+            ],
+            "styles": [
+              "Wedding Set"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Brooches",
+      "path": null,
+      "styles": [
+        {
+          "name": "Accent Stones",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Accent Stones"
+            ]
+          }
+        },
+        {
+          "name": "Antique",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Antique"
+            ]
+          }
+        },
+        {
+          "name": "Bead",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Bead"
+            ]
+          }
+        },
+        {
+          "name": "Bezel",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Bezel"
+            ]
+          }
+        },
+        {
+          "name": "Celtic",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Celtic"
+            ]
+          }
+        },
+        {
+          "name": "Drops",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Drops"
+            ]
+          }
+        },
+        {
+          "name": "Earring Jacket",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Earring Jacket"
+            ]
+          }
+        },
+        {
+          "name": "Floral",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Floral"
+            ]
+          }
+        },
+        {
+          "name": "Flush Set",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Flush Set"
+            ]
+          }
+        },
+        {
+          "name": "Halo",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hidden Halo",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Hidden Halo"
+            ]
+          }
+        },
+        {
+          "name": "Hoops",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Hoops"
+            ]
+          }
+        },
+        {
+          "name": "Lady Diana",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Lady Diana"
+            ]
+          }
+        },
+        {
+          "name": "Men's",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Men's"
+            ]
+          }
+        },
+        {
+          "name": "Multi Stone",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Multi Stone"
+            ]
+          }
+        },
+        {
+          "name": "Pave",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Pave"
+            ]
+          }
+        },
+        {
+          "name": "Solitaire",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Solitaire"
+            ]
+          }
+        },
+        {
+          "name": "Studs",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Studs"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Line",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Tennis/Line"
+            ]
+          }
+        },
+        {
+          "name": "Tennis/Riviere",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Tennis/Riviere"
+            ]
+          }
+        },
+        {
+          "name": "Three Stone",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Three Stone"
+            ]
+          }
+        },
+        {
+          "name": "Two Stone (toi et moi)",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Two Stone (toi et moi)"
+            ]
+          }
+        },
+        {
+          "name": "Vedic",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Vedic"
+            ]
+          }
+        },
+        {
+          "name": "Wedding Set",
+          "query": {
+            "categories": [
+              "Brooch"
+            ],
+            "styles": [
+              "Wedding Set"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Men's Rings",
+      "path": "/mens-gemstone-rings",
+      "styles": []
+    }
+  ],
+  "jewelleryLandings": {
+    "rings": "/gemstone-rings",
+    "allRings": "/all-gemstone-rings"
+  }
+}

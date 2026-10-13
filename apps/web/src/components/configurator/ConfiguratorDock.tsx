@@ -16,10 +16,10 @@ const TryOn = dynamic(
 );
 
 const METALS: readonly { id: MetalFinish; label: string; swatch: string }[] = [
-  { id: 'YELLOW_GOLD', label: 'Yellow gold', swatch: '#D4AF37' },
-  { id: 'WHITE_GOLD', label: 'White gold', swatch: '#E4E4E8' },
-  { id: 'ROSE_GOLD', label: 'Rose gold', swatch: '#B76E79' },
-  { id: 'PLATINUM', label: 'Platinum', swatch: '#C5C8D0' },
+  { id: 'YELLOW_GOLD', label: 'Yellow gold', swatch: '#C9A84C' },
+  { id: 'WHITE_GOLD', label: 'White gold', swatch: '#FAFAF8' },
+  { id: 'ROSE_GOLD', label: 'Rose gold', swatch: '#EA580C' },
+  { id: 'PLATINUM', label: 'Platinum', swatch: '#8A867E' },
 ];
 
 const METAL_IDS: readonly MetalFinish[] = ['YELLOW_GOLD', 'WHITE_GOLD', 'ROSE_GOLD', 'PLATINUM'];
@@ -43,7 +43,7 @@ export function ConfiguratorDock({
       <div className="cfg__stage">
         <Canvas
           metal={metal}
-          stone={{ shape: 'round', carat, color: '#9fd4ea' }}
+          stone={{ shape: 'round', carat, color: '#0891B2' }}
           label={`${metalLabel} ring, ${carat.toFixed(1)} carat centre stone`}
         />
         <p className="cfg__caption">Drag to turn · scroll to zoom</p>

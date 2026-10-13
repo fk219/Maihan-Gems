@@ -3,10 +3,10 @@ import type { MetalFinish } from './JewelryConfiguratorCanvas.js';
 type ThreeModule = typeof import('three');
 
 const METAL: Record<MetalFinish, { color: number; roughness: number }> = {
-  YELLOW_GOLD: { color: 0xd4af37, roughness: 0.18 },
-  WHITE_GOLD: { color: 0xe6e6ea, roughness: 0.16 },
-  ROSE_GOLD: { color: 0xb76e79, roughness: 0.2 },
-  PLATINUM: { color: 0xc5c7ce, roughness: 0.12 },
+  YELLOW_GOLD: { color: 0xc9a84c, roughness: 0.18 },
+  WHITE_GOLD: { color: 0xfafaf8, roughness: 0.16 },
+  ROSE_GOLD: { color: 0xea580c, roughness: 0.2 },
+  PLATINUM: { color: 0x8a867e, roughness: 0.12 },
 };
 
 export function metalMaterial(THREE: ThreeModule, metal: MetalFinish) {

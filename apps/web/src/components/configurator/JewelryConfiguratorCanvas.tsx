@@ -28,10 +28,10 @@ export interface JewelryConfiguratorCanvasProps {
 }
 
 const METAL: Record<MetalFinish, { color: number; roughness: number }> = {
-  YELLOW_GOLD: { color: 0xd4af37, roughness: 0.18 },
-  WHITE_GOLD: { color: 0xe6e6ea, roughness: 0.16 },
-  ROSE_GOLD: { color: 0xb76e79, roughness: 0.2 },
-  PLATINUM: { color: 0xc5c7ce, roughness: 0.12 },
+  YELLOW_GOLD: { color: 0xc9a84c, roughness: 0.18 },
+  WHITE_GOLD: { color: 0xfafaf8, roughness: 0.16 },
+  ROSE_GOLD: { color: 0xea580c, roughness: 0.2 },
+  PLATINUM: { color: 0x8a867e, roughness: 0.12 },
 };
 
 export function JewelryConfiguratorCanvas({
@@ -56,7 +56,7 @@ export function JewelryConfiguratorCanvas({
       if (disposed || !hostRef.current) return;
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xf7f3ea);
+      scene.background = new THREE.Color(0xfafaf8);
       const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 40);
       camera.position.set(0, 0.35, 2.4);
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
@@ -70,11 +70,11 @@ export function JewelryConfiguratorCanvas({
       const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
       scene.environment = env;
 
-      scene.add(new THREE.AmbientLight(0xfff8ee, 0.35));
-      const key = new THREE.DirectionalLight(0xfff6e4, 1.4);
+      scene.add(new THREE.AmbientLight(0xfafaf8, 0.35));
+      const key = new THREE.DirectionalLight(0xe8c96a, 1.4);
       key.position.set(2.4, 4.2, 3.2);
       scene.add(key);
-      const fill = new THREE.DirectionalLight(0xffe7b8, 0.7);
+      const fill = new THREE.DirectionalLight(0xffffff, 0.7);
       fill.position.set(-2.2, 1.6, 2.4);
       scene.add(fill);
 
@@ -126,7 +126,7 @@ export function JewelryConfiguratorCanvas({
             : shape.includes('pear') || shape.includes('marquise')
               ? new THREE.SphereGeometry(scale * 0.55, 24, 16)
               : new THREE.OctahedronGeometry(scale * 0.62, 1);
-        const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#7ec8e3'));
+        const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#0891B2'));
         mesh.name = 'center_stone';
         return mesh;
       }
@@ -235,7 +235,7 @@ export function JewelryConfiguratorCanvas({
       ref={hostRef}
       role="img"
       aria-label={label}
-      style={{ width: '100%', height: 440, borderRadius: 12, overflow: 'hidden', background: '#f7f3ea' }}
+      style={{ width: '100%', height: 440, borderRadius: 12, overflow: 'hidden', background: '#FAFAF8' }}
     />
   );
 }

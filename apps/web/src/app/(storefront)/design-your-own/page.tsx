@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 
 export default async function DesignYourOwnPage() {
   const [settings, stones] = await Promise.all([
-    listSettingsForDyo(12),
-    listProducts({ kind: 'gemstone', limit: 32 }),
+    listSettingsForDyo(40),
+    listProducts({ kind: 'gemstone', limit: 80 }),
   ]);
 
   return (

@@ -182,7 +182,7 @@ export function productImage(input: ProductImageInput): string {
   if (input.kind === 'jewelry') {
     return JEWELRY[jewelryKey(input)] ?? JEWELRY['ring-sapphire']!;
   }
-  return SETTING[settingKey(input)] ?? SETTING.ring!;
+  return SETTING[settingKey(input)] ?? SETTING['ring']!;
 }
 
 export function inferJewelryType(title: string): string | undefined {

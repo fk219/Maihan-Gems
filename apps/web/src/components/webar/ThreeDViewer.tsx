@@ -88,8 +88,8 @@ export function ThreeDViewer({
         height / 2,
         width * 0.7
       );
-      bgGrad.addColorStop(0, '#1c1c1f');
-      bgGrad.addColorStop(1, '#0b0b0d');
+      bgGrad.addColorStop(0, '#0D1B2A');
+      bgGrad.addColorStop(1, '#08121E');
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, width, height);
 
@@ -109,13 +109,13 @@ export function ThreeDViewer({
       ctx.ellipse(0, 0, radX, radY, 0, 0, 2 * Math.PI);
       ctx.lineWidth = 14 * zoom;
       const rimGrad = ctx.createLinearGradient(-radX, -radY, radX, radY);
-      rimGrad.addColorStop(0, '#f9e4a8');
+      rimGrad.addColorStop(0, '#E8C96A');
       rimGrad.addColorStop(0.3, '#C9A84C');
-      rimGrad.addColorStop(0.6, '#aa820a');
-      rimGrad.addColorStop(0.85, '#f9e4a8');
-      rimGrad.addColorStop(1, '#664d00');
+      rimGrad.addColorStop(0.6, '#8B6914');
+      rimGrad.addColorStop(0.85, '#E8C96A');
+      rimGrad.addColorStop(1, '#8B6914');
       ctx.strokeStyle = rimGrad;
-      ctx.shadowColor = 'rgba(212, 175, 55, 0.4)';
+      ctx.shadowColor = 'rgba(201, 168, 76, 0.4)';
       ctx.shadowBlur = 15;
       ctx.stroke();
 
@@ -123,7 +123,7 @@ export function ThreeDViewer({
       ctx.beginPath();
       ctx.ellipse(0, 0, radX - 10 * zoom, radY - 4 * zoom, 0, 0, 2 * Math.PI);
       ctx.lineWidth = 3 * zoom;
-      ctx.strokeStyle = '#2a2414';
+      ctx.strokeStyle = '#08121E';
       ctx.shadowBlur = 0;
       ctx.stroke();
 
@@ -132,15 +132,15 @@ export function ThreeDViewer({
       const gemY = -radY;
       const gemGrad = ctx.createRadialGradient(gemX, gemY, 2, gemX, gemY, 22 * zoom);
       gemGrad.addColorStop(0, '#ffffff');
-      gemGrad.addColorStop(0.2, '#93c5fd');
-      gemGrad.addColorStop(0.5, '#1d4ed8');
+      gemGrad.addColorStop(0.2, '#3B82F6');
+      gemGrad.addColorStop(0.5, '#1E3A8A');
       gemGrad.addColorStop(0.9, '#1e3a8a');
       gemGrad.addColorStop(1, '#0f172a');
 
       ctx.beginPath();
       ctx.arc(gemX, gemY, 18 * zoom, 0, 2 * Math.PI);
       ctx.fillStyle = gemGrad;
-      ctx.shadowColor = 'rgba(147, 197, 253, 0.6)';
+      ctx.shadowColor = 'rgba(59, 130, 246, 0.6)';
       ctx.shadowBlur = 20;
       ctx.fill();
 
@@ -214,10 +214,10 @@ export function ThreeDViewer({
         position: 'relative',
         width: '100%',
         minHeight: '440px',
-        backgroundColor: '#0a0a0c',
+        backgroundColor: '#08121E',
         borderRadius: '12px',
         overflow: 'hidden',
-        border: '1px solid #26262a',
+        border: '1px solid rgba(201, 168, 76, 0.15)',
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -230,7 +230,7 @@ export function ThreeDViewer({
           style={{
             padding: '2.5rem',
             textAlign: 'center',
-            color: '#a1a1aa',
+            color: '#8A867E',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -240,7 +240,7 @@ export function ThreeDViewer({
           }}
         >
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💎</div>
-          <h3 style={{ color: '#fafafa', marginBottom: '0.5rem' }}>3D Viewing Unavailable</h3>
+          <h3 style={{ color: '#FAFAF8', marginBottom: '0.5rem' }}>3D Viewing Unavailable</h3>
           <p style={{ maxWidth: '420px', fontSize: '0.9rem', lineHeight: '1.5' }}>
             Your browser does not have WebGL2 or hardware acceleration enabled. A high-resolution
             static preview is displayed below.
@@ -253,7 +253,7 @@ export function ThreeDViewer({
                 marginTop: '1.5rem',
                 maxHeight: '260px',
                 objectFit: 'contain',
-                borderRadius: '8px',
+                borderRadius: '12px',
               }}
             />
           )}
@@ -270,7 +270,7 @@ export function ThreeDViewer({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(10, 10, 12, 0.85)',
+            backgroundColor: 'rgba(8, 18, 30, 0.85)',
             zIndex: 10,
             color: '#C9A84C',
           }}
@@ -279,9 +279,9 @@ export function ThreeDViewer({
             style={{
               width: '40px',
               height: '40px',
-              border: '3px solid #27272a',
+              border: '3px solid #0D1B2A',
               borderTopColor: '#C9A84C',
-              borderRadius: '50%',
+              borderRadius: '12px',
               animation: 'spin 1s linear infinite',
               marginBottom: '1rem',
             }}
@@ -323,8 +323,8 @@ export function ThreeDViewer({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0.75rem 1rem',
-            backgroundColor: 'rgba(17, 17, 20, 0.9)',
-            borderTop: '1px solid #26262a',
+            backgroundColor: 'rgba(13, 27, 42, 0.9)',
+            borderTop: '1px solid rgba(201, 168, 76, 0.15)',
             zIndex: 5,
           }}
         >
@@ -335,11 +335,11 @@ export function ThreeDViewer({
               aria-label="Zoom in"
               className="btn-control"
               style={{
-                background: '#27272a',
+                background: '#0D1B2A',
                 border: 'none',
-                color: '#fafafa',
+                color: '#FAFAF8',
                 padding: '0.4rem 0.75rem',
-                borderRadius: '4px',
+                borderRadius: '12px',
                 cursor: 'pointer',
                 fontSize: '0.9rem',
               }}
@@ -351,11 +351,11 @@ export function ThreeDViewer({
               onClick={() => setZoom((z) => Math.max(z - 0.2, 0.6))}
               aria-label="Zoom out"
               style={{
-                background: '#27272a',
+                background: '#0D1B2A',
                 border: 'none',
-                color: '#fafafa',
+                color: '#FAFAF8',
                 padding: '0.4rem 0.75rem',
-                borderRadius: '4px',
+                borderRadius: '12px',
                 cursor: 'pointer',
                 fontSize: '0.9rem',
               }}
@@ -367,11 +367,11 @@ export function ThreeDViewer({
               onClick={resetView}
               aria-label="Reset 3D view"
               style={{
-                background: '#27272a',
+                background: '#0D1B2A',
                 border: 'none',
-                color: '#a1a1aa',
+                color: '#8A867E',
                 padding: '0.4rem 0.75rem',
-                borderRadius: '4px',
+                borderRadius: '12px',
                 cursor: 'pointer',
                 fontSize: '0.8rem',
               }}
@@ -391,12 +391,12 @@ export function ThreeDViewer({
                 alignItems: 'center',
                 gap: '0.5rem',
                 backgroundColor: '#C9A84C',
-                color: '#09090b',
+                color: '#FFFFFF',
                 fontWeight: 600,
                 fontSize: '0.85rem',
                 border: 'none',
                 padding: '0.5rem 1rem',
-                borderRadius: '6px',
+                borderRadius: '12px',
                 cursor: 'pointer',
                 transition: 'background-color 0.15s ease',
               }}

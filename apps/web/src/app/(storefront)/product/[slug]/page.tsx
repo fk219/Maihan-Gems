@@ -4,7 +4,9 @@ import { notFound } from 'next/navigation';
 
 import { LuxuryProductCard } from '../../../../components/storefront/LuxuryProductCard.js';
 import { ProductActions } from '../../../../components/storefront/ProductActions.js';
+import { ProductStudio } from '../../../../components/storefront/ProductStudio.js';
 import { cardToAtelier } from '../../../../lib/atelier-item.js';
+import { findNgcProduct, ngcCards } from '../../../../lib/ngc/catalog.js';
 import { getProductBySlug, listProducts } from '../../../../lib/storefront-data.js';
 import { productImage } from '../../../../lib/storefront-images.js';
 
@@ -16,6 +18,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const ngc = findNgcProduct(slug);
+  if (ngc) return { title: `${ngc.title} | Maihan Gems` };
   const product = await getProductBySlug(slug);
   return { title: product ? `${product.title} | Maihan Gems` : 'Piece | Maihan Gems' };
 }
@@ -26,6 +30,14 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const ngc = findNgcProduct(slug);
+  if (ngc) {
+    const related = ngcCards({ kind: ngc.kind, stoneSlug: ngc.stoneType?.toLowerCase().replace(/[^a-z0-9]+/g, '-'), limit: 5 }).filter(
+      (row) => row.sku !== ngc.id,
+    );
+    return <ProductStudio product={ngc} related={related} />;
+  }
+
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
@@ -102,13 +114,10 @@ export default async function ProductPage({
           </div>
         </div>
         {related.length > 0 ? (
-          <div style={{ marginTop: '4rem' }}>
-            <h2 className="lx-h2" style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>Nearby in the vault</h2>
-            <div className="lx-grid">
-              {related.map((item) => (
-                <LuxuryProductCard key={item.id} product={item} />
-              ))}
-            </div>
+          <div className="lx-grid" style={{ marginTop: '3rem' }}>
+            {related.map((row) => (
+              <LuxuryProductCard key={row.id} product={row} />
+            ))}
           </div>
         ) : null}
       </div>

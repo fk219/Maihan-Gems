@@ -2,6 +2,7 @@
  * Script to run the storefront seed data
  */
 import { Pool } from 'pg';
+import { importNgcResearch } from './import-ngc-research.js';
 import { storefrontSeed } from './storefront-seed.js';
 
 const pool = new Pool({
@@ -13,8 +14,13 @@ async function runSeed() {
   
   try {
     const existing = await client.query<{ n: number }>('SELECT COUNT(*)::int AS n FROM products');
-    if ((existing.rows[0]?.n ?? 0) > 0) {
-      console.log('✓ Storefront seed skipped (products table already populated).\n');
+    const populated = (existing.rows[0]?.n ?? 0) > 0;
+    if (populated) {
+      console.log('✓ House seed skipped (products table already populated). Importing NGC research catalog…\n');
+      await client.query('BEGIN');
+      const ngc = await importNgcResearch(client);
+      await client.query('COMMIT');
+      console.log(`✓ NGC research catalog upserted ${ngc.upserted} products.\n`);
       return;
     }
 
@@ -260,7 +266,9 @@ async function runSeed() {
     }
     console.log(`✓ ${storefrontSeed.jewelry.length} jewelry pieces seeded\n`);
 
+    const ngc = await importNgcResearch(client);
     await client.query('COMMIT');
+    console.log(`✓ NGC research catalog upserted ${ngc.upserted} products.`);
     console.log('✅ Storefront seed completed successfully!');
     
   } catch (error) {

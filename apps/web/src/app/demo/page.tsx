@@ -84,7 +84,7 @@ export default async function DemoStorefrontPage() {
                       <p className="mt-1 text-sm text-[#8A867E]">{product.stone_type}</p>
                     )}
                     {product.weight_ct && (
-                      <p className="mt-1 text-sm font-medium text-[#475569]">{product.weight_ct} ct</p>
+                      <p className="mt-1 text-sm font-medium text-[#4A4740]">{product.weight_ct} ct</p>
                     )}
                     {product.regional_price > 0 && (
                       <p style={{ fontFamily: 'JetBrains Mono, monospace' }} className="mt-3 text-lg font-medium text-[#C9A84C]">

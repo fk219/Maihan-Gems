@@ -1,38 +1,55 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
+import { CategoryLanding } from '../../../components/storefront/CategoryLanding.js';
+import { CollectionBrowser } from '../../../components/storefront/CollectionFilters.js';
 import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
-import { loadCollectionView } from '../../../lib/collection-route.js';
-import { displayStoneName, parseCollectionSlug } from '../../../lib/search-parser.js';
+import { landingView } from '../../../lib/ngc/landing.js';
+import { parseLandingSlug } from '../../../lib/ngc/routes.js';
 
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: Promise<{ varietySlug?: string }>;
+  searchParams?: Promise<{ style?: string; page?: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { varietySlug } = await params;
-  const parsed = parseCollectionSlug(varietySlug);
-  if (!parsed) return { title: 'Collection | Maihan Gems' };
-  const name = displayStoneName(parsed.stoneType);
-  if (parsed.mode === 'pairs') return { title: `${name} pairs | Maihan Gems` };
-  if (parsed.mode === 'jewelry') return { title: `${name} ${parsed.formLabel} | Maihan Gems` };
-  if (parsed.mode === 'settings') return { title: `${name} settings | Maihan Gems` };
-  return { title: `${name} | Maihan Gems` };
+  const view = landingView(varietySlug);
+  return { title: view ? `${view.title} | Maihan Gems` : 'Collection | Maihan Gems' };
 }
 
 export default async function VarietyPage({ params }: PageProps) {
   const { varietySlug } = await params;
-  const view = await loadCollectionView(varietySlug);
-  if (!view) notFound();
+  const parsed = parseLandingSlug(varietySlug);
+  const view = landingView(varietySlug);
+  if (!parsed || !view) notFound();
+
+  if (!view.showCatalog || view.tiles.length > 8) {
+    return (
+      <CategoryLanding
+        kicker={view.kicker}
+        title={view.title}
+        lede={view.lede}
+        cta={view.cta}
+        tiles={view.tiles}
+        colours={view.colours}
+      >
+        {view.showCatalog && view.products.length > 0 ? (
+          <CollectionBrowser products={view.products} />
+        ) : null}
+      </CategoryLanding>
+    );
+  }
+
   return (
     <CollectionPage
       kicker={view.kicker}
       title={view.title}
       lede={view.lede}
       products={view.products}
-      stoneSlug={view.stoneSlug}
+      stoneSlug={parsed.type === 'stone' ? parsed.slug : undefined}
     />
   );
 }

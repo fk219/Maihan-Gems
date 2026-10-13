@@ -15,7 +15,7 @@ const { Client } = pg;
 
 const STOREFRONT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'storefront-migrations');
 
-const FILES = ['0019_storefront_schema.sql', '0020_media_provenance.sql'] as const;
+const FILES = ['0019_storefront_schema.sql', '0020_media_provenance.sql', '0021_ngc_research_schema.sql'] as const;
 
 async function hasStorefrontProducts(client: pg.Client): Promise<boolean> {
   const result = await client.query<{ ok: boolean }>(`
@@ -66,6 +66,8 @@ export async function runStorefrontSchema(databaseUrl: string): Promise<{ applie
     if (await hasStorefrontProducts(client)) {
       process.stdout.write('storefront-schema: already applied (products.vendor_id present)\n');
       await runSqlFile(client, '0020_media_provenance.sql').catch(() => undefined);
+      process.stdout.write('storefront-schema: applying 0021_ngc_research_schema.sql\n');
+      await runSqlFile(client, '0021_ngc_research_schema.sql');
       return { applied: false };
     }
 

@@ -97,11 +97,12 @@ export function DyoStudio({
     setReserved(true);
   }
 
+  const needsReview = Boolean(stone && setting && ((stone.caratTotal ?? 0) > 5 || (setting.settingFor === 'earrings' && stone.quantityType !== 'pair')));
   const swatches = [
-    { name: '18K Yellow Gold' as const, color: '#D4AF37' },
-    { name: '18K White Gold' as const, color: '#E6E6EA' },
-    { name: '18K Rose Gold' as const, color: '#B76E79' },
-    { name: 'Platinum' as const, color: '#C5C8D0' },
+    { name: '18K Yellow Gold' as const, color: '#C9A84C' },
+    { name: '18K White Gold' as const, color: '#FAFAF8' },
+    { name: '18K Rose Gold' as const, color: '#EA580C' },
+    { name: 'Platinum' as const, color: '#8A867E' },
   ];
 
   return (
@@ -203,6 +204,11 @@ export function DyoStudio({
             <div className="is-total"><dt>{metal}{setting?.settingFor === 'ring' ? ` · US ${size}` : ''}</dt><dd>{formatMoney(total, currency, rates)}</dd></div>
           </dl>
           {accept ? <p className="atelier__note">Accepts {accept}</p> : null}
+          {needsReview ? (
+            <p className="atelier__note">
+              This pairing sits near the seat’s size band. A jeweller will review the prongs before the piece is made.
+            </p>
+          ) : null}
           <button type="button" className="atelier__bag" disabled={!setting || !stone} onClick={reserve}>
             {reserved ? 'Held in your bag' : 'Add to bag'}
           </button>

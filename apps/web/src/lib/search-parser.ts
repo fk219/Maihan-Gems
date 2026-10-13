@@ -7,19 +7,19 @@
 export type StorefrontCurrency = 'USD' | 'AED' | 'THB';
 
 export interface ParsedSearch {
-  readonly raw: string;
-  readonly remainder: string;
-  readonly stoneType?: string;
-  readonly quantityType?: 'single' | 'pair';
-  readonly shape?: string;
-  readonly minCarat?: number;
-  readonly maxCarat?: number;
-  readonly origin?: string;
-  readonly treatment?: string;
-  readonly minPriceUsd?: number;
-  readonly maxPriceUsd?: number;
-  readonly kind?: 'gemstone' | 'jewelry' | 'setting';
-  readonly jewelryType?: string;
+  raw: string;
+  remainder: string;
+  stoneType?: string;
+  quantityType?: 'single' | 'pair';
+  shape?: string;
+  minCarat?: number;
+  maxCarat?: number;
+  origin?: string;
+  treatment?: string;
+  minPriceUsd?: number;
+  maxPriceUsd?: number;
+  kind?: 'gemstone' | 'jewelry' | 'setting';
+  jewelryType?: string;
 }
 
 const STONE_ALIASES: ReadonlyArray<readonly [RegExp, string]> = [

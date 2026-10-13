@@ -10,8 +10,11 @@
  * @vitest-environment happy-dom
  */
 import { describe, it, expect, beforeAll, vi } from 'vitest';
+import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { AxeBuilder } from '../../lib/axe-builder.js';
+import { StorefrontProvider } from '../storefront/StorefrontProvider.js';
+import { DEFAULT_FX } from '../../lib/currency.js';
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
@@ -24,11 +27,15 @@ import DyoReviewPage from '../../app/(storefront)/design-your-own/review/[config
 import CartPage from '../../app/(storefront)/cart/page.js';
 import { DyoConfigurator } from './DyoConfigurator.js';
 
+function withStorefront(ui: React.ReactNode): React.ReactElement {
+  return createElement(StorefrontProvider, { rates: DEFAULT_FX, children: ui });
+}
+
 async function auditA11y(name: string, ui: React.ReactElement): Promise<void> {
   document.documentElement.setAttribute('lang', 'en');
   if (document.title === '') document.title = 'Maihan Gems';
   const container = document.createElement('div');
-  container.innerHTML = renderToStaticMarkup(ui);
+  container.innerHTML = renderToStaticMarkup(withStorefront(ui));
   document.body.appendChild(container);
 
   try {
@@ -60,13 +67,14 @@ describe('Phase 7 DYO Storefront Flow & UI Verification', () => {
   });
 
   it('renders DYO entry page with configurator shell and mounting choices', async () => {
-    const markup = renderToStaticMarkup(<DesignYourOwnEntryPage />);
-    expect(markup).toContain('Design Your Own');
-    expect(markup).toContain('Select Precious Mounting &amp; Metal');
-    expect(markup).toContain('Solitaire Classic');
-    expect(markup).toContain('Trellis Cathedral');
-    expect(markup).toContain('14K White Gold');
-    expect(markup).toContain('Platinum 950');
+    const page = await DesignYourOwnEntryPage();
+    const markup = renderToStaticMarkup(withStorefront(page));
+    expect(markup).toContain('Design your own');
+    expect(markup).toContain('Setting');
+    expect(markup).toContain('Stone');
+    expect(markup).toContain('Finish');
+    expect(markup).toContain('18K Yellow Gold');
+    expect(markup).toContain('Platinum');
   });
 
   it('renders DyoConfigurator component correctly', () => {
@@ -106,14 +114,16 @@ describe('Phase 7 DYO Storefront Flow & UI Verification', () => {
   });
 
   it('renders CartPage with atelier shopping bag layout', async () => {
-    const markup = renderToStaticMarkup(<CartPage />);
-    expect(markup).toContain('Shopping Bag');
-    expect(markup).toContain('cart-container');
+    const markup = renderToStaticMarkup(
+      withStorefront(await CartPage({ searchParams: Promise.resolve({}) })),
+    );
+    expect(markup).toContain('Your bag');
+    expect(markup).toContain('lx-empty');
   });
 
   describe('Accessibility Audits (axe-core WCAG 2.2 AA)', () => {
     it('passes a11y audit on DYO entry page', async () => {
-      await auditA11y('dyo entry page', <DesignYourOwnEntryPage />);
+      await auditA11y('dyo entry page', await DesignYourOwnEntryPage());
     });
 
     it('passes a11y audit on DYO review page', async () => {
@@ -124,7 +134,7 @@ describe('Phase 7 DYO Storefront Flow & UI Verification', () => {
     });
 
     it('passes a11y audit on cart page', async () => {
-      await auditA11y('cart page', <CartPage />);
+      await auditA11y('cart page', await CartPage({ searchParams: Promise.resolve({}) }));
     });
   });
 });

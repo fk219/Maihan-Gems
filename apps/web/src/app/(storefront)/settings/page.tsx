@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
-import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
-import { listProducts } from '../../../lib/storefront-data.js';
+import { CategoryLanding } from '../../../components/storefront/CategoryLanding.js';
+import { CollectionBrowser } from '../../../components/storefront/CollectionFilters.js';
+import { landingView } from '../../../lib/ngc/landing.js';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Settings | Maihan Gems' };
@@ -12,21 +14,19 @@ export default async function SettingsPage({
   searchParams: Promise<{ for?: string }>;
 }) {
   const { for: settingFor } = await searchParams;
-  const allowed = settingFor === 'ring' || settingFor === 'pendant' || settingFor === 'earrings'
-    ? settingFor
-    : undefined;
-  const products = await listProducts({
-    kind: 'setting',
-    settingFor: allowed,
-    settingForIn: allowed ? undefined : ['ring', 'pendant', 'earrings'],
-    limit: 32,
-  });
+  const slug =
+    settingFor === 'earrings'
+      ? 'gemstone-earring-settings'
+      : settingFor === 'pendant'
+        ? 'gemstone-necklace-pendant-settings'
+        : settingFor === 'bracelet'
+          ? 'gemstone-bracelet-settings'
+          : 'gemstone-ring-settings';
+  const view = landingView(slug);
+  if (!view) notFound();
   return (
-    <CollectionPage
-      kicker="Atelier mountings"
-      title="Settings"
-      lede="Ring, earring and pendant mountings, priced without the centre stone."
-      products={products}
-    />
+    <CategoryLanding kicker={view.kicker} title={view.title} lede={view.lede} cta={view.cta} tiles={view.tiles}>
+      <CollectionBrowser products={view.products} />
+    </CategoryLanding>
   );
 }

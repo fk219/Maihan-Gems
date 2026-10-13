@@ -50,9 +50,16 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
   const [state, setState] = useState<CatalogFilterState>(() => emptyFilterState(facets));
   const [open, setOpen] = useState(false);
 
+  const [page, setPage] = useState(1);
   const visible = useMemo(() => applyCatalogFilters(products, state), [products, state]);
+  const pageSize = 60;
+  const pages = Math.max(1, Math.ceil(visible.length / pageSize));
+  const paged = visible.slice((page - 1) * pageSize, page * pageSize);
 
-  const patch = (partial: Partial<CatalogFilterState>) => setState((prev) => ({ ...prev, ...partial }));
+  const patch = (partial: Partial<CatalogFilterState>) => {
+    setPage(1);
+    setState((prev) => ({ ...prev, ...partial }));
+  };
   const toggle = (key: 'shapes' | 'colours' | 'origins' | 'treatments' | 'labs', value: string) => {
     setState((prev) => ({ ...prev, [key]: toggleValue(prev[key], value) }));
   };
@@ -179,6 +186,7 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
         <div className="lx-toolbar">
           <span className="lx-toolbar__count">
             {visible.length} piece{visible.length === 1 ? '' : 's'}
+            {visible.length > pageSize ? ` · page ${page} of ${pages}` : ''}
           </span>
           <div className="lx-toolbar__tools">
             <button type="button" className="lx-btn lx-btn--ghost lx-drawer-btn" onClick={() => setOpen(true)}>
@@ -191,10 +199,10 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
                 value={state.sort}
                 onChange={(e) => patch({ sort: e.target.value as CatalogSort })}
               >
-                <option value="price-desc">Price · high to low</option>
+                <option value="price-desc">Featured first</option>
+                <option value="title-asc">New first</option>
                 <option value="price-asc">Price · low to high</option>
                 <option value="carat-desc">Carat · high to low</option>
-                <option value="title-asc">Name · A to Z</option>
               </select>
             </label>
             <div className="lx-view-toggle" role="group" aria-label="Layout">
@@ -207,8 +215,23 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
             </div>
           </div>
         </div>
-        {visible.length > 0 ? (
-          <ProductGrid products={visible} view={state.view} />
+        {paged.length > 0 ? (
+          <>
+            <ProductGrid products={paged} view={state.view} />
+            {pages > 1 ? (
+              <nav className="lx-pager" aria-label="Catalogue pages">
+                <button type="button" className="lx-btn lx-btn--ghost" disabled={page <= 1} onClick={() => setPage((n) => n - 1)}>
+                  Previous
+                </button>
+                <span>
+                  {page} / {pages}
+                </span>
+                <button type="button" className="lx-btn lx-btn--ghost" disabled={page >= pages} onClick={() => setPage((n) => n + 1)}>
+                  Next
+                </button>
+              </nav>
+            ) : null}
+          </>
         ) : (
           <p className="lx-empty-copy">No pieces match these filters. Clear them to return to the full drawer.</p>
         )}

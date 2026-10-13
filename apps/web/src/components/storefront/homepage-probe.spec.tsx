@@ -33,7 +33,8 @@ describe('homepage redesign', () => {
     expect(container.querySelector('.mgh-gems h2')?.textContent).toBe('Gemstones');
     expect(container.querySelectorAll('.mgh-gem').length).toBeGreaterThanOrEqual(10);
     expect(container.querySelector('.mgh-jewellery h2')?.textContent).toContain('Jewellery');
-    expect(container.querySelectorAll('.mgh-jew').length).toBe(4);
+    expect(container.querySelectorAll('.mgh-jewellery .mgh-jew').length).toBe(4);
+    expect(container.querySelector('#mgh-set-h')?.textContent).toBe('Settings');
     expect(container.querySelector('.mgh-pack h2')?.textContent).toContain('Packaging');
     expect(container.querySelectorAll('.mgh-pack__item').length).toBe(5);
     expect(container.querySelector('.mgh-dyo h2')?.textContent).toContain('Design Your Own');

@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
-import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
-import { listProducts } from '../../../lib/storefront-data.js';
+import { CategoryLanding } from '../../../components/storefront/CategoryLanding.js';
+import { CollectionBrowser } from '../../../components/storefront/CollectionFilters.js';
+import { landingView } from '../../../lib/ngc/landing.js';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Jewellery | Maihan Gems' };
@@ -12,12 +14,19 @@ export default async function JewelleryPage({
   searchParams: Promise<{ type?: string }>;
 }) {
   const { type } = await searchParams;
-  const products = await listProducts({ kind: 'jewelry', jewelryType: type, limit: 48 });
+  const slug =
+    type === 'earrings'
+      ? 'gemstone-earrings'
+      : type === 'pendant'
+        ? 'gemstone-necklaces-pendants'
+        : type === 'bracelet'
+          ? 'gemstone-bracelets-bangles'
+          : 'gemstone-rings';
+  const view = landingView(slug);
+  if (!view) notFound();
   return (
-    <CollectionPage
-      kicker="Finished pieces"
-      title="Jewellery"
-      products={products}
-    />
+    <CategoryLanding kicker={view.kicker} title={view.title} lede={view.lede} cta={view.cta} tiles={view.tiles}>
+      <CollectionBrowser products={view.products} />
+    </CategoryLanding>
   );
 }

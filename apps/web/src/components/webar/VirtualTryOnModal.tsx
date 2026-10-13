@@ -15,6 +15,8 @@ export interface VirtualTryOnModalProps {
   readonly metal: MetalFinish;
   readonly carat: number;
   readonly title?: string;
+  readonly mode?: 'hand' | 'ear' | 'neck' | 'room';
+  readonly sharePath?: string;
 }
 
 export function VirtualTryOnModal({
@@ -23,6 +25,8 @@ export function VirtualTryOnModal({
   metal,
   carat,
   title = 'Virtual try-on',
+  mode = 'hand',
+  sharePath,
 }: VirtualTryOnModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -41,8 +45,9 @@ export function VirtualTryOnModal({
 
   useEffect(() => {
     if (!open) return;
-    setShareUrl(`${window.location.origin}/design-your-own?tryon=1&metal=${metal}&carat=${carat}`);
-  }, [open, metal, carat]);
+    const path = sharePath ?? `/design-your-own?tryon=1&metal=${metal}&carat=${carat}`;
+    setShareUrl(`${window.location.origin}${path}`);
+  }, [open, metal, carat, sharePath]);
 
   useEffect(() => {
     if (!open) return;
@@ -82,7 +87,7 @@ export function VirtualTryOnModal({
       <div className="vto__panel">
         <header className="vto__bar">
           <div>
-            <p className="cfg__kicker">On your hand</p>
+            <p className="cfg__kicker">{mode === 'ear' ? 'On the ear' : mode === 'neck' ? 'At the neck' : mode === 'room' ? 'In the room' : 'On your hand'}</p>
             <h2>{title}</h2>
           </div>
           <button type="button" className="vto__close" onClick={onClose}>Close</button>
@@ -93,7 +98,11 @@ export function VirtualTryOnModal({
         ) : (
           <div className="vto__intro">
             <div>
-              <p>Scan with your phone to try this {carat.toFixed(1)} ct ring on your hand. Or use the camera on this device.</p>
+              <p>
+                {mode === 'room'
+                  ? `Scan with your phone to place this ${carat.toFixed(1)} ct gem in the room (AR Quick Look on iOS).`
+                  : `Scan with your phone to try this ${carat.toFixed(1)} ct piece. MediaPipe tracks hand, ear or neck. AR Quick Look on iOS.`}
+              </p>
               {qrImage ? <img src={qrImage} alt="QR code to open try-on on a phone" width={220} height={220} /> : null}
             </div>
             <button type="button" className="cfg__try" onClick={() => void startCamera()}>Use this camera</button>

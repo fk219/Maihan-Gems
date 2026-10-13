@@ -1,3 +1,13 @@
+# NGC RESEARCH STOREFRONT + CLOUDINARY MEDIA (2026-10-13)
+
+Compiled `docs/research/ngc/` (443 products) to `apps/web/src/data/ngc-catalog.json`.
+Storefront overlay + seed (`0021_ngc_research_schema.sql`, `import-ngc-research.ts`)
+upserts the research catalogue. Product media delivery is Cloudinary cloud
+`o1zwhvbi`: public_id `maihan/products/<id>/<file>`, render with `f_auto,q_auto`.
+The gzipped mapping URL returns Cloudinary "Untrusted File Access" for raw JSON;
+public_ids are derived from that convention and live image/video/srn/spin360.mp4
+URLs were verified. Silk & Stone colours are Design.md tokens only.
+
 # SHOWCASE CATALOG IMPORT (2026-10-13)
 
 Stopped the bulk dealer crawl. `packages/db/src/seed/import-public-catalog.ts`

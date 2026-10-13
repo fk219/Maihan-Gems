@@ -172,15 +172,15 @@ export function WebArModal({
         ctx.ellipse(0, 0, 36 * ringScale, 16 * ringScale, 0.1, 0, 2 * Math.PI);
         ctx.lineWidth = 8 * ringScale;
         ctx.strokeStyle = '#C9A84C';
-        ctx.shadowColor = 'rgba(212, 175, 55, 0.6)';
+        ctx.shadowColor = 'rgba(201, 168, 76, 0.6)';
         ctx.shadowBlur = 12;
         ctx.stroke();
 
         // Highlight
         ctx.beginPath();
         ctx.ellipse(0, -14 * ringScale, 8 * ringScale, 8 * ringScale, 0, 0, 2 * Math.PI);
-        ctx.fillStyle = '#60a5fa';
-        ctx.shadowColor = 'rgba(96, 165, 250, 0.8)';
+        ctx.fillStyle = '#3B82F6';
+        ctx.shadowColor = 'rgba(59, 130, 246, 0.8)';
         ctx.shadowBlur = 15;
         ctx.fill();
 
@@ -207,7 +207,7 @@ export function WebArModal({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.92)',
+        backgroundColor: 'rgba(8, 18, 30, 0.92)',
         zIndex: 9999,
         display: 'flex',
         flexDirection: 'column',
@@ -232,10 +232,10 @@ export function WebArModal({
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <span style={{ fontSize: '1.25rem' }}>💎</span>
           <div>
-            <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#fafafa', margin: 0 }}>
+            <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#FAFAF8', margin: 0 }}>
               Atelier AR Try-On
             </h2>
-            <span style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>
+            <span style={{ fontSize: '0.75rem', color: '#8A867E' }}>
               Jewellery: {jewelleryType}
             </span>
           </div>
@@ -248,11 +248,11 @@ export function WebArModal({
           style={{
             background: 'rgba(255, 255, 255, 0.1)',
             border: 'none',
-            color: '#fafafa',
+            color: '#FAFAF8',
             fontSize: '1.25rem',
             width: '36px',
             height: '36px',
-            borderRadius: '50%',
+            borderRadius: '12px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -270,10 +270,10 @@ export function WebArModal({
           width: '100%',
           maxWidth: '720px',
           height: '540px',
-          backgroundColor: '#0c0c0e',
+          backgroundColor: '#08121E',
           borderRadius: '16px',
           overflow: 'hidden',
-          border: '1px solid #27272a',
+          border: '1px solid #0D1B2A',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -287,11 +287,11 @@ export function WebArModal({
               padding: '2.5rem',
               textAlign: 'center',
               maxWidth: '480px',
-              color: '#d4d4d8',
+              color: '#8A867E',
             }}
           >
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
-            <h3 style={{ fontSize: '1.25rem', color: '#fafafa', marginBottom: '0.75rem' }}>
+            <h3 style={{ fontSize: '1.25rem', color: '#FAFAF8', marginBottom: '0.75rem' }}>
               Privacy-First Virtual Try-On
             </h3>
             <p style={{ fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
@@ -306,11 +306,11 @@ export function WebArModal({
                 onClick={requestCameraAccess}
                 style={{
                   backgroundColor: '#C9A84C',
-                  color: '#09090b',
+                  color: '#FFFFFF',
                   fontWeight: 600,
                   fontSize: '0.95rem',
                   padding: '0.75rem 1.5rem',
-                  borderRadius: '8px',
+                  borderRadius: '12px',
                   border: 'none',
                   cursor: 'pointer',
                 }}
@@ -323,11 +323,11 @@ export function WebArModal({
                 onClick={requestQrHandoff}
                 style={{
                   backgroundColor: 'transparent',
-                  color: '#a1a1aa',
-                  border: '1px solid #3f3f46',
+                  color: '#8A867E',
+                  border: '1px solid rgba(201, 168, 76, 0.3)',
                   fontSize: '0.85rem',
                   padding: '0.5rem 1rem',
-                  borderRadius: '8px',
+                  borderRadius: '12px',
                   cursor: 'pointer',
                 }}
               >
@@ -340,11 +340,11 @@ export function WebArModal({
                 style={{
                   marginTop: '1.5rem',
                   padding: '1rem',
-                  backgroundColor: '#18181b',
-                  borderRadius: '8px',
+                  backgroundColor: '#0D1B2A',
+                  borderRadius: '12px',
                 }}
               >
-                <p style={{ fontSize: '0.8rem', color: '#e4e4e7', marginBottom: '0.5rem' }}>
+                <p style={{ fontSize: '0.8rem', color: '#FAFAF8', marginBottom: '0.5rem' }}>
                   Scan with your smartphone camera to launch instant AR:
                 </p>
                 <div
@@ -352,10 +352,10 @@ export function WebArModal({
                     padding: '0.5rem',
                     backgroundColor: '#ffffff',
                     display: 'inline-block',
-                    borderRadius: '4px',
+                    borderRadius: '12px',
                   }}
                 >
-                  <code style={{ color: '#09090b', fontSize: '0.75rem' }}>{qrHandoffUrl}</code>
+                  <code style={{ color: '#1A1A18', fontSize: '0.75rem' }}>{qrHandoffUrl}</code>
                 </div>
               </div>
             )}
@@ -364,9 +364,9 @@ export function WebArModal({
 
         {/* Permission Denied Fallback Screen */}
         {cameraState === 'DENIED' && (
-          <div style={{ padding: '2rem', textAlign: 'center', maxWidth: '440px', color: '#d4d4d8' }}>
+          <div style={{ padding: '2rem', textAlign: 'center', maxWidth: '440px', color: '#8A867E' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📷🚫</div>
-            <h3 style={{ color: '#fafafa', marginBottom: '0.5rem' }}>Camera Access Denied</h3>
+            <h3 style={{ color: '#FAFAF8', marginBottom: '0.5rem' }}>Camera Access Denied</h3>
             <p style={{ fontSize: '0.875rem', lineHeight: '1.5', marginBottom: '1.5rem' }}>
               To experience AR try-on, allow camera access in your browser settings. You can still
               inspect the piece using the interactive 3D viewer.
@@ -375,11 +375,11 @@ export function WebArModal({
               type="button"
               onClick={onClose}
               style={{
-                backgroundColor: '#27272a',
-                color: '#fafafa',
+                backgroundColor: '#0D1B2A',
+                color: '#FAFAF8',
                 border: 'none',
                 padding: '0.6rem 1.25rem',
-                borderRadius: '6px',
+                borderRadius: '12px',
                 cursor: 'pointer',
               }}
             >
@@ -422,11 +422,11 @@ export function WebArModal({
                 position: 'absolute',
                 bottom: '1rem',
                 left: '1rem',
-                backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                backgroundColor: 'rgba(8, 18, 30, 0.75)',
                 padding: '0.4rem 0.8rem',
-                borderRadius: '20px',
+                borderRadius: '12px',
                 fontSize: '0.8rem',
-                color: trackingState === 'TRACKED' ? '#4ade80' : '#facc15',
+                color: trackingState === 'TRACKED' ? '#10B981' : '#FBBF24',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.4rem',

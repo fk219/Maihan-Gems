@@ -1,0 +1,2753 @@
+[
+ {
+  "id": "K31613",
+  "stoneType": "Rhodolite Garnet",
+  "shape": "Round",
+  "weight": 0.59,
+  "length": 4.76,
+  "width": 4.82,
+  "height": 3.49,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 2692,
+    "sample": [
+     "JS1855",
+     "JS1885",
+     "JS1889",
+     "JS1893",
+     "JS1894",
+     "JS1899"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Flush Set",
+     "Halo",
+     "Lady Diana",
+     "Men's",
+     "Pave",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 496,
+    "sample": [
+     "JS1815",
+     "JS1820",
+     "JS1831",
+     "JS1840",
+     "JS1850",
+     "JS1868",
+     "JS1881"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 36,
+    "sample": [
+     "JS1255",
+     "JS1321",
+     "JS1327",
+     "JS1648",
+     "JS1665",
+     "JS1666",
+     "JS1668",
+     "JS1670"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32447",
+  "stoneType": "Tsavorite Garnet",
+  "shape": "Round",
+  "weight": 1.45,
+  "length": 7.51,
+  "width": 7.44,
+  "height": 4.15,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 3474,
+    "sample": [
+     "JS1885",
+     "JS1889",
+     "JS1890",
+     "JS1893",
+     "JS1894",
+     "JS1899"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Flush Set",
+     "Halo",
+     "Lady Diana",
+     "Men's",
+     "Pave",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 487,
+    "sample": [
+     "JS1815",
+     "JS1820",
+     "JS1831",
+     "JS1840",
+     "JS1850",
+     "JS1868",
+     "JS1881"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 30,
+    "sample": [
+     "JS1255",
+     "JS1327",
+     "JS1665",
+     "JS1666",
+     "JS1668",
+     "JS1670"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32649",
+  "stoneType": "Citrine",
+  "shape": "Round",
+  "weight": 4.11,
+  "length": 11.22,
+  "width": 11.24,
+  "height": 6.96,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 3413,
+    "sample": [
+     "JS1885",
+     "JS1889",
+     "JS1890",
+     "JS1893",
+     "JS1894",
+     "JS1899"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Flush Set",
+     "Halo",
+     "Lady Diana",
+     "Men's",
+     "Pave",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 478,
+    "sample": [
+     "JS1815",
+     "JS1820",
+     "JS1831",
+     "JS1840",
+     "JS1850",
+     "JS1868",
+     "JS1881"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 10,
+    "sample": [
+     "JS1665",
+     "JS1666"
+    ],
+    "styles": [
+     "Bezel",
+     "Pave",
+     "Solitaire"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32632",
+  "stoneType": "Amethyst",
+  "shape": "Round",
+  "weight": 10.98,
+  "length": 15.74,
+  "width": 15.71,
+  "height": 9.27,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 1666,
+    "sample": [
+     "JS1858",
+     "JS1885",
+     "JS1890",
+     "JS1893",
+     "JS1894",
+     "JS1899"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Celtic",
+     "Flush Set",
+     "Halo",
+     "Lady Diana",
+     "Men's",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 407,
+    "sample": [
+     "JS1778",
+     "JS1810",
+     "JS1820",
+     "JS1831",
+     "JS1850",
+     "JS1868",
+     "JS1881"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K23342",
+  "stoneType": "Amethyst",
+  "shape": "Round",
+  "weight": 207.28,
+  "length": 36.96,
+  "width": 37.01,
+  "height": 30.11,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 160,
+    "sample": [
+     "JS1171",
+     "JS1295",
+     "JS1634",
+     "JS1733",
+     "JS1737"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Celtic",
+     "Floral",
+     "Men's",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 346,
+    "sample": [
+     "JS1583",
+     "JS1591",
+     "JS1600",
+     "JS1753",
+     "JS1775",
+     "JS1778",
+     "JS1831"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K32444",
+  "stoneType": "Alexandrite",
+  "shape": "Oval",
+  "weight": 0.54,
+  "length": 5.1,
+  "width": 4.32,
+  "height": 2.87,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 4022,
+    "sample": [
+     "JS1885",
+     "JS1889",
+     "JS1890",
+     "JS1893",
+     "JS1894",
+     "JS1899",
+     "JS1901"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Flush Set",
+     "Halo",
+     "Lady Diana",
+     "Men's",
+     "Pave",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 482,
+    "sample": [
+     "JS1814",
+     "JS1820",
+     "JS1831",
+     "JS1840",
+     "JS1850",
+     "JS1868",
+     "JS1881",
+     "JS1906"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 41,
+    "sample": [
+     "JS1255",
+     "JS1321",
+     "JS1327",
+     "JS1648",
+     "JS1665",
+     "JS1666",
+     "JS1667",
+     "JS1668",
+     "JS1670"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32719",
+  "stoneType": "Spinel",
+  "shape": "Oval",
+  "weight": 1.18,
+  "length": 6.53,
+  "width": 4.95,
+  "height": 4.77,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 4227,
+    "sample": [
+     "JS1885",
+     "JS1889",
+     "JS1890",
+     "JS1893",
+     "JS1894",
+     "JS1899",
+     "JS1901"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Flush Set",
+     "Halo",
+     "Lady Diana",
+     "Men's",
+     "Pave",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 491,
+    "sample": [
+     "JS1814",
+     "JS1820",
+     "JS1831",
+     "JS1840",
+     "JS1850",
+     "JS1868",
+     "JS1881",
+     "JS1906"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 35,
+    "sample": [
+     "JS1255",
+     "JS1327",
+     "JS1665",
+     "JS1666",
+     "JS1667",
+     "JS1668",
+     "JS1670"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32727",
+  "stoneType": "Spessartite Garnet",
+  "shape": "Oval",
+  "weight": 3.03,
+  "length": 9.89,
+  "width": 8.01,
+  "height": 5.05,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 4228,
+    "sample": [
+     "JS1885",
+     "JS1889",
+     "JS1890",
+     "JS1893",
+     "JS1894",
+     "JS1899",
+     "JS1901"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Flush Set",
+     "Halo",
+     "Lady Diana",
+     "Men's",
+     "Pave",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 491,
+    "sample": [
+     "JS1820",
+     "JS1831",
+     "JS1834",
+     "JS1840",
+     "JS1850",
+     "JS1868",
+     "JS1881",
+     "JS1906"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 20,
+    "sample": [
+     "JS1665",
+     "JS1666",
+     "JS1668",
+     "JS1670"
+    ],
+    "styles": [
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32198",
+  "stoneType": "Aquamarine",
+  "shape": "Oval",
+  "weight": 20.61,
+  "length": 21.96,
+  "width": 16.02,
+  "height": 10.44,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 275,
+    "sample": [
+     "JS1511",
+     "JS1634",
+     "JS1733",
+     "JS1737",
+     "JS1899"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Floral",
+     "Men's",
+     "Solitaire",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 377,
+    "sample": [
+     "JS1600",
+     "JS1773",
+     "JS1778",
+     "JS1810",
+     "JS1820",
+     "JS1831",
+     "JS1906"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K31742",
+  "stoneType": "Citrine",
+  "shape": "Oval",
+  "weight": 223.1,
+  "length": 41.11,
+  "width": 36.71,
+  "height": 26.2,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 184,
+    "sample": [
+     "JS1368",
+     "JS1495",
+     "JS1634",
+     "JS1733",
+     "JS1737"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Floral",
+     "Men's",
+     "Solitaire",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 350,
+    "sample": [
+     "JS1582",
+     "JS1591",
+     "JS1600",
+     "JS1773",
+     "JS1778",
+     "JS1831",
+     "JS1906"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K31660",
+  "stoneType": "Spinel",
+  "shape": "Cushion",
+  "weight": 0.41,
+  "length": 4.96,
+  "width": 3.99,
+  "height": 2.43,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 3011,
+    "sample": [
+     "JS1854",
+     "JS1855",
+     "JS1879",
+     "JS1883",
+     "JS1885",
+     "JS1899"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Flush Set",
+     "Halo",
+     "Men's",
+     "Pave",
+     "Solitaire",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 421,
+    "sample": [
+     "JS1814",
+     "JS1820",
+     "JS1831",
+     "JS1840",
+     "JS1850",
+     "JS1868",
+     "JS1881",
+     "JS1906"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 41,
+    "sample": [
+     "JS1255",
+     "JS1256",
+     "JS1321",
+     "JS1648",
+     "JS1665",
+     "JS1666",
+     "JS1667",
+     "JS1668",
+     "JS1670"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32725",
+  "stoneType": "Spinel",
+  "shape": "Cushion",
+  "weight": 1.15,
+  "length": 5.73,
+  "width": 5.3,
+  "height": 4.15,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 3878,
+    "sample": [
+     "JS1879",
+     "JS1883",
+     "JS1885",
+     "JS1888",
+     "JS1890",
+     "JS1899"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Men's",
+     "Multi Stone",
+     "Pave",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 439,
+    "sample": [
+     "JS1814",
+     "JS1820",
+     "JS1831",
+     "JS1840",
+     "JS1850",
+     "JS1868",
+     "JS1881",
+     "JS1906"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 41,
+    "sample": [
+     "JS1255",
+     "JS1256",
+     "JS1321",
+     "JS1648",
+     "JS1665",
+     "JS1666",
+     "JS1667",
+     "JS1668",
+     "JS1670"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32644",
+  "stoneType": "Zircon",
+  "shape": "Cushion",
+  "weight": 3.95,
+  "length": 10.11,
+  "width": 6.69,
+  "height": 5.51,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 4087,
+    "sample": [
+     "JS1879",
+     "JS1883",
+     "JS1885",
+     "JS1888",
+     "JS1890",
+     "JS1899"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Men's",
+     "Multi Stone",
+     "Pave",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 439,
+    "sample": [
+     "JS1820",
+     "JS1831",
+     "JS1834",
+     "JS1840",
+     "JS1850",
+     "JS1868",
+     "JS1881",
+     "JS1906"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 10,
+    "sample": [
+     "JS1665",
+     "JS1666"
+    ],
+    "styles": [
+     "Bezel",
+     "Pave",
+     "Solitaire"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32426",
+  "stoneType": "Amethyst",
+  "shape": "Cushion",
+  "weight": 11.65,
+  "length": 18.02,
+  "width": 13.04,
+  "height": 8.62,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 1225,
+    "sample": [
+     "JS1826",
+     "JS1879",
+     "JS1885",
+     "JS1890",
+     "JS1899"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Lady Diana",
+     "Men's",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 368,
+    "sample": [
+     "JS1773",
+     "JS1778",
+     "JS1810",
+     "JS1820",
+     "JS1831",
+     "JS1868",
+     "JS1881",
+     "JS1906"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K31741",
+  "stoneType": "Citrine",
+  "shape": "Cushion",
+  "weight": 458.5,
+  "length": 57.23,
+  "width": 42.24,
+  "height": 30.5,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 118,
+    "sample": [
+     "JS1368",
+     "JS1495",
+     "JS1634",
+     "JS1733",
+     "JS1737"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Floral",
+     "Men's",
+     "Solitaire",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 307,
+    "sample": [
+     "JS1582",
+     "JS1591",
+     "JS1600",
+     "JS1773",
+     "JS1778",
+     "JS1831",
+     "JS1906"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K32286",
+  "stoneType": "Tsavorite Garnet",
+  "shape": "Emerald Cut",
+  "weight": 0.17,
+  "length": 4.17,
+  "width": 3.11,
+  "height": 1.56,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 2527,
+    "sample": [
+     "JS1839",
+     "JS1854",
+     "JS1857",
+     "JS1883",
+     "JS1886",
+     "JS1900"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Flush Set",
+     "Halo",
+     "Men's",
+     "Pave",
+     "Solitaire",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 318,
+    "sample": [
+     "JS1812",
+     "JS1813",
+     "JS1819",
+     "JS1828",
+     "JS1850",
+     "JS1867",
+     "JS1882",
+     "JS1907"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 20,
+    "sample": [
+     "JS1256",
+     "JS1328",
+     "JS1605",
+     "JS1668"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32728",
+  "stoneType": "Malaya Garnet",
+  "shape": "Emerald Cut",
+  "weight": 1.07,
+  "length": 5.95,
+  "width": 5.04,
+  "height": 3.3,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 3412,
+    "sample": [
+     "JS1877",
+     "JS1883",
+     "JS1886",
+     "JS1888",
+     "JS1892",
+     "JS1900"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Men's",
+     "Multi Stone",
+     "Pave",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 327,
+    "sample": [
+     "JS1812",
+     "JS1813",
+     "JS1819",
+     "JS1828",
+     "JS1850",
+     "JS1867",
+     "JS1882",
+     "JS1907"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 40,
+    "sample": [
+     "JS1256",
+     "JS1324",
+     "JS1328",
+     "JS1605",
+     "JS1665",
+     "JS1668",
+     "JS1726",
+     "JS1727"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32405",
+  "stoneType": "Citrine",
+  "shape": "Emerald Cut",
+  "weight": 3.38,
+  "length": 9.94,
+  "width": 8.02,
+  "height": 5.91,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 3679,
+    "sample": [
+     "JS1877",
+     "JS1883",
+     "JS1886",
+     "JS1888",
+     "JS1892",
+     "JS1900"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Men's",
+     "Multi Stone",
+     "Pave",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 336,
+    "sample": [
+     "JS1813",
+     "JS1819",
+     "JS1828",
+     "JS1834",
+     "JS1850",
+     "JS1867",
+     "JS1882",
+     "JS1907"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 20,
+    "sample": [
+     "JS1324",
+     "JS1605",
+     "JS1665",
+     "JS1668"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K31925",
+  "stoneType": "Garnet",
+  "shape": "Emerald Cut",
+  "weight": 11.06,
+  "length": 12.01,
+  "width": 9.95,
+  "height": 9.14,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 3497,
+    "sample": [
+     "JS1877",
+     "JS1883",
+     "JS1886",
+     "JS1888",
+     "JS1892",
+     "JS1900"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Men's",
+     "Multi Stone",
+     "Pave",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 336,
+    "sample": [
+     "JS1813",
+     "JS1819",
+     "JS1828",
+     "JS1834",
+     "JS1850",
+     "JS1867",
+     "JS1882",
+     "JS1907"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 5,
+    "sample": [
+     "JS1324"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K30727",
+  "stoneType": "Quartz",
+  "shape": "Emerald Cut",
+  "weight": 172.29,
+  "length": 38.04,
+  "width": 29.11,
+  "height": 10.55,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 250,
+    "sample": [
+     "JS1592",
+     "JS1601",
+     "JS1766",
+     "JS1772",
+     "JS1778",
+     "JS1828",
+     "JS1907"
+    ],
+    "styles": [
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K31886",
+  "stoneType": "Spinel",
+  "shape": "Pear",
+  "weight": 0.59,
+  "length": 6.81,
+  "width": 4.45,
+  "height": 2.88,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 1000,
+    "sample": [
+     "JS1870",
+     "JS1878",
+     "JS1884",
+     "JS1891",
+     "JS1898"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Lady Diana",
+     "Pave",
+     "Solitaire",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 347,
+    "sample": [
+     "JS1816",
+     "JS1821",
+     "JS1829",
+     "JS1830",
+     "JS1850",
+     "JS1869",
+     "JS1873"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 31,
+    "sample": [
+     "JS1329",
+     "JS1603",
+     "JS1604",
+     "JS1665",
+     "JS1668",
+     "JS1669"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32715",
+  "stoneType": "Spinel",
+  "shape": "Pear",
+  "weight": 1.02,
+  "length": 7.1,
+  "width": 4.62,
+  "height": 4.04,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 1000,
+    "sample": [
+     "JS1870",
+     "JS1878",
+     "JS1884",
+     "JS1891",
+     "JS1898"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Lady Diana",
+     "Pave",
+     "Solitaire",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 338,
+    "sample": [
+     "JS1816",
+     "JS1821",
+     "JS1829",
+     "JS1830",
+     "JS1850",
+     "JS1869",
+     "JS1873"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 31,
+    "sample": [
+     "JS1329",
+     "JS1603",
+     "JS1604",
+     "JS1665",
+     "JS1668",
+     "JS1669"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K31890",
+  "stoneType": "Tourmaline",
+  "shape": "Pear",
+  "weight": 4.22,
+  "length": 12.14,
+  "width": 8.64,
+  "height": 5.15,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 986,
+    "sample": [
+     "JS1870",
+     "JS1878",
+     "JS1884",
+     "JS1891",
+     "JS1898"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Lady Diana",
+     "Pave",
+     "Solitaire",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 338,
+    "sample": [
+     "JS1816",
+     "JS1821",
+     "JS1829",
+     "JS1830",
+     "JS1850",
+     "JS1869",
+     "JS1873"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 5,
+    "sample": [
+     "JS1669"
+    ],
+    "styles": [
+     "Halo",
+     "Pave"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K30353",
+  "stoneType": "Apatite",
+  "shape": "Pear",
+  "weight": 29.56,
+  "length": 29.71,
+  "width": 18.46,
+  "height": 9.11,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 112,
+    "sample": [
+     "JS1236",
+     "JS1290",
+     "JS1331",
+     "JS1570",
+     "JS1671"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Celtic",
+     "Solitaire",
+     "Two Stone (toi et moi)"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 274,
+    "sample": [
+     "JS1584",
+     "JS1602",
+     "JS1758",
+     "JS1774",
+     "JS1804",
+     "JS1829",
+     "JS1830"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K29330",
+  "stoneType": "Topaz",
+  "shape": "Pear",
+  "weight": 115.83,
+  "length": 30.3,
+  "width": 29.5,
+  "height": 17.5,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 70,
+    "sample": [
+     "JS1236",
+     "JS1331",
+     "JS662",
+     "JS663",
+     "JS668"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Celtic",
+     "Solitaire",
+     "Two Stone (toi et moi)",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 265,
+    "sample": [
+     "JS1578",
+     "JS1584",
+     "JS1602",
+     "JS1758",
+     "JS1774",
+     "JS1829",
+     "JS1830"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K4288",
+  "stoneType": "Moonstone",
+  "shape": "Heart",
+  "weight": 0.47,
+  "length": 4.79,
+  "width": 5.35,
+  "height": 3.61,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 525,
+    "sample": [
+     "JS1839",
+     "JS1856",
+     "JS1862",
+     "JS1878",
+     "JS1884"
+    ],
+    "styles": [
+     "Antique",
+     "Floral",
+     "Halo",
+     "Lady Diana",
+     "Pave",
+     "Three Stone",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 162,
+    "sample": [
+     "JS1474",
+     "JS1533",
+     "JS1581",
+     "JS1803",
+     "JS1816",
+     "JS1850",
+     "JS1873"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 26,
+    "sample": [
+     "JS1329",
+     "JS1603",
+     "JS1665",
+     "JS1668",
+     "JS1669"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32724",
+  "stoneType": "Spinel",
+  "shape": "Heart",
+  "weight": 1.16,
+  "length": 6.1,
+  "width": 6.5,
+  "height": 4.41,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 798,
+    "sample": [
+     "JS1862",
+     "JS1870",
+     "JS1878",
+     "JS1884",
+     "JS1891"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Floral",
+     "Halo",
+     "Lady Diana",
+     "Pave",
+     "Solitaire",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 208,
+    "sample": [
+     "JS1581",
+     "JS1793",
+     "JS1803",
+     "JS1816",
+     "JS1850",
+     "JS1869",
+     "JS1873"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 26,
+    "sample": [
+     "JS1329",
+     "JS1603",
+     "JS1665",
+     "JS1668",
+     "JS1669"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K31933",
+  "stoneType": "Garnet",
+  "shape": "Heart",
+  "weight": 3.05,
+  "length": 8.22,
+  "width": 8.8,
+  "height": 5.66,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 798,
+    "sample": [
+     "JS1862",
+     "JS1870",
+     "JS1878",
+     "JS1884",
+     "JS1891"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Floral",
+     "Halo",
+     "Lady Diana",
+     "Pave",
+     "Solitaire",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 199,
+    "sample": [
+     "JS1581",
+     "JS1793",
+     "JS1803",
+     "JS1816",
+     "JS1850",
+     "JS1869",
+     "JS1873"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 26,
+    "sample": [
+     "JS1329",
+     "JS1603",
+     "JS1665",
+     "JS1668",
+     "JS1669"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K31508",
+  "stoneType": "Amethyst",
+  "shape": "Heart",
+  "weight": 11.54,
+  "length": 15.37,
+  "width": 15.94,
+  "height": 9.63,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 390,
+    "sample": [
+     "JS1862",
+     "JS1870",
+     "JS1878",
+     "JS1884",
+     "JS1891"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Floral",
+     "Halo",
+     "Lady Diana",
+     "Pave",
+     "Solitaire",
+     "Three Stone",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 153,
+    "sample": [
+     "JS1390",
+     "JS1421",
+     "JS1474",
+     "JS1533",
+     "JS1581",
+     "JS1850",
+     "JS1873"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 5,
+    "sample": [
+     "JS1669"
+    ],
+    "styles": [
+     "Halo",
+     "Pave"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K22425",
+  "stoneType": "Citrine",
+  "shape": "Heart",
+  "weight": 67.24,
+  "length": 26.58,
+  "width": 27.33,
+  "height": 18.27,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 98,
+    "sample": [
+     "JS1236",
+     "JS1242",
+     "JS1331",
+     "JS1570",
+     "JS1671"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Celtic",
+     "Solitaire",
+     "Two Stone (toi et moi)"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 135,
+    "sample": [
+     "JS1298",
+     "JS1314",
+     "JS1390",
+     "JS1421",
+     "JS1474",
+     "JS1533",
+     "JS1581"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K30514",
+  "stoneType": "Spinel",
+  "shape": "Marquise",
+  "weight": 0.45,
+  "length": 7.7,
+  "width": 3.33,
+  "height": 2.72,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 703,
+    "sample": [
+     "JS1823",
+     "JS1827",
+     "JS1833",
+     "JS1836",
+     "JS1861"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Floral",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 112,
+    "sample": [
+     "JS1434",
+     "JS1435",
+     "JS1436",
+     "JS1437",
+     "JS1438",
+     "JS1537",
+     "JS1850"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 21,
+    "sample": [
+     "JS1603",
+     "JS1604",
+     "JS1665",
+     "JS1668"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32666",
+  "stoneType": "Tsavorite Garnet",
+  "shape": "Marquise",
+  "weight": 1.03,
+  "length": 10.08,
+  "width": 4.97,
+  "height": 3.26,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 703,
+    "sample": [
+     "JS1823",
+     "JS1827",
+     "JS1833",
+     "JS1836",
+     "JS1861"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Floral",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 112,
+    "sample": [
+     "JS1434",
+     "JS1435",
+     "JS1436",
+     "JS1437",
+     "JS1438",
+     "JS1537",
+     "JS1850"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 16,
+    "sample": [
+     "JS1603",
+     "JS1604",
+     "JS1665"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32396",
+  "stoneType": "Garnet",
+  "shape": "Marquise",
+  "weight": 3.16,
+  "length": 15.25,
+  "width": 7.09,
+  "height": 3.95,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 398,
+    "sample": [
+     "JS1730",
+     "JS1731",
+     "JS1771",
+     "JS1779",
+     "JS1861"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Flush Set",
+     "Pave",
+     "Three Stone",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 101,
+    "sample": [
+     "JS1434",
+     "JS1435",
+     "JS1436",
+     "JS1437",
+     "JS1438",
+     "JS1537",
+     "JS1850"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K30185",
+  "stoneType": "Smoky Quartz",
+  "shape": "Marquise",
+  "weight": 16.88,
+  "length": 25.21,
+  "width": 15.03,
+  "height": 10.19,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 9,
+    "sample": [
+     "JS1252"
+    ],
+    "styles": [
+     "Halo",
+     "Pave"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 92,
+    "sample": [
+     "JS1283",
+     "JS1434",
+     "JS1435",
+     "JS1436",
+     "JS1437",
+     "JS1438",
+     "JS1537"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K29820",
+  "stoneType": "Spinel",
+  "shape": "Trillion",
+  "weight": 0.37,
+  "length": 5.28,
+  "width": 6.79,
+  "height": 2.3,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 749,
+    "sample": [
+     "JS1839",
+     "JS1870",
+     "JS1878",
+     "JS1884",
+     "JS1891"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Pave",
+     "Solitaire",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 291,
+    "sample": [
+     "JS1816",
+     "JS1821",
+     "JS1829",
+     "JS1830",
+     "JS1850",
+     "JS1869",
+     "JS1873"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 30,
+    "sample": [
+     "JS1326",
+     "JS1329",
+     "JS1603",
+     "JS1665",
+     "JS1668",
+     "JS1669"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K32189",
+  "stoneType": "Tanzanite",
+  "shape": "Trillion",
+  "weight": 1.18,
+  "length": 6.66,
+  "width": 6.73,
+  "height": 4.53,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 777,
+    "sample": [
+     "JS1839",
+     "JS1870",
+     "JS1878",
+     "JS1884",
+     "JS1891"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Pave",
+     "Solitaire",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 291,
+    "sample": [
+     "JS1816",
+     "JS1821",
+     "JS1829",
+     "JS1830",
+     "JS1850",
+     "JS1869",
+     "JS1873"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 31,
+    "sample": [
+     "JS1329",
+     "JS1603",
+     "JS1604",
+     "JS1665",
+     "JS1668",
+     "JS1669"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K28691",
+  "stoneType": "Ametrine",
+  "shape": "Trillion",
+  "weight": 3.42,
+  "length": 10.9,
+  "width": 10.05,
+  "height": 6.11,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 777,
+    "sample": [
+     "JS1839",
+     "JS1870",
+     "JS1878",
+     "JS1884",
+     "JS1891"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Pave",
+     "Solitaire",
+     "Three Stone",
+     "Vedic",
+     "Wedding Set"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 282,
+    "sample": [
+     "JS1816",
+     "JS1821",
+     "JS1829",
+     "JS1830",
+     "JS1850",
+     "JS1869",
+     "JS1873"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Antique",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 26,
+    "sample": [
+     "JS1329",
+     "JS1603",
+     "JS1604",
+     "JS1665",
+     "JS1669"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   }
+  }
+ },
+ {
+  "id": "K24284",
+  "stoneType": "Quartz",
+  "shape": "Trillion",
+  "weight": 26.53,
+  "length": 21.02,
+  "width": 21.1,
+  "height": 11.96,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 110,
+    "sample": [
+     "JS1236",
+     "JS1331",
+     "JS1570",
+     "JS1671",
+     "JS1672"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Celtic",
+     "Flush Set",
+     "Solitaire",
+     "Two Stone (toi et moi)"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 201,
+    "sample": [
+     "JS1578",
+     "JS1581",
+     "JS1602",
+     "JS1774",
+     "JS1804",
+     "JS1829",
+     "JS1830"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ },
+ {
+  "id": "K24590",
+  "stoneType": "Amethyst",
+  "shape": "Trillion",
+  "weight": 63.35,
+  "length": 28.56,
+  "width": 23.89,
+  "height": 19.11,
+  "cuttingStyle": "Faceted",
+  "compatibleSettings": {
+   "ring": {
+    "total": 98,
+    "sample": [
+     "JS1176",
+     "JS1236",
+     "JS1331",
+     "JS1570",
+     "JS1671"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Celtic",
+     "Solitaire",
+     "Two Stone (toi et moi)"
+    ]
+   },
+   "earring": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   },
+   "pendant": {
+    "total": 201,
+    "sample": [
+     "JS1578",
+     "JS1581",
+     "JS1602",
+     "JS1774",
+     "JS1804",
+     "JS1829",
+     "JS1830"
+    ],
+    "styles": [
+     "Accent Stones",
+     "Bezel",
+     "Halo",
+     "Pave",
+     "Solitaire",
+     "Vedic"
+    ]
+   },
+   "bracelet": {
+    "total": 0,
+    "sample": [],
+    "styles": []
+   }
+  }
+ }
+]

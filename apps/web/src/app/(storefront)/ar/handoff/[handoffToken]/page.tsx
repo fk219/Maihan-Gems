@@ -55,8 +55,8 @@ export default async function ArHandoffPage({ params }: PageProps) {
     <main
       style={{
         minHeight: '100vh',
-        backgroundColor: '#09090b',
-        color: '#fafafa',
+        backgroundColor: '#08121E',
+        color: '#FAFAF8',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -70,7 +70,7 @@ export default async function ArHandoffPage({ params }: PageProps) {
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.75rem' }}>
           AR Handoff Expired
         </h1>
-        <p style={{ color: '#a1a1aa', lineHeight: 1.6, marginBottom: '2rem' }}>
+        <p style={{ color: '#8A867E', lineHeight: 1.6, marginBottom: '2rem' }}>
           {redemptionError?.includes('AR_HANDOFF_REPLAYED')
             ? 'This QR handoff code has already been redeemed. Each mobile transfer code is single-use for your security.'
             : 'This transfer link is invalid or has expired (handoff codes expire in 10 minutes).'}
@@ -79,9 +79,9 @@ export default async function ArHandoffPage({ params }: PageProps) {
           href="/"
           style={{
             backgroundColor: '#C9A84C',
-            color: '#09090b',
+            color: '#FFFFFF',
             padding: '0.75rem 1.5rem',
-            borderRadius: '6px',
+            borderRadius: '12px',
             textDecoration: 'none',
             fontWeight: 600,
           }}
