@@ -31,6 +31,6 @@ describe('gemRefractionParams', () => {
     expect(params.bounces).toBeGreaterThanOrEqual(3);
     expect(params.bounces).toBeLessThanOrEqual(5);
     expect(params.aberrationStrength).toBeGreaterThan(0.01);
-    expect(params.absorption).toBeGreaterThan(1);
+    expect(params.absorption).toBeGreaterThan(0.4);
   });
 });

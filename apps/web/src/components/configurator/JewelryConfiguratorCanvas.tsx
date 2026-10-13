@@ -61,7 +61,7 @@ export function JewelryConfiguratorCanvas({
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.12;
+      renderer.toneMappingExposure = 1.35;
       renderer.shadowMap.enabled = mode === 'mounted';
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.domElement.style.width = '100%';
@@ -128,8 +128,9 @@ export function JewelryConfiguratorCanvas({
           absorptionColor: absorption,
           stoneType: stone?.stoneType,
         });
-        gemMaterials.push(material);
         const mesh = new THREE.Mesh(built.geometry, material);
+        material.userData['mesh'] = mesh;
+        gemMaterials.push(material);
         mesh.scale.setScalar(scale);
         if (mode === 'stone') mesh.rotation.x = -0.2;
         mesh.castShadow = mode === 'mounted';

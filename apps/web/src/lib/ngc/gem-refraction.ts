@@ -26,14 +26,14 @@ export function createStudioEnvMap(): THREE.CanvasTexture {
     ctx.fillStyle = fill;
     ctx.fillRect(u0 * width, v0 * height, (u1 - u0) * width, (v1 - v0) * height);
   };
-  panel(0.34, 0.1, 0.66, 0.3, '#ffffff');
-  panel(0.38, 0.04, 0.62, 0.1, '#f4f4f8');
-  panel(0.06, 0.2, 0.2, 0.4, '#f2f0ff');
-  panel(0.8, 0.22, 0.94, 0.44, '#ffe9c8');
-  panel(0.46, 0.16, 0.54, 0.24, '#ffffff');
-  panel(0.16, 0.12, 0.2, 0.18, '#ffffff');
-  panel(0.84, 0.12, 0.88, 0.18, '#fff7ea');
-  panel(0.0, 0.72, 1, 1, '#121218');
+  panel(0.28, 0.08, 0.72, 0.34, '#ffffff');
+  panel(0.36, 0.02, 0.64, 0.1, '#ffffff');
+  panel(0.04, 0.16, 0.24, 0.42, '#f7f5ff');
+  panel(0.76, 0.18, 0.96, 0.46, '#ffe7c2');
+  panel(0.44, 0.14, 0.56, 0.26, '#ffffff');
+  panel(0.12, 0.1, 0.18, 0.18, '#ffffff');
+  panel(0.82, 0.1, 0.9, 0.2, '#fff8ee');
+  panel(0.0, 0.7, 1, 1, '#16161c');
   const texture = new THREE.CanvasTexture(canvas);
   texture.mapping = THREE.EquirectangularReflectionMapping;
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -84,6 +84,8 @@ export function createGemRefractionMaterial(options: {
       bvh: { value: bvhUniform },
       projectionMatrixInv: { value: new THREE.Matrix4() },
       viewMatrixInv: { value: new THREE.Matrix4() },
+      modelMatrixWorld: { value: new THREE.Matrix4() },
+      modelMatrixInverse: { value: new THREE.Matrix4() },
       resolution: { value: new THREE.Vector2(1, 1) },
       bounces: { value: params.bounces },
       ior: { value: params.ior },
@@ -94,7 +96,6 @@ export function createGemRefractionMaterial(options: {
     },
     vertexShader: /* glsl */ `
       varying vec3 vWorldPosition;
-      uniform mat4 viewMatrixInv;
       void main() {
         vec4 world = modelMatrix * vec4(position, 1.0);
         vWorldPosition = world.xyz;
@@ -120,6 +121,8 @@ export function createGemRefractionMaterial(options: {
       uniform float absorption;
       uniform mat4 projectionMatrixInv;
       uniform mat4 viewMatrixInv;
+      uniform mat4 modelMatrixWorld;
+      uniform mat4 modelMatrixInverse;
       uniform vec2 resolution;
       uniform float aberrationStrength;
       uniform float fresnel;
@@ -139,7 +142,6 @@ export function createGemRefractionMaterial(options: {
         vec3 rayDirection = incomingDirection;
         rayDirection = refract(rayDirection, normal, 1.0 / rayIor);
         rayOrigin = vWorldPosition + rayDirection * RAY_OFFSET;
-        mat4 modelMatrixInverse = inverse(modelMatrix);
         rayOrigin = (modelMatrixInverse * vec4(rayOrigin, 1.0)).xyz;
         rayDirection = normalize((modelMatrixInverse * vec4(rayDirection, 0.0)).xyz);
 
@@ -161,7 +163,7 @@ export function createGemRefractionMaterial(options: {
           rayDirection = reflect(rayDirection, faceNormal);
           rayOrigin = hitPos + rayDirection * RAY_OFFSET;
         }
-        return normalize((modelMatrix * vec4(rayDirection, 0.0)).xyz);
+        return normalize((modelMatrixWorld * vec4(rayDirection, 0.0)).xyz);
       }
 
       void main() {
@@ -189,7 +191,7 @@ export function createGemRefractionMaterial(options: {
 
         vec3 transmitted = vec3(envSample(dirR).r, envSample(dirG).g, envSample(dirB).b);
         float pathLength = (pathR + pathG + pathB) / 3.0;
-        vec3 beer = exp(-(vec3(1.0) - color) * pathLength * absorption);
+        vec3 beer = max(exp(-(vec3(1.0) - color) * pathLength * absorption), color * 0.18);
         vec3 viewDir = normalize(cameraPosition - vWorldPosition);
         vec3 reflected = envSample(reflect(-viewDir, normal));
         float f = pow(1.0 - max(dot(viewDir, normal), 0.0), 5.0) * fresnel;
@@ -214,4 +216,10 @@ export function syncGemRefraction(
   material.uniforms['viewMatrixInv']?.value.copy(camera.matrixWorld);
   material.uniforms['projectionMatrixInv']?.value.copy(camera.projectionMatrixInverse);
   material.uniforms['resolution']?.value.copy(drawingBuffer);
+  const mesh = material.userData['mesh'] as THREE.Object3D | undefined;
+  if (mesh) {
+    mesh.updateWorldMatrix(true, false);
+    material.uniforms['modelMatrixWorld']?.value.copy(mesh.matrixWorld);
+    material.uniforms['modelMatrixInverse']?.value.copy(mesh.matrixWorld).invert();
+  }
 }
