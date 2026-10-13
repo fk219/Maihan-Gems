@@ -108,5 +108,8 @@ describe('public catalog parse', () => {
     expect(assignShowcaseCategory({
       url: 'https://naturalgemstones.com/gemstone-ring-settings/18k-rose-gold-pave-ring-setting-js1618r18/',
     })).toBe('setting-ring');
+    expect(assignShowcaseCategory({
+      url: 'https://naturalgemstones.com/tourmaline/13.96ct-mozambique-emerald-cut-red-tourmaline-k8734/',
+    })).toBe('tourmaline');
   });
 });
