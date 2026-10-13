@@ -28,7 +28,41 @@ import {
 const UA = 'MaihanGemsImporter/1.0 (+https://github.com/fk219/Maihan-Gems; catalog-import)';
 const DEFAULT_DELAY_MS = 2100;
 const MAIHAN_VENDOR = '00000000-0000-0000-0000-000000000001';
-const CANDIDATES_PER_SLOT = 6;
+const CANDIDATES_PER_SLOT = 14;
+const SKIP_WIPE = process.env['IMPORT_SKIP_WIPE'] === '1' || process.env['IMPORT_GAPS_ONLY'] === '1';
+const GAPS_ONLY = process.env['IMPORT_GAPS_ONLY'] === '1';
+
+/** Known live product URLs used only to finish empty showcase slots. */
+const GAP_URLS: Array<{ slug: string; urls: string[] }> = [
+  {
+    slug: 'natural-gemstone-company',
+    urls: [
+      'https://naturalgemstones.com/tourmaline/0.67ct-mozambique-fancy-pink-tourmaline-k1953/',
+      'https://naturalgemstones.com/tourmaline/3.05ct-mozambique-emerald-cut-multi-color-tourmaline-k1964/',
+      'https://naturalgemstones.com/tanzanite/4.42ct-tanzanian-oval-violet-tanzanite-k4487/',
+      'https://naturalgemstones.com/tanzanite/3.51ct-tanzanian-round-violetish-blue-tanzanite-k5113/',
+      'https://naturalgemstones.com/tanzanite/7.44ct-tanzanian-cushion-violet-tanzanite-k20243/',
+      'https://naturalgemstones.com/alexandrite/4.03ct-ceylon-sri-lankan-oval-alexandrite-k4774/',
+      'https://naturalgemstones.com/alexandrite/10.43ct-ceylon-sri-lankan-cushion-alexandrite-k4775/',
+      'https://naturalgemstones.com/alexandrite/10.66ct-madagascar-oval-alexandrite-k4776/',
+      'https://naturalgemstones.com/topaz/17.70ct-brazilian-trillion-blue-topaz-k2854/',
+      'https://naturalgemstones.com/topaz/9.48ct-brazilian-oval-blue-topaz-k2856/',
+      'https://naturalgemstones.com/topaz/32.44ct-brazilian-round-blue-topaz-k2857/',
+      'https://naturalgemstones.com/black-opal-dark-opal/3.93ct-australian-oval-multi-color-black-opal-dark-opal-k547/',
+    ],
+  },
+  {
+    slug: 'natural-sapphire-company',
+    urls: [
+      'https://www.thenaturalsapphirecompany.com/padparadscha-sapphires/1.51ct-ceylon-sri-lankan-pear-padparadscha-sapphire-s19556/',
+      'https://www.thenaturalsapphirecompany.com/padparadscha-sapphires/1.33ct-tanzanian-oval-padparadscha-sapphire-s19583/',
+      'https://www.thenaturalsapphirecompany.com/padparadscha-sapphires/4.08ct-ceylon-sri-lankan-cushion-padparadscha-sapphire-s19778/',
+      'https://www.thenaturalsapphirecompany.com/yellow-sapphires/1.01ct-ceylon-sri-lankan-fancy-yellow-sapphire-s20604/',
+      'https://www.thenaturalsapphirecompany.com/yellow-sapphires/1.22ct-tanzanian-fancy-yellow-sapphire-s17573/',
+      'https://www.thenaturalsapphirecompany.com/yellow-sapphires/0.70ct-australian-fancy-yellowish-green-sapphire-s20432/',
+    ],
+  },
+];
 
 type SourceMode = 'html' | 'shopify-json' | 'skip';
 
@@ -632,8 +666,12 @@ async function main(): Promise<void> {
   await pool.query(`ALTER TABLE media ADD COLUMN IF NOT EXISTS source_url TEXT`);
   await pool.query(`ALTER TABLE media ADD COLUMN IF NOT EXISTS source_vendor TEXT`);
 
-  console.log('Resetting previous dealer imports (Maihan house seed kept)...');
-  await wipeImportedCatalog(pool);
+  if (!SKIP_WIPE) {
+    console.log('Resetting previous dealer imports (Maihan house seed kept)...');
+    await wipeImportedCatalog(pool);
+  } else {
+    console.log('Keeping existing dealer rows (IMPORT_SKIP_WIPE=1)');
+  }
 
   for (const source of SOURCES) {
     await ensureVendor(pool, source);
@@ -658,6 +696,7 @@ async function main(): Promise<void> {
   let inserted = 0;
 
   for (const source of SOURCES) {
+    if (GAPS_ONLY) break;
     const needed = neededRemaining(filled);
     if (needed.size === 0) break;
     console.log(`\n→ ${source.displayName} (need ${[...needed].join(', ')})`);
@@ -679,6 +718,18 @@ async function main(): Promise<void> {
     const candidates = takeCandidates(urls, neededRemaining(filled));
     const queued = [...candidates.values()].reduce((n, list) => n + list.length, 0);
     console.log(`  urls ${urls.length}, queued ${queued} across ${candidates.size} categories`);
+    inserted += await importCandidates(pool, source, vendorId, rules, fx, filled, candidates);
+  }
+
+  for (const gap of GAP_URLS) {
+    const needed = neededRemaining(filled);
+    if (needed.size === 0) break;
+    const source = SOURCES.find((s) => s.slug === gap.slug);
+    if (!source) continue;
+    console.log(`\n→ gap fill ${source.displayName}`);
+    const vendorId = await ensureVendor(pool, source);
+    const rules = await loadRobots(source);
+    const candidates = takeCandidates(gap.urls, needed);
     inserted += await importCandidates(pool, source, vendorId, rules, fx, filled, candidates);
   }
 
