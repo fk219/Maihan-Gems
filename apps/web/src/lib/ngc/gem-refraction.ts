@@ -190,12 +190,13 @@ export function createGemRefractionMaterial(options: {
         }
 
         vec3 transmitted = vec3(envSample(dirR).r, envSample(dirG).g, envSample(dirB).b);
-        float pathLength = (pathR + pathG + pathB) / 3.0;
-        vec3 beer = max(exp(-(vec3(1.0) - color) * pathLength * absorption), color * 0.18);
+        float pathLength = max((pathR + pathG + pathB) / 3.0, 0.45);
+        vec3 beer = exp(-(vec3(1.0) - color) * pathLength * absorption);
+        vec3 body = transmitted * mix(color, vec3(1.0), 0.16) * beer;
         vec3 viewDir = normalize(cameraPosition - vWorldPosition);
         vec3 reflected = envSample(reflect(-viewDir, normal));
         float f = pow(1.0 - max(dot(viewDir, normal), 0.0), 5.0) * fresnel;
-        gl_FragColor = vec4(mix(transmitted * beer, reflected, f), 1.0);
+        gl_FragColor = vec4(mix(body, reflected * mix(color, vec3(1.0), 0.5), f), 1.0);
 
         #include <tonemapping_fragment>
         #include <colorspace_fragment>

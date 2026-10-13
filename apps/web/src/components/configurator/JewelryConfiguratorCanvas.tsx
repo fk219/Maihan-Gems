@@ -95,7 +95,7 @@ export function JewelryConfiguratorCanvas({
         controls.target.set(0, 0.02, 0);
         controls.minDistance = 2.2;
         controls.maxDistance = 5.4;
-        camera.position.set(0.42, 2.35, 1.95);
+        camera.position.set(0.7, 1.9, 2.2);
       } else {
         controls.target.set(0, 0.22, 0);
         controls.minDistance = 3.2;
