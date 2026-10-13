@@ -49,6 +49,8 @@ describe('sourceSlugOf (doc 34 section 5 — target slug preserves the source sh
 describe('isNewRoute', () => {
   it('recognises target-only routes', () => {
     expect(isNewRoute('/products/halo-ring')).toBe(true);
+    expect(isNewRoute('/product/natural-sapphire-company-s11050')).toBe(true);
+    expect(familyRedirect('/product/natural-sapphire-company-s11050')).toBeNull();
     expect(isNewRoute('/varieties')).toBe(true);
     expect(isNewRoute('/search')).toBe(true);
     expect(isNewRoute('/agate')).toBe(false);

@@ -172,7 +172,14 @@ const FIXED_REDIRECTS: ReadonlyMap<string, RedirectDecision> = new Map<string, R
 
 /** New target-only routes: never intercepted, always served by the app. */
 const NEW_ROUTE_PREFIXES: readonly string[] = [
+  '/product/',
   '/products/',
+  '/browse',
+  '/jewellery',
+  '/pairs',
+  '/cart',
+  '/favorites',
+  '/compare',
   '/settings/',
   '/settings',
   '/design-your-own',
