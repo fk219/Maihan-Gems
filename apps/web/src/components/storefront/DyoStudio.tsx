@@ -97,141 +97,114 @@ export function DyoStudio({
     setReserved(true);
   }
 
-  return (
-    <div className="lx-dyo">
-      <ol className="lx-steps">
-        {(['Setting', 'Stone', 'Finish'] as const).map((label, i) => {
-          const n = (i + 1) as 1 | 2 | 3;
-          return (
-            <li key={label} className={step === n ? 'is-on' : step > n ? 'is-done' : ''}>
-              <button
-                type="button"
-                onClick={() => setStep(n)}
-                disabled={(n === 2 && !setting) || (n === 3 && !stone)}
-                className="lx-steps__btn"
-              >
-                <span>{n}</span>
-                {label}
-              </button>
-            </li>
-          );
-        })}
-      </ol>
+  const swatches = [
+    { name: '18K Yellow Gold' as const, color: '#D4AF37' },
+    { name: '18K White Gold' as const, color: '#E6E6EA' },
+    { name: '18K Rose Gold' as const, color: '#B76E79' },
+    { name: 'Platinum' as const, color: '#C5C8D0' },
+  ];
 
-      <div className="lx-dyo__grid">
-        <div className="lx-dyo__stage">
+  return (
+    <div className="atelier">
+      <header className="atelier__head">
+        <div>
+          <p className="atelier__kicker">Bespoke</p>
+          <h1>Design your own</h1>
+          <p>Choose a mounting, then a stone it will hold, then metal and size. The preview uses those catalogue photographs.</p>
+        </div>
+        <ol className="atelier__steps">
+          {(['Setting', 'Stone', 'Finish'] as const).map((label, i) => {
+            const n = (i + 1) as 1 | 2 | 3;
+            return (
+              <li key={label} className={step === n ? 'is-on' : step > n ? 'is-done' : ''}>
+                <button type="button" onClick={() => setStep(n)} disabled={(n === 2 && !setting) || (n === 3 && !stone)}>
+                  <span>{n}</span>
+                  {label}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      </header>
+
+      <div className="atelier__layout">
+        <section className="atelier__stage" aria-live="polite">
           {step === 1 ? (
             settings.length === 0 ? (
-              <p className="lx-lede">No settings are in the catalogue yet.</p>
+              <p className="atelier__empty">No settings are in the catalogue yet.</p>
             ) : (
-            <div className="lx-dyo__choices">
-              {settings.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`lx-pick${settingId === item.id ? ' is-on' : ''}`}
-                  onClick={() => chooseSetting(item.id)}
-                >
-                  <img src={imageFor(item)} alt="" />
-                  <span className="lx-card__meta">{item.settingFor}</span>
-                  <strong>{item.title}</strong>
-                  <em>{formatMoney(item.priceUsd, currency, rates)}</em>
-                </button>
-              ))}
-            </div>
+              <div className="atelier__grid">
+                {settings.map((item) => (
+                  <button key={item.id} type="button" className={`atelier-card${settingId === item.id ? ' is-on' : ''}`} onClick={() => chooseSetting(item.id)}>
+                    <span className="atelier-card__media"><img src={imageFor(item)} alt="" /></span>
+                    <span className="atelier-card__kicker">{item.settingFor}</span>
+                    <strong>{item.title}</strong>
+                    <em>{formatMoney(item.priceUsd, currency, rates)}</em>
+                  </button>
+                ))}
+              </div>
             )
           ) : null}
 
           {step === 2 ? (
             matches.length > 0 ? (
-              <div className="lx-dyo__choices">
+              <div className="atelier__grid">
                 {matches.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`lx-pick${stoneId === item.id ? ' is-on' : ''}`}
-                    onClick={() => chooseStone(item.id)}
-                  >
-                    <img src={imageFor(item)} alt="" />
-                    <span className="lx-card__meta">{item.originCountry}</span>
+                  <button key={item.id} type="button" className={`atelier-card${stoneId === item.id ? ' is-on' : ''}`} onClick={() => chooseStone(item.id)}>
+                    <span className="atelier-card__media"><img src={imageFor(item)} alt="" /></span>
+                    <span className="atelier-card__kicker">{[item.caratTotal ? `${item.caratTotal} ct` : null, item.shape, item.originCountry].filter(Boolean).join(' · ')}</span>
                     <strong>{item.title}</strong>
                     <em>{formatMoney(item.priceUsd, currency, rates)}</em>
                   </button>
                 ))}
               </div>
             ) : (
-              <p className="lx-lede">No vault stones currently satisfy this setting’s acceptance rules. Choose another mounting.</p>
+              <p className="atelier__empty">No stones currently fit this mounting. Go back and choose another setting.</p>
             )
           ) : null}
 
           {step === 3 ? (
-            <div className="lx-finish">
-              <label>
-                Metal
-                <select value={metal} onChange={(e) => setMetal(e.target.value as (typeof METALS)[number])}>
-                  {METALS.map((m) => (
-                    <option key={m}>{m}</option>
-                  ))}
-                </select>
-              </label>
+            <div className="atelier__finish">
+              <p className="atelier__kicker">Metal</p>
+              <div className="atelier__metals">
+                {swatches.map((item) => (
+                  <button key={item.name} type="button" className={metal === item.name ? 'is-on' : ''} onClick={() => setMetal(item.name)}>
+                    <i style={{ background: item.color }} />
+                    {item.name}
+                  </button>
+                ))}
+              </div>
               {setting?.settingFor === 'ring' ? (
-                <label>
-                  Ring size (US)
-                  <select value={size} onChange={(e) => setSize(e.target.value)}>
-                    {SIZES.map((s) => (
-                      <option key={s}>{s}</option>
+                <>
+                  <p className="atelier__kicker">Ring size, US</p>
+                  <div className="atelier__sizes">
+                    {SIZES.map((value) => (
+                      <button key={value} type="button" className={size === value ? 'is-on' : ''} onClick={() => setSize(value)}>{value}</button>
                     ))}
-                  </select>
-                </label>
+                  </div>
+                </>
               ) : null}
-              <p className="lx-lede">
-                Compatibility follows the setting’s accepted shapes and carat range. Inferred identities are not manufactured here.
-              </p>
             </div>
           ) : null}
-        </div>
+        </section>
 
-        <aside className="lx-preview">
-          <span className="lx-kicker">Live preview</span>
-          <div className="lx-preview__frame">
-            {finishedImage ? (
-              <img src={finishedImage} alt={stone ? `${stone.title} in ${setting?.title}` : setting?.title} className="is-finished" />
-            ) : (
-              <p>Choose a setting to begin.</p>
-            )}
+        <aside className="atelier__preview">
+          <p className="atelier__kicker">Live preview</p>
+          <div className="atelier__hero">
+            {finishedImage ? <img src={finishedImage} alt={stone && setting ? `${stone.title} with ${setting.title}` : 'Your design'} /> : <p>Select a setting</p>}
           </div>
-          <div className="lx-preview__pair">
-            <figure>
-              {settingImage ? <img src={settingImage} alt="" /> : <span>Setting</span>}
-              <figcaption>{setting?.title ?? 'Setting'}</figcaption>
-            </figure>
-            <figure>
-              {stoneImage ? <img src={stoneImage} alt="" /> : <span>Stone</span>}
-              <figcaption>{stone?.title ?? 'Stone'}</figcaption>
-            </figure>
+          <div className="atelier__thumbs">
+            <figure>{settingImage ? <img src={settingImage} alt="" /> : <span />}<figcaption>{setting?.title ?? 'Setting'}</figcaption></figure>
+            <figure>{stoneImage ? <img src={stoneImage} alt="" /> : <span />}<figcaption>{stone?.title ?? 'Stone'}</figcaption></figure>
           </div>
-          <dl className="lx-summary__rows">
-            <div>
-              <dt>Setting</dt>
-              <dd>{setting ? formatMoney(setting.priceUsd, currency, rates) : '—'}</dd>
-            </div>
-            <div>
-              <dt>Stone</dt>
-              <dd>{stone ? formatMoney(stone.priceUsd, currency, rates) : '—'}</dd>
-            </div>
-            <div className="is-total">
-              <dt>Combined</dt>
-              <dd>{formatMoney(total, currency, rates)}</dd>
-            </div>
+          <dl>
+            <div><dt>Setting</dt><dd>{setting ? formatMoney(setting.priceUsd, currency, rates) : '—'}</dd></div>
+            <div><dt>Stone</dt><dd>{stone ? formatMoney(stone.priceUsd, currency, rates) : '—'}</dd></div>
+            <div className="is-total"><dt>{metal}{setting?.settingFor === 'ring' ? ` · US ${size}` : ''}</dt><dd>{formatMoney(total, currency, rates)}</dd></div>
           </dl>
-          {accept ? <p className="lx-summary__note">Accepts {accept}</p> : null}
-          <button
-            type="button"
-            className="lx-btn lx-btn--solid lx-btn--block"
-            disabled={!setting || !stone}
-            onClick={reserve}
-          >
-            {reserved ? 'Held in your bag' : 'Add composition to bag'}
+          {accept ? <p className="atelier__note">Accepts {accept}</p> : null}
+          <button type="button" className="atelier__bag" disabled={!setting || !stone} onClick={reserve}>
+            {reserved ? 'Held in your bag' : 'Add to bag'}
           </button>
         </aside>
       </div>

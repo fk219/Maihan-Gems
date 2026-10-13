@@ -1573,10 +1573,66 @@
 
 .lx-card__actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-top: 0.85rem;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
 }
+.lx-card__actions .lx-text-btn {
+  flex: 1;
+  border: 1px solid #eadfbe;
+  border-radius: 12px;
+  padding: 0.45rem 0.4rem;
+  text-align: center;
+}
+.lx-card__actions .lx-text-btn:first-child {
+  background: var(--gold-gradient);
+  border-color: transparent;
+  color: #1a1408;
+}
+.lx-card__media { background: #f7f3ea; aspect-ratio: 1; padding: 0.85rem; }
+.lx-card__price { color: #8B6914; }
+
+.atelier-page { background: #fff; padding: 1.5rem 0 4rem; }
+.atelier { max-width: 80rem; margin: 0 auto; padding: 0 1.25rem; }
+.atelier__head { display: flex; justify-content: space-between; gap: 2rem; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.atelier__kicker { margin: 0 0 0.35rem; letter-spacing: 0.16em; text-transform: uppercase; font-size: 0.72rem; color: #8B6914; }
+.atelier__head h1 { margin: 0 0 0.4rem; font-family: var(--font-serif); font-weight: 500; font-size: clamp(2.2rem, 4vw, 3.2rem); }
+.atelier__head p:last-child { margin: 0; max-width: 36rem; color: #5c5346; }
+.atelier__steps { list-style: none; display: flex; gap: 0.4rem; margin: 0; padding: 0; }
+.atelier__steps button { display: flex; align-items: center; gap: 0.45rem; border: 0; background: #f7f3ea; border-radius: 12px; padding: 0.45rem 0.7rem; cursor: pointer; color: #5c5346; }
+.atelier__steps button:disabled { opacity: 0.45; cursor: default; }
+.atelier__steps span { width: 1.4rem; height: 1.4rem; border-radius: 12px; display: grid; place-items: center; font-size: 0.75rem; }
+.atelier__steps .is-on button { background: #1a1408; color: #f7f1e4; }
+.atelier__steps .is-on span, .atelier__steps .is-done span { background: var(--gold-gradient); color: #1a1408; }
+.atelier__layout { display: grid; gap: 1.25rem; }
+@media (min-width: 980px) { .atelier__layout { grid-template-columns: minmax(0, 1.6fr) 320px; align-items: start; } }
+.atelier__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.85rem; }
+.atelier-card { display: flex; flex-direction: column; text-align: left; border: 1px solid #eadfbe; border-radius: 12px; background: #fff; padding: 0; cursor: pointer; overflow: hidden; color: #1a1408; }
+.atelier-card:hover { border-color: #C9A84C; transform: translateY(-2px); }
+.atelier-card.is-on { border-color: #C9A84C; box-shadow: inset 0 0 0 1px #C9A84C; }
+.atelier-card__media { background: #f7f3ea; aspect-ratio: 1; display: grid; place-items: center; }
+.atelier-card__media img { width: 100%; height: 100%; object-fit: contain; padding: 0.6rem; }
+.atelier-card__kicker { display: block; padding: 0.7rem 0.8rem 0; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8a7b62; }
+.atelier-card strong { padding: 0.2rem 0.8rem 0; font-family: var(--font-serif); font-weight: 500; font-size: 1.05rem; }
+.atelier-card em { padding: 0.35rem 0.8rem 0.85rem; font-style: normal; color: #8B6914; }
+.atelier__finish { display: grid; gap: 0.7rem; }
+.atelier__metals, .atelier__sizes { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.atelier__metals button, .atelier__sizes button { border: 1px solid #eadfbe; background: #fff; border-radius: 12px; padding: 0.55rem 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; }
+.atelier__metals button.is-on, .atelier__sizes button.is-on { border-color: #C9A84C; background: #fbf6ea; }
+.atelier__metals i { width: 0.9rem; height: 0.9rem; border-radius: 12px; border: 1px solid rgba(26,20,8,0.15); }
+.atelier__preview { position: sticky; top: 5.5rem; border: 1px solid #eadfbe; border-radius: 12px; padding: 1rem; background: #fff; }
+.atelier__hero { background: #f7f3ea; border-radius: 12px; aspect-ratio: 1; display: grid; place-items: center; overflow: hidden; }
+.atelier__hero img { width: 100%; height: 100%; object-fit: contain; }
+.atelier__thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.7rem 0; }
+.atelier__thumbs figure { margin: 0; background: #f7f3ea; border-radius: 12px; overflow: hidden; }
+.atelier__thumbs img, .atelier__thumbs span { width: 100%; aspect-ratio: 1; object-fit: contain; display: block; }
+.atelier__thumbs figcaption { font-size: 0.72rem; padding: 0.35rem 0.45rem 0.5rem; color: #5c5346; }
+.atelier__preview dl { margin: 0; }
+.atelier__preview dl div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.35rem 0; font-size: 0.9rem; }
+.atelier__preview .is-total { border-top: 1px solid #eadfbe; margin-top: 0.3rem; padding-top: 0.6rem; font-weight: 600; }
+.atelier__note { color: #8a7b62; font-size: 0.78rem; }
+.atelier__bag { width: 100%; margin-top: 0.6rem; min-height: 2.8rem; border: 0; border-radius: 12px; background: var(--gold-gradient); color: #1a1408; font-weight: 600; cursor: pointer; }
+.atelier__bag:disabled { opacity: 0.45; cursor: default; }
+.atelier__empty { color: #5c5346; }
 
 /* Natural Gemstones layout, Maihan gold + 12px corners */
 .ngc-header { position: sticky; top: 0; z-index: 90; background: #fff; border-bottom: 1px solid #eadfbe; }
