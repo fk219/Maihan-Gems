@@ -233,7 +233,15 @@ function pickSitemapFiles(indexLocs: string[], indexUrl: string): string[] {
     .sort((a, b) => a.n - b.n);
   if (numbered.length >= 6) {
     const pickAt = (ratio: number) => numbered[Math.min(numbered.length - 1, Math.floor(numbered.length * ratio))]!.url;
-    return [...new Set([pickAt(0.12), pickAt(0.28), pickAt(0.52), pickAt(0.55), pickAt(0.82)])];
+    return [...new Set([
+      pickAt(0.08),
+      pickAt(0.12),
+      pickAt(0.22),
+      pickAt(0.35),
+      pickAt(0.52),
+      pickAt(0.55),
+      pickAt(0.82),
+    ])];
   }
   const productish = sitemapFiles.filter((u) => /product/i.test(u) && !/tag|cat/i.test(u));
   return (productish.length > 0 ? productish : sitemapFiles).slice(0, 4);
@@ -473,7 +481,7 @@ function listingFromPage(url: string, html: string): { parsed: ParsedListing; mo
     jsonName: typeof json['name'] === 'string' ? json['name'] : null,
     jsonSku: typeof json['sku'] === 'string' ? json['sku'] : skuFromUrl(url),
     imageUrl,
-    extraText: html.slice(0, 8000),
+    extraText: typeof json['description'] === 'string' ? json['description'].slice(0, 400) : null,
     productType: typeof json['category'] === 'string' ? json['category'] : null,
   });
   return { parsed, money, imageUrl };

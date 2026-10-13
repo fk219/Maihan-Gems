@@ -94,7 +94,7 @@ export function skuFromUrl(url: string): string | null {
   } catch {
     /* keep raw */
   }
-  const m = path.match(/-((?:js|pr|[jk])\d{3,}[a-z0-9]*)\/?$/i);
+  const m = path.match(/-((?:js|pr|[a-z])\d{3,}[a-z0-9]*)\/?$/i);
   return m ? m[1]!.toUpperCase() : null;
 }
 
@@ -306,7 +306,7 @@ export function parseListing(input: {
   const metalType = /platinum/i.test(blob) ? 'platinum' : /silver/i.test(blob) ? 'silver' : metalPurity ? 'gold' : null;
 
   const carat = detectCarat(blob);
-  const stoneType = detectStone(blob);
+  const stoneType = detectStone(url) ?? detectStone(`${input.jsonName ?? ''} ${input.imageUrl ?? ''}`) ?? detectStone(blob);
   const origin = detectOrigin(blob);
   const shape = detectShape(blob);
   const color = detectColor(blob);

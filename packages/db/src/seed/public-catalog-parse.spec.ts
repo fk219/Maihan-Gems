@@ -17,6 +17,7 @@ describe('public catalog parse', () => {
   it('reads SKU and kind from a loose spinel URL', () => {
     const url = 'https://naturalgemstones.com/spinel/1.75ct-burma-myanmar-fancy-pink-spinel-k16466/';
     expect(skuFromUrl(url)).toBe('K16466');
+    expect(skuFromUrl('https://www.thenaturalsapphirecompany.com/blue-sapphires/1.01ct-ceylon-cushion-blue-sapphire-s19322/')).toBe('S19322');
     expect(classifyUrl(url)).toBe('gemstone');
     const parsed = parseListing({
       url,
@@ -121,5 +122,14 @@ describe('public catalog parse', () => {
     expect(assignShowcaseCategory({
       url: 'https://naturalgemstones.com/sapphire/11.77ct-brazilian-oval-red-sapphire-k8735/',
     })).toBeNull();
+  });
+
+  it('reads the stone from the URL path so nav HTML cannot relabel a topaz as a sapphire', () => {
+    const parsed = parseListing({
+      url: 'https://naturalgemstones.com/topaz/11.77ct-brazilian-oval-golden-orange-topaz-k8735/',
+      jsonName: '11.77 Ct. Golden Orange Topaz from Brazil',
+      extraText: 'Sapphire Ruby Emerald Tourmaline mega menu copy',
+    });
+    expect(parsed.stoneType).toBe('topaz');
   });
 });
