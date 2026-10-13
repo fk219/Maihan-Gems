@@ -134,6 +134,13 @@
       "when": 1791158400018,
       "tag": "0019_storefront_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791860000000,
+      "tag": "0020_media_provenance",
+      "breakpoints": true
     }
   ]
 }
