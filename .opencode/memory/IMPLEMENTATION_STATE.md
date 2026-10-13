@@ -1,3 +1,13 @@
+# NGC REVIEW FIXES — posters, stone 3D tab, titles, filters (2026-10-13)
+
+PDP thumbnail rail uses Cloudinary `video_thumbnail` (UUID match) or `so_0,f_jpg`
+posters with a play badge; 360 has its own `spin360.mp4` first-frame thumb.
+Loose-stone 3D is a gallery tab (`mode='stone'`): no ring, `gemHexFor` colour
+(violet-blue tanzanite), brilliant facets, millimetre scale, `#F7F7F5` canvas.
+Settings/jewellery/DYO stay mounted. Catalogue SKU-only titles rebuild via
+`displayTitle()`; card images pad to `b_rgb:F7F7F5`. Filter panel is 22rem,
+sticky, collapsible, single-column shapes so counts are not clipped.
+
 # NGC STOREFRONT PREMIUM BRIEF (2026-10-13)
 
 Contact details on the storefront now come from `STOREFRONT_CONTACT` in

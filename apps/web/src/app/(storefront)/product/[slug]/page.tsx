@@ -7,6 +7,7 @@ import { ProductActions } from '../../../../components/storefront/ProductActions
 import { ProductStudio } from '../../../../components/storefront/ProductStudio.js';
 import { cardToAtelier } from '../../../../lib/atelier-item.js';
 import { findNgcProduct, ngcCards } from '../../../../lib/ngc/catalog.js';
+import { displayTitle } from '../../../../lib/ngc/title.js';
 import { getProductBySlug, listProducts } from '../../../../lib/storefront-data.js';
 import { productImage } from '../../../../lib/storefront-images.js';
 
@@ -19,7 +20,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const ngc = findNgcProduct(slug);
-  if (ngc) return { title: `${ngc.title} | Maihan Gems` };
+  if (ngc) return { title: `${displayTitle(ngc)} | Maihan Gems` };
   const product = await getProductBySlug(slug);
   return { title: product ? `${product.title} | Maihan Gems` : 'Piece | Maihan Gems' };
 }

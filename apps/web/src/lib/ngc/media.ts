@@ -154,7 +154,65 @@ export function primaryImage(product: NgcProduct): string {
 export function catalogImageSrc(product: NgcProduct, item?: NgcMediaItem): string {
   const media = item ?? product.media.find((m) => m.kind === 'image') ?? product.media.find((m) => m.kind === 'lifestyle_image') ?? product.media[0];
   if (!media) return '';
-  return displayMediaUrl(product.id, media);
+  return withStudioPad(displayMediaUrl(product.id, media), media.kind);
+}
+
+/** Neutral Design.md pad so black-studio and white-studio photos share one surface. */
+export function withStudioPad(url: string, kind?: string): string {
+  if (!url.includes('res.cloudinary.com')) return url;
+  if (url.includes('b_rgb:')) return url;
+  const playableVideo =
+    (kind === 'video' || kind === 'spin360' || url.includes('/video/upload/')) && !url.includes('so_0');
+  if (playableVideo) return url;
+  if (url.includes('/upload/so_0,f_jpg,q_auto/')) {
+    return url.replace('/upload/so_0,f_jpg,q_auto/', '/upload/so_0,f_jpg,q_auto,c_pad,b_rgb:F7F7F5,w_900,h_900/');
+  }
+  if (url.includes('/upload/f_auto,q_auto/')) {
+    return url.replace('/upload/f_auto,q_auto/', '/upload/f_auto,q_auto,c_pad,b_rgb:F7F7F5,w_900,h_900/');
+  }
+  if (url.includes('/image/upload/')) {
+    return url.replace('/image/upload/', '/image/upload/c_pad,b_rgb:F7F7F5,w_900,h_900/');
+  }
+  return url;
+}
+
+/** First-frame JPEG of a Cloudinary video (`so_0`). */
+export function cloudinaryVideoPoster(url: string): string {
+  if (!url.includes('/video/upload/')) return url;
+  if (url.includes('so_0')) return url;
+  if (url.includes('/upload/f_auto,q_auto/')) {
+    return url.replace('/upload/f_auto,q_auto/', '/upload/so_0,f_jpg,q_auto/');
+  }
+  return url.replace('/video/upload/', '/video/upload/so_0,f_jpg,q_auto/');
+}
+
+function mediaToken(item: NgcMediaItem): string | null {
+  const fromName = (item.fileName ?? item.localPath ?? '').match(
+    /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i,
+  );
+  if (fromName) return fromName[0].toLowerCase();
+  const fromUrl = (item.url ?? '').match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+  return fromUrl ? fromUrl[0].toLowerCase() : null;
+}
+
+/** Poster for a video or 360 item: uploaded thumbnail, else Cloudinary `so_0`. */
+export function galleryPoster(product: NgcProduct, item: NgcMediaItem): string {
+  if (item.kind === 'video') {
+    const token = mediaToken(item);
+    const thumbs = product.media.filter((row) => row.kind === 'video_thumbnail');
+    const match =
+      (token ? thumbs.find((row) => mediaToken(row) === token) : undefined) ??
+      thumbs.find((row) => row.title && row.title === item.title);
+    if (match) return withStudioPad(displayMediaUrl(product.id, match), 'image');
+    const videoUrl = displayMediaUrl(product.id, item);
+    return withStudioPad(cloudinaryVideoPoster(videoUrl));
+  }
+  if (item.kind === 'spin360') {
+    const videoUrl = displayMediaUrl(product.id, item);
+    if (videoUrl.includes('/video/upload/')) return withStudioPad(cloudinaryVideoPoster(videoUrl));
+    if (item.urlPattern) return spinFrameUrl(item.urlPattern, 1);
+  }
+  return withStudioPad(displayMediaUrl(product.id, item), item.kind);
 }
 
 export const PREFIX = CLOUDINARY_PREFIX;

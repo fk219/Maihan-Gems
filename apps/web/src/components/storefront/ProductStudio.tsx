@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { STOREFRONT_CONTACT } from '@maihan/config';
 
 import type { NgcMediaItem, NgcProduct } from '../../lib/ngc/types.js';
-import { catalogImageSrc, fallbackMediaUrl, galleryImages, galleryReports, galleryVideos, spinFrameUrl, spinMedia } from '../../lib/ngc/media.js';
+import { catalogImageSrc, fallbackMediaUrl, galleryImages, galleryPoster, galleryReports, galleryVideos, spinFrameUrl, spinMedia } from '../../lib/ngc/media.js';
+import { gemHexFor } from '../../lib/ngc/colors.js';
+import { displayTitle } from '../../lib/ngc/title.js';
 import { imageTo3dHook } from '../../lib/ngc/compat.js';
 import { cardToAtelier } from '../../lib/atelier-item.js';
 import type { StorefrontCard } from '../../lib/storefront-types.js';
@@ -84,13 +86,14 @@ function tryOnMode(product: NgcProduct): 'hand' | 'ear' | 'neck' | 'room' {
   return 'hand';
 }
 
-type SlideKind = 'photo' | 'video' | 'spin' | 'report';
+type SlideKind = 'photo' | 'video' | 'spin' | 'report' | 'preview3d';
 
 interface GallerySlide {
   readonly id: string;
   readonly kind: SlideKind;
   readonly label: string;
-  readonly media: NgcMediaItem;
+  readonly media?: NgcMediaItem;
+  readonly poster?: string;
 }
 
 function ZoomStage({
@@ -135,7 +138,7 @@ export function ProductStudio({
   const videos = galleryVideos(product);
   const reports = galleryReports(product);
   const spinItem = spinMedia(product);
-  const [tab, setTab] = useState<'piece' | 'reports'>('piece');
+  const [tab, setTab] = useState<'piece' | 'reports' | 'preview3d'>('piece');
   const [active, setActive] = useState(0);
   const [tryOn, setTryOn] = useState(false);
   const [spin, setSpin] = useState(1);
@@ -146,15 +149,28 @@ export function ProductStudio({
       kind: 'photo',
       label: media.kind === 'lifestyle_image' ? 'Lifestyle' : 'Photo',
       media,
+      poster: galleryPoster(product, media),
     }));
     videos.forEach((media, index) => {
-      slides.push({ id: `video-${index}`, kind: 'video', label: media.title || 'Video', media });
+      slides.push({
+        id: `video-${index}`,
+        kind: 'video',
+        label: media.title || 'Video',
+        media,
+        poster: galleryPoster(product, media),
+      });
     });
     if (spinItem) {
-      slides.push({ id: 'spin', kind: 'spin', label: '360°', media: spinItem });
+      slides.push({
+        id: 'spin',
+        kind: 'spin',
+        label: '360°',
+        media: spinItem,
+        poster: galleryPoster(product, spinItem),
+      });
     }
     return slides;
-  }, [photos, videos, spinItem]);
+  }, [photos, videos, spinItem, product]);
 
   const reportSlides = useMemo<GallerySlide[]>(
     () =>
@@ -163,19 +179,22 @@ export function ProductStudio({
         kind: 'report',
         label: media.title || (media.kind === 'certificate' ? 'Certificate' : media.kind.replace(/_/g, ' ')),
         media,
+        poster: galleryPoster(product, media),
       })),
-    [reports],
+    [reports, product],
   );
 
-  const slides = tab === 'piece' ? pieceSlides : reportSlides;
-  const current = slides[active] ?? slides[0] ?? pieceSlides[0];
-  const src = current ? catalogImageSrc(product, current.media) : catalogImageSrc(product);
-  const fallback = current ? fallbackMediaUrl(current.media) : '';
+  const slides = tab === 'piece' ? pieceSlides : tab === 'reports' ? reportSlides : [];
+  const current = slides[active] ?? slides[0];
+  const src = current?.media ? catalogImageSrc(product, current.media) : catalogImageSrc(product);
+  const fallback = current?.media ? fallbackMediaUrl(current.media) : '';
+  const mounted = product.kind === 'setting' || product.kind === 'jewelry' || product.kind === 'dyo_composite';
+  const title = displayTitle(product);
   const item = cardToAtelier({
     id: product.id,
     sku: product.id,
     slug: product.slug,
-    title: product.title,
+    title,
     kind: product.kind === 'setting' ? 'setting' : product.kind === 'jewelry' || product.kind === 'dyo_composite' ? 'jewelry' : 'gemstone',
     description: null,
     priceUsd: product.priceUsd,
@@ -226,7 +245,7 @@ export function ProductStudio({
           {(product.breadcrumbs.length ? product.breadcrumbs : [{ name: 'Home', path: '/' }, { name: product.title, path: null }]).map((crumb, index) => (
             <span key={`${crumb.name}-${index}`}>
               {index > 0 ? <span aria-hidden="true"> / </span> : null}
-              {crumb.path ? <Link href={crumb.path}>{crumb.name}</Link> : <span>{crumb.name}</span>}
+              {crumb.path ? <Link href={crumb.path}>{crumb.name}</Link> : <span>{crumb.name === product.id || crumb.name === product.title ? title : crumb.name}</span>}
             </span>
           ))}
         </nav>
@@ -252,6 +271,16 @@ export function ProductStudio({
               </button>
               <button
                 type="button"
+                className={tab === 'preview3d' ? 'is-on' : ''}
+                onClick={() => {
+                  setTab('preview3d');
+                  setActive(0);
+                }}
+              >
+                3D
+              </button>
+              <button
+                type="button"
                 className={tab === 'reports' ? 'is-on' : ''}
                 onClick={() => {
                   setTab('reports');
@@ -261,67 +290,79 @@ export function ProductStudio({
                 Reports {reportSlides.length}
               </button>
             </div>
-            <div className="ngc-gallery__layout">
-              <div className="ngc-thumbs" role="list">
-                {slides.map((slide, index) => (
-                  <button
-                    key={slide.id}
-                    type="button"
-                    className={index === active ? 'is-on' : ''}
-                    aria-label={`${slide.label} ${index + 1} of ${slides.length}`}
-                    onClick={() => setActive(index)}
-                  >
-                    {slide.kind === 'video' ? (
-                      <span className="ngc-thumbs__badge">Video</span>
-                    ) : slide.kind === 'spin' ? (
-                      <span className="ngc-thumbs__badge">360°</span>
-                    ) : slide.kind === 'report' ? (
-                      <span className="ngc-thumbs__badge">Cert</span>
-                    ) : null}
-                    <CatalogImage src={catalogImageSrc(product, slide.media)} fallback={fallbackMediaUrl(slide.media)} alt="" />
-                  </button>
-                ))}
-              </div>
-              {current?.kind === 'video' ? (
+            <div className={`ngc-gallery__layout${tab === 'preview3d' ? ' ngc-gallery__layout--solo' : ''}`}>
+              {tab !== 'preview3d' ? (
+                <div className="ngc-thumbs" role="list">
+                  {slides.map((slide, index) => (
+                    <button
+                      key={slide.id}
+                      type="button"
+                      className={index === active ? 'is-on' : ''}
+                      aria-label={`${slide.label} ${index + 1} of ${slides.length}`}
+                      onClick={() => setActive(index)}
+                    >
+                      {slide.kind === 'video' ? <span className="ngc-thumbs__play" aria-hidden="true" /> : null}
+                      {slide.kind === 'spin' ? <span className="ngc-thumbs__badge">360°</span> : null}
+                      {slide.kind === 'report' ? <span className="ngc-thumbs__badge">Cert</span> : null}
+                      <CatalogImage
+                        src={slide.poster ?? (slide.media ? catalogImageSrc(product, slide.media) : '')}
+                        fallback={slide.kind === 'video' || slide.kind === 'spin' ? '' : slide.media ? fallbackMediaUrl(slide.media) : ''}
+                        alt=""
+                      />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {tab === 'preview3d' ? (
+                <div className="ngc-gallery__stage ngc-gallery__stage--3d">
+                  {glb && mounted ? (
+                    <ThreeDViewer glbUrl={glb} title={title} posterUrl={src} onTryArClick={() => setTryOn(true)} />
+                  ) : (
+                    <JewelryConfiguratorCanvas
+                      mode={mounted ? 'mounted' : 'stone'}
+                      metal={metalFinish}
+                      stone={{
+                        shape: product.shape ?? product.centerStones[0]?.shape ?? 'Round',
+                        carat: product.weightCt ?? product.centerStones[0]?.weightCt ?? 1,
+                        color: gemHexFor(product.color ?? product.centerStones[0]?.color, product.stoneType ?? product.centerStones[0]?.stoneType),
+                        lengthMm: product.lengthMm ?? product.centerStones[0]?.lengthMm,
+                        widthMm: product.widthMm ?? product.centerStones[0]?.widthMm,
+                      }}
+                      label={mounted ? `3D preview · ${title}` : `Loose ${product.stoneType ?? 'gemstone'} in 3D`}
+                    />
+                  )}
+                </div>
+              ) : current?.kind === 'video' ? (
                 <div className="ngc-gallery__stage">
-                  <video src={src} controls poster={catalogImageSrc(product) || undefined} />
+                  <video src={src} controls poster={current.poster || catalogImageSrc(product) || undefined} />
                 </div>
               ) : current?.kind === 'spin' && spinSrc ? (
                 <div className="ngc-gallery__stage ngc-gallery__stage--spin">
-                  <video src={spinSrc} controls poster={catalogImageSrc(product) || undefined} />
+                  <video src={spinSrc} controls poster={current.poster || catalogImageSrc(product) || undefined} />
                 </div>
               ) : current?.kind === 'spin' && pattern && frames > 1 ? (
                 <div className="ngc-gallery__stage ngc-gallery__stage--spin">
-                  <CatalogImage src={spinFrameUrl(pattern, spin)} alt={`${product.title} 360 frame ${spin}`} />
+                  <CatalogImage src={spinFrameUrl(pattern, spin)} alt={`${title} 360 frame ${spin}`} />
                   <input type="range" min={1} max={frames} value={spin} onChange={(e) => setSpin(Number(e.target.value))} aria-label="360 rotation" />
                 </div>
               ) : (
-                <ZoomStage src={src} fallback={fallback} alt={product.title} />
+                <ZoomStage src={src} fallback={fallback} alt={title} />
               )}
             </div>
-            {glb ? <ThreeDViewer glbUrl={glb} title={product.title} posterUrl={src} onTryArClick={() => setTryOn(true)} /> : (
-              <div className="ngc-procedural">
-                <p className="lx-kicker">3D preview</p>
-                <JewelryConfiguratorCanvas
-                  metal={metalFinish}
-                  stone={{
-                    shape: product.shape ?? 'Round',
-                    carat: product.weightCt ?? 1,
-                    color: product.color ?? '#C9A84C',
-                  }}
-                />
-                <p className="lx-card__specs">
-                  {hook.status === 'pending_service'
-                    ? 'Procedural preview from shape, millimetres and colour. Image-to-3D service hook is ready when a model is approved.'
-                    : 'Source GLB attached.'}
-                </p>
-              </div>
-            )}
+            {tab === 'preview3d' ? (
+              <p className="lx-card__specs">
+                {mounted
+                  ? hook.status === 'pending_service'
+                    ? 'Procedural mounting from metal, millimetres and colour. Image-to-3D service hook is ready when a model is approved.'
+                    : 'Source GLB attached.'
+                  : 'Loose stone preview from colour, cut and millimetres. It rotates on the studio canvas.'}
+              </p>
+            ) : null}
           </div>
 
           <div className="ngc-pdp__buy">
             <p className="lx-kicker">{product.availability}</p>
-            <h1 className="lx-h2">{product.title}</h1>
+            <h1 className="lx-h2">{title}</h1>
             <p className="lx-card__specs">Item ID: {product.id}</p>
             {product.shipDaysMin ? (
               <p className="lx-lede">Est. ship: {product.shipDaysMin}–{product.shipDaysMax} days. Rush service may be available upon request.</p>
@@ -422,7 +463,7 @@ export function ProductStudio({
         onClose={() => setTryOn(false)}
         metal={metalFinish}
         carat={product.weightCt ?? 1}
-        title={`Try on · ${product.title}`}
+        title={`Try on · ${title}`}
         mode={mode}
         sharePath={`/product/${product.id}?tryon=1`}
       />

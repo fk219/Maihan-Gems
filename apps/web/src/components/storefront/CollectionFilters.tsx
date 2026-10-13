@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 
 import { swatchFor } from '../../lib/ngc/colors.js';
 import {
@@ -19,6 +19,32 @@ import { ShapeIcon } from './ShapeIcon.js';
 
 function toggleValue(list: string[], value: string): string[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+}
+
+function FilterSection({
+  title,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section className={`lx-filter${open ? ' is-open' : ''}`}>
+      <button
+        type="button"
+        className="lx-filter__toggle"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <h3>{title}</h3>
+        <span aria-hidden="true">{open ? '–' : '+'}</span>
+      </button>
+      {open ? <div className="lx-filter__body">{children}</div> : null}
+    </section>
+  );
 }
 
 function FacetChecks({
@@ -133,14 +159,12 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
       </div>
 
       {facets.shapes.length > 0 ? (
-        <section className="lx-filter">
-          <h3>Shape</h3>
+        <FilterSection title="Shape" defaultOpen>
           <FacetChecks kind="shape" values={facets.shapes} selected={state.shapes} onToggle={(v) => toggle('shapes', v)} />
-        </section>
+        </FilterSection>
       ) : null}
 
-      <section className="lx-filter">
-        <h3>Carat</h3>
+      <FilterSection title="Carat" defaultOpen>
         <ul className="lx-filter__list">
           {CARAT_BUCKETS.map((bucket) => {
             const count = facets.caratBuckets.find((row) => row.value === bucket.id)?.count ?? 0;
@@ -172,11 +196,10 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
           onLo={(n) => patch({ minCarat: n })}
           onHi={(n) => patch({ maxCarat: n })}
         />
-      </section>
+      </FilterSection>
 
       {facets.length.max > facets.length.min ? (
-        <section className="lx-filter">
-          <h3>Length (mm)</h3>
+        <FilterSection title="Length (mm)">
           <RangePair
             min={facets.length.min}
             max={facets.length.max}
@@ -189,12 +212,11 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
             onLo={(n) => patch({ minLength: n })}
             onHi={(n) => patch({ maxLength: n })}
           />
-        </section>
+        </FilterSection>
       ) : null}
 
       {facets.width.max > facets.width.min ? (
-        <section className="lx-filter">
-          <h3>Width (mm)</h3>
+        <FilterSection title="Width (mm)">
           <RangePair
             min={facets.width.min}
             max={facets.width.max}
@@ -207,14 +229,13 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
             onLo={(n) => patch({ minWidth: n })}
             onHi={(n) => patch({ maxWidth: n })}
           />
-        </section>
+        </FilterSection>
       ) : null}
 
       {facets.colours.length > 0 ? (
-        <section className="lx-filter">
-          <h3>Colour</h3>
+        <FilterSection title="Colour" defaultOpen>
           <FacetChecks kind="swatch" values={facets.colours} selected={state.colours} onToggle={(v) => toggle('colours', v)} />
-        </section>
+        </FilterSection>
       ) : null}
 
       <FacetChecksSection title="Intensity" values={facets.intensities} selected={state.intensities} onToggle={(v) => toggle('intensities', v)} />
@@ -227,8 +248,7 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
       <FacetChecksSection title="Metal" values={facets.metals} selected={state.metals} onToggle={(v) => toggle('metals', v)} />
       <FacetChecksSection title="Availability" values={facets.availabilities} selected={state.availabilities} onToggle={(v) => toggle('availabilities', v)} />
 
-      <section className="lx-filter">
-        <h3>Price (USD)</h3>
+      <FilterSection title="Price (USD)" defaultOpen>
         <RangePair
           min={facets.price.min}
           max={facets.price.max}
@@ -241,7 +261,7 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
           onLo={(n) => patch({ minPrice: n })}
           onHi={(n) => patch({ maxPrice: n })}
         />
-      </section>
+      </FilterSection>
     </aside>
   );
 
@@ -316,9 +336,8 @@ function FacetChecksSection({
 }) {
   if (values.length === 0) return null;
   return (
-    <section className="lx-filter">
-      <h3>{title}</h3>
+    <FilterSection title={title}>
       <FacetChecks values={values} selected={selected} onToggle={onToggle} />
-    </section>
+    </FilterSection>
   );
 }

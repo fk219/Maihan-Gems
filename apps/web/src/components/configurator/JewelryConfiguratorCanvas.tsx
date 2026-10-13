@@ -18,6 +18,8 @@ export interface ConfiguratorStone {
   readonly shape: string;
   readonly carat: number;
   readonly color: string;
+  readonly lengthMm?: number | null;
+  readonly widthMm?: number | null;
 }
 
 export interface JewelryConfiguratorCanvasProps {
@@ -25,6 +27,7 @@ export interface JewelryConfiguratorCanvasProps {
   readonly stone: ConfiguratorStone | null;
   readonly glbUrl?: string | null;
   readonly label?: string;
+  readonly mode?: 'stone' | 'mounted';
 }
 
 const METAL: Record<MetalFinish, { color: number; roughness: number }> = {
@@ -39,6 +42,7 @@ export function JewelryConfiguratorCanvas({
   stone,
   glbUrl,
   label = 'Assembled jewellery',
+  mode = 'mounted',
 }: JewelryConfiguratorCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +60,7 @@ export function JewelryConfiguratorCanvas({
       if (disposed || !hostRef.current) return;
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xfafaf8);
+      scene.background = new THREE.Color(0xf7f7f5);
       const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 40);
       camera.position.set(0, 0.35, 2.4);
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
@@ -79,11 +83,20 @@ export function JewelryConfiguratorCanvas({
       scene.add(fill);
 
       const controls = new OrbitControls(camera, renderer.domElement);
-      controls.target.set(0, 0.08, 0);
       controls.enablePan = false;
-      controls.minDistance = 1.35;
-      controls.maxDistance = 3.6;
-      camera.position.set(1.15, 0.95, 1.7);
+      if (mode === 'stone') {
+        controls.target.set(0, 0, 0);
+        controls.minDistance = 0.9;
+        controls.maxDistance = 3.2;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.4;
+        camera.position.set(0.55, 0.45, 1.55);
+      } else {
+        controls.target.set(0, 0.08, 0);
+        controls.minDistance = 1.35;
+        controls.maxDistance = 3.6;
+        camera.position.set(1.15, 0.95, 1.7);
+      }
 
       const assembly = new THREE.Group();
       scene.add(assembly);
@@ -93,14 +106,15 @@ export function JewelryConfiguratorCanvas({
         return new THREE.MeshPhysicalMaterial({
           color,
           metalness: 0,
-          roughness: 0.04,
-          transmission: 0.55,
-          thickness: 0.45,
-          ior: 2.15,
+          roughness: 0.06,
+          transmission: mode === 'stone' ? 0.72 : 0.45,
+          thickness: mode === 'stone' ? 0.85 : 0.45,
+          ior: 2.42,
           clearcoat: 1,
-          clearcoatRoughness: 0.05,
+          clearcoatRoughness: 0.04,
           attenuationColor: new THREE.Color(color),
-          attenuationDistance: 0.35,
+          attenuationDistance: mode === 'stone' ? 0.55 : 0.35,
+          specularIntensity: 1,
         });
       }
 
@@ -116,19 +130,45 @@ export function JewelryConfiguratorCanvas({
         });
       }
 
-      function stoneMesh() {
+      function stoneScale(): number {
+        const length = stone?.lengthMm && stone.lengthMm > 0 ? stone.lengthMm : null;
+        if (length) return Math.max(0.22, Math.min(length / 10, 1.8));
         const carat = stone?.carat ?? 1;
-        const scale = 0.28 + Math.min(carat, 8) * 0.04;
+        return Math.max(0.22, Math.min(0.65 * Math.cbrt(carat), 1.8));
+      }
+
+      function stoneMesh() {
+        const scale = stoneScale();
         const shape = (stone?.shape ?? 'round').toLowerCase();
-        const geometry =
-          shape.includes('emerald') || shape.includes('radiant')
-            ? new THREE.BoxGeometry(scale * 1.15, scale * 0.72, scale * 0.85)
-            : shape.includes('pear') || shape.includes('marquise')
-              ? new THREE.SphereGeometry(scale * 0.55, 24, 16)
-              : new THREE.OctahedronGeometry(scale * 0.62, 1);
-        const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#0891B2'));
-        mesh.name = 'center_stone';
-        return mesh;
+        const color = stone?.color ?? '#1E3A8A';
+        const material = gemMaterial(color);
+        const group = new THREE.Group();
+        group.name = 'center_stone';
+        const ovalX = stone?.lengthMm && stone?.widthMm && stone.widthMm > 0 ? (stone.lengthMm / stone.widthMm) : 1;
+
+        if (shape.includes('emerald') || shape.includes('radiant') || shape.includes('asscher')) {
+          const mesh = new THREE.Mesh(new THREE.BoxGeometry(scale * 1.05, scale * 0.62, scale * 0.82), material);
+          group.add(mesh);
+        } else if (shape.includes('pear') || shape.includes('marquise') || shape.includes('heart')) {
+          const mesh = new THREE.Mesh(new THREE.SphereGeometry(scale * 0.48, 20, 14), material);
+          mesh.scale.set(1, 1.25, 0.85);
+          group.add(mesh);
+        } else if (shape.includes('cushion') || shape.includes('oval')) {
+          const mesh = new THREE.Mesh(new THREE.SphereGeometry(scale * 0.5, 24, 16), material);
+          mesh.scale.set(Math.min(ovalX, 1.45), 0.72, 1);
+          group.add(mesh);
+        } else {
+          const pavilion = new THREE.Mesh(new THREE.ConeGeometry(scale * 0.5, scale * 0.58, 16), material);
+          pavilion.rotation.x = Math.PI;
+          pavilion.position.y = -scale * 0.2;
+          const crown = new THREE.Mesh(new THREE.CylinderGeometry(scale * 0.28, scale * 0.5, scale * 0.22, 16), material);
+          crown.position.y = scale * 0.16;
+          const table = new THREE.Mesh(new THREE.CircleGeometry(scale * 0.26, 16), material);
+          table.rotation.x = -Math.PI / 2;
+          table.position.y = scale * 0.27;
+          group.add(pavilion, crown, table);
+        }
+        return group;
       }
 
       function proceduralRing() {
@@ -156,7 +196,7 @@ export function JewelryConfiguratorCanvas({
       async function mount() {
         assembly.clear();
         let root: import('three').Object3D | null = null;
-        if (glbUrl) {
+        if (glbUrl && mode !== 'stone') {
           const cached = cache.get(glbUrl);
           if (cached) {
             root = cached.clone(true);
@@ -170,16 +210,27 @@ export function JewelryConfiguratorCanvas({
             }
           }
         }
-        if (!root) root = proceduralRing();
-        root.traverse((node: import('three').Object3D) => {
-          const mesh = node as import('three').Mesh;
-          if (mesh.isMesh && mesh.name !== 'center_stone') {
-            mesh.material = metalMaterial();
-          }
-        });
-        const socket = root.getObjectByName('socket_center_stone') ?? root;
-        if (stone) socket.add(stoneMesh());
-        assembly.add(root);
+        if (mode === 'stone') {
+          const ground = new THREE.Mesh(
+            new THREE.CircleGeometry(1.15, 48),
+            new THREE.MeshBasicMaterial({ color: 0xefefea, transparent: true, opacity: 0.9 }),
+          );
+          ground.rotation.x = -Math.PI / 2;
+          ground.position.y = -0.55;
+          assembly.add(ground);
+          assembly.add(stoneMesh());
+        } else {
+          if (!root) root = proceduralRing();
+          root.traverse((node: import('three').Object3D) => {
+            const mesh = node as import('three').Mesh;
+            if (mesh.isMesh && mesh.name !== 'center_stone') {
+              mesh.material = metalMaterial();
+            }
+          });
+          const socket = root.getObjectByName('socket_center_stone') ?? root;
+          if (stone) socket.add(stoneMesh());
+          assembly.add(root);
+        }
       }
 
       await mount();
@@ -228,14 +279,14 @@ export function JewelryConfiguratorCanvas({
       disposed = true;
       cleanup();
     };
-  }, [metal, stone?.shape, stone?.carat, stone?.color, glbUrl]);
+  }, [metal, stone?.shape, stone?.carat, stone?.color, stone?.lengthMm, stone?.widthMm, glbUrl, mode]);
 
   return (
     <div
       ref={hostRef}
       role="img"
       aria-label={label}
-      style={{ width: '100%', height: 440, borderRadius: 12, overflow: 'hidden', background: '#FAFAF8' }}
+      style={{ width: '100%', height: '100%', minHeight: 320, borderRadius: 12, overflow: 'hidden', background: '#F7F7F5' }}
     />
   );
 }

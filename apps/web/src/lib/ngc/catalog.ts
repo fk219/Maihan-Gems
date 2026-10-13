@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 import type { SettingForDyo, StorefrontCard } from '../storefront-types.js';
 import { catalogImageSrc } from './media.js';
+import { displayTitle } from './title.js';
 import type { NgcKind, NgcProduct, NgcTaxonomy } from './types.js';
 
 function dataPath(file: string): string {
@@ -66,7 +67,7 @@ export function toStorefrontCard(product: NgcProduct): StorefrontCard {
     id: product.id,
     sku: product.id,
     slug: productCardSlug(product),
-    title: product.title,
+    title: displayTitle(product),
     kind: cardKind(product.kind),
     description: product.descriptionHtml.replace(/<[^>]+>/g, ' ').slice(0, 400) || null,
     priceUsd: product.priceUsd ?? 0,
