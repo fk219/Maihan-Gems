@@ -94,6 +94,11 @@ export function LuxuryHeader({ stones }: LuxuryHeaderProps) {
               <path d="M20 20l-3.5-3.5" />
             </svg>
           </Link>
+          <Link href="/compare" className="lx-icon" aria-label="Compare">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <path d="M6 4v16M12 8v12M18 12v8" />
+            </svg>
+          </Link>
           <Link href="/favorites" className="lx-icon" aria-label="Favourites">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
               <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.6-7 10-7 10z" />

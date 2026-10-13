@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 
 import { ProductGrid } from './LuxuryProductCard.js';
@@ -18,12 +19,14 @@ export function CollectionPage({
   lede,
   products,
   stoneSlug,
+  chips,
 }: {
   kicker: string;
   title: string;
   lede?: string;
   products: StorefrontCard[];
   stoneSlug?: string;
+  chips?: ReactNode;
 }) {
   return (
     <main className="lx-section">
@@ -40,6 +43,7 @@ export function CollectionPage({
             ))}
           </nav>
         ) : null}
+        {chips ? <nav className="lx-facets" aria-label="Stone types">{chips}</nav> : null}
         <p className="lx-card__specs" style={{ margin: '1.5rem 0 2rem' }}>
           {products.length} piece{products.length === 1 ? '' : 's'}
         </p>

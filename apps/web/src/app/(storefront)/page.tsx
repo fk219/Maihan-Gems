@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { HeroSearch } from '../../components/storefront/HeroSearch.js';
 import { ProductGrid } from '../../components/storefront/LuxuryProductCard.js';
-import { getFeaturedHome } from '../../lib/storefront-data.js';
+import { getFeaturedHome, listProducts } from '../../lib/storefront-data.js';
 import { HERO_IMAGE } from '../../lib/storefront-images.js';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,10 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const { gemstones, settings, jewelry } = await getFeaturedHome();
+  const [{ gemstones, settings, jewelry }, pairs] = await Promise.all([
+    getFeaturedHome(),
+    listProducts({ kind: 'gemstone', quantityType: 'pair', limit: 4 }),
+  ]);
 
   return (
     <main id="main-content">
@@ -44,6 +47,15 @@ export default async function HomePage() {
                 <span className="lx-kicker" style={{ color: '#e8c96a' }}>Loose stones</span>
                 <h3>Gemstones</h3>
                 <p>Sapphires, rubies, emeralds and more</p>
+              </div>
+            </Link>
+            <Link href="/pairs" className="lx-tile">
+              <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=1200&q=80" alt="" />
+              <div className="lx-tile__veil" />
+              <div className="lx-tile__copy">
+                <span className="lx-kicker" style={{ color: '#e8c96a' }}>Earrings</span>
+                <h3>Matched pairs</h3>
+                <p>Kept together for colour and cut</p>
               </div>
             </Link>
             <Link href="/jewellery" className="lx-tile">
@@ -80,6 +92,21 @@ export default async function HomePage() {
           <ProductGrid products={gemstones} />
         </div>
       </section>
+
+      {pairs.length > 0 ? (
+        <section className="lx-section" style={{ background: '#fff' }} aria-labelledby="featured-pairs">
+          <div className="lx-wrap">
+            <div className="lx-section__head">
+              <div>
+                <span className="lx-kicker">Kept together</span>
+                <h2 id="featured-pairs" className="lx-h2">Matched pairs</h2>
+              </div>
+              <Link className="lx-more" href="/pairs">View all</Link>
+            </div>
+            <ProductGrid products={pairs} />
+          </div>
+        </section>
+      ) : null}
 
       <section className="lx-section" style={{ background: '#fff' }} aria-labelledby="featured-settings">
         <div className="lx-wrap">

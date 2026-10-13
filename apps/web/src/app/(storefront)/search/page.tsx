@@ -33,13 +33,14 @@ export default async function SearchPage({
           <button type="submit">Search</button>
         </form>
         {parsed ? (
-          <p className="lx-card__specs" style={{ marginBottom: '1.5rem' }}>
-            {items.length} result{items.length === 1 ? '' : 's'}
-            {parsed.stoneType ? ` · ${parsed.stoneType.replace(/_/g, ' ')}` : ''}
-            {parsed.shape ? ` · ${parsed.shape}` : ''}
-            {parsed.origin ? ` · ${parsed.origin}` : ''}
-            {parsed.quantityType === 'pair' ? ' · pairs' : ''}
-          </p>
+          <nav className="lx-facets" aria-label="Parsed filters">
+            <span>{items.length} result{items.length === 1 ? '' : 's'}</span>
+            {parsed.stoneType ? <span>{parsed.stoneType.replace(/_/g, ' ')}</span> : null}
+            {parsed.shape ? <span>{parsed.shape.replace(/_/g, ' ')}</span> : null}
+            {parsed.origin ? <span>{parsed.origin}</span> : null}
+            {parsed.quantityType === 'pair' ? <span>pairs</span> : null}
+            {parsed.treatment ? <span>{parsed.treatment.replace(/_/g, ' ')}</span> : null}
+          </nav>
         ) : null}
         {items.length > 0 ? (
           <ProductGrid products={items} />
