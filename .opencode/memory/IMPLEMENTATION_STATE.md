@@ -2,10 +2,10 @@
 
 Round brilliant lattice is manifold: knife-edge girdle with shared vertices,
 pavilion mains as kites pointing at bezels, outward-facing FrontSide normals.
-Tanzanite albedo `#7A3AE8` / attenuation `#3B1470` (vault-photo violet-blue, not
-royal emissive). Studio PMREM cards drive per-facet light/dark and clearcoat
-specular; additive sparkle points and stone-mode PCF shadows are gone. Slow
-auto-rotate. DYO ring: ~2mm comfort-fit
+Tanzanite albedo `#8A4AE8` / attenuation `#4C1A8C` (vault-photo violet, not
+navy). Studio PMREM plus key/fill/rim lights drive per-facet contrast; the
+canvas fills the 3D stage so the stone is framed, not cropped. Additive
+sparkle points and stone-mode PCF shadows are gone. Slow auto-rotate. DYO ring: ~2mm comfort-fit
 band tapering to a 4/6-prong claw head, jewellery metal PBR (yellow/white/rose
 gold, platinum). Caption uses `settingSeatLabel` so live metal is named once
 (no “Platinum 950 … (18K Yellow Gold)”). Finish step fills the left column with

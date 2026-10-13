@@ -31,7 +31,7 @@ export function swatchFor(name: string): string {
  */
 export function gemHexFor(color: string | null | undefined, stoneType?: string | null): string {
   const text = `${color ?? ''} ${stoneType ?? ''}`.toLowerCase();
-  if (text.includes('tanzanite') || text.includes('violet')) return '#7A3AE8';
+  if (text.includes('tanzanite') || text.includes('violet')) return '#8A4AE8';
   if (text.includes('paraiba') || text.includes('neon')) return '#06B6D4';
   if (text.includes('emerald') || (text.includes('green') && !text.includes('bluish'))) return '#065F46';
   if (text.includes('ruby') || text.includes('red')) return '#991B1B';
@@ -58,11 +58,12 @@ export function gemAttenuationHex(color: string | null | undefined, stoneType?: 
   if (
     text.includes('tanzanite')
     || text.includes('violet')
+    || (color ?? '').toUpperCase() === '#8A4AE8'
     || (color ?? '').toUpperCase() === '#7A3AE8'
     || (color ?? '').toUpperCase() === '#6B32E8'
     || (color ?? '').toUpperCase() === '#3A12C2'
   ) {
-    return '#3B1470';
+    return '#4C1A8C';
   }
   if (text.includes('paraiba') || text.includes('neon')) return '#0E7490';
   if (text.includes('emerald') || (text.includes('green') && !text.includes('bluish'))) return '#022C22';

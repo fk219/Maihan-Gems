@@ -58,32 +58,35 @@ export function JewelryConfiguratorCanvas({
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.12;
+      renderer.toneMappingExposure = 1.28;
       renderer.shadowMap.enabled = mode === 'mounted';
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
+      renderer.domElement.style.display = 'block';
       host.appendChild(renderer.domElement);
 
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x050508);
+      envScene.background = new THREE.Color(0x08080c);
       const card = (w: number, h: number, color: number, pos: [number, number, number]) => {
         const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color }));
         mesh.position.set(...pos);
-        mesh.lookAt(0, 0.12, 0);
+        mesh.lookAt(0, 0.08, 0);
         envScene.add(mesh);
       };
-      card(9.2, 6.4, 0xffffff, [0.6, 4.4, 6.2]);
-      card(4.8, 3.4, 0xf4f0ff, [-0.4, 6.4, 1.2]);
-      card(3.2, 4.2, 0xffe4b5, [5.4, 2.6, 2.2]);
-      card(3.6, 4.4, 0x6d28d9, [-5.2, 2.1, -0.6]);
-      card(14, 14, 0x06060b, [0, -6.2, 0]);
+      card(10, 7, 0xffffff, [0.8, 4.6, 6.4]);
+      card(5.4, 3.8, 0xf5f3ff, [-1.2, 6.8, 1.4]);
+      card(3.6, 4.4, 0xffe7c2, [5.6, 2.4, 2.4]);
+      card(4.2, 5, 0x7c3aed, [-5.4, 2.2, -0.4]);
+      card(16, 16, 0x07070c, [0, -6.4, 0]);
       const pmrem = new THREE.PMREMGenerator(renderer);
-      const env = pmrem.fromScene(envScene, 0.02).texture;
+      const env = pmrem.fromScene(envScene, 0.04).texture;
       scene.environment = env;
-      scene.environmentIntensity = 1.7;
+      scene.environmentIntensity = 1.55;
 
-      scene.add(new THREE.HemisphereLight(0xf5f3ff, 0x12081f, 0.16));
-      const key = new THREE.DirectionalLight(0xfff8f0, 0.42);
-      key.position.set(2.4, 4.6, 3.2);
+      scene.add(new THREE.HemisphereLight(0xf5f3ff, 0x1e1b4b, 0.32));
+      const key = new THREE.DirectionalLight(0xfff7ee, 2.15);
+      key.position.set(3.1, 4.8, 3.8);
       if (mode === 'mounted') {
         key.castShadow = true;
         key.shadow.mapSize.set(1024, 1024);
@@ -92,18 +95,24 @@ export function JewelryConfiguratorCanvas({
         key.shadow.radius = 6;
       }
       scene.add(key);
+      const fill = new THREE.DirectionalLight(0xddd6fe, 0.95);
+      fill.position.set(-3.8, 2.4, 2.6);
+      scene.add(fill);
+      const rim = new THREE.DirectionalLight(0xa78bfa, 1.25);
+      rim.position.set(-2.4, 1.6, -3.6);
+      scene.add(rim);
 
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enablePan = false;
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
       controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.32;
+      controls.autoRotateSpeed = 0.4;
       if (mode === 'stone') {
         controls.target.set(0, 0, 0);
-        controls.minDistance = 1.6;
-        controls.maxDistance = 4.2;
-        camera.position.set(0.52, 0.58, 2.28);
+        controls.minDistance = 2.3;
+        controls.maxDistance = 5.4;
+        camera.position.set(1.15, 1.25, 3.35);
       } else {
         controls.target.set(0, 0.22, 0);
         controls.minDistance = 3.2;
@@ -121,7 +130,7 @@ export function JewelryConfiguratorCanvas({
           ? Math.max(0.18, Math.min(length / 10, 1.6))
           : Math.max(0.18, Math.min(0.65 * Math.cbrt(stone?.carat ?? 1), 1.6));
         if (mode === 'mounted') return Math.min(physical * 0.48, 0.34);
-        return Math.min(physical * 1.28, 1.05);
+        return Math.min(physical * 1.08, 0.86);
       }
 
       function gemMaterial(color: string) {
@@ -129,21 +138,21 @@ export function JewelryConfiguratorCanvas({
         return new THREE.MeshPhysicalMaterial({
           color,
           metalness: 0,
-          roughness: 0.018,
-          transmission: 0.84,
-          thickness: mode === 'stone' ? 1.05 : 0.55,
+          roughness: 0.06,
+          transmission: 0.42,
+          thickness: mode === 'stone' ? 0.85 : 0.5,
           ior,
           dispersion: gemDispersion(stone?.stoneType),
           attenuationColor: new THREE.Color(gemAttenuationHex(color, stone?.stoneType)),
-          attenuationDistance: 0.48,
+          attenuationDistance: 0.55,
           clearcoat: 1,
-          clearcoatRoughness: 0.035,
+          clearcoatRoughness: 0.08,
           specularIntensity: 1,
           specularColor: 0xf3eaff,
-          iridescence: 0.32,
+          iridescence: 0.22,
           iridescenceIOR: 1.35,
-          iridescenceThicknessRange: [140, 420],
-          envMapIntensity: 1.85,
+          iridescenceThicknessRange: [180, 380],
+          envMapIntensity: 1.35,
           flatShading: true,
           side: THREE.FrontSide,
         });
@@ -159,9 +168,9 @@ export function JewelryConfiguratorCanvas({
         geometry.setAttribute('position', new THREE.BufferAttribute(built.positions, 3));
         geometry.setIndex(new THREE.BufferAttribute(built.indices, 1));
         geometry.computeVertexNormals();
-        const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#7A3AE8'));
+        const mesh = new THREE.Mesh(geometry, gemMaterial(stone?.color ?? '#8A4AE8'));
         mesh.scale.setScalar(scale);
-        if (mode === 'stone') mesh.rotation.x = -0.32;
+        if (mode === 'stone') mesh.rotation.x = -0.48;
         mesh.castShadow = mode === 'mounted';
         mesh.name = 'center_stone';
         const group = new THREE.Group();
@@ -295,7 +304,7 @@ export function JewelryConfiguratorCanvas({
       ref={hostRef}
       role="img"
       aria-label={label}
-      style={{ width: '100%', height: '100%', minHeight: 320, borderRadius: 12, overflow: 'hidden', background: '#F7F7F5' }}
+      style={{ width: '100%', height: '100%', minHeight: '100%', borderRadius: 12, overflow: 'hidden', background: '#F7F7F5' }}
     />
   );
 }

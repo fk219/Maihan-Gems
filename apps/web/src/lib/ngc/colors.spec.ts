@@ -4,7 +4,7 @@ import { gemAttenuationHex, gemDispersion, gemHexFor, gemIor } from './colors.js
 
 describe('gemHexFor', () => {
   it('maps named NGC colours to hex so Three.js does not render white', () => {
-    expect(gemHexFor('Violetish Blue', 'Tanzanite')).toBe('#7A3AE8');
+    expect(gemHexFor('Violetish Blue', 'Tanzanite')).toBe('#8A4AE8');
     expect(gemHexFor('Bluish Green', 'Paraiba Tourmaline')).toBe('#06B6D4');
     expect(gemHexFor('Green', 'Emerald')).toBe('#065F46');
     expect(gemHexFor('#1E3A8A')).toBe('#1E3A8A');
@@ -12,8 +12,8 @@ describe('gemHexFor', () => {
   });
 
   it('uses a darker tanzanite body colour for Beer-law attenuation', () => {
-    expect(gemAttenuationHex('Violetish Blue', 'Tanzanite')).toBe('#3B1470');
-    expect(gemAttenuationHex('#7A3AE8')).toBe('#3B1470');
+    expect(gemAttenuationHex('Violetish Blue', 'Tanzanite')).toBe('#4C1A8C');
+    expect(gemAttenuationHex('#8A4AE8')).toBe('#4C1A8C');
   });
 
   it('uses tanzanite RI ~1.7 rather than diamond 2.42', () => {
