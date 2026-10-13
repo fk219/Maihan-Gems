@@ -1,0 +1,32 @@
+import { describe, expect, it } from 'vitest';
+
+import { ROUND_BRILLIANT_FACETS, buildFacetedGem, parseGemShape } from './faceted-gem.js';
+
+describe('faceted gem geometry', () => {
+  it('maps NGC shape names', () => {
+    expect(parseGemShape('Round')).toBe('round');
+    expect(parseGemShape('Oval mixed brilliant')).toBe('oval');
+    expect(parseGemShape('Cushion')).toBe('cushion');
+    expect(parseGemShape('Emerald Cut')).toBe('emerald');
+    expect(parseGemShape('Pear')).toBe('pear');
+  });
+
+  it('builds a 57-facet round brilliant', () => {
+    const mesh = buildFacetedGem('round');
+    expect(mesh.facetCount).toBe(ROUND_BRILLIANT_FACETS);
+    expect(mesh.positions.length).toBeGreaterThan(57 * 9);
+    expect(mesh.positions.length % 3).toBe(0);
+  });
+
+  it('warps oval, cushion and pear from the brilliant lattice', () => {
+    expect(buildFacetedGem('oval', 1.35).facetCount).toBe(ROUND_BRILLIANT_FACETS);
+    expect(buildFacetedGem('cushion').facetCount).toBe(ROUND_BRILLIANT_FACETS);
+    expect(buildFacetedGem('pear').facetCount).toBe(ROUND_BRILLIANT_FACETS);
+  });
+
+  it('builds step cuts and square brilliants with many planar facets', () => {
+    expect(buildFacetedGem('emerald').facetCount).toBeGreaterThan(40);
+    expect(buildFacetedGem('princess').facetCount).toBeGreaterThan(16);
+    expect(buildFacetedGem('trillion').facetCount).toBeGreaterThan(10);
+  });
+});

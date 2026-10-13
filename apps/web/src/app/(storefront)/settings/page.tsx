@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { CategoryLanding } from '../../../components/storefront/CategoryLanding.js';
 import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
+import { LuxuryProductCard } from '../../../components/storefront/LuxuryProductCard.js';
 import { landingView, settingsHub } from '../../../lib/ngc/landing.js';
 
 export const dynamic = 'force-dynamic';
@@ -24,7 +25,18 @@ export default async function SettingsPage({
         cta={view.cta}
         tiles={view.tiles}
         heroImage={view.heroImage}
-      />
+      >
+        {view.products.length > 0 ? (
+          <section>
+            <h2 className="lx-h3">From the bench</h2>
+            <div className="lx-grid">
+              {view.products.map((card) => (
+                <LuxuryProductCard key={card.id} product={card} />
+              ))}
+            </div>
+          </section>
+        ) : null}
+      </CategoryLanding>
     );
   }
   const slug =

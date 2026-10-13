@@ -211,17 +211,17 @@ export function ngcStoneTypeRows(): { stoneType: string; count: number; pairCoun
 export function settingsForDyo(limit = 24): SettingForDyo[] {
   return filterNgc({ kind: 'setting', limit }).map((product) => {
     const card = toStorefrontCard(product);
-    const shapes = new Set<string>();
-    if (product.shape) shapes.add(product.shape);
-    ['Round', 'Oval', 'Cushion', 'Emerald Cut', 'Pear', 'Heart', 'Marquise', 'Princess', 'Radiant'].forEach((s) => shapes.add(s));
     const bracelet = product.settingType === 'bracelet';
+    const earring = product.settingType === 'earring';
     return {
       ...card,
-      accepts: [...shapes].map((shape) => ({
-        shape,
-        minCarat: bracelet ? 0.2 : 0.3,
-        maxCarat: bracelet ? 5 : 30,
-      })),
+      accepts: [
+        {
+          shape: product.shape ?? 'Round',
+          minCarat: bracelet ? 0.2 : 0.35,
+          maxCarat: bracelet ? 5 : earring ? 8 : 30,
+        },
+      ],
     };
   });
 }

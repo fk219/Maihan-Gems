@@ -38,6 +38,10 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+vi.mock('next/headers', () => ({
+  headers: async () => new Headers(),
+}));
+
 import { setCatalogServiceForTest } from './catalog-server.js';
 import {
   FakeCatalogPort,

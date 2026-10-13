@@ -1,40 +1,45 @@
 import { STOREFRONT_CONTACT } from '@maihan/config';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 
-export function StorefrontFooter() {
+import { storefrontBySlug, withPrefix } from '../../lib/ngc/storefronts.js';
+
+export async function StorefrontFooter() {
   const year = new Date().getFullYear();
+  const brand = storefrontBySlug((await headers()).get('x-maihan-storefront'));
+  const href = (path: string) => withPrefix(path, brand.pathPrefix);
   return (
     <footer className="home-footer">
       <div className="home-footer__top">
         <div>
-          <p>Maihan Gems</p>
+          <p>{brand.name}</p>
           <h2>Natural stones, set with care.</h2>
         </div>
-        <Link href="/design-your-own" className="home-footer__cta">
+        <Link href={href('/design-your-own')} className="home-footer__cta">
           Design Your Own
         </Link>
       </div>
       <div className="home-footer__grid">
         <div>
           <h3>Shop</h3>
-          <Link href="/browse">Gemstones</Link>
-          <Link href="/jewellery">Jewellery</Link>
-          <Link href="/settings">Settings</Link>
-          <Link href="/design-your-own">Design your own</Link>
+          <Link href={href('/browse')}>Gemstones</Link>
+          <Link href={href('/jewellery')}>Jewellery</Link>
+          <Link href={href('/settings')}>Settings</Link>
+          <Link href={href('/design-your-own')}>Design your own</Link>
         </div>
         <div>
           <h3>Client care</h3>
-          <Link href="/contact">Contact</Link>
-          <Link href="/showrooms">Showroom</Link>
-          <Link href="/cart">Bag</Link>
-          <Link href="/compare">Compare</Link>
+          <Link href={href('/contact')}>Contact</Link>
+          <Link href={href('/showrooms')}>Showroom</Link>
+          <Link href={href('/cart')}>Bag</Link>
+          <Link href={href('/compare')}>Compare</Link>
         </div>
         <div>
           <h3>The house</h3>
-          <Link href="/about">About us</Link>
-          <Link href="/education">Education</Link>
-          <Link href="/account">Account</Link>
-          <Link href="/search">Vault search</Link>
+          <Link href={href('/about')}>About us</Link>
+          <Link href={href('/education')}>Education</Link>
+          <Link href={href('/account')}>Account</Link>
+          <Link href={href('/search')}>Vault search</Link>
         </div>
         <div>
           <h3>Visit</h3>
@@ -45,7 +50,7 @@ export function StorefrontFooter() {
         </div>
       </div>
       <p className="home-footer__legal">
-        © {year} Maihan Gems. Unverified specifications are never shown as certified facts.
+        © {year} {brand.name}. Unverified specifications are never shown as certified facts.
       </p>
     </footer>
   );

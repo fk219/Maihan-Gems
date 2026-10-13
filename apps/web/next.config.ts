@@ -45,12 +45,10 @@ const nextConfig: NextConfig = {
       '.mjs': ['.mts', '.mjs'],
       '.cjs': ['.cts', '.cjs'],
     };
-    if (!dev) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'agentation$': false,
-      };
-    }
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      ...(process.env['NEXT_PUBLIC_AGENTATION'] === '1' && dev ? {} : { 'agentation$': false }),
+    };
     return config;
   },
 };

@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { STOREFRONT_CONTACT } from '@maihan/config';
 
 import { COLOR_SWATCH } from '../../lib/ngc/colors.js';
+import { withPrefix } from '../../lib/ngc/storefronts.js';
 import type { StorefrontBrand } from '../../lib/ngc/types.js';
 import { NGC_MEDIA } from '../../lib/ngc-home.js';
 import { CurrencySwitcher } from './CurrencySwitcher.js';
@@ -40,9 +41,9 @@ function More({ href, close }: { href: string; close: () => void }) {
   return <Link href={href} className="mega-more" onClick={close}>View More</Link>;
 }
 
-function Promo({ close }: { close: () => void }) {
+function Promo({ close, href }: { close: () => void; href: (path: string) => string }) {
   return (
-    <Link href="/design-your-own" className="mega-promo" onClick={close}>
+    <Link href={href('/design-your-own')} className="mega-promo" onClick={close}>
       <img src="/media/jew-sapphire-ring.jpg" alt="" />
       <div>
         <p>Design Your Own</p>
@@ -85,14 +86,14 @@ const GEM_COLORS: readonly { label: string; hex: string; href: string }[] = (
   href: `/${label.toLowerCase().replace(/\s+/g, '-')}-gemstones`,
 }));
 
-function MenuPanel({ id, close }: { id: NavId; close: () => void }) {
+function MenuPanel({ id, close, href }: { id: NavId; close: () => void; href: (path: string) => string }) {
   if (id === 'dyo') {
     return (
       <div className="mega-panel">
         <div className="mega-split">
-          <Link href="/browse" onClick={close}><span>◇</span> Start with a Gemstone</Link>
+          <Link href={href('/browse')} onClick={close}><span>◇</span> Start with a Gemstone</Link>
           <span className="mega-or">or</span>
-          <Link href="/settings" onClick={close}><span>○</span> Start with a Setting</Link>
+          <Link href={href('/settings')} onClick={close}><span>○</span> Start with a Setting</Link>
           <button type="button" aria-label="Close menu" onClick={close}>×</button>
         </div>
         <div className="mega-cols">
@@ -100,31 +101,31 @@ function MenuPanel({ id, close }: { id: NavId; close: () => void }) {
             <p>Shop Gemstones by Type</p>
             <div className="mega-tiles">
               {([['Garnet', 'garnet'], ['Moonstone', 'moonstone'], ['Quartz', 'quartz'], ['Spinel', 'spinel'], ['Tourmaline', 'tourmaline']] as const).map(([label, slug]) => (
-                <Tile key={slug} href={`/${slug}`} label={label} img={STONE(slug)} close={close} />
+                <Tile key={slug} href={href(`/${slug}`)} label={label} img={STONE(slug)} close={close} />
               ))}
-              <More href="/natural-gemstones" close={close} />
+              <More href={href('/natural-gemstones')} close={close} />
             </div>
             <p>Shop Gemstones by Color</p>
             <div className="mega-tiles">
               {['Blue', 'Green', 'Pink', 'Purple', 'Yellow'].map((label) => (
-                <Tile key={label} href={`/colour/${label.toLowerCase()}`} label={label} img={`/images/normal/mainMenu/stoneColor/${label.toLowerCase()}.png`} close={close} />
+                <Tile key={label} href={href(`/colour/${label.toLowerCase()}`)} label={label} img={`/images/normal/mainMenu/stoneColor/${label.toLowerCase()}.png`} close={close} />
               ))}
-              <More href="/natural-gemstones" close={close} />
+              <More href={href('/natural-gemstones')} close={close} />
             </div>
           </div>
           <div>
             <p>Shop Settings by Type</p>
             <div className="mega-tiles">
-              <Tile href="/settings?for=ring" label="Rings" img={SETTING('rings')} close={close} />
-              <Tile href="/settings?for=ring" label="Men's Rings" img={SETTING('mens-rings')} close={close} />
-              <Tile href="/settings?for=earrings" label="Earrings" img={SETTING('earrings')} close={close} />
-              <Tile href="/settings?for=pendant" label="Necklaces & Pendants" img={SETTING('necklaces-pendants')} close={close} />
-              <Tile href="/settings?for=bracelet" label="Bracelets" img={SETTING('bracelets')} close={close} />
+              <Tile href={href('/settings?for=ring')} label="Rings" img={SETTING('rings')} close={close} />
+              <Tile href={href('/settings?for=ring')} label="Men's Rings" img={SETTING('mens-rings')} close={close} />
+              <Tile href={href('/settings?for=earrings')} label="Earrings" img={SETTING('earrings')} close={close} />
+              <Tile href={href('/settings?for=pendant')} label="Necklaces & Pendants" img={SETTING('necklaces-pendants')} close={close} />
+              <Tile href={href('/settings?for=bracelet')} label="Bracelets" img={SETTING('bracelets')} close={close} />
             </div>
             <p>Shop Ring Settings by Style</p>
             <div className="mega-styles">
               {['Antique', 'Halo', 'Pave', 'Solitaire', 'Three Stone', 'Wedding Set'].map((label) => (
-                <Link key={label} href="/settings?for=ring" onClick={close}>{label}</Link>
+                <Link key={label} href={href('/settings?for=ring')} onClick={close}>{label}</Link>
               ))}
             </div>
           </div>
@@ -142,16 +143,16 @@ function MenuPanel({ id, close }: { id: NavId; close: () => void }) {
           <p>Shop Gemstones by Type</p>
           <div className="mega-tiles">
             {types.map((label) => (
-              <Tile key={label} href={`/${label.toLowerCase().replace(/ /g, '-')}`} label={label} img={STONE(label.toLowerCase().replace(/ /g, '-'))} close={close} />
+              <Tile key={label} href={href(`/${label.toLowerCase().replace(/ /g, '-')}`)} label={label} img={STONE(label.toLowerCase().replace(/ /g, '-'))} close={close} />
             ))}
-            <More href="/browse" close={close} />
+            <More href={href('/browse')} close={close} />
           </div>
         </div>
         <div>
           <p>Shop Gemstones by Color</p>
           <ul className="mega-colors">
             {GEM_COLORS.map((color) => (
-              <li key={color.label}><Link href={color.href} onClick={close}><i style={{ background: color.hex }} />{color.label}</Link></li>
+              <li key={color.label}><Link href={href(color.href)} onClick={close}><i style={{ background: color.hex }} />{color.label}</Link></li>
             ))}
           </ul>
         </div>
@@ -181,12 +182,12 @@ function MenuPanel({ id, close }: { id: NavId; close: () => void }) {
       <div>
         <p>{jewellery ? 'Shop Jewellery by Type' : 'Shop Settings by Type'}</p>
         <div className="mega-tiles mega-tiles--wide">
-          {tiles.map(([label, href, slug]) => (
-            <Tile key={label} href={href} label={label} img={SETTING(slug)} close={close} />
+          {tiles.map(([label, path, slug]) => (
+            <Tile key={label} href={href(path)} label={label} img={SETTING(slug)} close={close} />
           ))}
         </div>
       </div>
-      <Promo close={close} />
+      <Promo close={close} href={href} />
     </div>
   );
 }
@@ -195,6 +196,8 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
   const { bagCount, favCount } = useStorefront();
   const [open, setOpen] = useState<string | null>(null);
   const [drawer, setDrawer] = useState(false);
+  const prefix = brand?.pathPrefix ?? '';
+  const href = (path: string) => withPrefix(path, prefix);
 
   return (
     <header className="ngc-header">
@@ -212,7 +215,7 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
           <span />
           <span />
         </button>
-        <Link href="/" className="ngc-logo" aria-label="Maihan Gems">
+        <Link href={href('/')} className="ngc-logo" aria-label={brand?.name ?? 'Maihan Gems'}>
           <span className="ngc-logo__word">{brand?.wordmark ?? 'MAIHAN'}</span>
           <span className="ngc-logo__sub">{brand?.kicker ?? 'GEMS · Atelier'}</span>
         </Link>
@@ -223,15 +226,15 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
               className={`ngc-nav__item${open === item.id ? ' is-open' : ''}`}
               onMouseEnter={() => setOpen(item.id)}
             >
-              <Link href={item.href} className="ngc-nav__link" onClick={() => setOpen(null)}>
+              <Link href={href(item.href)} className="ngc-nav__link" onClick={() => setOpen(null)}>
                 {item.label}
               </Link>
-              {open === item.id ? <MenuPanel id={item.id} close={() => setOpen(null)} /> : null}
+              {open === item.id ? <MenuPanel id={item.id} close={() => setOpen(null)} href={href} /> : null}
             </div>
           ))}
         </nav>
         <div className="ngc-tools">
-          <Link href="/design-your-own" className="ngc-cta">
+          <Link href={href('/design-your-own')} className="ngc-cta">
             Bespoke Atelier
           </Link>
           <CurrencySwitcher />
@@ -257,9 +260,9 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
       {drawer ? (
         <div className="ngc-drawer">
           {NAV.map((item) => (
-            <Link key={item.id} href={item.href} onClick={() => setDrawer(false)}>{item.label}</Link>
+            <Link key={item.id} href={href(item.href)} onClick={() => setDrawer(false)}>{item.label}</Link>
           ))}
-          <Link href="/design-your-own" className="ngc-drawer__cta" onClick={() => setDrawer(false)}>
+          <Link href={href('/design-your-own')} className="ngc-drawer__cta" onClick={() => setDrawer(false)}>
             Bespoke Atelier
           </Link>
         </div>

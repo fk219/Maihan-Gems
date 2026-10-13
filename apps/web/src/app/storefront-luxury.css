@@ -1731,8 +1731,15 @@
 .atelier__metals button.is-on, .atelier__sizes button.is-on { border-color: #C9A84C; background: var(--warm-white); }
 .atelier__metals i { width: 0.9rem; height: 0.9rem; border-radius: 12px; border: 1px solid rgba(26, 26, 24, 0.15); }
 .atelier__preview { position: sticky; top: 5.5rem; border: 1px solid var(--hairline-border); border-radius: 12px; padding: 1rem; background: var(--studio-white); }
-.atelier__hero { background: var(--media-canvas); border-radius: 12px; aspect-ratio: 1; display: grid; place-items: center; overflow: hidden; }
-.atelier__hero img { width: 100%; height: 100%; object-fit: contain; }
+.atelier__hero { background: var(--media-canvas); border-radius: 12px; aspect-ratio: 1; display: grid; place-items: center; overflow: hidden; min-height: 280px; }
+.atelier__hero img, .atelier__hero canvas { width: 100%; height: 100%; object-fit: contain; }
+.atelier__hero > div { width: 100%; height: 100%; min-height: 280px; }
+.atelier__caption { margin: 0.7rem 0 0; font-size: 0.82rem; line-height: 1.45; color: var(--text-secondary); }
+.atelier__fit { margin: 0.45rem 0 0; font-size: 0.78rem; color: #065F46; }
+.atelier-card__fit { display: block; padding: 0 0.8rem 0.75rem; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #065F46; }
+.atelier-card__fit.is-review { color: #8B6914; }
+.atelier__try { width: 100%; margin-top: 0.45rem; min-height: 2.6rem; border: 1px solid var(--hairline-border); border-radius: 12px; background: var(--studio-white); color: var(--text-primary); font-weight: 600; cursor: pointer; }
+.atelier__try:disabled { opacity: 0.45; cursor: default; }
 .atelier__thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.7rem 0; }
 .atelier__thumbs figure { margin: 0; background: var(--media-canvas); border-radius: 12px; overflow: hidden; }
 .atelier__thumbs img, .atelier__thumbs span { width: 100%; aspect-ratio: 1; object-fit: contain; display: block; }

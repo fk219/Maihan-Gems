@@ -1019,3 +1019,21 @@
     page-break-inside: avoid;
   }
 }
+
+/* Agentation Issue chip — off unless html[data-agentation] is set on purpose */
+html:not([data-agentation]) [class*="agentation"],
+html:not([data-agentation]) [id*="agentation"],
+html:not([data-agentation]) [data-agentation-root],
+html:not([data-agentation]) iframe[src*="agentation"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+@media print {
+  [class*="agentation"], [id*="agentation"] { display: none !important; }
+}

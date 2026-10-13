@@ -51,3 +51,12 @@ export function withPrefix(href: string, prefix: string): string {
   if (href === '/') return prefix;
   return `${prefix}${href}`;
 }
+
+export function cardMatchesBrand(
+  card: { stoneType?: string | null; variety?: string | null; title?: string | null },
+  stone: string | null,
+): boolean {
+  if (!stone) return true;
+  const text = `${card.stoneType ?? ''} ${card.variety ?? ''} ${card.title ?? ''}`.toLowerCase();
+  return text.includes(stone.toLowerCase());
+}

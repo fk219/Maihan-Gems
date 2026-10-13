@@ -14,6 +14,10 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+vi.mock('next/headers', () => ({
+  headers: async () => new Headers(),
+}));
+
 const HomePage = (await import('../../app/(storefront)/page.js')).default;
 
 describe('homepage redesign', () => {

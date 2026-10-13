@@ -1,22 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-type AgentationComponent = typeof import('agentation').Agentation;
-
+/**
+ * The red Agentation "Issue" overlay is disabled for this storefront.
+ * It must not appear in screenshots or production. Opt-in is the
+ * NEXT_PUBLIC_AGENTATION=1 webpack alias plus an explicit html[data-agentation]
+ * attribute — neither is set here.
+ */
 export function AgentationOverlay() {
-  const [Agentation, setAgentation] = useState<AgentationComponent | null>(null);
-
-  useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') return;
-    if (process.env['NEXT_PUBLIC_AGENTATION'] !== '1') return;
-
-    import('agentation').then((module) => setAgentation(() => module.Agentation));
-  }, []);
-
-  if (process.env.NODE_ENV !== 'development' || process.env['NEXT_PUBLIC_AGENTATION'] !== '1' || Agentation === null) {
-    return null;
-  }
-
-  return <Agentation appName="Maihan Gems" />;
+  return null;
 }

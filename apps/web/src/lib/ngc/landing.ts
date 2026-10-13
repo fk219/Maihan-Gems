@@ -79,7 +79,7 @@ export function settingsHub(): LandingView {
     lede: 'Master settings in platinum, gold and silver — priced without the centre stone. Choose a seat, then a compatible gem.',
     cta: { href: '/gemstone-ring-settings', label: 'View the settings catalogue' },
     tiles,
-    products: [],
+    products: ngcCards({ kind: 'setting', limit: 8 }),
     showCatalog: false,
     heroImage: heroFrom({ kind: 'setting' }),
   };
@@ -124,7 +124,7 @@ export function jewelleryHub(): LandingView {
     lede: 'Ready-to-ship jewels and custom designs built from a setting and a stone. Start with a category, then open the catalogue.',
     cta: { href: '/all-gemstone-rings', label: 'View the jewellery catalogue' },
     tiles,
-    products: [],
+    products: ngcCards({ kind: ['jewelry', 'dyo_composite'], limit: 8 }),
     showCatalog: false,
     heroImage: heroFrom({ kind: ['jewelry', 'dyo_composite'] }),
   };
@@ -270,6 +270,8 @@ export function landingView(slug: string | undefined): LandingView | null {
       tiles: (group?.styles ?? []).map((style) => ({
         href: `/${slug}?style=${encodeURIComponent(style.name)}`,
         label: style.name,
+        image: thumbFrom({ kind: 'setting', settingType, style: style.name }),
+        count: countOf({ kind: 'setting', settingType, style: style.name }),
       })),
       products: ngcCards({ kind: 'setting', settingType, limit: 500 }),
       showCatalog: true,
@@ -306,6 +308,16 @@ export function landingView(slug: string | undefined): LandingView | null {
       tiles: (group?.styles ?? []).map((style) => ({
         href: `/${slug}?style=${encodeURIComponent(style.name)}`,
         label: style.name,
+        image: thumbFrom({
+          kind: ['jewelry', 'dyo_composite'],
+          jewelryType: seat === 'earring' ? 'earring' : seat,
+          style: style.name,
+        }),
+        count: countOf({
+          kind: ['jewelry', 'dyo_composite'],
+          jewelryType: seat === 'earring' ? 'earring' : seat,
+          style: style.name,
+        }),
       })),
       products: ngcCards({ kind: ['jewelry', 'dyo_composite'], jewelryType: seat === 'earring' ? 'earring' : seat, limit: 500 }),
       showCatalog: parsed.type === 'jewellery-all' || parsed.seat !== 'ring',

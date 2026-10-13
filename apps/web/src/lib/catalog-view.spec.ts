@@ -10,9 +10,13 @@
  *  - variety + colour + settings pages rendering through the cached service
  *    over the FakeCatalogPort, including the taxonomy-gated not-found path.
  */
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+
+vi.mock('next/headers', () => ({
+  headers: async () => new Headers(),
+}));
 import { StorefrontProvider } from '../components/storefront/StorefrontProvider.js';
 import { DEFAULT_FX } from './currency.js';
 

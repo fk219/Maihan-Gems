@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 
 import { HeroSearch } from '../../components/storefront/HeroSearch.js';
 import { NGC_MEDIA } from '../../lib/ngc-home.js';
+import { storefrontBySlug, withPrefix } from '../../lib/ngc/storefronts.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -146,29 +148,69 @@ function PeaceIcon({ kind }: { kind: 'truck' | 'returns' | 'shield' | 'financing
   );
 }
 
-export default function HomePage() {
+function houseNoun(stone: string): string {
+  if (stone === 'ruby') return 'rubies';
+  if (stone === 'sapphire') return 'sapphires';
+  if (stone === 'emerald') return 'emeralds';
+  return `${stone}s`;
+}
+
+function gemsFor(stone: string | null) {
+  if (!stone) return GEMS;
+  return GEMS.filter(
+    (gem) =>
+      gem.name.toLowerCase() === stone
+      || (stone === 'sapphire' && gem.name === 'Padparadscha')
+      || gem.name === 'Explore All',
+  );
+}
+
+export default async function HomePage() {
+  const brand = storefrontBySlug((await headers()).get('x-maihan-storefront'));
+  const prefix = brand.pathPrefix;
+  const href = (path: string) => withPrefix(path, prefix);
+  const sister = Boolean(brand.defaultStone);
+  const gems = gemsFor(brand.defaultStone);
+  const heroMain =
+    brand.defaultStone === 'ruby'
+      ? '/media/jew-ruby-ring.jpg'
+      : brand.defaultStone === 'emerald'
+        ? '/media/jew-sapphire-pendant.jpg'
+        : '/media/jew-ruby-ring.jpg';
+  const heroSmall =
+    brand.defaultStone === 'ruby'
+      ? '/media/stone-ruby.jpg'
+      : brand.defaultStone === 'emerald'
+        ? '/media/stone-emerald.jpg'
+        : '/media/stone-sapphire-pair.jpg';
+
   return (
     <main id="main-content" className="mgh">
       {/* Hero */}
-      <section className="mgh-hero" aria-label="Maihan Gems">
+      <section className="mgh-hero" aria-label={brand.name}>
         <div className="mgh-hero__inner">
           <div className="mgh-hero__copy">
-            <p className="mgh-eyebrow mgh-eyebrow--gold">Natural Gemstones · Matched Pairs · Fine Jewellery</p>
+            <p className="mgh-eyebrow mgh-eyebrow--gold">
+              {sister ? brand.kicker : 'Natural Gemstones · Matched Pairs · Fine Jewellery'}
+            </p>
             <h1 className="mgh-hero__title">
-              The world&rsquo;s finest natural gemstones, set by hand
+              {sister
+                ? `The world\u2019s finest natural ${houseNoun(brand.defaultStone!)}, set by hand`
+                : 'The world\u2019s finest natural gemstones, set by hand'}
             </h1>
             <p className="mgh-hero__sub">
-              Thousands of earth-mined stones, master settings and finished jewels. Choose a work
-              from the vault — or design your own, from the stone up.
+              {sister
+                ? brand.lede
+                : 'Thousands of earth-mined stones, master settings and finished jewels. Choose a work from the vault — or design your own, from the stone up.'}
             </p>
             <div className="mgh-hero__actions">
-              <Link href="/natural-gemstones" className="mgh-btn mgh-btn--gold">
+              <Link href={href('/natural-gemstones')} className="mgh-btn mgh-btn--gold">
                 Shop Gemstones
               </Link>
-              <Link href="/gemstone-rings" className="mgh-btn mgh-btn--ghost">
+              <Link href={href('/gemstone-rings')} className="mgh-btn mgh-btn--ghost">
                 Gemstone Jewellery
               </Link>
-              <Link href="/design-your-own" className="mgh-btn mgh-btn--outline-dark">
+              <Link href={href('/design-your-own')} className="mgh-btn mgh-btn--outline-dark">
                 Design Your Own
               </Link>
             </div>
@@ -177,8 +219,8 @@ export default function HomePage() {
             </div>
           </div>
           <div className="mgh-hero__media" aria-hidden="true">
-            <img className="mgh-hero__img-main" src="/media/jew-ruby-ring.jpg" alt="" />
-            <img className="mgh-hero__img-small" src="/media/stone-sapphire-pair.jpg" alt="" />
+            <img className="mgh-hero__img-main" src={heroMain} alt="" />
+            <img className="mgh-hero__img-small" src={heroSmall} alt="" />
           </div>
         </div>
       </section>
@@ -195,11 +237,11 @@ export default function HomePage() {
                 status and laboratory papers.
               </p>
             </div>
-            <Link href="/natural-gemstones" className="mgh-link">View all gemstones →</Link>
+            <Link href={href('/natural-gemstones')} className="mgh-link">View all gemstones →</Link>
           </div>
           <div className="mgh-gems__grid">
-            {GEMS.map((gem) => (
-              <Link key={gem.name} href={gem.href} className="mgh-gem">
+            {gems.map((gem) => (
+              <Link key={gem.name} href={href(gem.href)} className="mgh-gem">
                 <span className="mgh-gem__frame">
                   <img src={gem.img} alt="" />
                 </span>
@@ -221,11 +263,11 @@ export default function HomePage() {
                 Ready-to-ship jewels set by master goldsmiths — or the same pieces, made yours.
               </p>
             </div>
-            <Link href="/gemstone-rings" className="mgh-link mgh-link--light">View all jewellery →</Link>
+            <Link href={href('/gemstone-rings')} className="mgh-link mgh-link--light">View all jewellery →</Link>
           </div>
           <div className="mgh-jewellery__grid">
             {JEWELLERY.map((item) => (
-              <Link key={item.label} href={item.href} className="mgh-jew">
+              <Link key={item.label} href={href(item.href)} className="mgh-jew">
                 <img src={item.img} alt={`Finished ${item.label.toLowerCase()}`} />
                 <span className="mgh-jew__label">
                   {item.label} <em aria-hidden="true">→</em>
@@ -245,7 +287,7 @@ export default function HomePage() {
               <h2 id="mgh-set-h" className="mgh-h2">Settings</h2>
               <p className="mgh-lede">Ring, earring, pendant and bracelet seats, waiting for a stone.</p>
             </div>
-            <Link href="/gemstone-ring-settings" className="mgh-link">View all settings →</Link>
+            <Link href={href('/gemstone-ring-settings')} className="mgh-link">View all settings →</Link>
           </div>
           <div className="mgh-jewellery__grid">
             {[
@@ -254,7 +296,7 @@ export default function HomePage() {
               { label: 'Pendant settings', href: '/gemstone-necklace-pendant-settings', img: '/media/setting-pendant.jpg' },
               { label: 'Bracelet settings', href: '/gemstone-bracelet-settings', img: '/media/setting-ring.jpg' },
             ].map((item) => (
-              <Link key={item.href} href={item.href} className="mgh-jew">
+              <Link key={item.href} href={href(item.href)} className="mgh-jew">
                 <img src={item.img} alt="" />
                 <span className="mgh-jew__label">{item.label} <em aria-hidden="true">→</em></span>
               </Link>
@@ -299,7 +341,7 @@ export default function HomePage() {
               <li><span>2</span> Select a Gemstone</li>
               <li><span>3</span> Review Your Design</li>
             </ol>
-            <Link href="/design-your-own" className="mgh-btn mgh-btn--gold">
+            <Link href={href('/design-your-own')} className="mgh-btn mgh-btn--gold">
               Begin Designing
             </Link>
           </div>
@@ -321,7 +363,7 @@ export default function HomePage() {
                 From the mines to the marketplace — the path a stone takes before it reaches the bench.
               </p>
             </div>
-            <Link href="/about" className="mgh-link mgh-link--light">Read our story →</Link>
+            <Link href={href('/about')} className="mgh-link mgh-link--light">Read our story →</Link>
           </div>
           <div className="mgh-history__grid">
             {HISTORY.map((entry) => (
@@ -372,7 +414,7 @@ export default function HomePage() {
               The atelier pairs a setting to a stone, or the reverse, and keeps the composition
               honest from first sketch to finished piece.
             </p>
-            <Link href="/about" className="mgh-btn mgh-btn--outline">Our Story</Link>
+            <Link href={href('/about')} className="mgh-btn mgh-btn--outline">Our Story</Link>
           </div>
         </div>
       </section>
@@ -407,7 +449,7 @@ export default function HomePage() {
               <p className="mgh-eyebrow">Client Words</p>
               <h2 id="mgh-feedback-h" className="mgh-h2">Customer Feedback</h2>
             </div>
-            <Link href="/contact" className="mgh-link">Speak with our advisors →</Link>
+            <Link href={href('/contact')} className="mgh-link">Speak with our advisors →</Link>
           </div>
           <div className="mgh-feedback__grid">
             {TESTIMONIALS.map((t) => (

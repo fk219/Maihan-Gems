@@ -1,3 +1,17 @@
+# FACETED GEM + LANDINGS + DYO + SISTERS (2026-10-13)
+
+Loose-stone 3D is a real faceted lattice (`faceted-gem.ts`): round brilliant 57
+facets, oval/cushion/pear/marquise/heart warps, emerald/asscher step cuts,
+princess/trillion/radiant. MeshPhysicalMaterial with transmission, per-stone
+IOR (tanzanite 1.7), dispersion, thickness, clearcoat, flat shading, PMREM
+studio HDRI, PCF soft contact shadow, auto-rotate + drag. Agentation Issue
+overlay is removed from the root layout, webpack-aliased out unless
+`NEXT_PUBLIC_AGENTATION=1` in dev, and CSS-hidden for screenshots. Settings and
+jewellery hubs show featured NGC cards. DYO uses NGC `settingsForDyo` + shape
+compatibility (INV-02/03), 3D mounted preview, atelier caption, fit badges,
+URL `?setting=&stone=`, and AR QR. Sister houses (`/sapphire` `/ruby`
+`/emerald`) prefix chrome and filter catalogue cards.
+
 # NGC REVIEW FIXES — posters, stone 3D tab, titles, filters (2026-10-13)
 
 PDP thumbnail rail uses Cloudinary `video_thumbnail` (UUID match) or `so_0,f_jpg`

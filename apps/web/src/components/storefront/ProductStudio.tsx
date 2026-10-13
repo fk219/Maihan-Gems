@@ -292,7 +292,7 @@ export function ProductStudio({
             </div>
             <div className={`ngc-gallery__layout${tab === 'preview3d' ? ' ngc-gallery__layout--solo' : ''}`}>
               {tab !== 'preview3d' ? (
-                <div className="ngc-thumbs" role="list">
+                <div className="ngc-thumbs">
                   {slides.map((slide, index) => (
                     <button
                       key={slide.id}
@@ -327,6 +327,7 @@ export function ProductStudio({
                         color: gemHexFor(product.color ?? product.centerStones[0]?.color, product.stoneType ?? product.centerStones[0]?.stoneType),
                         lengthMm: product.lengthMm ?? product.centerStones[0]?.lengthMm,
                         widthMm: product.widthMm ?? product.centerStones[0]?.widthMm,
+                        stoneType: product.stoneType ?? product.centerStones[0]?.stoneType,
                       }}
                       label={mounted ? `3D preview · ${title}` : `Loose ${product.stoneType ?? 'gemstone'} in 3D`}
                     />

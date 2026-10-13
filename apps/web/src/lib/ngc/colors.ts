@@ -48,3 +48,27 @@ export function gemHexFor(color: string | null | undefined, stoneType?: string |
   if (/^#[0-9a-f]{3,8}$/i.test((color ?? '').trim())) return color!.trim();
   return '#1E3A8A';
 }
+
+/** Refractive index for MeshPhysicalMaterial. Tanzanite is ~1.69–1.70. */
+export function gemIor(stoneType?: string | null): number {
+  const text = (stoneType ?? '').toLowerCase();
+  if (text.includes('diamond')) return 2.42;
+  if (text.includes('zircon')) return 1.95;
+  if (text.includes('sapphire') || text.includes('ruby') || text.includes('corundum')) return 1.77;
+  if (text.includes('garnet') || text.includes('tsavorite') || text.includes('spessart')) return 1.74;
+  if (text.includes('spinel')) return 1.72;
+  if (text.includes('tanzanite')) return 1.7;
+  if (text.includes('topaz') || text.includes('tourmaline') || text.includes('paraiba')) return 1.64;
+  if (text.includes('emerald') || text.includes('beryl') || text.includes('aqua') || text.includes('morganite')) return 1.58;
+  return 1.7;
+}
+
+export function gemDispersion(stoneType?: string | null): number {
+  const text = (stoneType ?? '').toLowerCase();
+  if (text.includes('diamond')) return 0.044;
+  if (text.includes('zircon')) return 0.038;
+  if (text.includes('tanzanite')) return 0.03;
+  if (text.includes('sapphire') || text.includes('ruby')) return 0.018;
+  if (text.includes('emerald')) return 0.014;
+  return 0.02;
+}
