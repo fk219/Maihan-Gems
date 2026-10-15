@@ -172,7 +172,7 @@ export async function validateDyoConfiguration(
   const stoneId = config.gemstone_id ?? config.gemstone_pair_id;
   if (stoneId) {
     const stoneRes = await db.query(
-      `SELECT variety_id, colour_id, shape, carat_weight::float as weight, kind, length_mm::float as length_mm, width_mm::float as width_mm
+      `SELECT variety_id, colour_id, shape, total_weight_ct::float as weight, kind, length_mm::float as length_mm, width_mm::float as width_mm
        FROM gemstones WHERE id = $1;`,
       [stoneId],
     );
@@ -237,7 +237,13 @@ export async function createDyoPriceQuote(
   let stonePrice = 0;
   if (config.gemstone_id || config.gemstone_pair_id) {
     const stoneId = config.gemstone_id ?? config.gemstone_pair_id;
-    const sRes = await db.query(`SELECT base_price::float as price FROM gemstones WHERE id = $1`, [stoneId]);
+    const sRes = await db.query(
+      `SELECT price_amount::float as price, price_evidence FROM gemstones WHERE id = $1`,
+      [stoneId],
+    );
+    if (sRes.rows.length > 0 && sRes.rows[0].price_evidence === 'UNKNOWN') {
+      throw new Error('DYO_PRICE_UNVERIFIED');
+    }
     if (sRes.rows.length > 0) stonePrice = sRes.rows[0].price || 0;
   }
 
@@ -301,7 +307,7 @@ export async function findCompatibleSettingsForStone(
   gemstoneId: string,
 ): Promise<any[]> {
   const stoneRes = await db.query(
-    `SELECT kind, jewellery_type, variety_id, colour_id, shape, carat_weight::float as weight
+    `SELECT kind, variety_id, colour_id, shape, total_weight_ct::float as weight
      FROM gemstones WHERE id = $1;`,
     [gemstoneId],
   );

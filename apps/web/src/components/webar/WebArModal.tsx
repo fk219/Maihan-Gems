@@ -33,7 +33,7 @@ export function WebArModal({
   isOpen,
   onClose,
   glbUrl: _glbUrl,
-  fitRule,
+  fitRule: _fitRule,
   jewelleryType = 'RING',
   assetId,
 }: WebArModalProps) {
@@ -134,67 +134,12 @@ export function WebArModal({
     }
   };
 
-  // AR Overlay Rendering Loop (MediaPipe hand tracking simulation)
   const startArRenderLoop = () => {
-    const canvas = overlayCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let tick = 0;
-
-    const render = () => {
-      tick += 1;
-      const width = canvas.width;
-      const height = canvas.height;
-
-      ctx.clearRect(0, 0, width, height);
-
-      // Track hand position (simulated ring finger proximal phalanx segment anchor)
-      const now = Date.now();
-      const isHandVisible = true; // Hand in frame
-
-      if (isHandVisible) {
-        setTrackingState('TRACKED');
-        lastTrackedTimeRef.current = now;
-
-        // Position model anchor at finger coordinate
-        const anchorX = width * 0.5 + Math.sin(tick * 0.03) * 15;
-        const anchorY = height * 0.55 + Math.cos(tick * 0.03) * 10;
-        const ringScale = fitRule.baseScale * 1.1;
-
-        // Render jewellery overlay at anchor point
-        ctx.save();
-        ctx.translate(anchorX, anchorY);
-
-        // Ring outer shadow
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 36 * ringScale, 16 * ringScale, 0.1, 0, 2 * Math.PI);
-        ctx.lineWidth = 8 * ringScale;
-        ctx.strokeStyle = '#C9A84C';
-        ctx.shadowColor = 'rgba(201, 168, 76, 0.6)';
-        ctx.shadowBlur = 12;
-        ctx.stroke();
-
-        // Highlight
-        ctx.beginPath();
-        ctx.ellipse(0, -14 * ringScale, 8 * ringScale, 8 * ringScale, 0, 0, 2 * Math.PI);
-        ctx.fillStyle = '#3B82F6';
-        ctx.shadowColor = 'rgba(59, 130, 246, 0.8)';
-        ctx.shadowBlur = 15;
-        ctx.fill();
-
-        ctx.restore();
-      } else {
-        if (now - lastTrackedTimeRef.current > 3000) {
-          setTrackingState('LOST');
-        }
-      }
-
-      animFrameRef.current = requestAnimationFrame(render);
-    };
-
-    animFrameRef.current = requestAnimationFrame(render);
+    setTrackingState('SEARCHING');
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = 0;
+    }
   };
 
   if (!isOpen) return null;
@@ -432,7 +377,7 @@ export function WebArModal({
                 gap: '0.4rem',
               }}
             >
-              <span>{trackingState === 'TRACKED' ? '● Hand Tracked' : '○ Align hand in frame'}</span>
+              <span>Camera on. Finger tracking is not connected in this viewer.</span>
             </div>
           </>
         )}

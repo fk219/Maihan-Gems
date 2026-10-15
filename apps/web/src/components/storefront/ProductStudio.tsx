@@ -386,9 +386,13 @@ export function ProductStudio({
                 </Link>
               </p>
             ) : null}
-            <button type="button" className="lx-btn lx-btn--solid" onClick={() => setTryOn(true)}>
-              Virtual try-on
-            </button>
+            {mode === 'hand' ? (
+              <button type="button" className="lx-btn lx-btn--solid" onClick={() => setTryOn(true)}>
+                Virtual try-on
+              </button>
+            ) : (
+              <p className="lx-card__specs">Camera try-on is available for rings. This piece stays in the studio view.</p>
+            )}
             <p className="lx-card__specs">{product.interestCount} collectors have asked after this piece.</p>
           </div>
         </div>
@@ -465,7 +469,8 @@ export function ProductStudio({
         metal={metalFinish}
         carat={product.weightCt ?? 1}
         title={`Try on · ${title}`}
-        mode={mode}
+        mode={mode === 'hand' ? 'hand' : mode}
+        stoneColor={gemHexFor(product.color, product.stoneType)}
         sharePath={`/product/${product.id}?tryon=1`}
       />
     </main>

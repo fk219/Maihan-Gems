@@ -303,9 +303,13 @@ export function DyoStudio({
               </button>
             ))}
           </div>
-          <button type="button" className="atelier__try" disabled={!setting || !stone} onClick={() => setTryOn(true)}>
-            Virtual try-on
-          </button>
+          {setting?.settingFor === 'ring' || !setting ? (
+            <button type="button" className="atelier__try" disabled={!setting || !stone} onClick={() => setTryOn(true)}>
+              Virtual try-on
+            </button>
+          ) : (
+            <p className="atelier__kicker">Camera try-on is available for rings. This mounting stays in the 3D studio.</p>
+          )}
         </aside>
       </div>
       <VirtualTryOnModal
@@ -314,7 +318,8 @@ export function DyoStudio({
         metal={metalFinishOf(metal)}
         carat={stone?.caratTotal ?? 1}
         title="Try on your design"
-        mode={setting?.settingFor === 'earrings' ? 'ear' : setting?.settingFor === 'pendant' ? 'neck' : 'hand'}
+        mode="hand"
+        stoneColor={gemHexFor(stone?.colorHue, stone?.stoneType)}
         sharePath={`/design-your-own?setting=${setting?.id ?? ''}&stone=${stone?.id ?? ''}&tryon=1`}
       />
     </div>

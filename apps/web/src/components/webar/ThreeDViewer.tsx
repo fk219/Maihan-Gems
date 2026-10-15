@@ -38,6 +38,7 @@ export function ThreeDViewer({
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isWebGl2Supported, setIsWebGl2Supported] = useState<boolean>(true);
   const [rotation, setRotation] = useState<{ x: number; y: number }>({ x: 15, y: 35 });
   const [zoom, setZoom] = useState<number>(1.0);
@@ -59,117 +60,72 @@ export function ThreeDViewer({
     }
   }, []);
 
-  // WebGL rendering simulation / Three.js canvas hook
   useEffect(() => {
     if (!isWebGl2Supported) return;
-
-    let isMounted = true;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    let disposed = false;
+    let frame = 0;
+    let renderer: { dispose: () => void } | null = null;
 
-    let animId: number;
+    const boot = async () => {
+      const THREE = await import('three');
+      const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+      if (disposed || !canvasRef.current) return;
 
-    const render = () => {
-      if (!isMounted || !canvas) return;
-      const width = canvas.width;
-      const height = canvas.height;
+      const webgl = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer = webgl;
+      webgl.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      webgl.setSize(canvas.clientWidth || 600, canvas.clientHeight || 440, false);
+      webgl.outputColorSpace = THREE.SRGBColorSpace;
+      webgl.toneMapping = THREE.ACESFilmicToneMapping;
 
-      ctx.clearRect(0, 0, width, height);
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color('#08121e');
+      const camera = new THREE.PerspectiveCamera(35, (canvas.clientWidth || 600) / (canvas.clientHeight || 440), 0.01, 100);
+      camera.position.set(0, 0.15, 2.6 / zoom);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+      const key = new THREE.DirectionalLight(0xfff4e0, 1.5);
+      key.position.set(2, 3, 4);
+      scene.add(key);
 
-      // Gradient studio backdrop
-      const bgGrad = ctx.createRadialGradient(
-        width / 2,
-        height / 2,
-        width * 0.1,
-        width / 2,
-        height / 2,
-        width * 0.7
-      );
-      bgGrad.addColorStop(0, '#0D1B2A');
-      bgGrad.addColorStop(1, '#08121E');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, width, height);
+      try {
+        const gltf = await new GLTFLoader().loadAsync(glbUrl);
+        if (disposed) return;
+        const root = gltf.scene;
+        const box = new THREE.Box3().setFromObject(root);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        root.position.sub(center);
+        const maxDim = Math.max(size.x, size.y, size.z, 0.001);
+        root.scale.setScalar(1.15 / maxDim);
+        root.rotation.x = (rotation.x * Math.PI) / 180;
+        root.rotation.y = (rotation.y * Math.PI) / 180;
+        scene.add(root);
+        setLoadError(null);
+        setLoading(false);
+      } catch {
+        if (!disposed) {
+          setLoading(false);
+          setLoadError('This 3D file could not be loaded. The studio photograph is shown instead.');
+        }
+        return;
+      }
 
-      // PBR Lighting & Metal Ring Geometry Simulation
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const radX = 85 * zoom;
-      const radY = (35 + (rotation.x % 90) * 0.5) * zoom;
-      const angleRad = (rotation.y * Math.PI) / 180;
-
-      ctx.save();
-      ctx.translate(centerX, centerY);
-      ctx.rotate(angleRad * 0.15);
-
-      // Outer gold/platinum rim
-      ctx.beginPath();
-      ctx.ellipse(0, 0, radX, radY, 0, 0, 2 * Math.PI);
-      ctx.lineWidth = 14 * zoom;
-      const rimGrad = ctx.createLinearGradient(-radX, -radY, radX, radY);
-      rimGrad.addColorStop(0, '#E8C96A');
-      rimGrad.addColorStop(0.3, '#C9A84C');
-      rimGrad.addColorStop(0.6, '#8B6914');
-      rimGrad.addColorStop(0.85, '#E8C96A');
-      rimGrad.addColorStop(1, '#8B6914');
-      ctx.strokeStyle = rimGrad;
-      ctx.shadowColor = 'rgba(201, 168, 76, 0.4)';
-      ctx.shadowBlur = 15;
-      ctx.stroke();
-
-      // Inner bevel / gemstone mount
-      ctx.beginPath();
-      ctx.ellipse(0, 0, radX - 10 * zoom, radY - 4 * zoom, 0, 0, 2 * Math.PI);
-      ctx.lineWidth = 3 * zoom;
-      ctx.strokeStyle = '#08121E';
-      ctx.shadowBlur = 0;
-      ctx.stroke();
-
-      // Solitaire Crown / Gemstone
-      const gemX = 0;
-      const gemY = -radY;
-      const gemGrad = ctx.createRadialGradient(gemX, gemY, 2, gemX, gemY, 22 * zoom);
-      gemGrad.addColorStop(0, '#ffffff');
-      gemGrad.addColorStop(0.2, '#3B82F6');
-      gemGrad.addColorStop(0.5, '#1E3A8A');
-      gemGrad.addColorStop(0.9, '#1e3a8a');
-      gemGrad.addColorStop(1, '#0f172a');
-
-      ctx.beginPath();
-      ctx.arc(gemX, gemY, 18 * zoom, 0, 2 * Math.PI);
-      ctx.fillStyle = gemGrad;
-      ctx.shadowColor = 'rgba(59, 130, 246, 0.6)';
-      ctx.shadowBlur = 20;
-      ctx.fill();
-
-      // Facet highlights
-      ctx.beginPath();
-      ctx.moveTo(gemX - 10 * zoom, gemY - 4 * zoom);
-      ctx.lineTo(gemX, gemY - 14 * zoom);
-      ctx.lineTo(gemX + 10 * zoom, gemY - 4 * zoom);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.fill();
-
-      ctx.restore();
-
-      animId = requestAnimationFrame(render);
+      const loop = () => {
+        if (disposed) return;
+        frame = requestAnimationFrame(loop);
+        webgl.render(scene, camera);
+      };
+      loop();
     };
 
-    // Simulate async asset streaming
-    const timer = setTimeout(() => {
-      if (isMounted) {
-        setLoading(false);
-        render();
-      }
-    }, 400);
-
+    void boot();
     return () => {
-      isMounted = false;
-      clearTimeout(timer);
-      cancelAnimationFrame(animId);
+      disposed = true;
+      cancelAnimationFrame(frame);
+      renderer?.dispose();
     };
   }, [glbUrl, isWebGl2Supported, rotation, zoom]);
 
@@ -261,7 +217,14 @@ export function ThreeDViewer({
       )}
 
       {/* Loading Overlay */}
-      {loading && isWebGl2Supported && (
+      {loadError && isWebGl2Supported ? (
+        <div className="webar-fallback-notice" style={{ padding: '2rem', textAlign: 'center', color: '#FAFAF8' }}>
+          <p>{loadError}</p>
+          {posterUrl ? <img src={posterUrl} alt={title} style={{ marginTop: '1rem', maxHeight: '260px', objectFit: 'contain' }} /> : null}
+        </div>
+      ) : null}
+
+      {loading && isWebGl2Supported && !loadError && (
         <div
           style={{
             position: 'absolute',
@@ -293,7 +256,7 @@ export function ThreeDViewer({
       )}
 
       {/* 3D Canvas with drag & zoom */}
-      {isWebGl2Supported && (
+      {isWebGl2Supported && !loadError && (
         <canvas
           ref={canvasRef}
           width={600}

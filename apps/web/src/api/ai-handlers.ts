@@ -14,12 +14,14 @@ import {
   type ToolServices,
   type OrchestratorTurnInput,
 } from '@maihan/ai';
+import { calculateDyoPrice, evaluateCompatibility, type JewelleryType } from '@maihan/domain';
 import {
   createConversation,
   getConversationByKey,
   updateConversationState,
   appendMessage,
   recordAiInteraction,
+  loadSettingCompatibilityRules,
 } from '@maihan/db';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
@@ -96,20 +98,133 @@ export function buildToolServices(ctx: RouteContext): ToolServices {
       },
     },
     dyo: {
-      checkCompatibility: async (_input) => {
+      checkCompatibility: async (input) => {
+        const variantRes = await db.query(
+          `SELECT sv.setting_id, s.jewellery_type
+           FROM setting_variants sv
+           JOIN settings s ON s.id = sv.setting_id
+           WHERE sv.sku = $1 AND sv.deleted_at IS NULL
+           LIMIT 1;`,
+          [input.settingVariantSku],
+        );
+        const gemRes = await db.query(
+          `SELECT kind, variety_id, colour_id, shape, total_weight_ct::float AS weight,
+                  length_mm::float AS length_mm, width_mm::float AS width_mm, treatment_id
+           FROM gemstones
+           WHERE gem_ref = $1 AND deleted_at IS NULL
+           LIMIT 1;`,
+          [input.gemRef],
+        );
+        const variant = variantRes.rows[0] as { setting_id: string; jewellery_type: string } | undefined;
+        const gem = gemRes.rows[0] as
+          | {
+              kind: 'SINGLE' | 'PAIR';
+              variety_id: string;
+              colour_id: string | null;
+              shape: string | null;
+              weight: number;
+              length_mm: number | null;
+              width_mm: number | null;
+              treatment_id: string | null;
+            }
+          | undefined;
+        if (!variant || !gem) {
+          return {
+            status: 'UNKNOWN',
+            reasons: ['The setting or gemstone was not found in the catalogue.'],
+            evaluatedRules: [],
+          };
+        }
+        const rules = await loadSettingCompatibilityRules(db, variant.setting_id);
+        const evaluation = evaluateCompatibility(
+          { settingId: variant.setting_id, jewelleryType: variant.jewellery_type as JewelleryType },
+          {
+            kind: gem.kind,
+            varietyId: gem.variety_id,
+            colourId: gem.colour_id,
+            shape: gem.shape as never,
+            weightCt: gem.weight,
+            lengthMm: gem.length_mm,
+            widthMm: gem.width_mm,
+            treatmentId: gem.treatment_id,
+          },
+          rules,
+        );
+        const status = evaluation.status === 'REQUIRES_REVIEW' ? 'UNKNOWN' : evaluation.status;
         return {
-          status: 'COMPATIBLE',
-          reasons: ['Design accepts stone shape and dimensions within tolerance.'],
-          evaluatedRules: [],
+          status,
+          reasons: evaluation.ruleDetails.map((detail) => detail.message),
+          evaluatedRules: evaluation.ruleDetails,
         };
       },
     },
     pricing: {
-      getQuote: async (_input) => {
+      getQuote: async (input) => {
+        const gemRef = typeof input['gemRef'] === 'string' ? input['gemRef'] : null;
+        const settingSku = typeof input['settingVariantSku'] === 'string' ? input['settingVariantSku'] : null;
+        const productId = typeof input['productId'] === 'string' ? input['productId'] : null;
+
+        if (productId && !gemRef && !settingSku) {
+          const productRes = await db.query(
+            `SELECT price_amount::float AS price, currency, price_evidence
+             FROM products WHERE (id::text = $1 OR slug = $1) AND deleted_at IS NULL LIMIT 1;`,
+            [productId],
+          );
+          const product = productRes.rows[0] as
+            | { price: number | null; currency: string; price_evidence: string }
+            | undefined;
+          if (!product || product.price == null || product.price_evidence === 'UNKNOWN') {
+            throw new ContractError('UNPROCESSABLE', 'No authoritative price is recorded for this product.');
+          }
+          return {
+            totalAmount: product.price,
+            currency: product.currency?.trim() || 'USD',
+            breakdown: { gemstoneComponent: product.price },
+          };
+        }
+
+        if (!gemRef && !settingSku) {
+          throw new ContractError('UNPROCESSABLE', 'A catalogue gemstone or setting is required before a price can be quoted.');
+        }
+
+        let gemstoneBasePrice = 0;
+        if (gemRef) {
+          const gemRes = await db.query(
+            `SELECT price_amount::float AS price, price_evidence
+             FROM gemstones WHERE gem_ref = $1 AND deleted_at IS NULL LIMIT 1;`,
+            [gemRef],
+          );
+          const gem = gemRes.rows[0] as { price: number | null; price_evidence: string } | undefined;
+          if (!gem || gem.price == null || gem.price_evidence === 'UNKNOWN') {
+            throw new ContractError('UNPROCESSABLE', 'No authoritative price is recorded for this gemstone.');
+          }
+          gemstoneBasePrice = gem.price;
+        }
+
+        let settingBasePrice = 0;
+        if (settingSku) {
+          const settingRes = await db.query(
+            `SELECT base_price::float AS price, price_evidence
+             FROM setting_variants WHERE sku = $1 AND deleted_at IS NULL LIMIT 1;`,
+            [settingSku],
+          );
+          const setting = settingRes.rows[0] as { price: number | null; price_evidence: string } | undefined;
+          if (!setting || setting.price == null || setting.price_evidence === 'UNKNOWN') {
+            throw new ContractError('UNPROCESSABLE', 'No authoritative price is recorded for this setting.');
+          }
+          settingBasePrice = setting.price;
+        }
+
+        const priced = calculateDyoPrice({ gemstoneBasePrice, settingBasePrice, currency: 'USD' });
         return {
-          totalAmount: 3200,
-          currency: 'USD',
-          breakdown: { gemstoneComponent: 2400, settingComponent: 800 },
+          totalAmount: priced.total,
+          currency: priced.currency,
+          breakdown: {
+            gemstoneComponent: priced.gemstoneComponent,
+            settingComponent: priced.settingComponent,
+            makingFee: priced.makingComponent,
+            taxAmount: priced.taxComponent,
+          },
         };
       },
     },

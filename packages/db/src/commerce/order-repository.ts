@@ -279,15 +279,20 @@ export async function placeOrder(
       SELECT
         g.id,
         g.gem_ref,
-        g.variety,
-        g.shape,
-        g.carat_weight::text AS carat_weight,
-        g.origin,
-        g.treatment,
-        g.clarity,
-        g.colour_description
+        gv.display_name AS variety,
+        g.shape::text AS shape,
+        g.total_weight_ct::text AS carat_weight,
+        go.name AS origin,
+        t.label AS treatment,
+        cl.label AS clarity,
+        gc.name AS colour_description
       FROM products p
       LEFT JOIN gemstones g ON g.id = p.gemstone_id OR g.id = p.gemstone_pair_id
+      LEFT JOIN gemstone_varieties gv ON gv.id = g.variety_id
+      LEFT JOIN gemstone_origins go ON go.id = g.origin_id
+      LEFT JOIN treatments t ON t.id = g.treatment_id
+      LEFT JOIN clarities cl ON cl.id = g.clarity_id
+      LEFT JOIN gemstone_colours gc ON gc.id = g.colour_id
       WHERE p.id = ${item.product_id}
       LIMIT 1
     `);
@@ -299,12 +304,17 @@ export async function placeOrder(
     const certRes = await db.execute(sql`
       SELECT
         c.certificate_number,
-        c.lab::text AS lab,
-        c.report_type::text AS report_type,
-        c.carat_weight::text AS cert_weight
+        c.lab_name AS lab,
+        c.report_type,
+        g.total_weight_ct::text AS cert_weight,
+        c.verification_status
       FROM certificates c
-      WHERE c.gemstone_id = ${gemSnapshot['id'] ?? null}
-         OR c.product_id = ${item.product_id}
+      LEFT JOIN gemstones g ON g.id = c.gemstone_id
+      WHERE c.deleted_at IS NULL
+        AND (
+          c.gemstone_id = ${gemSnapshot['id'] ?? null}
+          OR c.product_id = ${item.product_id}
+        )
       LIMIT 1
     `);
 

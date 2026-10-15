@@ -52,8 +52,8 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
         if (sql.includes('FROM dyo_configurations WHERE short_code = $1')) {
           return { rows: storedConfig ? [storedConfig] : [] };
         }
-        if (sql.includes('SELECT base_price::float as price FROM gemstones')) {
-          return { rows: [{ price: 3500 }] };
+        if (sql.includes('SELECT price_amount::float as price')) {
+          return { rows: [{ price: 3500, price_evidence: 'OBSERVED' }] };
         }
         if (sql.includes('SELECT base_price::float as price FROM setting_variants')) {
           return { rows: [{ price: 1200 }] };
@@ -129,8 +129,17 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
             ],
           };
         }
-        if (sql.includes('SELECT id FROM products WHERE state =')) {
+        if (sql.includes('FROM dyo_price_snapshots')) {
+          return { rows: [{ id: 'snap-1', total: 4700 }] };
+        }
+        if (sql.includes('FROM products') && sql.includes('slug')) {
           return { rows: [{ id: 'product-active-1' }] };
+        }
+        if (sql.includes('UPDATE products SET price_amount')) {
+          return { rows: [] };
+        }
+        if (sql.includes('UPDATE dyo_quotes')) {
+          return { rows: [] };
         }
         // Cart repository mock queries
         if (sql.includes('SELECT id, cart_token, state')) {

@@ -114,12 +114,36 @@ export class AiOrchestrator {
     } else if (lowerMsg.includes('ring') || lowerMsg.includes('setting') || lowerMsg.includes('earring') || lowerMsg.includes('pendant')) {
       plannedTools.push({ name: 'search_inventory', input: { query: input.message, limit: 3 } });
     } else if (lowerMsg.includes('custom') || lowerMsg.includes('compatible') || lowerMsg.includes('bespoke')) {
-      plannedTools.push({
-        name: 'check_dyo_compatibility',
-        input: { jewelleryType: 'RING', settingVariantSku: 'JS1150W14', gemRef: 'K1324' },
-      });
+      const sku = input.message.match(/\bJS\d+[A-Z0-9]+\b/i)?.[0]?.toUpperCase();
+      const gemRef = input.message.match(/\b(?:K|PR)\d+\b/i)?.[0]?.toUpperCase();
+      const jewelleryType = lowerMsg.includes('earring')
+        ? 'EARRINGS'
+        : lowerMsg.includes('pendant')
+          ? 'PENDANT'
+          : lowerMsg.includes('necklace')
+            ? 'NECKLACE'
+            : lowerMsg.includes('bracelet')
+              ? 'BRACELET'
+              : 'RING';
+      if (sku && gemRef) {
+        plannedTools.push({
+          name: 'check_dyo_compatibility',
+          input: { jewelleryType, settingVariantSku: sku, gemRef },
+        });
+      } else {
+        plannedTools.push({ name: 'search_knowledge', input: { query: input.message, limit: 3 } });
+      }
     } else if (lowerMsg.includes('price') || lowerMsg.includes('quote') || lowerMsg.includes('cost')) {
-      plannedTools.push({ name: 'get_price_quote', input: { productId: 'prod_1' } });
+      const sku = input.message.match(/\bJS\d+[A-Z0-9]+\b/i)?.[0]?.toUpperCase();
+      const gemRef = input.message.match(/\b(?:K|PR)\d+\b/i)?.[0]?.toUpperCase();
+      if (sku || gemRef) {
+        plannedTools.push({
+          name: 'get_price_quote',
+          input: { settingVariantSku: sku, gemRef },
+        });
+      } else {
+        plannedTools.push({ name: 'search_inventory', input: { query: input.message, limit: 3 } });
+      }
     } else {
       // Default to knowledge retrieval
       plannedTools.push({ name: 'search_knowledge', input: { query: input.message, limit: 3 } });

@@ -1,3 +1,13 @@
+# DYO INTEGRITY — SQL, CART, AI HONESTY, REAL GLB VIEWER (2026-10-15)
+
+Canonical DYO quote reads `gemstones.price_amount` and `total_weight_ct`.
+Add-to-cart writes a `dyo-{shortCode}` CONFIGURED product and `configuration_id`
+instead of `SELECT … LIMIT 1`. Order gem snapshots join taxonomy tables.
+AI compatibility and quotes use catalogue rows and refuse when price evidence
+is UNKNOWN. `ThreeDViewer` loads the GLB. Ring try-on uses the selected stone
+colour; ear, neck, and room modes no longer claim hand tracking. QR links stay
+on this site.
+
 # K11733 3D — BVH REFRACTION GEM (2026-10-13)
 
 Loose-stone 3D uses a watertight 57-facet brilliant and a three-mesh-bvh

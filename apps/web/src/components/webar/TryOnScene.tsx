@@ -15,10 +15,12 @@ export function TryOnScene({
   video,
   metal,
   carat,
+  stoneColor = '#6B32E6',
 }: {
   readonly video: HTMLVideoElement;
   readonly metal: MetalFinish;
   readonly carat: number;
+  readonly stoneColor?: string;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const pose = useHandTracker(video, true);
@@ -64,7 +66,7 @@ export function TryOnScene({
       screen.scale.x = -1;
       scene.add(screen);
 
-      const ring = buildProceduralRing(THREE, { metal, carat, color: '#0891B2', occluder: true });
+      const ring = buildProceduralRing(THREE, { metal, carat, color: stoneColor, occluder: true });
       ring.visible = false;
       scene.add(ring);
 
@@ -117,7 +119,7 @@ export function TryOnScene({
       disposed = true;
       cleanup();
     };
-  }, [video, metal, carat]);
+  }, [video, metal, carat, stoneColor]);
 
   return (
     <div className="vto__stage">

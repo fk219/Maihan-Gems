@@ -17,6 +17,7 @@ export interface VirtualTryOnModalProps {
   readonly title?: string;
   readonly mode?: 'hand' | 'ear' | 'neck' | 'room';
   readonly sharePath?: string;
+  readonly stoneColor?: string;
 }
 
 export function VirtualTryOnModal({
@@ -27,6 +28,7 @@ export function VirtualTryOnModal({
   title = 'Virtual try-on',
   mode = 'hand',
   sharePath,
+  stoneColor = '#6B32E6',
 }: VirtualTryOnModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -78,34 +80,32 @@ export function VirtualTryOnModal({
 
   if (!open) return null;
 
-  const qrImage = shareUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(shareUrl)}`
-    : null;
+  const handTracking = mode === 'hand';
 
   return (
     <div className="vto" role="dialog" aria-modal="true" aria-label={title}>
       <div className="vto__panel">
         <header className="vto__bar">
           <div>
-            <p className="cfg__kicker">{mode === 'ear' ? 'On the ear' : mode === 'neck' ? 'At the neck' : mode === 'room' ? 'In the room' : 'On your hand'}</p>
+            <p className="cfg__kicker">{handTracking ? 'On your hand' : 'Studio only'}</p>
             <h2>{title}</h2>
           </div>
           <button type="button" className="vto__close" onClick={onClose}>Close</button>
         </header>
         <video ref={videoRef} playsInline muted className="vto__video" />
-        {videoNode ? (
-          <TryOnScene video={videoNode} metal={metal} carat={carat} />
+        {handTracking && videoNode ? (
+          <TryOnScene video={videoNode} metal={metal} carat={carat} stoneColor={stoneColor} />
         ) : (
           <div className="vto__intro">
             <div>
               <p>
-                {mode === 'room'
-                  ? `Scan with your phone to place this ${carat.toFixed(1)} ct gem in the room (AR Quick Look on iOS).`
-                  : `Scan with your phone to try this ${carat.toFixed(1)} ct piece. MediaPipe tracks hand, ear or neck. AR Quick Look on iOS.`}
+                {handTracking
+                  ? `Open this link on your phone to try the ${carat.toFixed(1)} ct ring on your hand. The camera stays on that device.`
+                  : 'Camera try-on is available for rings. Earrings, necklaces, and loose stones stay in the 3D studio so we do not place a ring on the wrong part of you.'}
               </p>
-              {qrImage ? <img src={qrImage} alt="QR code to open try-on on a phone" width={220} height={220} /> : null}
+              {shareUrl ? <p><a href={shareUrl}>{shareUrl}</a></p> : null}
             </div>
-            <button type="button" className="cfg__try" onClick={() => void startCamera()}>Use this camera</button>
+            {handTracking ? <button type="button" className="cfg__try" onClick={() => void startCamera()}>Use this camera</button> : null}
           </div>
         )}
         {message ? <p className="vto__status">{message}</p> : null}
