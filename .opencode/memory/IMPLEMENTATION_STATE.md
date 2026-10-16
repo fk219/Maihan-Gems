@@ -1,3 +1,16 @@
+# DYO QUOTE-BOUND CART CONVERSION (2026-10-16)
+
+DYO conversion locks the configuration and exact quote in a Drizzle transaction,
+rechecks compatibility and evidenced component prices, anchors cart lines to the
+quote snapshot, consumes only that quote, advances state once, and records an
+outbox event. Cart reads and merges preserve price-snapshot references; orders
+freeze configuration and the exact price snapshot selected by each cart line.
+Checks: 20 DB repository tests, 1 DYO API test, workspace typecheck, and
+`git diff --check` passed. Added a PostgreSQL-backed order snapshot regression
+restricted to local `127.0.0.1:5433/maihan_dev`; it was skipped here because
+local PostgreSQL is unavailable and Docker access is denied, so no live DB
+conversion was exercised.
+
 # DYO INTEGRITY — SQL, CART, AI HONESTY, REAL GLB VIEWER (2026-10-15)
 
 Canonical DYO quote reads `gemstones.price_amount` and `total_weight_ct`.

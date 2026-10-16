@@ -321,6 +321,55 @@ export async function placeOrder(
     const documentSnapshot =
       certRes.rows.length > 0 && certRes.rows[0] ? (certRes.rows[0] as Record<string, unknown>) : null;
 
+    const configurationRes = item.configuration_id
+      ? await db.execute(sql`
+          SELECT
+            c.id AS configuration_id,
+            c.configuration_hash,
+            c.hash_version,
+            c.short_code,
+            c.jewellery_type::text AS jewellery_type,
+            c.setting_id,
+            c.setting_variant_id,
+            c.gemstone_id,
+            c.gemstone_pair_id,
+            c.side_stones,
+            c.engraving_text,
+            c.selected_options,
+            c.compatibility_status::text AS compatibility_status,
+            c.compatibility_detail,
+            dps.id AS price_snapshot_id,
+            dps.gemstone_component::text AS gemstone_component,
+            dps.setting_component::text AS setting_component,
+            dps.side_stone_component::text AS side_stone_component,
+            dps.making_component::text AS making_component,
+            dps.discount_component::text AS discount_component,
+            dps.tax_component::text AS tax_component,
+            dps.total::text AS total,
+            dps.currency,
+            dps.pricing_rule_version,
+            dps.breakdown,
+            dps.computed_at,
+            dps.expires_at
+          FROM dyo_configurations c
+          LEFT JOIN dyo_price_snapshots dps ON dps.id = (
+            SELECT ci.price_snapshot_id
+            FROM cart_items ci
+            WHERE ci.cart_id = ${cart.id}
+              AND ci.product_id = ${item.product_id}
+              AND ci.configuration_id = ${item.configuration_id}
+            LIMIT 1
+          )
+          WHERE c.id = ${item.configuration_id}
+          LIMIT 1
+        `)
+      : null;
+    const configurationSnapshot = configurationRes?.rows[0]
+      ? (configurationRes.rows[0] as Record<string, unknown>)
+      : item.configuration_id
+        ? { configuration_id: item.configuration_id, options: item.options ?? {} }
+        : item.options ?? null;
+
     await db.execute(sql`
       INSERT INTO order_items (
         order_id,
@@ -341,7 +390,7 @@ export async function placeOrder(
         ${item.configuration_id},
         ${item.product_slug},
         ${item.title},
-        ${item.options ? JSON.stringify(item.options) : null}::jsonb,
+        ${configurationSnapshot ? JSON.stringify(configurationSnapshot) : null}::jsonb,
         ${JSON.stringify(gemSnapshot)}::jsonb,
         ${documentSnapshot ? JSON.stringify(documentSnapshot) : null}::jsonb,
         ${item.quantity},

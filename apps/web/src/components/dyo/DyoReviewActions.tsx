@@ -25,6 +25,7 @@ export function DyoReviewActions({ shortCode }: DyoReviewActionsProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [quoteToken, setQuoteToken] = useState<string | null>(null);
 
   const handleAddToCart = async () => {
     setIsAdding(true);
@@ -41,15 +42,28 @@ export function DyoReviewActions({ shortCode }: DyoReviewActionsProps) {
     }
 
     try {
+      let activeQuoteToken = quoteToken;
+      if (!activeQuoteToken) {
+        const quoteRes = await fetch(`/api/v1/dyo/configurations/${shortCode}/quote`, { method: 'POST' });
+        if (!quoteRes.ok) throw new Error('This configuration could not be quoted. Please refresh and try again.');
+        const quoteData = await quoteRes.json();
+        activeQuoteToken = quoteData?.data?.quoteToken ?? null;
+        if (!activeQuoteToken) throw new Error('The quote response was incomplete. Please try again.');
+        setQuoteToken(activeQuoteToken);
+      }
+
       const res = await fetch(`/api/v1/dyo/configurations/${shortCode}/add-to-cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cartToken }),
+        body: JSON.stringify({ cartToken, quoteToken: activeQuoteToken }),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || 'Cart conversion failed.');
+        if (data?.error?.code === 'PRICE_CHANGED' || res.status === 409 || res.status === 422) {
+          setQuoteToken(null);
+        }
+        throw new Error(data?.error?.message || data.message || 'Cart conversion failed.');
       }
 
       if (router?.push) {
@@ -57,13 +71,8 @@ export function DyoReviewActions({ shortCode }: DyoReviewActionsProps) {
       } else if (typeof window !== 'undefined') {
         window.location.href = '/cart';
       }
-    } catch {
-      // If offline/test, gracefully navigate to cart
-      if (router?.push) {
-        router.push('/cart');
-      } else if (typeof window !== 'undefined') {
-        window.location.href = '/cart';
-      }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Cart conversion failed. Please try again.');
     } finally {
       setIsAdding(false);
     }

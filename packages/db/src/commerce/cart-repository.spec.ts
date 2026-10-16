@@ -10,6 +10,7 @@ import {
   mergeGuestCart,
 } from './cart-repository.js';
 import { ContractError } from '@maihan/contracts';
+import { vi } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -169,6 +170,33 @@ describe('Cart Repository & Authoritative Re-pricing (Phase 6 Task 1)', () => {
     expect(updated.pricing_snapshot.subtotal).toBe(expectedSubtotal);
     expect(updated.pricing_snapshot.grand_total).toBe(expectedSubtotal);
     expect(updated.pricing_snapshot.item_count).toBe(2);
+  });
+
+  it('uses the referenced DYO snapshot rather than the configured product price when reading a cart', async () => {
+    const statements: string[] = [];
+    const queryText = (statement: unknown) => {
+      const chunks = (statement as { queryChunks?: Array<{ value?: string[] } | null> }).queryChunks ?? [];
+      return chunks.map((chunk) => chunk?.value?.join('') ?? '').join(' ');
+    };
+    const db: any = {
+      execute: vi.fn(async (statement: unknown) => {
+        const query = queryText(statement);
+        statements.push(query);
+        if (query.includes('FROM carts')) {
+          return { rows: [{ id: 'cart-id', cart_token: 'cart-token', customer_id: null, anonymous_session_id: null, currency: 'USD', state: 'ACTIVE', pricing_snapshot: null, expires_at: new Date(Date.now() + 60_000), converted_order_id: null, created_at: new Date(), updated_at: new Date() }] };
+        }
+        if (query.includes('FROM cart_items')) {
+          return { rows: [{ id: 'item-id', cart_id: 'cart-id', product_id: 'product-id', configuration_id: 'config-id', price_snapshot_id: 'snapshot-id', dyo_snapshot_amount: '4700.00', quantity: 1, unit_price: '1.00', engraving_text: null, options: {}, added_at: new Date(), product_slug: 'configured', product_title: 'Configured ring', product_state: 'ACTIVE', product_price_amount: '1.00', price_entry_amount: '1.00' }] };
+        }
+        return { rows: [] };
+      }),
+    };
+
+    const cart = await getCartByToken(db, 'cart-token');
+
+    expect(cart.items[0]?.unit_price).toBe('4700.00');
+    expect(cart.pricing_snapshot.grand_total).toBe('4700.00');
+    expect(statements.some((query) => query.includes('dyo_price_snapshots'))).toBe(true);
   });
 
   it('updates item quantity and recalculates totals', async () => {

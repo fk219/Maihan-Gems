@@ -57,6 +57,8 @@ interface RawCartItemRow {
   product_state: string;
   product_price_amount: string | null;
   price_entry_amount: string | null;
+  price_snapshot_id: string | null;
+  dyo_snapshot_amount: string | null;
 }
 
 function generateCartToken(): string {
@@ -71,8 +73,21 @@ function toIso(dateOrString: Date | string | null | undefined): string {
 function resolveAuthoritativeUnitPrice(row: {
   product_price_amount: string | null;
   price_entry_amount: string | null;
+  price_snapshot_id?: string | null;
+  dyo_snapshot_amount?: string | null;
+  configuration_id?: string | null;
   unit_price: string;
 }): string {
+  if (row.configuration_id !== null && row.configuration_id !== undefined) {
+    if (!row.price_snapshot_id || row.dyo_snapshot_amount === null || row.dyo_snapshot_amount === undefined) {
+      throw new ContractError('UNPROCESSABLE', 'Configured cart item is missing its authoritative DYO price snapshot.');
+    }
+    const snapshotPrice = Number(row.dyo_snapshot_amount);
+    if (!Number.isFinite(snapshotPrice) || snapshotPrice < 0) {
+      throw new ContractError('UNPROCESSABLE', 'Configured cart item has an invalid DYO price snapshot.');
+    }
+    return snapshotPrice.toFixed(2);
+  }
   if (row.product_price_amount !== null && row.product_price_amount !== '') {
     return Number(row.product_price_amount).toFixed(2);
   }
@@ -194,6 +209,8 @@ export async function getCartByToken(
       ci.cart_id,
       ci.product_id,
       ci.configuration_id,
+      ci.price_snapshot_id,
+      dps.total::text AS dyo_snapshot_amount,
       ci.quantity,
       ci.unit_price::text AS unit_price,
       ci.engraving_text,
@@ -206,6 +223,10 @@ export async function getCartByToken(
       pe.amount::text AS price_entry_amount
     FROM cart_items ci
     JOIN products p ON p.id = ci.product_id
+    LEFT JOIN dyo_price_snapshots dps
+      ON dps.id = ci.price_snapshot_id
+     AND dps.configuration_id = ci.configuration_id
+     AND ci.configuration_id IS NOT NULL
     LEFT JOIN LATERAL (
       SELECT amount
       FROM price_entries pe
@@ -279,10 +300,15 @@ export async function getCartByToken(
   };
 }
 
+export type AddToCartRepositoryInput = AddToCartInput & {
+  /** Set only by trusted DYO application code; not accepted by the public cart DTO. */
+  readonly price_snapshot_id?: string;
+};
+
 export async function addItemToCart(
   db: CatalogDatabase,
   cartToken: string,
-  input: AddToCartInput,
+  input: AddToCartRepositoryInput,
 ): Promise<CartDto> {
   const quantity = input.quantity ?? 1;
   assertValidQuantity(quantity);
@@ -337,22 +363,53 @@ export async function addItemToCart(
     price_entry_amount: string | null;
   };
 
-  const authoritativePrice = resolveAuthoritativeUnitPrice({
-    product_price_amount: product.product_price_amount,
-    price_entry_amount: product.price_entry_amount,
-    unit_price: '0.00',
-  });
+  if (input.configuration_id !== undefined && !input.price_snapshot_id) {
+    throw new ContractError('UNPROCESSABLE', 'Configured cart items require a DYO price snapshot.');
+  }
+  if (input.configuration_id === undefined && input.price_snapshot_id !== undefined) {
+    throw new ContractError('VALIDATION_FAILED', 'A DYO price snapshot requires a configuration.');
+  }
+
+  const dyoSnapshot = input.price_snapshot_id
+    ? await db.execute(sql`
+        SELECT id, total::text AS total
+        FROM dyo_price_snapshots
+        WHERE id = ${input.price_snapshot_id}
+          AND configuration_id = ${input.configuration_id!}
+          AND (expires_at IS NULL OR expires_at > now())
+        LIMIT 1
+      `)
+    : null;
+  if (input.price_snapshot_id && (!dyoSnapshot || dyoSnapshot.rows.length === 0)) {
+    throw new ContractError('UNPROCESSABLE', 'The DYO price snapshot is missing, expired, or belongs to a different configuration.');
+  }
+  const dyoSnapshotAmount = input.price_snapshot_id
+    ? Number((dyoSnapshot!.rows[0] as { total: string }).total)
+    : null;
+  if (dyoSnapshotAmount !== null && (!Number.isFinite(dyoSnapshotAmount) || dyoSnapshotAmount < 0)) {
+    throw new ContractError('UNPROCESSABLE', 'The DYO price snapshot amount is invalid.');
+  }
+  const pricedUnit = dyoSnapshotAmount !== null
+    ? dyoSnapshotAmount.toFixed(2)
+    : resolveAuthoritativeUnitPrice({
+        product_price_amount: product.product_price_amount,
+        price_entry_amount: product.price_entry_amount,
+        unit_price: '0.00',
+      });
+  if (!Number.isFinite(Number(pricedUnit)) || Number(pricedUnit) < 0) {
+    throw new ContractError('UNPROCESSABLE', 'The authoritative product price is invalid.');
+  }
 
   // Strict price tampering protection: reject if client expected price does not match
-  if (!comparePriceMatch(input.expected_unit_price, authoritativePrice)) {
+  if (!comparePriceMatch(input.expected_unit_price, pricedUnit)) {
     throw new ContractError(
       'PRICE_CHANGED',
-      `Product price has changed. Expected ${input.expected_unit_price}, current authoritative price is ${authoritativePrice}.`,
+      `Product price has changed. Expected ${input.expected_unit_price}, current authoritative price is ${pricedUnit}.`,
       [
         {
           field: 'unit_price',
           expected: input.expected_unit_price,
-          authoritative: authoritativePrice,
+          authoritative: pricedUnit,
         },
       ],
     );
@@ -365,6 +422,7 @@ export async function addItemToCart(
       cart_id,
       product_id,
       configuration_id,
+      price_snapshot_id,
       quantity,
       unit_price,
       engraving_text,
@@ -373,13 +431,15 @@ export async function addItemToCart(
       ${cartRow.id},
       ${product.id},
       ${input.configuration_id ?? null},
+      ${input.price_snapshot_id ?? null},
       ${quantity},
-      ${authoritativePrice}::numeric,
+      ${pricedUnit}::numeric,
       ${input.engraving_text ?? null},
       ${optionsJson}::jsonb
     )
     ON CONFLICT (cart_id, product_id, configuration_id)
     DO UPDATE SET
+      price_snapshot_id = EXCLUDED.price_snapshot_id,
       quantity = cart_items.quantity + EXCLUDED.quantity,
       unit_price = EXCLUDED.unit_price,
       engraving_text = COALESCE(EXCLUDED.engraving_text, cart_items.engraving_text),
@@ -449,11 +509,24 @@ export async function mergeGuestCart(
 
   const guestCart = await getCartByToken(db, guestCartToken);
 
-  // Transfer all items from guest cart to customer cart
+  // Transfer all items from guest cart to customer cart. Configured products
+  // must retain the exact quote snapshot selected by the guest cart.
   for (const item of guestCart.items) {
+    const dyoSnapshotRes = item.configuration_id
+      ? await db.execute(sql`
+          SELECT price_snapshot_id
+          FROM cart_items
+          WHERE id = ${item.id} AND cart_id = ${guestCart.id}
+          LIMIT 1
+        `)
+      : null;
+    const priceSnapshotId = dyoSnapshotRes?.rows[0]
+      ? (dyoSnapshotRes.rows[0] as { price_snapshot_id: string | null }).price_snapshot_id
+      : null;
     await addItemToCart(db, customerCartToken, {
       product_id: item.product_id,
       configuration_id: item.configuration_id ?? undefined,
+      ...(priceSnapshotId ? { price_snapshot_id: priceSnapshotId } : {}),
       quantity: item.quantity,
       engraving_text: item.engraving_text ?? undefined,
       options: item.options,

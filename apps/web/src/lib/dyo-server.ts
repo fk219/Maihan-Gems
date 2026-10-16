@@ -11,6 +11,7 @@ import 'server-only';
 import { loadRuntimeConfig } from '@maihan/config';
 import {
   createPool,
+  createCatalogDatabase,
   getDyoConfigurationByShortCode,
   type DyoConfigurationRow,
 } from '@maihan/db';
@@ -41,7 +42,7 @@ export async function loadDyoConfiguration(
   try {
     const config = loadRuntimeConfig();
     const pool = createPool(config.databaseUrl);
-    return await getDyoConfigurationByShortCode(pool, shortCode);
+    return await getDyoConfigurationByShortCode(createCatalogDatabase(pool), shortCode);
   } catch {
     // If DB is unavailable during testing or static generation, return null
     return null;

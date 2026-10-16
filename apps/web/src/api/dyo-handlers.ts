@@ -16,7 +16,7 @@ import {
   validateDyoConfiguration,
   createDyoPriceQuote,
   findCompatibleSettingsForStone,
-  addItemToCart,
+  addDyoConfigurationToCart,
   type CatalogDatabase,
 } from '@maihan/db';
 import { computeConfigurationIdentity, parseSkuOrThrow } from '@maihan/domain';
@@ -176,94 +176,40 @@ export const addDyoToCartHandler: RouteHandler = async (ctx) => {
     throw new ContractError('NOT_FOUND', `DYO configuration not found for short code: ${shortCode}`);
   }
 
-  // Validate that configuration is in PRICED state
-  if (config.state !== 'PRICED') {
-    throw new ContractError('UNPROCESSABLE', 'DYO configuration must be quoted and in PRICED state before adding to cart');
-  }
-
-  // Re-verify compatibility and price inside transaction
-  const updatedConfig = await validateDyoConfiguration(db, shortCode);
-  if (updatedConfig.compatibility_status !== 'COMPATIBLE') {
-    throw new ContractError('UNPROCESSABLE', 'DYO configuration re-validation failed during cart conversion');
-  }
-
-  if (!config.setting_variant_id || (!config.gemstone_id && !config.gemstone_pair_id)) {
-    throw new ContractError('UNPROCESSABLE', 'DYO configuration is missing a setting variant or gemstone.');
-  }
-
-  const snapRes = await (db as any).query(
-    `SELECT id, total::float AS total
-     FROM dyo_price_snapshots
-     WHERE configuration_id = $1 AND (expires_at IS NULL OR expires_at > now())
-     ORDER BY computed_at DESC
-     LIMIT 1;`,
-    [config.id],
-  );
-  const snapshot = snapRes.rows[0] as { id: string; total: number } | undefined;
-  if (!snapshot || snapshot.total == null) {
-    throw new ContractError('UNPROCESSABLE', 'DYO configuration has no active price snapshot.');
-  }
-
-  const slug = `dyo-${String(config.short_code).toLowerCase()}`;
-  const existing = await (db as any).query(
-    `SELECT id FROM products WHERE slug = $1 AND deleted_at IS NULL LIMIT 1;`,
-    [slug],
-  );
-  let productId = existing.rows[0]?.id as string | undefined;
-  if (productId) {
-    await (db as any).query(
-      `UPDATE products SET price_amount = $2, updated_at = now() WHERE id = $1;`,
-      [productId, snapshot.total],
-    );
-  } else {
-    const inserted = await (db as any).query(
-      `INSERT INTO products (
-         kind, slug, title, setting_variant_id, gemstone_id, gemstone_pair_id,
-         jewellery_type, stone_count, price_amount, currency, price_evidence, state, availability
-       ) VALUES (
-         'CONFIGURED', $1, $2, $3, $4, $5, $6::jewellery_type, $7, $8, 'USD', 'INFERRED', 'ACTIVE', true
-       )
-       RETURNING id;`,
-      [
-        slug,
-        `Custom ${config.jewellery_type} ${config.short_code}`,
-        config.setting_variant_id,
-        config.gemstone_id,
-        config.gemstone_pair_id,
-        config.jewellery_type,
-        config.gemstone_pair_id ? 2 : 1,
-        snapshot.total,
-      ],
-    );
-    productId = inserted.rows[0]?.id as string | undefined;
-  }
-  if (!productId) {
-    throw new ContractError('UNPROCESSABLE', 'The configured product could not be saved.');
-  }
-
-  const cart = await addItemToCart(db, cartToken, {
-    product_id: productId,
-    configuration_id: config.id,
-    quantity: 1,
-  });
-
-  await (db as any).query(
-    `UPDATE dyo_quotes SET consumed_at = now()
-     WHERE configuration_id = $1 AND consumed_at IS NULL;`,
-    [config.id],
-  );
-
-  // Mark configuration as ADDED_TO_CART
-  await (db as any).query(`UPDATE dyo_configurations SET state = 'ADDED_TO_CART'::dyo_state, updated_at = now() WHERE id = $1;`, [config.id]);
-
-  return {
-    status: 200,
-    body: {
-      data: {
-        cart,
-        configurationId: config.id,
-        state: 'ADDED_TO_CART',
+  try {
+    const result = await addDyoConfigurationToCart(db, {
+      shortCode,
+      cartToken,
+      quoteToken: String(rawBody['quoteToken'] ?? ''),
+    });
+    return {
+      status: 200,
+      body: {
+        data: {
+          cart: result.cart,
+          configurationId: result.configurationId,
+          state: 'ADDED_TO_CART',
+        },
       },
-    },
-  };
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      const messages: Record<string, string> = {
+        DYO_CONFIGURATION_NOT_FOUND: 'DYO configuration not found.',
+        DYO_CONFIGURATION_NOT_PRICED: 'DYO configuration must be quoted before adding it to cart.',
+        DYO_COMPATIBILITY_FAILED: 'DYO configuration re-validation failed during cart conversion.',
+        DYO_COMPONENTS_REQUIRED: 'DYO configuration is missing a setting variant or gemstone.',
+        DYO_QUOTE_INVALID: 'A valid, unconsumed quote is required to add this configuration to cart.',
+        DYO_PRICE_SNAPSHOT_EXPIRED: 'DYO configuration has no active price snapshot.',
+        DYO_CONFIGURED_PRODUCT_FAILED: 'The configured product could not be saved.',
+        DYO_CONFIGURATION_STATE_CHANGED: 'DYO configuration state changed during cart conversion.',
+      };
+      if (error.message === 'DYO_PRICE_CHANGED') {
+        throw new ContractError('PRICE_CHANGED', 'The quoted price is no longer current. Request a new quote before adding this configuration to cart.');
+      }
+      const message = messages[error.message];
+      if (message) throw new ContractError('UNPROCESSABLE', message);
+    }
+    throw error;
+  }
 };

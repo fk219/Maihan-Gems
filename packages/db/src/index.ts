@@ -170,6 +170,7 @@ export {
   loadSettingCompatibilityRules,
   validateDyoConfiguration,
   createDyoPriceQuote,
+  addDyoConfigurationToCart,
   findCompatibleSettingsForStone,
   type DyoConfigurationRow,
   type CreateDyoConfigurationInput,

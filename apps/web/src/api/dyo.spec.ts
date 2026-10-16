@@ -20,9 +20,30 @@ import {
 } from '../modules/catalog/index.js';
 import { FakeCatalogPort } from '../modules/catalog/testing/doubles.js';
 
+function queryChunks(query: unknown): unknown[] {
+  if (typeof query === 'string' || query === null || typeof query !== 'object') return [query];
+  const value = (query as { value?: unknown }).value;
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') return [value];
+  const children = (query as { queryChunks?: unknown[]; chunks?: unknown[] }).queryChunks
+    ?? (query as { chunks?: unknown[] }).chunks
+    ?? [];
+  return children.flatMap(queryChunks);
+}
+
+function queryText(query: unknown): string {
+  return queryChunks(query).map((chunk) => typeof chunk === 'string' ? chunk : '').join(' ');
+}
+
 describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
   it('creates, retrieves, validates, quotes, and converts DYO configuration to cart', async () => {
     let storedConfig: any = null;
+    let configuredProduct: any = null;
+    let cartItem: any = null;
+    let consumedQuote = false;
+    let forceStaleQuote = false;
+    let quoteToken: string | null = null;
+    let insertedCartSnapshotId: string | null = null;
     let storedCart: any = {
       id: 'cart-123',
       cart_token: 'cart_token_abc',
@@ -32,16 +53,19 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
     };
 
     const mockDb: any = {
-      query: async (sql: string, params: any[]) => {
-        if (sql.includes('INSERT INTO dyo_configurations')) {
+      transaction: (callback: (tx: any) => Promise<unknown>) => callback(mockDb),
+      query: async (statement: unknown, params?: unknown[]) => {
+        const query = typeof statement === 'string' ? statement : queryText(statement);
+        if (query.includes('INSERT INTO dyo_configurations')) {
           storedConfig = {
             id: 'dyo-cfg-uuid-1',
-            configuration_hash: params[0],
-            short_code: params[1] || 'short-code-123',
-            jewellery_type: params[2],
-            setting_id: params[3],
-            setting_variant_id: params[4],
-            gemstone_id: params[5],
+            configuration_hash: 'sha256:configuration',
+            short_code: 'short-code-123',
+            jewellery_type: 'RING',
+            setting_id: 'setting-1',
+            setting_variant_id: 'variant-1',
+            gemstone_id: 'gem-1',
+            gemstone_pair_id: null,
             state: 'DRAFT',
             compatibility_status: 'UNKNOWN',
             created_at: new Date(),
@@ -49,181 +73,124 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
           };
           return { rows: [storedConfig] };
         }
-        if (sql.includes('FROM dyo_configurations WHERE short_code = $1')) {
+        if (query.includes('UPDATE dyo_configurations')) {
+          storedConfig.state = String(params?.[0] ?? 'VALID');
+          storedConfig.compatibility_status = String(params?.[1] ?? 'COMPATIBLE');
+          storedConfig.compatibility_detail = JSON.parse(String(params?.[2] ?? '[]'));
+          return { rows: [storedConfig] };
+        }
+        if (query.includes('FROM dyo_configurations')) {
           return { rows: storedConfig ? [storedConfig] : [] };
-        }
-        if (sql.includes('SELECT price_amount::float as price')) {
-          return { rows: [{ price: 3500, price_evidence: 'OBSERVED' }] };
-        }
-        if (sql.includes('SELECT base_price::float as price FROM setting_variants')) {
-          return { rows: [{ price: 1200 }] };
-        }
-        if (sql.includes('FROM gemstones WHERE id = $1')) {
-          return {
-            rows: [
-              {
-                variety_id: 'variety-1',
-                colour_id: 'colour-1',
-                shape: 'OVAL',
-                weight: 2.5,
-                kind: 'SINGLE',
-                jewellery_type: 'RING',
-              },
-            ],
-          };
-        }
-        if (sql.includes('FROM setting_compatibility_rules')) {
-          return {
-            rows: [
-              {
-                id: 'rule-allow-1',
-                settingId: params[0],
-                jewelleryType: 'RING',
-                stoneKind: 'SINGLE',
-                minWeightCt: 1.0,
-                maxWeightCt: 5.0,
-                ruleKind: 'ALLOW',
-                priority: 100,
-                explanation: 'Ring setting accepts single gems up to 5ct',
-              },
-            ],
-          };
-        }
-        if (sql.includes('UPDATE dyo_configurations')) {
-          if (sql.includes('state = $1::dyo_state')) {
-            storedConfig.state = params[0];
-            storedConfig.compatibility_status = params[1];
-            storedConfig.compatibility_detail = JSON.parse(params[2]);
-            return { rows: [storedConfig] };
-          }
-          if (sql.includes("state = 'PRICED'::dyo_state")) {
-            storedConfig.state = 'PRICED';
-            return { rows: [storedConfig] };
-          }
-          if (sql.includes("state = 'ADDED_TO_CART'::dyo_state")) {
-            storedConfig.state = 'ADDED_TO_CART';
-            return { rows: [storedConfig] };
-          }
-        }
-        if (sql.includes('INSERT INTO dyo_price_snapshots')) {
-          return {
-            rows: [
-              {
-                id: 'snap-1',
-                configuration_id: params[0],
-                gemstone_component: params[1],
-                setting_component: params[2],
-                total: params[7],
-                currency: params[8],
-              },
-            ],
-          };
-        }
-        if (sql.includes('INSERT INTO dyo_quotes')) {
-          return { rows: [] };
-        }
-        if (sql.includes('FROM settings s')) {
-          return {
-            rows: [
-              { id: 'setting-1', design_code: '1150', name: 'Solitaire Ring', jewellery_type: 'RING' },
-            ],
-          };
-        }
-        if (sql.includes('FROM dyo_price_snapshots')) {
-          return { rows: [{ id: 'snap-1', total: 4700 }] };
-        }
-        if (sql.includes('FROM products') && sql.includes('slug')) {
-          return { rows: [{ id: 'product-active-1' }] };
-        }
-        if (sql.includes('UPDATE products SET price_amount')) {
-          return { rows: [] };
-        }
-        if (sql.includes('UPDATE dyo_quotes')) {
-          return { rows: [] };
-        }
-        // Cart repository mock queries
-        if (sql.includes('SELECT id, cart_token, state')) {
-          return { rows: [storedCart] };
-        }
-        if (sql.includes('SELECT ci.*, p.slug as product_slug')) {
-          return { rows: [] };
-        }
-        if (sql.includes('INSERT INTO cart_items')) {
-          return { rows: [{ id: 'item-1', cart_id: storedCart.id, product_id: 'product-active-1', quantity: 1 }] };
-        }
-        if (sql.includes('UPDATE carts')) {
-          return { rows: [storedCart] };
         }
         return { rows: [] };
       },
-      execute: async (sqlQuery: any) => {
-        let queryText = '';
-        if (typeof sqlQuery === 'string') {
-          queryText = sqlQuery;
-        } else if (sqlQuery && Array.isArray(sqlQuery.queryChunks)) {
-          queryText = sqlQuery.queryChunks.map((c: any) => (typeof c === 'string' ? c : c?.value ?? '')).join(' ');
-        } else {
-          queryText = JSON.stringify(sqlQuery);
+      execute: async (statement: unknown) => {
+        const query = queryText(statement);
+        if (query.includes('INSERT INTO dyo_configurations')) {
+          storedConfig = {
+            id: 'dyo-cfg-uuid-1',
+            configuration_hash: 'sha256:configuration',
+            short_code: 'short-code-123',
+            jewellery_type: 'RING',
+            setting_id: 'setting-1',
+            setting_variant_id: 'variant-1',
+            gemstone_id: 'gem-1',
+            gemstone_pair_id: null,
+            state: 'DRAFT',
+            compatibility_status: 'UNKNOWN',
+            created_at: new Date(),
+            updated_at: new Date(),
+          };
+          return { rows: [storedConfig] };
         }
-
-        if (queryText.includes('FROM carts') || queryText.includes('carts WHERE cart_token')) {
+        if (query.includes('FROM dyo_configurations')) {
+          return { rows: storedConfig ? [storedConfig] : [] };
+        }
+        if (query.includes('FROM gemstones')) {
+          if (query.includes('price_evidence')) {
+            return { rows: [{ price: forceStaleQuote ? '3400.00' : '3500.00', currency: 'USD', price_evidence: 'OBSERVED' }] };
+          }
+          return { rows: [{ variety_id: 'variety-1', colour_id: 'colour-1', shape: 'OVAL', weight: 2.5, kind: 'SINGLE' }] };
+        }
+        if (query.includes('FROM settings s')) {
+          return { rows: [{ id: 'setting-1', design_code: '1150', name: 'Solitaire Ring', jewellery_type: 'RING' }] };
+        }
+        if (query.includes('FROM setting_variants')) {
+          return { rows: [{ price: '1200.00', currency: 'USD', price_evidence: 'OBSERVED' }] };
+        }
+        if (query.includes('FROM setting_compatibility_rules')) {
           return {
-            rows: [
-              {
-                id: storedCart.id,
-                state: 'ACTIVE',
-                expires_at: new Date(Date.now() + 86400000),
-              },
-            ],
+            rows: [{
+              id: 'rule-allow-1',
+              settingId: 'setting-1',
+              jewelleryType: 'RING',
+              stoneKind: 'SINGLE',
+              varietyId: 'variety-1',
+              colourId: 'colour-1',
+              shape: 'OVAL',
+              minWeightCt: 1.0,
+              maxWeightCt: 5.0,
+              ruleKind: 'ALLOW',
+              priority: 100,
+              explanation: 'Ring setting accepts single gems up to 5ct',
+            }],
           };
         }
-        if (queryText.includes('FROM products') || queryText.includes('products WHERE id')) {
-          return {
-            rows: [
-              {
-                id: 'product-active-1',
-                slug: 'active-piece-1',
-                title: 'Active Configured Piece',
-                price_amount: '4700.00',
-                currency: 'USD',
-                state: 'ACTIVE',
-                availability: true,
-              },
-            ],
-          };
+        if (query.includes('UPDATE dyo_configurations')) {
+          if (query.includes('compatibility_status')) {
+            storedConfig.state = storedConfig.state === 'PRICED' ? 'PRICED' : 'VALID';
+            storedConfig.compatibility_status = 'COMPATIBLE';
+            storedConfig.compatibility_detail = [];
+            return { rows: [storedConfig] };
+          }
+          if (query.includes("state IN ('VALID'::dyo_state, 'PRICED'::dyo_state)")) {
+            storedConfig.state = 'PRICED';
+            return { rows: [{ id: storedConfig.id }] };
+          }
+          if (query.includes("state = 'ADDED_TO_CART'::dyo_state")) {
+            storedConfig.state = 'ADDED_TO_CART';
+            return { rows: [{ id: storedConfig.id }] };
+          }
         }
-        if (queryText.includes('INSERT INTO cart_items')) {
-          storedCart.items.push({
-            id: 'item-1',
-            cart_id: storedCart.id,
-            product_id: 'product-active-1',
-            quantity: 1,
-            unit_price_snapshot: '4700.00',
-            line_total: '4700.00',
-          });
+        if (query.includes('INSERT INTO dyo_price_snapshots')) {
+          return { rows: [{ id: 'snap-1', total: '4700.00', configuration_id: 'dyo-cfg-uuid-1', currency: 'USD' }] };
+        }
+        if (query.includes('INSERT INTO dyo_quotes')) {
+          quoteToken = 'quote_test';
           return { rows: [] };
         }
-        if (queryText.includes('FROM cart_items') || queryText.includes('cart_items ci')) {
-          return {
-            rows: [
-              {
-                id: 'item-1',
-                cart_id: storedCart.id,
-                product_id: 'product-active-1',
-                product_slug: 'active-piece-1',
-                product_title: 'Active Configured Piece',
-                product_state: 'ACTIVE',
-                product_price_amount: '4700.00',
-                price_entry_amount: '4700.00',
-                unit_price: '4700.00',
-                quantity: 1,
-                added_at: new Date(),
-                engraving_text: null,
-                options: null,
-              },
-            ],
-          };
+        if (query.includes('FROM dyo_quotes')) {
+          return { rows: !consumedQuote && quoteToken ? [{ id: 'quote-row-1', price_snapshot_id: 'snap-1' }] : [] };
         }
+        if (query.includes('UPDATE dyo_quotes')) {
+          consumedQuote = true;
+          return { rows: [{ id: 'quote-row-1' }] };
+        }
+        if (query.includes('FROM dyo_price_snapshots')) {
+          if (query.includes('INSERT INTO')) return { rows: [{ id: 'snap-1', total: '4700.00' }] };
+          return { rows: [{ id: 'snap-1', total: '4700.00', currency: 'USD' }] };
+        }
+        if (query.includes('INSERT INTO products')) {
+          configuredProduct = { id: 'product-configured-1', slug: 'dyo-short-code-123', price_amount: '4700.00' };
+          return { rows: [configuredProduct] };
+        }
+        if (query.includes('FROM products')) {
+          return { rows: [{ id: 'product-configured-1', slug: 'dyo-short-code-123', title: 'Custom ring', state: 'ACTIVE', product_price_amount: '1.00', price_entry_amount: null }] };
+        }
+        if (query.includes('FROM carts')) {
+          return { rows: [{ id: storedCart.id, cart_token: storedCart.cart_token, customer_id: null, anonymous_session_id: null, currency: 'USD', state: 'ACTIVE', pricing_snapshot: null, expires_at: new Date(Date.now() + 86400000), converted_order_id: null, created_at: new Date(), updated_at: new Date() }] };
+        }
+        if (query.includes('FROM cart_items')) {
+          return { rows: cartItem ? [{ ...cartItem, cart_id: storedCart.id, product_slug: 'dyo-short-code-123', product_title: 'Custom RING short-code-123', product_state: 'ACTIVE', product_price_amount: '4700.00', price_entry_amount: null, price_snapshot_id: 'snap-1', dyo_snapshot_amount: '4700.00', added_at: new Date() }] : [] };
+        }
+        if (query.includes('INSERT INTO cart_items')) {
+          insertedCartSnapshotId = queryChunks(statement).find((value) => value === 'snap-1') as string ?? null;
+          cartItem = { id: 'item-1', product_id: 'product-configured-1', configuration_id: 'dyo-cfg-uuid-1', quantity: 1, unit_price: '4700.00', price_snapshot_id: insertedCartSnapshotId };
+          storedCart.items = [cartItem];
+          return { rows: [] };
+        }
+        if (query.includes('UPDATE cart_items')) return { rows: [] };
+        if (query.includes('UPDATE carts')) return { rows: [storedCart] };
         return { rows: [] };
       },
     };
@@ -279,8 +246,26 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
     const quoteRes = await api(quoteReq);
     expect(quoteRes.status).toBe(200);
     const quoteData = (await quoteRes.json()) as any;
-    expect(quoteData.data.priceSnapshot.total).toBe(4700);
+    expect(Number(quoteData.data.priceSnapshot.total)).toBe(4700);
     expect(quoteData.data.quoteToken).toContain('quote_');
+    quoteToken = quoteData.data.quoteToken;
+
+    const priceChangedQuoteReq = new Request('https://maihan.gems/api/v1/dyo/configurations/short-code-123/quote', { method: 'POST' });
+    const priceChangedQuoteRes = await api(priceChangedQuoteReq);
+    expect(priceChangedQuoteRes.status).toBe(200);
+    const refreshedQuote = (await priceChangedQuoteRes.json() as any).data;
+    expect(refreshedQuote.priceSnapshot.total).toBe('4700.00');
+    quoteToken = refreshedQuote.quoteToken;
+
+    forceStaleQuote = true;
+    const currentPricingError = await api(new Request('https://maihan.gems/api/v1/dyo/configurations/short-code-123/add-to-cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cartToken: 'cart_token_abc', quoteToken }),
+    }));
+    expect(currentPricingError.status).toBe(409);
+    expect((await currentPricingError.json()).error.code).toBe('PRICE_CHANGED');
+    forceStaleQuote = false;
 
     // 4. Compatible Settings Lookup
     const compReq = new Request('https://maihan.gems/api/v1/dyo/configurations/short-code-123/compatible-settings', {
@@ -297,11 +282,27 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         cartToken: 'cart_token_abc',
+        quoteToken,
       }),
     });
     const addCartRes = await api(addCartReq);
     expect(addCartRes.status).toBe(200);
     const addCartData = (await addCartRes.json()) as any;
     expect(addCartData.data.state).toBe('ADDED_TO_CART');
+    expect(addCartData.data.cart.items[0]).toMatchObject({
+      product_id: 'product-configured-1',
+      configuration_id: 'dyo-cfg-uuid-1',
+      unit_price: '4700.00',
+    });
+    expect(configuredProduct).toMatchObject({ price_amount: '4700.00' });
+    expect(insertedCartSnapshotId).toBe('snap-1');
+    expect(consumedQuote).toBe(true);
+
+    const replayResponse = await api(new Request('https://maihan.gems/api/v1/dyo/configurations/short-code-123/add-to-cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cartToken: 'cart_token_abc', quoteToken }),
+    }));
+    expect(replayResponse.status).toBe(422);
   });
 });
