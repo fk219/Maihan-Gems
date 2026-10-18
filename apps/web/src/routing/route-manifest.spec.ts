@@ -112,6 +112,12 @@ describe('Phase 4 Task 1 — storefront route tree', () => {
       'loading.tsx',
       'route.ts',
       'README.md',
+      // Server-actions module of the account catch-all (a 'use server'
+      // module consumed by client islands, not a route segment).
+      'actions.ts',
+      // Root stylesheets of the app shell (never route segments).
+      'globals.css',
+      'storefront-luxury.css',
     ]);
     const appFiles = listFiles(APP_ROOT);
     for (const file of appFiles) {

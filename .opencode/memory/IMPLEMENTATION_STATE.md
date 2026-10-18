@@ -1,3 +1,27 @@
+# COMPLETE ECOMMERCE, AUTHENTICATION, RBAC, VENDOR & ADMIN PORTALS (2026-10-18)
+
+Completed full-stack ecommerce implementation across `@maihan/db` and `@maihan/web`:
+1. **Authentication, Sessions & RBAC (`packages/db/src/auth/auth-repository.ts`, `apps/web/src/api/auth-handlers.ts`)**:
+   - Memory-hard password hashing via `node:crypto` `scryptSync` (N=16384, r=8, p=1, 16-byte random salt, 64-byte key) + `timingSafeEqual` and dummy hash comparison against timing enumeration.
+   - HMAC-SHA256 signed + PostgreSQL-backed revocable sessions (`maihan_session` HttpOnly cookie, SHA-256 token hash stored at rest in `jobs` `queue='auth_sessions'`).
+   - Single-use SHA-256 hashed email verification tokens (`24h` TTL, sets `customers.email_verified_at`) and password reset tokens (`30m` TTL, revokes all active sessions on reset).
+   - Brute-force lockout after 5 consecutive failed sign-in attempts (`15m` lockout).
+   - Server-side ownership and RBAC enforcement across customer accounts, orders, refunds, vendor routes, and admin routes.
+2. **Vendor Portal & Product Moderation Lifecycle (`packages/db/src/vendor/vendor-repository.ts`, `apps/web/src/api/vendor-handlers.ts`, `apps/web/src/app/vendor/**`)**:
+   - Vendor onboarding (`PENDING` -> `APPROVED` / `SUSPENDED` / `REJECTED`), product creation (`DRAFT`), image MIME/extension/size validation (`assets` + `asset_usages`), review submission (`SUBMITTED`), and strict cross-vendor isolation.
+   - Vendor order line visibility and shipment fulfilment updates (`IN_FULFILLMENT` -> `SHIPPED` -> `DELIVERED`) with carrier and tracking number (`fulfillments`, `order_events`, `audit_logs`, customer notifications).
+3. **Admin Console & Back-Office API (`packages/db/src/backoffice/dashboards-repository.ts`, `apps/web/src/api/admin/backoffice-handlers.ts`, `apps/web/src/app/admin/**`)**:
+   - Live executive dashboard metrics, product moderation (`APPROVE`, `REJECT` with reason, `PUBLISH`, `UNPUBLISH`, `ARCHIVE`), vendor moderation, order & refund oversight, discount code creation, customer directory, `ADMIN_SUPER` role assignment, CMS pages, and append-only audit log review.
+4. **Storefront, Cart, Checkout & Route Completeness (`apps/web/src/app/(storefront)/**`)**:
+   - Next.js App Router API delegation (`/api/v1/[...path]/route.ts`) and `server.ts` request body streaming fix.
+   - Eliminated all `return null` storefront pages (`/policy/[policySlug]`, `/about/[aboutSlug]`, `/showrooms/[showroomSlug]`, `/financing`, `/protection-plan`, `/varieties/[varietySlug]`, `/blog`, `/account/**`, `/admin/**`, `/vendor/**`) and removed orphaned fabricated DYO configurator/review fallbacks.
+   - Unified `storefront-data.ts` to read published `state='ACTIVE'` products from the locked schema alongside NGC catalog items, with atomic stock reservation/depletion (`FOR UPDATE` / conditional `UPDATE`) on order placement.
+5. **Verification**:
+   - `pnpm run typecheck`: 0 errors.
+   - `pnpm -r run test` (against live PostgreSQL 16 `maihan_dev`): 944 passing tests, 0 failures (including `ecommerce-e2e.spec.ts` covering all 14 E2E journeys, `route-manifest.spec.ts`, `data-states.spec.tsx`, and `api-db.spec.ts`).
+   - `pnpm --filter @maihan/web run build` & `check:budgets`: 100% pass (Category 150.5 KB <= 170 KB, Product 147.1 KB <= 190 KB).
+   - `pnpm run schema-fidelity`: PASS on fresh `maihan_dev_fidelity` scratch database (18 migrations).
+
 # DYO QUOTE-BOUND CART CONVERSION (2026-10-16)
 
 DYO conversion locks the configuration and exact quote in a Drizzle transaction,

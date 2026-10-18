@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { CategoryLanding } from '../../../components/storefront/CategoryLanding.js';
 import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
 import { LuxuryProductCard } from '../../../components/storefront/LuxuryProductCard.js';
+import { EmptyState } from '../../../components/design-system/EmptyState.js';
 import { currentStorefront } from '../../../lib/ngc/current-storefront.js';
 import { landingView } from '../../../lib/ngc/landing.js';
 import { parseLandingSlug } from '../../../lib/ngc/routes.js';
@@ -67,7 +68,16 @@ export default async function VarietyPage({ params, searchParams }: PageProps) {
               ))}
             </div>
           </section>
-        ) : null}
+        ) : (
+          <EmptyState
+            title="No pieces from this collection are in the vault right now."
+            action={
+              <a href="/browse" className="lx-btn lx-btn--solid">
+                Browse the vault
+              </a>
+            }
+          />
+        )}
       </CategoryLanding>
     );
   }

@@ -1,0 +1,343 @@
+/* Maihan Gems — back office. Shared identity with the storefront (near-black,
+   gold, ivory) at operational information density. */
+
+.admin-shell {
+  min-height: 100vh;
+  background: var(--color-off-white, #FAFAF8);
+  color: var(--text-primary, #1A1A18);
+  font-family: var(--font-sans, Montserrat, sans-serif);
+}
+
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0.9rem 2rem;
+  background: var(--color-navy-deep, #08121E);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.35);
+}
+
+.admin-topbar__brand {
+  font-family: var(--font-serif, Cormorant Garamond, Georgia, serif);
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.admin-topbar__meta {
+  display: flex;
+  gap: 1.5rem;
+  align-items: baseline;
+  font-size: 0.625rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: calc(100vh - 3.6rem);
+}
+
+@media (min-width: 900px) {
+  .admin-layout {
+    grid-template-columns: 15.5rem minmax(0, 1fr);
+  }
+}
+
+.admin-sidebar {
+  padding: 1.6rem 1.1rem;
+  border-bottom: 1px solid var(--hairline-border, rgba(201, 168, 76, 0.15));
+  background: #ffffff;
+}
+
+@media (min-width: 900px) {
+  .admin-sidebar {
+    border-right: 1px solid var(--hairline-border, rgba(201, 168, 76, 0.15));
+    border-bottom: none;
+  }
+}
+
+.admin-sidebar__group {
+  font-size: 0.5625rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-muted, #8A867E);
+  font-weight: 600;
+  margin: 1.4rem 0 0.5rem 0.6rem;
+}
+
+.admin-sidebar__group:first-child {
+  margin-top: 0;
+}
+
+.admin-sidebar nav a {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  text-decoration: none;
+  color: var(--text-secondary, #4A4740);
+  font-size: 0.875rem;
+  border-left: 2px solid transparent;
+}
+
+.admin-sidebar nav a:hover {
+  color: var(--color-gold-dark, #8B6914);
+}
+
+.admin-sidebar nav a.is-on {
+  color: var(--color-gold-dark, #8B6914);
+  border-left-color: var(--color-gold, #C9A84C);
+  background: rgba(201, 168, 76, 0.07);
+}
+
+.admin-main {
+  padding: 2rem 2.4rem 4rem;
+  min-width: 0;
+}
+
+.admin-eyebrow,
+.admin-main .admin-eyebrow {
+  display: block;
+  font-size: 0.6875rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-muted, #8A867E);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.admin-main h1 {
+  font-family: var(--font-serif, Cormorant Garamond, Georgia, serif);
+  font-size: 1.875rem;
+  font-weight: 500;
+  margin: 0 0 0.35rem;
+}
+
+.admin-main .admin-lede {
+  color: var(--text-secondary, #4A4740);
+  font-size: 0.9375rem;
+  margin: 0 0 2rem;
+}
+
+.admin-tilegrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.admin-tile {
+  border: 1px solid var(--hairline-border, rgba(201, 168, 76, 0.15));
+  background: #ffffff;
+  padding: 1.35rem 1.5rem;
+}
+
+.admin-tile__label {
+  display: block;
+  font-size: 0.625rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-muted, #8A867E);
+  font-weight: 600;
+}
+
+.admin-tile__value {
+  font-family: var(--font-mono, monospace);
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+  margin: 0.35rem 0 0;
+}
+
+.admin-tile__note {
+  color: var(--text-muted, #8A867E);
+  font-size: 0.75rem;
+  margin: 0.25rem 0 0;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border: 1px solid var(--hairline-border, rgba(201, 168, 76, 0.15));
+  font-size: 0.875rem;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.admin-table th {
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted, #8A867E);
+  font-weight: 600;
+  background: rgba(201, 168, 76, 0.05);
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table a {
+  color: var(--color-gold-dark, #8B6914);
+  text-decoration: none;
+  font-family: var(--font-mono, monospace);
+}
+
+.admin-table a:hover {
+  text-decoration: underline;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  font-size: 0.5625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--text-secondary, #4A4740);
+}
+
+.admin-badge--danger {
+  border-color: rgba(180, 40, 40, 0.4);
+  color: #8a2424;
+}
+
+.admin-badge--ok {
+  border-color: rgba(61, 107, 61, 0.4);
+  color: #2f5230;
+}
+
+.admin-gate {
+  max-width: 34rem;
+  margin: 16vh auto;
+  padding: 2.5rem;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  background: #ffffff;
+}
+
+.admin-gate span.admin-eyebrow,
+.admin-gate .admin-eyebrow {
+  margin-bottom: 0.75rem;
+}
+
+.admin-gate h1 {
+  font-family: var(--font-serif, Cormorant Garamond, Georgia, serif);
+  font-size: 1.75rem;
+  font-weight: 500;
+  margin: 0 0 0.75rem;
+}
+
+.admin-gate p {
+  color: var(--text-secondary, #4A4740);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+.admin-gate__hint {
+  margin-top: 1.25rem;
+  font-size: 0.8125rem !important;
+}
+
+.admin-gate code {
+  font-family: var(--font-mono, monospace);
+  background: rgba(201, 168, 76, 0.1);
+  padding: 0.05rem 0.3rem;
+}
+
+.admin-panel {
+  border: 1px solid var(--hairline-border, rgba(201, 168, 76, 0.15));
+  background: #ffffff;
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-panel h2 {
+  font-family: var(--font-serif, Cormorant Garamond, Georgia, serif);
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0 0 1rem;
+}
+
+.admin-rows {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.admin-rows div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  padding-bottom: 0.35rem;
+  font-size: 0.875rem;
+}
+
+.admin-rows dt {
+  color: var(--text-muted, #8A867E);
+}
+
+.admin-rows dd {
+  font-family: var(--font-mono, monospace);
+  text-align: right;
+}
+
+.admin-timeline {
+  display: grid;
+  gap: 0.7rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+
+.admin-timeline li {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.admin-timeline__state {
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gold-dark, #8B6914);
+  font-weight: 600;
+}
+
+.admin-timeline__when {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  color: var(--text-muted, #8A867E);
+}
+
+.admin-timeline__reason {
+  color: var(--text-secondary, #4A4740);
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 720px) {
+  .admin-timeline li {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+}
+
+.admin-empty {
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-muted, #8A867E);
+  font-size: 0.9375rem;
+  border: 1px dashed rgba(201, 168, 76, 0.35);
+  background: rgba(201, 168, 76, 0.03);
+}

@@ -2,26 +2,34 @@
  * apps/web/src/app/(storefront)/checkout/secure-payment/page.tsx
  *
  * `/checkout/secure-payment` — checkout step 3 (target of the observed
- * /cart/secure-payment 301). SoT 12.2.
+ * /cart/secure-payment 301). SoT 12.2. The final review places the order
+ * through the real confirm checkpoint and order endpoint; the resulting
+ * confirmation is rendered from the authoritative order read model.
  */
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
+import { CheckoutConfirm } from '../../../../components/checkout/CheckoutConfirm.js';
 
 export const metadata: Metadata = {
   title: 'Secure Payment | Maihan Gems Checkout',
-  description: 'Complete end-to-end encrypted bank wire, credit card, or escrow payment settlement.',
+  description: 'Final review and order placement. Settlement state is confirmed by the payment provider, never by this page.',
 };
 
-export default function CheckoutSecurePaymentPage() {
+export default async function CheckoutSecurePaymentPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ session?: string }>;
+}) {
+  const { session } = await searchParams;
+
   return (
-    <main className="page checkout-page">
+    <main className="page checkout-page" id="main-content">
       <Breadcrumbs
         crumbs={[
           { label: 'Home', href: '/' },
-          { label: 'Shopping Bag', href: '/cart' },
-          { label: 'Payment Order', href: '/checkout/payment-order' },
+          { label: 'Bag', href: '/cart' },
+          { label: 'Order Summary', href: '/checkout/order-summary' },
           { label: 'Secure Payment' },
         ]}
       />
@@ -34,49 +42,31 @@ export default function CheckoutSecurePaymentPage() {
           </div>
           <div className="checkout-step checkout-step--completed">
             <span>✓</span>
-            <span>Payment Order</span>
+            <span>Delivery &amp; Payment</span>
           </div>
           <div className="checkout-step checkout-step--active">
             <span>3</span>
-            <span>Secure Settlement</span>
+            <span>Review &amp; Place</span>
           </div>
         </div>
 
         <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
           Checkpoint Funnel · Step 3 of 3
         </span>
-        <h1 style={{ color: 'var(--text-primary)', marginTop: 0 }}>Secure Settlement Gateway</h1>
+        <h1 style={{ color: 'var(--text-primary)', marginTop: 0 }}>Final Review &amp; Order</h1>
         <p className="page-subtitle" style={{ color: 'var(--text-secondary)' }}>
-          Payment processing runs via high-security encrypted protocols. Funds remain in custodial escrow until laboratory dossier release.
+          Placing the order is idempotent and atomic: immutable price, gemstone and setting snapshots are taken
+          at placement, and the state timeline is append-only.
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', margin: '2rem 0' }}>
-          <div style={{ padding: '1.5rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-              International Bank Wire (SWIFT / IBAN)
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              Direct settlement to Maihan Gems custodial corporate escrow in Dubai (Emirates NBD) or Geneva (Pictet / UBS). Wire instructions provided upon order creation.
-            </p>
+        {session ? (
+          <CheckoutConfirm sessionId={session} />
+        ) : (
+          <div className="lx-account-card" role="status">
+            <p className="lx-account-note">No checkout session in progress.</p>
+            <a href="/checkout/order-summary" className="lx-btn lx-btn--solid">Start checkout</a>
           </div>
-          <div style={{ padding: '1.5rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-              Encrypted Digital Card &amp; Amex
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              PCI-DSS Level 1 compliant gateway with 3D-Secure 2.0 biometric multi-factor authentication.
-            </p>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}>
-          <Link href="/cart" className="btn-primary">
-            View Current Bag
-          </Link>
-          <Link href="/contact" className="btn-secondary">
-            Consult Private Client Advisory
-          </Link>
-        </div>
+        )}
       </div>
     </main>
   );

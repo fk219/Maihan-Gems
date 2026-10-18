@@ -35,11 +35,13 @@ import { ContractError } from '@maihan/contracts';
 import { HANDLERS, type HandlerOutcome, type RouteContext } from './handlers.js';
 import { SEARCH_HANDLERS } from './search-handlers.js';
 import { COMMERCE_HANDLERS } from './commerce-handlers.js';
+import { AUTH_HANDLERS } from './auth-handlers.js';
 import { ACCOUNT_HANDLERS } from './account-handlers.js';
 import { FAVORITES_HANDLERS } from './favorites-handlers.js';
 import { ADDON_HANDLERS } from './addon-handlers.js';
 import { DISCOUNT_HANDLERS } from './discount-handlers.js';
 import { REFUND_HANDLERS } from './refund-handlers.js';
+import { VENDOR_HANDLERS } from './vendor-handlers.js';
 import {
   createDyoConfigurationHandler,
   getDyoConfigurationHandler,
@@ -84,6 +86,31 @@ import {
 } from './envelope.js';
 import { lookupRoute } from './routes.js';
 import { applyCacheHeaders } from './headers.js';
+import {
+  adminCreatePageHandler,
+  adminListPagesHandler,
+  adminGetPageHandler,
+  adminUpdateBlocksHandler,
+  adminSubmitForReviewHandler,
+  adminDecideRevisionHandler,
+  adminPublishPageHandler,
+  adminArchivePageHandler,
+} from './admin/cms-handlers.js';
+import {
+  adminDashboardSummaryHandler,
+  adminProductsListHandler,
+  adminModerateProductHandler,
+  adminVendorsListHandler,
+  adminModerateVendorHandler,
+  adminOrdersListHandler,
+  adminRefundsListHandler,
+  adminDiscountsListHandler,
+  adminCreateDiscountHandler,
+  adminCustomersListHandler,
+  adminAssignRoleHandler,
+  adminAuditLogsListHandler,
+  adminCmsPagesListHandler,
+} from './admin/backoffice-handlers.js';
 import type { RateLimitDecision, RateLimitGate } from './ratelimit/gate.js';
 import type { CatalogQueryService } from '../modules/catalog/index.js';
 import type { CatalogDatabase } from '@maihan/db';
@@ -191,10 +218,35 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       metricsHandler,
     };
 
+    const ADMIN_HANDLERS: Record<string, any> = {
+      adminCreatePageHandler,
+      adminListPagesHandler,
+      adminGetPageHandler,
+      adminUpdateBlocksHandler,
+      adminSubmitForReviewHandler,
+      adminDecideRevisionHandler,
+      adminPublishPageHandler,
+      adminArchivePageHandler,
+      adminDashboardSummaryHandler,
+      adminProductsListHandler,
+      adminModerateProductHandler,
+      adminVendorsListHandler,
+      adminModerateVendorHandler,
+      adminOrdersListHandler,
+      adminRefundsListHandler,
+      adminDiscountsListHandler,
+      adminCreateDiscountHandler,
+      adminCustomersListHandler,
+      adminAssignRoleHandler,
+      adminAuditLogsListHandler,
+      adminCmsPagesListHandler,
+    };
+
     const handler =
       HANDLERS[lookup.route.id] ??
       SEARCH_HANDLERS[lookup.route.id] ??
       COMMERCE_HANDLERS[lookup.route.id] ??
+      AUTH_HANDLERS[lookup.route.id] ??
       ACCOUNT_HANDLERS[lookup.route.id] ??
       FAVORITES_HANDLERS[lookup.route.id] ??
       ADDON_HANDLERS[lookup.route.id] ??
@@ -205,7 +257,9 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       AI_HANDLERS[lookup.route.id] ??
       WHATSAPP_HANDLERS[lookup.route.id] ??
       WEBAR_HANDLERS[lookup.route.id] ??
-      HEALTH_HANDLERS[lookup.route.id];
+      VENDOR_HANDLERS[lookup.route.id] ??
+      HEALTH_HANDLERS[lookup.route.id] ??
+      ADMIN_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }

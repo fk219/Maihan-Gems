@@ -7,6 +7,7 @@ import {
   getBag,
   removeFromBag,
   subscribeAtelier,
+  updateBagQuantity,
   type AtelierItem,
 } from '../../lib/atelier-store.js';
 import { itemImage } from '../../lib/atelier-item.js';
@@ -32,7 +33,14 @@ export function BagView({
     return subscribeAtelier(() => setItems(getBag()));
   }, [forceEmpty]);
 
-  const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.priceUsd, 0), [items]);
+  const subtotal = useMemo(
+    () => items.reduce((sum, item) => sum + item.priceUsd * (item.quantity ?? 1), 0),
+    [items],
+  );
+  const totalPieceCount = useMemo(
+    () => items.reduce((sum, item) => sum + (item.quantity ?? 1), 0),
+    [items],
+  );
   const duty = subtotal * 0.05;
 
   if (items.length === 0) {
@@ -52,24 +60,47 @@ export function BagView({
   return (
     <div className="lx-bag">
       <ul className="lx-bag__lines">
-        {items.map((item) => (
-          <li key={item.id} className="lx-bag__line">
-            <Link href={`/product/${item.slug}`} className="lx-bag__thumb">
-              <img src={itemImage(item)} alt={item.title} />
-            </Link>
-            <div className="lx-bag__copy">
-              <p className="lx-card__meta">{item.kind}</p>
-              <h2 className="lx-bag__title">
-                <Link href={`/product/${item.slug}`}>{item.title}</Link>
-              </h2>
-              {item.specs ? <p className="lx-card__specs">{item.specs}</p> : null}
-              <button type="button" className="lx-text-btn" onClick={() => removeFromBag(item.id)}>
-                Remove
-              </button>
-            </div>
-            <p className="lx-bag__price">{formatMoney(item.priceUsd, currency, rates)}</p>
-          </li>
-        ))}
+        {items.map((item) => {
+          const qty = item.quantity ?? 1;
+          return (
+            <li key={item.id} className="lx-bag__line">
+              <Link href={`/product/${item.slug}`} className="lx-bag__thumb">
+                <img src={itemImage(item)} alt={item.title} />
+              </Link>
+              <div className="lx-bag__copy">
+                <p className="lx-card__meta">{item.kind}</p>
+                <h2 className="lx-bag__title">
+                  <Link href={`/product/${item.slug}`}>{item.title}</Link>
+                </h2>
+                {item.specs ? <p className="lx-card__specs">{item.specs}</p> : null}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.5rem' }}>
+                  <button
+                    type="button"
+                    className="lx-text-btn"
+                    aria-label={`Decrease quantity for ${item.title}`}
+                    onClick={() => updateBagQuantity(item.id, qty - 1)}
+                  >
+                    −
+                  </button>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>Qty {qty}</span>
+                  <button
+                    type="button"
+                    className="lx-text-btn"
+                    aria-label={`Increase quantity for ${item.title}`}
+                    onClick={() => updateBagQuantity(item.id, qty + 1)}
+                  >
+                    +
+                  </button>
+                  <span aria-hidden="true">·</span>
+                  <button type="button" className="lx-text-btn" onClick={() => removeFromBag(item.id)}>
+                    Remove
+                  </button>
+                </div>
+              </div>
+              <p className="lx-bag__price">{formatMoney(item.priceUsd * qty, currency, rates)}</p>
+            </li>
+          );
+        })}
       </ul>
 
       <aside className="lx-summary">
@@ -77,7 +108,7 @@ export function BagView({
         <h2 className="lx-h2" style={{ fontSize: '1.8rem', marginBottom: '1.4rem' }}>Summary</h2>
         <dl className="lx-summary__rows">
           <div>
-            <dt>Subtotal · {items.length} piece{items.length === 1 ? '' : 's'}</dt>
+            <dt>Subtotal · {totalPieceCount} piece{totalPieceCount === 1 ? '' : 's'}</dt>
             <dd>{formatMoney(subtotal, currency, rates)}</dd>
           </div>
           <div>
@@ -96,7 +127,8 @@ export function BagView({
         <p className="lx-summary__note">
           Prices follow your selected currency ({currency}). Final settlement is confirmed by concierge.
         </p>
-        <Link href="/contact" className="lx-btn lx-btn--solid lx-btn--block">Request reservation</Link>
+        <Link href="/checkout/order-summary" className="lx-btn lx-btn--solid lx-btn--block">Secure checkout</Link>
+        <Link href="/contact" className="lx-btn lx-btn--ghost lx-btn--block">Request concierge reservation</Link>
         <Link href="/browse" className="lx-btn lx-btn--ghost lx-btn--block">Continue in the vault</Link>
       </aside>
     </div>

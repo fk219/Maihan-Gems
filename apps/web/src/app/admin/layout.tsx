@@ -1,12 +1,12 @@
 /**
  * apps/web/src/app/admin/layout.tsx
  *
- * Admin route group layout.
- *
- * SoT 12.2: "admin/ — separate layout, separate authz". Auth, RBAC and the
- * admin console are Phase 13; the structural separation (a distinct layout,
- * no storefront chrome, non-indexable) is what Task 1 establishes.
+ * Admin route group layout — separate chrome, separate authz (SoT 12.2).
+ * The shell renders a professional back-office frame; every page inside
+ * re-checks its own capability through requireAdminAccess.
  */
+import '../../styles/admin.css';
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <div className="admin-shell">{children}</div>;
 }

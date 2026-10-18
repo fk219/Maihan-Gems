@@ -25,6 +25,7 @@ import {
   type CatalogDatabase,
 } from '@maihan/db';
 import type { RouteHandler, RouteContext } from './handlers.js';
+import { resolveRequestActor } from './auth-handlers.js';
 import { requireIdentifier } from './query.js';
 
 function getDb(ctx: RouteContext): CatalogDatabase {
@@ -34,15 +35,24 @@ function getDb(ctx: RouteContext): CatalogDatabase {
   throw new ContractError('INTERNAL', 'Database connection not available.');
 }
 
-function requireCustomerId(ctx: RouteContext): string {
-  const customerId =
+async function requireCustomerId(ctx: RouteContext): Promise<string> {
+  const actor = await resolveRequestActor(ctx);
+  const headerCustomerId =
     ctx.request?.headers.get('x-customer-id') ??
     ctx.url.searchParams.get('customer_id');
 
-  if (!customerId) {
-    throw new ContractError('UNAUTHORIZED', 'Authentication required for account access.');
+  if (actor) {
+    if (headerCustomerId && headerCustomerId !== actor.customer_id) {
+      throw new ContractError('FORBIDDEN', 'Cross-customer account access is forbidden.');
+    }
+    return actor.customer_id;
   }
-  return customerId;
+
+  if (headerCustomerId && process.env['MAIHAN_ENV'] !== 'production') {
+    return headerCustomerId;
+  }
+
+  throw new ContractError('UNAUTHORIZED', 'Authentication required for account access.');
 }
 
 async function parseBody(request?: Request): Promise<unknown> {
@@ -59,7 +69,7 @@ async function parseBody(request?: Request): Promise<unknown> {
 export const ACCOUNT_HANDLERS: Record<string, RouteHandler> = {
   async getProfile(ctx) {
     const db = getDb(ctx);
-    const customerId = requireCustomerId(ctx);
+    const customerId = await requireCustomerId(ctx);
     const profile = await getCustomerProfile(db, customerId);
     return {
       status: 200,
@@ -69,7 +79,7 @@ export const ACCOUNT_HANDLERS: Record<string, RouteHandler> = {
 
   async updateProfile(ctx) {
     const db = getDb(ctx);
-    const customerId = requireCustomerId(ctx);
+    const customerId = await requireCustomerId(ctx);
     const body = await parseBody(ctx.request);
     const input = UpdateCustomerProfileInputSchema.parse(body);
     const profile = await updateCustomerProfile(db, customerId, input);
@@ -81,7 +91,7 @@ export const ACCOUNT_HANDLERS: Record<string, RouteHandler> = {
 
   async getAddresses(ctx) {
     const db = getDb(ctx);
-    const customerId = requireCustomerId(ctx);
+    const customerId = await requireCustomerId(ctx);
     const addresses = await getCustomerAddresses(db, customerId);
     return {
       status: 200,
@@ -91,7 +101,7 @@ export const ACCOUNT_HANDLERS: Record<string, RouteHandler> = {
 
   async createAddress(ctx) {
     const db = getDb(ctx);
-    const customerId = requireCustomerId(ctx);
+    const customerId = await requireCustomerId(ctx);
     const body = await parseBody(ctx.request);
     const input = CreateCustomerAddressInputSchema.parse(body);
     const address = await createCustomerAddress(db, customerId, input);
@@ -103,7 +113,7 @@ export const ACCOUNT_HANDLERS: Record<string, RouteHandler> = {
 
   async updateAddress(ctx) {
     const db = getDb(ctx);
-    const customerId = requireCustomerId(ctx);
+    const customerId = await requireCustomerId(ctx);
     const addressId = requireIdentifier(ctx.params['addressId'], 'addressId');
     const body = await parseBody(ctx.request);
     const input = UpdateCustomerAddressInputSchema.parse(body);
@@ -116,7 +126,7 @@ export const ACCOUNT_HANDLERS: Record<string, RouteHandler> = {
 
   async deleteAddress(ctx) {
     const db = getDb(ctx);
-    const customerId = requireCustomerId(ctx);
+    const customerId = await requireCustomerId(ctx);
     const addressId = requireIdentifier(ctx.params['addressId'], 'addressId');
     await deleteCustomerAddress(db, customerId, addressId);
     return {
@@ -127,7 +137,7 @@ export const ACCOUNT_HANDLERS: Record<string, RouteHandler> = {
 
   async getOrders(ctx) {
     const db = getDb(ctx);
-    const customerId = requireCustomerId(ctx);
+    const customerId = await requireCustomerId(ctx);
     const orders = await getCustomerOrders(db, customerId);
     return {
       status: 200,
@@ -137,7 +147,7 @@ export const ACCOUNT_HANDLERS: Record<string, RouteHandler> = {
 
   async getCustomerOrderDetail(ctx) {
     const db = getDb(ctx);
-    const customerId = requireCustomerId(ctx);
+    const customerId = await requireCustomerId(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
     const order = await getCustomerOrder(db, customerId, orderId);
     return {

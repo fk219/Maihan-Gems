@@ -274,7 +274,7 @@ export async function placeOrder(
 
   // Insert order_items with immutable gemstone, configuration, and document snapshots
   for (const item of cart.items) {
-    // Query gemstone specs for stone snapshot
+    // Query gemstone specs and product stock for stone snapshot & concurrency check
     const gemRes = await db.execute(sql`
       SELECT
         g.id,
@@ -285,7 +285,10 @@ export async function placeOrder(
         go.name AS origin,
         t.label AS treatment,
         cl.label AS clarity,
-        gc.name AS colour_description
+        gc.name AS colour_description,
+        p.state::text AS product_state,
+        p.availability AS product_availability,
+        p.structured_extra AS product_extra
       FROM products p
       LEFT JOIN gemstones g ON g.id = p.gemstone_id OR g.id = p.gemstone_pair_id
       LEFT JOIN gemstone_varieties gv ON gv.id = g.variety_id
@@ -299,6 +302,38 @@ export async function placeOrder(
 
     const gemSnapshot: Record<string, unknown> =
       gemRes.rows.length > 0 && gemRes.rows[0] ? (gemRes.rows[0] as Record<string, unknown>) : {};
+
+    if (!item.configuration_id) {
+      if (
+        (gemSnapshot['product_state'] && gemSnapshot['product_state'] !== 'ACTIVE') ||
+        gemSnapshot['product_availability'] === false
+      ) {
+        throw new ContractError('UNPROCESSABLE', `Product "${item.title}" is no longer available in stock.`);
+      }
+      const prodExtra = gemSnapshot['product_extra'] as Record<string, unknown> | null | undefined;
+      if (prodExtra && typeof prodExtra['inventory_quantity'] === 'number') {
+        const currentQty = Number(prodExtra['inventory_quantity']);
+        if (currentQty < item.quantity) {
+          throw new ContractError('UNPROCESSABLE', `Insufficient stock for "${item.title}".`);
+        }
+        const remainingQty = currentQty - item.quantity;
+        const nextExtra = { ...prodExtra, inventory_quantity: remainingQty };
+        const decRes = await db.execute(sql`
+          UPDATE products
+          SET availability = ${remainingQty > 0},
+              state = CASE WHEN ${remainingQty <= 0} THEN 'SOLD_OUT'::product_state ELSE state END,
+              structured_extra = ${JSON.stringify(nextExtra)}::jsonb,
+              updated_at = now()
+          WHERE id = ${item.product_id}
+            AND availability = true
+            AND COALESCE((structured_extra->>'inventory_quantity')::int, 1) >= ${item.quantity}
+          RETURNING id
+        `);
+        if (decRes.rows.length === 0) {
+          throw new ContractError('UNPROCESSABLE', `Concurrent order conflict: "${item.title}" is out of stock.`);
+        }
+      }
+    }
 
     // Query certificate references for document snapshot
     const certRes = await db.execute(sql`

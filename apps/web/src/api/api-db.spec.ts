@@ -38,6 +38,7 @@ const describeDb = DB_URL === null ? describe.skip : describe;
  * DB-backed suites SKIP there instead of failing on a missing relation.
  */
 let schemaReady = false;
+let corpusReady = false;
 
 beforeAll(async () => {
   if (DB_URL === null) return;
@@ -48,8 +49,17 @@ beforeAll(async () => {
     );
     const row = result.rows[0] as { t: string | null; r: string | null };
     schemaReady = row.t !== null && row.r !== null;
+    if (schemaReady) {
+      const dataProbe = await probe.query(
+        `SELECT (SELECT count(*) FROM gemstones WHERE gem_ref = 'K1551') AS k1551,
+                (SELECT count(*) FROM products WHERE state = 'DRAFT' AND deleted_at IS NULL AND source_url LIKE 'https://naturalgemstones.com/%') AS drafts`,
+      );
+      const counts = dataProbe.rows[0] as { k1551: string; drafts: string };
+      corpusReady = Number(counts.k1551) > 0 && Number(counts.drafts) >= 4;
+    }
   } catch {
     schemaReady = false; // unreachable database: every DB-backed test skips
+    corpusReady = false;
   } finally {
     await probe.end();
   }
@@ -59,6 +69,13 @@ beforeAll(async () => {
 const itDb = (name: string, fn: () => Promise<void>): void =>
   it(name, async (ctx) => {
     if (!schemaReady) return ctx.skip();
+    await fn();
+  });
+
+/** Runs only when the Phase 2 source corpus has been loaded into the database. */
+const itData = (name: string, fn: () => Promise<void>): void =>
+  it(name, async (ctx) => {
+    if (!schemaReady || !corpusReady) return ctx.skip();
     await fn();
   });
 
@@ -101,7 +118,7 @@ describeDb('catalogue API against the real migrated database', () => {
   let fixtures: PublishedFixture[] = [];
 
   beforeAll(async () => {
-    if (!schemaReady) return;
+    if (!schemaReady || !corpusReady) return;
     harness = buildApi();
     // The migrated corpus is DRAFT until Phase 12 curation — the product
     // read model gates on state='ACTIVE' (products-repository.ts, doc 10).
@@ -126,7 +143,7 @@ describeDb('catalogue API against the real migrated database', () => {
   });
 
   afterAll(async () => {
-    if (!schemaReady) return;
+    if (!schemaReady || !corpusReady) return;
     for (const fixture of fixtures) {
       await harness.pool.query(
         'UPDATE products SET state = $2, published_at = NULL WHERE slug = $1',
@@ -136,7 +153,7 @@ describeDb('catalogue API against the real migrated database', () => {
     await harness.close();
   });
 
-  itDb('product list: documented envelope, real published items, real facet values', async () => {
+  itData('product list: documented envelope, real published items, real facet values', async () => {
     const response = await get(harness.api, '/api/v1/products?limit=2');
     expect(response.status).toBe(200);
     const body = ProductListEnvelopeSchema.parse(await response.json());
@@ -156,7 +173,7 @@ describeDb('catalogue API against the real migrated database', () => {
     }
   });
 
-  itDb('pagination determinism: identical requests return identical pages; cursors advance without overlap', async () => {
+  itData('pagination determinism: identical requests return identical pages; cursors advance without overlap', async () => {
     const firstA = ProductListEnvelopeSchema.parse(
       await (await get(harness.api, '/api/v1/products?limit=2')).json(),
     );
@@ -182,7 +199,7 @@ describeDb('catalogue API against the real migrated database', () => {
     expect(second.meta.next_cursor).toBeNull(); // end of the published set
   });
 
-  itDb('an unsupported filter VALUE is honestly reported in rejectedFilters, never silently dropped', async () => {
+  itData('an unsupported filter VALUE is honestly reported in rejectedFilters, never silently dropped', async () => {
     const response = await get(
       harness.api,
       '/api/v1/products?limit=5&variety=definitely-not-a-migrated-variety',
@@ -193,7 +210,7 @@ describeDb('catalogue API against the real migrated database', () => {
     expect(JSON.stringify(body.rejectedFilters)).toContain('definitely-not-a-migrated-variety');
   });
 
-  itDb('product detail: real slug resolves and provenance travels verbatim from Phase 2', async () => {
+  itData('product detail: real slug resolves and provenance travels verbatim from Phase 2', async () => {
     const fixture = fixtures[0] as PublishedFixture;
     const response = await get(harness.api, `/api/v1/products/${fixture.slug}`);
     expect(response.status).toBe(200);
@@ -204,7 +221,7 @@ describeDb('catalogue API against the real migrated database', () => {
     expect(typeof body.data.provenance.import_batch).toBe('string');
   });
 
-  itDb('the publication gate still bites: a DRAFT product stays 404', async () => {
+  itData('the publication gate still bites: a DRAFT product stays 404', async () => {
     const draft = await harness.pool.query(
       `SELECT slug FROM products
         WHERE state = 'DRAFT' AND deleted_at IS NULL AND slug IS NOT NULL AND slug <> ''
@@ -220,7 +237,7 @@ describeDb('catalogue API against the real migrated database', () => {
     expect(body.error.code).toBe('PRODUCT_NOT_FOUND');
   });
 
-  itDb('gemstone detail: real gemRef resolves with provenance', async () => {
+  itData('gemstone detail: real gemRef resolves with provenance', async () => {
     const response = await get(harness.api, `/api/v1/gemstones/${REAL_GEM_REF}`);
     expect(response.status).toBe(200);
     const body = GemstoneDetailEnvelopeSchema.parse(await response.json());
@@ -228,7 +245,7 @@ describeDb('catalogue API against the real migrated database', () => {
     expect(body.data.provenance.source_url).toMatch(/^https:\/\/naturalgemstones\.com\//);
   });
 
-  itDb('taxonomy reflects the migrated reference data (facets endpoint is taxonomy-derived)', async () => {
+  itData('taxonomy reflects the migrated reference data (facets endpoint is taxonomy-derived)', async () => {
     const response = await get(harness.api, '/api/v1/taxonomy/facets');
     expect(response.status).toBe(200);
     const body: unknown = await response.json();

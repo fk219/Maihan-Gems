@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { CategoryLanding } from '../../../components/storefront/CategoryLanding.js';
 import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
 import { LuxuryProductCard } from '../../../components/storefront/LuxuryProductCard.js';
+import { EmptyState } from '../../../components/design-system/EmptyState.js';
 import { landingView, settingsHub } from '../../../lib/ngc/landing.js';
 
 export const dynamic = 'force-dynamic';
@@ -35,7 +36,16 @@ export default async function SettingsPage({
               ))}
             </div>
           </section>
-        ) : null}
+        ) : (
+          <EmptyState
+            title="No mountings match this filter."
+            action={
+              <a href="/settings" className="lx-btn lx-btn--solid">
+                View all settings
+              </a>
+            }
+          />
+        )}
       </CategoryLanding>
     );
   }

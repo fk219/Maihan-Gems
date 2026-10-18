@@ -40,7 +40,7 @@ import { RATE_LIMIT_POLICIES } from './ratelimit/policy.js';
 import { createBackendChain } from './ratelimit/limiter.js';
 import type { CacheStore, GenerationStore } from '../modules/catalog/index.js';
 
-function toRequest(req: IncomingMessage): Request {
+async function toRequest(req: IncomingMessage): Promise<Request> {
   const host = req.headers.host ?? '127.0.0.1';
   const headers = new Headers();
   for (const [name, value] of Object.entries(req.headers)) {
@@ -58,10 +58,19 @@ function toRequest(req: IncomingMessage): Request {
   if (remote !== undefined && remote !== null && remote !== '') {
     headers.set('x-client-ip', remote);
   }
-  return new Request(`http://${host}${req.url ?? '/'}`, {
-    method: req.method ?? 'GET',
-    headers,
-  });
+  const method = req.method ?? 'GET';
+  const url = `http://${host}${req.url ?? '/'}`;
+  if (method === 'GET' || method === 'HEAD') {
+    return new Request(url, { method, headers });
+  }
+  // Request bodies must travel with the Request: POST/PATCH/DELETE handlers
+  // (carts, checkout, account, DYO, webhooks) read `request.text()/json()`,
+  // and webhook verification needs the exact raw bytes as one buffer.
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) chunks.push(Buffer.from(chunk as Buffer));
+  const body = Buffer.concat(chunks);
+  const bodyInit = new Uint8Array(body);
+  return new Request(url, { method, headers, body: bodyInit });
 }
 
 async function writeResponse(response: Response, res: ServerResponse): Promise<void> {
@@ -78,7 +87,7 @@ export function createNodeServer(api: CatalogApi): Server {
   return createServer((req, res) => {
     void (async () => {
       try {
-        const response = await api(toRequest(req));
+        const response = await api(await toRequest(req));
         await writeResponse(response, res);
       } catch {
         // Transport-level failure only (the API maps all catalogue errors).

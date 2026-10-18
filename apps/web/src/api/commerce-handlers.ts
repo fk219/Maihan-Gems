@@ -43,6 +43,7 @@ import {
   type CatalogDatabase,
 } from '@maihan/db';
 import { TestPaymentProvider } from '../integrations/payment/test-payment-provider.js';
+import { resolveRequestActor } from './auth-handlers.js';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
@@ -136,9 +137,14 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
 
   async createCheckoutSession(ctx) {
     const db = getDb(ctx);
+    const actor = await resolveRequestActor(ctx);
     const body = await parseBody(ctx.request);
     const input = CreateCheckoutSessionInputSchema.parse(body);
-    const session = await createCheckoutSession(db, input);
+    const session = await createCheckoutSession(db, {
+      ...input,
+      customer_id: input.customer_id ?? actor?.customer_id,
+      email: input.email ?? actor?.email,
+    });
     return {
       status: 201,
       body: { data: session },
@@ -206,6 +212,14 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     const db = getDb(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
     const order = await getOrderById(db, orderId);
+    const actor = await resolveRequestActor(ctx);
+    const headerCustomerId = ctx.request?.headers.get('x-customer-id');
+    if (actor && actor.role === 'CUSTOMER' && order.customer_id && order.customer_id !== actor.customer_id) {
+      throw new ContractError('FORBIDDEN', 'You do not have permission to access another customer’s order.');
+    }
+    if (!actor && headerCustomerId && order.customer_id && order.customer_id !== headerCustomerId) {
+      throw new ContractError('FORBIDDEN', 'You do not have permission to access another customer’s order.');
+    }
     return {
       status: 200,
       body: { data: order },
@@ -215,6 +229,15 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
   async getOrderTimeline(ctx) {
     const db = getDb(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
+    const order = await getOrderById(db, orderId);
+    const actor = await resolveRequestActor(ctx);
+    const headerCustomerId = ctx.request?.headers.get('x-customer-id');
+    if (actor && actor.role === 'CUSTOMER' && order.customer_id && order.customer_id !== actor.customer_id) {
+      throw new ContractError('FORBIDDEN', 'You do not have permission to access another customer’s order timeline.');
+    }
+    if (!actor && headerCustomerId && order.customer_id && order.customer_id !== headerCustomerId) {
+      throw new ContractError('FORBIDDEN', 'You do not have permission to access another customer’s order timeline.');
+    }
     const events = await getOrderEvents(db, orderId);
     return {
       status: 200,
@@ -225,13 +248,22 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
   async cancelOrder(ctx) {
     const db = getDb(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
+    const existing = await getOrderById(db, orderId);
+    const actor = await resolveRequestActor(ctx);
+    const headerCustomerId = ctx.request?.headers.get('x-customer-id');
+    if (actor && actor.role === 'CUSTOMER' && existing.customer_id && existing.customer_id !== actor.customer_id) {
+      throw new ContractError('FORBIDDEN', 'You do not have permission to cancel another customer’s order.');
+    }
+    if (!actor && headerCustomerId && existing.customer_id && existing.customer_id !== headerCustomerId) {
+      throw new ContractError('FORBIDDEN', 'You do not have permission to cancel another customer’s order.');
+    }
     const body = await parseBody(ctx.request);
     const reason = typeof (body as any)?.reason === 'string' ? (body as any).reason : 'Cancelled by customer';
     const result = await transitionOrderState(
       db,
       orderId,
       { type: 'CANCEL_REQUESTED', reason, actor: 'CUSTOMER' },
-      { type: 'CUSTOMER' },
+      { type: 'CUSTOMER', id: actor?.customer_id },
     );
     return {
       status: 200,

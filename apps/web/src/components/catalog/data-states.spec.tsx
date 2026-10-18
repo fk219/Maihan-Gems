@@ -30,14 +30,17 @@ const read = (rel: string): string => readFileSync(join(WEB_ROOT, rel), 'utf8');
 
 const LISTING_ROUTES = [
   '[varietySlug]',
-  '[varietySlug]-pairs',
-  '[varietySlug]-rings',
   'colour/[colourSlug]',
   'settings',
   'search',
+  'browse',
+  'shop',
+  'pairs',
+  'jewellery',
+  'varieties/[varietySlug]',
 ];
 
-const DETAIL_ROUTES = ['products/[productSlug]', '[varietySlug]-rings/[productSlug]'];
+const DETAIL_ROUTES = ['products/[productSlug]', 'product/[slug]', '[varietySlug]/[productSlug]'];
 
 describe('LOADING — every data-dependent route has a loading.tsx skeleton', () => {
   it.each(LISTING_ROUTES)('%s/loading.tsx renders the listing skeleton', (route) => {

@@ -19,6 +19,15 @@
  *   - PROJECT_SOURCE_OF_TRUTH.md 13.2 (new target-only routes)
  *   - technical_design/08 (route group structure)
  *   - technical_design/34 (route map doc 34, sitemap targets, robots)
+ *
+ * 2026-10-18 revision (frontend completion session): the `[varietySlug]-pairs`
+ * / `-rings` SUFFIX FOLDERS were deleted in `082b39b` — Next.js never passed
+ * `varietySlug` inside suffix folders, so every suffix route crashed. Collection
+ * facets (`-pairs`, `-rings`, `-earrings`, …) now parse INSIDE
+ * `[varietySlug]/page.tsx` via `lib/collection-route.ts` + the NGC landing
+ * parser. The manifest previously demanded those deleted files and went stale;
+ * it now models the deliberate tree (suffix parsing routes + the pages later
+ * sessions added) so the tree assertion is true again.
  */
 
 export interface RouteManifestEntry {
@@ -47,7 +56,11 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: the root of the listed app route tree; every group inherits <html>/<body> from it (not drawn as an explicit line in the SoT chart, implied as the tree root)',
     storefront: false,
     group: 'app-root',
-    extraFiles: ['src/app/error.tsx'],
+    extraFiles: [
+      'src/app/error.tsx',
+      'src/app/globals.css',
+      'src/app/storefront-luxury.css',
+    ],
   },
   // ── (storefront) group ────────────────────────────────────────────────────
   {
@@ -66,8 +79,9 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
   },
   {
     fsPath: 'src/app/(storefront)/[varietySlug]/page.tsx',
-    sotPath: 'app/(storefront)/[variety]/page.tsx   # /tsavorite-garnet',
-    authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: variety index for loose stones',
+    sotPath: 'app/(storefront)/[variety]/page.tsx   # /tsavorite-garnet and /tsavorite-garnet-pairs, -rings, -earrings, -pendants, -settings (suffix facets parsed by collection-route.ts)',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2: variety index for loose stones. 13.1 preserves the observed source suffix routes; commit 082b39b parses those suffixes here instead of in suffix folders (suffix folders crash Next.js — varietySlug never resolves inside them).',
     storefront: true,
     group: 'storefront',
     extraFiles: [
@@ -78,39 +92,89 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     ],
   },
   {
-    fsPath: 'src/app/(storefront)/[varietySlug]-pairs/page.tsx',
-    sotPath: 'app/(storefront)/[variety]-pairs/page.tsx   # /tsavorite-garnet-pairs',
-    authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: matched-pair variety index',
+    fsPath: 'src/app/(storefront)/[varietySlug]/[productSlug]/page.tsx',
+    sotPath: 'app/(storefront)/[variety]/[slug]/page.tsx   # /tanzanite/<product-slug> NGC product detail',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.1: source product paths preserve the /<collection>/<product-slug> shape; this segment renders the NGC research PDP (rendering-layer task added it under the variety branch).',
     storefront: true,
     group: 'storefront',
     extraFiles: [
-      'src/app/(storefront)/[varietySlug]-pairs/not-found.tsx',
-      'src/app/(storefront)/[varietySlug]-pairs/loading.tsx',
-      'src/app/(storefront)/[varietySlug]-pairs/error.tsx',
+      'src/app/(storefront)/[varietySlug]/[productSlug]/not-found.tsx',
+      'src/app/(storefront)/[varietySlug]/[productSlug]/loading.tsx',
+      'src/app/(storefront)/[varietySlug]/[productSlug]/error.tsx',
     ],
   },
   {
-    fsPath: 'src/app/(storefront)/[varietySlug]-rings/page.tsx',
-    sotPath: 'app/(storefront)/[variety]-rings/page.tsx   # /tsavorite-garnet-rings',
-    authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: ready-made variety rings index',
+    fsPath: 'src/app/(storefront)/about/page.tsx',
+    sotPath: 'app/(storefront)/about/page.tsx   # /about index',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.1: /about/* source routes preserved; the about index segments the preserved detail slugs.',
     storefront: true,
     group: 'storefront',
-    extraFiles: [
-      'src/app/(storefront)/[varietySlug]-rings/not-found.tsx',
-      'src/app/(storefront)/[varietySlug]-rings/loading.tsx',
-      'src/app/(storefront)/[varietySlug]-rings/error.tsx',
-    ],
   },
   {
-    fsPath: 'src/app/(storefront)/[varietySlug]-rings/[productSlug]/page.tsx',
-    sotPath: 'app/(storefront)/[variety]-rings/[slug]/page.tsx   # ready-made detail',
-    authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: ready-made product detail',
+    fsPath: 'src/app/(storefront)/browse/page.tsx',
+    sotPath: 'app/(storefront)/browse/page.tsx   # /browse',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.2: new target-only route ([INFERRED] storefront addition) — the vault discovery grid used by the bag/favourites empty states.',
+    storefront: true,
+    group: 'storefront',
+      extraFiles: [
+      'src/app/(storefront)/browse/loading.tsx',
+      'src/app/(storefront)/browse/error.tsx',
+      'src/app/(storefront)/browse/not-found.tsx',
+    ],
+},
+  {
+    fsPath: 'src/app/(storefront)/shop/page.tsx',
+    sotPath: 'app/(storefront)/shop/page.tsx   # /shop',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.2: new target-only route ([INFERRED] storefront addition) — simple storefront-schema catalogue grid.',
+    storefront: true,
+    group: 'storefront',
+      extraFiles: [
+      'src/app/(storefront)/shop/loading.tsx',
+      'src/app/(storefront)/shop/error.tsx',
+      'src/app/(storefront)/shop/not-found.tsx',
+    ],
+},
+  {
+    fsPath: 'src/app/(storefront)/pairs/page.tsx',
+    sotPath: 'app/(storefront)/pairs/page.tsx   # /pairs',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.2: new target-only route ([INFERRED] storefront addition) — matched pairs drawer (INV-02: pairs attach to EARRINGS in DYO).',
+    storefront: true,
+    group: 'storefront',
+      extraFiles: [
+      'src/app/(storefront)/pairs/loading.tsx',
+      'src/app/(storefront)/pairs/error.tsx',
+      'src/app/(storefront)/pairs/not-found.tsx',
+    ],
+},
+  {
+    fsPath: 'src/app/(storefront)/jewellery/page.tsx',
+    sotPath: 'app/(storefront)/jewellery/page.tsx   # /jewellery',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.2: new target-only route ([INFERRED] storefront addition) — finished jewellery drawer.',
+    storefront: true,
+    group: 'storefront',
+      extraFiles: [
+      'src/app/(storefront)/jewellery/loading.tsx',
+      'src/app/(storefront)/jewellery/error.tsx',
+      'src/app/(storefront)/jewellery/not-found.tsx',
+    ],
+},
+  {
+    fsPath: 'src/app/(storefront)/product/[slug]/page.tsx',
+    sotPath: 'app/(storefront)/product/[slug]/page.tsx   # /product/<slug> source PDP shape',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.1: the source site served product detail under /product/<slug>; preserved as the bag/favourites link target.',
     storefront: true,
     group: 'storefront',
     extraFiles: [
-      'src/app/(storefront)/[varietySlug]-rings/[productSlug]/not-found.tsx',
-      'src/app/(storefront)/[varietySlug]-rings/[productSlug]/loading.tsx',
-      'src/app/(storefront)/[varietySlug]-rings/[productSlug]/error.tsx',
+      'src/app/(storefront)/product/[slug]/not-found.tsx',
+      'src/app/(storefront)/product/[slug]/loading.tsx',
+      'src/app/(storefront)/product/[slug]/error.tsx',
     ],
   },
   {
@@ -135,7 +199,8 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
       // The settings index always exists; only loading/error apply (Task 5).
       'src/app/(storefront)/settings/loading.tsx',
       'src/app/(storefront)/settings/error.tsx',
-    ],
+          'src/app/(storefront)/settings/not-found.tsx',
+],
   },
   {
     fsPath: 'src/app/(storefront)/settings/[settingSku]/page.tsx',
@@ -153,6 +218,7 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     extraFiles: [
       'src/app/(storefront)/search/loading.tsx',
       'src/app/(storefront)/search/error.tsx',
+      'src/app/(storefront)/search/not-found.tsx',
     ],
   },
   {
@@ -238,11 +304,26 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     group: 'storefront',
   },
   {
+    fsPath: 'src/app/(storefront)/checkout/confirmation/[orderId]/page.tsx',
+    sotPath: 'app/(storefront)/checkout/confirmation/[orderId]/page.tsx',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 + 13.2: checkout terminal state — order confirmation served from the authoritative order read ([INFERRED] route added with the functional checkout funnel; the funnel is the Phase 6 session flow).',
+    storefront: true,
+    group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/checkout/confirmation/[orderId]/loading.tsx',
+      'src/app/(storefront)/checkout/confirmation/[orderId]/error.tsx',
+    ],
+  },
+  {
     fsPath: 'src/app/(storefront)/account/[[...accountPath]]/page.tsx',
     sotPath: 'app/(storefront)/account/...',
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2 + 13.1 + 13.2: /account/** one catch-all, sub-routes committed by Phase 6',
     storefront: true,
     group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/account/actions.ts',
+    ],
   },
   {
     fsPath: 'src/app/(storefront)/contact/page.tsx',
@@ -320,9 +401,14 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 13.2: /varieties/{slug} new target-only route',
     storefront: true,
     group: 'storefront',
-  },
+      extraFiles: [
+      'src/app/(storefront)/varieties/[varietySlug]/loading.tsx',
+      'src/app/(storefront)/varieties/[varietySlug]/error.tsx',
+      'src/app/(storefront)/varieties/[varietySlug]/not-found.tsx',
+    ],
+},
 
-  // ── admin group ──────────────────────────────────────────────────────────
+  // ── admin & vendor operational groups ────────────────────────────────────
   {
     fsPath: 'src/app/admin/layout.tsx',
     sotPath: 'app/admin/   # separate layout, separate authz',
@@ -337,6 +423,20 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     storefront: false,
     group: 'admin',
   },
+  {
+    fsPath: 'src/app/vendor/layout.tsx',
+    sotPath: 'app/vendor/   # trade partner layout, separate authz',
+    authority: 'PROJECT_SOURCE_OF_TRUTH.md 13.2: new target-only operational route for trade partner vendors',
+    storefront: false,
+    group: 'admin',
+  },
+  {
+    fsPath: 'src/app/vendor/[[...vendorPath]]/page.tsx',
+    sotPath: 'app/vendor/   # /vendor/**',
+    authority: 'PROJECT_SOURCE_OF_TRUTH.md 13.2: /vendor/** trade partner product & fulfilment portal',
+    storefront: false,
+    group: 'admin',
+  },
 
   // ── api (what the SoT chart calls "api/ — route handlers, section 11") ───
   {
@@ -346,6 +446,30 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
       'PROJECT_SOURCE_OF_TRUTH.md 12.2: api/ route handlers. Reserved in Task 1: the Phase 3 catalogue handler already exists outside the Next app; mounting it into this App-Router namespace is a later rendering-layer task, NOT a Task 1 decision. UI pages never mount the Phase 3 handler either.',
     storefront: false,
     group: 'api',
+  },
+  {
+    fsPath: 'src/app/api/search/route.ts',
+    sotPath: 'app/api/search/route.ts   # storefront search suggest',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 11.2 + 13.2: Next-side route handler for the storefront search bar (renders-layer task; delegates to the storefront data seam, not the Phase 3 handler).',
+    storefront: false,
+    group: 'api',
+  },
+  {
+    fsPath: 'src/app/api/v1/[...path]/route.ts',
+    sotPath: 'app/api/v1/...   # Next-side delegation to the app API',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 + 13.2: api/ route handlers — the App Router mounting the framework-free `(Request)=>Response` API described in the app api README and delegated per technical_design/08 ("the Phase 4 Next.js route handlers delegate to exactly this function").',
+    storefront: false,
+    group: 'api',
+  },
+  {
+    fsPath: 'src/app/demo/page.tsx',
+    sotPath: 'app/demo/page.tsx   # development demo surface',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.2: new target-only route ([INFERRED] development-only demo surface, never linked from the storefront chrome).',
+    storefront: false,
+    group: 'app-root',
   },
 
   // ── SEO endpoints (Phase 4 Task 7: generated, never migrated) ────────────

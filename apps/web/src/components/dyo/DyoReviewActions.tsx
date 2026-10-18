@@ -31,17 +31,35 @@ export function DyoReviewActions({ shortCode }: DyoReviewActionsProps) {
     setIsAdding(true);
     setError(null);
 
-    // Retrieve or establish cart token
-    let cartToken = '';
-    if (typeof window !== 'undefined') {
-      cartToken = localStorage.getItem('maihan_cart_token') || '';
-      if (!cartToken) {
-        cartToken = `cart_${Math.random().toString(36).substring(2, 12)}`;
-        localStorage.setItem('maihan_cart_token', cartToken);
-      }
-    }
-
     try {
+      // Resolve a REAL server cart token. A locally invented token would be
+      // rejected by the API (CART_NOT_FOUND); reuse an active cart when the
+      // server confirms it, otherwise create one.
+      let cartToken = '';
+      const cached = typeof window !== 'undefined' ? localStorage.getItem('maihan_cart_token') : null;
+      if (cached) {
+        const check = await fetch(`/api/v1/carts/${encodeURIComponent(cached)}`);
+        if (check.ok) {
+          const body = await check.json().catch(() => null);
+          if (body?.data?.state === 'ACTIVE') cartToken = cached;
+        }
+      }
+      if (!cartToken) {
+        const createRes = await fetch('/api/v1/carts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}',
+        });
+        if (!createRes.ok) {
+          const data = await createRes.json().catch(() => ({}));
+          throw new Error(data?.error?.message || 'The server could not open a bag. Please try again.');
+        }
+        const body = await createRes.json();
+        cartToken = body?.data?.cart_token ?? '';
+        if (!cartToken) throw new Error('The server did not return a bag token. Please try again.');
+        if (typeof window !== 'undefined') localStorage.setItem('maihan_cart_token', cartToken);
+      }
+
       let activeQuoteToken = quoteToken;
       if (!activeQuoteToken) {
         const quoteRes = await fetch(`/api/v1/dyo/configurations/${shortCode}/quote`, { method: 'POST' });

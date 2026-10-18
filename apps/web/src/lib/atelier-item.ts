@@ -7,6 +7,7 @@ export interface AtelierItem {
   title: string;
   kind: string;
   priceUsd: number;
+  quantity?: number;
   image: string;
   specs?: string;
   stoneType?: string | null;

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 
+import { EmptyState } from '../design-system/EmptyState.js';
 import type { StorefrontCard } from '../../lib/storefront-types.js';
 import { CollectionBrowser } from './CollectionFilters.js';
 
@@ -70,7 +71,16 @@ export function CollectionPage({
           {products.length > 0 ? (
             <CollectionBrowser products={products} />
           ) : (
-            <p className="lx-empty-copy">Nothing in this drawer just now. Browse another facet or the vault menu.</p>
+            <EmptyState
+              title="Nothing in this drawer just now."
+              action={
+                <Link href="/browse" className="lx-btn lx-btn--solid">
+                  Browse the vault
+                </Link>
+              }
+            >
+              <p>Browse another facet, or search the full catalogue.</p>
+            </EmptyState>
           )}
         </div>
       </div>

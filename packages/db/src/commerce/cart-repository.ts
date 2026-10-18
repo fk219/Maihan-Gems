@@ -334,6 +334,8 @@ export async function addItemToCart(
       p.slug,
       p.title,
       p.state,
+      p.availability,
+      p.structured_extra,
       p.price_amount::text AS product_price_amount,
       pe.amount::text AS price_entry_amount
     FROM products p
@@ -359,9 +361,24 @@ export async function addItemToCart(
     slug: string;
     title: string;
     state: string;
+    availability?: boolean;
+    structured_extra?: Record<string, unknown> | null;
     product_price_amount: string | null;
     price_entry_amount: string | null;
   };
+
+  if (input.configuration_id === undefined) {
+    if (product.state && product.state !== 'ACTIVE') {
+      throw new ContractError('UNPROCESSABLE', 'Product is not published or available for purchase.');
+    }
+    if (product.availability === false) {
+      throw new ContractError('UNPROCESSABLE', 'Product is currently out of stock.');
+    }
+    const maxStock = product.structured_extra?.['inventory_quantity'];
+    if (typeof maxStock === 'number' && quantity > maxStock) {
+      throw new ContractError('UNPROCESSABLE', `Requested quantity (${quantity}) exceeds available stock (${maxStock}).`);
+    }
+  }
 
   if (input.configuration_id !== undefined && !input.price_snapshot_id) {
     throw new ContractError('UNPROCESSABLE', 'Configured cart items require a DYO price snapshot.');

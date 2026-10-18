@@ -1,18 +1,21 @@
 # `apps/web/src/app/api`
 
-**Reserved for Phase 4 Task 6+ / Phase 3 parity.**
+Next-side route handlers. Two live surfaces:
 
-The SoT 12.2 route tree pins an `api/` folder inside the Next.js app for route
-handlers ("section 11" of the Source of Truth). The catalogue HTTP surface
-already exists as a standalone `(Request)=>Response` handler in
-`apps/web/src/api/` (NOT this folder), served by the node adapter in
-`server.ts`.
+- **`api/search/route.ts`** — the storefront search bar's suggest endpoint.
+  Reads the storefront data seam directly (`lib/storefront-data.ts`).
+- **`api/v1/[...path]/route.ts`** — the App Router mounting of the
+  framework-free app API in `src/api/**` (the single
+  `(Request) => Promise<Response>` function that `server.ts` also wraps).
+  With `MAIHAN_API_URL` set it FORWARDS to the API process
+  (`node dist/api/server.js`, port `API_PORT`, default 3001) — the
+  deployment-accurate seam, one API plane, zero extra pools in the Next
+  process. Without it, it delegates in-process (single-process local runs).
 
-This folder is intentionally **created-and-empty** in Task 1: Next.js's own
-`app/api/**` for v1 route handlers will be SELF-CONTAINED here when a phase
-needs it; mounting the existing handler into Next is a rendering-layer
-decision, not a route-tree decision. UI route folders do NOT mount this
-handler either: that is the scope of a later phase.
+This realises the mounting reserved by the earlier Task 1 note below: the
+frontend phase wires the browser's `/api/v1/**` fetches (cart, checkout,
+account, DYO, AI, AR) through the documented delegation instead of leaving
+them unrouted.
 
-Do not place UI page files here. Do not implement handlers here before the
-owning phase authorises it.
+The framework-free handler itself is NOT re-implemented here and stays the
+only place where route logic lives.

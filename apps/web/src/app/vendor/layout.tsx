@@ -1,0 +1,11 @@
+/**
+ * apps/web/src/app/vendor/layout.tsx
+ *
+ * Vendor portal route group layout — operational workspace sharing Maihan Gems
+ * brand identity (near-black, gold, ivory) with dedicated authorization.
+ */
+import '../../styles/admin.css';
+
+export default function VendorLayout({ children }: { children: React.ReactNode }) {
+  return <div className="admin-shell">{children}</div>;
+}

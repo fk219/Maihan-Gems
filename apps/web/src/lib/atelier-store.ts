@@ -49,9 +49,32 @@ export function isFav(id: string): boolean {
   return getFavs().some((f) => f.id === id);
 }
 
-export function addToBag(item: AtelierItem): void {
+export function addToBag(item: AtelierItem, qty = 1): void {
   const bag = getBag();
-  if (!bag.some((b) => b.id === item.id)) write(KEYS.bag, [...bag, item]);
+  const safeQty = Math.max(1, Math.min(99, Math.floor(qty || 1)));
+  const existing = bag.find((b) => b.id === item.id);
+  if (existing) {
+    const nextQty = Math.min(99, (existing.quantity ?? 1) + safeQty);
+    write(
+      KEYS.bag,
+      bag.map((b) => (b.id === item.id ? { ...b, quantity: nextQty } : b)),
+    );
+  } else {
+    write(KEYS.bag, [...bag, { ...item, quantity: safeQty }]);
+  }
+}
+
+export function updateBagQuantity(id: string, quantity: number): void {
+  const safeQty = Math.floor(Number(quantity));
+  if (!Number.isFinite(safeQty) || safeQty <= 0) {
+    removeFromBag(id);
+    return;
+  }
+  const capped = Math.min(99, safeQty);
+  write(
+    KEYS.bag,
+    getBag().map((b) => (b.id === id ? { ...b, quantity: capped } : b)),
+  );
 }
 
 export function removeFromBag(id: string): void {

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { ProductGrid } from '../../../components/storefront/LuxuryProductCard.js';
+import { EmptyState } from '../../../components/design-system/EmptyState.js';
 import { searchStorefront } from '../../../lib/storefront-data.js';
 
 export const dynamic = 'force-dynamic';
@@ -45,10 +46,18 @@ export default async function SearchPage({
         {items.length > 0 ? (
           <ProductGrid products={items} />
         ) : (
-          <p>
-            No pieces matched. Try <Link href="/browse">all gemstones</Link> or a prompt such as
-            “untreated 3ct Ceylon sapphire”.
-          </p>
+          <EmptyState
+            title="No pieces matched this search."
+            action={
+              <Link href="/browse" className="lx-btn lx-btn--solid">
+                Browse all gemstones
+              </Link>
+            }
+          >
+            <p>
+              Try a broader prompt such as &ldquo;untreated 3ct Ceylon sapphire&rdquo;, or clear the filters above.
+            </p>
+          </EmptyState>
         )}
       </div>
     </main>

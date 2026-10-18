@@ -2,26 +2,27 @@
  * apps/web/src/app/(storefront)/checkout/order-summary/page.tsx
  *
  * `/checkout/order-summary` — checkout step 1 (target of the observed
- * /cart/order-summary 301). SoT 12.2. Route structure only; checkout is
- * Phase 6 (four-step funnel with server checkpoints).
+ * /cart/order-summary 301). SoT 12.2. The review island bridges the guest
+ * bag into a real server cart and opens a real checkout session with the
+ * server-authoritative pricing snapshot.
  */
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
+import { CheckoutReview } from '../../../../components/checkout/CheckoutReview.js';
 
 export const metadata: Metadata = {
   title: 'Order Summary | Maihan Gems Checkout',
-  description: 'Review your fine gemstone order summary and configure checkout preferences.',
+  description: 'Review your order, then open a server-side checkout session with verified pricing and reserved stock.',
 };
 
 export default function CheckoutOrderSummaryPage() {
   return (
-    <main className="page checkout-page">
+    <main className="page checkout-page" id="main-content">
       <Breadcrumbs
         crumbs={[
           { label: 'Home', href: '/' },
-          { label: 'Shopping Bag', href: '/cart' },
+          { label: 'Bag', href: '/cart' },
           { label: 'Order Summary' },
         ]}
       />
@@ -34,11 +35,11 @@ export default function CheckoutOrderSummaryPage() {
           </div>
           <div className="checkout-step">
             <span>2</span>
-            <span>Payment Order</span>
+            <span>Delivery &amp; Payment</span>
           </div>
           <div className="checkout-step">
             <span>3</span>
-            <span>Secure Settlement</span>
+            <span>Review &amp; Place</span>
           </div>
         </div>
 
@@ -47,36 +48,11 @@ export default function CheckoutOrderSummaryPage() {
         </span>
         <h1 style={{ color: 'var(--text-primary)', marginTop: 0 }}>Review Your Order</h1>
         <p className="page-subtitle" style={{ color: 'var(--text-secondary)' }}>
-          Confirm your gemstone pieces, verified certificates, and insured delivery preferences before issuing the payment order.
+          Starting checkout opens a server-side session: the atelier re-confirms every price and reserves the
+          1-of-1 stock for 30 minutes.
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', margin: '2rem 0' }}>
-          <div style={{ padding: '1.5rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-              Insured Armoured Transit
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              All high-value parcels ship fully insured via Malca-Amit or Brink&apos;s Global Services, requiring direct passport verification upon delivery.
-            </p>
-          </div>
-          <div style={{ padding: '1.5rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-              Lab Dossier &amp; Provenance
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              Original laboratory reports (GIA, Gübelin, SSEF, or GRS) are sealed in tamper-evident security vaults accompanying your piece.
-            </p>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}>
-          <Link href="/checkout/payment-order" className="btn-primary">
-            Proceed to Payment Order →
-          </Link>
-          <Link href="/cart" className="btn-secondary">
-            Return to Shopping Bag
-          </Link>
-        </div>
+        <CheckoutReview />
       </div>
     </main>
   );

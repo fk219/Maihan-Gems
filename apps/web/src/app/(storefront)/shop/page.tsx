@@ -1,61 +1,65 @@
 /**
- * Simple shop page using the new storefront schema
+ * apps/web/src/app/(storefront)/shop/page.tsx
+ *
+ * `/shop` — the simple catalogue grid over the storefront schema. Filters,
+ * imagery, prices and empty state all come from the storefront data seam.
  */
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getStorefrontRepository } from '../../../lib/db';
-import type { SimpleProduct } from '@maihan/db';
+
+import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
+import { listProducts } from '../../../lib/storefront-data.js';
+
+export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Shop the Vault | Maihan Gems',
+  description: 'Natural gemstones, matched pairs, settings and finished jewellery from the private vault.',
+};
+
+const KINDS = ['gemstone', 'jewelry', 'setting'] as const;
+type Kind = (typeof KINDS)[number];
+
+const KIND_LABELS: Record<Kind, string> = {
+  gemstone: 'Loose gemstones',
+  jewelry: 'Finished jewellery',
+  setting: 'Atelier settings',
+};
 
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: { kind?: string; region?: string };
+  searchParams: Promise<{ kind?: string }>;
 }) {
-  const repo = getStorefrontRepository();
-  const kind = searchParams.kind as 'gemstone' | 'jewelry' | 'setting' | undefined;
+  const query = await searchParams;
+  const kind = KINDS.includes(query.kind as Kind) ? (query.kind as Kind) : undefined;
 
-  const products = await repo.listProducts(kind, 24);
+  const products = await listProducts({ kind, limit: 48 });
 
   return (
-    <div className="lx-section" style={{ background: 'var(--warm-alabaster)' }}>
-      <div className="lx-wrap">
-        <span className="lx-kicker">The vault</span>
-        <h1 className="lx-h2">Maihan Gems</h1>
-        <p className="lx-lede">Natural untreated gemstones and master atelier settings.</p>
-
-        <div className="lx-facets">
-          <Link href="/shop" className={!kind ? 'is-on' : undefined}>
-            All products
+    <CollectionPage
+      kicker="The vault"
+      title={kind ? KIND_LABELS[kind] : 'Shop the vault'}
+      lede="Natural gemstones, matched pairs, settings and finished jewellery. Prices follow your selected currency."
+      products={products}
+      chips={
+        <>
+          <Link href="/shop" className={kind ? undefined : 'is-on'} aria-current={kind ? undefined : 'page'}>
+            All pieces
           </Link>
-          <Link href="/shop?kind=gemstone" className={kind === 'gemstone' ? 'is-on' : undefined}>
-            Gemstones
-          </Link>
-          <Link href="/shop?kind=jewelry" className={kind === 'jewelry' ? 'is-on' : undefined}>
-            Jewellery
-          </Link>
-          <Link href="/shop?kind=setting" className={kind === 'setting' ? 'is-on' : undefined}>
-            Settings
-          </Link>
-        </div>
-
-        <div className="lx-grid" style={{ marginTop: '2rem' }}>
-          {products.map((product: SimpleProduct) => (
-            <Link key={product.id} href={`/shop/${product.slug}`} className="lx-card">
-              <div className="lx-card__media" />
-              <div className="lx-card__body">
-                <h3 className="lx-card__title">{product.title}</h3>
-                {product.description ? <p className="lx-card__specs">{product.description}</p> : null}
-                <p className="lx-card__meta">
-                  {[product.stone_type, product.jewelry_type].filter(Boolean).join(' · ')}
-                </p>
-              </div>
+          {KINDS.map((row) => (
+            <Link
+              key={row}
+              href={`/shop?kind=${row}`}
+              className={kind === row ? 'is-on' : undefined}
+              aria-current={kind === row ? 'page' : undefined}
+            >
+              {KIND_LABELS[row]}
             </Link>
           ))}
-        </div>
-
-        {products.length === 0 ? (
-          <p className="lx-empty-copy">No products found</p>
-        ) : null}
-      </div>
-    </div>
+        </>
+      }
+      cta={{ href: '/design-your-own', label: 'Design your own piece' }}
+    />
   );
 }
