@@ -55,8 +55,8 @@ export default async function ArHandoffPage({ params }: PageProps) {
     <main
       style={{
         minHeight: '100vh',
-        backgroundColor: '#08121E',
-        color: '#FAFAF8',
+        backgroundColor: '#16110C',
+        color: '#F6F2E9',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -78,7 +78,7 @@ export default async function ArHandoffPage({ params }: PageProps) {
         <a
           href="/"
           style={{
-            backgroundColor: '#C9A84C',
+            backgroundColor: '#D4A437',
             color: '#FFFFFF',
             padding: '0.75rem 1.5rem',
             borderRadius: '12px',

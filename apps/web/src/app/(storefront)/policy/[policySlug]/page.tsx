@@ -8,6 +8,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
+import { CmsBlockList } from '../../../../components/cms/CmsBlockView.js';
+import { getCmsPageBySlug } from '../../../../lib/cms-pages.js';
 
 interface PageProps {
   params: Promise<{ policySlug: string }>;
@@ -104,6 +106,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PolicyPage({ params }: PageProps) {
   const { policySlug } = await params;
   const key = policySlug.toLowerCase();
+  // CMS-first (doc 22: storefront renders the PUBLISHED head revision only);
+  // the static institutional copy remains as the fallback when the CMS row
+  // is absent — never the other way round.
+  const cmsPage = await getCmsPageBySlug(key);
   const entry = POLICIES[key] ?? {
     title: policySlug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
     eyebrow: 'Institutional Policy',
@@ -123,23 +129,32 @@ export default async function PolicyPage({ params }: PageProps) {
         crumbs={[
           { label: 'Home', href: '/' },
           { label: 'Policies', href: '/policy/terms' },
-          { label: entry.title },
+          { label: cmsPage?.title ?? entry.title },
         ]}
       />
       <span className="page-eyebrow">{entry.eyebrow}</span>
-      <h1>{entry.title}</h1>
-      <p className="page-subtitle">{entry.summary}</p>
-
-      <div className="lx-account-grid" style={{ marginTop: '2rem' }}>
-        {entry.sections.map((s) => (
-          <section key={s.heading} className="lx-account-card">
-            <h2 className="lx-account-card__title">{s.heading}</h2>
-            <p className="lx-account-note" style={{ margin: 0, lineHeight: 1.7 }}>
-              {s.body}
-            </p>
+      <h1>{cmsPage?.title ?? entry.title}</h1>
+      {cmsPage && cmsPage.blocks.length > 0 ? (
+        <div className="lx-account-grid" style={{ marginTop: '2rem' }}>
+          <section className="lx-account-card">
+            <CmsBlockList blocks={cmsPage.blocks} />
           </section>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <>
+          <p className="page-subtitle">{entry.summary}</p>
+          <div className="lx-account-grid" style={{ marginTop: '2rem' }}>
+            {entry.sections.map((s) => (
+              <section key={s.heading} className="lx-account-card">
+                <h2 className="lx-account-card__title">{s.heading}</h2>
+                <p className="lx-account-note" style={{ margin: 0, lineHeight: 1.7 }}>
+                  {s.body}
+                </p>
+              </section>
+            ))}
+          </div>
+        </>
+      )}
 
       <nav className="lx-account-nav" aria-label="Policy navigation" style={{ marginTop: '2.5rem' }}>
         <Link href="/policy/shipping" className={key === 'shipping' ? 'is-on' : undefined}>

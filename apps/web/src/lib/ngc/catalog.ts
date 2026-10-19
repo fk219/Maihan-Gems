@@ -211,15 +211,16 @@ export function ngcStoneTypeRows(): { stoneType: string; count: number; pairCoun
 export function settingsForDyo(limit = 24): SettingForDyo[] {
   return filterNgc({ kind: 'setting', limit }).map((product) => {
     const card = toStorefrontCard(product);
-    const bracelet = product.settingType === 'bracelet';
-    const earring = product.settingType === 'earring';
+    // Honest accepts: the compiled fixture does not carry per-design
+    // acceptance ranges, so none is invented here (INV-07). Shape falls back
+    // to the setting's own observed shape where present.
     return {
       ...card,
       accepts: [
         {
-          shape: product.shape ?? 'Round',
-          minCarat: bracelet ? 0.2 : 0.35,
-          maxCarat: bracelet ? 5 : earring ? 8 : 30,
+          shape: product.shape ?? null,
+          minCarat: null,
+          maxCarat: null,
         },
       ],
     };

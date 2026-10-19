@@ -170,6 +170,7 @@ export const DYO_ROUTES: readonly RouteDefinition[] = [
   { id: 'quoteDyoConfigurationHandler', method: 'POST', path: '/api/v1/dyo/configurations/{shortCode}/quote' },
   { id: 'quoteDyoConfigurationHandler', method: 'POST', path: '/dyo/configurations/{shortCode}/quote' },
   { id: 'getCompatibleSettingsHandler', method: 'GET', path: '/api/v1/dyo/configurations/{shortCode}/compatible-settings' },
+  { id: 'getCompatibleSettingsHandler', method: 'GET', path: '/dyo/configurations/{shortCode}/compatible-settings' },
   { id: 'addDyoToCartHandler', method: 'POST', path: '/api/v1/dyo/configurations/{shortCode}/add-to-cart' },
   { id: 'addDyoToCartHandler', method: 'POST', path: '/dyo/configurations/{shortCode}/add-to-cart' },
 ];

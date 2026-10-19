@@ -16,8 +16,8 @@ const TryOn = dynamic(
 );
 
 const METALS: readonly { id: MetalFinish; label: string; swatch: string }[] = [
-  { id: 'YELLOW_GOLD', label: 'Yellow gold', swatch: '#C9A84C' },
-  { id: 'WHITE_GOLD', label: 'White gold', swatch: '#FAFAF8' },
+  { id: 'YELLOW_GOLD', label: 'Yellow gold', swatch: '#D4A437' },
+  { id: 'WHITE_GOLD', label: 'White gold', swatch: '#F6F2E9' },
   { id: 'ROSE_GOLD', label: 'Rose gold', swatch: '#EA580C' },
   { id: 'PLATINUM', label: 'Platinum', swatch: '#8A867E' },
 ];

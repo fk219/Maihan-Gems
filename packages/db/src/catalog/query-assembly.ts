@@ -37,6 +37,12 @@ export interface SortTupleColumn {
   readonly orderedExpr: SQL;
   /** Projection for minting the next cursor (same expression, float8 cast). */
   readonly valueExpr: SQL;
+  /**
+   * Seek-side projection of the boundary value. Defaults to casting the
+   * cursor float8 (`$1::float8`); keys whose orderedExpr lives in a
+   * different domain (e.g. recency's timestamptz) re-project explicitly.
+   */
+  readonly seekValue?: (cursor: CursorPayload) => SQL;
 }
 
 /**
@@ -63,7 +69,12 @@ export const PRODUCT_SORT_COLUMNS: Record<ProductSortKey, SortTupleColumn> = {
   },
   recency: {
     key: 'recency',
-    orderedExpr: sql`coalesce(p.published_at, '-infinity'::timestamptz)`,
+    // The full sort tuple lives in ONE numeric domain (epoch float8, with the
+    // same -1 sentinel as valueExpr) so ORDER BY, cursor minting AND the seek
+    // predicate share it exactly — a timestamptz ORDER BY against an
+    // epoch-boundary seek has no Postgres operator, and mapping only the seek
+    // side would mis-handle the '-infinity' sentinel rows.
+    orderedExpr: sql`coalesce(extract(epoch from p.published_at), -1)::float8`,
     valueExpr: sql`coalesce(extract(epoch from p.published_at), -1)::float8`,
   },
 };
@@ -75,7 +86,8 @@ export function orderBySql(key: ProductSortKey, direction: SortDirection): SQL {
 
 export function seekPredicateSql(key: ProductSortKey, direction: SortDirection, cursor: CursorPayload): SQL {
   const col = PRODUCT_SORT_COLUMNS[key].orderedExpr;
-  const tupleValue = sql.param(cursor.a);
+  const seekFn = PRODUCT_SORT_COLUMNS[key].seekValue;
+  const tupleValue = seekFn !== undefined ? seekFn(cursor) : sql.param(cursor.a);
   const tupleNumber = sql.param(cursor.n);
   const comparison = direction === 'asc' ? sql`>` : sql`<`;
   // Row-value comparison in the tuple order: (col, product_number) placed

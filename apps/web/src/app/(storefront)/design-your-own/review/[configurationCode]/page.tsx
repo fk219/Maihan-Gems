@@ -106,7 +106,7 @@ export default async function DyoReviewPage({ params }: PageProps) {
         {/* Specification Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Mounting & Metal Specifications */}
-          <article className="p-6 bg-white border border-[rgba(201,168,76,0.15)] rounded-[12px] shadow-sm">
+          <article className="p-6 bg-white border border-[rgba(212,164,55,0.15)] rounded-[12px] shadow-sm">
             <span className="eyebrow block mb-3 text-[10px]">Architectural Mounting</span>
             <h2 className="font-serif text-2xl font-medium text-[#1A1A18] mb-1">
               {settingVariant?.name ?? <NotEvidenced />}
@@ -147,7 +147,7 @@ export default async function DyoReviewPage({ params }: PageProps) {
           </article>
 
           {/* Mineralogy & Gemstone Specifications */}
-          <article className="p-6 bg-white border border-[rgba(201,168,76,0.15)] rounded-[12px] shadow-sm">
+          <article className="p-6 bg-white border border-[rgba(212,164,55,0.15)] rounded-[12px] shadow-sm">
             <span className="eyebrow block mb-3 text-[10px]">Mineralogical Entity</span>
             <h2 className="font-serif text-2xl font-medium text-[#1A1A18] mb-1">
               {gemstone?.variety ? (
@@ -190,13 +190,13 @@ export default async function DyoReviewPage({ params }: PageProps) {
         </div>
 
         {/* Structural Compatibility Ledger */}
-        <section aria-labelledby="invariants-ledger-title" className="p-6 bg-[#FAFAF8] border border-[rgba(201,168,76,0.15)] rounded-[12px] mb-8">
+        <section aria-labelledby="invariants-ledger-title" className="p-6 bg-[#F6F2E9] border border-[rgba(212,164,55,0.15)] rounded-[12px] mb-8">
           <h2 id="invariants-ledger-title" className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#8A867E] mb-4">
             Structural Compatibility Ledger
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            <div className="p-3 bg-white rounded-[8px] border border-[rgba(201,168,76,0.12)]">
+            <div className="p-3 bg-white rounded-[8px] border border-[rgba(212,164,55,0.12)]">
               <div className="flex items-center gap-2 font-semibold text-[#1A1A18] mb-1">
                 <span className={compatibilityVerified ? 'text-[#3D6B3D]' : 'text-[#8A867E]'}>
                   {compatibilityVerified ? '✓' : '·'}
@@ -208,7 +208,7 @@ export default async function DyoReviewPage({ params }: PageProps) {
               </p>
             </div>
 
-            <div className="p-3 bg-white rounded-[8px] border border-[rgba(201,168,76,0.12)]">
+            <div className="p-3 bg-white rounded-[8px] border border-[rgba(212,164,55,0.12)]">
               <div className="flex items-center gap-2 font-semibold text-[#1A1A18] mb-1">
                 <span className={compatibilityVerified ? 'text-[#3D6B3D]' : 'text-[#8A867E]'}>
                   {compatibilityVerified ? '✓' : '·'}
@@ -220,7 +220,7 @@ export default async function DyoReviewPage({ params }: PageProps) {
               </p>
             </div>
 
-            <div className="p-3 bg-white rounded-[8px] border border-[rgba(201,168,76,0.12)]">
+            <div className="p-3 bg-white rounded-[8px] border border-[rgba(212,164,55,0.12)]">
               <div className="flex items-center gap-2 font-semibold text-[#1A1A18] mb-1">
                 <span className={compatibilityVerified ? 'text-[#3D6B3D]' : 'text-[#8A867E]'}>
                   {compatibilityVerified ? '✓' : '·'}
@@ -255,7 +255,7 @@ export default async function DyoReviewPage({ params }: PageProps) {
 
         {/* Authoritative Pricing Snapshot */}
         {quote ? (
-          <section aria-labelledby="pricing-snapshot-title" className="p-6 bg-white border border-[rgba(201,168,76,0.15)] rounded-[12px] shadow-sm mb-6">
+          <section aria-labelledby="pricing-snapshot-title" className="p-6 bg-white border border-[rgba(212,164,55,0.15)] rounded-[12px] shadow-sm mb-6">
             <h2 id="pricing-snapshot-title" className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#8A867E] mb-4">
               Price Snapshot ({quote.currency})
             </h2>
@@ -289,7 +289,7 @@ export default async function DyoReviewPage({ params }: PageProps) {
               ) : null}
               <div className="flex justify-between items-center pt-3 text-lg font-serif font-semibold text-[#1A1A18]">
                 <span>Total</span>
-                <span className="font-mono text-2xl text-[#8B6914]">{formatUsd(quote.total)}</span>
+                <span className="font-mono text-2xl text-[#8A5E12]">{formatUsd(quote.total)}</span>
               </div>
             </div>
 
@@ -301,7 +301,7 @@ export default async function DyoReviewPage({ params }: PageProps) {
             </p>
           </section>
         ) : (
-          <section aria-labelledby="pricing-snapshot-title" className="p-6 bg-[#FAFAF8] border border-[rgba(201,168,76,0.15)] rounded-[12px] mb-6">
+          <section aria-labelledby="pricing-snapshot-title" className="p-6 bg-[#F6F2E9] border border-[rgba(212,164,55,0.15)] rounded-[12px] mb-6">
             <h2 id="pricing-snapshot-title" className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#8A867E] mb-3">
               Price Snapshot
             </h2>
@@ -316,7 +316,7 @@ export default async function DyoReviewPage({ params }: PageProps) {
         <DyoReviewActions shortCode={configurationCode} />
 
         <p className="mt-6 text-xs text-[#8A867E]">
-          Prefer concierge guidance? <Link href="/contact" className="underline hover:text-[#C9A84C]">Contact the advisory desk</Link>.
+          Prefer concierge guidance? <Link href="/contact" className="underline hover:text-[#D4A437]">Contact the advisory desk</Link>.
         </p>
       </div>
     </main>

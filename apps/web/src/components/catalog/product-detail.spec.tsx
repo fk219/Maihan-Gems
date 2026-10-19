@@ -53,8 +53,23 @@ describe('ProductDetailContent — canonical contract rendering', () => {
     expect(html).toContain('derived, not an observed source SKU');
   });
 
-  it('renders no image element — the ProductDetail DTO has no media field', () => {
+  it('renders no fabricated image when media is absent — gallery is honest', () => {
+    // The contract now carries `media`; with an empty array the gallery
+    // renders the "not yet evidenced" placeholder, never an invented image.
     const html = S(<ProductDetailContent detail={detail} />);
     expect(html).not.toContain('<img');
+    expect(html).toContain('not yet evidenced');
+  });
+
+  it('renders gallery media verbatim from the DTO media array', () => {
+    const withMedia = {
+      ...detail,
+      media: [
+        { url: 'https://res.cloudinary.com/example/test.jpg', kind: 'IMAGE', role: 'PRIMARY', position: 0, alt: 'Test stone' },
+      ],
+    };
+    const html = S(<ProductDetailContent detail={withMedia} />);
+    expect(html).toContain('https://res.cloudinary.com/example/test.jpg');
+    expect(html).toContain('Test stone');
   });
 });

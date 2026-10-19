@@ -170,10 +170,10 @@ export function ThreeDViewer({
         position: 'relative',
         width: '100%',
         minHeight: '440px',
-        backgroundColor: '#08121E',
+        backgroundColor: '#16110C',
         borderRadius: '12px',
         overflow: 'hidden',
-        border: '1px solid rgba(201, 168, 76, 0.15)',
+        border: '1px solid rgba(212, 164, 55, 0.15)',
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -196,7 +196,7 @@ export function ThreeDViewer({
           }}
         >
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💎</div>
-          <h3 style={{ color: '#FAFAF8', marginBottom: '0.5rem' }}>3D Viewing Unavailable</h3>
+          <h3 style={{ color: '#F6F2E9', marginBottom: '0.5rem' }}>3D Viewing Unavailable</h3>
           <p style={{ maxWidth: '420px', fontSize: '0.9rem', lineHeight: '1.5' }}>
             Your browser does not have WebGL2 or hardware acceleration enabled. A high-resolution
             static preview is displayed below.
@@ -218,7 +218,7 @@ export function ThreeDViewer({
 
       {/* Loading Overlay */}
       {loadError && isWebGl2Supported ? (
-        <div className="webar-fallback-notice" style={{ padding: '2rem', textAlign: 'center', color: '#FAFAF8' }}>
+        <div className="webar-fallback-notice" style={{ padding: '2rem', textAlign: 'center', color: '#F6F2E9' }}>
           <p>{loadError}</p>
           {posterUrl ? <img src={posterUrl} alt={title} style={{ marginTop: '1rem', maxHeight: '260px', objectFit: 'contain' }} /> : null}
         </div>
@@ -233,17 +233,17 @@ export function ThreeDViewer({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(8, 18, 30, 0.85)',
+            backgroundColor: 'rgba(22, 17, 12, 0.85)',
             zIndex: 10,
-            color: '#C9A84C',
+            color: '#D4A437',
           }}
         >
           <div
             style={{
               width: '40px',
               height: '40px',
-              border: '3px solid #0D1B2A',
-              borderTopColor: '#C9A84C',
+              border: '3px solid #241B12',
+              borderTopColor: '#D4A437',
               borderRadius: '12px',
               animation: 'spin 1s linear infinite',
               marginBottom: '1rem',
@@ -286,8 +286,8 @@ export function ThreeDViewer({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0.75rem 1rem',
-            backgroundColor: 'rgba(13, 27, 42, 0.9)',
-            borderTop: '1px solid rgba(201, 168, 76, 0.15)',
+            backgroundColor: 'rgba(36, 27, 18, 0.9)',
+            borderTop: '1px solid rgba(212, 164, 55, 0.15)',
             zIndex: 5,
           }}
         >
@@ -298,9 +298,9 @@ export function ThreeDViewer({
               aria-label="Zoom in"
               className="btn-control"
               style={{
-                background: '#0D1B2A',
+                background: '#241B12',
                 border: 'none',
-                color: '#FAFAF8',
+                color: '#F6F2E9',
                 padding: '0.4rem 0.75rem',
                 borderRadius: '12px',
                 cursor: 'pointer',
@@ -314,9 +314,9 @@ export function ThreeDViewer({
               onClick={() => setZoom((z) => Math.max(z - 0.2, 0.6))}
               aria-label="Zoom out"
               style={{
-                background: '#0D1B2A',
+                background: '#241B12',
                 border: 'none',
-                color: '#FAFAF8',
+                color: '#F6F2E9',
                 padding: '0.4rem 0.75rem',
                 borderRadius: '12px',
                 cursor: 'pointer',
@@ -330,7 +330,7 @@ export function ThreeDViewer({
               onClick={resetView}
               aria-label="Reset 3D view"
               style={{
-                background: '#0D1B2A',
+                background: '#241B12',
                 border: 'none',
                 color: '#8A867E',
                 padding: '0.4rem 0.75rem',
@@ -353,7 +353,7 @@ export function ThreeDViewer({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                backgroundColor: '#C9A84C',
+                backgroundColor: '#D4A437',
                 color: '#FFFFFF',
                 fontWeight: 600,
                 fontSize: '0.85rem',

@@ -5,6 +5,7 @@ import { CategoryLanding } from '../../../components/storefront/CategoryLanding.
 import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
 import { LuxuryProductCard } from '../../../components/storefront/LuxuryProductCard.js';
 import { EmptyState } from '../../../components/design-system/EmptyState.js';
+import { loadCollectionView } from '../../../lib/collection-route.js';
 import { currentStorefront } from '../../../lib/ngc/current-storefront.js';
 import { landingView } from '../../../lib/ngc/landing.js';
 import { parseLandingSlug } from '../../../lib/ngc/routes.js';
@@ -34,6 +35,25 @@ export default async function VarietyPage({ params, searchParams }: PageProps) {
   if (varietySlug && (SISTER_SLUGS as readonly string[]).includes(varietySlug) && !query.style) {
     return HomePage({ brand: storefrontBySlug(varietySlug) });
   }
+
+  // Suffix collections ({variety}-pairs / -rings / -earrings / -pendants /
+  // -bracelets / -necklaces / -settings) parse INSIDE this route — suffix
+  // folders crash Next.js. DB-backed collection when the suffix parses.
+  if (varietySlug && /-(pairs|earrings|pendants|bracelets|necklaces|rings|settings)$/.test(varietySlug)) {
+    const collection = await loadCollectionView(varietySlug);
+    if (collection) {
+      return (
+        <CollectionPage
+          kicker={collection.kicker}
+          title={collection.title}
+          lede={collection.lede}
+          products={collection.products}
+          stoneSlug={collection.stoneSlug}
+        />
+      );
+    }
+  }
+
   const parsed = parseLandingSlug(varietySlug);
   const view = landingView(varietySlug);
   if (!parsed || !view) notFound();

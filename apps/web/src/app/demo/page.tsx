@@ -19,27 +19,27 @@ export default async function DemoStorefrontPage() {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Jost:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#FAFAF8]" style={{
-        fontFamily: 'Montserrat, sans-serif',
+      <body className="bg-[#F6F2E9]" style={{
+        fontFamily: 'Jost, sans-serif',
       }}>
         {/* Header */}
-        <header className="border-b border-[rgba(201,168,76,0.15)] bg-[#08121E] text-white">
+        <header className="border-b border-[rgba(212,164,55,0.15)] bg-[#16110C] text-white">
           <div className="container mx-auto px-6 py-8">
             <h1 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="text-5xl font-light tracking-wide">
               Maihan Gems
             </h1>
-            <p className="mt-2 text-sm font-light tracking-wide text-[#C9A84C]">
+            <p className="mt-2 text-sm font-light tracking-wide text-[#D4A437]">
               Natural Untreated Gemstones & Master Atelier Settings
             </p>
           </div>
         </header>
 
         {/* Hero */}
-        <section className="bg-gradient-to-b from-[#0D1B2A] to-[#08121E] py-20 text-white">
+        <section className="bg-gradient-to-b from-[#241B12] to-[#16110C] py-20 text-white">
           <div className="container mx-auto px-6 text-center">
             <h2 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="text-6xl font-light">
               Discover Earth's Finest
@@ -55,7 +55,7 @@ export default async function DemoStorefrontPage() {
         {/* Featured Gemstones */}
         <section className="py-16">
           <div className="container mx-auto px-6">
-            <h2 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="mb-8 text-4xl font-light text-[#08121E]">
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="mb-8 text-4xl font-light text-[#16110C]">
               Featured Gemstones
             </h2>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -77,7 +77,7 @@ export default async function DemoStorefrontPage() {
                     )}
                   </div>
                   <div className="p-5">
-                    <h3 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="text-xl font-medium text-[#08121E]">
+                    <h3 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="text-xl font-medium text-[#16110C]">
                       {product.title}
                     </h3>
                     {product.stone_type && (
@@ -87,7 +87,7 @@ export default async function DemoStorefrontPage() {
                       <p className="mt-1 text-sm font-medium text-[#4A4740]">{product.weight_ct} ct</p>
                     )}
                     {product.regional_price > 0 && (
-                      <p style={{ fontFamily: 'JetBrains Mono, monospace' }} className="mt-3 text-lg font-medium text-[#C9A84C]">
+                      <p style={{ fontFamily: 'JetBrains Mono, monospace' }} className="mt-3 text-lg font-medium text-[#D4A437]">
                         {product.regional_currency} {product.regional_price.toLocaleString()}
                       </p>
                     )}
@@ -99,14 +99,14 @@ export default async function DemoStorefrontPage() {
         </section>
 
         {/* Settings */}
-        <section className="bg-[#0D1B2A] py-16 text-white">
+        <section className="bg-[#241B12] py-16 text-white">
           <div className="container mx-auto px-6">
             <h2 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="mb-8 text-4xl font-light">
               Master Atelier Settings
             </h2>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {settings.map((product: any) => (
-                <div key={product.id} className="overflow-hidden rounded-lg bg-[#08121E] shadow-lg">
+                <div key={product.id} className="overflow-hidden rounded-lg bg-[#16110C] shadow-lg">
                   <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900">
                     {product.primary_image ? (
                       <img
@@ -128,7 +128,7 @@ export default async function DemoStorefrontPage() {
                       <p className="mt-1 text-sm text-[#8A867E]">{product.setting_type}</p>
                     )}
                     {product.regional_price > 0 && (
-                      <p style={{ fontFamily: 'JetBrains Mono, monospace' }} className="mt-3 text-base font-medium text-[#C9A84C]">
+                      <p style={{ fontFamily: 'JetBrains Mono, monospace' }} className="mt-3 text-base font-medium text-[#D4A437]">
                         {product.regional_currency} {product.regional_price.toLocaleString()}
                       </p>
                     )}
@@ -142,7 +142,7 @@ export default async function DemoStorefrontPage() {
         {/* Jewelry */}
         <section className="py-16">
           <div className="container mx-auto px-6">
-            <h2 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="mb-8 text-4xl font-light text-[#08121E]">
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="mb-8 text-4xl font-light text-[#16110C]">
               Fine Jewelry
             </h2>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -162,14 +162,14 @@ export default async function DemoStorefrontPage() {
                     )}
                   </div>
                   <div className="p-5">
-                    <h3 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="text-xl font-medium text-[#08121E]">
+                    <h3 style={{ fontFamily: 'Cormorant Garamond, serif' }} className="text-xl font-medium text-[#16110C]">
                       {product.title}
                     </h3>
                     {product.jewelry_type && (
                       <p className="mt-1 text-sm text-[#8A867E]">{product.jewelry_type}</p>
                     )}
                     {product.regional_price > 0 && (
-                      <p style={{ fontFamily: 'JetBrains Mono, monospace' }} className="mt-3 text-lg font-medium text-[#C9A84C]">
+                      <p style={{ fontFamily: 'JetBrains Mono, monospace' }} className="mt-3 text-lg font-medium text-[#D4A437]">
                         {product.regional_currency} {product.regional_price.toLocaleString()}
                       </p>
                     )}
@@ -181,7 +181,7 @@ export default async function DemoStorefrontPage() {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-[rgba(201,168,76,0.15)] bg-[#08121E] py-12 text-white">
+        <footer className="border-t border-[rgba(212,164,55,0.15)] bg-[#16110C] py-12 text-white">
           <div className="container mx-auto px-6 text-center">
             <p className="text-sm font-light text-gray-400">
               © 2026 Maihan Gems. All rights reserved.

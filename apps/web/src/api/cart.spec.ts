@@ -28,8 +28,14 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
   let pool: ReturnType<typeof createPool> | undefined;
   let api: CatalogApi | undefined;
   let hasDb = false;
-  let sampleProductId: string | undefined;
-  let sampleProductPrice: string | undefined;
+  let sampleProductIds: string[] = [];
+  let sampleProductPrices: string[] = [];
+  let sampleProductCursor = 0;
+  function nextSampleProduct(): { id: string | undefined; price: string | undefined } {
+    if (sampleProductIds.length === 0) return { id: undefined, price: undefined };
+    const index = sampleProductCursor++ % sampleProductIds.length;
+    return { id: sampleProductIds[index]!, price: sampleProductPrices[index] };
+  }
   const createdCartTokens: string[] = [];
 
   beforeAll(async () => {
@@ -39,16 +45,29 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
       pool = createPool(url, { max: 2 });
       const client = await pool.connect();
       const res = await client.query(`
-        SELECT id, price_amount::text AS price_amount
-        FROM products
-        WHERE price_amount IS NOT NULL
-          AND state = 'ACTIVE'
-        LIMIT 1
+        SELECT p.id, p.price_amount::text AS price_amount
+        FROM products p
+        JOIN gemstones g ON g.id = p.gemstone_id
+        WHERE p.price_amount IS NOT NULL
+          AND p.state = 'ACTIVE'
+          AND p.availability = true
+          AND g.availability = true
+          AND g.state = 'ACTIVE'
+          AND NOT EXISTS (
+            SELECT 1 FROM jobs r
+            WHERE r.job_key = 'reservation:gemstone:' || g.id::text
+              AND r.queue = 'inventory_reservations'
+              AND r.state = 'QUEUED'
+              AND r.run_after > now()
+          )
+        ORDER BY p.product_number
+        LIMIT 3
       `);
-      if (res.rows.length > 0) {
-        sampleProductId = res.rows[0].id;
-        sampleProductPrice = Number(res.rows[0].price_amount).toFixed(2);
-      }
+      // Real 1-of-1 inventory: each cart test takes its own stone so parallel
+      // sessions can never collide on one reservation.
+      sampleProductIds = res.rows.map((r: { id: string }) => r.id);
+      sampleProductPrices = res.rows.map((r: { price_amount: string }) => Number(r.price_amount).toFixed(2));
+      sampleProductCursor = 0;
       client.release();
 
       const db = createCatalogDatabase(pool);
@@ -75,7 +94,9 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
           await client.query('DELETE FROM carts WHERE cart_token = $1', [token]);
         }
         client.release();
-      } catch {}
+      } catch {
+        // tolerated: probe failures simply skip the DB-gated tests
+      }
     }
     if (pool) {
       await pool.end().catch(() => {});
@@ -124,6 +145,9 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
   });
 
   it('POST /api/v1/carts/{cartToken}/items rejects tampered price with 409 PRICE_CHANGED', async () => {
+    const sample = nextSampleProduct();
+    const sampleProductId = sample.id;
+    const sampleProductPrice = sample.price;
     if (!hasDb || !api || !sampleProductId || !sampleProductPrice) return;
 
     const createReq = new Request('http://localhost/api/v1/carts', {
@@ -155,6 +179,9 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
   });
 
   it('POST /api/v1/carts/{cartToken}/items adds item when price matches and recalculates subtotal', async () => {
+    const sample = nextSampleProduct();
+    const sampleProductId = sample.id;
+    const sampleProductPrice = sample.price;
     if (!hasDb || !api || !sampleProductId || !sampleProductPrice) return;
 
     const createReq = new Request('http://localhost/api/v1/carts', {
@@ -195,6 +222,9 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
   });
 
   it('PATCH /api/v1/carts/{cartToken}/items/{itemId} updates quantity', async () => {
+    const sample = nextSampleProduct();
+    const sampleProductId = sample.id;
+    const sampleProductPrice = sample.price;
     if (!hasDb || !api || !sampleProductId || !sampleProductPrice) return;
 
     const createReq = new Request('http://localhost/api/v1/carts', {
@@ -235,6 +265,8 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
   });
 
   it('DELETE /api/v1/carts/{cartToken}/items/{itemId} removes item', async () => {
+    const sample = nextSampleProduct();
+    const sampleProductId = sample.id;
     if (!hasDb || !api || !sampleProductId) return;
 
     const createReq = new Request('http://localhost/api/v1/carts', {
@@ -270,6 +302,8 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
   });
 
   it('POST /api/v1/carts/{cartToken}/merge merges guest cart into customer cart', async () => {
+    const sample = nextSampleProduct();
+    const sampleProductId = sample.id;
     if (!hasDb || !api || !sampleProductId) return;
 
     // Create guest cart

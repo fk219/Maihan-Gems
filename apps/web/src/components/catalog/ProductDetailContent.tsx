@@ -6,11 +6,9 @@
  * displayed field comes verbatim from the Phase 3 ProductDetail contract —
  * nothing inferred, no pricing engine, no availability derivation.
  *
- * MEDIA (documented contract limitation): the ProductDetail DTO carries NO
- * media/asset field (verified against packages/contracts entities.ts), so
- * this view renders no gallery rather than fabricating image URLs. When the
- * asset pipeline (Phase 4 Task 8 / doc 24) exposes media on the read model,
- * the gallery slots into the marked position.
+ * MEDIA: the ProductDetail contract exposes `media` (resolved from
+ * `asset_usages`/`assets` in the read model); the gallery renders it verbatim.
+ * An empty media array renders an honest "not yet evidenced" placeholder.
  */
 import type { ProductDetailReadModel, WebarAssetReadModel } from '@maihan/contracts';
 import { WebArLauncher } from '../webar/WebArLauncher.js';
@@ -18,6 +16,10 @@ import { WebArLauncher } from '../webar/WebArLauncher.js';
 import { Breadcrumbs } from '../design-system/Breadcrumbs.js';
 import { Badge } from '../design-system/Badge.js';
 import { SpecTable, type SpecRow } from '../design-system/SpecTable.js';
+import { ProductGallery } from './ProductGallery.js';
+import { ProductActions } from '../storefront/ProductActions.js';
+import type { AtelierItem } from '../../lib/atelier-item.js';
+import { atelierItemFromDetail } from '../../lib/atelier-item.js';
 
 export interface ProductDetailContentProps {
   readonly detail: ProductDetailReadModel;
@@ -52,6 +54,7 @@ function specRows(detail: ProductDetailReadModel): SpecRow[] {
 
 export function ProductDetailContent({ detail, webarAsset }: ProductDetailContentProps) {
   const isAvailable = detail.availability;
+  const item: AtelierItem = atelierItemFromDetail(detail);
 
   return (
     <main className="page product-detail">
@@ -66,10 +69,11 @@ export function ProductDetailContent({ detail, webarAsset }: ProductDetailConten
       />
 
       <article className="product-detail__layout">
-        {/*
-          MEDIA SLOT: no media field exists on the ProductDetail contract
-          (see header comment). Nothing fabricated renders here.
-        */}
+        <ProductGallery
+          media={detail.media.map((m) => ({ url: m.url, kind: m.kind, role: m.role, alt: m.alt }))}
+          title={detail.title}
+        />
+
         <section className="product-detail__summary" aria-busy="false">
           <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
             {KIND_LABEL[detail.kind]}
@@ -91,18 +95,7 @@ export function ProductDetailContent({ detail, webarAsset }: ProductDetailConten
             </Badge>
           </div>
 
-          {detail.short_description !== null && (
-            <p className="product-detail__short">{detail.short_description}</p>
-          )}
-
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2.5rem' }}>
-            <a href="/design-your-own" className="btn-primary">
-              Customise in Atelier
-            </a>
-            <a href="/contact" className="btn-secondary">
-              Inquire with Concierge
-            </a>
-          </div>
+          <ProductActions item={item} />
 
           {/* WebAR & 3D Interactive Viewer Slot (Phase 11): Rendered ONLY when webarAsset is present */}
           {webarAsset && (

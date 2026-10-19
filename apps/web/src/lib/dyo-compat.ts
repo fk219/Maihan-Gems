@@ -7,7 +7,8 @@ function normShape(value: string | null | undefined): string {
 }
 
 export function ruleAcceptsStone(rule: SettingAcceptRule, stone: StorefrontCard): boolean {
-  if (normShape(rule.shape) !== normShape(stone.shape)) return false;
+  // A rule without an evidenced shape accepts any shape (honest default).
+  if (rule.shape !== null && normShape(rule.shape) !== normShape(stone.shape)) return false;
   const carat = stone.caratTotal ?? 0;
   if (rule.minCarat !== null && carat < rule.minCarat) return false;
   if (rule.maxCarat !== null && carat > rule.maxCarat) return false;
@@ -76,7 +77,13 @@ export function pairingCaption(
   }
   if (setting && !stone) {
     const seat = setting.accepts[0];
-    const band = seat ? `, cut for a ${seat.shape} of ${seat.minCarat ?? 0}–${seat.maxCarat ?? '∞'} ct` : '';
+    const band = seat
+      ? `, cut for ${seat.shape !== null ? `a ${seat.shape} ` : 'any shape '}of ${
+          seat.minCarat !== null || seat.maxCarat !== null
+            ? `${seat.minCarat ?? 0}–${seat.maxCarat ?? '∞'} ct`
+            : 'an unevidenced weight range'
+        }`
+      : '';
     return `A ${settingSeatLabel(setting.title, setting.settingFor)} in ${metal}${band}. Select a compatible stone to seat it.`;
   }
   if (!setting && stone) {

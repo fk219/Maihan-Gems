@@ -70,8 +70,12 @@ export {
 export {
   createCatalogDatabase,
   type CatalogDatabase,
+  // Re-exported so consumer apps (apps/worker) compose queries through the
+  // SAME drizzle instance family as packages/db — no second drizzle install.
+  sql,
 } from './catalog/executor.js';
 export { createPool, type CreatePoolOptions } from './pool.js';
+export type { Pool } from 'pg';
 export {
   incrementRateLimitCounter,
   type RateLimitIncrement,

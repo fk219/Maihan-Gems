@@ -3,14 +3,14 @@
  * There is no purple in the brand palette; violet stones use sapphire-deep.
  */
 export const COLOR_SWATCH: Readonly<Record<string, string>> = {
-  'Bi Color': '#E8C96A',
-  Black: '#08121E',
+  'Bi Color': '#F0D48A',
+  Black: '#16110C',
   Blue: '#1E3A8A',
-  Brown: '#8B6914',
+  Brown: '#8A5E12',
   'Color Change': '#0891B2',
   Green: '#065F46',
   Grey: '#8A867E',
-  'Multi Color': '#C9A84C',
+  'Multi Color': '#D4A437',
   Orange: '#EA580C',
   Peach: '#FB923C',
   Pink: '#FB923C',
@@ -21,7 +21,7 @@ export const COLOR_SWATCH: Readonly<Record<string, string>> = {
 };
 
 export function swatchFor(name: string): string {
-  return COLOR_SWATCH[name] ?? '#C9A84C';
+  return COLOR_SWATCH[name] ?? '#D4A437';
 }
 
 /**
@@ -40,7 +40,7 @@ export function gemHexFor(color: string | null | undefined, stoneType?: string |
   if (text.includes('yellow') || text.includes('citrine') || text.includes('heliodor')) return '#D97706';
   if (text.includes('orange') || text.includes('spessart')) return '#EA580C';
   if (text.includes('white') || text.includes('colorless')) return '#FAFAF8';
-  if (text.includes('black')) return '#08121E';
+  if (text.includes('black')) return '#16110C';
   if (text.includes('bluish green') || text.includes('teal')) return '#0891B2';
   if (text.includes('blue') || text.includes('sapphire') || text.includes('spinel')) return '#1E3A8A';
   if (text.includes('purple') || text.includes('amethyst')) return '#1E3A8A';

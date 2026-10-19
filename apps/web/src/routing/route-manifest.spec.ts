@@ -110,6 +110,7 @@ describe('Phase 4 Task 1 — storefront route tree', () => {
       'not-found.tsx',
       'error.tsx',
       'loading.tsx',
+      'robots.ts',
       'route.ts',
       'README.md',
       // Server-actions module of the account catch-all (a 'use server'

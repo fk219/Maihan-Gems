@@ -10,6 +10,7 @@
  */
 import type { RouteContext, HandlerOutcome } from './handlers.js';
 import { globalRegistry, withSpan } from '@maihan/observability';
+import { sql } from '@maihan/db';
 import type { HealthCheckResponse } from '@maihan/contracts';
 
 const PROCESS_START_TIME = Date.now();
@@ -55,8 +56,9 @@ export async function healthReadyHandler(ctx: RouteContext): Promise<HandlerOutc
     const dbStart = Date.now();
     try {
       await withSpan('health.db_check', { attributes: { 'component': 'database' } }, async () => {
-        // Run simple 1=1 query via execute
-        await (ctx.db as any).execute({ text: 'SELECT 1 as ping', values: [] });
+        // ctx.db is the Drizzle read executor — execute takes a SQL object,
+        // never a raw { text, values } pair.
+        await (ctx.db as unknown as { execute: (query: unknown) => Promise<unknown> }).execute(sql`SELECT 1 AS ping`);
       });
       components['database'] = {
         status: 'UP',

@@ -152,7 +152,7 @@ export function WebArModal({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(8, 18, 30, 0.92)',
+        backgroundColor: 'rgba(22, 17, 12, 0.92)',
         zIndex: 9999,
         display: 'flex',
         flexDirection: 'column',
@@ -177,7 +177,7 @@ export function WebArModal({
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <span style={{ fontSize: '1.25rem' }}>💎</span>
           <div>
-            <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#FAFAF8', margin: 0 }}>
+            <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#F6F2E9', margin: 0 }}>
               Atelier AR Try-On
             </h2>
             <span style={{ fontSize: '0.75rem', color: '#8A867E' }}>
@@ -193,7 +193,7 @@ export function WebArModal({
           style={{
             background: 'rgba(255, 255, 255, 0.1)',
             border: 'none',
-            color: '#FAFAF8',
+            color: '#F6F2E9',
             fontSize: '1.25rem',
             width: '36px',
             height: '36px',
@@ -215,10 +215,10 @@ export function WebArModal({
           width: '100%',
           maxWidth: '720px',
           height: '540px',
-          backgroundColor: '#08121E',
+          backgroundColor: '#16110C',
           borderRadius: '16px',
           overflow: 'hidden',
-          border: '1px solid #0D1B2A',
+          border: '1px solid #241B12',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -236,7 +236,7 @@ export function WebArModal({
             }}
           >
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
-            <h3 style={{ fontSize: '1.25rem', color: '#FAFAF8', marginBottom: '0.75rem' }}>
+            <h3 style={{ fontSize: '1.25rem', color: '#F6F2E9', marginBottom: '0.75rem' }}>
               Privacy-First Virtual Try-On
             </h3>
             <p style={{ fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
@@ -250,7 +250,7 @@ export function WebArModal({
                 type="button"
                 onClick={requestCameraAccess}
                 style={{
-                  backgroundColor: '#C9A84C',
+                  backgroundColor: '#D4A437',
                   color: '#FFFFFF',
                   fontWeight: 600,
                   fontSize: '0.95rem',
@@ -269,7 +269,7 @@ export function WebArModal({
                 style={{
                   backgroundColor: 'transparent',
                   color: '#8A867E',
-                  border: '1px solid rgba(201, 168, 76, 0.3)',
+                  border: '1px solid rgba(212, 164, 55, 0.3)',
                   fontSize: '0.85rem',
                   padding: '0.5rem 1rem',
                   borderRadius: '12px',
@@ -285,11 +285,11 @@ export function WebArModal({
                 style={{
                   marginTop: '1.5rem',
                   padding: '1rem',
-                  backgroundColor: '#0D1B2A',
+                  backgroundColor: '#241B12',
                   borderRadius: '12px',
                 }}
               >
-                <p style={{ fontSize: '0.8rem', color: '#FAFAF8', marginBottom: '0.5rem' }}>
+                <p style={{ fontSize: '0.8rem', color: '#F6F2E9', marginBottom: '0.5rem' }}>
                   Scan with your smartphone camera to launch instant AR:
                 </p>
                 <div
@@ -311,7 +311,7 @@ export function WebArModal({
         {cameraState === 'DENIED' && (
           <div style={{ padding: '2rem', textAlign: 'center', maxWidth: '440px', color: '#8A867E' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📷🚫</div>
-            <h3 style={{ color: '#FAFAF8', marginBottom: '0.5rem' }}>Camera Access Denied</h3>
+            <h3 style={{ color: '#F6F2E9', marginBottom: '0.5rem' }}>Camera Access Denied</h3>
             <p style={{ fontSize: '0.875rem', lineHeight: '1.5', marginBottom: '1.5rem' }}>
               To experience AR try-on, allow camera access in your browser settings. You can still
               inspect the piece using the interactive 3D viewer.
@@ -320,8 +320,8 @@ export function WebArModal({
               type="button"
               onClick={onClose}
               style={{
-                backgroundColor: '#0D1B2A',
-                color: '#FAFAF8',
+                backgroundColor: '#241B12',
+                color: '#F6F2E9',
                 border: 'none',
                 padding: '0.6rem 1.25rem',
                 borderRadius: '12px',
@@ -367,7 +367,7 @@ export function WebArModal({
                 position: 'absolute',
                 bottom: '1rem',
                 left: '1rem',
-                backgroundColor: 'rgba(8, 18, 30, 0.75)',
+                backgroundColor: 'rgba(22, 17, 12, 0.75)',
                 padding: '0.4rem 0.8rem',
                 borderRadius: '12px',
                 fontSize: '0.8rem',

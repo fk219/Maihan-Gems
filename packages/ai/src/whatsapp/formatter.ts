@@ -37,7 +37,7 @@ export function formatForWhatsApp(rawText: string): string {
   text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)');
 
   // 6. Ensure bullet points use clean '-'
-  text = text.replace(/^\s*[\*\•]\s+/gm, '- ');
+  text = text.replace(/^\s*[*\u2022]\s+/gm, '- ');
 
   // Collapse multiple blank lines
   text = text.replace(/\n\s*\n\s*\n/g, '\n\n');

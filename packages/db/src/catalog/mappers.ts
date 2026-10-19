@@ -119,6 +119,17 @@ export function mapProductDetail(row: Row, stones: readonly GemstoneStoneRow[]):
           },
     gemstone,
     gemstone_pair: gemstonePair,
+    media: Array.isArray(row['media'])
+      ? (row['media'] as Array<Record<string, unknown>>)
+          .filter((m) => typeof m['url'] === 'string' && (m['url'] as string).length > 0)
+          .map((m) => ({
+            url: String(m['url']),
+            kind: String(m['kind'] ?? 'IMAGE'),
+            role: String(m['role'] ?? 'GALLERY'),
+            position: Number(m['position'] ?? 0),
+            alt: (m['alt'] as string | null) ?? null,
+          }))
+      : [],
   };
   void stones; // gemstone stones ride the gemstone detail surface, not the product's
   return ProductDetailSchema.parse(detail);

@@ -327,7 +327,12 @@ export async function addItemToCart(
     throw new ContractError('CART_EXPIRED', 'Cart is expired or not active.');
   }
 
-  // Verify product is active and get authoritative price
+  // Verify product is active and get authoritative price.
+  // Identity resolves by UUID or by public slug (the catalogue's public key);
+  // this keeps client surfaces UUID-free per the read-model contract.
+  const resolveProductBy = input.product_slug !== undefined
+    ? sql`p.slug = ${input.product_slug}`
+    : sql`p.id = ${input.product_id ?? ''}`;
   const productQuery = sql`
     SELECT
       p.id,
@@ -348,13 +353,13 @@ export async function addItemToCart(
       ORDER BY pe.created_at DESC
       LIMIT 1
     ) pe ON true
-    WHERE p.id = ${input.product_id}
+    WHERE ${resolveProductBy}
       AND p.deleted_at IS NULL
     LIMIT 1
   `;
   const productRes = await db.execute(productQuery);
   if (productRes.rows.length === 0) {
-    throw new ContractError('PRODUCT_NOT_FOUND', `Product with id "${input.product_id}" not found.`);
+    throw new ContractError('PRODUCT_NOT_FOUND', `Product not found.`);
   }
   const product = productRes.rows[0] as unknown as {
     id: string;

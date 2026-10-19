@@ -54,7 +54,7 @@ export function ArClientView({ assetId }: { assetId: string }) {
           height: '100vh',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#C9A84C',
+          color: '#D4A437',
         }}
       >
         <span>Retrieving 3D Model Specification...</span>
@@ -72,7 +72,7 @@ export function ArClientView({ assetId }: { assetId: string }) {
           textAlign: 'center',
         }}
       >
-        <h2 style={{ color: '#FAFAF8', marginBottom: '0.75rem' }}>3D Asset Unavailable</h2>
+        <h2 style={{ color: '#F6F2E9', marginBottom: '0.75rem' }}>3D Asset Unavailable</h2>
         <p style={{ color: '#8A867E', lineHeight: 1.6, marginBottom: '2rem' }}>
           {error || 'This gemstone or setting does not currently have an approved 3D model.'}
         </p>
@@ -80,7 +80,7 @@ export function ArClientView({ assetId }: { assetId: string }) {
           href="/"
           style={{
             display: 'inline-block',
-            backgroundColor: '#C9A84C',
+            backgroundColor: '#D4A437',
             color: '#FFFFFF',
             padding: '0.75rem 1.5rem',
             borderRadius: '12px',
@@ -115,7 +115,7 @@ export function ArClientView({ assetId }: { assetId: string }) {
         }}
       >
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0, color: '#FAFAF8' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0, color: '#F6F2E9' }}>
             Maihan Atelier AR
           </h1>
           <span style={{ fontSize: '0.85rem', color: '#8A867E' }}>
@@ -128,7 +128,7 @@ export function ArClientView({ assetId }: { assetId: string }) {
             color: '#8A867E',
             textDecoration: 'none',
             fontSize: '0.9rem',
-            border: '1px solid #0D1B2A',
+            border: '1px solid #241B12',
             padding: '0.4rem 0.8rem',
             borderRadius: '12px',
           }}

@@ -141,8 +141,8 @@ export function runCertificateCrossChecks(
     const normOcrOrigin = extraction.origin.value.trim().toLowerCase();
     const normDbOrigin = structured.origin.trim().toLowerCase();
     // Check direct substring inclusion or word token overlap
-    const ocrTokens = normOcrOrigin.split(/[\s,()\/]+/).filter((t) => t.length > 2);
-    const dbTokens = normDbOrigin.split(/[\s,()\/]+/).filter((t) => t.length > 2);
+    const ocrTokens = normOcrOrigin.split(/[\s,()/]+/).filter((t) => t.length > 2);
+    const dbTokens = normDbOrigin.split(/[\s,()/]+/).filter((t) => t.length > 2);
     const hasTokenOverlap = ocrTokens.some((t) => dbTokens.includes(t));
 
     if (!normDbOrigin.includes(normOcrOrigin) && !normOcrOrigin.includes(normDbOrigin) && !hasTokenOverlap) {

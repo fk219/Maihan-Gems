@@ -17,6 +17,7 @@
  * contract-validated DTOs.
  */
 import { drizzle } from 'drizzle-orm/node-postgres';
+import { sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { Pool } from 'pg';
 
@@ -25,3 +26,5 @@ export type CatalogDatabase = NodePgDatabase<Record<string, never>>;
 export function createCatalogDatabase(pool: Pool): CatalogDatabase {
   return drizzle(pool) as unknown as CatalogDatabase;
 }
+
+export { sql };

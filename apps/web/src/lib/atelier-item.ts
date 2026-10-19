@@ -1,5 +1,6 @@
 import { productImage } from './storefront-images.js';
 import type { StorefrontCard } from './storefront-types.js';
+import type { ProductDetailReadModel } from '@maihan/contracts';
 
 export interface AtelierItem {
   id: string;
@@ -74,4 +75,36 @@ export function itemImage(item: AtelierItem): string {
     colorHue: item.colorHue,
     imageUrl: item.image,
   });
+}
+
+/**
+ * Catalogue PDP read model → atelier item. Only VERBATIM contract fields are
+ * mapped; the kind string is lowercased to the storefront kind vocabulary.
+ */
+export function atelierItemFromDetail(detail: ProductDetailReadModel): AtelierItem {
+  const kind =
+    detail.kind === 'LOOSE_STONE' || detail.kind === 'STONE_PAIR'
+      ? 'gemstone'
+      : detail.kind === 'SETTING_ONLY'
+        ? 'setting'
+        : 'jewelry';
+  return {
+    id: detail.slug,
+    slug: detail.slug,
+    title: detail.title,
+    kind,
+    priceUsd: detail.price_amount,
+    image: detail.media.find((m) => m.kind === 'IMAGE')?.url ?? '',
+    specs: [
+      detail.total_weight_ct !== null ? `${detail.total_weight_ct} ct` : null,
+      detail.variety?.name ?? null,
+      detail.color?.name ?? null,
+    ]
+      .filter(Boolean)
+      .join(' · '),
+    stoneType: detail.variety?.name ?? null,
+    caratTotal: detail.total_weight_ct,
+    colorHue: detail.color?.name ?? null,
+    jewelryType: detail.jewellery_type.toLowerCase(),
+  };
 }

@@ -55,7 +55,7 @@ export async function getCustomerFavorites(
   const res = await db.execute(sql`
     SELECT
       p.id,
-      p.sku,
+      COALESCE(p.source_sku, p.source_sku_derived, 'MG-' || p.product_number::text) AS sku,
       p.title,
       p.price_amount::text AS price_amount,
       p.currency,
@@ -67,7 +67,7 @@ export async function getCustomerFavorites(
     FROM products p
     LEFT JOIN gemstones g ON g.id = p.gemstone_id
     LEFT JOIN gemstone_varieties gv ON gv.id = g.variety_id
-    LEFT JOIN asset_usages au ON au.entity_type = 'PRODUCT' AND au.entity_id = p.id AND au.role = 'PRIMARY_IMAGE'
+    LEFT JOIN asset_usages au ON au.entity_type = 'PRODUCT' AND au.entity_id = p.id AND au.role = 'PRIMARY'
     LEFT JOIN assets a ON a.id = au.asset_id
     WHERE p.id IN (${sql.join(productIds.map((id) => sql`${id}`), sql`, `)})
       AND p.state <> 'DRAFT'
@@ -133,8 +133,8 @@ export async function addCustomerFavorite(
   const payloadJson = JSON.stringify({ product_ids: updatedIds });
 
   await db.execute(sql`
-    INSERT INTO jobs (queue, job_key, payload, state, run_at)
-    VALUES ('customer_favorites', ${jobKey}, ${payloadJson}::jsonb, 'COMPLETED', now())
+    INSERT INTO jobs (queue, job_key, job_type, payload, state, run_after)
+    VALUES ('customer_favorites', ${jobKey}, 'SYNC_FAVORITES', ${payloadJson}::jsonb, 'SUCCEEDED', now())
     ON CONFLICT (job_key)
     DO UPDATE SET payload = EXCLUDED.payload, updated_at = now()
   `);
@@ -154,8 +154,8 @@ export async function removeCustomerFavorite(
   const payloadJson = JSON.stringify({ product_ids: updatedIds });
 
   await db.execute(sql`
-    INSERT INTO jobs (queue, job_key, payload, state, run_at)
-    VALUES ('customer_favorites', ${jobKey}, ${payloadJson}::jsonb, 'COMPLETED', now())
+    INSERT INTO jobs (queue, job_key, job_type, payload, state, run_after)
+    VALUES ('customer_favorites', ${jobKey}, 'SYNC_FAVORITES', ${payloadJson}::jsonb, 'SUCCEEDED', now())
     ON CONFLICT (job_key)
     DO UPDATE SET payload = EXCLUDED.payload, updated_at = now()
   `);
@@ -175,31 +175,32 @@ export async function getCompareMatrix(
   const res = await db.execute(sql`
     SELECT
       p.id,
-      p.sku,
+      COALESCE(p.source_sku, p.source_sku_derived, 'MG-' || p.product_number::text) AS sku,
       p.title,
       p.price_amount::text AS price_amount,
       p.currency,
       gv.name AS variety_name,
       gs.name AS species_name,
-      g.weight_carats::text AS carat_weight,
-      g.dimensions_mm,
-      g.shape,
+      g.total_weight_ct::text AS carat_weight,
+      g.length_mm::text || ' x ' || g.width_mm::text || ' x ' || g.depth_mm::text AS dimensions_mm,
+      g.shape::text AS shape,
       gc.name AS color_name,
-      c.name AS clarity_name,
+      cl.label AS clarity_name,
       go.name AS origin_name,
-      g.treatment_code,
+      tr.code::text AS treatment_code,
       cft.certificate_number,
-      cft.lab AS certificate_lab,
+      cft.lab_name AS certificate_lab,
       a.storage_key AS image_storage_key
     FROM products p
     LEFT JOIN gemstones g ON g.id = p.gemstone_id
     LEFT JOIN gemstone_varieties gv ON gv.id = g.variety_id
     LEFT JOIN gemstone_species gs ON gs.id = g.species_id
     LEFT JOIN gemstone_colours gc ON gc.id = g.colour_id
-    LEFT JOIN clarities c ON c.id = g.clarity_id
+    LEFT JOIN clarities cl ON cl.id = g.clarity_id
     LEFT JOIN gemstone_origins go ON go.id = g.origin_id
+    LEFT JOIN treatments tr ON tr.id = g.treatment_id
     LEFT JOIN certificates cft ON cft.gemstone_id = g.id
-    LEFT JOIN asset_usages au ON au.entity_type = 'PRODUCT' AND au.entity_id = p.id AND au.role = 'PRIMARY_IMAGE'
+    LEFT JOIN asset_usages au ON au.entity_type = 'PRODUCT' AND au.entity_id = p.id AND au.role = 'PRIMARY'
     LEFT JOIN assets a ON a.id = au.asset_id
     WHERE p.id IN (${sql.join(uniqueIds.map((id) => sql`${id}`), sql`, `)})
       AND p.state <> 'DRAFT'

@@ -30,6 +30,17 @@ describe('Checkout HTTP API & Checkpoint Funnel Endpoints (Phase 6 Tasks 2-3)', 
   let hasDb = false;
   let sampleProductId: string | undefined;
   let sampleProductPrice: string | undefined;
+  // Real inventory is 1-of-1: each checkout session holds its stone for 30
+  // minutes, so every session-creating test takes its OWN product.
+  let sampleProductIds: string[] = [];
+  let sampleProductPrices: string[] = [];
+  let sampleProductCursor = 0;
+  function nextSampleProduct(): { id: string | undefined; price: string | undefined } {
+    if (sampleProductIds.length === 0) return { id: undefined, price: undefined };
+    const index = sampleProductCursor % sampleProductIds.length;
+    sampleProductCursor += 1;
+    return { id: sampleProductIds[index]!, price: sampleProductPrices[index] };
+  }
   const createdCartTokens: string[] = [];
   const createdSessionIds: string[] = [];
 
@@ -47,11 +58,21 @@ describe('Checkout HTTP API & Checkpoint Funnel Endpoints (Phase 6 Tasks 2-3)', 
           AND p.state = 'ACTIVE'
           AND g.availability = true
           AND g.state = 'ACTIVE'
-        LIMIT 1;
+          AND NOT EXISTS (
+            SELECT 1 FROM jobs r
+            WHERE r.job_key = 'reservation:gemstone:' || g.id::text
+              AND r.queue = 'inventory_reservations'
+              AND r.state = 'QUEUED'
+              AND r.run_after > now()
+          )
+        ORDER BY p.product_number
+        LIMIT 6;
       `);
+      sampleProductIds = res.rows.map((r: { id: string }) => r.id);
+      sampleProductPrices = res.rows.map((r: { price_amount: string }) => Number(r.price_amount).toFixed(2));
       if (res.rows.length > 0) {
-        sampleProductId = res.rows[0].id;
-        sampleProductPrice = Number(res.rows[0].price_amount).toFixed(2);
+        sampleProductId = sampleProductIds[0];
+        sampleProductPrice = sampleProductPrices[0]!;
       }
       client.release();
 
@@ -167,7 +188,8 @@ describe('Checkout HTTP API & Checkpoint Funnel Endpoints (Phase 6 Tasks 2-3)', 
   });
 
   it('creates checkout session successfully, reserves stock, and returns 201 with frozen snapshot', async () => {
-    if (!hasDb || !api || !sampleProductId) return;
+    const sample = nextSampleProduct();
+    if (!hasDb || !api || !sample.id) return;
 
     // Create cart
     const createCartRes = await api(
@@ -186,7 +208,7 @@ describe('Checkout HTTP API & Checkpoint Funnel Endpoints (Phase 6 Tasks 2-3)', 
       new Request(`https://maihan.test/api/v1/carts/${cartToken}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: sampleProductId, quantity: 1 }),
+        body: JSON.stringify({ product_id: sample.id, quantity: 1 }),
       }),
     );
     const addBody = await addRes.json();
@@ -223,7 +245,8 @@ describe('Checkout HTTP API & Checkpoint Funnel Endpoints (Phase 6 Tasks 2-3)', 
   });
 
   it('enforces sequential server checkpoints and rejects skipping shipping step with 422', async () => {
-    if (!hasDb || !api || !sampleProductId) return;
+    const sample = nextSampleProduct();
+    if (!hasDb || !api || !sample.id) return;
 
     // Create cart & add item
     const createCartRes = await api(
@@ -240,7 +263,7 @@ describe('Checkout HTTP API & Checkpoint Funnel Endpoints (Phase 6 Tasks 2-3)', 
       new Request(`https://maihan.test/api/v1/carts/${cartToken}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: sampleProductId, quantity: 1 }),
+        body: JSON.stringify({ product_id: sample.id, quantity: 1 }),
       }),
     );
 
@@ -251,7 +274,7 @@ describe('Checkout HTTP API & Checkpoint Funnel Endpoints (Phase 6 Tasks 2-3)', 
         body: JSON.stringify({ cart_token: cartToken }),
       }),
     );
-    const sessionId = (await sessionRes.json()).data.id;
+    const sessionId = (await sessionRes.json()).data?.id;
     createdSessionIds.push(sessionId);
 
     // Attempt to jump directly to payment checkpoint without shipping
@@ -269,7 +292,8 @@ describe('Checkout HTTP API & Checkpoint Funnel Endpoints (Phase 6 Tasks 2-3)', 
   });
 
   it('completes shipping, payment and confirm checkpoints in sequence as the observed funnel', async () => {
-    if (!hasDb || !api || !sampleProductId) return;
+    const sample = nextSampleProduct();
+    if (!hasDb || !api || !sample.id) return;
 
     // Create cart & add item
     const createCartRes = await api(
@@ -286,7 +310,7 @@ describe('Checkout HTTP API & Checkpoint Funnel Endpoints (Phase 6 Tasks 2-3)', 
       new Request(`https://maihan.test/api/v1/carts/${cartToken}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: sampleProductId, quantity: 1 }),
+        body: JSON.stringify({ product_id: sample.id, quantity: 1 }),
       }),
     );
     const initialTotal = (await addRes.json()).data.pricing_snapshot.grand_total;

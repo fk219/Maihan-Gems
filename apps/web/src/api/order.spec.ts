@@ -47,6 +47,14 @@ describe('Order Placement & Immutable Snapshots (Phase 6 Task 4)', () => {
           AND p.state = 'ACTIVE'
           AND g.availability = true
           AND g.state = 'ACTIVE'
+          AND NOT EXISTS (
+            SELECT 1 FROM jobs r
+            WHERE r.job_key = 'reservation:gemstone:' || g.id::text
+              AND r.queue = 'inventory_reservations'
+              AND r.state = 'QUEUED'
+              AND r.run_after > now()
+          )
+        ORDER BY p.product_number
         LIMIT 1;
       `);
       if (res.rows.length > 0) {

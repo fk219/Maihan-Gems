@@ -44,7 +44,7 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
     let forceStaleQuote = false;
     let quoteToken: string | null = null;
     let insertedCartSnapshotId: string | null = null;
-    let storedCart: any = {
+    const storedCart: any = {
       id: 'cart-123',
       cart_token: 'cart_token_abc',
       currency: 'USD',

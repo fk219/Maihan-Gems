@@ -55,10 +55,22 @@ describe('Cart Repository & Authoritative Re-pricing (Phase 6 Task 1)', () => {
       const client = await pool.connect();
       // Find an active product with a price to use for testing
       const res = await client.query(`
-        SELECT id, price_amount::text AS price_amount
-        FROM products
-        WHERE price_amount IS NOT NULL
-          AND state = 'ACTIVE'
+        SELECT p.id, p.price_amount::text AS price_amount
+        FROM products p
+        JOIN gemstones g ON g.id = p.gemstone_id
+        WHERE p.price_amount IS NOT NULL
+          AND p.state = 'ACTIVE'
+          AND p.availability = true
+          AND g.availability = true
+          AND g.state = 'ACTIVE'
+          AND NOT EXISTS (
+            SELECT 1 FROM jobs r
+            WHERE r.job_key = 'reservation:gemstone:' || g.id::text
+              AND r.queue = 'inventory_reservations'
+              AND r.state = 'QUEUED'
+              AND r.run_after > now()
+          )
+        ORDER BY p.product_number
         LIMIT 1
       `);
       if (res.rows.length > 0) {
@@ -81,7 +93,9 @@ describe('Cart Repository & Authoritative Re-pricing (Phase 6 Task 1)', () => {
           await client.query('DELETE FROM carts WHERE cart_token = $1', [token]);
         }
         client.release();
-      } catch {}
+      } catch {
+        // tolerated: probe failures simply skip the DB-gated tests
+      }
     }
     if (pool) {
       await pool.end().catch(() => {});

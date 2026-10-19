@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { addToBag, getBag, subscribeAtelier } from '../../lib/atelier-store.js';
-import { cardToAtelier } from '../../lib/atelier-item.js';
 import { formatMoney } from '../../lib/currency.js';
 import { gemHexFor } from '../../lib/ngc/colors.js';
 import {
@@ -19,7 +17,7 @@ import { JewelryConfiguratorCanvas, type MetalFinish } from '../configurator/Jew
 import { VirtualTryOnModal } from '../webar/VirtualTryOnModal.js';
 import { useStorefront } from './StorefrontProvider.js';
 
-const METALS = ['18K Yellow Gold', '18K White Gold', '18K Rose Gold', 'Platinum'] as const;
+type MetalName = '18K Yellow Gold' | '18K White Gold' | '18K Rose Gold' | 'Platinum';
 const SIZES = ['5', '5.5', '6', '6.5', '7', '7.5', '8', '8.5', '9'];
 
 function imageFor(product: StorefrontCard): string {
@@ -37,7 +35,7 @@ function imageFor(product: StorefrontCard): string {
   });
 }
 
-function metalFinishOf(name: (typeof METALS)[number]): MetalFinish {
+function metalFinishOf(name: MetalName): MetalFinish {
   if (name.includes('White')) return 'WHITE_GOLD';
   if (name.includes('Rose')) return 'ROSE_GOLD';
   if (name.includes('Platinum')) return 'PLATINUM';
@@ -70,9 +68,10 @@ export function DyoStudio({
   const { currency, rates } = useStorefront();
   const [settingId, setSettingId] = useState<string | null>(initialSettingId);
   const [stoneId, setStoneId] = useState<string | null>(initialStoneId);
-  const [metal, setMetal] = useState<(typeof METALS)[number]>('18K Yellow Gold');
+  const [metal, setMetal] = useState<MetalName>('18K Yellow Gold');
   const [size, setSize] = useState('6.5');
-  const [reserved, setReserved] = useState(false);
+  const [beginning, setBeginning] = useState(false);
+  const [beginError, setBeginError] = useState<string | null>(null);
   const [tryOn, setTryOn] = useState(initialTryOn);
 
   const lockedStone = stones.find((row) => row.id === initialStoneId) ?? null;
@@ -94,21 +93,20 @@ export function DyoStudio({
   const total = (setting?.priceUsd ?? 0) + (stone?.priceUsd ?? 0);
   const settingImage = setting ? imageFor(setting) : '';
   const stoneImage = stone ? imageFor(stone) : '';
-  const accept = setting?.accepts.map((r) => `${r.shape} ${r.minCarat ?? 0}–${r.maxCarat ?? '∞'}ct`).join(' · ');
-  const compositionId = setting && stone ? `dyo-${setting.id}-${stone.id}` : null;
+  const accept = setting?.accepts
+    .map((r) => {
+      const shape = r.shape ?? 'any shape';
+      const min = r.minCarat ?? null;
+      const max = r.maxCarat ?? null;
+      const range = min !== null || max !== null ? `${min ?? 0}–${max ?? '∞'}ct` : 'weight range not evidenced';
+      return `${shape} ${range}`;
+    })
+    .join(' · ');
   const caption = pairingCaption(setting, stone, metal);
 
   useEffect(() => {
     syncQuery(settingId, stoneId);
   }, [settingId, stoneId]);
-
-  useEffect(() => {
-    const sync = () => {
-      if (compositionId) setReserved(getBag().some((row) => row.id === compositionId));
-    };
-    sync();
-    return subscribeAtelier(sync);
-  }, [compositionId]);
 
   function chooseSetting(id: string) {
     setSettingId(id);
@@ -121,22 +119,49 @@ export function DyoStudio({
     setPanel(3);
   }
 
-  function reserve() {
-    if (!setting || !stone) return;
-    addToBag({
-      ...cardToAtelier(setting),
-      id: `dyo-${setting.id}-${stone.id}`,
-      slug: setting.slug,
-      title: `${setting.title} × ${stone.title}`,
-      priceUsd: total,
-      specs: `${stone.caratTotal ?? ''} ct · ${metal}${setting.settingFor === 'ring' ? ` · US ${size}` : ''}`,
-    });
-    setReserved(true);
+  /**
+   * The atelier order is NOT a client-priced bag line — the server composes
+   * the configuration (INV-01/02/03), validates it against the real
+   * compatibility rules and quotes it (server-authoritative price). The
+   * review page then converts the exact quote transactionally.
+   */
+  async function beginAtelierOrder(): Promise<void> {
+    if (!setting || !stone || beginning) return;
+    setBeginning(true);
+    setBeginError(null);
+    try {
+      const createRes = await fetch('/api/v1/dyo/configurations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settingVariantSku: setting.sku,
+          gemRef: stone.sku,
+          jewelleryType: (setting.settingFor ?? 'ring').toUpperCase() === 'EARRINGS' ? 'EARRINGS' : 'RING',
+        }),
+      });
+      const createBody = (await createRes.json().catch(() => null)) as {
+        data?: { configuration?: { short_code?: string } };
+        error?: { message?: string };
+      } | null;
+      const shortCode = createBody?.data?.configuration?.short_code;
+      if (!createRes.ok || !shortCode) {
+        throw new Error(createBody?.error?.message ?? 'The atelier could not register this composition.');
+      }
+      const validateRes = await fetch(`/api/v1/dyo/configurations/${encodeURIComponent(shortCode)}/validate`, { method: 'POST' });
+      if (!validateRes.ok) {
+        const validateBody = (await validateRes.json().catch(() => null)) as { error?: { message?: string } } | null;
+        throw new Error(validateBody?.error?.message ?? 'This composition failed compatibility validation.');
+      }
+      window.location.href = `/design-your-own/review/${encodeURIComponent(shortCode)}`;
+    } catch (cause) {
+      setBeginError(cause instanceof Error ? cause.message : 'The atelier could not begin this composition.');
+      setBeginning(false);
+    }
   }
 
   const swatches = [
-    { name: '18K Yellow Gold' as const, color: '#C9A84C' },
-    { name: '18K White Gold' as const, color: '#FAFAF8' },
+    { name: '18K Yellow Gold' as const, color: '#D4A437' },
+    { name: '18K White Gold' as const, color: '#F6F2E9' },
     { name: '18K Rose Gold' as const, color: '#EA580C' },
     { name: 'Platinum' as const, color: '#D7D8DC' },
   ];
@@ -248,11 +273,20 @@ export function DyoStudio({
               <dl className="atelier__totals">
                 <div><dt>Setting</dt><dd>{setting ? formatMoney(setting.priceUsd, currency, rates) : '—'}</dd></div>
                 <div><dt>Stone</dt><dd>{stone ? formatMoney(stone.priceUsd, currency, rates) : '—'}</dd></div>
-                <div className="is-total"><dt>{metal}{setting?.settingFor === 'ring' ? ` · US ${size}` : ''}</dt><dd>{formatMoney(total, currency, rates)}</dd></div>
+                <div className="is-total"><dt>Indicative total</dt><dd>{formatMoney(total, currency, rates)}</dd></div>
               </dl>
-              <button type="button" className="atelier__bag" disabled={!setting || !stone} onClick={reserve}>
-                {reserved ? 'Held in your bag' : 'Add to bag'}
+              <p className="atelier__note">
+                The authoritative price is the server quote on the review page — component prices here are indicative.
+              </p>
+              <button
+                type="button"
+                className="atelier__bag"
+                disabled={!setting || !stone || beginning}
+                onClick={() => void beginAtelierOrder()}
+              >
+                {beginning ? 'Preparing your composition…' : 'Review & quote on the server'}
               </button>
+              {beginError ? <p role="alert" className="atelier__note">{beginError}</p> : null}
               {accept ? <p className="atelier__note">Accepts {accept}</p> : null}
               {fit === 'needs_review' ? (
                 <p className="atelier__note">

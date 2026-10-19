@@ -48,7 +48,7 @@ export function SearchFilterPanel({ facets, searchParams }: SearchFilterPanelPro
           alignItems: 'center',
           marginBottom: '1rem',
           paddingBottom: '0.75rem',
-          borderBottom: '1px solid rgba(201, 168, 76, 0.2)',
+          borderBottom: '1px solid rgba(212, 164, 55, 0.2)',
         }}
       >
         <h2

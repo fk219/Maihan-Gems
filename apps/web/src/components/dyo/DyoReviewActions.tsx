@@ -117,7 +117,7 @@ export function DyoReviewActions({ shortCode }: DyoReviewActionsProps) {
           type="button"
           disabled={isAdding}
           onClick={handleAddToCart}
-          className="flex-1 px-8 py-4 text-[11px] font-semibold tracking-[0.2em] uppercase text-white bg-gradient-to-r from-[#C9A84C] via-[#E8C96A] to-[#8B6914] rounded-[12px] shadow-sm hover:brightness-105 cursor-pointer transition-all text-center"
+          className="flex-1 px-8 py-4 text-[11px] font-semibold tracking-[0.2em] uppercase text-white bg-gradient-to-r from-[#D4A437] via-[#F0D48A] to-[#8A5E12] rounded-[12px] shadow-sm hover:brightness-105 cursor-pointer transition-all text-center"
         >
           {isAdding ? 'Adding to Atelier Bag...' : 'Add to Bag & Proceed to Checkout'}
         </button>
@@ -125,7 +125,7 @@ export function DyoReviewActions({ shortCode }: DyoReviewActionsProps) {
         <button
           type="button"
           onClick={handleCopyLink}
-          className="px-6 py-4 text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1A1A18] bg-[#FFFFFF] border border-[rgba(201,168,76,0.3)] rounded-[12px] hover:border-[#C9A84C] cursor-pointer transition-all text-center"
+          className="px-6 py-4 text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1A1A18] bg-[#FFFFFF] border border-[rgba(212,164,55,0.3)] rounded-[12px] hover:border-[#D4A437] cursor-pointer transition-all text-center"
         >
           {copied ? '✓ Link Copied' : 'Share Configuration'}
         </button>
@@ -134,7 +134,7 @@ export function DyoReviewActions({ shortCode }: DyoReviewActionsProps) {
       <div className="text-center pt-2">
         <a
           href="/design-your-own"
-          className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#8A867E] hover:text-[#C9A84C] transition-colors"
+          className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#8A867E] hover:text-[#D4A437] transition-colors"
         >
           ← Modify or Configure Another Piece
         </a>

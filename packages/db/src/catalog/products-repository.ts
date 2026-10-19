@@ -329,13 +329,35 @@ const PRODUCT_DETAIL_JOINS = sql`
  * soft-deleted, or NOT PUBLISHED (`state = 'ACTIVE'` only — the migrated
  * corpus stays DRAFT until Phase 12 curation publishes it, so unpublished
  * rows can never leak into a public identity lookup).
+ *
+ * Gallery media is aggregated in the SAME statement (one dispatch, no N+1):
+ * a `media` CTE resolves `asset_usages` (entity PRODUCT) against `assets`,
+ * ordered by position — URL order: cdn_url when READY, else source_url.
  */
 export async function findProductDetailBySlug(
   db: CatalogDatabase,
   slug: string,
 ): Promise<Record<string, unknown> | null> {
   const statement = sql`
-    SELECT ${PRODUCT_DETAIL_COLUMNS}
+    WITH media AS (
+      SELECT a.cdn_url AS url,
+             a.kind::text AS kind,
+             au.role::text AS role,
+             au.position AS position,
+             a.alt_text AS alt
+        FROM asset_usages au
+        JOIN assets a ON a.id = au.asset_id
+       WHERE au.entity_type = 'PRODUCT'
+         AND a.deleted_at IS NULL
+         AND a.processing_state = 'READY'
+         AND (a.cdn_url IS NOT NULL OR a.source_url IS NOT NULL)
+         AND au.entity_id = (SELECT p0.id FROM products p0 WHERE p0.slug = ${slug} AND p0.state = 'ACTIVE' AND p0.deleted_at IS NULL LIMIT 1)
+       ORDER BY au.position ASC
+    )
+    SELECT ${PRODUCT_DETAIL_COLUMNS},
+      COALESCE((SELECT json_agg(m) FROM (
+         SELECT COALESCE(url, '') AS url, kind, role, position, alt FROM media
+       ) m), '[]'::json) AS media
       FROM products p
       ${PRODUCT_DETAIL_JOINS}
      WHERE p.slug = ${slug}

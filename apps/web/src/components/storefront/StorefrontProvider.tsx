@@ -77,7 +77,16 @@ export function StorefrontProvider({
 export function useStorefront() {
   const ctx = useContext(StorefrontContext);
   if (!ctx) {
-    throw new Error('useStorefront must be used within StorefrontProvider');
+    // Isolated renders (server templates, spec harnesses) outside the live
+    // storefront chrome get the documented defaults — USD + fallback FX.
+    // Interactive surfaces always mount the provider.
+    return {
+      currency: 'USD' as const,
+      setCurrency: () => undefined,
+      rates: { ...DEFAULT_FX },
+      bagCount: 0,
+      favCount: 0,
+    };
   }
   return ctx;
 }

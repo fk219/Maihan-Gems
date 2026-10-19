@@ -53,6 +53,18 @@ export type CodeRef = z.infer<typeof CodeRefSchema>;
 
 // ─── PRODUCT ──────────────────────────────────────────────────────────────────
 
+/** One gallery media item, resolved from `assets` via `asset_usages` (doc 24). */
+export const ProductMediaSchema = z
+  .object({
+    url: z.string().min(1),
+    kind: z.string().min(1),
+    role: z.string().min(1),
+    position: z.number().int().min(0),
+    alt: z.string().nullable(),
+  })
+  .strict();
+export type ProductMedia = z.infer<typeof ProductMediaSchema>;
+
 export const ProductSummarySchema = z
   .object({
     slug: z.string().min(1),
@@ -103,6 +115,8 @@ export const ProductDetailSchema = ProductSummarySchema.extend({
     })
     .strict()
     .nullable(),
+  /** Gallery media (photos, video, 360, certificates) ordered by position; empty when none. */
+  media: ProductMediaSchema.array(),
 });
 
 export type ProductDetail = z.infer<typeof ProductDetailSchema>;

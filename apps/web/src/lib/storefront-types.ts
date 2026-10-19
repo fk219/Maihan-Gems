@@ -1,5 +1,6 @@
 export interface SettingAcceptRule {
-  shape: string;
+  /** Accepted seat shape; null/undefined = any shape (not evidenced per design). */
+  shape: string | null;
   minCarat: number | null;
   maxCarat: number | null;
 }

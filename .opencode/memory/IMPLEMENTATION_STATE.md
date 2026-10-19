@@ -1,3 +1,125 @@
+# STOREFRONT SEED, WORKER, CMS CONTENT, DYO INTEGRITY & SECURITY-CLEANUP (2026-10-19)
+
+Session built on top of the 2026-10-18 full-stack completion. Commit `d1e2e86` already
+delivered auth/RBAC/vendor/admin/checkout; this session closed the audit gaps that
+ remained after it and got the storefront serving REAL database data end to end.
+
+1. **Live catalogue seed into the LOCKED schema (`packages/db/src/seed/catalogue-seed.ts`,
+   `run-catalogue-seed.ts`, script `seed:catalogue`)** — the flagship gap. The DB existed but
+   was EMPTY; every storefront page fell back to the compile-time NGC static fixture
+   (violating "no hardcoded data"). The seed imports the compiled NGC research fixture
+   (`apps/web/src/data/ngc-catalog.json`, SHA-256 recorded in `import_batches`
+   batch_key `ngc-catalog-v1`) into the locked schema: 255 gemstones (361 stone rows
+   incl. per-pair INV-06 rows), 85 settings + 85 variants (SKUs composed per the JS
+   grammar, EXTRACTED) + 85 compatibility rules (INV-02/03 as data), 443 products
+   (144 LOOSE_STONE, 102 STONE_PAIR, 85 SETTING_ONLY, 88 READY_MADE; 419 active),
+   7,072 assets + usages (Cloudinary cdn_url, verbatim source URLs), 9 display-only
+   UNVERIFIED certificates, 14 PUBLISHED CMS pages, 2 promo codes, 2 add-ons. Every
+   row carries batch provenance; re-run mutates nothing (idempotent upserts).
+   `/policies/education/blog` content = registry-validated CMS blocks. Titles composed
+   verbatim only (0 bare-id titles remain). Root script `pnpm run storefront:db:setup`
+   now runs migrate + reference seed + catalogue seed.
+
+2. **Background worker (`apps/worker`) — was `export {}`** — real outbox dispatcher
+   (FOR UPDATE SKIP LOCKED claim, PENDING -> PUBLISHED + `event_consumers` ledger in ONE
+   transaction, exponential backoff, DEAD_LETTER after 5 attempts) plus idempotent sweeps:
+   reservation TTL (via `sweepExpiredReservations`), checkout-session expiry
+   (jobs queue, stale sessions -> CANCELLED), cart expiry, and webhook-receipt failure
+   flagging (exhausted receipts marked for admin review — never replayed unsigned).
+   `pnpm run worker` root script; 2 live-Postgres tests (dispatch idempotency, sweep
+   second-run no-op).
+
+3. **Media on the PDP read model** — `ProductDetail.media` added to the contracts DTO
+   (schema docs updated, OpenAPI regenerated), aggregated in the SAME statement in
+   `findProductDetailBySlug` (CTE on asset_usages/assets; no N+1); new `ProductGallery`
+   island renders photos/video/certificates verbatim; empty media renders an honest
+   "not yet evidenced" placeholder. PDP also now renders `ProductActions`
+   (add-to-bag/wishlist/compare from the catalogue detail).
+
+4. **Cart identity by public slug** — `AddToCartInputSchema` accepts `product_slug`
+   (the catalogue's public key) as an alternative to the internal UUID;
+   `addItemToCart` resolves server-side. CheckoutReview bridges bag items by UUID when
+   available else by slug.
+
+5. **DYO honesty + integrity** — configurator uses DB-backed `listSettingsForDyo`
+   (real `setting_compatibility_rules`; the NGC fallback no longer invents carat
+   ranges) and DB stones; `createDyoConfigurationHandler` resolves
+   settingVariantSku/gemRef SERVER-side into setting_variant_id + gemstone_id XOR
+   gemstone_pair_id (resolving pair gem_refs to EARRINGS per INV-02); the studio's
+   client-priced "Add to bag" was replaced by the server flow: POST configurations ->
+   validate -> navigate to review/{code} -> quote -> add-to-cart with the consumed
+   quote.
+
+6. **Route coverage** — `/{variety}-earrings / -pendants / -bracelets / -necklaces /
+   -settings / -rings / -pairs` now parse INSIDE `[varietySlug]` via the orphaned
+   `loadCollectionView` (suffix folders crash Next.js). `/settings/{sku}` is a REAL
+   locked-schema lookup (setting + variant + metal + compat rules + SETTING_ONLY
+   product) with honest 404s replacing the previously fabricated static page.
+   Added `app/robots.ts`, root `loading.tsx` (Skeleton primitives) and root
+   `not-found.tsx`.
+
+7. **CMS-driven storefront content** — `apps/web/src/lib/cms-pages.ts` +
+   `CmsBlockView` (RICH_TEXT renders markdown as plain paragraphs, never raw HTML):
+   `/policy/{slug}`, `/education/**` (+ article routes), `/blog` + `/blog/{slug}` read
+   PUBLISHED pages from the locked `pages` table with static fallback for absent
+   rows.
+
+8. **Fixes found by the now-running integration tests** (they SKIPPED silently before
+   the seed existed because the DB had no products):
+   - recency sort seek: `recency` cursor tuple now lives fully in the epoch-float8
+     domain (ORDER BY + mint + seek share one domain) — `timestamptz > float8` has
+     no Postgres operator and broke paged recency reads.
+   - `favorites-repository`: jobs insert used `run_at` (col is `run_after`),
+     state 'COMPLETED' (enum is 'SUCCEEDED'), missing `job_type`, storefront-schema
+     `p.sku` -> locked COALESCE(source_sku…), media role 'PRIMARY_IMAGE' -> 'PRIMARY',
+     compare query rewritten to locked columns (clarities live in
+     `label`, treatments by FK).
+   - health/ready DB probe: `db.execute({text,values})` -> Drizzle `sql` template.
+   - webhook receipt/validation flows unchanged but smoke-verified live (see below).
+   - checkout/cart/favorites spec fixtures now select REAL available, unreserved
+     stones and each checkout/merge test takes its OWN product (1-of-1 inventory
+     makes shared fixtures collide).
+
+9. **Security** — the leaked-secret chat log (`freebuff-chat-*.md`, contains the
+   Neon password per COMPLETENESS_AUDIT C1) was already deleted from the working
+   tree: untracked via `git rm --cached` + `.gitignore` entry. IMPORTANT: it remains
+   in git HISTORY; the Neon credential must be rotated regardless (client action).
+
+10. **Lint restored to error-free** — was already red at HEAD (~305 errors, pre-existing):
+    spec/test files get the standard no-console/no-explicit-any override; observability
+    logger + seeders + CLIs get console (they ARE the logging seam); worker/roots
+    scripts get node globals; `no-unused-vars` honours `_`-prefix + `catch {}`;
+    whatsapp/certificate regex escapes and DYOStudio const-type fixed by hand.
+    The ~214 remaining structural `any`s stay VISIBLE as trackable warnings
+    (previously inaccessible behind the failing gate).
+
+11. **Final verification (all live, 2026-10-19)**:
+    - `pnpm run typecheck` 0 errors; `pnpm run build` green; `pnpm run lint`
+      0 errors / 213 tracked warnings.
+    - `pnpm -r run test`: domain 239, contracts 43 (OpenAPI parity incl. regenerated
+      spec), ai 14, observability 12, db 144, worker 2, tools/migrate 33,
+      web 469 — ALL PASS (19 skipped: DB-gated fixtures etc.).
+    - `pnpm run schema-fidelity`: PASS (fresh DB, 18 migrations, exact locked schema).
+    - Bundle budgets: product route 150.0 KB <= 190 KB.
+    - LIVE HTTP smoke (postgres + API + storefront): register/login/session; cart
+      add-by-slug with authoritative price; checkout checkpoints (skip=422);
+      order MG-2026-000001 PENDING_PAYMENT with frozen totals; idempotent replay
+      returns the SAME order; signed webhook -> PAID; duplicate webhook -> "duplicate"
+      no-op; tampered webhook -> 401; order timeline events. Storefront pages all
+      200 with REAL DB content: /, /browse, /shop, /pairs, /jewellery, variety
+      landings + suffix collections, /settings/{sku}, PDP w/ gallery, /search,
+      /varieties, /colour, /cart, 4-step checkout funnel, /design-your-own,
+      /account, /favorites, /compare, CMS policy/education/blog, /showrooms,
+      robots.txt, sitemap index, honest 404 view.
+
+12. **Known limits (unchanged)**: no live providers (payments/tax/email/FX table) —
+    test settlement adapter + honest fallbacks; AI concierge needs LLM key (UI shows
+    truthful unavailable state); gemstock.org live sync is the NEXT integration step on
+    top of the same seed pipeline (fixture already mirrors its data model).
+
+
+---
+
 # COMPLETE ECOMMERCE, AUTHENTICATION, RBAC, VENDOR & ADMIN PORTALS (2026-10-18)
 
 Completed full-stack ecommerce implementation across `@maihan/db` and `@maihan/web`:

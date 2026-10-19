@@ -81,21 +81,20 @@ export function CheckoutReview() {
       const cartToken = cartBody.data?.cart_token ?? '';
       if (!cartToken) throw new Error('The server did not return a bag token.');
 
-      // 2. Bridge the orderable pieces (UUID ids only; the rest stay concierge).
+      // 2. Bridge the orderable pieces (UUID ids resolve directly; other
+      // items resolve by their public slug — the catalogue's public key).
       const notOrderable: string[] = [];
       for (const item of items) {
-        if (!UUID_RE.test(item.id)) {
-          notOrderable.push(item.title);
-          continue;
-        }
+        const body: Record<string, unknown> = {
+          quantity: item.quantity ?? 1,
+          expected_unit_price: item.priceUsd ? item.priceUsd.toFixed(2) : undefined,
+        };
+        if (UUID_RE.test(item.id)) body['product_id'] = item.id;
+        else body['product_slug'] = item.slug || item.id;
         const addRes = await fetch(`/api/v1/carts/${encodeURIComponent(cartToken)}/items`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            product_id: item.id,
-            quantity: item.quantity ?? 1,
-            expected_unit_price: item.priceUsd ? item.priceUsd.toFixed(2) : undefined,
-          }),
+          body: JSON.stringify(body),
         });
         if (!addRes.ok) {
           const body = (await addRes.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;

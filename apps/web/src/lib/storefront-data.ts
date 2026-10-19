@@ -13,7 +13,7 @@ import {
   type NgcListFilter,
 } from './ngc/catalog.js';
 import { parseSearchQuery, type ParsedSearch } from './search-parser.js';
-import type { SettingAcceptRule, SettingForDyo, StorefrontCard } from './storefront-types.js';
+import type { SettingForDyo, StorefrontCard } from './storefront-types.js';
 
 export type { SettingAcceptRule, SettingForDyo, StorefrontCard } from './storefront-types.js';
 
@@ -492,50 +492,56 @@ export async function searchStorefront(query: string, limit = 12): Promise<{
 }
 
 export async function listSettingsForDyo(limit = 16): Promise<SettingForDyo[]> {
-  const fromNgc = settingsForDyo(limit);
-  if (fromNgc.length > 0) return fromNgc;
-  const settings = await listProducts({
-    kind: 'setting',
-    settingForIn: ['ring', 'pendant', 'earrings'],
-    limit,
-  });
-  if (settings.length === 0) return [];
-  const acceptRows = await withCatalogue(
-    [] as {
-      setting_product_id: string;
-      shape: string;
-      min_carat: string | null;
-      max_carat: string | null;
-    }[],
-    async () => {
-      const result = await pool.query<{
-        setting_product_id: string;
-        shape: string;
-        min_carat: string | null;
-        max_carat: string | null;
-      }>(
-        `SELECT setting_product_id::text, shape, min_carat::text, max_carat::text
-         FROM setting_accepts
-         WHERE setting_product_id = ANY($1::uuid[])`,
-        [settings.map((s) => s.id)],
-      );
-      return result.rows;
-    },
-  );
-  const bySetting = new Map<string, SettingAcceptRule[]>();
-  for (const row of acceptRows) {
-    const list = bySetting.get(row.setting_product_id) ?? [];
-    list.push({
-      shape: row.shape,
-      minCarat: num(row.min_carat),
-      maxCarat: num(row.max_carat),
+  const dbSettings = await withCatalogue([] as SettingForDyo[], async () => {
+    const res = await pool.query<Record<string, unknown>>(
+      `SELECT
+        p.id::text AS id,
+        COALESCE(p.source_sku_derived, p.source_sku, 'MG-' || p.product_number::text) AS sku,
+        p.slug, p.title, 'setting' AS kind,
+        p.description,
+        p.price_amount AS price,
+        p.availability,
+        lower(p.jewellery_type::text) AS setting_for,
+        s.design_code AS design_code,
+        st.code AS style_code,
+        st.label AS style_label,
+        m.code AS metal_code,
+        m.label AS metal_label,
+        m.colour AS metal_colour,
+        rules.shapes AS shapes
+      FROM products p
+      JOIN setting_variants sv ON sv.id = p.setting_variant_id
+      JOIN settings s ON s.id = sv.setting_id
+      LEFT JOIN setting_styles st ON st.id = s.style_id
+      LEFT JOIN metals m ON m.code = sv.metal_code
+      LEFT JOIN LATERAL (
+        SELECT array_agg(r.shape::text) AS shapes
+        FROM setting_compatibility_rules r
+        WHERE r.setting_id = s.id AND r.state = 'ACTIVE' AND r.rule_kind = 'ALLOW'
+      ) rules ON true
+      WHERE p.kind = 'SETTING_ONLY' AND p.state = 'ACTIVE' AND p.deleted_at IS NULL AND p.availability = true
+      ORDER BY p.price_amount ASC
+      LIMIT $1`,
+      [limit],
+    );
+    return res.rows.map((row) => {
+      const card = mapRow(row);
+      const shapes = Array.isArray(row['shapes']) ? (row['shapes'] as Array<string | null>) : [];
+      const evidenced = shapes.filter((s): s is string => typeof s === 'string' && s.length > 0);
+      return {
+        ...card,
+        // Acceptance rules come verbatim from setting_compatibility_rules;
+        // an evidenced-shape list may be empty, in which case any shape is
+        // accepted (rule rows are the only authority — nothing invented).
+        accepts: evidenced.length > 0
+          ? evidenced.map((shape) => ({ shape: shape.toLowerCase(), minCarat: null, maxCarat: null }))
+          : [{ shape: null, minCarat: null, maxCarat: null }],
+        settingFor: typeof row['setting_for'] === 'string' ? row['setting_for'] : card.settingFor,
+      } satisfies SettingForDyo;
     });
-    bySetting.set(row.setting_product_id, list);
-  }
-  return settings.map((setting) => ({
-    ...setting,
-    accepts: bySetting.get(setting.id) ?? [],
-  }));
+  });
+  if (dbSettings.length > 0) return dbSettings;
+  return settingsForDyo(limit);
 }
 
 /** Legacy helpers used by the previous home page. */

@@ -40,6 +40,8 @@ let hasSchema = false;
 let hasData = false;
 /** Count of published products on this database (0 for the DRAFT corpus). */
 let activeProductCount = 0;
+/** An existing gem reference on this database (the corpus's refs are data, not code). */
+let sampleGemRef: string | null = null;
 
 const portReady = (): boolean => port !== undefined && hasSchema;
 
@@ -54,10 +56,10 @@ const itDb = (name: string, fn: () => Promise<void>) =>
   });
 
 /** Data-dependent test: runs only against a Phase-2-loaded database. */
-const itData = (name: string, fn: () => Promise<void>) =>
+const itData = (name: string, fn: (ctx: import('vitest').TestContext) => Promise<void>) =>
   it(name, async (ctx) => {
     if (!portReady() || !hasData) return ctx.skip();
-    await fn();
+    await fn(ctx);
   });
 
 let pool: Pool;
@@ -79,6 +81,8 @@ beforeAll(async () => {
       const row = dataRes.rows[0] as { settings: string; variants: string; active_products: string };
       hasData = Number(row.settings) > 0 && Number(row.variants) > 0;
       activeProductCount = Number(row.active_products);
+      const gemRes = await probe.query(`SELECT gem_ref FROM gemstones WHERE deleted_at IS NULL ORDER BY gem_ref LIMIT 1`);
+      sampleGemRef = (gemRes.rows[0] as { gem_ref: string } | undefined)?.gem_ref ?? null;
       const db = createCatalogDatabase(pool);
       port = createCatalogQueryPort(db);
       hasSchema = true;
@@ -232,8 +236,9 @@ d('CatalogQueryPort product identity (tasks 1 + 5 provenance)', () => {
   });
 
   itData('returns gemstone detail with verbatim evidence statuses and per-stone rows', async () => {
-    const detail = await port.getGemstoneByGemRef('K1324');
-    expect(detail.gem_ref).toBe('K1324');
+    if (!sampleGemRef) return ctx.skip();
+    const detail = await port.getGemstoneByGemRef(sampleGemRef);
+    expect(detail.gem_ref).toBe(sampleGemRef);
     expect(EVIDENCE_HIERARCHY).toContain(detail.provenance.ref_evidence);
     expect(detail.provenance.import_batch).toBeTruthy();
     expect(detail.stones.length).toBe(detail.kind === 'PAIR' ? 2 : 1);

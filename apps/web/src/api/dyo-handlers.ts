@@ -10,6 +10,7 @@
  *   - POST /api/v1/dyo/configurations/{shortCode}/add-to-cart
  */
 import { ContractError } from '@maihan/contracts';
+import { sql } from '@maihan/db';
 import {
   createDyoConfiguration,
   getDyoConfigurationByShortCode,
@@ -53,10 +54,50 @@ export const createDyoConfigurationHandler: RouteHandler = async (ctx) => {
   }
   const gemRef = (rawBody['gemRef'] as string | undefined) ?? null;
 
+  // Resolve the canonical rows server-side: the setting variant by SKU and
+  // the stone (single XOR pair, INV-01) by gem reference. Client identifiers
+  // are never trusted as foreign keys.
+  const variantRes = await db.execute(sql`
+    SELECT sv.id, sv.setting_id, s.jewellery_type::text AS jewellery_type
+      FROM setting_variants sv
+      JOIN settings s ON s.id = sv.setting_id
+     WHERE LOWER(sv.sku) = LOWER(${parsedSku.sku}) AND sv.deleted_at IS NULL
+     LIMIT 1
+  `);
+  const variant = variantRes.rows[0] as { id: string; setting_id: string; jewellery_type: string } | undefined;
+  if (!variant) {
+    throw new ContractError('VALIDATION_FAILED', `Unknown setting variant SKU: ${parsedSku.sku}`);
+  }
+
+  let gemstoneId: string | undefined;
+  let gemstonePairId: string | undefined;
+  let resolvedJewelleryType = jewelleryType;
+  if (gemRef !== null) {
+    const gemRes = await db.execute(sql`
+      SELECT id, kind::text AS kind FROM gemstones
+       WHERE gem_ref = ${gemRef.toUpperCase()} AND deleted_at IS NULL
+       LIMIT 1
+    `);
+    const gem = gemRes.rows[0] as { id: string; kind: 'SINGLE' | 'PAIR' } | undefined;
+    if (!gem) {
+      throw new ContractError('VALIDATION_FAILED', `Unknown gemstone reference: ${gemRef}`);
+    }
+    if (gem.kind === 'PAIR') {
+      // INV-02: a pair attaches only to EARRINGS.
+      gemstonePairId = gem.id;
+      resolvedJewelleryType = 'EARRINGS';
+    } else {
+      gemstoneId = gem.id;
+    }
+  }
+  if (variant.jewellery_type) {
+    resolvedJewelleryType = variant.jewellery_type;
+  }
+
   // Compute canonical identity
   const idResult = computeConfigurationIdentity({
     hashVersion: 1,
-    jewelleryType: jewelleryType as any,
+    jewelleryType: resolvedJewelleryType as any,
     settingVariantSku: parsedSku.sku,
     gemRef,
     options: (rawBody['options'] as Record<string, unknown> | undefined) ?? {},
@@ -65,11 +106,11 @@ export const createDyoConfigurationHandler: RouteHandler = async (ctx) => {
   const row = await createDyoConfiguration(db, {
     configurationHash: idResult.configurationHash.value,
     shortCode: rawBody['shortCode'] as string,
-    jewelleryType,
-    settingId: rawBody['settingId'] as string | undefined,
-    settingVariantId: rawBody['settingVariantId'] as string | undefined,
-    gemstoneId: rawBody['gemstoneId'] as string | undefined,
-    gemstonePairId: rawBody['gemstonePairId'] as string | undefined,
+    jewelleryType: resolvedJewelleryType,
+    settingId: variant.setting_id,
+    settingVariantId: variant.id,
+    gemstoneId,
+    gemstonePairId,
     engravingText: rawBody['engravingText'] as string | undefined,
     selectedOptions: rawBody['options'] as Record<string, unknown> | undefined,
     anonymousSessionId: rawBody['sessionId'] as string | undefined,

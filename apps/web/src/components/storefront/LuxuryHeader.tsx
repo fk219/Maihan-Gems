@@ -83,7 +83,7 @@ const GEM_COLORS: readonly { label: string; hex: string; href: string }[] = (
   ] as const
 ).map((label) => ({
   label,
-  hex: COLOR_SWATCH[label] ?? '#C9A84C',
+  hex: COLOR_SWATCH[label] ?? '#D4A437',
   href: `/${label.toLowerCase().replace(/\s+/g, '-')}-gemstones`,
 }));
 

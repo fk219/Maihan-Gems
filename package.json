@@ -9,7 +9,8 @@
   },
   "scripts": {
     "dev": "pnpm --filter @maihan/web run dev",
-    "storefront:db:setup": "pnpm exec tsx packages/db/src/run-storefront-schema.ts && pnpm exec tsx packages/db/src/seed/run-storefront-seed.ts",
+    "worker": "pnpm --filter @maihan/worker run start",
+    "storefront:db:setup": "pnpm --filter @maihan/db run migrate && pnpm --filter @maihan/db run seed && pnpm --filter @maihan/db run seed:catalogue",
     "start": "pnpm --filter @maihan/web run start:web",
     "build": "tsc -b",
     "typecheck": "tsc -b",

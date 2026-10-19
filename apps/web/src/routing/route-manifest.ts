@@ -361,6 +361,14 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     group: 'storefront',
   },
   {
+    fsPath: 'src/app/(storefront)/blog/[postSlug]/page.tsx',
+    sotPath: 'app/(storefront)/blog/[postSlug]/page.tsx   # /blog/{slug} journal dispatch',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 + 13.1 (blog identity route) + spec §7.11: journal dispatches render from the CMS (BLOG kind, published head revision only).',
+    storefront: true,
+    group: 'storefront',
+  },
+  {
     fsPath: 'src/app/(storefront)/policy/[policySlug]/page.tsx',
     sotPath: 'app/(storefront)/policy/[slug]/page.tsx',
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: policy pages',
@@ -488,6 +496,32 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
       'PROJECT_SOURCE_OF_TRUTH.md 12.8 + technical_design/34 §9: the numbered product sitemap shards; /sitemap-products-N.xml 301s here.',
     storefront: false,
     group: 'app-root',
+  },
+  {
+    fsPath: 'src/app/robots.ts',
+    sotPath: 'app/robots.ts   # /robots.txt (generated)',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.8 + technical_design/34 (route map doc 34, robots target): generated robots.txt; protected portals and APIs disallowed, sitemap reference from the canonical SITE_URL only.',
+    storefront: false,
+    group: 'app-root',
+  },
+  {
+    fsPath: 'src/app/loading.tsx',
+    sotPath: 'app/loading.tsx   # root skeleton fallback',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 (app root) + spec §11: route-level loading skeletons (aria-busy, never spinners) — the root fallback for suspended segments.',
+    storefront: false,
+    group: 'app-root',
+    extraFiles: [],
+  },
+  {
+    fsPath: 'src/app/not-found.tsx',
+    sotPath: 'app/not-found.tsx   # root 404 boundary',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 (app root) + spec §6.1 error states: every unmatched path gets honest 404 UI with browse/search/home recovery navigation.',
+    storefront: false,
+    group: 'app-root',
+    extraFiles: [],
   },
 ];
 

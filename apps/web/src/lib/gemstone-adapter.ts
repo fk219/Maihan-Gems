@@ -51,6 +51,7 @@ export function adaptGemstoneToProductDetail(
     seo_description: `Certified natural untreated ${varietyName}. Direct-source gemmological provenance with lab certification.`,
     engraving_enabled: false,
     setting_variant: null,
+    media: [],
     gemstone: gem.kind === 'SINGLE' ? {
       gem_ref: gem.gem_ref,
       kind: 'SINGLE',

@@ -1537,6 +1537,44 @@
                             "provenance"
                           ],
                           "additionalProperties": false
+                        },
+                        "media": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "kind": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "role": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "position": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "alt": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "url",
+                              "kind",
+                              "role",
+                              "position",
+                              "alt"
+                            ],
+                            "additionalProperties": false
+                          }
                         }
                       },
                       "required": [
@@ -1561,7 +1599,8 @@
                         "engraving_enabled",
                         "setting_variant",
                         "gemstone",
-                        "gemstone_pair"
+                        "gemstone_pair",
+                        "media"
                       ],
                       "additionalProperties": false
                     }

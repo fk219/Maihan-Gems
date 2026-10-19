@@ -12,47 +12,47 @@
 
 @layer base {
   :root {
-    /* Design.md §2.1 — Core Neutral & Metal Tokens */
-    --warm-white: #FAFAF8;
-    --warm-alabaster: #FAFAF8;
-    --studio-white: #FFFFFF;
-    --navy-deep: #08121E;
-    --deep-midnight: #08121E;
-    --navy: #0D1B2A;
-    --atelier-navy: #0D1B2A;
-    --gold: #C9A84C;
-    --imperial-gold: #C9A84C;
-    --gold-light: #E8C96A;
-    --gold-dark: #8B6914;
-    --text-primary: #1A1A18;
-    --text-secondary: #4A4740;
-    --text-muted: #8A867E;
-    --hairline-border: rgba(201, 168, 76, 0.15);
-    --subtle-divider: rgba(0, 0, 0, 0.06);
+    /* Golden Obsidian — core neutral & metal tokens */
+    --warm-white: #F6F2E9;
+    --warm-alabaster: #F6F2E9;
+    --studio-white: #FDFBF5;
+    --navy-deep: #16110C;
+    --deep-midnight: #16110C;
+    --navy: #241B12;
+    --atelier-navy: #241B12;
+    --gold: #D4A437;
+    --imperial-gold: #D4A437;
+    --gold-light: #F0D48A;
+    --gold-dark: #8A5E12;
+    --text-primary: #1D1710;
+    --text-secondary: #5C5344;
+    --text-muted: #94897A;
+    --hairline-border: rgba(212, 164, 55, 0.18);
+    --subtle-divider: rgba(29, 23, 16, 0.08);
 
-    /* Design.md §5.3 / §5.4 — component surfaces */
-    --media-canvas: #F7F7F5;
-    --card-border: rgba(201, 168, 76, 0.12);
-    --card-border-hover: rgba(201, 168, 76, 0.35);
-    --btn-secondary-border: rgba(201, 168, 76, 0.3);
-    --gold-separator: rgba(201, 168, 76, 0.5);
-    --search-border: rgba(201, 168, 76, 0.25);
-    --focus-ring: rgba(201, 168, 76, 0.2);
-    --wordmark-divider: rgba(201, 168, 76, 0.4);
-    --gold-hover-wash: rgba(201, 168, 76, 0.04);
-    --card-split: rgba(0, 0, 0, 0.05);
-    --header-canvas: rgba(250, 250, 248, 0.95);
+    /* Component surfaces */
+    --media-canvas: #EFE9DC;
+    --card-border: rgba(212, 164, 55, 0.16);
+    --card-border-hover: rgba(212, 164, 55, 0.45);
+    --btn-secondary-border: rgba(212, 164, 55, 0.35);
+    --gold-separator: rgba(212, 164, 55, 0.55);
+    --search-border: rgba(212, 164, 55, 0.3);
+    --focus-ring: rgba(212, 164, 55, 0.25);
+    --wordmark-divider: rgba(212, 164, 55, 0.45);
+    --gold-hover-wash: rgba(212, 164, 55, 0.06);
+    --card-split: rgba(29, 23, 16, 0.06);
+    --header-canvas: rgba(246, 242, 233, 0.92);
 
-    /* Aliases used by existing sheets — same Design.md values */
-    --color-gold: #C9A84C;
-    --color-gold-light: #E8C96A;
-    --color-gold-dark: #8B6914;
-    --gold-mid: #C9A84C;
-    --color-navy: #0D1B2A;
-    --color-navy-deep: #08121E;
-    --color-navy-mid: #0D1B2A;
-    --color-off-white: #FAFAF8;
-    --color-gold-pale: #E8C96A;
+    /* Aliases used by existing sheets */
+    --color-gold: #D4A437;
+    --color-gold-light: #F0D48A;
+    --color-gold-dark: #8A5E12;
+    --gold-mid: #D4A437;
+    --color-navy: #241B12;
+    --color-navy-deep: #16110C;
+    --color-navy-mid: #241B12;
+    --color-off-white: #F6F2E9;
+    --color-gold-pale: #F0D48A;
 
     /* Design.md §2.2 — Gemstone Accent Spectrum */
     --gem-sapphire: #1E3A8A;
@@ -74,12 +74,12 @@
     --gem-paraiba-deep: #164E63;
     --gem-paraiba-light: #06B6D4;
 
-    /* Design.md §5.2 / §7 — brushed gold gradient */
-    --gold-gradient: linear-gradient(135deg, #E8C96A 0%, #C9A84C 50%, #8B6914 100%);
+    /* Signature brushed-gold gradient */
+    --gold-gradient: linear-gradient(115deg, #F6E3A6 0%, #D4A437 48%, #8A5E12 100%);
 
-    /* Design.md §3.1 — Typography */
+    /* Typography */
     --font-serif: 'Cormorant Garamond', Georgia, serif;
-    --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-sans: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     --font-body: var(--font-sans);
 
@@ -115,22 +115,22 @@
     --space-section: clamp(4rem, 8vw, 6rem);
     --space-container: clamp(1.5rem, 5vw, 3rem);
 
-    /* Design.md §4.2 — Radius 12px, nested inner 8px. No 999px pills. */
-    --radius: 12px;
-    --radius-card: 12px;
+    /* Radius — architectural 6px, nested inner 4px. No 999px pills. */
+    --radius: 6px;
+    --radius-card: 6px;
     --radius-image: 0px;
-    --radius-control: 12px;
-    --radius-menu: 12px;
-    --radius-inner: 8px;
+    --radius-control: 6px;
+    --radius-menu: 6px;
+    --radius-inner: 4px;
 
-    /* Design.md §4.2 — Elevation */
-    --shadow-rest: 0 4px 20px -4px rgba(0, 0, 0, 0.03);
-    --shadow-hover: 0 30px 60px -15px rgba(139, 105, 20, 0.08);
-    --shadow-card-hover: 0 24px 48px -12px rgba(139, 105, 20, 0.08);
-    --shadow-gold: 0 4px 15px -2px rgba(201, 168, 76, 0.25);
-    --shadow-gold-hover: 0 12px 24px -4px rgba(201, 168, 76, 0.35);
-    --shadow-search: 0 10px 30px -5px rgba(201, 168, 76, 0.08);
-    --gold-glow: 0 12px 24px -4px rgba(201, 168, 76, 0.35);
+    /* Elevation — warm gold-tinted */
+    --shadow-rest: 0 2px 12px -2px rgba(28, 20, 8, 0.05);
+    --shadow-hover: 0 24px 48px -16px rgba(138, 94, 18, 0.14);
+    --shadow-card-hover: 0 18px 40px -14px rgba(138, 94, 18, 0.16);
+    --shadow-gold: 0 4px 14px -2px rgba(212, 164, 55, 0.35);
+    --shadow-gold-hover: 0 10px 26px -6px rgba(212, 164, 55, 0.45);
+    --shadow-search: 0 8px 24px -8px rgba(212, 164, 55, 0.12);
+    --gold-glow: 0 10px 26px -6px rgba(212, 164, 55, 0.45);
 
     /* Design.md §6.1 — Motion */
     --ease-luxury: cubic-bezier(0.16, 1, 0.3, 1);
@@ -422,7 +422,7 @@
   }
 
   .section-title .text-gold-gradient {
-    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    background: var(--gold-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -678,7 +678,7 @@
   .search-pill-link:hover {
     color: var(--text-primary);
     border-color: var(--hairline-border);
-    background: rgba(201, 168, 76, 0.04);
+    background: rgba(212, 164, 55, 0.04);
   }
 }
 
@@ -688,7 +688,7 @@
 
 @layer components {
   .marquee-container {
-    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    background: var(--gold-gradient);
     padding: 1rem 0;
     overflow: hidden;
     position: relative;
@@ -944,7 +944,7 @@
   }
 
   .mega-menu__link:hover {
-    background: rgba(201, 168, 76, 0.05);
+    background: rgba(212, 164, 55, 0.05);
     color: var(--text-primary);
   }
 }

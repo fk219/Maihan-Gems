@@ -112,6 +112,7 @@ export function productDetailFixture(slug = 'pave-green-tourmaline-ring'): Produ
       },
     },
     gemstone_pair: null,
+    media: [],
   };
 }
 

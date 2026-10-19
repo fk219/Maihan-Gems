@@ -64,14 +64,19 @@ export type CreateCartInput = z.input<typeof CreateCartInputSchema>;
 
 export const AddToCartInputSchema = z
   .object({
-    product_id: z.string().uuid(),
+    product_id: z.string().uuid().optional(),
+    /** Resolve by public slug instead of UUID (slug is the catalogue's public identity). Exactly one of product_id / product_slug is required. */
+    product_slug: z.string().min(1).optional(),
     configuration_id: z.string().uuid().optional(),
     quantity: z.number().int().positive().max(99).default(1),
     engraving_text: z.string().max(50).optional(),
     options: z.record(z.string(), z.unknown()).optional(),
     expected_unit_price: z.string().optional(),
   })
-  .strict();
+  .strict()
+  .refine((v) => v.product_id !== undefined || v.product_slug !== undefined, {
+    message: 'product_id or product_slug is required',
+  });
 export type AddToCartInput = z.input<typeof AddToCartInputSchema>;
 
 export const UpdateCartItemInputSchema = z

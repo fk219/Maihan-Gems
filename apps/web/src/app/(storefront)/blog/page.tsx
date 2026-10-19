@@ -2,45 +2,26 @@
  * apps/web/src/app/(storefront)/blog/page.tsx
  *
  * `/blog` — Gemmological Journal & Bourse Dispatches (SoT 12.2 + 13.1).
+ * CMS-driven (doc 22): BLOG pages render from the locked `pages` table,
+ * published head revision only; article links go to the journal post view.
+ * No fabricated dispatches — an empty CMS renders the honest empty state.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
+import { CmsBlockList } from '../../../components/cms/CmsBlockView.js';
+import { listCmsPages } from '../../../lib/cms-pages.js';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Gemmological Journal | Maihan Gems',
   description: 'Field notes, origin studies, and gemmological dispatches from Dubai and Bangkok.',
 };
 
-const DISPATCHES = [
-  {
-    slug: 'sapphire',
-    eyebrow: 'Corundum Studies',
-    title: 'Understanding Unheated Ceylon & Kashmir Velvety Blue Sapphires',
-    summary:
-      'How trace titanium-iron intervalence charge transfer and rutile silk inclusions distinguish classic origin corundum under microscopic examination.',
-    href: '/education/sapphire',
-  },
-  {
-    slug: 'tanzanite',
-    eyebrow: 'Pleochroism & Cut Geometry',
-    title: 'Orienting Merelani Zoisite for Deep Violetish-Blue Face-Up Saturation',
-    summary:
-      'Why pavilion angle precision and table proportion determine whether a trichroic tanzanite crystal exhibits royal blue or violet dominance.',
-    href: '/tanzanite',
-  },
-  {
-    slug: 'pairs',
-    eyebrow: 'Atelier Curation',
-    title: 'The Discipline of Matching Natural Gemstone Suites for High Jewellery Earrings',
-    summary:
-      'Calibrating millimetre outline, depth, colour saturation, and internal brilliance across two independent earth-mined crystals (INV-02).',
-    href: '/pairs',
-  },
-];
-
-export default function BlogPage() {
+export default async function BlogPage() {
+  const pages = await listCmsPages('BLOG');
   return (
     <main className="page" id="main-content">
       <Breadcrumbs crumbs={[{ label: 'Home', href: '/' }, { label: 'Journal' }]} />
@@ -51,20 +32,28 @@ export default function BlogPage() {
         bespoke goldsmithing.
       </p>
 
-      <div className="education-grid" style={{ marginTop: '2rem' }}>
-        {DISPATCHES.map((post) => (
-          <article key={post.slug} className="lx-account-card">
-            <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>
-              {post.eyebrow}
-            </span>
-            <h2 className="lx-account-card__title">{post.title}</h2>
-            <p className="lx-account-note">{post.summary}</p>
-            <Link href={post.href} className="lx-text-btn">
-              Read study →
-            </Link>
-          </article>
-        ))}
-      </div>
+      {pages.length === 0 ? (
+        <p role="status">No dispatches are published yet. Please check back shortly.</p>
+      ) : (
+        <div className="education-grid" style={{ marginTop: '2rem' }}>
+          {pages
+            .filter((page) => page.slug !== 'blog')
+            .map((page) => (
+              <article key={page.slug} className="lx-account-card">
+                <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>
+                  Dispatch
+                </span>
+                <h2 className="lx-account-card__title">{page.title}</h2>
+                <div className="lx-account-note">
+                  <CmsBlockList blocks={page.blocks.slice(0, 1)} />
+                </div>
+                <Link href={`/blog/${page.slug}`} className="lx-text-btn">
+                  Read dispatch →
+                </Link>
+              </article>
+            ))}
+        </div>
+      )}
     </main>
   );
 }

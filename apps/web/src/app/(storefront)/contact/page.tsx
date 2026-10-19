@@ -33,7 +33,7 @@ export default function ContactPage() {
 
       <div className="concierge-shell">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
-          <div style={{ padding: '1.75rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
+          <div style={{ padding: '1.75rem', background: '#F6F2E9', borderRadius: '12px', border: '1px solid rgba(212, 164, 55, 0.2)' }}>
             <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>Direct Line</span>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', margin: '0 0 0.5rem 0' }}>{STOREFRONT_CONTACT.appointmentLabel}</h2>
             <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
@@ -49,7 +49,7 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div style={{ padding: '1.75rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
+          <div style={{ padding: '1.75rem', background: '#F6F2E9', borderRadius: '12px', border: '1px solid rgba(212, 164, 55, 0.2)' }}>
             <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>Appointments</span>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', margin: '0 0 0.5rem 0' }}>Private viewing</h2>
             <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
@@ -58,7 +58,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div style={{ padding: '2rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
+        <div style={{ padding: '2rem', background: '#F6F2E9', borderRadius: '12px', border: '1px solid rgba(212, 164, 55, 0.2)' }}>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
             Request Private Gemstone Viewing
           </h2>
