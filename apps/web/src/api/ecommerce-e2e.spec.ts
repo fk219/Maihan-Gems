@@ -111,7 +111,8 @@ describe('Full Ecommerce End-to-End Journeys (Auth, RBAC, Vendor, Admin, Cart, C
         await client.query(`DELETE FROM carts WHERE cart_token = $1`, [token]);
       }
       for (const sid of createdSessionIds) {
-        await client.query(`DELETE FROM jobs WHERE job_key = $1`, [`checkout:session:${sid}`]);
+        await client.query(`DELETE FROM inventory_reservations WHERE session_id = $1`, [sid]);
+        await client.query(`DELETE FROM checkout_sessions WHERE id = $1`, [sid]);
       }
       for (const pid of createdProductIds) {
         const gemRes = await client.query<{ gid: string }>(
@@ -124,6 +125,7 @@ describe('Full Ecommerce End-to-End Journeys (Auth, RBAC, Vendor, Admin, Cart, C
         await client.query(`DELETE FROM audit_logs WHERE entity_id = $1`, [pid]);
         await client.query(`DELETE FROM products WHERE id = $1`, [pid]);
         if (gid) {
+          await client.query(`DELETE FROM inventory_reservations WHERE gemstone_id = $1`, [gid]);
           await client.query(`DELETE FROM gemstones WHERE id = $1`, [gid]);
         }
       }
@@ -134,8 +136,6 @@ describe('Full Ecommerce End-to-End Journeys (Auth, RBAC, Vendor, Admin, Cart, C
       for (const cid of createdCustomerIds) {
         await client.query(`DELETE FROM addresses WHERE customer_id = $1`, [cid]);
         await client.query(`DELETE FROM customer_profiles WHERE customer_id = $1`, [cid]);
-        await client.query(`DELETE FROM jobs WHERE payload->>'customer_id' = $1`, [cid]);
-        await client.query(`DELETE FROM jobs WHERE job_key = $1`, [`auth:cred:${cid}`]);
         await client.query(`DELETE FROM audit_logs WHERE entity_id = $1 OR actor_id = $1`, [cid]);
         await client.query(`DELETE FROM customers WHERE id = $1`, [cid]);
       }

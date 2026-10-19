@@ -18,7 +18,6 @@
 import { describe, expect, it } from 'vitest';
 import { ErrorEnvelopeSchema } from '@maihan/contracts';
 import {
-  NOT_YET_APPLICABLE_SCOPES,
   RATE_LIMIT_POLICIES,
   bucketKey,
   secondsUntilWindowEnd,
@@ -103,17 +102,19 @@ describe('SoT 11.11 policy', () => {
     expect(POLICY.windowSeconds).toBe(60);
   });
 
-  it('records every not-yet-applicable SoT scope verbatim (no invented limits)', () => {
-    expect(NOT_YET_APPLICABLE_SCOPES).toEqual([
-      { scope: 'search', limit: 60, windowSeconds: 60 },
-      { scope: 'cart_mutation', limit: 60, windowSeconds: 60 },
-      { scope: 'checkout', limit: 20, windowSeconds: 60 },
-      { scope: 'ai_stream', limit: 20, windowSeconds: 60, dailyLimit: 200 },
-      { scope: 'ai_tool_invocation', limit: 200, windowSeconds: 60 },
-      { scope: 'certificate_upload', limit: 10, windowSeconds: 3600 },
-      { scope: 'admin_write', limit: 300, windowSeconds: 60 },
-      { scope: 'webhook', limit: 1000, windowSeconds: 60 },
-    ]);
+  it('carries every SoT scope verbatim — now ACTIVE, limits unchanged (no invented limits)', () => {
+    // M-09 remediation: the formerly NOT_YET_APPLICABLE scopes went live with
+    // the exact SoT 11.11 numbers; the assertion exists so a drift in any
+    // limit fails CI rather than silently repricing an endpoint group.
+    expect(RATE_LIMIT_POLICIES['public_get']).toMatchObject({ limit: 300, windowSeconds: 60 });
+    expect(RATE_LIMIT_POLICIES['search']).toMatchObject({ limit: 60, windowSeconds: 60 });
+    expect(RATE_LIMIT_POLICIES['cart_mutation']).toMatchObject({ limit: 60, windowSeconds: 60 });
+    expect(RATE_LIMIT_POLICIES['checkout']).toMatchObject({ limit: 20, windowSeconds: 60 });
+    expect(RATE_LIMIT_POLICIES['ai_stream']).toMatchObject({ limit: 20, windowSeconds: 60, dailyLimit: 200 });
+    expect(RATE_LIMIT_POLICIES['ai_tool_invocation']).toMatchObject({ limit: 200, windowSeconds: 60 });
+    expect(RATE_LIMIT_POLICIES['certificate_upload']).toMatchObject({ limit: 10, windowSeconds: 3600 });
+    expect(RATE_LIMIT_POLICIES['admin_write']).toMatchObject({ limit: 300, windowSeconds: 60 });
+    expect(RATE_LIMIT_POLICIES['webhook']).toMatchObject({ limit: 1000, windowSeconds: 60 });
   });
 });
 

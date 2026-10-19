@@ -18,30 +18,14 @@ import {
   type FavoriteItemDto,
 } from '@maihan/contracts';
 
-interface FavoritesPayload {
-  product_ids: string[];
-}
-
-function getFavoritesJobKey(customerId: string): string {
-  return `favorites:customer:${customerId}`;
-}
-
 async function getStoredProductIds(db: CatalogDatabase, customerId: string): Promise<string[]> {
-  const jobKey = getFavoritesJobKey(customerId);
   const res = await db.execute(sql`
-    SELECT payload
-    FROM jobs
-    WHERE queue = 'customer_favorites'
-      AND job_key = ${jobKey}
-    LIMIT 1
+    SELECT product_id::text AS product_id
+    FROM favorites
+    WHERE customer_id = ${customerId}::uuid
+    ORDER BY created_at ASC
   `);
-
-  if (res.rows.length === 0) return [];
-  const row = res.rows[0] as Record<string, unknown> | undefined;
-  if (!row) return [];
-  const payload = row['payload'] as FavoritesPayload | null;
-  if (!payload || !Array.isArray(payload.product_ids)) return [];
-  return payload.product_ids;
+  return (res.rows as Array<{ product_id: string }>).map((row) => row.product_id);
 }
 
 export async function getCustomerFavorites(
@@ -114,10 +98,10 @@ export async function addCustomerFavorite(
   customerId: string,
   productId: string,
 ): Promise<FavoriteItemDto[]> {
-  // Verify product exists
+  // Resolve the canonical product by id OR public slug (the API accepts both).
   const prodCheck = await db.execute(sql`
-    SELECT id FROM products
-    WHERE id = ${productId}
+    SELECT id::text AS id FROM products
+    WHERE (id::text = ${productId} OR slug = ${productId})
       AND state <> 'DRAFT'
     LIMIT 1
   `);
@@ -125,18 +109,12 @@ export async function addCustomerFavorite(
   if (prodCheck.rows.length === 0) {
     throw new ContractError('NOT_FOUND', `Product "${productId}" not found.`);
   }
-
-  const existingIds = await getStoredProductIds(db, customerId);
-  const updatedIds = existingIds.includes(productId) ? existingIds : [...existingIds, productId];
-
-  const jobKey = getFavoritesJobKey(customerId);
-  const payloadJson = JSON.stringify({ product_ids: updatedIds });
+  const resolvedId = (prodCheck.rows[0] as { id: string }).id;
 
   await db.execute(sql`
-    INSERT INTO jobs (queue, job_key, job_type, payload, state, run_after)
-    VALUES ('customer_favorites', ${jobKey}, 'SYNC_FAVORITES', ${payloadJson}::jsonb, 'SUCCEEDED', now())
-    ON CONFLICT (job_key)
-    DO UPDATE SET payload = EXCLUDED.payload, updated_at = now()
+    INSERT INTO favorites (customer_id, product_id)
+    VALUES (${customerId}::uuid, ${resolvedId}::uuid)
+    ON CONFLICT (customer_id, product_id) DO NOTHING
   `);
 
   return getCustomerFavorites(db, customerId);
@@ -147,17 +125,13 @@ export async function removeCustomerFavorite(
   customerId: string,
   productId: string,
 ): Promise<FavoriteItemDto[]> {
-  const existingIds = await getStoredProductIds(db, customerId);
-  const updatedIds = existingIds.filter((id) => id !== productId);
-
-  const jobKey = getFavoritesJobKey(customerId);
-  const payloadJson = JSON.stringify({ product_ids: updatedIds });
-
   await db.execute(sql`
-    INSERT INTO jobs (queue, job_key, job_type, payload, state, run_after)
-    VALUES ('customer_favorites', ${jobKey}, 'SYNC_FAVORITES', ${payloadJson}::jsonb, 'SUCCEEDED', now())
-    ON CONFLICT (job_key)
-    DO UPDATE SET payload = EXCLUDED.payload, updated_at = now()
+    DELETE FROM favorites
+    WHERE customer_id = ${customerId}::uuid
+      AND (
+        product_id::text = ${productId}
+        OR product_id IN (SELECT id FROM products WHERE slug = ${productId})
+      )
   `);
 
   return getCustomerFavorites(db, customerId);

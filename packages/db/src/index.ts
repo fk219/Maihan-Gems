@@ -70,6 +70,7 @@ export {
 export {
   createCatalogDatabase,
   withRlsContext,
+  withPoolRlsSession,
   type CatalogDatabase,
   type RlsSessionContext,
   // Re-exported so consumer apps (apps/worker) compose queries through the

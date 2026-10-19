@@ -77,9 +77,86 @@ async function parseBody(request?: Request): Promise<unknown> {
   }
 }
 
+/**
+ * Upload validation gates (SG-5, M-08): an allowed content type, an explicit
+ * size cap, and — when the document bytes are presented inline — a magic-byte
+ * sniff so a renamed executable cannot register as a certificate document.
+ */
+const CERT_CONTENT_TYPES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+]);
+const CERT_MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+
+function magicByteOk(contentType: string, bytes: Uint8Array): boolean {
+  const head = Array.from(bytes.slice(0, 12))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+  switch (contentType) {
+    case 'application/pdf':
+      return head.startsWith('25504446'); // %PDF
+    case 'image/jpeg':
+      return head.startsWith('ffd8ff');
+    case 'image/png':
+      return head.startsWith('89504e47');
+    case 'image/webp':
+      return head.startsWith('52494646') && head.slice(16, 24) === '57454250'; // RIFF....WEBP
+    default:
+      return false;
+  }
+}
+
+function validateUploadDeclaration(body: Record<string, unknown>): void {
+  const contentType = body['contentType'] as string | undefined;
+  const sizeBytes = body['sizeBytes'] as number | undefined;
+  const contentBase64 = body['contentBase64'] as string | undefined;
+
+  if (contentType !== undefined && !CERT_CONTENT_TYPES.has(contentType)) {
+    throw new ContractError(
+      'VALIDATION_FAILED',
+      `Unsupported certificate document type: ${contentType}. Allowed: ${[...CERT_CONTENT_TYPES].join(', ')}.`,
+    );
+  }
+  if (sizeBytes !== undefined) {
+    if (!Number.isFinite(sizeBytes) || sizeBytes <= 0) {
+      throw new ContractError('VALIDATION_FAILED', 'sizeBytes must be a positive number.');
+    }
+    if (sizeBytes > CERT_MAX_SIZE_BYTES) {
+      throw new ContractError(
+        'VALIDATION_FAILED',
+        `Certificate document exceeds the ${CERT_MAX_SIZE_BYTES} byte cap.`,
+      );
+    }
+  }
+  if (contentBase64 !== undefined) {
+    if (typeof contentBase64 !== 'string' || contentBase64.length === 0) {
+      throw new ContractError('VALIDATION_FAILED', 'contentBase64 must be a non-empty string.');
+    }
+    const decoded = Buffer.from(contentBase64, 'base64');
+    if (decoded.length === 0) {
+      throw new ContractError('VALIDATION_FAILED', 'contentBase64 is not valid base64.');
+    }
+    if (decoded.length > CERT_MAX_SIZE_BYTES) {
+      throw new ContractError(
+        'VALIDATION_FAILED',
+        `Certificate document exceeds the ${CERT_MAX_SIZE_BYTES} byte cap.`,
+      );
+    }
+    if (contentType !== undefined && !magicByteOk(contentType, decoded)) {
+      throw new ContractError(
+        'VALIDATION_FAILED',
+        'Document bytes do not match the declared content type (magic-byte sniff failed).',
+      );
+    }
+  }
+}
+
 export const createCertificateHandler: RouteHandler = async (ctx) => {
   const db = getDb(ctx);
   const rawBody = (await parseBody(ctx.request)) as Record<string, any>;
+  validateUploadDeclaration(rawBody);
 
   const kind = rawBody['kind'] ?? 'CERTIFICATE';
   const gemstoneId = rawBody['gemstoneId'] ?? null;

@@ -13,8 +13,9 @@
  *     `search.reindex`, `ai.embed`, `cert.extract`, `retention.sweep`, etc.).
  *   - Exponential backoff on transient failure; `DEAD_LETTER` on exhaustion.
  */
-import { sql } from '@maihan/db';
+import { sql, buildDeterministicEmbedding1024 } from '@maihan/db';
 import type { CatalogDatabase } from './catalog-db.js';
+import { sendTransactionalEmail, type OutgoingEmail } from '../handlers/email.js';
 
 export const OPERATIONAL_QUEUES = [
   'critical',
@@ -32,6 +33,50 @@ export interface JobsRunResult {
   succeeded: number;
   retried: number;
   deadLettered: number;
+}
+
+/**
+ * Real RAG re-embedding (M-06): recomputes the deterministic 1024-dim
+ * embeddings for every chunk of the knowledge document referenced by the
+ * event (by document id, or by its source page id for PagePublished events)
+ * and stamps `embedded_at` / `embedding_model` on the document. Idempotent:
+ * re-running produces the same vectors (content-hash semantics, ADR-018).
+ */
+async function reembedKnowledgeDocument(
+  db: CatalogDatabase,
+  job: { payload: Record<string, unknown> },
+): Promise<Record<string, unknown>> {
+  const aggregateId = String(job.payload['aggregate_id'] ?? '');
+  if (!aggregateId) {
+    return { handled: 'ai.embed', status: 'skipped', reason: 'missing_aggregate_id' };
+  }
+  const docRes = await db.execute(sql`
+    SELECT id::text AS id, content FROM knowledge_documents
+    WHERE id = ${aggregateId}::uuid OR source_page_id = ${aggregateId}::uuid
+    LIMIT 1
+  `);
+  const doc = docRes.rows[0] as { id: string; content: string } | undefined;
+  if (!doc) {
+    return { handled: 'ai.embed', status: 'no_document', aggregate_id: aggregateId };
+  }
+  const vec = buildDeterministicEmbedding1024(doc.content);
+  const chunkRes = await db.execute(sql`
+    UPDATE knowledge_chunks
+    SET embedding = ${vec}::vector, embedding_model = 'deterministic-1024-v1'
+    WHERE document_id = ${doc.id}::uuid
+    RETURNING id::text AS id
+  `);
+  await db.execute(sql`
+    UPDATE knowledge_documents
+    SET embedded_at = now(), embedding_model = 'deterministic-1024-v1', updated_at = now()
+    WHERE id = ${doc.id}::uuid
+  `);
+  return {
+    handled: 'ai.embed',
+    status: 'indexed',
+    document_id: doc.id,
+    chunks_embedded: chunkRes.rowCount ?? 0,
+  };
 }
 
 async function executeJobHandler(
@@ -80,34 +125,67 @@ async function executeJobHandler(
         if (ord && ord.customer_id) {
           const notifKey = `notify:ORDER_CONFIRMATION:${orderId}`;
           await db.execute(sql`
-            INSERT INTO jobs (job_key, queue, job_type, payload, state, result)
-            VALUES (
-              ${notifKey},
-              'notifications',
+            INSERT INTO notifications (
+              customer_id, email, kind, subject, body, metadata, dedupe_key
+            ) VALUES (
+              ${ord.customer_id}::uuid,
+              ${ord.email},
               'ORDER_CONFIRMATION',
+              ${`Order confirmed: ${orderNumber || orderId}`},
+              ${`Your Maihan Gems order ${orderNumber || orderId} (${ord.currency} ${ord.grand_total}) has been recorded.`},
+              ${JSON.stringify({ order_id: orderId, order_number: orderNumber })}::jsonb,
+              ${notifKey}
+            )
+            ON CONFLICT (dedupe_key) DO NOTHING
+          `);
+          // Transactional email for the confirmation (M-05): claimable by the
+          // notify.email handler on the `default` operational queue.
+          await db.execute(sql`
+            INSERT INTO jobs (job_key, queue, job_type, payload, state)
+            VALUES (
+              ${notifKey + ':email'},
+              'default',
+              'notify.email',
               ${JSON.stringify({
                 customer_id: ord.customer_id,
                 email: ord.email,
                 kind: 'ORDER_CONFIRMATION',
                 subject: `Order confirmed: ${orderNumber || orderId}`,
-                body: `Your Maihan Gems order ${orderNumber || orderId} (${ord.currency} ${ord.grand_total}) has been recorded.`,
-                metadata: { order_id: orderId, order_number: orderNumber },
+                text: `Your Maihan Gems order ${orderNumber || orderId} (${ord.currency} ${ord.grand_total}) has been recorded.`,
+                category: 'ORDER_CONFIRMATION',
                 created_at: new Date().toISOString(),
               })}::jsonb,
-              'SUCCEEDED',
-              '{"delivered_via":"worker_outbox"}'::jsonb
+              'QUEUED'
             )
             ON CONFLICT (job_key) DO NOTHING
           `);
+          return { handled: 'order.confirm', order_id: orderId };
         }
       }
       return { handled: 'order.confirm', order_id: orderId };
     }
-    case 'ai.embed': {
-      return { handled: 'ai.embed', status: 'indexed' };
-    }
     case 'cert.extract': {
       return { handled: 'cert.extract', status: 'queued_for_review' };
+    }
+    case 'notify.email': {
+      // Real transactional email delivery (M-05/M-06). With RESEND_API_KEY or
+      // MAILTRAP_API_TOKEN set the mail goes out over the provider HTTP API;
+      // with neither, the disposition is an honest OUTBOX_LOG (no pretend send).
+      const email: OutgoingEmail = {
+        to: String(job.payload['email'] ?? ''),
+        subject: String(job.payload['subject'] ?? 'Maihan Gems'),
+        text: String(job.payload['text'] ?? ''),
+        category: String(job.payload['kind'] ?? 'transactional'),
+      };
+      if (!email.to) {
+        return { handled: 'notify.email', delivered: false, reason: 'missing_recipient' };
+      }
+      const result = await sendTransactionalEmail(email);
+      return { handled: 'notify.email', delivered: result.delivered, provider: result.provider, messageId: result.messageId };
+    }
+    case 'ai.embed':
+    case 'knowledge.embed': {
+      return reembedKnowledgeDocument(db, job);
     }
     default:
       return { handled: job.job_type, status: 'completed' };

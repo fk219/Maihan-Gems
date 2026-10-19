@@ -37,6 +37,10 @@ export interface RlsSessionContext {
  * Executes a callback inside a PostgreSQL transaction with RLS session settings
  * (`app.user_subject`, `app.anonymous_session_id`, `app.staff`) applied via
  * `set_config(..., true)` (transaction-local, doc 04 & doc 09).
+ *
+ * Graceful degradation: when the executor does not expose a `transaction`
+ * (unit-test mocks) or `execute` (raw mocks), the callback runs directly so
+ * only real database executors pay the transaction boundary.
  */
 export async function withRlsContext<T>(
   db: CatalogDatabase,
@@ -46,8 +50,14 @@ export async function withRlsContext<T>(
   const maybeTx = (
     db as unknown as {
       transaction?: <R>(fn: (tx: CatalogDatabase) => Promise<R>) => Promise<R>;
+      execute?: unknown;
     }
   ).transaction;
+  const hasExecute = typeof (db as unknown as { execute?: unknown }).execute === 'function';
+
+  if (typeof maybeTx !== 'function' || !hasExecute) {
+    return work(db);
+  }
 
   const applyAndRun = async (executor: CatalogDatabase): Promise<T> => {
     const userSub = ctx.userSubject ?? '';
@@ -62,10 +72,59 @@ export async function withRlsContext<T>(
     return work(executor);
   };
 
-  if (typeof maybeTx === 'function') {
-    return (await maybeTx.call(db, applyAndRun)) as T;
+  return (await maybeTx.call(db, applyAndRun)) as T;
+}
+
+type PoolLike = {
+  connect: () => Promise<{
+    query: (text: string, values?: unknown[]) => Promise<unknown>;
+    release: () => void;
+  }>;
+};
+
+/**
+ * Pool-level RLS session: checks a client out of the pool, opens a
+ * transaction, applies the RLS session settings transaction-locally, runs
+ * `work(client)`, and commits (or rolls back on throw). Used by seams whose
+ * repositories speak the raw `client.query` protocol (e.g. the AI repos).
+ *
+ * Graceful degradation: a mock pool without `connect` runs the callback
+ * directly, so handler unit tests with fake databases are unaffected.
+ */
+export async function withPoolRlsSession<T>(
+  pool: PoolLike,
+  ctx: RlsSessionContext,
+  work: (client: unknown) => Promise<T>,
+): Promise<T> {
+  if (typeof pool.connect !== 'function') {
+    return work(pool);
   }
-  return applyAndRun(db);
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const userSub = ctx.userSubject ?? '';
+    const anonSess = ctx.anonymousSessionId ?? '';
+    const staffFlag = ctx.isStaff ? 'true' : 'false';
+    await client.query(
+      `SELECT set_config('app.user_subject', $1, true),
+              set_config('app.anonymous_session_id', $2, true),
+              set_config('app.staff', $3, true)`,
+      [userSub, anonSess, staffFlag],
+    );
+    const result = await work(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      // rollback of an already-failed transaction may itself fail; the
+      // client is released below regardless.
+    }
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 export { sql };

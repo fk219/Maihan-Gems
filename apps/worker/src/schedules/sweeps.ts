@@ -32,15 +32,15 @@ export async function sweepReservations(db: CatalogDatabase): Promise<SweepResul
 }
 
 export async function sweepCheckoutSessions(db: CatalogDatabase): Promise<SweepResult> {
-  // Checkout sessions live as `jobs` rows (queue 'checkout_sessions',
-  // reservation window = run_after). Expiry marks them CANCELLED — the same
-  // state the read path treats as expired (CHECKOUT_SESSION_EXPIRED).
+  // Checkout sessions live in the normalized `checkout_sessions` table
+  // (ADR-027). Expiry marks them CANCELLED — the same state the read path
+  // treats as expired (CHECKOUT_SESSION_EXPIRED).
   const res = await db.execute(sql`
-    UPDATE jobs
+    UPDATE checkout_sessions
     SET state = 'CANCELLED', updated_at = now()
-    WHERE queue = 'checkout_sessions'
-      AND state = 'QUEUED'
-      AND run_after < now()
+    WHERE state = 'ACTIVE'
+      AND reservation_expires_at IS NOT NULL
+      AND reservation_expires_at < now()
   `);
   return { name: 'checkout-sessions', changed: res.rowCount ?? 0 };
 }

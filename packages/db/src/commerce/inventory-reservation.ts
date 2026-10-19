@@ -81,20 +81,19 @@ export async function reserveStockForCart(
 
       // Check active unexpired reservation
       const jobKey = `reservation:gemstone:${stone.id}`;
-      const activeJobRes = await db.execute(sql`
-        SELECT id, payload
-        FROM jobs
-        WHERE job_key = ${jobKey}
-          AND queue = 'inventory_reservations'
-          AND state = 'QUEUED'
-          AND run_after > now()
+      const activeRes = await db.execute(sql`
+        SELECT session_id
+        FROM inventory_reservations
+        WHERE gemstone_id = ${stone.id}::uuid
+          AND state = 'ACTIVE'
+          AND expires_at > now()
         LIMIT 1
       `);
 
-      if (activeJobRes.rows.length > 0) {
-        const existingJob = activeJobRes.rows[0] as { payload?: { sessionId?: string } };
+      if (activeRes.rows.length > 0) {
+        const existing = activeRes.rows[0] as { session_id: string | null };
         // If already held by this same session, extend it
-        if (existingJob.payload?.sessionId !== sessionId) {
+        if (existing.session_id !== sessionId) {
           throw new ContractError(
             'ALREADY_RESERVED',
             `Gemstone ${stone.gem_ref} is currently held under an active reservation.`,
@@ -103,37 +102,25 @@ export async function reserveStockForCart(
         }
       }
 
-      const payload = JSON.stringify({
-        sessionId,
-        cartId,
-        gemstoneId: stone.id,
-        gemRef: stone.gem_ref,
-        reservedAt: new Date().toISOString(),
-      });
-
-      // Upsert reservation job with 30-minute TTL
+      // Upsert reservation with the 30-minute TTL
       await db.execute(sql`
-        INSERT INTO jobs (
-          job_key,
-          queue,
-          job_type,
-          payload,
-          state,
-          run_after
+        INSERT INTO inventory_reservations (
+          job_key, gemstone_id, session_id, cart_id, expires_at
         ) VALUES (
           ${jobKey},
-          'inventory_reservations',
-          'RELEASE_RESERVATION',
-          ${payload}::jsonb,
-          'QUEUED',
+          ${stone.id}::uuid,
+          ${sessionId},
+          ${cartId ?? null},
           now() + (${RESERVATION_TTL_MINUTES} * INTERVAL '1 minute')
         )
         ON CONFLICT (job_key)
         DO UPDATE SET
-          payload = EXCLUDED.payload,
-          run_after = EXCLUDED.run_after,
-          state = 'QUEUED',
-          updated_at = now()
+          session_id = EXCLUDED.session_id,
+          cart_id = EXCLUDED.cart_id,
+          expires_at = EXCLUDED.expires_at,
+          state = 'ACTIVE',
+          reserved_at = now(),
+          released_at = NULL
       `);
     }
 
@@ -165,19 +152,18 @@ export async function reserveStockForCart(
       }
 
       const jobKey = `reservation:gemstone:${pair.id}`;
-      const activeJobRes = await db.execute(sql`
-        SELECT id, payload
-        FROM jobs
-        WHERE job_key = ${jobKey}
-          AND queue = 'inventory_reservations'
-          AND state = 'QUEUED'
-          AND run_after > now()
+      const activePairRes = await db.execute(sql`
+        SELECT session_id
+        FROM inventory_reservations
+        WHERE gemstone_id = ${pair.id}::uuid
+          AND state = 'ACTIVE'
+          AND expires_at > now()
         LIMIT 1
       `);
 
-      if (activeJobRes.rows.length > 0) {
-        const existingJob = activeJobRes.rows[0] as { payload?: { sessionId?: string } };
-        if (existingJob.payload?.sessionId !== sessionId) {
+      if (activePairRes.rows.length > 0) {
+        const existing = activePairRes.rows[0] as { session_id: string | null };
+        if (existing.session_id !== sessionId) {
           throw new ContractError(
             'PAIR_RESERVATION_FAILED',
             `Atomic pair reservation failed: pair ${pair.gem_ref} is already reserved by another customer. Neither stone is reserved.`,
@@ -186,37 +172,24 @@ export async function reserveStockForCart(
         }
       }
 
-      const payload = JSON.stringify({
-        sessionId,
-        cartId,
-        gemstoneId: pair.id,
-        gemRef: pair.gem_ref,
-        isPair: true,
-        reservedAt: new Date().toISOString(),
-      });
-
       await db.execute(sql`
-        INSERT INTO jobs (
-          job_key,
-          queue,
-          job_type,
-          payload,
-          state,
-          run_after
+        INSERT INTO inventory_reservations (
+          job_key, gemstone_id, session_id, cart_id, expires_at
         ) VALUES (
           ${jobKey},
-          'inventory_reservations',
-          'RELEASE_RESERVATION',
-          ${payload}::jsonb,
-          'QUEUED',
+          ${pair.id}::uuid,
+          ${sessionId},
+          ${cartId ?? null},
           now() + (${RESERVATION_TTL_MINUTES} * INTERVAL '1 minute')
         )
         ON CONFLICT (job_key)
         DO UPDATE SET
-          payload = EXCLUDED.payload,
-          run_after = EXCLUDED.run_after,
-          state = 'QUEUED',
-          updated_at = now()
+          session_id = EXCLUDED.session_id,
+          cart_id = EXCLUDED.cart_id,
+          expires_at = EXCLUDED.expires_at,
+          state = 'ACTIVE',
+          reserved_at = now(),
+          released_at = NULL
       `);
     }
   }
@@ -235,57 +208,58 @@ export async function sweepExpiredReservations(
   db: CatalogDatabase,
 ): Promise<InventoryReleaseResult[]> {
   const res = await db.execute(sql`
-    UPDATE jobs
-    SET state = 'SUCCEEDED', updated_at = now()
-    WHERE queue = 'inventory_reservations'
-      AND state = 'QUEUED'
-      AND run_after <= now()
-    RETURNING id, payload
+    UPDATE inventory_reservations r
+    SET state = 'EXPIRED', released_at = now()
+    FROM gemstones g
+    WHERE g.id = r.gemstone_id
+      AND r.state = 'ACTIVE'
+      AND r.expires_at <= now()
+    RETURNING r.id::text AS id, r.gemstone_id::text AS gemstone_id, r.cart_id::text AS cart_id,
+              r.session_id, g.gem_ref, g.kind::text AS kind
   `);
 
   const released: InventoryReleaseResult[] = [];
-  for (const row of res.rows as unknown as Array<{ id: string; payload: any }>) {
-    const payload = row.payload ?? {};
-    const gemstoneId = payload.gemstoneId;
-    const gemRef = payload.gemRef;
-    const sessionId = payload.sessionId;
+  for (const row of res.rows as unknown as Array<{
+    id: string;
+    gemstone_id: string;
+    cart_id: string | null;
+    session_id: string | null;
+    gem_ref: string;
+    kind: string;
+  }>) {
     const nowIso = new Date().toISOString();
 
-    if (gemstoneId) {
-      const eventPayloadJson = JSON.stringify({
-        sessionId,
-        cartId: payload.cartId,
-        gemstoneId,
-        gemRef,
-        isPair: payload.isPair ?? false,
-        reason: 'EXPIRED',
-        releasedAt: nowIso,
-      });
-
-      await db.execute(sql`
-        INSERT INTO domain_events (
-          event_id,
-          event_type,
-          aggregate_type,
-          aggregate_id,
-          payload,
-          status
-        ) VALUES (
-          gen_random_uuid(),
-          'InventoryReleased',
-          'GEMSTONE',
-          ${gemstoneId},
-          ${eventPayloadJson}::jsonb,
-          'PENDING'
-        )
-      `);
-    }
+    await db.execute(sql`
+      INSERT INTO domain_events (
+        event_id,
+        event_type,
+        aggregate_type,
+        aggregate_id,
+        payload,
+        status
+      ) VALUES (
+        gen_random_uuid(),
+        'InventoryReleased',
+        'GEMSTONE',
+        ${row.gemstone_id}::uuid,
+        ${JSON.stringify({
+          sessionId: row.session_id,
+          cartId: row.cart_id,
+          gemstoneId: row.gemstone_id,
+          gemRef: row.gem_ref,
+          isPair: row.kind === 'PAIR',
+          reason: 'EXPIRED',
+          releasedAt: nowIso,
+        })}::jsonb,
+        'PENDING'
+      )
+    `);
 
     released.push({
       jobId: row.id,
-      gemstoneId: gemstoneId ?? '',
-      gemRef,
-      sessionId,
+      gemstoneId: row.gemstone_id,
+      gemRef: row.gem_ref,
+      sessionId: row.session_id ?? undefined,
       releasedAt: nowIso,
       reason: 'EXPIRED',
     });
@@ -299,45 +273,48 @@ export async function releaseStockForSession(
   sessionId: string,
 ): Promise<number> {
   const res = await db.execute(sql`
-    UPDATE jobs
-    SET state = 'CANCELLED', updated_at = now()
-    WHERE queue = 'inventory_reservations'
-      AND state = 'QUEUED'
-      AND payload->>'sessionId' = ${sessionId}
-    RETURNING id, payload
+    UPDATE inventory_reservations r
+    SET state = 'RELEASED', released_at = now()
+    FROM gemstones g
+    WHERE g.id = r.gemstone_id
+      AND r.state = 'ACTIVE'
+      AND r.session_id = ${sessionId}
+    RETURNING r.id::text AS id, r.gemstone_id::text AS gemstone_id, r.cart_id::text AS cart_id,
+              g.gem_ref, g.kind::text AS kind
   `);
 
-  for (const row of res.rows as unknown as Array<{ id: string; payload: any }>) {
-    const payload = row.payload ?? {};
-    if (payload.gemstoneId) {
-      const eventPayloadJson = JSON.stringify({
-        sessionId,
-        cartId: payload.cartId,
-        gemstoneId: payload.gemstoneId,
-        gemRef: payload.gemRef,
-        isPair: payload.isPair ?? false,
-        reason: 'SESSION_RELEASED',
-        releasedAt: new Date().toISOString(),
-      });
-
-      await db.execute(sql`
-        INSERT INTO domain_events (
-          event_id,
-          event_type,
-          aggregate_type,
-          aggregate_id,
-          payload,
-          status
-        ) VALUES (
-          gen_random_uuid(),
-          'InventoryReleased',
-          'GEMSTONE',
-          ${payload.gemstoneId},
-          ${eventPayloadJson}::jsonb,
-          'PENDING'
-        )
-      `);
-    }
+  for (const row of res.rows as unknown as Array<{
+    id: string;
+    gemstone_id: string;
+    cart_id: string | null;
+    gem_ref: string;
+    kind: string;
+  }>) {
+    await db.execute(sql`
+      INSERT INTO domain_events (
+        event_id,
+        event_type,
+        aggregate_type,
+        aggregate_id,
+        payload,
+        status
+      ) VALUES (
+        gen_random_uuid(),
+        'InventoryReleased',
+        'GEMSTONE',
+        ${row.gemstone_id}::uuid,
+        ${JSON.stringify({
+          sessionId,
+          cartId: row.cart_id,
+          gemstoneId: row.gemstone_id,
+          gemRef: row.gem_ref,
+          isPair: row.kind === 'PAIR',
+          reason: 'SESSION_RELEASED',
+          releasedAt: new Date().toISOString(),
+        })}::jsonb,
+        'PENDING'
+      )
+    `);
   }
 
   return res.rows.length;
@@ -347,14 +324,12 @@ export async function isGemstoneReserved(
   db: CatalogDatabase,
   gemstoneId: string,
 ): Promise<boolean> {
-  const jobKey = `reservation:gemstone:${gemstoneId}`;
   const res = await db.execute(sql`
     SELECT id
-    FROM jobs
-    WHERE job_key = ${jobKey}
-      AND queue = 'inventory_reservations'
-      AND state = 'QUEUED'
-      AND run_after > now()
+    FROM inventory_reservations
+    WHERE gemstone_id = ${gemstoneId}::uuid
+      AND state = 'ACTIVE'
+      AND expires_at > now()
     LIMIT 1
   `);
   return res.rows.length > 0;

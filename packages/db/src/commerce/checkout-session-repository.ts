@@ -107,19 +107,21 @@ export async function createCheckoutSession(
   };
 
   await db.execute(sql`
-    INSERT INTO jobs (
-      job_key,
-      queue,
-      job_type,
+    INSERT INTO checkout_sessions (
+      id,
+      cart_token,
+      customer_id,
+      email,
+      current_step,
       payload,
-      state,
-      run_after
+      reservation_expires_at
     ) VALUES (
-      ${'checkout:session:' + sessionId},
-      'checkout_sessions',
-      'CHECKOUT_SESSION',
+      ${sessionId},
+      ${session.cart_token},
+      ${session.customer_id}::uuid,
+      ${session.email},
+      ${session.current_step},
       ${JSON.stringify(session)}::jsonb,
-      'QUEUED',
       ${reservationExpiresAt}::timestamptz
     )
   `);
@@ -132,10 +134,9 @@ export async function getCheckoutSession(
   sessionId: string,
 ): Promise<CheckoutSessionDto> {
   const res = await db.execute(sql`
-    SELECT id, payload, state, run_after
-    FROM jobs
-    WHERE job_key = ${'checkout:session:' + sessionId}
-      AND queue = 'checkout_sessions'
+    SELECT payload, state, reservation_expires_at
+    FROM checkout_sessions
+    WHERE id = ${sessionId}
     LIMIT 1
   `);
 
@@ -146,10 +147,14 @@ export async function getCheckoutSession(
   const row = res.rows[0] as {
     payload: CheckoutSessionDto;
     state: string;
-    run_after: Date | string;
+    reservation_expires_at: Date | string | null;
   };
 
-  if (row.state === 'CANCELLED' || isReservationExpired(row.run_after)) {
+  if (
+    row.state === 'CANCELLED' ||
+    row.state === 'EXPIRED' ||
+    (row.reservation_expires_at !== null && isReservationExpired(row.reservation_expires_at))
+  ) {
     throw new ContractError('CHECKOUT_SESSION_EXPIRED', `Checkout session ${sessionId} has expired.`);
   }
 
@@ -161,11 +166,13 @@ export async function saveCheckoutSession(
   session: CheckoutSessionDto,
 ): Promise<CheckoutSessionDto> {
   const res = await db.execute(sql`
-    UPDATE jobs
+    UPDATE checkout_sessions
     SET payload = ${JSON.stringify(session)}::jsonb,
+        current_step = ${session.current_step},
+        completed_order_id = ${session.completed_order_id ?? null}::uuid,
+        state = CASE WHEN ${session.completed_order_id ?? null}::uuid IS NOT NULL THEN 'COMPLETED' ELSE state END,
         updated_at = now()
-    WHERE job_key = ${'checkout:session:' + session.id}
-      AND queue = 'checkout_sessions'
+    WHERE id = ${session.id}
     RETURNING id
   `);
 

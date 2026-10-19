@@ -1,3 +1,56 @@
+# MASTER TRUTH AUDIT + REMEDIATION ROUND 2 (2026-10-19)
+
+Full product audit written to `MAIHAN_GEMS_COMPLETE_PRODUCT_AUDIT.md` (≈72% weighted,
+NOT production-ready). Immediately after it, the following audit findings were FIXED
+(all verified: build/typecheck/lint 0 errors, schema-fidelity PASS, all suites green —
+domain 240, contracts 43, ai 14, observability 12, db 153, worker 3, migrate 31, web 473):
+
+1. **RLS runtime wiring (M-02)** — `withPoolRlsSession` raw-client seam + hardened
+   `withRlsContext` (mock-graceful) in `packages/db/src/catalog/executor.ts`;
+   `AuthenticatedActor.identity_user_id` now selected by verifySession/login/register;
+   RLS session context applied on `GET /orders/{id}`, account profile/orders/order-detail,
+   and `GET /ai/conversations/{key}`; new `packages/db/src/catalog/rls-context.spec.ts`
+   proves GUCs set inside the boundary + no residue. Carts/messages wiring follows the
+   same helper (currently transparent: dev runs as superuser/bypass).
+2. **Transactional email delivery (M-05)** — `recordNotification` additionally enqueues
+   `notify.email` (queue `default`, QUEUED); `apps/worker/src/handlers/email.ts` sends
+   via Resend → Mailtrap → honest OUTBOX_LOG; `order.confirm` enqueues the confirmation
+   email the same way.
+3. **Real worker handlers (M-06)** — `notify.email` real; `ai.embed` really re-embeds the
+   referenced knowledge document's chunks (deterministic 1024-dim) + stamps `embedded_at`.
+4. **Certificate upload validation (M-08 partial)** — content-type allowlist (PDF/JPEG/
+   PNG/WebP), 10 MB cap, base64 magic-byte sniff in `createCertificateHandler`. Virus
+   scan + real R2 presign still need the storage decision/credentials.
+5. **Per-scope rate limiting (M-09)** — full SoT 11.11 table LIVE (9 scopes incl.
+   `ai_stream` dailyLimit 200 via a day-aligned second window), `scopeForRoute` +
+   `createScopedRateLimitGate` (checkout/AI-stream/certificate-upload fail CLOSED);
+   policy spec freezes all limits.
+6. **Live payments wired (M-04 partial)** — `placeOrder` creates a real Stripe
+   PaymentIntent + AUTHORIZED payment record when `STRIPE_SECRET_KEY` is set
+   (idempotency keys, webhook reconciles by provider_payment_id); TEST behaviour
+   unchanged without keys.
+7. **Edge host security (M-15)** — `apps/web/src/proxy.ts` (Next 16 middleware successor):
+   prod `ALLOWED_HOSTS` allow-list fails closed (403) + host-based house resolution
+   (`sapphire.`/`ruby.`/`emerald.` subdomains).
+8. **CI breadth + secret scan (M-12/M-10 script half)** — `scripts/scan-secrets.mjs`
+   (dependency-free, allow-listed, verified 1,366 files / 0 findings) + AI/observability/
+   worker suites added to ci.yml (domain/db/web/budgets were already there — original
+   M-12/M-13 claims overstated; `check:budgets` already enforces SoT 12.11).
+9. **Docs de-staled (M-18)** — AGENTS.md §6.7 + e2e/tests READMEs now record ADR-021
+   Accepted (2026-10-07); `scripts/generate-redirects.mjs` created (was referenced but
+   missing; refuses to ship an empty module).
+
+**STILL OPEN (owners):** M-01 corpus migration (BLOCKED — restore `naturalgemstones/`
+out of band, then run migrate + gates corpus-mode + redirects generator); M-03 jobs
+normalization (BLOCKED — locked schema has NO auth/favorites/etc. tables; requires new
+expand migration + client-approved ADR-027 draft in the audit addendum; do NOT touch
+schema unilaterally); M-10 credential rotation + history purge (client); M-11 WebAR
+assets + device verification (client); M-16 admin consoles (AI ops/redirect manager/
+bulk ops); M-17 ADR-022/023/024 approvals (client); M-14 remaining dyo-handler SQL
+extraction (debt).
+
+---
+
 # STOREFRONT REDESIGN + 4-PHASE AUDIT REMEDIATION COMPLETED (2026-10-19)
 
 1. **Theme & Homepage Redesign ("Golden Obsidian" & "The Private Vault")** — Updated global design tokens (`--gold: #D4A437`, `--gold-gradient`, `--warm-white: #F6F2E9`, `--navy-deep: #16110C`, Jost + Cormorant Garamond, 6px border-radius) across `apps/web/src/app/globals.css`, `apps/web/src/lib/theme-styles.ts`, `apps/web/src/app/storefront-luxury.css`, `apps/web/src/app/layout.tsx`, and rebuilt `apps/web/src/app/(storefront)/page.tsx` while keeping all `mgh-*` spec selectors intact.

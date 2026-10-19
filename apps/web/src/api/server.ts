@@ -35,9 +35,7 @@ import {
   createCatalogQueryService,
 } from '../modules/catalog/index.js';
 import { createCatalogApi, type CatalogApi } from './index.js';
-import { createRateLimitGate } from './ratelimit/gate.js';
-import { RATE_LIMIT_POLICIES } from './ratelimit/policy.js';
-import { createBackendChain } from './ratelimit/limiter.js';
+import { createScopedRateLimitGate } from './ratelimit/gate.js';
 import type { CacheStore, GenerationStore } from '../modules/catalog/index.js';
 
 async function toRequest(req: IncomingMessage): Promise<Request> {
@@ -131,19 +129,19 @@ export async function wireApi(config: RuntimeConfig = loadRuntimeConfig()): Prom
 
   const service = createCatalogQueryService({ port: catalogPort, store, generations, namespace });
 
-  // Task 9: the request-boundary rate limiter (SoT 11.11 "Public GET 300 /
-  // 1 min per IP"). Backend chain: Redis primary when configured, the
-  // LOCKED `rate_limit_counters` table as the documented fallback, in-process
-  // counters when neither exists (local runs). Failure mode 'allow' for
-  // public reads (doc 06 failure modes: "reads continue, 429 less precise").
-  const rateLimit = createRateLimitGate({
-    policy: RATE_LIMIT_POLICIES.public_get,
-    backends: createBackendChain({
-      redis: redis?.client ?? null,
-      db: catalogDatabase,
-      policy: RATE_LIMIT_POLICIES.public_get,
-    }),
-    failureMode: 'allow',
+  // Task 9: the request-boundary rate limiter (SoT 11.11 full scope table).
+  // Backend chain per scope: Redis primary when configured, the LOCKED
+  // `rate_limit_counters` table as the documented fallback, in-process
+  // counters when neither exists (local runs). Failure modes are per scope
+  // (doc 06): reads 'allow'; checkout/AI-stream/certificate-upload 'reject'.
+  const rateLimit = createScopedRateLimitGate({
+    redis: redis?.client ?? null,
+    db: catalogDatabase,
+    onDegradation: (event) => {
+      process.stdout.write(
+        `rate-limit degraded at ${event.stage}: ${(event.error as Error | undefined)?.message ?? 'unknown'}\n`,
+      );
+    },
   });
 
   const api = createCatalogApi({ service, rateLimit, db: catalogDatabase });

@@ -65,10 +65,52 @@ function isNgcCanonicalProductPath(pathname: string): boolean {
   return /(?:-k\d+|-pr\d+|-j\d+|js\d+[a-z0-9]*-k\d+)$/i.test(last);
 }
 
+function resolveHouseFromHost(host: string | null): string | null {
+  if (!host) return null;
+  const lower = host.toLowerCase().split(':')[0] ?? '';
+  if (lower.startsWith('sapphire.')) return 'sapphire';
+  if (lower.startsWith('ruby.')) return 'ruby';
+  if (lower.startsWith('emerald.')) return 'emerald';
+  return null;
+}
+
+/**
+ * Production host allow-list (M-15). When MAIHAN_ENV=production and
+ * ALLOWED_HOSTS is configured, any request whose Host is not on the list
+ * (comma-separated, entries may be exact or a leading-dot suffix such as
+ * `.maihangems.com`) fails closed with 403 — no host-header-driven cache or
+ * SEO poisoning. Unset/empty list or non-production: every host passes.
+ */
+function hostAllowed(request: NextRequest): boolean {
+  if (process.env['MAIHAN_ENV'] !== 'production') return true;
+  const allowList = (process.env['ALLOWED_HOSTS'] ?? '').trim();
+  if (!allowList) return true;
+  const host = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim() || request.headers.get('host') || '';
+  const lowerHost = host.toLowerCase().split(':')[0] ?? '';
+  if (!lowerHost) return false;
+  return allowList
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean)
+    .some((allowed) =>
+      allowed.startsWith('.') ? lowerHost.endsWith(allowed) || lowerHost === allowed.slice(1) : lowerHost === allowed,
+    );
+}
+
 export function proxy(request: NextRequest): NextResponse {
+  if (!hostAllowed(request)) {
+    return new NextResponse('Forbidden host.', {
+      status: 403,
+      headers: { 'content-type': 'text/plain; charset=utf-8' },
+    });
+  }
+
   const { pathname, search } = request.nextUrl;
   const first = pathname.split('/').filter(Boolean)[0] ?? '';
-  const house = resolveHouse(request, first);
+  const fromHost = resolveHouseFromHost(
+    request.headers.get('x-forwarded-host')?.split(',')[0] ?? request.headers.get('host'),
+  );
+  const house = fromHost ?? resolveHouse(request, first);
 
   if (SISTERS.has(first)) {
     const rest = pathname.slice(first.length + 1) || '/';

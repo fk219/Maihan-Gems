@@ -8,13 +8,16 @@
  * "Maihan Gems Dev" project), where the two introspections matched exactly.
  *
  * The aggregate counts are the locked architecture numbers (AGENTS.md section 7;
- * INITIAL_IMPLEMENTATION_PLAN.md section 36 task 5):
- *   75 tables (74 locked + the 0018 CMS review-ledger expansion), 33 enums, 95 FKs, 595 CHECK-class constraints, 266 indexes,
+ * INITIAL_IMPLEMENTATION_PLAN.md section 36 task 5) plus the ADR-027 expansion:
+ *   82 tables (74 locked + the 0018 CMS review-ledger expansion + the 0019
+ *   jobs-normalization expansion: auth_credentials, auth_sessions, auth_tokens,
+ *   favorites, checkout_sessions, inventory_reservations, notifications),
+ *   33 enums, 103 FKs, 645 CHECK-class constraints, 283 indexes,
  *   9 named invariant constraints, 6 RLS tables with 6 policies and
  *   0 policy-less tables, 2 HNSW indexes, 1 trigger, 1 view, 2 functions.
  *
- * The "591 CHECK" figure reconciles as 28 pg_constraint CHECK entries plus
- * 563 NOT NULL column constraints (PG16 keeps NOT NULL in pg_attribute, not
+ * The CHECK-class total reconciles as 32 pg_constraint CHECK entries plus
+ * 613 NOT NULL column constraints (PG16 keeps NOT NULL in pg_attribute, not
  * pg_constraint). Both components are asserted; the counting semantics are the
  * ones established by packages/db/src/introspect.ts in Task 4.
  *
@@ -54,7 +57,7 @@ export const EXPECTED_EXTENSIONS: readonly string[] = [
   'pg_stat_statements'
 ];
 
-/** The 74 public tables of the locked schema, exact names. */
+/** The 82 public tables: 74 locked + 0018 CMS ledger + 0019 ADR-027 expansion. */
 export const EXPECTED_TABLES: readonly string[] = [
   'addresses',
   'ai_evaluations',
@@ -64,6 +67,9 @@ export const EXPECTED_TABLES: readonly string[] = [
   'asset_variants',
   'assets',
   'audit_logs',
+  'auth_credentials',
+  'auth_sessions',
+  'auth_tokens',
   'cart_items',
   'carts',
   'certificate_anomalies',
@@ -71,6 +77,7 @@ export const EXPECTED_TABLES: readonly string[] = [
   'certificate_ocr_runs',
   'certificate_reviews',
   'certificates',
+  'checkout_sessions',
   'clarities',
   'clarity_labels',
   'colour_intensities',
@@ -83,6 +90,7 @@ export const EXPECTED_TABLES: readonly string[] = [
   'dyo_price_snapshots',
   'dyo_quotes',
   'event_consumers',
+  'favorites',
   'feature_flags',
   'fulfillments',
   'gemstone_colours',
@@ -93,6 +101,7 @@ export const EXPECTED_TABLES: readonly string[] = [
   'gemstones',
   'guardrail_events',
   'import_batches',
+  'inventory_reservations',
   'jewellery_types',
   'jobs',
   'knowledge_chunks',
@@ -100,6 +109,7 @@ export const EXPECTED_TABLES: readonly string[] = [
   'messages',
   'metals',
   'navigations',
+  'notifications',
   'order_events',
   'order_items',
   'orders',
@@ -171,7 +181,7 @@ export const EXPECTED_ENUMS: readonly { name: string; members: readonly string[]
   { name: 'verification_status', members: ['UNVERIFIED', 'EXTRACTED', 'CROSS_CHECKED', 'VERIFIED', 'REJECTED'] },
 ];
 
-/** The 94 foreign-key constraint names of the locked schema. */
+/** The 103 foreign-key constraint names of the locked schema + ADR-027 expansion. */
 export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'addresses_customer_id_fkey',
   'ai_interactions_conversation_id_fkey',
@@ -180,6 +190,9 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'asset_usages_asset_id_fkey',
   'asset_variants_asset_id_fkey',
   'assets_import_batch_id_fkey',
+  'auth_credentials_customer_id_fkey',
+  'auth_sessions_customer_id_fkey',
+  'auth_tokens_customer_id_fkey',
   'cart_items_cart_id_fkey',
   'cart_items_configuration_id_fkey',
   'cart_items_price_snapshot_id_fkey',
@@ -192,6 +205,7 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'certificates_configuration_id_fkey',
   'certificates_gemstone_id_fkey',
   'certificates_product_id_fkey',
+  'checkout_sessions_customer_id_fkey',
   'clarity_labels_clarity_id_fkey',
   'conversations_customer_id_fkey',
   'customer_profiles_customer_id_fkey',
@@ -204,6 +218,8 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'dyo_quotes_configuration_id_fkey',
   'dyo_quotes_price_snapshot_id_fkey',
   'event_consumers_event_id_fkey',
+  'favorites_customer_id_fkey',
+  'favorites_product_id_fkey',
   'fulfillments_order_id_fkey',
   'fulfillments_order_item_id_fkey',
   'gemstone_colours_parent_id_fkey',
@@ -219,10 +235,12 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'gemstones_variety_id_fkey',
   'guardrail_events_conversation_id_fkey',
   'guardrail_events_interaction_id_fkey',
+  'inventory_reservations_gemstone_id_fkey',
   'knowledge_chunks_document_id_fkey',
   'knowledge_documents_source_page_id_fkey',
   'knowledge_documents_variety_id_fkey',
   'messages_conversation_id_fkey',
+  'notifications_customer_id_fkey',
   'order_events_order_id_fkey',
   'page_review_state_revision_id_fkey',
   'order_items_configuration_id_fkey',
@@ -300,18 +318,18 @@ export const EXPECTED_VIEWS: readonly string[] = ['certificate_public'];
 /** The 2 vector(1024) columns (ADR-018). */
 export const EXPECTED_VECTOR_COLUMNS: readonly string[] = ['knowledge_chunks.embedding', 'product_embeddings.embedding'];
 
-/** Aggregate counts — the locked architecture numbers. */
+/** Aggregate counts — the locked architecture numbers + the ADR-027 expansion. */
 export const EXPECTED_COUNTS = {
-  tables: 75,
+  tables: 82,
   enums: 33,
-  primary_key: 75,
-  foreign_key: 95,
-  unique: 59,
-  check: 29,
-  not_null_columns: 566,
-  /** check + not_null_columns: the documented "591 CHECK". */
-  check_class_total: 595,
-  indexes: 266,
+  primary_key: 82,
+  foreign_key: 103,
+  unique: 64,
+  check: 32,
+  not_null_columns: 613,
+  /** check + not_null_columns: the documented CHECK-class total. */
+  check_class_total: 645,
+  indexes: 283,
   hnsw: 2,
   vector_columns: 2,
   triggers: 1,

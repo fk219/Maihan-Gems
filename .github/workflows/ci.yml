@@ -50,6 +50,12 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
+      # SG-7 / M-10: dependency-free secret scan over git-tracked files.
+      # The local dev fixture credentials published in compose.yaml are on the
+      # documented allow-list; anything else fails the build.
+      - name: Secret scan
+        run: node scripts/scan-secrets.mjs
+
       - name: Build
         run: pnpm run build
 
@@ -114,6 +120,23 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
         run: pnpm --filter @maihan/web run test
+
+      # Phase 13 remediation M-12: the remaining suites run in CI too — the AI
+      # orchestrator/eval suites, the observability primitives, and the worker
+      # dispatch/sweep suites (DB-gated; skip cleanly when the database is
+      # unmigrated).
+      - name: AI orchestrator and evaluation suites
+        env:
+          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
+        run: pnpm --filter @maihan/ai run test
+
+      - name: Observability suite
+        run: pnpm --filter @maihan/observability run test
+
+      - name: Worker dispatch and sweep suites
+        env:
+          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
+        run: pnpm --filter @maihan/worker run test
 
       # Migrates a fresh scratch database (maihan_dev_fidelity) from zero on
       # the disposable instance, asserts the locked schema exactly, and always

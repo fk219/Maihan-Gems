@@ -25,6 +25,7 @@ import {
   addItemToCart,
   createCart,
   createCheckoutSession,
+  createPaymentRecord,
   getCartByToken,
   getCheckoutSession,
   getOrderById,
@@ -40,6 +41,7 @@ import {
   sweepExpiredReservations,
   transitionOrderState,
   updateCartItemQuantity,
+  withRlsContext,
   type CatalogDatabase,
 } from '@maihan/db';
 import { TestPaymentProvider } from '../integrations/payment/test-payment-provider.js';
@@ -240,16 +242,69 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     const body = await parseBody(ctx.request);
     const input = PlaceOrderInputSchema.parse(body);
     const order = await placeOrder(db, input);
+
+    // Live payment intent (M-04): with a real PSP configured the placement
+    // immediately creates an AUTHORIZED payment record, so the webhook that
+    // follows reconciles against it. Without keys the Test adapter answers
+    // and the flow is unchanged — the payment lands at webhook time.
+    let payment: Record<string, unknown> | null = null;
+    const provider = createPaymentProvider();
+    if (provider.providerName === 'STRIPE') {
+      try {
+        const authorized = await provider.authorize({
+          order_id: order.id,
+          order_number: order.order_number,
+          amount: order.grand_total,
+          currency: order.currency,
+          method_type: 'CARD',
+          idempotency_key: `pi:${order.id}`,
+        });
+        await createPaymentRecord(db, {
+          order_id: order.id,
+          provider: provider.providerName,
+          provider_payment_id: authorized.provider_payment_id,
+          amount: order.grand_total,
+          currency: order.currency,
+          state: 'AUTHORIZED',
+          method_type: 'CARD',
+          idempotency_key: `pay:${order.id}`,
+        });
+        payment = {
+          provider: authorized.provider,
+          provider_payment_id: authorized.provider_payment_id,
+          state: 'AUTHORIZED',
+        };
+      } catch (cause) {
+        payment = {
+          provider: provider.providerName,
+          state: 'FAILED',
+          message: cause instanceof Error ? cause.message : 'Payment authorization failed.',
+        };
+      }
+    }
+
     return {
       status: 201,
-      body: { data: order },
+      body: { data: payment ? { ...order, payment } : order },
     };
   },
 
   async getOrder(ctx) {
     const db = getDb(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
-    const order = await getOrderById(db, orderId);
+    // RLS defence-in-depth (doc 09): when the caller is an authenticated
+    // customer the read runs inside an RLS session carrying their identity
+    // subject, so the orders_own policy bites for non-bypass app roles.
+    const sessionToken = extractSessionToken(ctx.request);
+    const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+    const isCustomer = actor?.role === 'CUSTOMER';
+    const order = isCustomer
+      ? await withRlsContext(
+          db,
+          { userSubject: actor.identity_user_id ?? '' },
+          (tx) => getOrderById(tx as unknown as CatalogDatabase, orderId),
+        )
+      : await getOrderById(db, orderId);
     await assertOrderOwnership(ctx, order.customer_id, 'access another customer’s order');
     return {
       status: 200,

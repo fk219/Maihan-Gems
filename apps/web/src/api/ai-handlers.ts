@@ -24,6 +24,7 @@ import {
   loadSettingCompatibilityRules,
   buildDeterministicEmbedding1024,
   seedCuratedKnowledgeCorpus,
+  withPoolRlsSession,
 } from '@maihan/db';
 import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
 import type { RouteHandler, RouteContext } from './handlers.js';
@@ -473,16 +474,25 @@ export const aiGetConversationHandler: RouteHandler = async (ctx) => {
   const db = getDb(ctx);
   const conversationKey = requireIdentifier(ctx.params['conversationKey'], 'conversationKey');
 
-  const conv = await getConversationByKey(db, conversationKey);
-  if (!conv) {
-    throw new ContractError('NOT_FOUND', `Conversation ${conversationKey} not found.`);
-  }
-
   const sessionToken = extractSessionToken(ctx.request);
   const actor = sessionToken ? await resolveRequestActor(ctx) : null;
   const headerCustomerId = ctx.request?.headers.get('x-customer-id')?.trim() || null;
   const callerCustomerId = actor?.customer_id ?? headerCustomerId;
   const isAdmin = Boolean(actor && (ADMIN_ROLES as readonly string[]).includes(actor.role));
+
+  // RLS defence-in-depth (doc 09): the conversation + transcript read runs
+  // inside an RLS session whose `app.user_subject` is the authenticated
+  // customer's identity subject, and `app.staff` for admins. With the
+  // superuser/bypass roles used in dev and tests this is transparent; with a
+  // non-bypass app role the policies in 0016_rls.sql now actually bite.
+  const conv = await withPoolRlsSession(
+    db as unknown as Parameters<typeof withPoolRlsSession>[0],
+    { userSubject: actor?.identity_user_id ?? '', isStaff: isAdmin },
+    async (client) => getConversationByKey(client, conversationKey),
+  );
+  if (!conv) {
+    throw new ContractError('NOT_FOUND', `Conversation ${conversationKey} not found.`);
+  }
 
   if (conv.customer_id && !isAdmin) {
     if (callerCustomerId && conv.customer_id !== callerCustomerId) {

@@ -53,11 +53,10 @@ describe('Payment Webhooks & Reconciliation (Phase 6 Task 6)', () => {
           AND g.availability = true
           AND g.state = 'ACTIVE'
           AND NOT EXISTS (
-            SELECT 1 FROM jobs r
-            WHERE r.job_key = 'reservation:gemstone:' || g.id::text
-              AND r.queue = 'inventory_reservations'
-              AND r.state = 'QUEUED'
-              AND r.run_after > now()
+            SELECT 1 FROM inventory_reservations r
+            WHERE r.gemstone_id = g.id
+              AND r.state = 'ACTIVE'
+              AND r.expires_at > now()
           )
         ORDER BY p.product_number
         OFFSET 1
@@ -105,8 +104,8 @@ describe('Payment Webhooks & Reconciliation (Phase 6 Task 6)', () => {
           await client.query(`DELETE FROM carts WHERE cart_token = $1`, [token]);
         }
         for (const sid of createdSessionIds) {
-          await client.query(`DELETE FROM jobs WHERE payload->>'sessionId' = $1`, [sid]);
-          await client.query(`DELETE FROM jobs WHERE job_key = $1`, [`checkout:session:${sid}`]);
+          await client.query(`DELETE FROM inventory_reservations WHERE session_id = $1`, [sid]);
+          await client.query(`DELETE FROM checkout_sessions WHERE id = $1`, [sid]);
         }
       } finally {
         client.release();

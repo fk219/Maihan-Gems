@@ -90,7 +90,7 @@ describe('Order repository DYO snapshots', () => {
       execute: async (statement: unknown) => {
         const { text, params } = queryDetails(statement);
         if (text.includes('SELECT id FROM orders WHERE idempotency_key')) return { rows: [] };
-        if (text.includes('FROM jobs')) return { rows: [{ payload: checkoutSession, state: 'QUEUED', run_after: checkoutSession.reservation_expires_at }] };
+        if (text.includes('FROM checkout_sessions')) return { rows: [{ payload: checkoutSession, state: 'ACTIVE', reservation_expires_at: checkoutSession.reservation_expires_at }] };
         if (text.includes('SELECT') && text.includes('FROM carts')) {
           return { rows: [{ id: cartId, cart_token: 'cart-token', customer_id: null, anonymous_session_id: null, currency: 'USD', state: 'ACTIVE', pricing_snapshot: null, expires_at: new Date(Date.now() + 60_000), converted_order_id: null, created_at: new Date(), updated_at: new Date() }] };
         }
@@ -110,7 +110,7 @@ describe('Order repository DYO snapshots', () => {
           insertedConfigurationSnapshot = params[5] as string | undefined;
           return { rows: [] };
         }
-        if (text.includes('UPDATE jobs')) return { rows: [{ id: 'checkout-job-1' }] };
+        if (text.includes('UPDATE checkout_sessions')) return { rows: [{ id: 'checkout-job-1' }] };
         if (text.includes('FROM orders') && text.includes('WHERE id =')) return { rows: [orderRow] };
         if (text.includes('FROM order_items') && text.includes('WHERE order_id =')) {
           return { rows: [{ id: 'order-item-1', order_id: orderRow.id, product_id: productId, configuration_id: configurationId, sku_snapshot: 'dyo-short123', title_snapshot: 'Configured ring', configuration_snapshot: itemSnapshot, gem_snapshot: {}, document_snapshot: null, quantity: 1, unit_price: '4700.00', line_total: '4700.00', production_days: null, state: 'PENDING' }] };

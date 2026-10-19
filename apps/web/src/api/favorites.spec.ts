@@ -86,9 +86,7 @@ describe('Wishlist (/favorites) & Compare-list (/compare) (Phase 6 Task 8)', () 
       const client = await pool.connect();
       try {
         if (customerId) {
-          await client.query(`DELETE FROM jobs WHERE queue = 'customer_favorites' AND job_key = $1`, [
-            `favorites:customer:${customerId}`,
-          ]);
+          await client.query(`DELETE FROM favorites WHERE customer_id = $1`, [customerId]);
           await client.query(`DELETE FROM customer_profiles WHERE customer_id = $1`, [customerId]);
           await client.query(`DELETE FROM customers WHERE id = $1`, [customerId]);
         }

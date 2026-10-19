@@ -86,8 +86,8 @@ describe('Checkout Session & Inventory Reservation (Phase 6 Task 2)', () => {
           await client.query(`DELETE FROM carts WHERE cart_token = $1`, [token]);
         }
         for (const sid of createdSessionIds) {
-          await client.query(`DELETE FROM jobs WHERE payload->>'sessionId' = $1`, [sid]);
-          await client.query(`DELETE FROM jobs WHERE job_key = $1`, [`checkout:session:${sid}`]);
+          await client.query(`DELETE FROM inventory_reservations WHERE session_id = $1`, [sid]);
+          await client.query(`DELETE FROM checkout_sessions WHERE id = $1`, [sid]);
         }
       } finally {
         client.release();

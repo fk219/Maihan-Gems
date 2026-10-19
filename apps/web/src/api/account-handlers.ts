@@ -22,7 +22,9 @@ import {
   getCustomerProfile,
   updateCustomerAddress,
   updateCustomerProfile,
+  withRlsContext,
   type CatalogDatabase,
+  type RlsSessionContext,
 } from '@maihan/db';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { resolveRequestActor } from './auth-handlers.js';
@@ -33,6 +35,37 @@ function getDb(ctx: RouteContext): CatalogDatabase {
   const svc = ctx.service as unknown as { port?: { db?: CatalogDatabase } };
   if (svc.port?.db) return svc.port.db;
   throw new ContractError('INTERNAL', 'Database connection not available.');
+}
+
+/**
+ * Resolves the authenticated actor (never a bare header id when a session is
+ * present) so the RLS session context can carry the identity subject.
+ */
+async function requireActor(ctx: RouteContext): Promise<{
+  customerId: string;
+  rls: RlsSessionContext;
+}> {
+  const actor = await resolveRequestActor(ctx);
+  const headerCustomerId =
+    ctx.request?.headers.get('x-customer-id') ??
+    ctx.url.searchParams.get('customer_id');
+
+  if (actor) {
+    if (headerCustomerId && headerCustomerId !== actor.customer_id) {
+      throw new ContractError('FORBIDDEN', 'Cross-customer account access is forbidden.');
+    }
+    const isAdmin = actor.role !== 'CUSTOMER' && actor.role !== 'VENDOR';
+    return {
+      customerId: actor.customer_id,
+      rls: { userSubject: actor.identity_user_id ?? '', isStaff: isAdmin },
+    };
+  }
+
+  if (headerCustomerId && process.env['MAIHAN_ENV'] !== 'production') {
+    return { customerId: headerCustomerId, rls: { userSubject: '', isStaff: false } };
+  }
+
+  throw new ContractError('UNAUTHORIZED', 'Authentication required for account access.');
 }
 
 async function requireCustomerId(ctx: RouteContext): Promise<string> {
@@ -69,8 +102,10 @@ async function parseBody(request?: Request): Promise<unknown> {
 export const ACCOUNT_HANDLERS: Record<string, RouteHandler> = {
   async getProfile(ctx) {
     const db = getDb(ctx);
-    const customerId = await requireCustomerId(ctx);
-    const profile = await getCustomerProfile(db, customerId);
+    const { customerId, rls } = await requireActor(ctx);
+    const profile = await withRlsContext(db, rls, (tx) =>
+      getCustomerProfile(tx as unknown as CatalogDatabase, customerId),
+    );
     return {
       status: 200,
       body: { data: profile },
@@ -137,8 +172,10 @@ export const ACCOUNT_HANDLERS: Record<string, RouteHandler> = {
 
   async getOrders(ctx) {
     const db = getDb(ctx);
-    const customerId = await requireCustomerId(ctx);
-    const orders = await getCustomerOrders(db, customerId);
+    const { customerId, rls } = await requireActor(ctx);
+    const orders = await withRlsContext(db, rls, (tx) =>
+      getCustomerOrders(tx as unknown as CatalogDatabase, customerId),
+    );
     return {
       status: 200,
       body: { data: { orders, total_count: orders.length } },
@@ -147,9 +184,11 @@ export const ACCOUNT_HANDLERS: Record<string, RouteHandler> = {
 
   async getCustomerOrderDetail(ctx) {
     const db = getDb(ctx);
-    const customerId = await requireCustomerId(ctx);
+    const { customerId, rls } = await requireActor(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
-    const order = await getCustomerOrder(db, customerId, orderId);
+    const order = await withRlsContext(db, rls, (tx) =>
+      getCustomerOrder(tx as unknown as CatalogDatabase, customerId, orderId),
+    );
     return {
       status: 200,
       body: { data: order },

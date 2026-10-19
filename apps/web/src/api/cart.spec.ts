@@ -54,11 +54,10 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
           AND g.availability = true
           AND g.state = 'ACTIVE'
           AND NOT EXISTS (
-            SELECT 1 FROM jobs r
-            WHERE r.job_key = 'reservation:gemstone:' || g.id::text
-              AND r.queue = 'inventory_reservations'
-              AND r.state = 'QUEUED'
-              AND r.run_after > now()
+            SELECT 1 FROM inventory_reservations r
+            WHERE r.gemstone_id = g.id
+              AND r.state = 'ACTIVE'
+              AND r.expires_at > now()
           )
         ORDER BY p.product_number
         LIMIT 3

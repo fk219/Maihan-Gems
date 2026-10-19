@@ -195,9 +195,17 @@ describeWithLocalDatabase('Order repository DYO snapshot integration (local Post
         completed_order_id: null,
       };
       await client.query(
-        `INSERT INTO jobs (job_key, queue, job_type, payload, state, run_after)
-         VALUES ($1, 'checkout_sessions', 'CHECKOUT_SESSION', $2::jsonb, 'QUEUED', $3::timestamptz)`,
-        [`checkout:session:${fixture.checkoutSessionId}`, JSON.stringify(session), session.reservation_expires_at],
+        `INSERT INTO checkout_sessions (
+           id, cart_token, customer_id, email, current_step, payload, reservation_expires_at
+         ) VALUES ($1, $2, NULL, $3, $4, $5::jsonb, $6::timestamptz)`,
+        [
+          fixture.checkoutSessionId,
+          fixture.cartToken,
+          session.email,
+          session.current_step,
+          JSON.stringify(session),
+          session.reservation_expires_at,
+        ],
       );
       await client.query('COMMIT');
     } catch (error) {
@@ -230,7 +238,7 @@ describeWithLocalDatabase('Order repository DYO snapshot integration (local Post
       );
       await client.query('DELETE FROM orders WHERE idempotency_key = $1', [fixture.orderIdempotencyKey]);
       await client.query('DELETE FROM carts WHERE id = $1', [fixture.cartId]);
-      await client.query('DELETE FROM jobs WHERE job_key = $1', [`checkout:session:${fixture.checkoutSessionId}`]);
+      await client.query('DELETE FROM checkout_sessions WHERE id = $1', [fixture.checkoutSessionId]);
       await client.query('DELETE FROM products WHERE id = $1', [fixture.productId]);
       await client.query('DELETE FROM dyo_quotes WHERE configuration_id = $1', [fixture.configurationId]);
       await client.query('DELETE FROM dyo_configurations WHERE id = $1', [fixture.configurationId]);

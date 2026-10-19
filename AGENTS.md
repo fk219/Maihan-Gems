@@ -149,7 +149,7 @@ These are not preferences. Violating any of them is a defect.
 | 4 | **No managed/production database access** without explicit, current user approval. Migrations run on a **Neon dev branch** or local PostgreSQL 16. |
 | 5 | **No silent technology additions.** Any new runtime dependency, framework or external service requires an ADR. See `SKILL_MATRIX_AND_TOOLING.md` §13–14. |
 | 6 | **No resolving open ADRs implicitly.** ADR-021 to ADR-024 are **Proposed**, not Accepted. |
-| 7 | **No test framework installation** until ADR-021 is resolved. |
+| 7 | ~~**No test framework installation** until ADR-021 is resolved.~~ **RESOLVED:** ADR-021 was **Accepted 2026-10-07** (Vitest + Playwright); both are installed and in use. New test tooling beyond them still requires an ADR. |
 | 8 | **No redesigning the locked architecture.** It is LOCKED. Propose a change; do not implement one. |
 | 9 | **No secrets** in the repository, the database, a config table, a log or a trace. |
 | 10 | **No AI/agent writing directly to the database.** See §8. |

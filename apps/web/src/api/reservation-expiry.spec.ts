@@ -71,11 +71,10 @@ describe('Reservation Expiry & Release (Phase 6 Task 12)', () => {
           AND g.state = 'ACTIVE'
           AND g.availability = true
           AND NOT EXISTS (
-            SELECT 1 FROM jobs r
-            WHERE r.job_key = 'reservation:gemstone:' || g.id::text
-              AND r.queue = 'inventory_reservations'
-              AND r.state = 'QUEUED'
-              AND r.run_after > now()
+            SELECT 1 FROM inventory_reservations r
+            WHERE r.gemstone_id = g.id
+              AND r.state = 'ACTIVE'
+              AND r.expires_at > now()
           )
         ORDER BY p.product_number
         OFFSET 2
@@ -98,7 +97,7 @@ describe('Reservation Expiry & Release (Phase 6 Task 12)', () => {
       const client = await pool.connect();
       try {
         if (gemstoneId) {
-          await client.query(`DELETE FROM jobs WHERE job_key = $1`, [`reservation:gemstone:${gemstoneId}`]);
+          await client.query(`DELETE FROM inventory_reservations WHERE job_key = $1`, [`reservation:gemstone:${gemstoneId}`]);
           await client.query(`DELETE FROM domain_events WHERE aggregate_id = $1`, [gemstoneId]);
         }
       } catch (e) {
@@ -171,8 +170,8 @@ describe('Reservation Expiry & Release (Phase 6 Task 12)', () => {
     // 2. Force the reservation job to expire (set run_after in the past)
     const client = await pool.connect();
     await client.query(`
-      UPDATE jobs
-      SET run_after = now() - INTERVAL '5 minutes'
+      UPDATE inventory_reservations
+      SET expires_at = now() - INTERVAL '5 minutes'
       WHERE job_key = $1
     `, [`reservation:gemstone:${gemstoneId}`]);
     client.release();

@@ -34,36 +34,89 @@
  */
 import { sha256Hex } from '../../modules/catalog/index.js';
 
-export type RateLimitScope = 'public_get';
+/**
+ * The SoT 11.11 scopes. `public_get` was the only ACTIVE scope while the
+ * catalogue API was the sole surface; every commerce, AI, certificate, admin
+ * and webhook group now exists, so the full table is live (Phase 13
+ * remediation M-09). Limits/windows are SoT values, never invented here.
+ */
+export type RateLimitScope =
+  | 'public_get'
+  | 'search'
+  | 'cart_mutation'
+  | 'checkout'
+  | 'ai_stream'
+  | 'ai_tool_invocation'
+  | 'certificate_upload'
+  | 'admin_write'
+  | 'webhook';
 
 export interface RateLimitPolicy {
   readonly scope: RateLimitScope;
   /** SoT 11.11 "Public GET | 300 | 1 min per IP". */
   readonly limit: number;
   readonly windowSeconds: number;
+  /** SoT 11.11 AI-stream second dimension: "200 per day per customer". */
+  readonly dailyLimit?: number;
 }
 
 export const RATE_LIMIT_POLICIES: Record<RateLimitScope, RateLimitPolicy> = {
   public_get: { scope: 'public_get', limit: 300, windowSeconds: 60 },
+  search: { scope: 'search', limit: 60, windowSeconds: 60 },
+  cart_mutation: { scope: 'cart_mutation', limit: 60, windowSeconds: 60 },
+  checkout: { scope: 'checkout', limit: 20, windowSeconds: 60 },
+  ai_stream: { scope: 'ai_stream', limit: 20, windowSeconds: 60, dailyLimit: 200 },
+  ai_tool_invocation: { scope: 'ai_tool_invocation', limit: 200, windowSeconds: 60 },
+  certificate_upload: { scope: 'certificate_upload', limit: 10, windowSeconds: 3600 },
+  admin_write: { scope: 'admin_write', limit: 300, windowSeconds: 60 },
+  webhook: { scope: 'webhook', limit: 1000, windowSeconds: 60 },
 };
 
 /**
- * SoT rows for endpoint groups that do not exist yet (Phase 5+). Not applied.
- * Every limit/window/identity below is transcribed verbatim from SoT 11.11;
- * `dailyLimit` carries the second dimension of the AI-stream row ("200 per
- * day per customer"), which needs a second, day-aligned window when the AI
- * phase lands.
+ * What to do when EVERY rate-limit backend fails. Doc 06 failure modes:
+ * reads continue ('allow'); money, uploads and abuse-sensitive writes fail
+ * closed ('reject') — the Postgres fallback must be down for this to fire,
+ * in which case those endpoints are unusable anyway.
  */
-export const NOT_YET_APPLICABLE_SCOPES = [
-  { scope: 'search', limit: 60, windowSeconds: 60 },
-  { scope: 'cart_mutation', limit: 60, windowSeconds: 60 },
-  { scope: 'checkout', limit: 20, windowSeconds: 60 },
-  { scope: 'ai_stream', limit: 20, windowSeconds: 60, dailyLimit: 200 },
-  { scope: 'ai_tool_invocation', limit: 200, windowSeconds: 60 },
-  { scope: 'certificate_upload', limit: 10, windowSeconds: 3600 },
-  { scope: 'admin_write', limit: 300, windowSeconds: 60 },
-  { scope: 'webhook', limit: 1000, windowSeconds: 60 },
-] as const;
+export const SCOPE_FAILURE_MODES: Record<RateLimitScope, 'allow' | 'reject'> = {
+  public_get: 'allow',
+  search: 'allow',
+  cart_mutation: 'allow',
+  checkout: 'reject',
+  ai_stream: 'reject',
+  ai_tool_invocation: 'allow',
+  certificate_upload: 'reject',
+  admin_write: 'allow',
+  webhook: 'allow',
+};
+
+/**
+ * Resolve the SoT scope for a registered route. Route ids are the stable
+ * handler names from routes.ts; paths are the fallback discriminator.
+ */
+export function scopeForRoute(
+  _routeId: string,
+  path: string,
+  method: string,
+): RateLimitScope {
+  const isWrite = method !== 'GET' && method !== 'HEAD';
+  // Route paths are registered with and without the /api/v1 mount prefix.
+  const p = path.startsWith('/api/v1/') ? path.slice('/api/v1'.length) : path;
+  if (p.startsWith('/webhooks/')) return 'webhook';
+  if (p.startsWith('/admin')) return isWrite ? 'admin_write' : 'public_get';
+  if (p.startsWith('/ai')) return 'ai_stream';
+  if (p.startsWith('/certificates')) return isWrite ? 'certificate_upload' : 'public_get';
+  if (p.startsWith('/checkout')) return 'checkout';
+  if (
+    (p.startsWith('/carts') && isWrite) ||
+    (p.startsWith('/favorites') && isWrite) ||
+    (p.startsWith('/dyo') && isWrite)
+  ) {
+    return 'cart_mutation';
+  }
+  if (p.startsWith('/search')) return 'search';
+  return 'public_get';
+}
 
 /** Fixed window start (epoch seconds) for a given instant. */
 export function windowStartSeconds(nowMs: number, windowSeconds: number): number {
