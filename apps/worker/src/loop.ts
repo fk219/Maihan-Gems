@@ -9,6 +9,7 @@
 import type { Pool } from '@maihan/db';
 
 import { createCatalogDatabase } from './dispatch/catalog-db.js';
+import { processOperationalJobs } from './dispatch/jobs-runner.js';
 import { dispatchOutbox } from './dispatch/outbox.js';
 import { runSweeps } from './schedules/sweeps.js';
 
@@ -20,6 +21,7 @@ export interface WorkerTickResult {
   published: number;
   retried: number;
   deadLettered: number;
+  jobsSucceeded: number;
   sweeps: Array<{ name: string; changed: number }>;
 }
 
@@ -36,10 +38,18 @@ export function runWorkerLoop(
     ticking = true;
     try {
       const outbox = await dispatchOutbox(db);
+      const jobs = await processOperationalJobs(db);
       const sweeps = await runSweeps(db);
-      if (outbox.published > 0 || outbox.deadLettered > 0 || sweeps.some((s) => s.changed > 0)) {
+      if (
+        outbox.published > 0 ||
+        outbox.deadLettered > 0 ||
+        jobs.succeeded > 0 ||
+        jobs.deadLettered > 0 ||
+        sweeps.some((s) => s.changed > 0)
+      ) {
         process.stdout.write(
           `worker: outbox published=${outbox.published} retried=${outbox.retried} dead-lettered=${outbox.deadLettered}; ` +
+            `jobs succeeded=${jobs.succeeded} retried=${jobs.retried} dead-lettered=${jobs.deadLettered}; ` +
             sweeps.map((s) => `${s.name}=${s.changed}`).join(' ') +
             '\n',
         );

@@ -27,4 +27,45 @@ export function createCatalogDatabase(pool: Pool): CatalogDatabase {
   return drizzle(pool) as unknown as CatalogDatabase;
 }
 
+export interface RlsSessionContext {
+  readonly userSubject?: string | null;
+  readonly anonymousSessionId?: string | null;
+  readonly isStaff?: boolean;
+}
+
+/**
+ * Executes a callback inside a PostgreSQL transaction with RLS session settings
+ * (`app.user_subject`, `app.anonymous_session_id`, `app.staff`) applied via
+ * `set_config(..., true)` (transaction-local, doc 04 & doc 09).
+ */
+export async function withRlsContext<T>(
+  db: CatalogDatabase,
+  ctx: RlsSessionContext,
+  work: (tx: CatalogDatabase) => Promise<T>,
+): Promise<T> {
+  const maybeTx = (
+    db as unknown as {
+      transaction?: <R>(fn: (tx: CatalogDatabase) => Promise<R>) => Promise<R>;
+    }
+  ).transaction;
+
+  const applyAndRun = async (executor: CatalogDatabase): Promise<T> => {
+    const userSub = ctx.userSubject ?? '';
+    const anonSess = ctx.anonymousSessionId ?? '';
+    const staffFlag = ctx.isStaff ? 'true' : 'false';
+    await executor.execute(sql`
+      SELECT
+        set_config('app.user_subject', ${userSub}, true),
+        set_config('app.anonymous_session_id', ${anonSess}, true),
+        set_config('app.staff', ${staffFlag}, true)
+    `);
+    return work(executor);
+  };
+
+  if (typeof maybeTx === 'function') {
+    return (await maybeTx.call(db, applyAndRun)) as T;
+  }
+  return applyAndRun(db);
+}
+
 export { sql };

@@ -84,6 +84,10 @@ export function DyoReviewActions({ shortCode }: DyoReviewActionsProps) {
         throw new Error(data?.error?.message || data.message || 'Cart conversion failed.');
       }
 
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('maihan-atelier'));
+      }
+
       if (router?.push) {
         router.push('/cart');
       } else if (typeof window !== 'undefined') {

@@ -16,6 +16,25 @@ export interface CreatePoolOptions {
   max?: number;
   /** Statement timeout in ms; catalogue reads are indexed and short (default 5s). */
   statementTimeoutMs?: number;
+  /** Explicit SSL override; otherwise derived from databaseUrl (sslmode=require / Neon). */
+  ssl?: boolean | { rejectUnauthorized: boolean };
+}
+
+function resolvePoolSsl(
+  databaseUrl: string,
+  explicit?: boolean | { rejectUnauthorized: boolean },
+): boolean | { rejectUnauthorized: boolean } {
+  if (explicit !== undefined) return explicit;
+  const lower = databaseUrl.toLowerCase();
+  if (
+    lower.includes('sslmode=require') ||
+    lower.includes('sslmode=verify') ||
+    lower.includes('ssl=true') ||
+    lower.includes('.neon.tech')
+  ) {
+    return { rejectUnauthorized: false };
+  }
+  return false;
 }
 
 export function createPool(databaseUrl: string, options: CreatePoolOptions = {}): Pool {
@@ -23,6 +42,6 @@ export function createPool(databaseUrl: string, options: CreatePoolOptions = {})
     connectionString: databaseUrl,
     max: options.max ?? 10,
     statement_timeout: options.statementTimeoutMs ?? 5000,
-    ssl: false, // Disable SSL for local development
+    ssl: resolvePoolSsl(databaseUrl, options.ssl),
   });
 }

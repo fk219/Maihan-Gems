@@ -15,6 +15,22 @@ import { formatMoney } from '../../lib/currency.js';
 import { useStorefront } from './StorefrontProvider.js';
 import { VaultEmpty } from './VaultEmpty.js';
 
+interface ServerCartItem {
+  id: string;
+  product_id: string;
+  product_slug: string;
+  title: string;
+  configuration_id: string | null;
+  quantity: number;
+  unit_price: string;
+  line_total: string;
+}
+
+type UnifiedBagItem = AtelierItem & {
+  serverItemId?: string;
+  serverCartToken?: string;
+};
+
 export function BagView({
   forceEmpty = false,
 }: {
@@ -22,16 +38,105 @@ export function BagView({
   forceEmpty?: boolean;
 }) {
   const { currency, rates } = useStorefront();
-  const [items, setItems] = useState<AtelierItem[]>([]);
+  const [localItems, setLocalItems] = useState<AtelierItem[]>([]);
+  const [serverItems, setServerItems] = useState<UnifiedBagItem[]>([]);
+
+  async function loadServerCart(): Promise<void> {
+    if (typeof window === 'undefined' || forceEmpty) {
+      setServerItems([]);
+      return;
+    }
+    const token = window.localStorage.getItem('maihan_cart_token');
+    if (!token) {
+      setServerItems([]);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/v1/carts/${encodeURIComponent(token)}`);
+      if (!res.ok) {
+        setServerItems([]);
+        return;
+      }
+      const body = (await res.json()) as {
+        data?: { state?: string; items?: ServerCartItem[] };
+      };
+      if (body.data?.state !== 'ACTIVE' || !Array.isArray(body.data.items)) {
+        setServerItems([]);
+        return;
+      }
+      setServerItems(
+        body.data.items.map((item) => ({
+          id: item.product_id,
+          slug: item.product_slug,
+          title: item.title,
+          kind: item.configuration_id ? 'Bespoke DYO Configuration' : 'Vault piece',
+          priceUsd: Number(item.unit_price) || 0,
+          quantity: item.quantity,
+          image: '',
+          specs: item.configuration_id ? `DYO Commission · Slug ${item.product_slug}` : undefined,
+          serverItemId: item.id,
+          serverCartToken: token,
+        })),
+      );
+    } catch {
+      setServerItems([]);
+    }
+  }
 
   useEffect(() => {
     if (forceEmpty) {
-      setItems([]);
+      setLocalItems([]);
+      setServerItems([]);
       return;
     }
-    setItems(getBag());
-    return subscribeAtelier(() => setItems(getBag()));
+    const sync = () => {
+      setLocalItems(getBag());
+      void loadServerCart();
+    };
+    sync();
+    return subscribeAtelier(sync);
   }, [forceEmpty]);
+
+  const items = useMemo<UnifiedBagItem[]>(() => {
+    const seenIds = new Set(serverItems.map((s) => s.id));
+    const seenSlugs = new Set(serverItems.map((s) => s.slug.toLowerCase()));
+    const merged: UnifiedBagItem[] = [...serverItems];
+    for (const loc of localItems) {
+      if (seenIds.has(loc.id) || seenSlugs.has(loc.slug.toLowerCase())) continue;
+      merged.push(loc);
+    }
+    return merged;
+  }, [serverItems, localItems]);
+
+  async function handleUpdateQty(item: UnifiedBagItem, nextQty: number): Promise<void> {
+    if (item.serverCartToken && item.serverItemId) {
+      if (nextQty <= 0) {
+        await handleRemoveItem(item);
+        return;
+      }
+      await fetch(
+        `/api/v1/carts/${encodeURIComponent(item.serverCartToken)}/items/${encodeURIComponent(item.serverItemId)}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quantity: nextQty }),
+        },
+      ).catch(() => undefined);
+      await loadServerCart();
+    }
+    updateBagQuantity(item.id, nextQty);
+  }
+
+  async function handleRemoveItem(item: UnifiedBagItem): Promise<void> {
+    if (item.serverCartToken && item.serverItemId) {
+      await fetch(
+        `/api/v1/carts/${encodeURIComponent(item.serverCartToken)}/items/${encodeURIComponent(item.serverItemId)}`,
+        { method: 'DELETE' },
+      ).catch(() => undefined);
+      await loadServerCart();
+    }
+    removeFromBag(item.id);
+  }
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.priceUsd * (item.quantity ?? 1), 0),
@@ -41,7 +146,6 @@ export function BagView({
     () => items.reduce((sum, item) => sum + (item.quantity ?? 1), 0),
     [items],
   );
-  const duty = subtotal * 0.05;
 
   if (items.length === 0) {
     return (
@@ -63,7 +167,7 @@ export function BagView({
         {items.map((item) => {
           const qty = item.quantity ?? 1;
           return (
-            <li key={item.id} className="lx-bag__line">
+            <li key={item.serverItemId ?? item.id} className="lx-bag__line">
               <Link href={`/product/${item.slug}`} className="lx-bag__thumb">
                 <img src={itemImage(item)} alt={item.title} />
               </Link>
@@ -78,7 +182,7 @@ export function BagView({
                     type="button"
                     className="lx-text-btn"
                     aria-label={`Decrease quantity for ${item.title}`}
-                    onClick={() => updateBagQuantity(item.id, qty - 1)}
+                    onClick={() => void handleUpdateQty(item, qty - 1)}
                   >
                     −
                   </button>
@@ -87,12 +191,12 @@ export function BagView({
                     type="button"
                     className="lx-text-btn"
                     aria-label={`Increase quantity for ${item.title}`}
-                    onClick={() => updateBagQuantity(item.id, qty + 1)}
+                    onClick={() => void handleUpdateQty(item, qty + 1)}
                   >
                     +
                   </button>
                   <span aria-hidden="true">·</span>
-                  <button type="button" className="lx-text-btn" onClick={() => removeFromBag(item.id)}>
+                  <button type="button" className="lx-text-btn" onClick={() => void handleRemoveItem(item)}>
                     Remove
                   </button>
                 </div>
@@ -112,20 +216,16 @@ export function BagView({
             <dd>{formatMoney(subtotal, currency, rates)}</dd>
           </div>
           <div>
-            <dt>Estimated duty (5%)</dt>
-            <dd>{formatMoney(duty, currency, rates)}</dd>
-          </div>
-          <div>
             <dt>Insured transit</dt>
             <dd>Complimentary</dd>
           </div>
           <div className="is-total">
             <dt>To reserve</dt>
-            <dd>{formatMoney(subtotal + duty, currency, rates)}</dd>
+            <dd>{formatMoney(subtotal, currency, rates)}</dd>
           </div>
         </dl>
         <p className="lx-summary__note">
-          Prices follow your selected currency ({currency}). Final settlement is confirmed by concierge.
+          Prices follow your selected currency ({currency}). Final settlement and promotional codes are confirmed at checkout.
         </p>
         <Link href="/checkout/order-summary" className="lx-btn lx-btn--solid lx-btn--block">Secure checkout</Link>
         <Link href="/contact" className="lx-btn lx-btn--ghost lx-btn--block">Request concierge reservation</Link>

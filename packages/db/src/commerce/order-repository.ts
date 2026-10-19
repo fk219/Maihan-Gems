@@ -19,6 +19,7 @@ import {
   type PlaceOrderInput,
 } from '@maihan/contracts';
 import {
+  comparePriceMatch,
   formatOrderNumber,
   transitionOrder,
   type OrderEvent,
@@ -27,6 +28,21 @@ import {
 } from '@maihan/domain';
 import { getCartByToken } from './cart-repository.js';
 import { getCheckoutSession, saveCheckoutSession } from './checkout-session-repository.js';
+
+async function runInTransaction<T>(
+  db: CatalogDatabase,
+  work: (tx: CatalogDatabase) => Promise<T>,
+): Promise<T> {
+  const maybeTx = (
+    db as unknown as {
+      transaction?: <R>(fn: (tx: CatalogDatabase) => Promise<R>) => Promise<R>;
+    }
+  ).transaction;
+  if (typeof maybeTx === 'function') {
+    return (await maybeTx.call(db, work)) as T;
+  }
+  return work(db);
+}
 
 interface RawOrderRow {
   id: string;
@@ -179,21 +195,22 @@ export async function placeOrder(
   db: CatalogDatabase,
   input: PlaceOrderInput,
 ): Promise<OrderDto> {
+  return runInTransaction(db, async (tx) => {
   // Idempotency replay check
   if (input.idempotency_key) {
-    const existingRes = await db.execute(sql`
+    const existingRes = await tx.execute(sql`
       SELECT id FROM orders WHERE idempotency_key = ${input.idempotency_key} LIMIT 1
     `);
     if (existingRes.rows.length > 0) {
       const existingId = (existingRes.rows[0] as { id: string }).id;
-      return getOrderById(db, existingId);
+      return getOrderById(tx, existingId);
     }
   }
 
-  const session = await getCheckoutSession(db, input.checkout_session_id);
+  const session = await getCheckoutSession(tx, input.checkout_session_id);
 
   if (session.completed_order_id) {
-    return getOrderById(db, session.completed_order_id);
+    return getOrderById(tx, session.completed_order_id);
   }
 
   if (!session.shipping_address) {
@@ -204,21 +221,36 @@ export async function placeOrder(
     throw new ContractError('UNPROCESSABLE', 'Payment intent is required to place an order.');
   }
 
-  const cart = await getCartByToken(db, session.cart_token);
+  const cart = await getCartByToken(tx, session.cart_token);
   if (!cart.items || cart.items.length === 0) {
     throw new ContractError('UNPROCESSABLE', 'Cannot place an order for an empty cart.');
   }
 
+  // Verify cart subtotal has not diverged from the frozen checkout session subtotal
+  if (!comparePriceMatch(cart.pricing_snapshot.subtotal, session.pricing_snapshot.subtotal)) {
+    throw new ContractError(
+      'PRICE_CHANGED',
+      'Cart items or prices changed after the checkout session was opened. Please review the updated total.',
+      [
+        {
+          field: 'subtotal',
+          expected: session.pricing_snapshot.subtotal,
+          authoritative: cart.pricing_snapshot.subtotal,
+        },
+      ],
+    );
+  }
+
   const currentYear = new Date().getFullYear();
   // Generate order number in MG-YYYY-NNNNNN structure
-  const countRes = await db.execute(sql`
+  const countRes = await tx.execute(sql`
     SELECT count(*)::int AS cnt FROM orders WHERE order_number LIKE ${'MG-' + currentYear + '-%'}
   `);
   const currentCount = Number((countRes.rows[0] as { cnt: number }).cnt ?? 0);
   let orderNumber = formatOrderNumber(currentYear, currentCount + 1);
 
   // Check collision and increment if necessary
-  const collisionRes = await db.execute(sql`
+  const collisionRes = await tx.execute(sql`
     SELECT id FROM orders WHERE order_number = ${orderNumber} LIMIT 1
   `);
   if (collisionRes.rows.length > 0) {
@@ -229,7 +261,7 @@ export async function placeOrder(
   const email = session.email ?? 'guest@maihan.test';
 
   // Insert into orders
-  const insertOrderRes = await db.execute(sql`
+  const insertOrderRes = await tx.execute(sql`
     INSERT INTO orders (
       order_number,
       customer_id,
@@ -275,7 +307,7 @@ export async function placeOrder(
   // Insert order_items with immutable gemstone, configuration, and document snapshots
   for (const item of cart.items) {
     // Query gemstone specs and product stock for stone snapshot & concurrency check
-    const gemRes = await db.execute(sql`
+    const gemRes = await tx.execute(sql`
       SELECT
         g.id,
         g.gem_ref,
@@ -318,7 +350,7 @@ export async function placeOrder(
         }
         const remainingQty = currentQty - item.quantity;
         const nextExtra = { ...prodExtra, inventory_quantity: remainingQty };
-        const decRes = await db.execute(sql`
+        const decRes = await tx.execute(sql`
           UPDATE products
           SET availability = ${remainingQty > 0},
               state = CASE WHEN ${remainingQty <= 0} THEN 'SOLD_OUT'::product_state ELSE state END,
@@ -336,7 +368,7 @@ export async function placeOrder(
     }
 
     // Query certificate references for document snapshot
-    const certRes = await db.execute(sql`
+    const certRes = await tx.execute(sql`
       SELECT
         c.certificate_number,
         c.lab_name AS lab,
@@ -357,7 +389,7 @@ export async function placeOrder(
       certRes.rows.length > 0 && certRes.rows[0] ? (certRes.rows[0] as Record<string, unknown>) : null;
 
     const configurationRes = item.configuration_id
-      ? await db.execute(sql`
+      ? await tx.execute(sql`
           SELECT
             c.id AS configuration_id,
             c.configuration_hash,
@@ -405,7 +437,7 @@ export async function placeOrder(
         ? { configuration_id: item.configuration_id, options: item.options ?? {} }
         : item.options ?? null;
 
-    await db.execute(sql`
+    await tx.execute(sql`
       INSERT INTO order_items (
         order_id,
         product_id,
@@ -437,7 +469,7 @@ export async function placeOrder(
   }
 
   // Append to order_events state timeline
-  await db.execute(sql`
+  await tx.execute(sql`
     INSERT INTO order_events (
       order_id,
       from_state,
@@ -458,7 +490,7 @@ export async function placeOrder(
   `);
 
   // Write immutable audit_log row
-  await db.execute(sql`
+  await tx.execute(sql`
     INSERT INTO audit_logs (
       actor_type,
       actor_id,
@@ -482,8 +514,34 @@ export async function placeOrder(
     )
   `);
 
+  // Emit OrderCreated outbox event in the same transaction (ADR-020)
+  await tx.execute(sql`
+    INSERT INTO domain_events (
+      event_id,
+      event_type,
+      aggregate_type,
+      aggregate_id,
+      aggregate_version,
+      payload,
+      status
+    ) VALUES (
+      gen_random_uuid(),
+      'OrderCreated',
+      'order',
+      ${orderId},
+      1,
+      ${JSON.stringify({
+        order_id: orderId,
+        order_number: orderNumber,
+        grand_total: session.pricing_snapshot.grand_total,
+        currency: session.pricing_snapshot.currency,
+      })}::jsonb,
+      'PENDING'
+    )
+  `);
+
   // Convert cart to CONVERTED
-  await db.execute(sql`
+  await tx.execute(sql`
     UPDATE carts
     SET state = 'CONVERTED',
         converted_order_id = ${orderId},
@@ -497,9 +555,10 @@ export async function placeOrder(
     current_step: 'COMPLETED' as const,
     completed_order_id: orderId,
   };
-  await saveCheckoutSession(db, completedSession);
+  await saveCheckoutSession(tx, completedSession);
 
-  return getOrderById(db, orderId);
+  return getOrderById(tx, orderId);
+  });
 }
 
 export interface OrderEventRow {
@@ -553,7 +612,8 @@ export async function transitionOrderState(
   event: OrderEvent,
   actor: { type: string; id?: string },
 ): Promise<{ order: OrderDto; transition: OrderTransitionResult }> {
-  const orderRes = await db.execute(sql`
+  return runInTransaction(db, async (tx) => {
+  const orderRes = await tx.execute(sql`
     SELECT id, state::text AS state, version
     FROM orders
     WHERE id = ${orderId} OR order_number = ${orderId}
@@ -582,13 +642,40 @@ export async function transitionOrderState(
     updateFields.push(sql`cancel_reason = ${transition.reason}`);
   }
 
-  await db.execute(sql`
+  const updRes = await tx.execute(sql`
     UPDATE orders
     SET ${sql.join(updateFields, sql`, `)}
-    WHERE id = ${rawOrder.id}
+    WHERE id = ${rawOrder.id} AND version = ${rawOrder.version}
+    RETURNING id
   `);
+  if (updRes.rows.length === 0) {
+    throw new ContractError('IDEMPOTENCY_CONFLICT', 'Concurrent order state modification detected.');
+  }
 
-  await db.execute(sql`
+  // Restore product availability and inventory quantity when an order is cancelled
+  if (transition.nextState === 'CANCELLED') {
+    await tx.execute(sql`
+      UPDATE products p
+      SET availability = true,
+          state = CASE WHEN p.state = 'SOLD_OUT' THEN 'ACTIVE'::product_state ELSE p.state END,
+          structured_extra = CASE
+            WHEN p.structured_extra ? 'inventory_quantity'
+            THEN jsonb_set(
+              p.structured_extra,
+              '{inventory_quantity}',
+              to_jsonb(COALESCE((p.structured_extra->>'inventory_quantity')::int, 0) + oi.quantity)
+            )
+            ELSE p.structured_extra
+          END,
+          updated_at = now()
+      FROM order_items oi
+      WHERE oi.order_id = ${rawOrder.id}
+        AND oi.product_id = p.id
+        AND oi.configuration_id IS NULL
+    `);
+  }
+
+  await tx.execute(sql`
     INSERT INTO order_events (
       order_id,
       from_state,
@@ -608,7 +695,7 @@ export async function transitionOrderState(
     )
   `);
 
-  await db.execute(sql`
+  await tx.execute(sql`
     INSERT INTO audit_logs (
       actor_type,
       actor_id,
@@ -630,6 +717,7 @@ export async function transitionOrderState(
     )
   `);
 
-  const updatedOrder = await getOrderById(db, rawOrder.id);
+  const updatedOrder = await getOrderById(tx, rawOrder.id);
   return { order: updatedOrder, transition };
+  });
 }

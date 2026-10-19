@@ -48,6 +48,7 @@ import { runPricesObservations } from './prices-observations.js';
 import { runAssets } from './assets.js';
 import { runCertificates } from './certificates.js';
 import { runCmsRedirects } from './cms-redirects.js';
+import { runKnowledgeEmbeddings } from './knowledge-embeddings.js';
 import { runCompatibility } from './compatibility.js';
 import { loadTokenizedSpecifications } from './tokenize-stones.js';
 import { figuresOf } from './canonical-catalog.js';
@@ -371,6 +372,7 @@ const expectedFamily = CORPUS_EXPECTATIONS.families;
   await runAssets(await batchContext('assets'), { corpus });
   await runCertificates(await batchContext('certificates'), { corpus });
   await runCmsRedirects(await batchContext('cms-redirects'), { corpus });
+  await runKnowledgeEmbeddings(await batchContext('knowledge-embeddings'));
   await runCompatibility(await batchContext('compatibility'), { corpus });
   const after = await digest();
   gate('V17', 'second run of every stage changes zero rows', before === after,

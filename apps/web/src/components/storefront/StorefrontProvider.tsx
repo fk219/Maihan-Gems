@@ -48,8 +48,22 @@ export function StorefrontProvider({
       setCurrencyState(detectCurrencyFromLocale());
     }
     const sync = () => {
-      setBagCount(getBag().length);
+      const localBag = getBag();
+      setBagCount(localBag.length);
       setFavCount(getFavs().length);
+      const token = typeof window !== 'undefined' ? window.localStorage.getItem('maihan_cart_token') : null;
+      if (token && typeof fetch === 'function') {
+        void fetch(`/api/v1/carts/${encodeURIComponent(token)}`)
+          .then((r) => (r.ok ? r.json() : null))
+          .then((body: { data?: { state?: string; items?: Array<{ product_id: string }> } } | null) => {
+            if (body?.data?.state === 'ACTIVE' && Array.isArray(body.data.items)) {
+              const serverIds = new Set(body.data.items.map((i) => i.product_id));
+              const extraLocal = localBag.filter((l) => !serverIds.has(l.id)).length;
+              setBagCount(body.data.items.length + extraLocal);
+            }
+          })
+          .catch(() => undefined);
+      }
     };
     sync();
     return subscribeAtelier(sync);

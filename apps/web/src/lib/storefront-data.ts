@@ -336,41 +336,75 @@ async function queryLockedActiveProducts(filters: ProductListFilters = {}): Prom
   return res.rows.map((row) => mapRow(row as Record<string, unknown>));
 }
 
+async function queryInactiveProductKeys(): Promise<{ skus: Set<string>; slugs: Set<string> }> {
+  try {
+    const res = await pool.query<{ sku: string | null; slug: string | null }>(`
+      SELECT upper(COALESCE(source_sku, source_sku_derived, structured_extra->>'sku')) AS sku,
+             lower(slug) AS slug
+      FROM products
+      WHERE state <> 'ACTIVE' OR availability = false OR deleted_at IS NOT NULL
+    `);
+    const skus = new Set<string>();
+    const slugs = new Set<string>();
+    for (const r of res.rows) {
+      if (r.sku) skus.add(r.sku.toUpperCase());
+      if (r.slug) slugs.add(r.slug.toLowerCase());
+    }
+    return { skus, slugs };
+  } catch {
+    return { skus: new Set(), slugs: new Set() };
+  }
+}
+
 export async function listProducts(filters: ProductListFilters = {}): Promise<StorefrontCard[]> {
   const limit = filters.limit ?? 24;
-  const fromNgc = ngcCards(ngcListFilters({ ...filters, limit: 500 }));
-  const fromDb = await withCatalogue([] as StorefrontCard[], async () => {
-    try {
-      return await queryLockedActiveProducts(filters);
-    } catch {
-      const clauses = [`p.status = 'active'`, `p.visibility = 'public'`];
-      const params: unknown[] = [];
-      if (filters.kind) clauses.push(`p.kind = ${push(params, filters.kind)}`);
-      if (filters.stoneType) clauses.push(`gd.stone_type = ${push(params, filters.stoneType)}`);
-      if (filters.quantityType) clauses.push(`gd.quantity_type = ${push(params, filters.quantityType)}`);
-      if (filters.jewelryType) clauses.push(`jd.jewelry_type = ${push(params, filters.jewelryType)}`);
-      if (filters.settingFor) clauses.push(`sd.setting_for = ${push(params, filters.settingFor)}`);
-      if (filters.settingForIn?.length) {
-        clauses.push(`sd.setting_for = ANY(${push(params, filters.settingForIn)}::text[])`);
-      }
-      if (filters.shape) clauses.push(`gd.shape ILIKE ${push(params, `%${filters.shape.replace(/_/g, ' ')}%`)}`);
-      if (filters.origin) {
-        const a = push(params, `%${filters.origin}%`);
-        const b = push(params, `%${filters.origin}%`);
-        clauses.push(`(gd.origin_country ILIKE ${a} OR gd.origin_region ILIKE ${b})`);
-      }
-      if (filters.treatment) clauses.push(`gd.treatment_status ILIKE ${push(params, `%${filters.treatment}%`)}`);
-      if (filters.minCarat !== undefined) clauses.push(`gd.carat_total >= ${push(params, filters.minCarat)}`);
-      if (filters.maxCarat !== undefined) clauses.push(`gd.carat_total <= ${push(params, filters.maxCarat)}`);
-      if (filters.minPriceUsd !== undefined) clauses.push(`pp.amount >= ${push(params, filters.minPriceUsd)}`);
-      if (filters.maxPriceUsd !== undefined) clauses.push(`pp.amount <= ${push(params, filters.maxPriceUsd)}`);
-      if (filters.titleContains) clauses.push(`p.title ILIKE ${push(params, `%${filters.titleContains}%`)}`);
+  const fromNgcRaw = ngcCards(ngcListFilters({ ...filters, limit: 500 }));
+  const { rows: fromDb, inactive } = await withCatalogue(
+    { rows: [] as StorefrontCard[], inactive: { skus: new Set<string>(), slugs: new Set<string>() } },
+    async () => {
+      try {
+        const [activeRows, inactiveKeys] = await Promise.all([
+          queryLockedActiveProducts(filters),
+          queryInactiveProductKeys(),
+        ]);
+        return { rows: activeRows, inactive: inactiveKeys };
+      } catch {
+        const clauses = [`p.status = 'active'`, `p.visibility = 'public'`];
+        const params: unknown[] = [];
+        if (filters.kind) clauses.push(`p.kind = ${push(params, filters.kind)}`);
+        if (filters.stoneType) clauses.push(`gd.stone_type = ${push(params, filters.stoneType)}`);
+        if (filters.quantityType) clauses.push(`gd.quantity_type = ${push(params, filters.quantityType)}`);
+        if (filters.jewelryType) clauses.push(`jd.jewelry_type = ${push(params, filters.jewelryType)}`);
+        if (filters.settingFor) clauses.push(`sd.setting_for = ${push(params, filters.settingFor)}`);
+        if (filters.settingForIn?.length) {
+          clauses.push(`sd.setting_for = ANY(${push(params, filters.settingForIn)}::text[])`);
+        }
+        if (filters.shape) clauses.push(`gd.shape ILIKE ${push(params, `%${filters.shape.replace(/_/g, ' ')}%`)}`);
+        if (filters.origin) {
+          const a = push(params, `%${filters.origin}%`);
+          const b = push(params, `%${filters.origin}%`);
+          clauses.push(`(gd.origin_country ILIKE ${a} OR gd.origin_region ILIKE ${b})`);
+        }
+        if (filters.treatment) clauses.push(`gd.treatment_status ILIKE ${push(params, `%${filters.treatment}%`)}`);
+        if (filters.minCarat !== undefined) clauses.push(`gd.carat_total >= ${push(params, filters.minCarat)}`);
+        if (filters.maxCarat !== undefined) clauses.push(`gd.carat_total <= ${push(params, filters.maxCarat)}`);
+        if (filters.minPriceUsd !== undefined) clauses.push(`pp.amount >= ${push(params, filters.minPriceUsd)}`);
+        if (filters.maxPriceUsd !== undefined) clauses.push(`pp.amount <= ${push(params, filters.maxPriceUsd)}`);
+        if (filters.titleContains) clauses.push(`p.title ILIKE ${push(params, `%${filters.titleContains}%`)}`);
 
-      const sql = `${SELECT} WHERE ${clauses.join(' AND ')} ORDER BY pp.amount DESC NULLS LAST, p.created_at LIMIT ${push(params, limit)}`;
-      const result = await pool.query(sql, params);
-      return result.rows.map((row) => mapRow(row as Record<string, unknown>));
-    }
-  });
+        const sql = `${SELECT} WHERE ${clauses.join(' AND ')} ORDER BY pp.amount DESC NULLS LAST, p.created_at LIMIT ${push(params, limit)}`;
+        const result = await pool.query(sql, params);
+        return {
+          rows: result.rows.map((row) => mapRow(row as Record<string, unknown>)),
+          inactive: { skus: new Set<string>(), slugs: new Set<string>() },
+        };
+      }
+    },
+  );
+  // Exclude any NGC static card that has been marked SOLD_OUT, DRAFT, or ARCHIVED in Postgres
+  const fromNgc = fromNgcRaw.filter(
+    (c) => !inactive.skus.has(c.sku.toUpperCase()) && !inactive.slugs.has(c.slug.toLowerCase()),
+  );
   if (fromDb.length > 0 && fromNgc.length > 0) return mergeCards(fromDb, fromNgc, limit);
   if (fromNgc.length > 0) return fromNgc.slice(0, limit);
   return fromDb;
@@ -390,23 +424,35 @@ export async function getFeaturedHome(): Promise<{
 }
 
 export async function getProductBySlug(slug: string): Promise<StorefrontCard | null> {
-  const fromDb = await withCatalogue(null, async () => {
-    try {
-      const lockedRes = await pool.query(
-        `${LOCKED_SELECT} WHERE p.slug = $1 AND p.state = 'ACTIVE' AND p.deleted_at IS NULL LIMIT 1`,
-        [slug],
-      );
-      if (lockedRes.rows[0]) {
-        return mapRow(lockedRes.rows[0] as Record<string, unknown>);
+  const dbOutcome = await withCatalogue<{ card: StorefrontCard | null; isInactiveInDb: boolean }>(
+    { card: null, isInactiveInDb: false },
+    async () => {
+      try {
+        const anyRes = await pool.query<{ state: string; availability: boolean; deleted_at: unknown }>(
+          `SELECT state::text AS state, availability, deleted_at FROM products WHERE (lower(slug) = lower($1) OR upper(source_sku) = upper($1)) LIMIT 1`,
+          [slug],
+        );
+        const existing = anyRes.rows[0];
+        if (existing && (existing.state !== 'ACTIVE' || !existing.availability || existing.deleted_at !== null)) {
+          return { card: null, isInactiveInDb: true };
+        }
+        const lockedRes = await pool.query(
+          `${LOCKED_SELECT} WHERE (lower(p.slug) = lower($1) OR upper(p.source_sku) = upper($1)) AND p.state = 'ACTIVE' AND p.availability = true AND p.deleted_at IS NULL LIMIT 1`,
+          [slug],
+        );
+        if (lockedRes.rows[0]) {
+          return { card: mapRow(lockedRes.rows[0] as Record<string, unknown>), isInactiveInDb: false };
+        }
+      } catch {
+        const result = await pool.query(`${SELECT} WHERE p.slug = $1 AND p.status = 'active' LIMIT 1`, [slug]);
+        const row = result.rows[0];
+        if (row) return { card: mapRow(row as Record<string, unknown>), isInactiveInDb: false };
       }
-    } catch {
-      const result = await pool.query(`${SELECT} WHERE p.slug = $1 AND p.status = 'active' LIMIT 1`, [slug]);
-      const row = result.rows[0];
-      if (row) return mapRow(row as Record<string, unknown>);
-    }
-    return null;
-  });
-  if (fromDb) return fromDb;
+      return { card: null, isInactiveInDb: false };
+    },
+  );
+  if (dbOutcome.isInactiveInDb) return null;
+  if (dbOutcome.card) return dbOutcome.card;
   const ngc = findNgcProduct(slug);
   if (ngc) return toStorefrontCard(ngc);
   return null;

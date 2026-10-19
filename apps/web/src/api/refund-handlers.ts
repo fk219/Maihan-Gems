@@ -74,13 +74,29 @@ export const REFUND_HANDLERS: Record<string, RouteHandler> = {
   async requestRefundHandler(ctx) {
     const db = getDb(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
-    const actor = await resolveRequestActor(ctx);
-    const headerCustomerId = ctx.request?.headers.get('x-customer-id');
-    if (actor?.role === 'CUSTOMER' || headerCustomerId) {
+    const sessionToken = extractSessionToken(ctx.request);
+    const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+    if (sessionToken && !actor) {
+      throw new ContractError('UNAUTHORIZED', 'Valid session required.');
+    }
+    if (actor?.role === 'VENDOR') {
+      throw new ContractError('FORBIDDEN', 'Vendors cannot request customer order refunds.');
+    }
+    const headerCustomerId = ctx.request?.headers.get('x-customer-id')?.trim() || null;
+    if (actor && headerCustomerId && headerCustomerId !== actor.customer_id) {
+      throw new ContractError('FORBIDDEN', 'You do not have permission to request a refund for another customer’s order.');
+    }
+    const isAdmin = actor && (ADMIN_ROLES as readonly string[]).includes(actor.role);
+    if (!isAdmin) {
       const order = await getOrderById(db, orderId);
       const effectiveCustomerId = actor?.customer_id ?? headerCustomerId;
-      if (order.customer_id && order.customer_id !== effectiveCustomerId) {
-        throw new ContractError('FORBIDDEN', 'You do not have permission to request a refund for another customer’s order.');
+      if (order.customer_id) {
+        if (effectiveCustomerId && order.customer_id !== effectiveCustomerId) {
+          throw new ContractError('FORBIDDEN', 'You do not have permission to request a refund for another customer’s order.');
+        }
+        if (!effectiveCustomerId && process.env['MAIHAN_ENV'] === 'production') {
+          throw new ContractError('UNAUTHORIZED', 'Authentication required to request a refund.');
+        }
       }
     }
     const body = await parseBody(ctx.request);
@@ -100,13 +116,29 @@ export const REFUND_HANDLERS: Record<string, RouteHandler> = {
   async listOrderRefundsHandler(ctx) {
     const db = getDb(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
-    const actor = await resolveRequestActor(ctx);
-    const headerCustomerId = ctx.request?.headers.get('x-customer-id');
-    if (actor?.role === 'CUSTOMER' || headerCustomerId) {
+    const sessionToken = extractSessionToken(ctx.request);
+    const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+    if (sessionToken && !actor) {
+      throw new ContractError('UNAUTHORIZED', 'Valid session required.');
+    }
+    if (actor?.role === 'VENDOR') {
+      throw new ContractError('FORBIDDEN', 'Vendors cannot view customer order refunds.');
+    }
+    const headerCustomerId = ctx.request?.headers.get('x-customer-id')?.trim() || null;
+    if (actor && headerCustomerId && headerCustomerId !== actor.customer_id) {
+      throw new ContractError('FORBIDDEN', 'You do not have permission to view refunds for another customer’s order.');
+    }
+    const isAdmin = actor && (ADMIN_ROLES as readonly string[]).includes(actor.role);
+    if (!isAdmin) {
       const order = await getOrderById(db, orderId);
       const effectiveCustomerId = actor?.customer_id ?? headerCustomerId;
-      if (order.customer_id && order.customer_id !== effectiveCustomerId) {
-        throw new ContractError('FORBIDDEN', 'You do not have permission to view refunds for another customer’s order.');
+      if (order.customer_id) {
+        if (effectiveCustomerId && order.customer_id !== effectiveCustomerId) {
+          throw new ContractError('FORBIDDEN', 'You do not have permission to view refunds for another customer’s order.');
+        }
+        if (!effectiveCustomerId && process.env['MAIHAN_ENV'] === 'production') {
+          throw new ContractError('UNAUTHORIZED', 'Authentication required to view order refunds.');
+        }
       }
     }
     const refunds = await getOrderRefunds(db, orderId);

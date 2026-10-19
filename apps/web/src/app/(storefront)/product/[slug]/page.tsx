@@ -31,16 +31,21 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const product = await getProductBySlug(slug);
+  if (!product) notFound();
+
   const ngc = findNgcProduct(slug);
   if (ngc) {
     const related = ngcCards({ kind: ngc.kind, stoneSlug: ngc.stoneType?.toLowerCase().replace(/[^a-z0-9]+/g, '-'), limit: 5 }).filter(
       (row) => row.sku !== ngc.id,
     );
-    return <ProductStudio product={ngc} related={related} />;
+    const mergedNgc = {
+      ...ngc,
+      title: product.title || ngc.title,
+      priceUsd: product.priceUsd || ngc.priceUsd,
+    };
+    return <ProductStudio product={mergedNgc} related={related} />;
   }
-
-  const product = await getProductBySlug(slug);
-  if (!product) notFound();
 
   const image = productImage({
     kind: product.kind,

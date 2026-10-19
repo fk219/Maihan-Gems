@@ -21,6 +21,7 @@ import {
   getPublicCertificatesForGemstone,
 } from '@maihan/db';
 import {
+  ADMIN_ROLES,
   runCertificateCrossChecks,
   canAutomateCrossCheckTransition,
   canPromoteToVerified,
@@ -28,8 +29,34 @@ import {
   type StructuredGemstoneData,
   type VerificationStatus,
 } from '@maihan/domain';
+import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
+
+async function assertCertificateReviewer(ctx: RouteContext): Promise<string | undefined> {
+  const sessionToken = extractSessionToken(ctx.request);
+  const headerCustomerId = ctx.request?.headers.get('x-customer-id');
+  if (headerCustomerId && !sessionToken) {
+    throw new ContractError('FORBIDDEN', 'Customer accounts cannot run OCR or approve certificates.');
+  }
+  if (sessionToken) {
+    const actor = await resolveRequestActor(ctx);
+    if (!actor) {
+      throw new ContractError('UNAUTHORIZED', 'Valid session required.');
+    }
+    if (!(ADMIN_ROLES as readonly string[]).includes(actor.role)) {
+      throw new ContractError('FORBIDDEN', 'Administrative role required for certificate review operations.');
+    }
+    if (actor.role !== 'ADMIN_SUPER' && actor.role !== 'TRUST_REVIEWER' && actor.role !== 'CATALOG_MANAGER') {
+      throw new ContractError('FORBIDDEN', 'Role TRUST_REVIEWER or ADMIN_SUPER is required for certificate operations.');
+    }
+    return actor.customer_id;
+  }
+  if (process.env['MAIHAN_ENV'] === 'production') {
+    throw new ContractError('UNAUTHORIZED', 'Authentication required for certificate operations.');
+  }
+  return undefined;
+}
 
 function getDb(ctx: RouteContext): any {
   const db = ctx.db || (ctx.service as any)?.port?.db;
@@ -101,17 +128,32 @@ export const getCertificateHandler: RouteHandler = async (ctx) => {
     throw new ContractError('NOT_FOUND', `Certificate ${certId} not found.`);
   }
 
+  // INV-07: Non-VERIFIED certificate fields must never render as verified truth to public callers
+  const sessionToken = extractSessionToken(ctx.request);
+  const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+  const isPrivileged = actor && (ADMIN_ROLES as readonly string[]).includes(actor.role);
+  const sanitizedCert =
+    !isPrivileged && cert.verification_status !== 'VERIFIED'
+      ? {
+          ...cert,
+          lab_name: null,
+          certificate_number: null,
+          verification_notice: 'On file, pending gemmological verification (INV-07).',
+        }
+      : cert;
+
   return {
     status: 200,
     body: {
       data: {
-        certificate: cert,
+        certificate: sanitizedCert,
       },
     },
   };
 };
 
 export const processOcrRunHandler: RouteHandler = async (ctx) => {
+  await assertCertificateReviewer(ctx);
   const db = getDb(ctx);
   const certId = requireIdentifier(ctx.params['certificateId'], 'certificateId');
   const rawBody = (await parseBody(ctx.request)) as Record<string, any>;
@@ -198,11 +240,12 @@ export const processOcrRunHandler: RouteHandler = async (ctx) => {
 };
 
 export const reviewCertificateHandler: RouteHandler = async (ctx) => {
+  const actorReviewerId = await assertCertificateReviewer(ctx);
   const db = getDb(ctx);
   const certId = requireIdentifier(ctx.params['certificateId'], 'certificateId');
   const rawBody = (await parseBody(ctx.request)) as Record<string, any>;
 
-  const reviewerId = rawBody['reviewerId'];
+  const reviewerId = rawBody['reviewerId'] ?? actorReviewerId;
   const decision = rawBody['decision'] as 'APPROVE' | 'REJECT';
   const notes = rawBody['notes'] ?? null;
 

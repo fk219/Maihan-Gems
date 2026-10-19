@@ -35,8 +35,19 @@ function money(amount: string | number): string {
     : String(amount);
 }
 
+interface ProductAddon {
+  id: string;
+  addon_type: string;
+  code: string;
+  name: string;
+  price: string;
+  currency: string;
+}
+
 export function CheckoutConfirm({ sessionId }: { sessionId: string }) {
   const [session, setSession] = useState<CheckoutSession | null>(null);
+  const [addons, setAddons] = useState<ProductAddon[]>([]);
+  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,8 +55,15 @@ export function CheckoutConfirm({ sessionId }: { sessionId: string }) {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const res = await fetch(`/api/v1/checkout/sessions/${encodeURIComponent(sessionId)}`);
+      const [res, addonsRes] = await Promise.all([
+        fetch(`/api/v1/checkout/sessions/${encodeURIComponent(sessionId)}`),
+        fetch('/api/v1/addons').catch(() => null),
+      ]);
       if (cancelled) return;
+      if (addonsRes && addonsRes.ok) {
+        const addonsBody = (await addonsRes.json().catch(() => null)) as { data?: ProductAddon[] } | null;
+        if (Array.isArray(addonsBody?.data)) setAddons(addonsBody.data);
+      }
       if (!res.ok) {
         setLoadError('This checkout session could not be loaded.');
         return;
@@ -64,6 +82,10 @@ export function CheckoutConfirm({ sessionId }: { sessionId: string }) {
       cancelled = true;
     };
   }, [sessionId]);
+
+  function toggleAddon(id: string) {
+    setSelectedAddonIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
 
   async function place(): Promise<void> {
     if (!session) return;
@@ -95,6 +117,16 @@ export function CheckoutConfirm({ sessionId }: { sessionId: string }) {
       const body = (await orderRes.json()) as { data?: { id?: string } };
       const orderId = body.data?.id ?? '';
       if (!orderId) throw new Error('The order response was incomplete.');
+
+      // Attach any selected protection plan or financing add-ons as separate order lines
+      for (const addonId of selectedAddonIds) {
+        await fetch(`/api/v1/orders/${encodeURIComponent(orderId)}/addons`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ addon_id: addonId }),
+        }).catch(() => undefined);
+      }
+
       window.location.href = `/checkout/confirmation/${orderId}`;
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'The order could not be placed.');
@@ -126,6 +158,33 @@ export function CheckoutConfirm({ sessionId }: { sessionId: string }) {
         <div><dt>Tax</dt><dd>{money(session.pricing_snapshot.tax_total)}</dd></div>
         <div className="is-total"><dt>Total ({session.pricing_snapshot.currency})</dt><dd>{money(session.pricing_snapshot.grand_total)}</dd></div>
       </dl>
+      {addons.length > 0 ? (
+        <div style={{ margin: '1.25rem 0', paddingTop: '1rem', borderTop: '1px solid var(--hairline-border)' }}>
+          <p className="lx-kicker" style={{ marginBottom: '0.6rem' }}>Optional Protection &amp; Financing Add-Ons</p>
+          <div style={{ display: 'grid', gap: '0.5rem' }}>
+            {addons.map((addon) => {
+              const checked = selectedAddonIds.includes(addon.id);
+              return (
+                <label
+                  key={addon.id}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', fontSize: '0.88rem', cursor: 'pointer' }}
+                >
+                  <span>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleAddon(addon.id)}
+                      style={{ marginRight: '0.5rem' }}
+                    />
+                    {addon.name} <small style={{ color: 'var(--text-muted)' }}>({addon.addon_type})</small>
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-mono)' }}>+{money(addon.price)}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
       <p className="lx-account-note">
         Settlement state is confirmed by the payment provider webhook — this page shows the server-authoritative
         state only and never marks an order paid on its own.

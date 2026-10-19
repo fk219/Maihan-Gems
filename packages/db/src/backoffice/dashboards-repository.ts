@@ -374,18 +374,348 @@ export async function listBackOfficeAuditLogs(
   }));
 }
 
-/** CMS pages with their locking-workflow state (back-office read). */
+/** CMS pages with their locking-workflow state and head revision id (back-office read). */
 export async function listCmsPages(
   db: CatalogDatabase,
   limit = 100,
 ): Promise<Record<string, unknown>[]> {
   const res = await db.execute(sql`
-    SELECT id::text AS id, slug, title, page_kind::text AS page_kind,
-           status::text AS state, version, created_at::text AS created_at
-    FROM pages
-    WHERE deleted_at IS NULL
-    ORDER BY created_at DESC
+    SELECT p.id::text AS id, p.slug, p.title, p.page_kind::text AS page_kind,
+           p.status::text AS state, p.version, p.created_at::text AS created_at,
+           r.id::text AS head_revision_id,
+           COALESCE(prs.review_state, 'PENDING') AS review_state
+    FROM pages p
+    LEFT JOIN LATERAL (
+      SELECT id FROM page_revisions pr
+      WHERE pr.page_id = p.id
+      ORDER BY pr.revision_number DESC
+      LIMIT 1
+    ) r ON true
+    LEFT JOIN page_review_state prs ON prs.revision_id = r.id
+    WHERE p.deleted_at IS NULL
+    ORDER BY p.created_at DESC
     LIMIT ${limit}
   `);
   return res.rows as unknown as Record<string, unknown>[];
+}
+
+export interface BackOfficeCertificateRow {
+  id: string;
+  kind: string;
+  gemstone_id: string | null;
+  product_id: string | null;
+  lab_name: string | null;
+  certificate_number: string | null;
+  verification_status: string;
+  confidence_overall: string | null;
+  source_url: string | null;
+  anomaly_count: number;
+  created_at: string;
+}
+
+export async function listBackOfficeCertificates(
+  db: CatalogDatabase,
+  limit = 100,
+): Promise<BackOfficeCertificateRow[]> {
+  const res = await db.execute(sql`
+    SELECT c.id::text AS id, c.kind::text AS kind,
+           c.gemstone_id::text AS gemstone_id, c.product_id::text AS product_id,
+           c.lab_name, c.certificate_number,
+           c.verification_status::text AS verification_status,
+           c.confidence_overall::text AS confidence_overall,
+           c.source_url,
+           c.created_at::text AS created_at,
+           (SELECT count(*)::int FROM certificate_anomalies ca WHERE ca.certificate_id = c.id AND ca.resolved_at IS NULL) AS anomaly_count
+    FROM certificates c
+    WHERE c.deleted_at IS NULL
+    ORDER BY c.created_at DESC
+    LIMIT ${limit}
+  `);
+  return (res.rows as unknown as Record<string, unknown>[]).map((row) => ({
+    id: String(row['id']),
+    kind: String(row['kind']),
+    gemstone_id: row['gemstone_id'] ? String(row['gemstone_id']) : null,
+    product_id: row['product_id'] ? String(row['product_id']) : null,
+    lab_name: row['lab_name'] ? String(row['lab_name']) : null,
+    certificate_number: row['certificate_number'] ? String(row['certificate_number']) : null,
+    verification_status: String(row['verification_status']),
+    confidence_overall: row['confidence_overall'] ? String(row['confidence_overall']) : null,
+    source_url: row['source_url'] ? String(row['source_url']) : null,
+    anomaly_count: Number(row['anomaly_count'] ?? 0),
+    created_at: new Date(String(row['created_at'])).toISOString(),
+  }));
+}
+
+export interface BackOfficeMigrationOverview {
+  batches: Array<{
+    id: string;
+    batch_key: string;
+    status: string;
+    records_seen: number;
+    records_accepted: number;
+    records_quarantined: number;
+    started_at: string;
+    finished_at: string | null;
+    notes: string | null;
+  }>;
+  conflicts: Array<{
+    id: string;
+    conflict_kind: string;
+    natural_key: string;
+    source_url_a: string | null;
+    source_url_b: string | null;
+    resolution: string;
+    created_at: string;
+  }>;
+  derived_refs: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    source_sku: string | null;
+    source_sku_derived: string | null;
+    sku_evidence_status: string;
+    state: string;
+  }>;
+}
+
+export async function getBackOfficeMigrationOverview(
+  db: CatalogDatabase,
+): Promise<BackOfficeMigrationOverview> {
+  const [batchesRes, conflictsRes, derivedRes] = await Promise.all([
+    db.execute(sql`
+      SELECT id::text AS id, batch_key, status::text AS status,
+             COALESCE(records_seen, 0) AS records_seen,
+             COALESCE(records_accepted, 0) AS records_accepted,
+             COALESCE(records_quarantined, 0) AS records_quarantined,
+             COALESCE(started_at, created_at)::text AS started_at,
+             finished_at::text AS finished_at, notes
+      FROM import_batches
+      ORDER BY created_at DESC
+      LIMIT 50
+    `),
+    db.execute(sql`
+      SELECT id::text AS id, entity_kind AS conflict_kind, entity_ref AS natural_key,
+             source_url_a, source_url_b, COALESCE(resolution, 'UNRESOLVED') AS resolution,
+             created_at::text AS created_at
+      FROM staging_conflicts
+      ORDER BY created_at DESC
+      LIMIT 50
+    `),
+    db.execute(sql`
+      SELECT id::text AS id, slug, title, source_sku, source_sku_derived,
+             sku_evidence_status::text AS sku_evidence_status, state::text AS state
+      FROM products
+      WHERE deleted_at IS NULL
+        AND (source_sku_derived IS NOT NULL OR sku_evidence_status = 'INFERRED')
+      ORDER BY created_at DESC
+      LIMIT 100
+    `),
+  ]);
+
+  return {
+    batches: (batchesRes.rows as Array<Record<string, unknown>>).map((r) => ({
+      id: String(r['id']),
+      batch_key: String(r['batch_key']),
+      status: String(r['status']),
+      records_seen: Number(r['records_seen'] ?? 0),
+      records_accepted: Number(r['records_accepted'] ?? 0),
+      records_quarantined: Number(r['records_quarantined'] ?? 0),
+      started_at: new Date(String(r['started_at'])).toISOString(),
+      finished_at: r['finished_at'] ? new Date(String(r['finished_at'])).toISOString() : null,
+      notes: r['notes'] ? String(r['notes']) : null,
+    })),
+    conflicts: (conflictsRes.rows as Array<Record<string, unknown>>).map((r) => ({
+      id: String(r['id']),
+      conflict_kind: String(r['conflict_kind']),
+      natural_key: String(r['natural_key']),
+      source_url_a: r['source_url_a'] ? String(r['source_url_a']) : null,
+      source_url_b: r['source_url_b'] ? String(r['source_url_b']) : null,
+      resolution: String(r['resolution']),
+      created_at: new Date(String(r['created_at'])).toISOString(),
+    })),
+    derived_refs: (derivedRes.rows as Array<Record<string, unknown>>).map((r) => ({
+      id: String(r['id']),
+      slug: String(r['slug']),
+      title: String(r['title']),
+      source_sku: r['source_sku'] ? String(r['source_sku']) : null,
+      source_sku_derived: r['source_sku_derived'] ? String(r['source_sku_derived']) : null,
+      sku_evidence_status: String(r['sku_evidence_status']),
+      state: String(r['state']),
+    })),
+  };
+}
+
+/**
+ * INV-08 Derived Reference Approval (technical_design/06 §Admin & doc 23):
+ * Promotes or rejects an INFERRED derived SKU, writing an audit_logs row
+ * naming the approving human actor and emitting DerivedReferenceApproved.
+ */
+export async function decideDerivedReference(
+  db: CatalogDatabase,
+  input: {
+    productId: string;
+    decision: 'APPROVE' | 'REJECT';
+    actorSub: string;
+    actorRole: string;
+    reason?: string;
+  },
+): Promise<{ id: string; source_sku: string | null; sku_evidence_status: string; state: string }> {
+  const existingRes = await db.execute(sql`
+    SELECT id::text AS id, source_sku, source_sku_derived,
+           sku_evidence_status::text AS sku_evidence_status, state::text AS state
+    FROM products
+    WHERE id = ${input.productId}::uuid AND deleted_at IS NULL
+    LIMIT 1
+  `);
+  if (existingRes.rows.length === 0) {
+    throw new ContractError('NOT_FOUND', 'Product for derived reference not found.');
+  }
+  const existing = existingRes.rows[0] as {
+    id: string;
+    source_sku: string | null;
+    source_sku_derived: string | null;
+    sku_evidence_status: string;
+    state: string;
+  };
+
+  if (input.decision === 'REJECT') {
+    const upd = await db.execute(sql`
+      UPDATE products
+      SET state = 'ARCHIVED',
+          structured_extra = jsonb_set(COALESCE(structured_extra, '{}'::jsonb), '{review_state}', '"REJECTED"'::jsonb),
+          version = version + 1,
+          updated_at = now()
+      WHERE id = ${input.productId}::uuid
+      RETURNING id::text AS id, source_sku, sku_evidence_status::text AS sku_evidence_status, state::text AS state
+    `);
+    await db.execute(sql`
+      INSERT INTO audit_logs (actor_type, action, entity_type, entity_id, before_state, after_state, reason)
+      VALUES (
+        'ADMIN',
+        'DERIVED_REF_REJECTED',
+        'product',
+        ${input.productId}::uuid,
+        ${JSON.stringify(existing)}::jsonb,
+        ${JSON.stringify({ decision: 'REJECT', actor: input.actorSub, role: input.actorRole })}::jsonb,
+        ${input.reason ?? 'Rejected inferred derived reference'}
+      )
+    `);
+    return upd.rows[0] as { id: string; source_sku: string | null; sku_evidence_status: string; state: string };
+  }
+
+  const promotedSku = existing.source_sku ?? existing.source_sku_derived;
+  if (!promotedSku) {
+    throw new ContractError('UNPROCESSABLE', 'Product does not carry a derived SKU to approve.');
+  }
+
+  const upd = await db.execute(sql`
+    UPDATE products
+    SET source_sku = ${promotedSku},
+        sku_evidence_status = 'EXTRACTED',
+        structured_extra = jsonb_set(COALESCE(structured_extra, '{}'::jsonb), '{review_state}', '"APPROVED"'::jsonb),
+        version = version + 1,
+        updated_at = now()
+    WHERE id = ${input.productId}::uuid
+    RETURNING id::text AS id, source_sku, sku_evidence_status::text AS sku_evidence_status, state::text AS state
+  `);
+
+  await db.execute(sql`
+    INSERT INTO audit_logs (actor_type, action, entity_type, entity_id, before_state, after_state, reason)
+    VALUES (
+      'ADMIN',
+      'DERIVED_REF_APPROVED',
+      'product',
+      ${input.productId}::uuid,
+      ${JSON.stringify(existing)}::jsonb,
+      ${JSON.stringify({ source_sku: promotedSku, review_state: 'APPROVED', actor: input.actorSub, role: input.actorRole })}::jsonb,
+      ${input.reason ?? 'Approved derived SKU reference (INV-08)'}
+    )
+  `);
+
+  await db.execute(sql`
+    INSERT INTO domain_events (event_id, event_type, aggregate_type, aggregate_id, aggregate_version, payload, status)
+    VALUES (
+      gen_random_uuid(),
+      'DerivedReferenceApproved',
+      'product',
+      ${input.productId}::uuid,
+      1,
+      ${JSON.stringify({ product_id: input.productId, source_sku: promotedSku, approved_by: input.actorSub })}::jsonb,
+      'PENDING'
+    )
+  `);
+
+  return upd.rows[0] as { id: string; source_sku: string | null; sku_evidence_status: string; state: string };
+}
+
+export interface BackOfficeOperationsOverview {
+  outbox: {
+    pending: number;
+    published: number;
+    dead_letter: number;
+  };
+  recent_events: Array<{
+    id: string;
+    event_type: string;
+    aggregate_type: string;
+    aggregate_id: string;
+    status: string;
+    attempts: number;
+    occurred_at: string;
+    published_at: string | null;
+    last_error: string | null;
+  }>;
+  queues: Array<{
+    queue: string;
+    state: string;
+    count: number;
+  }>;
+}
+
+export async function getBackOfficeOperationsOverview(
+  db: CatalogDatabase,
+): Promise<BackOfficeOperationsOverview> {
+  const [pendingCount, publishedCount, deadCount, eventsRes, queuesRes] = await Promise.all([
+    countOne(db, sql`SELECT count(*)::text AS n FROM domain_events WHERE status = 'PENDING'`),
+    countOne(db, sql`SELECT count(*)::text AS n FROM domain_events WHERE status = 'PUBLISHED'`),
+    countOne(db, sql`SELECT count(*)::text AS n FROM domain_events WHERE status = 'DEAD_LETTER'`),
+    db.execute(sql`
+      SELECT id::text AS id, event_type, aggregate_type, aggregate_id::text AS aggregate_id,
+             status::text AS status, attempts, occurred_at::text AS occurred_at,
+             published_at::text AS published_at, last_error
+      FROM domain_events
+      ORDER BY occurred_at DESC
+      LIMIT 40
+    `),
+    db.execute(sql`
+      SELECT queue, state::text AS state, count(*)::int AS count
+      FROM jobs
+      GROUP BY queue, state
+      ORDER BY queue ASC, state ASC
+    `),
+  ]);
+
+  return {
+    outbox: {
+      pending: pendingCount,
+      published: publishedCount,
+      dead_letter: deadCount,
+    },
+    recent_events: (eventsRes.rows as Array<Record<string, unknown>>).map((r) => ({
+      id: String(r['id']),
+      event_type: String(r['event_type']),
+      aggregate_type: String(r['aggregate_type']),
+      aggregate_id: String(r['aggregate_id']),
+      status: String(r['status']),
+      attempts: Number(r['attempts'] ?? 0),
+      occurred_at: new Date(String(r['occurred_at'])).toISOString(),
+      published_at: r['published_at'] ? new Date(String(r['published_at'])).toISOString() : null,
+      last_error: r['last_error'] ? String(r['last_error']) : null,
+    })),
+    queues: (queuesRes.rows as Array<Record<string, unknown>>).map((r) => ({
+      queue: String(r['queue']),
+      state: String(r['state']),
+      count: Number(r['count'] ?? 0),
+    })),
+  };
 }

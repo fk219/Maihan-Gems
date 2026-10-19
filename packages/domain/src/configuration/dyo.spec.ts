@@ -180,4 +180,14 @@ describe('DYO Pricing Calculator (technical_design/14 section 7)', () => {
     expect(res.settingComponent).toBe(800);
     expect(res.total).toBe(2050);
   });
+
+  it('uses exact integer-cent arithmetic with zero binary float drift (0.1 + 0.2 === 0.3)', () => {
+    const res = calculateDyoPrice({
+      gemstoneBasePrice: 0.1,
+      settingBasePrice: 0.2,
+    });
+    expect(res.gemstoneComponent).toBe(0.1);
+    expect(res.settingComponent).toBe(0.2);
+    expect(res.total).toBe(0.3);
+  });
 });

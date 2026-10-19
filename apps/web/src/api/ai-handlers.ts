@@ -14,7 +14,7 @@ import {
   type ToolServices,
   type OrchestratorTurnInput,
 } from '@maihan/ai';
-import { calculateDyoPrice, evaluateCompatibility, type JewelleryType } from '@maihan/domain';
+import { ADMIN_ROLES, calculateDyoPrice, evaluateCompatibility, type JewelleryType } from '@maihan/domain';
 import {
   createConversation,
   getConversationByKey,
@@ -22,7 +22,10 @@ import {
   appendMessage,
   recordAiInteraction,
   loadSettingCompatibilityRules,
+  buildDeterministicEmbedding1024,
+  seedCuratedKnowledgeCorpus,
 } from '@maihan/db';
+import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
@@ -84,8 +87,29 @@ export function buildToolServices(ctx: RouteContext): ToolServices {
       },
     },
     knowledge: {
-      search: async (_query, _docKinds, limit) => {
-        // Query knowledge_chunks via DB
+      search: async (query, docKinds, limit) => {
+        const cap = limit ?? 3;
+        const cleanQuery = (query ?? '').trim();
+        const vec = buildDeterministicEmbedding1024(cleanQuery || 'gemstone');
+        const filterKinds = docKinds && docKinds.length > 0 ? docKinds : null;
+        try {
+          const hybridSql = `
+            SELECT chunk_id AS id, title, document_slug AS slug, trust_tier, content, similarity
+            FROM match_knowledge_chunks($1::vector(1024), $2, $3, $4::text[])
+          `;
+          const hybridRes = await db.query(hybridSql, [vec, cleanQuery, cap, filterKinds]);
+          if (hybridRes.rows && hybridRes.rows.length > 0) {
+            return hybridRes.rows;
+          }
+          // If no rows exist yet in knowledge_documents, seed the curated education corpus once
+          await seedCuratedKnowledgeCorpus(db);
+          const retryRes = await db.query(hybridSql, [vec, cleanQuery, cap, filterKinds]);
+          if (retryRes.rows && retryRes.rows.length > 0) {
+            return retryRes.rows;
+          }
+        } catch {
+          // Fallback for mock DB clients in unit tests
+        }
         const querySql = `
           SELECT c.id, d.title, d.slug, d.doc_kind, d.trust_tier, c.content, 0.88 as similarity
           FROM knowledge_chunks c
@@ -93,7 +117,7 @@ export function buildToolServices(ctx: RouteContext): ToolServices {
           WHERE d.status = 'ACTIVE'
           LIMIT $1;
         `;
-        const res = await db.query(querySql, [limit ?? 3]);
+        const res = await db.query(querySql, [cap]);
         return res.rows;
       },
     },
@@ -261,13 +285,27 @@ export const aiChatHandler: RouteHandler = async (ctx) => {
   const surface = rawBody['surface'] ?? 'chat_panel';
   const shouldStream = rawBody['stream'] === true;
 
-  // 1. Ensure conversation row exists in DB
+  const sessionToken = extractSessionToken(ctx.request);
+  const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+  const headerCustomerId = ctx.request?.headers.get('x-customer-id')?.trim() || null;
+  const callerCustomerId = actor?.customer_id ?? headerCustomerId ?? (rawBody['customerId'] as string | undefined) ?? null;
+  const isAdmin = Boolean(actor && (ADMIN_ROLES as readonly string[]).includes(actor.role));
+
+  // 1. Ensure conversation row exists in DB & enforce customer ownership
   let conv = await getConversationByKey(db, conversationKey);
+  if (conv && conv.customer_id && !isAdmin) {
+    if (callerCustomerId && conv.customer_id !== callerCustomerId) {
+      throw new ContractError('FORBIDDEN', 'You do not have permission to access another customer’s AI conversation.');
+    }
+    if (!callerCustomerId && process.env['MAIHAN_ENV'] === 'production') {
+      throw new ContractError('UNAUTHORIZED', 'Authentication required to continue this customer conversation.');
+    }
+  }
   if (!conv) {
     conv = await createConversation(db, {
       conversationKey,
       channel: 'WEB_CHAT',
-      customerId: rawBody['customerId'] ?? null,
+      customerId: callerCustomerId,
     });
   }
 
@@ -406,6 +444,21 @@ export const aiGetConversationHandler: RouteHandler = async (ctx) => {
   const conv = await getConversationByKey(db, conversationKey);
   if (!conv) {
     throw new ContractError('NOT_FOUND', `Conversation ${conversationKey} not found.`);
+  }
+
+  const sessionToken = extractSessionToken(ctx.request);
+  const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+  const headerCustomerId = ctx.request?.headers.get('x-customer-id')?.trim() || null;
+  const callerCustomerId = actor?.customer_id ?? headerCustomerId;
+  const isAdmin = Boolean(actor && (ADMIN_ROLES as readonly string[]).includes(actor.role));
+
+  if (conv.customer_id && !isAdmin) {
+    if (callerCustomerId && conv.customer_id !== callerCustomerId) {
+      throw new ContractError('FORBIDDEN', 'You do not have permission to read another customer’s conversation.');
+    }
+    if (!callerCustomerId && process.env['MAIHAN_ENV'] === 'production') {
+      throw new ContractError('UNAUTHORIZED', 'Authentication required to read this customer conversation.');
+    }
   }
 
   return {

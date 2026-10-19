@@ -107,8 +107,7 @@ export const STAGES: readonly StageDefinition[] = Object.freeze([
     id: 'knowledge-embeddings',
     description: 'Knowledge documents and embeddings (1024-dim HNSW, content-hash-reentrant)',
     requiredArtifacts: ['media_analyzed.jsonl'],
-    implemented: false,
-    blockedBy: 'plan task 20 / Phase 2+',
+    implemented: true,
   },
   {
     id: 'compatibility',

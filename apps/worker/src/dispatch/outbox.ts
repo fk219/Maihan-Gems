@@ -70,6 +70,71 @@ export async function dispatchOutbox(
             VALUES (${consumerName}, ${row.id}, now())
             ON CONFLICT (consumer_name, event_id) DO NOTHING
           `);
+
+          // Route domain event to idempotent downstream queue jobs (technical_design/26 §3 & 27 §4)
+          if (
+            row.event_type === 'ProductCreated' ||
+            row.event_type === 'ProductUpdated' ||
+            row.event_type === 'ProductStateChanged' ||
+            row.event_type === 'InventoryReserved' ||
+            row.event_type === 'InventoryReleased' ||
+            row.event_type === 'OrderCreated'
+          ) {
+            await tx.execute(sql`
+              INSERT INTO jobs (job_key, queue, job_type, payload, state)
+              VALUES (
+                ${'search.generation_bump:' + row.id},
+                'search',
+                'search.generation_bump',
+                ${JSON.stringify({ event_id: row.id, event_type: row.event_type, aggregate_id: row.aggregate_id })}::jsonb,
+                'QUEUED'
+              )
+              ON CONFLICT (job_key) DO NOTHING
+            `);
+            await tx.execute(sql`
+              INSERT INTO event_consumers (consumer_name, event_id, processed_at)
+              VALUES ('search-cache-invalidator', ${row.id}, now())
+              ON CONFLICT (consumer_name, event_id) DO NOTHING
+            `);
+          }
+
+          if (row.event_type === 'OrderCreated') {
+            await tx.execute(sql`
+              INSERT INTO jobs (job_key, queue, job_type, payload, state)
+              VALUES (
+                ${'order.confirm:' + row.aggregate_id},
+                'critical',
+                'order.confirm',
+                ${JSON.stringify({ order_id: row.aggregate_id, event_id: row.id })}::jsonb,
+                'QUEUED'
+              )
+              ON CONFLICT (job_key) DO NOTHING
+            `);
+            await tx.execute(sql`
+              INSERT INTO event_consumers (consumer_name, event_id, processed_at)
+              VALUES ('order-confirmation-dispatcher', ${row.id}, now())
+              ON CONFLICT (consumer_name, event_id) DO NOTHING
+            `);
+          }
+
+          if (row.event_type === 'PagePublished' || row.event_type === 'KnowledgeDocumentUpdated') {
+            await tx.execute(sql`
+              INSERT INTO jobs (job_key, queue, job_type, payload, state)
+              VALUES (
+                ${'ai.embed:' + row.id},
+                'ai',
+                'ai.embed',
+                ${JSON.stringify({ aggregate_id: row.aggregate_id, event_type: row.event_type })}::jsonb,
+                'QUEUED'
+              )
+              ON CONFLICT (job_key) DO NOTHING
+            `);
+            await tx.execute(sql`
+              INSERT INTO event_consumers (consumer_name, event_id, processed_at)
+              VALUES ('rag-knowledge-indexer', ${row.id}, now())
+              ON CONFLICT (consumer_name, event_id) DO NOTHING
+            `);
+          }
         });
         result.published += 1;
       } catch (error) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { swatchFor } from '../../lib/ngc/colors.js';
 import {
@@ -117,9 +117,50 @@ function RangePair({
 
 export function CollectionBrowser({ products }: { products: StorefrontCard[] }) {
   const facets = useMemo(() => facetsFromProducts(products), [products]);
-  const [state, setState] = useState<CatalogFilterState>(() => emptyFilterState(facets));
+  const [state, setState] = useState<CatalogFilterState>(() => {
+    const base = emptyFilterState(facets);
+    if (typeof window === 'undefined') return base;
+    const params = new URLSearchParams(window.location.search);
+    const list = (key: string) => {
+      const val = params.get(key);
+      return val ? val.split(',').filter(Boolean) : [];
+    };
+    const sortParam = params.get('sort') as CatalogSort | null;
+    const viewParam = params.get('view') as CatalogView | null;
+    return {
+      ...base,
+      shapes: list('shape'),
+      colours: list('color'),
+      origins: list('origin'),
+      treatments: list('treatment'),
+      metals: list('metal'),
+      caratBuckets: list('carat'),
+      sort: sortParam ?? base.sort,
+      view: viewParam ?? base.view,
+    };
+  });
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    const setList = (key: string, values: string[]) => {
+      if (values.length > 0) url.searchParams.set(key, values.join(','));
+      else url.searchParams.delete(key);
+    };
+    setList('shape', state.shapes);
+    setList('color', state.colours);
+    setList('origin', state.origins);
+    setList('treatment', state.treatments);
+    setList('metal', state.metals);
+    setList('carat', state.caratBuckets);
+    if (state.sort && state.sort !== 'price-desc') url.searchParams.set('sort', state.sort);
+    else url.searchParams.delete('sort');
+    if (state.view && state.view !== 'grid') url.searchParams.set('view', state.view);
+    else url.searchParams.delete('view');
+    window.history.replaceState(null, '', `${url.pathname}${url.search}`);
+  }, [state]);
   const visible = useMemo(() => applyCatalogFilters(products, state, facets), [products, state, facets]);
   const pageSize = 60;
   const pages = Math.max(1, Math.ceil(visible.length / pageSize));

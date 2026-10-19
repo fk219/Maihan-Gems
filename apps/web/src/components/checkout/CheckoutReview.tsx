@@ -45,18 +45,134 @@ function money(amount: string | number): string {
     : String(amount);
 }
 
+interface ServerCartItem {
+  id: string;
+  product_id: string;
+  product_slug: string;
+  title: string;
+  configuration_id: string | null;
+  quantity: number;
+  unit_price: string;
+  line_total: string;
+}
+
 export function CheckoutReview() {
-  const [items, setItems] = useState<AtelierItem[]>([]);
+  const [localItems, setLocalItems] = useState<AtelierItem[]>([]);
+  const [serverCartToken, setServerCartToken] = useState<string | null>(null);
+  const [serverCartItems, setServerCartItems] = useState<ServerCartItem[]>([]);
   const [session, setSession] = useState<CheckoutSession | null>(null);
   const [skipped, setSkipped] = useState<string[]>([]);
   const [email, setEmail] = useState('');
+  const [discountCode, setDiscountCode] = useState('');
+  const [validatedDiscount, setValidatedDiscount] = useState<{
+    code: string;
+    name: string;
+    discount_amount: string;
+    final_subtotal: string;
+  } | null>(null);
+  const [discountMessage, setDiscountMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    setItems(getBag());
-    return subscribeAtelier(() => setItems(getBag()));
+    const load = async () => {
+      setLocalItems(getBag());
+      if (typeof window === 'undefined') return;
+      const cached = window.localStorage.getItem('maihan_cart_token');
+      if (!cached) {
+        setServerCartToken(null);
+        setServerCartItems([]);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/v1/carts/${encodeURIComponent(cached)}`);
+        if (!res.ok) {
+          setServerCartToken(null);
+          setServerCartItems([]);
+          return;
+        }
+        const body = (await res.json()) as {
+          data?: { state?: string; cart_token?: string; items?: ServerCartItem[] };
+        };
+        if (body.data?.state === 'ACTIVE') {
+          setServerCartToken(body.data.cart_token ?? cached);
+          setServerCartItems(body.data.items ?? []);
+        } else {
+          setServerCartToken(null);
+          setServerCartItems([]);
+        }
+      } catch {
+        setServerCartToken(null);
+        setServerCartItems([]);
+      }
+    };
+    void load();
+    return subscribeAtelier(() => void load());
   }, []);
+
+  const combinedItems: AtelierItem[] = (() => {
+    const serverIds = new Set(serverCartItems.map((i) => i.product_id));
+    const serverSlugs = new Set(serverCartItems.map((i) => i.product_slug.toLowerCase()));
+    const fromServer: AtelierItem[] = serverCartItems.map((i) => ({
+      id: i.product_id,
+      slug: i.product_slug,
+      title: i.title,
+      kind: i.configuration_id ? 'Bespoke DYO Configuration' : 'Vault piece',
+      priceUsd: Number(i.unit_price) || 0,
+      quantity: i.quantity,
+      image: '',
+    }));
+    const fromLocal = localItems.filter(
+      (l) => !serverIds.has(l.id) && !serverSlugs.has((l.slug || l.id).toLowerCase()),
+    );
+    return [...fromServer, ...fromLocal];
+  })();
+
+  const estimatedSubtotal = combinedItems.reduce(
+    (sum, item) => sum + item.priceUsd * (item.quantity ?? 1),
+    0,
+  );
+
+  async function handleValidatePromo(): Promise<void> {
+    const code = discountCode.trim().toUpperCase();
+    setDiscountMessage(null);
+    if (!code) {
+      setValidatedDiscount(null);
+      return;
+    }
+    try {
+      const res = await fetch('/api/v1/discounts/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, subtotal: estimatedSubtotal }),
+      });
+      const body = (await res.json().catch(() => null)) as {
+        data?: {
+          valid?: boolean;
+          discount?: { code?: string; name?: string };
+          discount_amount?: string;
+          final_subtotal?: string;
+        };
+        error?: { message?: string };
+      } | null;
+      if (!res.ok || !body?.data?.valid) {
+        setValidatedDiscount(null);
+        setDiscountMessage(body?.error?.message ?? 'Promotional code is invalid or inapplicable.');
+        return;
+      }
+      setValidatedDiscount({
+        code: body.data.discount?.code ?? code,
+        name: body.data.discount?.name ?? code,
+        discount_amount: body.data.discount_amount ?? '0.00',
+        final_subtotal: body.data.final_subtotal ?? estimatedSubtotal.toFixed(2),
+      });
+      setDiscountMessage(
+        `Applied ${body.data.discount?.name ?? code}: −${money(body.data.discount_amount ?? '0.00')}`,
+      );
+    } catch {
+      setDiscountMessage('Could not validate promotional code.');
+    }
+  }
 
   async function bridgeAndStart(): Promise<void> {
     const emailValue = email.trim();
@@ -67,24 +183,35 @@ export function CheckoutReview() {
     setBusy(true);
     setError(null);
     try {
-      // 1. Create the server cart.
-      const cartRes = await fetch('/api/v1/carts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: '{}',
-      });
-      if (!cartRes.ok) {
-        const body = (await cartRes.json().catch(() => null)) as { error?: { message?: string } } | null;
-        throw new Error(body?.error?.message ?? 'The bag could not be opened on the server.');
+      // 1. Reuse existing active server cart (preserving DYO quote-bound lines) or create a new one.
+      let cartToken = serverCartToken ?? '';
+      if (!cartToken) {
+        const cartRes = await fetch('/api/v1/carts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}',
+        });
+        if (!cartRes.ok) {
+          const body = (await cartRes.json().catch(() => null)) as { error?: { message?: string } } | null;
+          throw new Error(body?.error?.message ?? 'The bag could not be opened on the server.');
+        }
+        const cartBody = (await cartRes.json()) as { data?: { cart_token?: string } };
+        cartToken = cartBody.data?.cart_token ?? '';
+        if (!cartToken) throw new Error('The server did not return a bag token.');
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem('maihan_cart_token', cartToken);
+        }
       }
-      const cartBody = (await cartRes.json()) as { data?: { cart_token?: string } };
-      const cartToken = cartBody.data?.cart_token ?? '';
-      if (!cartToken) throw new Error('The server did not return a bag token.');
 
-      // 2. Bridge the orderable pieces (UUID ids resolve directly; other
-      // items resolve by their public slug — the catalogue's public key).
+      // 2. Bridge any browser bag items not already in the server cart.
+      const serverIds = new Set(serverCartItems.map((i) => i.product_id));
+      const serverSlugs = new Set(serverCartItems.map((i) => i.product_slug.toLowerCase()));
+      const unbridgedLocal = localItems.filter(
+        (l) => !serverIds.has(l.id) && !serverSlugs.has((l.slug || l.id).toLowerCase()),
+      );
+
       const notOrderable: string[] = [];
-      for (const item of items) {
+      for (const item of unbridgedLocal) {
         const body: Record<string, unknown> = {
           quantity: item.quantity ?? 1,
           expected_unit_price: item.priceUsd ? item.priceUsd.toFixed(2) : undefined,
@@ -97,20 +224,29 @@ export function CheckoutReview() {
           body: JSON.stringify(body),
         });
         if (!addRes.ok) {
-          const body = (await addRes.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
-          if (body?.error?.code === 'PRICE_CHANGED') {
+          const errBody = (await addRes.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
+          if (errBody?.error?.code === 'PRICE_CHANGED') {
             throw new Error('The price of one of your pieces changed on the server. Refresh the bag and review the updated price.');
           }
-          throw new Error(body?.error?.message ?? `This piece could not be reserved for checkout: ${item.title}`);
+          throw new Error(errBody?.error?.message ?? `This piece could not be reserved for checkout: ${item.title}`);
         }
       }
       setSkipped(notOrderable);
 
-      // 3. Create the checkout session (server freezes price + reserves stock).
+      // 3. Create the checkout session (server freezes price + applies discount + reserves stock).
+      const sessionPayload: Record<string, unknown> = {
+        cart_token: cartToken,
+        email: emailValue,
+      };
+      const codeToApply = validatedDiscount?.code || discountCode.trim().toUpperCase();
+      if (codeToApply) {
+        sessionPayload['discount_code'] = codeToApply;
+      }
+
       const sessionRes = await fetch('/api/v1/checkout/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart_token: cartToken, email: emailValue }),
+        body: JSON.stringify(sessionPayload),
       });
       if (!sessionRes.ok) {
         const body = (await sessionRes.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
@@ -120,6 +256,9 @@ export function CheckoutReview() {
       if (!sessionBody.data) throw new Error('Checkout session response was incomplete.');
       setSession(sessionBody.data);
       clearBag();
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('maihan_cart_token');
+      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Checkout could not be started.');
     } finally {
@@ -154,7 +293,7 @@ export function CheckoutReview() {
     );
   }
 
-  if (items.length === 0) {
+  if (combinedItems.length === 0) {
     return (
       <div className="lx-account-card">
         <p className="lx-account-note">Your bag is empty. Reserve pieces from the vault first.</p>
@@ -176,8 +315,33 @@ export function CheckoutReview() {
           onChange={(event) => setEmail(event.target.value)}
         />
       </div>
+      <div className="lx-account-field">
+        <label htmlFor="ck-promo-code">Promotional Code (Optional)</label>
+        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <input
+            id="ck-promo-code"
+            type="text"
+            placeholder="e.g. WELCOME10"
+            value={discountCode}
+            onChange={(event) => setDiscountCode(event.target.value.toUpperCase())}
+            style={{ flex: 1 }}
+          />
+          <button
+            type="button"
+            className="lx-btn lx-btn--ghost"
+            onClick={() => void handleValidatePromo()}
+          >
+            Apply code
+          </button>
+        </div>
+        {discountMessage ? (
+          <p className="lx-account-note" role="status" style={{ marginTop: '0.35rem' }}>
+            {discountMessage}
+          </p>
+        ) : null}
+      </div>
       <ul className="lx-order-items">
-        {items.map((item) => (
+        {combinedItems.map((item) => (
           <li key={item.id}>
             <span className="lx-order-items__title">
               <img src={itemImage(item)} alt="" width={44} height={44} style={{ verticalAlign: 'middle', marginRight: '0.6rem', objectFit: 'cover' }} />

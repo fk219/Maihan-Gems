@@ -126,6 +126,15 @@ function ZoomStage({
   );
 }
 
+function sanitizeDescriptionHtml(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<(iframe|object|embed|form|meta|link|style)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
+    .replace(/<(iframe|object|embed|form|meta|link|style)\b[^>]*\/?>/gi, '')
+    .replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/(href|src)\s*=\s*(['"]?)\s*javascript:[^'"\s>]*\2/gi, '$1="#"');
+}
+
 export function ProductStudio({
   product,
   related,
@@ -412,7 +421,7 @@ export function ProductStudio({
         {product.descriptionHtml ? (
           <section className="ngc-copy">
             <h2 className="lx-h3">Product description</h2>
-            <div className="ngc-copy__body" dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
+            <div className="ngc-copy__body" dangerouslySetInnerHTML={{ __html: sanitizeDescriptionHtml(product.descriptionHtml) }} />
           </section>
         ) : null}
 

@@ -194,7 +194,68 @@ export class DefaultModelGateway implements ModelGateway {
     provider: AiProvider,
     req: GenerateRequest,
   ): Promise<Omit<GenerateResult, 'latencyMs'>> {
-    // Default simulated generative outcome when no mockHandler is injected
+    const apiKey =
+      provider === 'OPENROUTER'
+        ? process.env['OPENROUTER_API_KEY']
+        : process.env['OPENAI_API_KEY'] ?? process.env['AI_GATEWAY_API_KEY'];
+
+    if (apiKey) {
+      const endpoint =
+        provider === 'OPENROUTER'
+          ? 'https://openrouter.ai/api/v1/chat/completions'
+          : (process.env['AI_GATEWAY_BASE_URL'] ?? 'https://api.openai.com/v1') +
+            '/chat/completions';
+      const modelId = req.model ?? this.defaultModel;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: req.messages.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+          temperature: req.temperature ?? 0.2,
+          max_tokens: req.maxTokens ?? 600,
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Provider ${provider} HTTP ${response.status}`);
+      }
+
+      const data = (await response.json()) as {
+        choices?: Array<{
+          message?: { content?: string };
+          finish_reason?: string;
+        }>;
+        usage?: {
+          prompt_tokens?: number;
+          completion_tokens?: number;
+        };
+      };
+      const content = data.choices?.[0]?.message?.content ?? '';
+      const inputTokens = data.usage?.prompt_tokens ?? 120;
+      const outputTokens = data.usage?.completion_tokens ?? 45;
+      const costUsd = (inputTokens * 0.00125 + outputTokens * 0.005) / 1000;
+      return {
+        content,
+        finishReason: 'stop',
+        usage: {
+          inputTokens,
+          outputTokens,
+          costUsd,
+        },
+        modelName: modelId,
+        provider,
+      };
+    }
+
+    // Default simulated generative outcome when no external API key or mockHandler is injected
     const lastMsg = req.messages[req.messages.length - 1]?.content ?? '';
     return {
       content: `I am the Maihan Gems advisory concierge. Based on our verified archives: ${lastMsg.slice(0, 100)}`,

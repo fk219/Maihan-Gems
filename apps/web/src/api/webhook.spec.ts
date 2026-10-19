@@ -7,6 +7,8 @@ import {
 } from '../modules/catalog/index.js';
 import { createCatalogApi, type CatalogApi } from './index.js';
 import { TestPaymentProvider } from '../integrations/payment/test-payment-provider.js';
+import { StripePaymentProvider } from '../integrations/payment/stripe-payment-provider.js';
+import { TransactionalEmailProvider } from '../integrations/email/email-provider.js';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -299,5 +301,114 @@ describe('Payment Webhooks & Reconciliation (Phase 6 Task 6)', () => {
     expect(replayRes.status).toBe(200);
     const replayBody = await replayRes.json();
     expect(replayBody.status).toBe('duplicate');
+  });
+
+  it('verifies Stripe-Signature (t=...,v1=...) HMAC-SHA256 and REST authorize/capture/refund', async () => {
+    const stripe = new StripePaymentProvider({
+      secretKey: 'sk_test_mock_key',
+      webhookSecret: 'whsec_stripe_unit_test',
+      fetchImpl: async (url) => {
+        const u = String(url);
+        if (u.endsWith('/v1/payment_intents')) {
+          return new Response(JSON.stringify({ id: 'pi_test_123', amount: 125000, currency: 'usd' }), {
+            status: 200,
+          });
+        }
+        if (u.endsWith('/capture')) {
+          return new Response(
+            JSON.stringify({ id: 'pi_test_123', amount_received: 125000, currency: 'usd' }),
+            { status: 200 },
+          );
+        }
+        return new Response(JSON.stringify({ id: 're_test_456', amount: 50000, currency: 'usd' }), {
+          status: 200,
+        });
+      },
+    });
+
+    const authRes = await stripe.authorize({
+      order_id: 'ord_1',
+      order_number: 'MG-2026-000001',
+      amount: '1250.00',
+      currency: 'USD',
+      method_type: 'CARD',
+    });
+    expect(authRes.provider_payment_id).toBe('pi_test_123');
+    expect(authRes.amount).toBe('1250.00');
+
+    const capRes = await stripe.capture({
+      order_id: 'ord_1',
+      provider_payment_id: 'pi_test_123',
+      amount: '1250.00',
+      currency: 'USD',
+    });
+    expect(capRes.captured_amount).toBe('1250.00');
+
+    const refRes = await stripe.refund({
+      order_id: 'ord_1',
+      provider_payment_id: 'pi_test_123',
+      amount: '500.00',
+      currency: 'USD',
+      reason: 'Customer request',
+    });
+    expect(refRes.provider_refund_id).toBe('re_test_456');
+
+    const payload = JSON.stringify({
+      id: 'evt_stripe_1',
+      type: 'payment_intent.succeeded',
+      data: {
+        object: {
+          id: 'pi_test_123',
+          amount_received: 125000,
+          currency: 'usd',
+          metadata: { order_id: 'ord_1' },
+        },
+      },
+    });
+    const nowSec = Math.floor(Date.now() / 1000);
+    const sig = stripe.signStripeWebhookPayload(payload, nowSec);
+    const verified = stripe.verifyWebhook({
+      rawBody: payload,
+      headers: { 'stripe-signature': sig },
+    });
+    expect(verified.isValid).toBe(true);
+    expect(verified.eventType).toBe('payment.captured');
+    expect(verified.orderId).toBe('ord_1');
+    expect(verified.amount).toBe('1250.00');
+
+    // Stale timestamp outside 300s replay window fails closed
+    const staleSig = stripe.signStripeWebhookPayload(payload, nowSec - 900);
+    const staleVerified = stripe.verifyWebhook({
+      rawBody: payload,
+      headers: { 'stripe-signature': staleSig },
+    });
+    expect(staleVerified.isValid).toBe(false);
+    expect(staleVerified.signatureError).toContain('tolerance window');
+  });
+
+  it('delivers transactional emails via Resend HTTP API or outbox fallback', async () => {
+    const outboxMailer = new TransactionalEmailProvider({ resendApiKey: '', mailtrapApiToken: '' });
+    const fallbackRes = await outboxMailer.send({
+      to: 'collector@maihan.test',
+      subject: 'Order Confirmation',
+      text: 'Your piece is reserved.',
+      category: 'order_confirmation',
+    });
+    expect(fallbackRes.delivered).toBe(true);
+    expect(fallbackRes.provider).toBe('OUTBOX_LOG');
+
+    const resendMailer = new TransactionalEmailProvider({
+      resendApiKey: 're_test_key',
+      fetchImpl: async () => new Response(JSON.stringify({ id: 'msg_resend_99' }), { status: 200 }),
+    });
+    const liveRes = await resendMailer.send({
+      to: 'collector@maihan.test',
+      subject: 'Verify Email',
+      text: 'Verification token',
+      category: 'auth_verification',
+    });
+    expect(liveRes.delivered).toBe(true);
+    expect(liveRes.provider).toBe('RESEND');
+    expect(liveRes.messageId).toBe('msg_resend_99');
   });
 });

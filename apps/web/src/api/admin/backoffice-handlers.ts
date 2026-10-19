@@ -16,9 +16,13 @@ import { ContractError, type AdminActor } from '@maihan/contracts';
 import {
   assignAccountRole,
   createBackOfficeDiscount,
+  decideDerivedReference,
+  getBackOfficeMigrationOverview,
+  getBackOfficeOperationsOverview,
   getCatalogueSummary,
   listAccountsForAdmin,
   listBackOfficeAuditLogs,
+  listBackOfficeCertificates,
   listBackOfficeDiscounts,
   listBackOfficeOrders,
   listBackOfficeRefunds,
@@ -96,6 +100,14 @@ export async function gateAdmin(
     if (!(ADMIN_ROLES as readonly string[]).includes(sessionActor.role)) {
       return { failure: authzFailureResponse(403, ctx.ids) };
     }
+    // Verify CSRF token if supplied on state-changing requests
+    const method = (ctx.request?.method ?? 'GET').toUpperCase();
+    if (method !== 'GET' && method !== 'HEAD') {
+      const csrfHeader = ctx.request?.headers.get('x-csrf-token')?.trim();
+      if (csrfHeader !== undefined && csrfHeader !== '' && csrfHeader !== sessionActor.csrf_token) {
+        return { failure: authzFailureResponse(403, ctx.ids) };
+      }
+    }
     const adminRole = sessionActor.role as AdminRole;
     if (!hasCapability(adminRole, request.module, request.action)) {
       return { failure: authzFailureResponse(403, ctx.ids) };
@@ -111,7 +123,12 @@ export async function gateAdmin(
     };
   }
 
-  // 2. Fallback to header-based admin actor resolution (used by admin gateway / specs)
+  // In production, never fall back to unverified x-admin-* request headers
+  if (process.env['MAIHAN_ENV'] === 'production') {
+    return { failure: authzFailureResponse(401, ctx.ids) };
+  }
+
+  // 2. Fallback to header-based admin actor resolution (used by non-prod admin gateway / specs)
   const headers = ctx.request?.headers ?? new Headers();
   const allowRoleHeader = deps.allowRoleHeader ?? process.env['ALLOW_ROLE_HEADER'] === '1';
   const decision = authorizeAdmin(headers, { ...request, allowRoleHeader });
@@ -239,7 +256,17 @@ export async function adminCustomersListHandler(
   const g = await gateAdmin(ctx, { module: 'orders', action: 'list' }, deps);
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const rows = await listAccountsForAdmin(getDb(ctx), 100);
-  return { status: 200, body: { data: rows, meta: { limit: 100, count: rows.length } } };
+  // technical_design/23 §3 & §8 rule 7: READ_ONLY_ANALYST responses never include PII
+  const sanitized =
+    g.actor.role === 'READ_ONLY_ANALYST'
+      ? rows.map((r) => ({
+          ...r,
+          email: '[REDACTED]',
+          first_name: null,
+          last_name: null,
+        }))
+      : rows;
+  return { status: 200, body: { data: sanitized, meta: { limit: 100, count: sanitized.length } } };
 }
 
 export async function adminAssignRoleHandler(
@@ -279,4 +306,58 @@ export async function adminCmsPagesListHandler(
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const rows = await listCmsPages(getDb(ctx), 100);
   return { status: 200, body: { data: rows, meta: { limit: 100, count: rows.length } } };
+}
+
+export async function adminCertificatesListHandler(
+  ctx: RouteContext,
+  deps: BackOfficeHandlerDeps = {},
+): Promise<HandlerOutcome> {
+  const g = await gateAdmin(ctx, { module: 'certificates', action: 'list' }, deps);
+  if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
+  const rows = await listBackOfficeCertificates(getDb(ctx), 100);
+  return { status: 200, body: { data: rows, meta: { limit: 100, count: rows.length } } };
+}
+
+export async function adminMigrationOverviewHandler(
+  ctx: RouteContext,
+  deps: BackOfficeHandlerDeps = {},
+): Promise<HandlerOutcome> {
+  const g = await gateAdmin(ctx, { module: 'import_batches', action: 'read' }, deps);
+  if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
+  const overview = await getBackOfficeMigrationOverview(getDb(ctx));
+  return { status: 200, body: { data: overview } };
+}
+
+const DecideDerivedRefSchema = z.object({
+  decision: z.enum(['APPROVE', 'REJECT']).default('APPROVE'),
+  reason: z.string().max(500).optional(),
+});
+
+export async function adminDecideDerivedRefHandler(
+  ctx: RouteContext,
+  deps: BackOfficeHandlerDeps = {},
+): Promise<HandlerOutcome> {
+  const g = await gateAdmin(ctx, { module: 'derived_approvals', action: 'approve' }, deps);
+  if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
+  const productId = requireIdentifier(ctx.params['id'], 'id');
+  const body = await parseBody(ctx.request);
+  const input = DecideDerivedRefSchema.parse(body);
+  const updated = await decideDerivedReference(getDb(ctx), {
+    productId,
+    decision: input.decision,
+    actorSub: g.actor.sub,
+    actorRole: g.actor.role,
+    reason: input.reason,
+  });
+  return { status: 200, body: { data: updated } };
+}
+
+export async function adminOperationsOverviewHandler(
+  ctx: RouteContext,
+  deps: BackOfficeHandlerDeps = {},
+): Promise<HandlerOutcome> {
+  const g = await gateAdmin(ctx, { module: 'dashboards', action: 'read' }, deps);
+  if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
+  const overview = await getBackOfficeOperationsOverview(getDb(ctx));
+  return { status: 200, body: { data: overview } };
 }

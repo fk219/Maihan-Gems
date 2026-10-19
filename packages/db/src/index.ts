@@ -69,7 +69,9 @@ export {
 } from './seed/reference-data.js';
 export {
   createCatalogDatabase,
+  withRlsContext,
   type CatalogDatabase,
+  type RlsSessionContext,
   // Re-exported so consumer apps (apps/worker) compose queries through the
   // SAME drizzle instance family as packages/db — no second drizzle install.
   sql,
@@ -203,6 +205,8 @@ export {
   recordToolCall,
   recordAiInteraction,
   recordGuardrailEvent,
+  buildDeterministicEmbedding1024,
+  seedCuratedKnowledgeCorpus,
   type ConversationRow,
   type MessageRow,
 } from './ai/ai-repository.js';
@@ -247,12 +251,19 @@ export {
   createBackOfficeDiscount,
   listBackOfficeAuditLogs,
   listCmsPages,
+  listBackOfficeCertificates,
+  getBackOfficeMigrationOverview,
+  decideDerivedReference,
+  getBackOfficeOperationsOverview,
   type CatalogueSummary,
   type CatalogueProductRow,
   type BackOfficeOrderRow,
   type BackOfficeRefundRow,
   type BackOfficeDiscountRow,
   type BackOfficeAuditLogRow,
+  type BackOfficeCertificateRow,
+  type BackOfficeMigrationOverview,
+  type BackOfficeOperationsOverview,
 } from './backoffice/dashboards-repository.js';
 export {
   hashPassword,

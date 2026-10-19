@@ -114,9 +114,18 @@ describe('Full Ecommerce End-to-End Journeys (Auth, RBAC, Vendor, Admin, Cart, C
         await client.query(`DELETE FROM jobs WHERE job_key = $1`, [`checkout:session:${sid}`]);
       }
       for (const pid of createdProductIds) {
+        const gemRes = await client.query<{ gid: string }>(
+          `SELECT COALESCE(gemstone_id, gemstone_pair_id)::text AS gid FROM products WHERE id = $1`,
+          [pid],
+        );
+        const gid = gemRes.rows[0]?.gid ?? null;
         await client.query(`DELETE FROM asset_usages WHERE entity_id = $1`, [pid]);
+        await client.query(`DELETE FROM domain_events WHERE aggregate_id = $1`, [pid]);
         await client.query(`DELETE FROM audit_logs WHERE entity_id = $1`, [pid]);
         await client.query(`DELETE FROM products WHERE id = $1`, [pid]);
+        if (gid) {
+          await client.query(`DELETE FROM gemstones WHERE id = $1`, [gid]);
+        }
       }
       for (const vid of createdVendorIds) {
         await client.query(`DELETE FROM audit_logs WHERE entity_id = $1`, [vid]);
@@ -967,5 +976,84 @@ describe('Full Ecommerce End-to-End Journeys (Auth, RBAC, Vendor, Admin, Cart, C
     expect(actions.has('VENDOR_PRODUCT_CREATED')).toBe(true);
     expect(actions.has('PRODUCT_PUBLISH')).toBe(true);
     expect(actions.has('VENDOR_FULFILLMENT_UPDATED')).toBe(true);
+  });
+
+  it('7. Admin Certificates, Migration, INV-08 Derived-SKU Approval, and Operations Overview', async () => {
+    if (!hasDb || !api || !pool) return;
+
+    // 1. Admin certificates list
+    const certsRes = await api(
+      new Request('http://localhost/api/v1/admin/certificates', {
+        headers: { 'x-admin-sub': 'super@maihan.test' },
+      }),
+    );
+    expect(certsRes.status).toBe(200);
+    const certsBody = (await certsRes.json()) as { data: unknown[] };
+    expect(Array.isArray(certsBody.data)).toBe(true);
+
+    // 2. Admin operations overview (outbox + queues)
+    const opsRes = await api(
+      new Request('http://localhost/api/v1/admin/operations', {
+        headers: { 'x-admin-sub': 'super@maihan.test' },
+      }),
+    );
+    expect(opsRes.status).toBe(200);
+    const opsBody = (await opsRes.json()) as {
+      data: {
+        outbox: { pending: number; published: number; dead_letter: number };
+        recent_events: unknown[];
+        queues: unknown[];
+      };
+    };
+    expect(typeof opsBody.data.outbox.pending).toBe('number');
+    expect(Array.isArray(opsBody.data.recent_events)).toBe(true);
+
+    // 3. Insert a synthetic INFERRED derived-SKU product and approve it via POST /api/v1/admin/derived-refs/{id}/approve (INV-08)
+    const derivedSku = `DERIVED_${runTag}`.toUpperCase();
+    const insDerived = await pool.query<{ id: string }>(
+      `INSERT INTO products (
+         kind, slug, title, jewellery_type, state, availability,
+         price_amount, price_evidence, source_sku, source_sku_derived, sku_evidence_status
+       ) VALUES (
+         'READY_MADE', $1, 'Inferred Derived Reference Test Piece', 'RING', 'DRAFT', false,
+         '1000.00', 'OBSERVED', NULL, $2, 'INFERRED'
+       ) RETURNING id::text AS id`,
+      [`derived-ref-${runTag}`, derivedSku],
+    );
+    const derivedProductId = insDerived.rows[0]!.id;
+    createdProductIds.push(derivedProductId);
+
+    const migRes = await api(
+      new Request('http://localhost/api/v1/admin/migration', {
+        headers: { 'x-admin-sub': 'super@maihan.test' },
+      }),
+    );
+    expect(migRes.status).toBe(200);
+    const migBody = (await migRes.json()) as {
+      data: { derived_refs: Array<{ id: string; source_sku_derived: string | null }> };
+    };
+    expect(migBody.data.derived_refs.some((r) => r.id === derivedProductId)).toBe(true);
+
+    const approveRefRes = await api(
+      new Request(`http://localhost/api/v1/admin/derived-refs/${derivedProductId}/approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-sub': 'super@maihan.test',
+        },
+        body: JSON.stringify({
+          decision: 'APPROVE',
+          reason: 'Verified physical dossier for INV-08 promotion',
+        }),
+      }),
+    );
+    expect(approveRefRes.status).toBe(200);
+    const approvedRef = (await approveRefRes.json()).data as {
+      id: string;
+      source_sku: string;
+      sku_evidence_status: string;
+    };
+    expect(approvedRef.source_sku).toBe(derivedSku);
+    expect(approvedRef.sku_evidence_status).toBe('EXTRACTED');
   });
 });

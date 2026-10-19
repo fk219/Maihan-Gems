@@ -287,6 +287,10 @@ export const ADMIN_ROUTES: readonly RouteDefinition[] = [
   { id: 'adminAssignRoleHandler', method: 'POST', path: '/api/v1/admin/users/{userId}/role' },
   { id: 'adminAuditLogsListHandler', method: 'GET', path: '/api/v1/admin/audit-logs' },
   { id: 'adminCmsPagesListHandler', method: 'GET', path: '/api/v1/admin/content/pages' },
+  { id: 'adminCertificatesListHandler', method: 'GET', path: '/api/v1/admin/certificates' },
+  { id: 'adminMigrationOverviewHandler', method: 'GET', path: '/api/v1/admin/migration' },
+  { id: 'adminDecideDerivedRefHandler', method: 'POST', path: '/api/v1/admin/derived-refs/{id}/approve' },
+  { id: 'adminOperationsOverviewHandler', method: 'GET', path: '/api/v1/admin/operations' },
 ];
 
 export const ALL_ROUTES: readonly RouteDefinition[] = [

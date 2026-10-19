@@ -33,14 +33,24 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 const HOP_BY_HOP = new Set(['host', 'connection']);
+const SPOOFABLE_IDENTITY_HEADERS = new Set([
+  'x-admin-sub',
+  'x-admin-role',
+  'x-admin-session',
+  'x-customer-id',
+]);
 
 /** Paths whose calls carry the verified client reference as the identity header. */
 const IDENTITY_COOKIE_PREFIXES = ['/account', '/favorites', '/compare'];
 
 function buildForwardHeaders(request: Request, path: string): Headers {
   const headers = new Headers();
+  const isProd = process.env['MAIHAN_ENV'] === 'production';
   request.headers.forEach((value, name) => {
-    if (!HOP_BY_HOP.has(name.toLowerCase())) headers.append(name, value);
+    const lower = name.toLowerCase();
+    if (HOP_BY_HOP.has(lower)) return;
+    if (isProd && SPOOFABLE_IDENTITY_HEADERS.has(lower)) return;
+    headers.append(name, value);
   });
   if (IDENTITY_COOKIE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) {
     const cookie = headers.get('cookie') ?? '';

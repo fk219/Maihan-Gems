@@ -29,9 +29,59 @@ export function FavoritesView({
       setItems([]);
       return;
     }
-    setItems(getFavs());
-    return subscribeAtelier(() => setItems(getFavs()));
+    const sync = () => {
+      const localFavs = getFavs();
+      setItems(localFavs);
+      if (typeof fetch === 'function') {
+        void fetch('/api/v1/favorites')
+          .then((r) => (r.ok ? r.json() : null))
+          .then(
+            (
+              body: {
+                data?: {
+                  items?: Array<{
+                    product_id: string;
+                    slug: string;
+                    title: string;
+                    kind: string;
+                    price_amount: string | null;
+                    primary_image_url: string | null;
+                  }>;
+                };
+              } | null,
+            ) => {
+              const serverList = body?.data?.items;
+              if (!Array.isArray(serverList) || serverList.length === 0) return;
+              const seen = new Set(localFavs.map((f) => f.id));
+              const merged = [...localFavs];
+              for (const s of serverList) {
+                if (seen.has(s.product_id)) continue;
+                seen.add(s.product_id);
+                merged.push({
+                  id: s.product_id,
+                  slug: s.slug,
+                  title: s.title,
+                  kind: s.kind,
+                  priceUsd: Number(s.price_amount ?? 0),
+                  image: s.primary_image_url ?? '',
+                });
+              }
+              setItems(merged);
+            },
+          )
+          .catch(() => undefined);
+      }
+    };
+    sync();
+    return subscribeAtelier(sync);
   }, [forceEmpty]);
+
+  async function handleRemoveFav(id: string): Promise<void> {
+    removeFav(id);
+    if (typeof fetch === 'function') {
+      await fetch(`/api/v1/favorites/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => undefined);
+    }
+  }
 
   if (items.length === 0) {
     return (
@@ -65,7 +115,7 @@ export function FavoritesView({
               <button type="button" className="lx-btn lx-btn--solid" onClick={() => addToBag(item)}>
                 Add to bag
               </button>
-              <button type="button" className="lx-text-btn" onClick={() => removeFav(item.id)}>
+              <button type="button" className="lx-text-btn" onClick={() => void handleRemoveFav(item.id)}>
                 Remove
               </button>
             </div>

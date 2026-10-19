@@ -260,3 +260,125 @@ export async function recordGuardrailEvent(
     JSON.stringify(input.detail ?? {}),
   ]);
 }
+
+const CURATED_GEMMOLOGICAL_KNOWLEDGE: ReadonlyArray<{
+  slug: string;
+  title: string;
+  docKind: string;
+  trustTier: string;
+  headingPath: string[];
+  content: string;
+}> = [
+  {
+    slug: 'sapphire-treatment-disclosure-guide',
+    title: 'Sapphire Heat Treatment & Unheated Provenance Guide',
+    docKind: 'TREATMENT',
+    trustTier: 'CURATED',
+    headingPath: ['Gemstone Education', 'Corundum & Treatments'],
+    content:
+      'Natural sapphires and rubies (corundum) are evaluated for thermal enhancement (heat treatment) by independent gemmological laboratories including GIA, SSEF, and Gübelin. Unheated ("No Heat") sapphires command a rarity premium and must be accompanied by a verified laboratory report (INV-07) before any unheated origin claim is displayed.',
+  },
+  {
+    slug: 'padparadscha-and-colour-grading',
+    title: 'Padparadscha, Royal Blue & Cornflower Sapphire Colour Grading',
+    docKind: 'EDUCATION',
+    trustTier: 'CURATED',
+    headingPath: ['Gemstone Education', 'Colour & Saturation'],
+    content:
+      'Fine coloured gemstones are graded by hue, tone, and saturation. Padparadscha sapphires exhibit a delicate marriage of lotus-pink and sunset-orange hues. Pricing in fine coloured stones is non-linear and never a simple weight-times-per-carat formula; rarity, origin, cut symmetry, and treatment status govern valuation.',
+  },
+  {
+    slug: 'bespoke-dyo-compatibility-rules',
+    title: 'Design Your Own (DYO) Setting & Gemstone Compatibility',
+    docKind: 'GUIDE',
+    trustTier: 'CURATED',
+    headingPath: ['Bespoke Jewellery', 'DYO Studio'],
+    content:
+      'Every bespoke configuration pairs exactly one setting variant (design × metal) with either one single loose stone (for rings, pendants, necklaces, and bracelets — INV-03) or one matched pair of gemstones (exclusively for earrings — INV-02). Calibrated seat dimensions and shape compatibility are checked deterministically.',
+  },
+  {
+    slug: 'laboratory-certification-inv07-policy',
+    title: 'Laboratory Certification & INV-07 Verification Standard',
+    docKind: 'POLICY',
+    trustTier: 'CURATED',
+    headingPath: ['Trust & Provenance', 'Laboratory Reports'],
+    content:
+      'Under Maihan Gems Invariant INV-07, any certificate or appraisal field with verification_status != VERIFIED is withheld from public rendering until a human gemmologist in the Trust Reviewer role completes verification and resolves all OCR anomalies.',
+  },
+];
+
+/**
+ * Deterministically builds a 1024-dimensional unit vector from text content
+ * for pgvector HNSW indexing when no external embedding API key is configured.
+ */
+export function buildDeterministicEmbedding1024(text: string): string {
+  const dims = new Array<number>(1024).fill(0);
+  const normalized = text.toLowerCase();
+  for (let i = 0; i < normalized.length; i += 1) {
+    const code = normalized.charCodeAt(i);
+    const idx = (code * 31 + i * 17) % 1024;
+    dims[idx] = (dims[idx] ?? 0) + ((code % 13) - 6) * 0.1;
+  }
+  let normSq = 0;
+  for (let i = 0; i < 1024; i += 1) {
+    normSq += (dims[i] ?? 0) * (dims[i] ?? 0);
+  }
+  const norm = normSq > 0 ? Math.sqrt(normSq) : 1;
+  if (normSq === 0) dims[0] = 1;
+  const formatted = dims.map((v) => (v / norm).toFixed(6)).join(',');
+  return `[${formatted}]`;
+}
+
+/**
+ * Seeds the curated gemmological education corpus and any published CMS pages
+ * into `knowledge_documents` and `knowledge_chunks` idempotently.
+ */
+export async function seedCuratedKnowledgeCorpus(
+  client: DbClient | any,
+): Promise<{ documentsUpserted: number; chunksUpserted: number }> {
+  let documentsUpserted = 0;
+  let chunksUpserted = 0;
+
+  for (const item of CURATED_GEMMOLOGICAL_KNOWLEDGE) {
+    const vec = buildDeterministicEmbedding1024(`${item.title} ${item.content}`);
+    const tokenCount = item.content.split(/\s+/).filter(Boolean).length;
+    const docRes = await client.query(
+      `INSERT INTO knowledge_documents (
+         slug, title, doc_kind, locale, content, trust_tier, status,
+         checksum_sha256, embedded_at, embedding_model
+       ) VALUES ($1, $2, $3, 'en', $4, $5, 'ACTIVE', md5($4), now(), 'deterministic-1024-v1')
+       ON CONFLICT (slug) DO UPDATE
+       SET title = EXCLUDED.title,
+           content = EXCLUDED.content,
+           checksum_sha256 = EXCLUDED.checksum_sha256,
+           updated_at = now()
+       RETURNING id::text AS id`,
+      [item.slug, item.title, item.docKind, item.content, item.trustTier],
+    );
+    const docId = docRes.rows[0]?.id as string | undefined;
+    if (docId) {
+      documentsUpserted += 1;
+      await client.query(
+        `INSERT INTO knowledge_chunks (
+           document_id, ordinal, content, token_count, heading_path,
+           embedding, embedding_model, metadata
+         ) VALUES ($1::uuid, 0, $2, $3, $4::text[], $5::vector, 'deterministic-1024-v1', $6::jsonb)
+         ON CONFLICT (document_id, ordinal) DO UPDATE
+         SET content = EXCLUDED.content,
+             token_count = EXCLUDED.token_count,
+             embedding = EXCLUDED.embedding`,
+        [
+          docId,
+          item.content,
+          tokenCount,
+          item.headingPath,
+          vec,
+          JSON.stringify({ slug: item.slug, doc_kind: item.docKind }),
+        ],
+      );
+      chunksUpserted += 1;
+    }
+  }
+
+  return { documentsUpserted, chunksUpserted };
+}

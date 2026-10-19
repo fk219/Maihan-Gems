@@ -19,6 +19,7 @@ import {
   type CatalogDatabase,
 } from '@maihan/db';
 import type { RouteHandler, RouteContext } from './handlers.js';
+import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
 import { requireIdentifier } from './query.js';
 
 function getDb(ctx: RouteContext): CatalogDatabase {
@@ -28,15 +29,26 @@ function getDb(ctx: RouteContext): CatalogDatabase {
   throw new ContractError('INTERNAL', 'Database connection not available.');
 }
 
-function requireCustomerId(ctx: RouteContext): string {
-  const customerId =
-    ctx.request?.headers.get('x-customer-id') ??
-    ctx.url.searchParams.get('customer_id');
+async function requireCustomerId(ctx: RouteContext): Promise<string> {
+  const sessionToken = extractSessionToken(ctx.request);
+  const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+  const headerCustomerId =
+    ctx.request?.headers.get('x-customer-id')?.trim() ||
+    ctx.url.searchParams.get('customer_id')?.trim() ||
+    null;
 
-  if (!customerId) {
-    throw new ContractError('UNAUTHORIZED', 'Authentication required for wishlist access.');
+  if (actor) {
+    if (headerCustomerId && headerCustomerId !== actor.customer_id) {
+      throw new ContractError('FORBIDDEN', 'Cross-customer wishlist access is forbidden.');
+    }
+    return actor.customer_id;
   }
-  return customerId;
+
+  if (headerCustomerId && process.env['MAIHAN_ENV'] !== 'production') {
+    return headerCustomerId;
+  }
+
+  throw new ContractError('UNAUTHORIZED', 'Authentication required for wishlist access.');
 }
 
 async function parseBody(request?: Request): Promise<unknown> {
@@ -53,7 +65,7 @@ async function parseBody(request?: Request): Promise<unknown> {
 export const FAVORITES_HANDLERS: Record<string, RouteHandler> = {
   async getFavorites(ctx) {
     const db = getDb(ctx);
-    const customerId = requireCustomerId(ctx);
+    const customerId = await requireCustomerId(ctx);
     const favorites = await getCustomerFavorites(db, customerId);
     return {
       status: 200,
@@ -63,7 +75,7 @@ export const FAVORITES_HANDLERS: Record<string, RouteHandler> = {
 
   async addFavorite(ctx) {
     const db = getDb(ctx);
-    const customerId = requireCustomerId(ctx);
+    const customerId = await requireCustomerId(ctx);
     const body = await parseBody(ctx.request);
     const input = AddFavoriteInputSchema.parse(body);
     const favorites = await addCustomerFavorite(db, customerId, input.product_id);
@@ -75,7 +87,7 @@ export const FAVORITES_HANDLERS: Record<string, RouteHandler> = {
 
   async removeFavorite(ctx) {
     const db = getDb(ctx);
-    const customerId = requireCustomerId(ctx);
+    const customerId = await requireCustomerId(ctx);
     const productId = requireIdentifier(ctx.params['productId'], 'productId');
     const favorites = await removeCustomerFavorite(db, customerId, productId);
     return {

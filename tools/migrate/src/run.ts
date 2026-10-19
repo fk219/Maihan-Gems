@@ -44,6 +44,7 @@ import { runPricesObservations } from './stages/prices-observations.js';
 import { runAssets } from './stages/assets.js';
 import { runCertificates } from './stages/certificates.js';
 import { runCmsRedirects } from './stages/cms-redirects.js';
+import { runKnowledgeEmbeddings } from './stages/knowledge-embeddings.js';
 import { runCompatibility } from './stages/compatibility.js';
 import { runVerifyGates } from './stages/verify-gates.js';
 import { runDerivedIdentities } from './stages/derived-identities.js';
@@ -195,6 +196,10 @@ async function executeStage(
       const corpus = options.minManifestArtifacts >= 13;
       const result = await runCmsRedirects(ctx, { corpus });
       return `redirects: ${String(result.rows)} source URLs, inserted ${String(result.inserted)}; status [${result.byStatus}]; family [${result.byFamily}]`;
+    }
+    case 'knowledge-embeddings': {
+      const result = await runKnowledgeEmbeddings(ctx);
+      return `knowledge-embeddings: curated ${String(result.curatedDocuments)}, cms ${String(result.cmsDocuments)}, chunks ${String(result.chunksUpserted)}`;
     }
     case 'certificates': {
       const corpus = options.minManifestArtifacts >= 13;

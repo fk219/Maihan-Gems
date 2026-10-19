@@ -22,6 +22,7 @@ const GROUPS: { group: string; links: { href: string; label: string; key: string
     links: [
       { href: '/admin/catalogue', label: 'Product Moderation', key: 'catalogue' },
       { href: '/admin/vendors', label: 'Trade Vendors', key: 'vendors' },
+      { href: '/admin/certificates', label: 'Certificates & OCR', key: 'certificates' },
       { href: '/admin/content', label: 'CMS Pages', key: 'content' },
     ],
   },
@@ -30,6 +31,8 @@ const GROUPS: { group: string; links: { href: string; label: string; key: string
     links: [
       { href: '/admin/customers', label: 'Customers', key: 'customers' },
       { href: '/admin/users', label: 'Roles & Permissions', key: 'users' },
+      { href: '/admin/migration', label: 'Migration & INV-08', key: 'migration' },
+      { href: '/admin/operations', label: 'Operations & Queues', key: 'operations' },
       { href: '/admin/audit', label: 'Audit Logs', key: 'audit' },
     ],
   },

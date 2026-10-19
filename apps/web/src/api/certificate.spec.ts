@@ -229,4 +229,24 @@ describe('Certificate Intelligence HTTP API (Phase 8 Tasks 1-10)', () => {
     expect(json.data.certificates[0].field_status).toBe('VERIFIED');
     expect(json.data.notice).toContain('INV-07');
   });
+
+  it('rejects customer-scoped callers from running OCR or approving certificates (403 FORBIDDEN)', async () => {
+    const res = await api(
+      new Request('http://localhost:3000/api/v1/certificates/cert_mock_123/review', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-customer-id': 'cust_unauthorized_123',
+        },
+        body: JSON.stringify({
+          reviewerId: 'cust_unauthorized_123',
+          decision: 'APPROVE',
+          extraction: createMockExtraction(),
+        }),
+      }),
+    );
+    expect(res.status).toBe(403);
+    const json = await res.json();
+    expect(json.error.code).toBe('FORBIDDEN');
+  });
 });

@@ -35,6 +35,7 @@ import {
   toCents,
 } from '@maihan/domain';
 import { getCartByToken } from './cart-repository.js';
+import { validateDiscount } from './discount-repository.js';
 import { reserveStockForCart } from './inventory-reservation.js';
 
 export async function createCheckoutSession(
@@ -73,13 +74,30 @@ export async function createCheckoutSession(
 
   const reservationExpiresAt = computeReservationExpiry(new Date(), RESERVATION_TTL_MINUTES).toISOString();
 
+  let sessionPricingSnapshot: PricingSnapshotDto = cart.pricing_snapshot;
+  if (input.discount_code && input.discount_code.trim().length > 0) {
+    const discountValidation = await validateDiscount(db, {
+      code: input.discount_code.trim(),
+      subtotal: Number(cart.pricing_snapshot.subtotal),
+      customer_id: input.customer_id ?? cart.customer_id ?? undefined,
+    });
+    if (discountValidation.valid) {
+      sessionPricingSnapshot = {
+        ...cart.pricing_snapshot,
+        discount_total: discountValidation.discount_amount,
+        grand_total: discountValidation.final_subtotal,
+        computed_at: new Date().toISOString(),
+      };
+    }
+  }
+
   const session: CheckoutSessionDto = {
     id: sessionId,
     cart_token: cart.cart_token,
     customer_id: input.customer_id ?? cart.customer_id ?? null,
     email: input.email ?? null,
     current_step: 'SHIPPING',
-    pricing_snapshot: cart.pricing_snapshot,
+    pricing_snapshot: sessionPricingSnapshot,
     shipping_address: null,
     shipping_method: null,
     payment_intent_id: null,

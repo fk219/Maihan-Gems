@@ -65,6 +65,7 @@ export const CreateCheckoutSessionInputSchema = z
     expected_total: z.string().optional(),
     email: z.string().email().optional(),
     customer_id: z.string().uuid().optional(),
+    discount_code: z.string().max(64).optional(),
   })
   .strict();
 export type CreateCheckoutSessionInput = z.input<typeof CreateCheckoutSessionInputSchema>;

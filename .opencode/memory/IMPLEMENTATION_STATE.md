@@ -1,3 +1,14 @@
+# STOREFRONT REDESIGN + 4-PHASE AUDIT REMEDIATION COMPLETED (2026-10-19)
+
+1. **Theme & Homepage Redesign ("Golden Obsidian" & "The Private Vault")** — Updated global design tokens (`--gold: #D4A437`, `--gold-gradient`, `--warm-white: #F6F2E9`, `--navy-deep: #16110C`, Jost + Cormorant Garamond, 6px border-radius) across `apps/web/src/app/globals.css`, `apps/web/src/lib/theme-styles.ts`, `apps/web/src/app/storefront-luxury.css`, `apps/web/src/app/layout.tsx`, and rebuilt `apps/web/src/app/(storefront)/page.tsx` while keeping all `mgh-*` spec selectors intact.
+2. **Full End-to-End Audit & 4-Phase Remediation (`COMPLETENESS_AUDIT.md`)**:
+   - **Phase 1:** Production identity header stripping (`route.ts`), unified `gateAdmin` session/CSRF/RBAC enforcement + `READ_ONLY_ANALYST` PII redaction, IDOR closures across orders/refunds/favorites/certificates/AI conversations, INV-07 unverified field redaction on `GET /certificates/{id}`, Neon SSL auto-detection in `pool.ts`, exact `BigInt` cent arithmetic in `calculateDyoPrice`, HTML sanitization in `ProductStudio.tsx`, transactional `placeOrder`/`transitionOrderState`/`requestRefund` with stock restoration on `CANCELLED`, and authoritative DB status filtering so `SOLD_OUT`/`DRAFT`/`ARCHIVED` DB rows are never resurrected from `ngc-catalog.json`.
+   - **Phase 2:** Unified `maihan_cart_token` server cart with browser `maihan_bag` across `BagView.tsx`, `CheckoutReview.tsx`, `DyoReviewActions.tsx`, and `StorefrontProvider.tsx`; persisted selected metal and ring size in `DyoStudio.tsx`; wired promo code validation & discount calculation into `CheckoutReview.tsx` / `createCheckoutSession` and Protection Plan / Financing add-ons into `CheckoutConfirm.tsx`; synced `FavoritesView.tsx` with `/api/v1/favorites` and `CollectionFilters.tsx` with URL `searchParams`.
+   - **Phase 3:** Built `apps/worker/src/dispatch/jobs-runner.ts` (8 operational queues with lease reclamation and exponential backoff) and outbox routing in `apps/worker/src/dispatch/outbox.ts`; normalized vendor `LOOSE_STONE`/`STONE_PAIR` products into `gemstones`; added `withRlsContext` in `packages/db`; built Admin APIs and interactive UI workspaces for `/admin/content`, `/admin/certificates`, `/admin/migration` (including INV-08 Derived-SKU Approval `POST /api/v1/admin/derived-refs/{id}/approve`), and `/admin/operations`; implemented `tools/migrate/src/stages/knowledge-embeddings.ts` and `seedCuratedKnowledgeCorpus` + hybrid `match_knowledge_chunks` retrieval.
+   - **Phase 4:** Added `StripePaymentProvider` (`Stripe-Signature` `t=...,v1=...` HMAC-SHA256 + REST API), `TransactionalEmailProvider` (Resend/Mailtrap HTTP API + outbox fallback), and live OpenAI/OpenRouter HTTP completion support in `DefaultModelGateway`.
+
+---
+
 # STOREFRONT SEED, WORKER, CMS CONTENT, DYO INTEGRITY & SECURITY-CLEANUP (2026-10-19)
 
 Session built on top of the 2026-10-18 full-stack completion. Commit `d1e2e86` already

@@ -7,6 +7,7 @@ import { sql } from '@maihan/db';
 
 import { createCatalogDatabase } from './dispatch/catalog-db.js';
 import { dispatchOutbox } from './dispatch/outbox.js';
+import { processOperationalJobs } from './dispatch/jobs-runner.js';
 import { runSweeps } from './schedules/sweeps.js';
 
 const DATABASE_URL = process.env['DATABASE_URL'] ?? '';
@@ -46,5 +47,19 @@ describe.skipIf(!dbReachable)('worker dispatch + sweeps (live database)', () => 
     for (const sweep of second) {
       expect(sweep.changed).toBe(0);
     }
+  });
+
+  it('routes ProductStateChanged outbox events into operational queues and processes them to SUCCEEDED', async () => {
+    const db = createCatalogDatabase(pool!);
+    await db.execute(sql`
+      INSERT INTO domain_events (event_id, event_type, aggregate_type, aggregate_id, payload)
+      VALUES (gen_random_uuid(), 'ProductStateChanged', 'product', gen_random_uuid(), '{"action": "PUBLISH"}'::jsonb)
+    `);
+    const dispatchRes = await dispatchOutbox(db, 'worker.spec');
+    expect(dispatchRes.published).toBeGreaterThanOrEqual(1);
+
+    const jobRes = await processOperationalJobs(db, 'worker.spec');
+    expect(jobRes.succeeded).toBeGreaterThanOrEqual(1);
+    expect(jobRes.deadLettered).toBe(0);
   });
 });

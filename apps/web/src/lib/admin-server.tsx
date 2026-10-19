@@ -56,7 +56,12 @@ export async function requireAdminAccess(
     };
   }
 
-  // 2. Fallback to gateway header seam
+  // In production, never fall back to unverified x-admin-* headers
+  if (process.env['MAIHAN_ENV'] === 'production') {
+    return { ok: false, status: 401, environment: 'locked' };
+  }
+
+  // 2. Fallback to gateway header seam (non-production / tests only)
   const headerList = await headers();
   const forwarded = new Headers();
   headerList.forEach((value, name) => forwarded.append(name, value));
@@ -66,7 +71,7 @@ export async function requireAdminAccess(
   return {
     ok: false,
     status: decision.status,
-    environment: process.env['MAIHAN_ENV'] === 'production' ? 'locked' : 'development',
+    environment: 'development',
   };
 }
 

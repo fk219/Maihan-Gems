@@ -19,7 +19,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type {
   BackOfficeAuditLogRow,
+  BackOfficeCertificateRow,
   BackOfficeDiscountRow,
+  BackOfficeMigrationOverview,
+  BackOfficeOperationsOverview,
   BackOfficeRefundRow,
   CatalogueProductRow,
   VendorProfileDto,
@@ -28,7 +31,11 @@ import type {
 import { requireAdminAccess, AdminGateScreen } from '../../../lib/admin-server.js';
 import { AdminSidebar } from '../../../components/admin/AdminSidebar.js';
 import {
+  AdminCertificatesWorkspace,
+  AdminCmsWorkspace,
   AdminDiscountsWorkspace,
+  AdminMigrationWorkspace,
+  AdminOperationsWorkspace,
   AdminProductModerationTable,
   AdminRefundsTable,
   AdminUsersTable,
@@ -116,6 +123,21 @@ export default async function AdminPage({ params }: PageProps) {
       const access = await requireAdminAccess('dashboards', 'read');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
       return <AdminAuditLogs />;
+    }
+    case 'certificates': {
+      const access = await requireAdminAccess('certificates', 'list');
+      if (!access.ok) return <AdminGateScreen status={access.status} />;
+      return <AdminCertificates />;
+    }
+    case 'migration': {
+      const access = await requireAdminAccess('import_batches', 'read');
+      if (!access.ok) return <AdminGateScreen status={access.status} />;
+      return <AdminMigration />;
+    }
+    case 'operations': {
+      const access = await requireAdminAccess('dashboards', 'read');
+      if (!access.ok) return <AdminGateScreen status={access.status} />;
+      return <AdminOperations />;
     }
     default:
       notFound();
@@ -400,45 +422,71 @@ async function AdminContent() {
   return (
     <AdminFrame
       active="content"
-      title="Content"
-      lede="CMS pages under the locking workflow. Approval is two-person and publish requires an approved head revision."
+      title="Content & Editorial CMS"
+      lede="CMS pages under the locking workflow. Approval is two-person for trust-bearing pages and publish requires an approved head revision."
     >
-      {rows.length === 0 ? (
-        <div className="admin-empty">No CMS pages yet.</div>
-      ) : (
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Slug</th>
-              <th>Kind</th>
-              <th>State</th>
-              <th>Version</th>
-              <th>Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={String(row['id'])}>
-                <td>{String(row['title'])}</td>
-                <td>
-                  <code>{String(row['slug'])}</code>
-                </td>
-                <td>{String(row['page_kind'])}</td>
-                <td>
-                  <span
-                    className={`admin-badge ${row['state'] === 'PUBLISHED' ? 'admin-badge--ok' : ''}`}
-                  >
-                    {String(row['state'])}
-                  </span>
-                </td>
-                <td>v{String(row['version'])}</td>
-                <td>{new Date(String(row['created_at'])).toLocaleDateString('en-GB')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <AdminCmsWorkspace initialPages={rows} />
+    </AdminFrame>
+  );
+}
+
+async function AdminCertificates() {
+  const response = await adminOriginFetch('/api/v1/admin/certificates');
+  if (!response.ok) {
+    return <AdminUnavailable status={response.status} />;
+  }
+  const body = (await response.json()) as { data?: BackOfficeCertificateRow[] };
+  const rows = body.data ?? [];
+
+  return (
+    <AdminFrame
+      active="certificates"
+      title="Certificates & OCR Verification (INV-07)"
+      lede="Review laboratory certificates and resolve OCR anomalies. Unverified certificate fields are redacted from public storefront responses."
+    >
+      <AdminCertificatesWorkspace initialCertificates={rows} />
+    </AdminFrame>
+  );
+}
+
+async function AdminMigration() {
+  const response = await adminOriginFetch('/api/v1/admin/migration');
+  if (!response.ok) {
+    return <AdminUnavailable status={response.status} />;
+  }
+  const body = (await response.json()) as { data?: BackOfficeMigrationOverview };
+  const overview = body.data ?? { batches: [], conflicts: [], derived_refs: [] };
+
+  return (
+    <AdminFrame
+      active="migration"
+      title="Migration Batches, Conflicts & INV-08 Derived References"
+      lede="Inspect deterministic migration batches, unresolved staging conflicts, and approve or reject inferred derived SKUs (INV-08)."
+    >
+      <AdminMigrationWorkspace initialOverview={overview} />
+    </AdminFrame>
+  );
+}
+
+async function AdminOperations() {
+  const response = await adminOriginFetch('/api/v1/admin/operations');
+  if (!response.ok) {
+    return <AdminUnavailable status={response.status} />;
+  }
+  const body = (await response.json()) as { data?: BackOfficeOperationsOverview };
+  const overview = body.data ?? {
+    outbox: { pending: 0, published: 0, dead_letter: 0 },
+    recent_events: [],
+    queues: [],
+  };
+
+  return (
+    <AdminFrame
+      active="operations"
+      title="Operations, Outbox & Job Queues"
+      lede="Monitor transactional outbox delivery, event consumers, and background worker queues."
+    >
+      <AdminOperationsWorkspace overview={overview} />
     </AdminFrame>
   );
 }

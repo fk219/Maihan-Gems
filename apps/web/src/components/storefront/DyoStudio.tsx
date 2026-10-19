@@ -130,6 +130,7 @@ export function DyoStudio({
     setBeginning(true);
     setBeginError(null);
     try {
+      const isRing = (setting.settingFor ?? 'ring').toLowerCase() === 'ring';
       const createRes = await fetch('/api/v1/dyo/configurations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -137,6 +138,10 @@ export function DyoStudio({
           settingVariantSku: setting.sku,
           gemRef: stone.sku,
           jewelleryType: (setting.settingFor ?? 'ring').toUpperCase() === 'EARRINGS' ? 'EARRINGS' : 'RING',
+          options: {
+            metal,
+            ...(isRing ? { ringSize: size } : {}),
+          },
         }),
       });
       const createBody = (await createRes.json().catch(() => null)) as {

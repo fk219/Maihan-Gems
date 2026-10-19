@@ -49,6 +49,21 @@ function mapRefundRow(row: RefundRow): RefundDto {
   };
 }
 
+async function runInTransaction<T>(
+  db: CatalogDatabase,
+  work: (tx: CatalogDatabase) => Promise<T>,
+): Promise<T> {
+  const maybeTx = (
+    db as unknown as {
+      transaction?: <R>(fn: (tx: CatalogDatabase) => Promise<R>) => Promise<R>;
+    }
+  ).transaction;
+  if (typeof maybeTx === 'function') {
+    return (await maybeTx.call(db, work)) as T;
+  }
+  return work(db);
+}
+
 export async function requestRefund(
   db: CatalogDatabase,
   input: {
@@ -58,8 +73,9 @@ export async function requestRefund(
     requested_by?: string;
   },
 ): Promise<RefundDto> {
-  // 1. Fetch order and captured payment
-  const orderRes = await db.execute(sql`
+  return runInTransaction(db, async (tx) => {
+  // 1. Fetch order and lock captured payment row FOR UPDATE to prevent concurrent over-refund races
+  const orderRes = await tx.execute(sql`
     SELECT id, order_number, state::text AS state
     FROM orders
     WHERE id = ${input.orderId} OR order_number = ${input.orderId}
@@ -72,7 +88,7 @@ export async function requestRefund(
 
   const order = orderRes.rows[0] as { id: string; order_number: string; state: string };
 
-  const paymentRes = await db.execute(sql`
+  const paymentRes = await tx.execute(sql`
     SELECT
       id,
       amount::text AS amount,
@@ -85,6 +101,7 @@ export async function requestRefund(
       AND state IN ('CAPTURED', 'PARTIALLY_REFUNDED', 'REFUNDED')
     ORDER BY created_at DESC
     LIMIT 1
+    FOR UPDATE
   `);
 
   if (paymentRes.rows.length === 0) {
@@ -104,7 +121,7 @@ export async function requestRefund(
   const alreadyRefunded = Number(payment.refunded_amount);
 
   // Check sum of already requested/approved pending refunds
-  const pendingRefundsRes = await db.execute(sql`
+  const pendingRefundsRes = await tx.execute(sql`
     SELECT COALESCE(SUM(amount), 0)::text AS pending_total
     FROM refunds
     WHERE payment_id = ${payment.id}
@@ -122,7 +139,7 @@ export async function requestRefund(
   }
 
   // 2. Insert into refunds
-  const refundRes = await db.execute(sql`
+  const refundRes = await tx.execute(sql`
     INSERT INTO refunds (
       payment_id,
       order_id,
@@ -158,7 +175,7 @@ export async function requestRefund(
   const createdRefund = mapRefundRow(refundRes.rows[0] as unknown as RefundRow);
 
   // 3. Log event to order_events
-  await db.execute(sql`
+  await tx.execute(sql`
     INSERT INTO order_events (
       order_id,
       from_state,
@@ -177,6 +194,7 @@ export async function requestRefund(
   `);
 
   return createdRefund;
+  });
 }
 
 export async function approveRefund(

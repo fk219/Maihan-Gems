@@ -110,6 +110,10 @@ import {
   adminAssignRoleHandler,
   adminAuditLogsListHandler,
   adminCmsPagesListHandler,
+  adminCertificatesListHandler,
+  adminMigrationOverviewHandler,
+  adminDecideDerivedRefHandler,
+  adminOperationsOverviewHandler,
 } from './admin/backoffice-handlers.js';
 import type { RateLimitDecision, RateLimitGate } from './ratelimit/gate.js';
 import type { CatalogQueryService } from '../modules/catalog/index.js';
@@ -240,6 +244,10 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       adminAssignRoleHandler,
       adminAuditLogsListHandler,
       adminCmsPagesListHandler,
+      adminCertificatesListHandler,
+      adminMigrationOverviewHandler,
+      adminDecideDerivedRefHandler,
+      adminOperationsOverviewHandler,
     };
 
     const handler =

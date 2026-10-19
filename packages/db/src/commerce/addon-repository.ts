@@ -15,7 +15,7 @@ import {
   type OrderDto,
   type ProductAddonDto,
 } from '@maihan/contracts';
-import { getCustomerOrders } from './account-repository.js';
+import { getOrderById } from './order-repository.js';
 
 interface AddonRow {
   id: string;
@@ -269,12 +269,8 @@ export async function attachAddonToOrder(
     )
   `);
 
-  // 6. Reload updated order
-  const orders = await getCustomerOrders(db, orderRow.customer_id ?? '');
-  const updatedOrder = orders.find((o) => o.id === input.orderId);
-  if (!updatedOrder) {
-    throw new ContractError('INTERNAL', 'Failed to reload updated order.');
-  }
+  // 6. Reload updated order (supports both customer-owned and guest orders)
+  const updatedOrder = await getOrderById(db, input.orderId);
 
   return {
     order: updatedOrder,

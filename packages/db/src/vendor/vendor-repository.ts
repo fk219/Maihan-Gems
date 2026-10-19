@@ -506,6 +506,54 @@ export async function createVendorProduct(
     submitted_at: null,
   };
 
+  // Normalize loose stones and matched pairs into the canonical gemstones table
+  // when a variety reference exists in gemstone_varieties
+  let linkedGemstoneId: string | null = null;
+  let linkedGemstonePairId: string | null = null;
+  let linkedVarietyId: string | null = null;
+  if (kind === 'LOOSE_STONE' || kind === 'STONE_PAIR') {
+    const stoneTypeText = (input.stone_type ?? 'sapphire').trim().toLowerCase();
+    const stoneSlug = stoneTypeText.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const varRes = await db.execute(sql`
+      SELECT id::text AS id FROM gemstone_varieties
+      WHERE lower(slug) = ${stoneSlug} OR lower(display_name) = ${stoneTypeText}
+      LIMIT 1
+    `);
+    const fallbackVarRes =
+      varRes.rows.length > 0
+        ? varRes
+        : await db.execute(sql`SELECT id::text AS id FROM gemstone_varieties LIMIT 1`);
+    if (fallbackVarRes.rows.length > 0) {
+      linkedVarietyId = (fallbackVarRes.rows[0] as { id: string }).id;
+      const gemKind = kind === 'STONE_PAIR' ? 'PAIR' : 'SINGLE';
+      const stoneCount = kind === 'STONE_PAIR' ? 2 : 1;
+      const effectiveWeight = weightCt !== null && weightCt > 0 ? weightCt.toFixed(3) : '1.000';
+      const gemIns = await db.execute(sql`
+        INSERT INTO gemstones (
+          gem_ref, kind, variety_id, total_weight_ct, stone_count,
+          price_amount, currency, price_evidence, availability, state, ref_evidence_status
+        ) VALUES (
+          ${sku}, ${gemKind}::gemstone_kind, ${linkedVarietyId}::uuid,
+          ${effectiveWeight}::numeric, ${stoneCount},
+          ${priceNum.toFixed(2)}::numeric, 'USD', 'OBSERVED', ${invQty > 0}, 'ACTIVE', 'OBSERVED'
+        )
+        ON CONFLICT (gem_ref) DO UPDATE
+        SET price_amount = EXCLUDED.price_amount,
+            availability = EXCLUDED.availability,
+            updated_at = now()
+        RETURNING id::text AS id
+      `);
+      const gemId = (gemIns.rows[0] as { id: string } | undefined)?.id ?? null;
+      if (gemId) {
+        if (kind === 'STONE_PAIR' && jewelleryType === 'EARRINGS') {
+          linkedGemstonePairId = gemId;
+        } else if (kind === 'LOOSE_STONE') {
+          linkedGemstoneId = gemId;
+        }
+      }
+    }
+  }
+
   const insertRes = await db.execute(sql`
     INSERT INTO products (
       kind,
@@ -513,6 +561,9 @@ export async function createVendorProduct(
       title,
       description,
       jewellery_type,
+      variety_id,
+      gemstone_id,
+      gemstone_pair_id,
       total_weight_ct,
       stone_count,
       price_amount,
@@ -529,6 +580,9 @@ export async function createVendorProduct(
       ${title},
       ${input.description?.trim() || null},
       ${jewelleryType}::jewellery_type,
+      ${linkedVarietyId}::uuid,
+      ${linkedGemstoneId}::uuid,
+      ${linkedGemstonePairId}::uuid,
       ${weightCt !== null ? weightCt.toFixed(3) : null},
       ${kind === 'STONE_PAIR' ? 2 : 1},
       ${priceNum.toFixed(2)},
@@ -840,6 +894,26 @@ export async function moderateProductByAdmin(
       ${JSON.stringify({ state: priorState, moderation_status: priorMod })}::jsonb,
       ${JSON.stringify({ state: nextState, moderation_status: nextMod, actor: input.actorSub, role: input.actorRole })}::jsonb,
       ${input.reason ?? null}
+    )
+  `);
+
+  await db.execute(sql`
+    INSERT INTO domain_events (
+      event_id, event_type, aggregate_type, aggregate_id, aggregate_version, payload, status
+    ) VALUES (
+      gen_random_uuid(),
+      'ProductStateChanged',
+      'product',
+      ${input.productId}::uuid,
+      1,
+      ${JSON.stringify({
+        product_id: input.productId,
+        action: input.action,
+        from_state: priorState,
+        to_state: nextState,
+        moderation_status: nextMod,
+      })}::jsonb,
+      'PENDING'
     )
   `);
 

@@ -43,9 +43,47 @@ import {
   type CatalogDatabase,
 } from '@maihan/db';
 import { TestPaymentProvider } from '../integrations/payment/test-payment-provider.js';
-import { resolveRequestActor } from './auth-handlers.js';
+import {
+  createPaymentProvider,
+  StripePaymentProvider,
+} from '../integrations/payment/stripe-payment-provider.js';
+import { ADMIN_ROLES } from '@maihan/domain';
+import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
+
+async function assertOrderOwnership(
+  ctx: RouteContext,
+  orderCustomerId: string | null | undefined,
+  actionDesc: string,
+  requireAuthInProd = true,
+): Promise<{ actorId?: string; actorType: string }> {
+  const sessionToken = extractSessionToken(ctx.request);
+  const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+  if (sessionToken && !actor) {
+    throw new ContractError('UNAUTHORIZED', 'Invalid or expired session token.');
+  }
+  if (actor && (ADMIN_ROLES as readonly string[]).includes(actor.role)) {
+    return { actorId: actor.customer_id, actorType: 'ADMIN' };
+  }
+  if (actor && actor.role === 'VENDOR') {
+    throw new ContractError('FORBIDDEN', `Vendors cannot ${actionDesc} via customer order endpoints.`);
+  }
+  const headerCustomerId = ctx.request?.headers.get('x-customer-id')?.trim() || null;
+  if (actor && headerCustomerId && headerCustomerId !== actor.customer_id) {
+    throw new ContractError('FORBIDDEN', `You do not have permission to ${actionDesc}.`);
+  }
+  const effectiveCustomerId = actor?.customer_id ?? headerCustomerId;
+  if (orderCustomerId) {
+    if (effectiveCustomerId && effectiveCustomerId !== orderCustomerId) {
+      throw new ContractError('FORBIDDEN', `You do not have permission to ${actionDesc}.`);
+    }
+    if (!effectiveCustomerId && requireAuthInProd && process.env['MAIHAN_ENV'] === 'production') {
+      throw new ContractError('UNAUTHORIZED', `Authentication required to ${actionDesc}.`);
+    }
+  }
+  return { actorId: effectiveCustomerId ?? undefined, actorType: 'CUSTOMER' };
+}
 
 function getDb(ctx: RouteContext): CatalogDatabase {
   if (ctx.db) return ctx.db;
@@ -212,14 +250,7 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     const db = getDb(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
     const order = await getOrderById(db, orderId);
-    const actor = await resolveRequestActor(ctx);
-    const headerCustomerId = ctx.request?.headers.get('x-customer-id');
-    if (actor && actor.role === 'CUSTOMER' && order.customer_id && order.customer_id !== actor.customer_id) {
-      throw new ContractError('FORBIDDEN', 'You do not have permission to access another customer’s order.');
-    }
-    if (!actor && headerCustomerId && order.customer_id && order.customer_id !== headerCustomerId) {
-      throw new ContractError('FORBIDDEN', 'You do not have permission to access another customer’s order.');
-    }
+    await assertOrderOwnership(ctx, order.customer_id, 'access another customer’s order');
     return {
       status: 200,
       body: { data: order },
@@ -230,14 +261,7 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     const db = getDb(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
     const order = await getOrderById(db, orderId);
-    const actor = await resolveRequestActor(ctx);
-    const headerCustomerId = ctx.request?.headers.get('x-customer-id');
-    if (actor && actor.role === 'CUSTOMER' && order.customer_id && order.customer_id !== actor.customer_id) {
-      throw new ContractError('FORBIDDEN', 'You do not have permission to access another customer’s order timeline.');
-    }
-    if (!actor && headerCustomerId && order.customer_id && order.customer_id !== headerCustomerId) {
-      throw new ContractError('FORBIDDEN', 'You do not have permission to access another customer’s order timeline.');
-    }
+    await assertOrderOwnership(ctx, order.customer_id, 'access another customer’s order timeline');
     const events = await getOrderEvents(db, orderId);
     return {
       status: 200,
@@ -249,21 +273,16 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     const db = getDb(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
     const existing = await getOrderById(db, orderId);
-    const actor = await resolveRequestActor(ctx);
-    const headerCustomerId = ctx.request?.headers.get('x-customer-id');
-    if (actor && actor.role === 'CUSTOMER' && existing.customer_id && existing.customer_id !== actor.customer_id) {
-      throw new ContractError('FORBIDDEN', 'You do not have permission to cancel another customer’s order.');
-    }
-    if (!actor && headerCustomerId && existing.customer_id && existing.customer_id !== headerCustomerId) {
-      throw new ContractError('FORBIDDEN', 'You do not have permission to cancel another customer’s order.');
-    }
+    const resolved = await assertOrderOwnership(ctx, existing.customer_id, 'cancel another customer’s order');
     const body = await parseBody(ctx.request);
-    const reason = typeof (body as any)?.reason === 'string' ? (body as any).reason : 'Cancelled by customer';
+    const reason = typeof (body as Record<string, unknown>)?.['reason'] === 'string'
+      ? String((body as Record<string, unknown>)['reason'])
+      : 'Cancelled by customer';
     const result = await transitionOrderState(
       db,
       orderId,
       { type: 'CANCEL_REQUESTED', reason, actor: 'CUSTOMER' },
-      { type: 'CUSTOMER', id: actor?.customer_id },
+      { type: resolved.actorType, id: resolved.actorId },
     );
     return {
       status: 200,
@@ -274,7 +293,12 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
   async handlePaymentWebhook(ctx) {
     const db = getDb(ctx);
     const providerParam = (ctx.params['provider'] ?? 'TEST').toUpperCase();
-    const providerAdapter = new TestPaymentProvider();
+    const providerAdapter =
+      providerParam === 'STRIPE'
+        ? new StripePaymentProvider()
+        : providerParam === 'TEST'
+          ? new TestPaymentProvider()
+          : createPaymentProvider();
 
     const rawBody = ctx.request ? await ctx.request.text() : '';
     const headers: Record<string, string> = {};
