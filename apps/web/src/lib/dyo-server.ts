@@ -169,6 +169,16 @@ function settingRow(row: Record<string, unknown>): DyoSettingComponent {
   };
 }
 
+let sharedDyoPool: ReturnType<typeof createPool> | null = null;
+
+function getSharedDyoPool(): ReturnType<typeof createPool> {
+  if (!sharedDyoPool) {
+    const config = loadRuntimeConfig();
+    sharedDyoPool = createPool(config.databaseUrl);
+  }
+  return sharedDyoPool;
+}
+
 export async function loadDyoReviewModel(
   shortCode: string,
 ): Promise<DyoReviewModel | null> {
@@ -179,102 +189,97 @@ export async function loadDyoReviewModel(
     return { configuration, gemstone: null, settingVariant: null, quote: null };
   }
 
-  const config = loadRuntimeConfig();
-  const pool = createPool(config.databaseUrl);
+  const pool = getSharedDyoPool();
   const db = createCatalogDatabase(pool);
-  try {
-    const configuration = await getDyoConfigurationByShortCode(db, shortCode);
-    if (configuration === null) return null;
+  const configuration = await getDyoConfigurationByShortCode(db, shortCode);
+  if (configuration === null) return null;
 
-    const queryable = pool as unknown as QueryablePool;
-    const gemId = configuration.gemstone_id ?? configuration.gemstone_pair_id;
-    const uuid = (value: string | null): string | null =>
-      value !== null && UUID_RE.test(value) ? value : null;
+  const queryable = pool as unknown as QueryablePool;
+  const gemId = configuration.gemstone_id ?? configuration.gemstone_pair_id;
+  const uuid = (value: string | null): string | null =>
+    value !== null && UUID_RE.test(value) ? value : null;
 
-    const gemIdSafe = uuid(gemId);
-    const variantIdSafe = uuid(configuration.setting_variant_id);
-    const settingIdSafe = uuid(configuration.setting_id);
+  const gemIdSafe = uuid(gemId);
+  const variantIdSafe = uuid(configuration.setting_variant_id);
+  const settingIdSafe = uuid(configuration.setting_id);
 
-    const [gemRes, settingRes, quoteRes] = await Promise.all([
-      gemIdSafe !== null
-        ? queryable.query<Record<string, unknown>>(`${GEM_SELECT} WHERE g.id = $1::uuid AND g.deleted_at IS NULL LIMIT 1`, [gemIdSafe])
-        : Promise.resolve({ rows: [] as Record<string, unknown>[] }),
-      variantIdSafe !== null
+  const [gemRes, settingRes, quoteRes] = await Promise.all([
+    gemIdSafe !== null
+      ? queryable.query<Record<string, unknown>>(`${GEM_SELECT} WHERE g.id = $1::uuid AND g.deleted_at IS NULL LIMIT 1`, [gemIdSafe])
+      : Promise.resolve({ rows: [] as Record<string, unknown>[] }),
+    variantIdSafe !== null
+      ? queryable.query<Record<string, unknown>>(`
+          SELECT s.design_code          AS design_code,
+                 s.name                 AS name,
+                 s.jewellery_type::text AS jewellery_type,
+                 s.description          AS description,
+                 sv.metal_code::text    AS metal_code,
+                 sv.sku                 AS variant_sku,
+                 sv.base_price::text    AS base_price,
+                 sv.price_evidence::text AS price_evidence,
+                 sv.availability        AS availability
+          FROM setting_variants sv
+          JOIN settings s ON s.id = sv.setting_id
+          WHERE sv.id = $1::uuid AND sv.deleted_at IS NULL AND s.deleted_at IS NULL
+          LIMIT 1
+        `, [variantIdSafe])
+      : settingIdSafe !== null
         ? queryable.query<Record<string, unknown>>(`
             SELECT s.design_code          AS design_code,
                    s.name                 AS name,
                    s.jewellery_type::text AS jewellery_type,
                    s.description          AS description,
-                   sv.metal_code::text    AS metal_code,
-                   sv.sku                 AS variant_sku,
-                   sv.base_price::text    AS base_price,
-                   sv.price_evidence::text AS price_evidence,
-                   sv.availability        AS availability
-            FROM setting_variants sv
-            JOIN settings s ON s.id = sv.setting_id
-            WHERE sv.id = $1::uuid AND sv.deleted_at IS NULL AND s.deleted_at IS NULL
+                   NULL::text             AS metal_code,
+                   NULL::text             AS variant_sku,
+                   NULL::text             AS base_price,
+                   'UNKNOWN'::text        AS price_evidence,
+                   NULL::boolean          AS availability
+            FROM settings s
+            WHERE s.id = $1::uuid AND s.deleted_at IS NULL
             LIMIT 1
-          `, [variantIdSafe])
-        : settingIdSafe !== null
-          ? queryable.query<Record<string, unknown>>(`
-              SELECT s.design_code          AS design_code,
-                     s.name                 AS name,
-                     s.jewellery_type::text AS jewellery_type,
-                     s.description          AS description,
-                     NULL::text             AS metal_code,
-                     NULL::text             AS variant_sku,
-                     NULL::text             AS base_price,
-                     'UNKNOWN'::text        AS price_evidence,
-                     NULL::boolean          AS availability
-              FROM settings s
-              WHERE s.id = $1::uuid AND s.deleted_at IS NULL
-              LIMIT 1
-            `, [settingIdSafe])
-          : Promise.resolve({ rows: [] as Record<string, unknown>[] }),
-      queryable.query<Record<string, unknown>>(`
-        SELECT gemstone_component::text   AS gemstone_component,
-               setting_component::text    AS setting_component,
-               side_stone_component::text AS side_stone_component,
-               making_component::text     AS making_component,
-               discount_component::text   AS discount_component,
-               tax_component::text        AS tax_component,
-               total::text                AS total,
-               currency                   AS currency,
-               pricing_rule_version       AS pricing_rule_version,
-               computed_at::text          AS computed_at,
-               expires_at::text           AS expires_at
-        FROM dyo_price_snapshots
-        WHERE configuration_id = $1::uuid
-        ORDER BY computed_at DESC
-        LIMIT 1
-      `, [configuration.id]),
-    ]);
+          `, [settingIdSafe])
+        : Promise.resolve({ rows: [] as Record<string, unknown>[] }),
+    queryable.query<Record<string, unknown>>(`
+      SELECT gemstone_component::text   AS gemstone_component,
+             setting_component::text    AS setting_component,
+             side_stone_component::text AS side_stone_component,
+             making_component::text     AS making_component,
+             discount_component::text   AS discount_component,
+             tax_component::text        AS tax_component,
+             total::text                AS total,
+             currency                   AS currency,
+             pricing_rule_version       AS pricing_rule_version,
+             computed_at::text          AS computed_at,
+             expires_at::text           AS expires_at
+      FROM dyo_price_snapshots
+      WHERE configuration_id = $1::uuid
+      ORDER BY computed_at DESC
+      LIMIT 1
+    `, [configuration.id]),
+  ]);
 
-    const gemRowValue = gemRes.rows[0] as Record<string, unknown> | undefined;
-    const settingRowValue = settingRes.rows[0] as Record<string, unknown> | undefined;
-    const quoteRow = quoteRes.rows[0] as Record<string, unknown> | undefined;
+  const gemRowValue = gemRes.rows[0] as Record<string, unknown> | undefined;
+  const settingRowValue = settingRes.rows[0] as Record<string, unknown> | undefined;
+  const quoteRow = quoteRes.rows[0] as Record<string, unknown> | undefined;
 
-    return {
-      configuration,
-      gemstone: gemRowValue ? gemRow(gemRowValue) : null,
-      settingVariant: settingRowValue ? settingRow(settingRowValue) : null,
-      quote: quoteRow
-        ? {
-            gemstoneComponent: String(quoteRow['gemstone_component'] ?? '0.00'),
-            settingComponent: String(quoteRow['setting_component'] ?? '0.00'),
-            sideStoneComponent: String(quoteRow['side_stone_component'] ?? '0.00'),
-            makingComponent: String(quoteRow['making_component'] ?? '0.00'),
-            discountComponent: String(quoteRow['discount_component'] ?? '0.00'),
-            taxComponent: String(quoteRow['tax_component'] ?? '0.00'),
-            total: String(quoteRow['total'] ?? '0.00'),
-            currency: String(quoteRow['currency'] ?? 'USD'),
-            pricingRuleVersion: String(quoteRow['pricing_rule_version'] ?? ''),
-            computedAt: String(quoteRow['computed_at'] ?? ''),
-            expiresAt: textOrNull(quoteRow['expires_at']),
-          }
-        : null,
-    };
-  } finally {
-    await pool.end().catch(() => undefined);
-  }
+  return {
+    configuration,
+    gemstone: gemRowValue ? gemRow(gemRowValue) : null,
+    settingVariant: settingRowValue ? settingRow(settingRowValue) : null,
+    quote: quoteRow
+      ? {
+          gemstoneComponent: String(quoteRow['gemstone_component'] ?? '0.00'),
+          settingComponent: String(quoteRow['setting_component'] ?? '0.00'),
+          sideStoneComponent: String(quoteRow['side_stone_component'] ?? '0.00'),
+          makingComponent: String(quoteRow['making_component'] ?? '0.00'),
+          discountComponent: String(quoteRow['discount_component'] ?? '0.00'),
+          taxComponent: String(quoteRow['tax_component'] ?? '0.00'),
+          total: String(quoteRow['total'] ?? '0.00'),
+          currency: String(quoteRow['currency'] ?? 'USD'),
+          pricingRuleVersion: String(quoteRow['pricing_rule_version'] ?? ''),
+          computedAt: String(quoteRow['computed_at'] ?? ''),
+          expiresAt: textOrNull(quoteRow['expires_at']),
+        }
+      : null,
+  };
 }

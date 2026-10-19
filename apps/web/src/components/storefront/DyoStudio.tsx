@@ -90,7 +90,9 @@ export function DyoStudio({
     setPanel(step);
   }, [step]);
 
-  const total = (setting?.priceUsd ?? 0) + (stone?.priceUsd ?? 0);
+  const componentSubtotal = (setting?.priceUsd ?? 0) + (stone?.priceUsd ?? 0);
+  const makingFee = Math.round(componentSubtotal * 15) / 100;
+  const total = Math.round((componentSubtotal + makingFee) * 100) / 100;
   const settingImage = setting ? imageFor(setting) : '';
   const stoneImage = stone ? imageFor(stone) : '';
   const accept = setting?.accepts
@@ -278,6 +280,7 @@ export function DyoStudio({
               <dl className="atelier__totals">
                 <div><dt>Setting</dt><dd>{setting ? formatMoney(setting.priceUsd, currency, rates) : '—'}</dd></div>
                 <div><dt>Stone</dt><dd>{stone ? formatMoney(stone.priceUsd, currency, rates) : '—'}</dd></div>
+                <div><dt>Atelier making (15%)</dt><dd>{setting && stone ? formatMoney(makingFee, currency, rates) : '—'}</dd></div>
                 <div className="is-total"><dt>Indicative total</dt><dd>{formatMoney(total, currency, rates)}</dd></div>
               </dl>
               <p className="atelier__note">

@@ -50,8 +50,62 @@ export function CompareView({
       setItems([]);
       return;
     }
-    setItems(getCompare());
-    return subscribeAtelier(() => setItems(getCompare()));
+    const syncCompare = () => {
+      const localItems = getCompare();
+      setItems(localItems);
+      const uuidIds = localItems
+        .map((i) => i.id)
+        .filter((id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
+        .slice(0, 4);
+      if (uuidIds.length > 0) {
+        void fetch(`/api/v1/compare?ids=${encodeURIComponent(uuidIds.join(','))}`)
+          .then((res) => (res.ok ? res.json() : null))
+          .then(
+            (
+              body: {
+                data?: {
+                  items?: Array<{
+                    product_id: string;
+                    title?: string;
+                    price_amount?: number | null;
+                    carat_weight?: number | null;
+                    shape?: string | null;
+                    color?: string | null;
+                    origin?: string | null;
+                    treatment?: string | null;
+                    metal?: string | null;
+                  }>;
+                };
+              } | null,
+            ) => {
+              const serverMap = new Map(
+                (body?.data?.items ?? []).map((row) => [row.product_id, row]),
+              );
+              if (serverMap.size === 0) return;
+              setItems((prev) =>
+                prev.map((item) => {
+                  const srv = serverMap.get(item.id);
+                  if (!srv) return item;
+                  return {
+                    ...item,
+                    title: srv.title ?? item.title,
+                    priceUsd: typeof srv.price_amount === 'number' ? srv.price_amount : item.priceUsd,
+                    caratTotal: srv.carat_weight ?? item.caratTotal,
+                    shape: srv.shape ?? item.shape,
+                    colorHue: srv.color ?? item.colorHue,
+                    originCountry: srv.origin ?? item.originCountry,
+                    treatment: srv.treatment ?? item.treatment,
+                    metalColor: srv.metal ?? item.metalColor,
+                  };
+                }),
+              );
+            },
+          )
+          .catch(() => undefined);
+      }
+    };
+    syncCompare();
+    return subscribeAtelier(syncCompare);
   }, [forceEmpty]);
 
   const columns = useMemo(() => items.slice(0, 4), [items]);

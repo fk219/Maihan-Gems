@@ -32,6 +32,7 @@
  * turns it into a `Response`, so response policy can never fork per handler.
  */
 import { ContractError } from '@maihan/contracts';
+import { globalRegistry } from '@maihan/observability';
 import { HANDLERS, type HandlerOutcome, type RouteContext } from './handlers.js';
 import { SEARCH_HANDLERS } from './search-handlers.js';
 import { COMMERCE_HANDLERS } from './commerce-handlers.js';
@@ -282,11 +283,25 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
     };
 
     let outcome: HandlerOutcome;
+    const reqStartMs = Date.now();
+    const methodLabel = request.method.toUpperCase();
+    const routeLabel = lookup.route.id;
     try {
       outcome = await handler(ctx);
     } catch (error) {
+      globalRegistry
+        .counter('http_requests_errors_total', 'Total failed HTTP API requests')
+        .inc({ method: methodLabel, route: routeLabel });
       return errorResponse(error, ids, rateHeaders);
     }
+
+    const durationMs = Math.max(0, Date.now() - reqStartMs);
+    globalRegistry
+      .counter('http_requests_total', 'Total HTTP API requests')
+      .inc({ method: methodLabel, route: routeLabel, status: String(outcome.status) });
+    globalRegistry
+      .histogram('http_request_duration_ms', 'HTTP API request duration in ms')
+      .observe(durationMs, { method: methodLabel, route: routeLabel });
 
     // Task 10: cache headers derive from the handler's CacheInfo and the
     // route's surface policy — one place, so no handler can emit its own.

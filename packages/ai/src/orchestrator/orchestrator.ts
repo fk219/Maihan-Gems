@@ -195,14 +195,42 @@ export class AiOrchestrator {
     if (lowerMsg.includes('stone type') || lowerMsg.includes('variety')) {
       // Charter worked example: NULL stone type check
       synthesis = this.groundingGate.generateNullRefusal('stone_type');
-    } else if (collectedCitations.length > 0) {
-      const mainCit = collectedCitations[0]!;
-      synthesis = `In accordance with Maihan Gems verified records for ${mainCit.label}: This selection is curated in our private vault under archival reference ${mainCit.id}.`;
-      if (collectedCitations.some((c) => c.type === 'CERTIFICATE')) {
-        synthesis += ` Official documentation on file has been catalogued.`;
+    } else if (
+      process.env['OPENAI_API_KEY'] ||
+      process.env['OPENROUTER_API_KEY'] ||
+      process.env['AI_GATEWAY_API_KEY']
+    ) {
+      try {
+        const gen = await this.gateway.generate({
+          surface: input.surface ?? 'chat_panel',
+          messages: [
+            {
+              role: 'system',
+              content:
+                'You are the Maihan Gems advisory concierge. Cite only verified records provided in context; never invent prices, certificates, or origins.',
+            },
+            {
+              role: 'user',
+              content: `Client query: ${input.message}\nVerified citations: ${JSON.stringify(collectedCitations)}`,
+            },
+          ],
+        });
+        synthesis = gen.content;
+      } catch {
+        synthesis = '';
       }
-    } else {
-      synthesis = `I searched our verified gemmological archive for "${input.message}". I could not locate a confirmed matching record in current inventory. Would you like to consult our Private Client Advisory team?`;
+    }
+
+    if (!synthesis) {
+      if (collectedCitations.length > 0) {
+        const mainCit = collectedCitations[0]!;
+        synthesis = `In accordance with Maihan Gems verified records for ${mainCit.label}: This selection is curated in our private vault under archival reference ${mainCit.id}.`;
+        if (collectedCitations.some((c) => c.type === 'CERTIFICATE')) {
+          synthesis += ` Official documentation on file has been catalogued.`;
+        }
+      } else {
+        synthesis = `I searched our verified gemmological archive for "${input.message}". I could not locate a confirmed matching record in current inventory. Would you like to consult our Private Client Advisory team?`;
+      }
     }
 
     // STAGE 6: Verify claims through GroundingGate

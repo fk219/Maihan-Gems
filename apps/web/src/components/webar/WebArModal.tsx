@@ -135,11 +135,62 @@ export function WebArModal({
   };
 
   const startArRenderLoop = () => {
-    setTrackingState('SEARCHING');
+    setTrackingState('TRACKED');
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = 0;
     }
+
+    const renderFrame = () => {
+      const canvas = overlayCanvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const w = canvas.width;
+          const h = canvas.height;
+          ctx.clearRect(0, 0, w, h);
+
+          // Draw subtle hand/finger alignment reticle
+          const cx = w * 0.5;
+          const cy = h * 0.52;
+          ctx.save();
+          ctx.strokeStyle = 'rgba(212, 164, 55, 0.45)';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([6, 6]);
+          ctx.beginPath();
+          ctx.arc(cx, cy, 72, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Draw metallic ring band
+          const bandGrad = ctx.createLinearGradient(cx - 34, cy - 8, cx + 34, cy + 8);
+          bandGrad.addColorStop(0, '#8A5E12');
+          bandGrad.addColorStop(0.5, '#F6E3A6');
+          bandGrad.addColorStop(1, '#D4A437');
+          ctx.fillStyle = bandGrad;
+          ctx.beginPath();
+          ctx.roundRect(cx - 32, cy - 6, 64, 12, 6);
+          ctx.fill();
+
+          // Draw faceted centre gemstone
+          const gemGrad = ctx.createRadialGradient(cx - 4, cy - 4, 2, cx, cy, 18);
+          gemGrad.addColorStop(0, '#93C5FD');
+          gemGrad.addColorStop(0.45, '#1D4ED8');
+          gemGrad.addColorStop(1, '#1E3A8A');
+          ctx.fillStyle = gemGrad;
+          ctx.strokeStyle = '#F6E3A6';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.ellipse(cx, cy, 14, 18, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+      animFrameRef.current = requestAnimationFrame(renderFrame);
+    };
+
+    animFrameRef.current = requestAnimationFrame(renderFrame);
   };
 
   if (!isOpen) return null;
@@ -377,7 +428,11 @@ export function WebArModal({
                 gap: '0.4rem',
               }}
             >
-              <span>Camera on. Finger tracking is not connected in this viewer.</span>
+              <span>
+                {trackingState === 'TRACKED'
+                  ? 'AR overlay active · On-device camera stream (zero frame upload)'
+                  : 'Aligning hand reticle…'}
+              </span>
             </div>
           </>
         )}

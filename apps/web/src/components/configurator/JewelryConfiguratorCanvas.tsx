@@ -54,6 +54,28 @@ export function JewelryConfiguratorCanvas({
       );
       if (disposed || !hostRef.current) return;
 
+      const probeCanvas = document.createElement('canvas');
+      const hasWebGl2 = Boolean(
+        probeCanvas.getContext('webgl2') || probeCanvas.getContext('webgl'),
+      );
+      if (!hasWebGl2) {
+        const fallback = document.createElement('div');
+        fallback.style.display = 'flex';
+        fallback.style.alignItems = 'center';
+        fallback.style.justifyContent = 'center';
+        fallback.style.height = '100%';
+        fallback.style.padding = '1.5rem';
+        fallback.style.color = '#524F49';
+        fallback.style.fontSize = '0.85rem';
+        fallback.textContent = `${label} — Interactive 3D preview requires WebGL2.`;
+        host.appendChild(fallback);
+        cleanup = () => {
+          fallback.remove();
+          return undefined;
+        };
+        return;
+      }
+
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0xf7f7f5);
       const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 40);
@@ -85,11 +107,16 @@ export function JewelryConfiguratorCanvas({
         scene.add(key);
       }
 
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enablePan = false;
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
-      controls.autoRotate = true;
+      controls.autoRotate = !prefersReducedMotion;
       controls.autoRotateSpeed = 0.4;
       if (mode === 'stone') {
         controls.target.set(0, 0.02, 0);
@@ -244,6 +271,11 @@ export function JewelryConfiguratorCanvas({
         cancelAnimationFrame(frame);
         observer.disconnect();
         controls.dispose();
+        for (const mat of gemMaterials) {
+          const bvhVal = mat.uniforms?.['bvh']?.value as { dispose?: () => void } | undefined;
+          bvhVal?.dispose?.();
+          mat.dispose();
+        }
         envMap.dispose();
         renderer.dispose();
         renderer.domElement.remove();
