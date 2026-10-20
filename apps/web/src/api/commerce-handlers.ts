@@ -51,6 +51,7 @@ import {
 } from '../integrations/payment/stripe-payment-provider.js';
 import { ADMIN_ROLES } from '@maihan/domain';
 import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
+import { isDevSeamEnabled } from '@maihan/config';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
@@ -80,7 +81,8 @@ async function assertOrderOwnership(
     if (effectiveCustomerId && effectiveCustomerId !== orderCustomerId) {
       throw new ContractError('FORBIDDEN', `You do not have permission to ${actionDesc}.`);
     }
-    if (!effectiveCustomerId && requireAuthInProd && process.env['MAIHAN_ENV'] === 'production') {
+    // R1-1 fail-closed: auth required unless an explicit dev seam opts out.
+    if (!effectiveCustomerId && requireAuthInProd && !isDevSeamEnabled()) {
       throw new ContractError('UNAUTHORIZED', `Authentication required to ${actionDesc}.`);
     }
   }

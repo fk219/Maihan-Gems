@@ -35,6 +35,7 @@ import {
   type CatalogDatabase,
 } from '@maihan/db';
 import { extractSessionToken, resolveRequestActor } from '../auth-handlers.js';
+import { isDevSeamEnabled } from '@maihan/config';
 import type { HandlerOutcome, RouteContext } from '../handlers.js';
 import { requireIdentifier } from '../query.js';
 import { authorizeAdmin, authzFailureResponse, type CapabilityRequest } from './authz.js';
@@ -123,8 +124,9 @@ export async function gateAdmin(
     };
   }
 
-  // In production, never fall back to unverified x-admin-* request headers
-  if (process.env['MAIHAN_ENV'] === 'production') {
+  // R1-1 fail-closed: never fall back to unverified x-admin-* request
+  // headers unless an explicit developer seam is opted into.
+  if (!isDevSeamEnabled()) {
     return { failure: authzFailureResponse(401, ctx.ids) };
   }
 

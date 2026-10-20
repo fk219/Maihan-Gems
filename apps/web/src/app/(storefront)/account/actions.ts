@@ -14,6 +14,7 @@ import { cookies } from 'next/headers';
 
 import { CLIENT_REF_COOKIE, accountApi } from '../../../lib/account-server.js';
 import type { CustomerProfileDto } from '@maihan/contracts';
+import { isDevSeamEnabled } from '@maihan/config';
 
 export type OpenPortfolioOutcome = 'ok' | 'rejected' | 'unreachable';
 
@@ -28,7 +29,7 @@ export async function openPortfolio(reference: string): Promise<OpenPortfolioOut
     store.set(CLIENT_REF_COOKIE, value, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: process.env['MAIHAN_ENV'] === 'production',
+      secure: !isDevSeamEnabled(), // R1-1 fail-closed: Secure by default
       path: '/',
       maxAge: 60 * 60 * 12,
     });

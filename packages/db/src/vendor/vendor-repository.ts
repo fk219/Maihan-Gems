@@ -158,36 +158,46 @@ function validateAndNormalizeImages(
   });
 }
 
+/** Maps a vendor_onboarding row (flat columns) to the DTO. */
+function mapVendorRow(row: Record<string, unknown>): VendorProfileDto {
+  return {
+    id: String(row['id']),
+    owner_customer_id: String(row['owner_customer_id'] ?? ''),
+    email: String(row['email'] ?? ''),
+    slug: String(row['slug'] ?? ''),
+    display_name: String(row['display_name'] ?? ''),
+    legal_name: String(row['legal_name'] ?? ''),
+    country_code: String(row['country_code'] ?? 'AE'),
+    city: String(row['city'] ?? 'Dubai'),
+    bourse_member: Boolean(row['bourse_member']),
+    description: row['description'] ? String(row['description']) : null,
+    contact_phone: row['contact_phone'] ? String(row['contact_phone']) : null,
+    status: (row['status'] as VendorOnboardingStatus) ?? 'PENDING',
+    rejection_reason: row['rejection_reason'] ? String(row['rejection_reason']) : null,
+    created_at: new Date(String(row['created_at'])).toISOString(),
+    updated_at: new Date(String(row['updated_at'])).toISOString(),
+  };
+}
+
+const VENDOR_COLUMNS = `id::text AS id, owner_customer_id::text AS owner_customer_id,
+    email, slug, display_name, legal_name, country_code, city, bourse_member,
+    description, contact_phone, status, rejection_reason,
+    created_at::text AS created_at, updated_at::text AS updated_at`;
+
 export async function getVendorById(
   db: CatalogDatabase,
   vendorId: string,
 ): Promise<VendorProfileDto | null> {
+  // R1-3 (F-06 completion): vendor profiles live in vendor_onboarding, not
+  // the 90-day-retention jobs queue (technical_design/27 §1).
   const res = await db.execute(sql`
-    SELECT id::text AS id, payload, created_at::text AS created_at, updated_at::text AS updated_at
-    FROM jobs
-    WHERE id = ${vendorId} AND queue = 'vendors'
+    SELECT ${sql.raw(VENDOR_COLUMNS)}
+    FROM vendor_onboarding
+    WHERE id = ${vendorId}
     LIMIT 1
   `);
   if (res.rows.length === 0) return null;
-  const row = res.rows[0] as { id: string; payload: Record<string, unknown>; created_at: string; updated_at: string };
-  const p = row.payload;
-  return {
-    id: row.id,
-    owner_customer_id: String(p['owner_customer_id'] ?? ''),
-    email: String(p['email'] ?? ''),
-    slug: String(p['slug'] ?? ''),
-    display_name: String(p['display_name'] ?? ''),
-    legal_name: String(p['legal_name'] ?? ''),
-    country_code: String(p['country_code'] ?? 'AE'),
-    city: String(p['city'] ?? 'Dubai'),
-    bourse_member: Boolean(p['bourse_member']),
-    description: p['description'] ? String(p['description']) : null,
-    contact_phone: p['contact_phone'] ? String(p['contact_phone']) : null,
-    status: (p['status'] as VendorOnboardingStatus) ?? 'PENDING',
-    rejection_reason: p['rejection_reason'] ? String(p['rejection_reason']) : null,
-    created_at: new Date(row.created_at).toISOString(),
-    updated_at: new Date(row.updated_at).toISOString(),
-  };
+  return mapVendorRow(res.rows[0] as Record<string, unknown>);
 }
 
 export async function getVendorByOwnerCustomerId(
@@ -195,31 +205,13 @@ export async function getVendorByOwnerCustomerId(
   customerId: string,
 ): Promise<VendorProfileDto | null> {
   const res = await db.execute(sql`
-    SELECT id::text AS id, payload, created_at::text AS created_at, updated_at::text AS updated_at
-    FROM jobs
-    WHERE job_key = ${'vendor:owner:' + customerId} AND queue = 'vendors'
+    SELECT ${sql.raw(VENDOR_COLUMNS)}
+    FROM vendor_onboarding
+    WHERE owner_customer_id = ${customerId}
     LIMIT 1
   `);
   if (res.rows.length === 0) return null;
-  const row = res.rows[0] as { id: string; payload: Record<string, unknown>; created_at: string; updated_at: string };
-  const p = row.payload;
-  return {
-    id: row.id,
-    owner_customer_id: String(p['owner_customer_id'] ?? customerId),
-    email: String(p['email'] ?? ''),
-    slug: String(p['slug'] ?? ''),
-    display_name: String(p['display_name'] ?? ''),
-    legal_name: String(p['legal_name'] ?? ''),
-    country_code: String(p['country_code'] ?? 'AE'),
-    city: String(p['city'] ?? 'Dubai'),
-    bourse_member: Boolean(p['bourse_member']),
-    description: p['description'] ? String(p['description']) : null,
-    contact_phone: p['contact_phone'] ? String(p['contact_phone']) : null,
-    status: (p['status'] as VendorOnboardingStatus) ?? 'PENDING',
-    rejection_reason: p['rejection_reason'] ? String(p['rejection_reason']) : null,
-    created_at: new Date(row.created_at).toISOString(),
-    updated_at: new Date(row.updated_at).toISOString(),
-  };
+  return mapVendorRow(res.rows[0] as Record<string, unknown>);
 }
 
 export async function updateVendorProfile(
@@ -243,26 +235,17 @@ export async function updateVendorProfile(
   if (existing.owner_customer_id !== actorCustomerId) {
     throw new ContractError('FORBIDDEN', 'You do not have permission to modify another vendor profile.');
   }
-  const updatedPayload = {
-    owner_customer_id: existing.owner_customer_id,
-    email: existing.email,
-    slug: existing.slug,
-    display_name: input.display_name?.trim() || existing.display_name,
-    legal_name: input.legal_name?.trim() || existing.legal_name,
-    country_code: input.country_code?.trim().toUpperCase().slice(0, 2) || existing.country_code,
-    city: input.city?.trim() || existing.city,
-    bourse_member: input.bourse_member ?? existing.bourse_member,
-    description: input.description !== undefined ? input.description.trim() : existing.description,
-    contact_phone: input.contact_phone !== undefined ? input.contact_phone.trim() : existing.contact_phone,
-    status: existing.status,
-    rejection_reason: existing.rejection_reason,
-    created_at: existing.created_at,
-    updated_at: new Date().toISOString(),
-  };
-
   await db.execute(sql`
-    UPDATE jobs SET payload = ${JSON.stringify(updatedPayload)}::jsonb, updated_at = now()
-    WHERE id = ${vendorId} AND queue = 'vendors'
+    UPDATE vendor_onboarding SET
+      display_name = ${input.display_name?.trim() || existing.display_name},
+      legal_name = ${input.legal_name?.trim() || existing.legal_name},
+      country_code = ${input.country_code?.trim().toUpperCase().slice(0, 2) || existing.country_code},
+      city = ${input.city?.trim() || existing.city},
+      bourse_member = ${input.bourse_member ?? existing.bourse_member},
+      description = ${input.description !== undefined ? input.description.trim() : existing.description},
+      contact_phone = ${input.contact_phone !== undefined ? input.contact_phone.trim() : existing.contact_phone},
+      updated_at = now()
+    WHERE id = ${vendorId}
   `);
 
   return (await getVendorById(db, vendorId))!;
@@ -272,36 +255,17 @@ export async function listVendorsForAdmin(
   db: CatalogDatabase,
   statusFilter?: VendorOnboardingStatus,
 ): Promise<VendorProfileDto[]> {
+  const where = statusFilter
+    ? sql`WHERE status = ${statusFilter}`
+    : sql``;
   const res = await db.execute(sql`
-    SELECT id::text AS id, payload, created_at::text AS created_at, updated_at::text AS updated_at
-    FROM jobs
-    WHERE queue = 'vendors'
+    SELECT ${sql.raw(VENDOR_COLUMNS)}
+    FROM vendor_onboarding
+    ${where}
     ORDER BY created_at DESC
     LIMIT 100
   `);
-  const all = (res.rows as Array<{ id: string; payload: Record<string, unknown>; created_at: string; updated_at: string }>).map(
-    (row) => {
-      const p = row.payload;
-      return {
-        id: row.id,
-        owner_customer_id: String(p['owner_customer_id'] ?? ''),
-        email: String(p['email'] ?? ''),
-        slug: String(p['slug'] ?? ''),
-        display_name: String(p['display_name'] ?? ''),
-        legal_name: String(p['legal_name'] ?? ''),
-        country_code: String(p['country_code'] ?? 'AE'),
-        city: String(p['city'] ?? 'Dubai'),
-        bourse_member: Boolean(p['bourse_member']),
-        description: p['description'] ? String(p['description']) : null,
-        contact_phone: p['contact_phone'] ? String(p['contact_phone']) : null,
-        status: (p['status'] as VendorOnboardingStatus) ?? 'PENDING',
-        rejection_reason: p['rejection_reason'] ? String(p['rejection_reason']) : null,
-        created_at: new Date(row.created_at).toISOString(),
-        updated_at: new Date(row.updated_at).toISOString(),
-      };
-    },
-  );
-  return statusFilter ? all.filter((v) => v.status === statusFilter) : all;
+  return (res.rows as Array<Record<string, unknown>>).map(mapVendorRow);
 }
 
 export async function moderateVendor(
@@ -330,30 +294,12 @@ export async function moderateVendor(
     throw new ContractError('VALIDATION_FAILED', `Unsupported vendor moderation action: ${input.action}`);
   }
 
-  const updatedPayload = {
-    owner_customer_id: existing.owner_customer_id,
-    email: existing.email,
-    slug: existing.slug,
-    display_name: existing.display_name,
-    legal_name: existing.legal_name,
-    country_code: existing.country_code,
-    city: existing.city,
-    bourse_member: existing.bourse_member,
-    description: existing.description,
-    contact_phone: existing.contact_phone,
-    status: nextStatus,
-    rejection_reason: input.action === 'REJECT' || input.action === 'SUSPEND' ? (input.reason ?? 'Policy decision') : null,
-    created_at: existing.created_at,
-    updated_at: new Date().toISOString(),
-  };
-
-  const jobState = nextStatus === 'APPROVED' ? 'SUCCEEDED' : nextStatus === 'REJECTED' ? 'FAILED' : 'QUEUED';
   await db.execute(sql`
-    UPDATE jobs
-    SET payload = ${JSON.stringify(updatedPayload)}::jsonb,
-        state = ${jobState}::job_state,
+    UPDATE vendor_onboarding
+    SET status = ${nextStatus},
+        rejection_reason = ${input.action === 'REJECT' || input.action === 'SUSPEND' ? (input.reason ?? 'Policy decision') : null},
         updated_at = now()
-    WHERE id = ${input.vendorId} AND queue = 'vendors'
+    WHERE id = ${input.vendorId}
   `);
 
   await db.execute(sql`

@@ -1,87 +1,21 @@
-# =============================================================================
-# Maihan Gems - source archive exclusion
-# =============================================================================
-# The reverse-engineering source archive contains the crawler database, raw
-# HTML, reverse-engineered datasets and all migration-critical source material.
-#
-# It is intentionally NOT committed to GitHub.
-#
-# NEVER: git add naturalgemstones/ | commit naturalgemstones/ | delete naturalgemstones/
-# NEVER: recreate fabricated naturalgemstones data
-#
-# A missing directory is NOT evidence that the archive does not exist. Its
-# absence from a Codespace clone is expected. See AGENTS.md > Source Archive Rule.
-
-naturalgemstones/
-
-# Explicit belt-and-braces for the large derived trees inside the archive.
-naturalgemstones/**
-/naturalgemstones
-
-# =============================================================================
-# Secrets and credentials
-# =============================================================================
-# No credential ever enters the repository, the database, a config table or a log.
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-secrets/
-**/secrets/
-
-# =============================================================================
-# Node toolchain
-# =============================================================================
-node_modules/
-.pnpm-store/
-.pnpm-debug.log*
+build/
 *.tsbuildinfo
-next-env.d.ts
-
-# =============================================================================
-# Build and test output
-# =============================================================================
 .next/
 out/
-dist/
-build/
-coverage/
-playwright-report/
-test-results/
-
-# =============================================================================
-# Migration working data
-# =============================================================================
-# tools/migrate writes staging and canonical data to a DATABASE, never to files
-# in the working tree. Any local dump or export is disposable by definition and
-# must never be committed.
-*.sql.gz
-migrations-local/
-staging-dump/
-
-# =============================================================================
-# Editor and OS noise
-# =============================================================================
-.DS_Store
-Thumbs.db
+.pnpm-store/
+.vscode/
 .idea/
 *.swp
-
-# =============================================================================
-# OpenCode local runtime state
-# =============================================================================
-# Committed: .opencode/memory/  (the persistent project context)
-# Ignored:   session transcripts, caches and local scratch data, which are
-#            per-machine and not project knowledge.
-.opencode/cache/
-.opencode/tmp/
-.opencode/logs/
-.opencode/*.log
-.opencode/sessions/
-
-# =============================================================================
-# NOTE: .opencode/memory/ files are deliberately NOT ignored.
-# They are the project's persistent memory and must reach GitHub so a new
-# Codespace inherits them after `git pull`.
-# =============================================================================freebuff-chat-*.md
+*.swo
+.DS_Store
+Thumbs.db
+.env
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+node_modules/

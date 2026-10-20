@@ -265,6 +265,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@maihan/config':
+        specifier: workspace:*
+        version: link:../config
       '@maihan/contracts':
         specifier: workspace:*
         version: link:../contracts

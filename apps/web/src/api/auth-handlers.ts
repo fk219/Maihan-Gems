@@ -20,6 +20,7 @@ import {
   type CatalogDatabase,
 } from '@maihan/db';
 import type { RouteContext, RouteHandler } from './handlers.js';
+import { isDevSeamEnabled } from '@maihan/config';
 
 export const SESSION_COOKIE_NAME = 'maihan_session';
 
@@ -101,7 +102,8 @@ export async function resolveRequestActor(ctx: RouteContext): Promise<Authentica
 }
 
 function buildSessionSetCookie(sessionToken: string, maxAgeSeconds = 7 * 24 * 3600): string {
-  const secure = process.env['MAIHAN_ENV'] === 'production' ? '; Secure' : '';
+  // R1-1 fail-closed: Secure flag on by default; dropped only in dev seam.
+  const secure = isDevSeamEnabled() ? '' : '; Secure';
   return `${SESSION_COOKIE_NAME}=${encodeURIComponent(sessionToken)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}${secure}`;
 }
 
@@ -124,7 +126,7 @@ export const AUTH_HANDLERS: Record<string, RouteHandler> = {
           session_token: result.session_token,
           csrf_token: result.csrf_token,
           verification_token:
-            process.env['MAIHAN_ENV'] === 'production' ? undefined : result.verification_token,
+            isDevSeamEnabled() ? result.verification_token : undefined, // R1-1 fail-closed
         },
       },
       headers: {
