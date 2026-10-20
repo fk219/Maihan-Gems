@@ -129,8 +129,8 @@ export async function getCatalogueSummary(db: CatalogDatabase): Promise<Catalogu
     countOne(db, sql`SELECT count(*)::text AS n FROM dyo_configurations`),
     countOne(db, sql`SELECT count(*)::text AS n FROM orders`),
     countOne(db, sql`SELECT count(*)::text AS n FROM refunds WHERE state IN ('REQUESTED','APPROVED')`),
-    countOne(db, sql`SELECT count(*)::text AS n FROM jobs WHERE queue = 'vendors' AND payload->>'status' = 'PENDING'`),
-    countOne(db, sql`SELECT count(*)::text AS n FROM jobs WHERE queue = 'vendors' AND payload->>'status' = 'APPROVED'`),
+    countOne(db, sql`SELECT count(*)::text AS n FROM vendor_onboarding WHERE status = 'PENDING'`),
+    countOne(db, sql`SELECT count(*)::text AS n FROM vendor_onboarding WHERE status = 'APPROVED'`),
     countOne(db, sql`SELECT count(*)::text AS n FROM page_review_state WHERE review_state = 'IN_REVIEW'`),
     countOne(db, sql`SELECT count(*)::text AS n FROM assets WHERE deleted_at IS NULL AND processing_state <> 'READY'`),
   ]);

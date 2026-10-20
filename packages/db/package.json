@@ -27,7 +27,8 @@
     "@maihan/domain": "workspace:*",
     "drizzle-orm": "0.45.3",
     "pg": "8.23.1",
-    "@maihan/contracts": "workspace:*"
+    "@maihan/contracts": "workspace:*",
+    "@maihan/config": "workspace:*"
   },
   "devDependencies": {
     "@types/pg": "8.23.1",

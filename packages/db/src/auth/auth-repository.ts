@@ -20,6 +20,7 @@
 import { createHash, createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { sql } from 'drizzle-orm';
 import { ContractError } from '@maihan/contracts';
+import { isDevSeamEnabled } from '@maihan/config';
 import { ADMIN_ROLES, ROLE_SCOPES, type AdminRole } from '@maihan/domain';
 import type { CatalogDatabase } from '../catalog/executor.js';
 
@@ -422,36 +423,33 @@ export async function registerAccount(
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '') + '-' + randomBytes(3).toString('hex');
-    const vendorJobRes = await db.execute(sql`
-      INSERT INTO jobs (
-        job_key,
-        queue,
-        job_type,
-        payload,
-        state
+    // R1-3 (F-06 completion): permanent vendor state lives in
+    // vendor_onboarding, never in the transient jobs queue (doc 27 §1).
+    const vendorInsertRes = await db.execute(sql`
+      INSERT INTO vendor_onboarding (
+        owner_customer_id,
+        email,
+        slug,
+        display_name,
+        legal_name,
+        country_code,
+        city,
+        bourse_member,
+        status
       ) VALUES (
-        ${'vendor:owner:' + customerId},
-        'vendors',
-        'VENDOR_PROFILE',
-        ${JSON.stringify({
-          owner_customer_id: customerId,
-          email: normalizedEmail,
-          slug,
-          display_name: displayName,
-          legal_name: displayName,
-          country_code: input.vendor_country?.trim().toUpperCase().slice(0, 2) || 'AE',
-          city: input.vendor_city?.trim() || 'Dubai',
-          bourse_member: false,
-          status: 'PENDING',
-          rejection_reason: null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })}::jsonb,
-        'QUEUED'
+        ${customerId},
+        ${normalizedEmail},
+        ${slug},
+        ${displayName},
+        ${displayName},
+        ${input.vendor_country?.trim().toUpperCase().slice(0, 2) || 'AE'},
+        ${input.vendor_city?.trim() || 'Dubai'},
+        false,
+        'PENDING'
       )
-      RETURNING id
+      RETURNING id::text AS id
     `);
-    vendorId = (vendorJobRes.rows[0] as { id: string }).id;
+    vendorId = (vendorInsertRes.rows[0] as { id: string }).id;
     vendorStatus = 'PENDING';
     vendorName = displayName;
   }
@@ -653,13 +651,14 @@ export async function authenticateAccount(
   let vendorStatus: VendorOnboardingStatus | null = null;
   let vendorName: string | null = null;
   if (cred.vendor_id) {
+    // R1-3: read from the normalized vendor_onboarding table.
     const vRes = await db.execute(sql`
-      SELECT payload FROM jobs WHERE id = ${cred.vendor_id} AND queue = 'vendors' LIMIT 1
+      SELECT status, display_name FROM vendor_onboarding WHERE id = ${cred.vendor_id} LIMIT 1
     `);
     if (vRes.rows.length > 0) {
-      const vp = (vRes.rows[0] as { payload: Record<string, unknown> }).payload;
-      vendorStatus = (vp['status'] as VendorOnboardingStatus) ?? 'PENDING';
-      vendorName = (vp['display_name'] as string) ?? null;
+      const vp = vRes.rows[0] as { status: string; display_name: string };
+      vendorStatus = (vp.status as VendorOnboardingStatus) ?? 'PENDING';
+      vendorName = vp.display_name ?? null;
     }
   }
 
@@ -752,13 +751,14 @@ export async function verifySession(
   let vendorStatus: VendorOnboardingStatus | null = null;
   let vendorName: string | null = null;
   if (vendorId) {
+    // R1-3: read from the normalized vendor_onboarding table.
     const vRes = await db.execute(sql`
-      SELECT payload FROM jobs WHERE id = ${vendorId} AND queue = 'vendors' LIMIT 1
+      SELECT status, display_name FROM vendor_onboarding WHERE id = ${vendorId} LIMIT 1
     `);
     if (vRes.rows.length > 0) {
-      const vp = (vRes.rows[0] as { payload: Record<string, unknown> }).payload;
-      vendorStatus = (vp['status'] as VendorOnboardingStatus) ?? 'PENDING';
-      vendorName = (vp['display_name'] as string) ?? null;
+      const vp = vRes.rows[0] as { status: string; display_name: string };
+      vendorStatus = (vp.status as VendorOnboardingStatus) ?? 'PENDING';
+      vendorName = vp.display_name ?? null;
     }
   }
 
@@ -899,9 +899,11 @@ export async function requestPasswordReset(
     metadata: { reset_path: `/account/reset-password?token=${rawResetToken}` },
   });
 
-  // In non-production environments, return the token in the internal result so
-  // automated integration tests can exercise the complete reset flow deterministically.
-  return process.env['MAIHAN_ENV'] === 'production' ? {} : { reset_token_for_sandbox: rawResetToken };
+  // R1-1 fail-closed: the reset token is returned in the internal result ONLY
+  // under an explicit developer seam (vitest sets NODE_ENV=test), so automated
+  // integration tests can still exercise the complete reset flow. A deployment
+  // that forgets MAIHAN_ENV no longer leaks reset tokens into API responses.
+  return isDevSeamEnabled() ? { reset_token_for_sandbox: rawResetToken } : {};
 }
 
 export async function resetPasswordWithToken(

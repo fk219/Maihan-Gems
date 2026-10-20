@@ -19,6 +19,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { createRedirectResolver } from './lib/redirects.js';
+import { isDevSeamEnabled } from '@maihan/config';
 import { GENERATED_REDIRECT_ROWS } from './lib/redirects-rows.generated';
 
 const resolver = createRedirectResolver(GENERATED_REDIRECT_ROWS);
@@ -75,14 +76,17 @@ function resolveHouseFromHost(host: string | null): string | null {
 }
 
 /**
- * Production host allow-list (M-15). When MAIHAN_ENV=production and
- * ALLOWED_HOSTS is configured, any request whose Host is not on the list
- * (comma-separated, entries may be exact or a leading-dot suffix such as
- * `.maihangems.com`) fails closed with 403 — no host-header-driven cache or
- * SEO poisoning. Unset/empty list or non-production: every host passes.
+ * Host allow-list (M-15, R1-1 fail-closed). When ALLOWED_HOSTS is configured,
+ * any request whose Host is not on the list (comma-separated, entries may be
+ * exact or a leading-dot suffix such as `.maihangems.com`) fails closed with
+ * 403 — no host-header-driven cache or SEO poisoning. The check now applies
+ * in EVERY deployment mode except an explicitly opted-in developer seam
+ * (`MAIHAN_DEV_SEAM='1'` or `NODE_ENV=test|development`); previously it was
+ * gated on `MAIHAN_ENV==='production'`, so forgetting that variable silently
+ * disabled the allow-list. Unset/empty list: every host passes.
  */
 function hostAllowed(request: NextRequest): boolean {
-  if (process.env['MAIHAN_ENV'] !== 'production') return true;
+  if (isDevSeamEnabled()) return true;
   const allowList = (process.env['ALLOWED_HOSTS'] ?? '').trim();
   if (!allowList) return true;
   const host = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim() || request.headers.get('host') || '';

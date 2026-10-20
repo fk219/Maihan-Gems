@@ -20,6 +20,7 @@ import {
 } from '@maihan/db';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
+import { isDevSeamEnabled } from '@maihan/config';
 import { requireIdentifier } from './query.js';
 
 function getDb(ctx: RouteContext): CatalogDatabase {
@@ -44,7 +45,8 @@ async function requireCustomerId(ctx: RouteContext): Promise<string> {
     return actor.customer_id;
   }
 
-  if (headerCustomerId && process.env['MAIHAN_ENV'] !== 'production') {
+  // R1-1 fail-closed: bare x-customer-id identity only under explicit dev seam.
+  if (headerCustomerId && isDevSeamEnabled()) {
     return headerCustomerId;
   }
 

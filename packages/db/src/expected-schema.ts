@@ -78,6 +78,7 @@ export const EXPECTED_TABLES: readonly string[] = [
   'certificate_reviews',
   'certificates',
   'checkout_sessions',
+  'vendor_onboarding',
   'clarities',
   'clarity_labels',
   'colour_intensities',

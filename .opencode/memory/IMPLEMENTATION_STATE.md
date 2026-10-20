@@ -1376,3 +1376,28 @@ uses functional and architecture language, clarifies the configured-jewellery
 composition constraints, and omits repository progress and implementation
 identifiers from the client-facing text. Markdown structure and seven Mermaid
 diagrams were checked.
+
+---
+
+## REMEDIATION PHASE R1 — COMPLETE (2026-10-19, commits 2a41141 + follow-up)
+
+Per AUDIT_PHASE_PLAN.md. Fresh verification executed THIS session:
+`pnpm run build` PASS · `pnpm -r run test` **897 passed / 0 failed / 85 skipped**
+(web 479+21sk, domain 240+11sk, db 101+52sk, contracts 43, ai 14, obs 12, migrate 20+11sk, worker 3sk)
+· `pnpm run lint` 0 errors / 210 warnings (pre-existing no-explicit-any debt).
+
+- R1-1 fail-closed security mode: packages/config/src/security-mode.ts is the single
+  authority (only package allowed to read process.env per doc 01). Missing MAIHAN_ENV now
+  FAILS CLOSED; dev seam only via MAIHAN_DEV_SEAM='1' or NODE_ENV=test|development. Wired:
+  route.ts header stripping, account/favorites/commerce/refund/ai/certificate/backoffice/
+  auth handlers, admin-server.tsx, proxy.ts host allow-list, account actions. New
+  security-mode.spec.ts (8 tests). NOTE: R3-6 password-change session revocation was found
+  ALREADY IMPLEMENTED (auth-repository.ts:956 revokeAllUserSessions) — reclassified verified.
+- R1-2 governance: ADR-027 recorded in technical_design/40 + DECISIONS.md.
+- R1-3 jobs normalization residual: migration 0020_vendor_onboarding.sql + repo cutover
+  (vendor/auth/dashboards repositories) + expected-schema entry. INTEGRATION TEST PENDING:
+  apply 0020 against a real Postgres (none available in this environment).
+- R1-4 leaked Git-history credentials: CLIENT-OWNED (rotation required; no history rewrite).
+
+Next: PHASE R2 (corpus migration needs naturalgemstones/ archive restore; email/PSP/AI keys;
+WebAR assets) — all client-gated.
