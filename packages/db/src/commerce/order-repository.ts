@@ -318,6 +318,7 @@ export async function placeOrder(
         t.label AS treatment,
         cl.label AS clarity,
         gc.name AS colour_description,
+        p.kind::text AS product_kind,
         p.state::text AS product_state,
         p.availability AS product_availability,
         p.structured_extra AS product_extra
@@ -335,7 +336,21 @@ export async function placeOrder(
     const gemSnapshot: Record<string, unknown> =
       gemRes.rows.length > 0 && gemRes.rows[0] ? (gemRes.rows[0] as Record<string, unknown>) : {};
 
-    if (!item.configuration_id) {
+    if (item.configuration_id) {
+      const configuredSold = await tx.execute(sql`
+        UPDATE products
+        SET availability = false,
+            state = CASE WHEN state = 'ACTIVE' THEN 'SOLD_OUT'::product_state ELSE state END,
+            updated_at = now()
+        WHERE id = ${item.product_id}
+          AND availability = true
+          AND state = 'ACTIVE'
+        RETURNING id
+      `);
+      if (configuredSold.rows.length === 0) {
+        throw new ContractError('UNPROCESSABLE', `Configured product "${item.title}" is no longer available.`);
+      }
+    } else {
       if (
         (gemSnapshot['product_state'] && gemSnapshot['product_state'] !== 'ACTIVE') ||
         gemSnapshot['product_availability'] === false
@@ -343,6 +358,15 @@ export async function placeOrder(
         throw new ContractError('UNPROCESSABLE', `Product "${item.title}" is no longer available in stock.`);
       }
       const prodExtra = gemSnapshot['product_extra'] as Record<string, unknown> | null | undefined;
+      const hasNumericStock = prodExtra !== null && prodExtra !== undefined &&
+        typeof prodExtra['inventory_quantity'] === 'number';
+      if (
+        (gemSnapshot['product_kind'] === 'LOOSE_STONE' || gemSnapshot['product_kind'] === 'STONE_PAIR') &&
+        !hasNumericStock &&
+        item.quantity > 1
+      ) {
+        throw new ContractError('UNPROCESSABLE', `A unique stone or pair cannot be ordered more than once ("${item.title}").`);
+      }
       if (prodExtra && typeof prodExtra['inventory_quantity'] === 'number') {
         const currentQty = Number(prodExtra['inventory_quantity']);
         if (currentQty < item.quantity) {
@@ -363,6 +387,28 @@ export async function placeOrder(
         `);
         if (decRes.rows.length === 0) {
           throw new ContractError('UNPROCESSABLE', `Concurrent order conflict: "${item.title}" is out of stock.`);
+        }
+      } else if (
+        gemSnapshot['product_kind'] === 'LOOSE_STONE' ||
+        gemSnapshot['product_kind'] === 'STONE_PAIR'
+      ) {
+        // A loose stone or pair is one physical object. The sale itself is
+        // the stock transition, guarded by the current state so two
+        // concurrent buyers cannot both succeed. SETTING_ONLY and READY_MADE
+        // are made-to-order per technical_design/15 and do not carry a
+        // one-of-one availability transition without an explicit quantity.
+        const soldRes = await tx.execute(sql`
+          UPDATE products
+          SET availability = false,
+              state = CASE WHEN state = 'ACTIVE' THEN 'SOLD_OUT'::product_state ELSE state END,
+              updated_at = now()
+          WHERE id = ${item.product_id}
+            AND availability = true
+            AND state = 'ACTIVE'
+          RETURNING id
+        `);
+        if (soldRes.rows.length === 0) {
+          throw new ContractError('UNPROCESSABLE', `Concurrent order conflict: "${item.title}" is no longer available.`);
         }
       }
     }
@@ -467,6 +513,28 @@ export async function placeOrder(
       )
     `);
   }
+
+  // The sold physical stone/pair must stop being reservable. Product state
+  // alone is not enough because reservation and DYO checks read gemstones.
+  await tx.execute(sql`
+    UPDATE gemstones g
+    SET availability = false,
+        availability_checked_at = now()
+    FROM order_items oi
+    JOIN products p ON p.id = oi.product_id
+    WHERE oi.order_id = ${orderId}
+      AND p.kind IN ('LOOSE_STONE', 'STONE_PAIR', 'CONFIGURED')
+      AND (g.id = p.gemstone_id OR g.id = p.gemstone_pair_id)
+  `);
+
+  // A completed sale consumes the reservation. Without this the stone would
+  // become reservable again when the 30-minute TTL sweeper runs.
+  await tx.execute(sql`
+    UPDATE inventory_reservations
+    SET state = 'CONSUMED', released_at = now()
+    WHERE cart_id = ${cart.id}
+      AND state = 'ACTIVE'
+  `);
 
   // Append to order_events state timeline
   await tx.execute(sql`
@@ -652,7 +720,7 @@ export async function transitionOrderState(
     throw new ContractError('IDEMPOTENCY_CONFLICT', 'Concurrent order state modification detected.');
   }
 
-  // Restore product availability and inventory quantity when an order is cancelled
+  // Restore product and gemstone availability when an order is cancelled.
   if (transition.nextState === 'CANCELLED') {
     await tx.execute(sql`
       UPDATE products p
@@ -672,6 +740,18 @@ export async function transitionOrderState(
       WHERE oi.order_id = ${rawOrder.id}
         AND oi.product_id = p.id
         AND oi.configuration_id IS NULL
+    `);
+
+    await tx.execute(sql`
+      UPDATE gemstones g
+      SET availability = true,
+          state = 'ACTIVE'::record_state,
+          availability_checked_at = now()
+      FROM order_items oi
+      JOIN products p ON p.id = oi.product_id
+      WHERE oi.order_id = ${rawOrder.id}
+        AND p.kind IN ('LOOSE_STONE', 'STONE_PAIR', 'CONFIGURED')
+        AND (g.id = p.gemstone_id OR g.id = p.gemstone_pair_id)
     `);
   }
 

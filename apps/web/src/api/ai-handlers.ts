@@ -21,6 +21,7 @@ import {
   updateConversationState,
   appendMessage,
   recordAiInteraction,
+  recordToolCall,
   loadSettingCompatibilityRules,
   buildDeterministicEmbedding1024,
   seedCuratedKnowledgeCorpus,
@@ -240,7 +241,8 @@ export function buildToolServices(ctx: RouteContext): ToolServices {
           settingBasePrice = setting.price;
         }
 
-        const priced = calculateDyoPrice({ gemstoneBasePrice, settingBasePrice, currency: 'USD' });
+        const makingFee = Math.round((gemstoneBasePrice + settingBasePrice) * 0.15 * 100) / 100;
+        const priced = calculateDyoPrice({ gemstoneBasePrice, settingBasePrice, makingFee, currency: 'USD' });
         return {
           totalAmount: priced.total,
           currency: priced.currency,
@@ -263,15 +265,13 @@ export function buildToolServices(ctx: RouteContext): ToolServices {
     commerce: {
       createCustomerRequest: async (input) => {
         const requestId = `req_${Date.now().toString(36)}`;
-        try {
-          await db.query(
-            `INSERT INTO audit_logs (actor_type, action, entity_type, after_state, reason)
-             VALUES ('AI_TOOL', 'CUSTOMER_REQUEST_CREATED', 'customer_request', $1::jsonb, 'AI concierge create_customer_request tool')`,
-            [JSON.stringify({ requestId, ...(input ?? {}) })],
-          );
-        } catch {
-          // Best-effort persistence when running against mock DB in unit tests
-        }
+        // Persist before returning. A failed write must fail the tool, never
+        // produce a fake success that the customer believes was recorded.
+        await db.query(
+          `INSERT INTO audit_logs (actor_type, action, entity_type, after_state, reason)
+           VALUES ('AI_TOOL', 'CUSTOMER_REQUEST_CREATED', 'customer_request', $1::jsonb, 'AI concierge create_customer_request tool')`,
+          [JSON.stringify({ requestId, ...(input ?? {}) })],
+        );
         return { requestId };
       },
     },
@@ -390,6 +390,26 @@ export const aiChatHandler: RouteHandler = async (ctx) => {
     role: 'user',
     content: message,
   });
+
+  for (const toolCall of outcome.toolCallsExecuted) {
+    await recordToolCall(db, {
+      conversationId: conv.id,
+      toolName: toolCall.tool,
+      toolVersion: '1.0.0',
+      input: toolCall.input,
+      authorizationDecision: toolCall.decision,
+      actorType: conv.customer_id ? 'CUSTOMER' : 'ANONYMOUS_WEB',
+    });
+  }
+
+  if (outcome.handoff) {
+    await updateConversationState(db, {
+      conversationId: conv.id,
+      state: 'AWAITING_HUMAN',
+      handoffReason: outcome.handoff.trigger,
+      summary: outcome.handoff.specialistNotice,
+    });
+  }
 
   await appendMessage(db, {
     conversationId: conv.id,

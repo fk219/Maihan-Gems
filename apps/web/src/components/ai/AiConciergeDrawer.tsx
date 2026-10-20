@@ -94,7 +94,7 @@ export function AiConciergeDrawer() {
         body: JSON.stringify({
           message: query,
           conversationKey,
-          surface: 'chat_drawer',
+          surface: 'chat_panel',
           stream: true,
         }),
       });
@@ -110,39 +110,63 @@ export function AiConciergeDrawer() {
         const decoder = new TextDecoder();
         let accumulated = '';
         let citations: any[] = [];
+        let buffer = '';
+
+        const applyFrame = (event: string, data: any) => {
+          if (event === 'content_delta') {
+            const text = typeof data?.text === 'string'
+              ? data.text
+              : typeof data?.delta === 'string'
+                ? data.delta
+                : '';
+            if (text.length > 0) {
+              accumulated += text;
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === assistantMessageId
+                    ? { ...msg, content: accumulated, citations }
+                    : msg,
+                ),
+              );
+            }
+          } else if (event === 'citation' && data?.citation) {
+            citations = [...citations, data.citation];
+          } else if (event === 'done' && typeof data?.response === 'string') {
+            accumulated = data.response;
+            if (Array.isArray(data.citations)) citations = data.citations;
+          } else if (typeof data?.response === 'string') {
+            accumulated = data.response;
+            if (Array.isArray(data.citations)) citations = data.citations;
+          }
+        };
+
+        const drain = (flush: boolean) => {
+          const blocks = buffer.split('\n\n');
+          buffer = flush ? '' : (blocks.pop() ?? '');
+          for (const block of blocks) {
+            let event = 'message';
+            const dataLines: string[] = [];
+            for (const line of block.split('\n')) {
+              if (line.startsWith('event:')) event = line.slice(6).trim();
+              else if (line.startsWith('data:')) dataLines.push(line.slice(5).trimStart());
+            }
+            if (dataLines.length === 0) continue;
+            try {
+              applyFrame(event, JSON.parse(dataLines.join('\n')));
+            } catch {
+              // Ignore a malformed frame; a later frame can still render.
+            }
+          }
+        };
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-
-          const textChunk = decoder.decode(value, { stream: true });
-          const lines = textChunk.split('\n');
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.delta) {
-                  accumulated += data.delta;
-                  setMessages((prev) =>
-                    prev.map((msg) =>
-                      msg.id === assistantMessageId
-                        ? { ...msg, content: accumulated, citations }
-                        : msg,
-                    ),
-                  );
-                } else if (data.citation) {
-                  citations.push(data.citation);
-                } else if (data.response) {
-                  accumulated = data.response;
-                  if (data.citations) citations = data.citations;
-                }
-              } catch {
-                // Ignore chunk parse glitch
-              }
-            }
-          }
+          buffer += decoder.decode(value, { stream: true });
+          drain(false);
         }
+        buffer += decoder.decode();
+        drain(true);
 
         setMessages((prev) =>
           prev.map((msg) =>
@@ -151,7 +175,7 @@ export function AiConciergeDrawer() {
                   ...msg,
                   content:
                     accumulated ||
-                    'Thank you for your inquiry. Our private client team will be delighted to guide your bespoke commission.',
+                    'The concierge returned no answer. Please try again or ask for a human specialist.',
                   citations,
                   isStreaming: false,
                 }

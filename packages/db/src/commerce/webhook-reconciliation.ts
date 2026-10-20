@@ -122,7 +122,7 @@ export async function reconcilePaymentWebhook(
 
   // Load authoritative order
   const orderRes = await db.execute(sql`
-    SELECT id, order_number, grand_total::text AS grand_total, state::text AS state
+    SELECT id, order_number, grand_total::text AS grand_total, state::text AS state, version
     FROM orders
     WHERE id = ${targetOrderId}
     LIMIT 1
@@ -138,7 +138,13 @@ export async function reconcilePaymentWebhook(
     return { reconciled: false, error: 'Order not found' };
   }
 
-  const order = orderRes.rows[0] as { id: string; order_number: string; grand_total: string; state: string };
+  const order = orderRes.rows[0] as {
+    id: string;
+    order_number: string;
+    grand_total: string;
+    state: string;
+    version: number;
+  };
 
   // Re-derivation amount check
   if (verified.amount && Number(verified.amount).toFixed(2) !== Number(order.grand_total).toFixed(2)) {
@@ -154,6 +160,20 @@ export async function reconcilePaymentWebhook(
 
   // Handle capture event
   if (verified.eventType === 'payment.captured' || verified.eventType === 'charge.successful') {
+    if (order.state === 'PAID') {
+      // At-least-once redelivery with a fresh receipt id: already applied.
+      return { reconciled: true, orderId: order.id };
+    }
+    if (order.state !== 'PENDING_PAYMENT') {
+      const err = `Cannot mark order ${order.order_number} PAID from state ${order.state}`;
+      await db.execute(sql`
+        UPDATE webhook_receipts
+        SET processing_error = ${err}
+        WHERE provider = ${verified.provider}
+          AND external_event_id = ${verified.externalEventId}
+      `);
+      return { reconciled: false, orderId: order.id, error: err };
+    }
     const providerPaymentId =
       verified.providerPaymentId ?? `pay_${verified.provider.toLowerCase()}_${verified.externalEventId}`;
 
@@ -185,12 +205,25 @@ export async function reconcilePaymentWebhook(
         updated_at = now()
     `);
 
-    // Update order to PAID
-    await db.execute(sql`
+    // Update order to PAID with optimistic concurrency and a state guard.
+    const paidRes = await db.execute(sql`
       UPDATE orders
-      SET state = 'PAID', paid_at = now(), updated_at = now()
+      SET state = 'PAID', paid_at = now(), updated_at = now(), version = version + 1
       WHERE id = ${order.id}
+        AND state = 'PENDING_PAYMENT'
+        AND version = ${order.version}
+      RETURNING id
     `);
+    if (paidRes.rows.length === 0) {
+      const err = 'Concurrent order state change detected during payment reconciliation';
+      await db.execute(sql`
+        UPDATE webhook_receipts
+        SET processing_error = ${err}
+        WHERE provider = ${verified.provider}
+          AND external_event_id = ${verified.externalEventId}
+      `);
+      return { reconciled: false, orderId: order.id, error: err };
+    }
 
     // Append to order_events timeline
     await db.execute(sql`

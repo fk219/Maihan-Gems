@@ -18,11 +18,15 @@ import {
   executeRefund,
   getOrderById,
   getOrderRefunds,
+  getPaymentById,
+  getRefund,
   rejectRefund,
   requestRefund,
   type CatalogDatabase,
 } from '@maihan/db';
 import { ADMIN_ROLES } from '@maihan/domain';
+import { StripePaymentProvider } from '../integrations/payment/stripe-payment-provider.js';
+import { TestPaymentProvider } from '../integrations/payment/test-payment-provider.js';
 import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
@@ -184,10 +188,39 @@ export const REFUND_HANDLERS: Record<string, RouteHandler> = {
     const db = getDb(ctx);
     await assertAdminRefundCapability(ctx);
     const refundId = requireIdentifier(ctx.params['refundId'], 'refundId');
-    const refund = await executeRefund(db, refundId);
+
+    const refundRecord = await getRefund(db, refundId);
+    if (refundRecord.state !== 'APPROVED' && refundRecord.state !== 'PROCESSING') {
+      throw new ContractError('UNPROCESSABLE', `Cannot execute refund in "${refundRecord.state}" state.`);
+    }
+    const payment = await getPaymentById(db, refundRecord.payment_id);
+    if (!payment) {
+      throw new ContractError('UNPROCESSABLE', 'The refund payment record does not exist.');
+    }
+
+    if (process.env['MAIHAN_ENV'] === 'production' && payment.provider === 'TEST') {
+      throw new ContractError('INTERNAL', 'The test payment provider cannot refund money in production.');
+    }
+    if (payment.provider === 'STRIPE' && !process.env['STRIPE_SECRET_KEY']) {
+      throw new ContractError('INTERNAL', 'Stripe credentials are not configured.');
+    }
+
+    const provider = payment.provider === 'STRIPE'
+      ? new StripePaymentProvider()
+      : new TestPaymentProvider();
+    const providerResult = await provider.refund({
+      order_id: refundRecord.order_id,
+      provider_payment_id: payment.provider_payment_id,
+      amount: refundRecord.amount,
+      currency: refundRecord.currency,
+      reason: refundRecord.reason,
+      idempotency_key: `refund:${refundId}`,
+    });
+
+    const refund = await executeRefund(db, refundId, providerResult.provider_refund_id);
     return {
       status: 200,
-      body: { data: refund },
+      body: { data: refund, provider: providerResult.provider },
     };
   },
 };

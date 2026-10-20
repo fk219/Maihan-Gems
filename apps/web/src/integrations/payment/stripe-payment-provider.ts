@@ -94,7 +94,21 @@ export class StripePaymentProvider implements PaymentProvider {
       throw new Error(`Stripe authorize failed with HTTP ${response.status}`);
     }
 
-    const body = (await response.json()) as { id: string; amount: number; currency: string };
+    const body = (await response.json()) as {
+      id: string;
+      amount: number;
+      currency: string;
+      status?: string;
+    };
+    // A PaymentIntent created without a payment method is only
+    // `requires_payment_method`; it is NOT authorized and must never be
+    // recorded as such. Manual capture intents are authorized when Stripe
+    // reports `requires_capture`.
+    if (body.status !== 'requires_capture' && body.status !== 'succeeded') {
+      throw new Error(
+        `Stripe authorize did not produce an authorized payment (status: ${body.status ?? 'unknown'}).`,
+      );
+    }
     return {
       provider: this.providerName,
       provider_payment_id: body.id,
@@ -194,6 +208,9 @@ export class StripePaymentProvider implements PaymentProvider {
   }
 
   verifyWebhook(req: RawWebhookRequest, secret?: string): VerifiedWebhook {
+    if (process.env['MAIHAN_ENV'] === 'production' && !secret && !process.env['STRIPE_WEBHOOK_SECRET']) {
+      throw new Error('STRIPE_WEBHOOK_SECRET must be configured in production.');
+    }
     const rawBodyBuffer =
       typeof req.rawBody === 'string' ? Buffer.from(req.rawBody, 'utf8') : req.rawBody;
     const rawBodyString = rawBodyBuffer.toString('utf8');
@@ -338,6 +355,9 @@ export class StripePaymentProvider implements PaymentProvider {
 export function createPaymentProvider(): PaymentProvider {
   if (process.env['STRIPE_SECRET_KEY'] || process.env['STRIPE_WEBHOOK_SECRET']) {
     return new StripePaymentProvider();
+  }
+  if (process.env['MAIHAN_ENV'] === 'production') {
+    throw new Error('No live payment provider is configured.');
   }
   return new TestPaymentProvider();
 }

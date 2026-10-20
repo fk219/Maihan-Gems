@@ -294,8 +294,10 @@ export async function adminAuditLogsListHandler(
 ): Promise<HandlerOutcome> {
   const g = await gateAdmin(ctx, { module: 'dashboards', action: 'read' }, deps);
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
-  const rows = await listBackOfficeAuditLogs(getDb(ctx), 100);
-  return { status: 200, body: { data: rows, meta: { limit: 100, count: rows.length } } };
+  const requested = Number(ctx.url.searchParams.get('limit') ?? '100');
+  const limit = Number.isFinite(requested) ? Math.min(Math.max(Math.trunc(requested), 1), 500) : 100;
+  const rows = await listBackOfficeAuditLogs(getDb(ctx), limit);
+  return { status: 200, body: { data: rows, meta: { limit, count: rows.length } } };
 }
 
 export async function adminCmsPagesListHandler(

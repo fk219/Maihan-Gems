@@ -124,6 +124,7 @@ export {
 } from './commerce/order-repository.js';
 export {
   createPaymentRecord,
+  getPaymentById,
   getPaymentByProviderPaymentId,
   updatePaymentState,
   type PaymentRecordRow,

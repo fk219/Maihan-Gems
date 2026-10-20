@@ -241,6 +241,9 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     const db = getDb(ctx);
     const body = await parseBody(ctx.request);
     const input = PlaceOrderInputSchema.parse(body);
+    // Resolve the provider BEFORE placing the order. Production with no live
+    // provider must fail closed without committing an unpayable order.
+    const provider = createPaymentProvider();
     const order = await placeOrder(db, input);
 
     // Live payment intent (M-04): with a real PSP configured the placement
@@ -248,7 +251,6 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     // follows reconciles against it. Without keys the Test adapter answers
     // and the flow is unchanged — the payment lands at webhook time.
     let payment: Record<string, unknown> | null = null;
-    const provider = createPaymentProvider();
     if (provider.providerName === 'STRIPE') {
       try {
         const authorized = await provider.authorize({
@@ -348,6 +350,9 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
   async handlePaymentWebhook(ctx) {
     const db = getDb(ctx);
     const providerParam = (ctx.params['provider'] ?? 'TEST').toUpperCase();
+    if (process.env['MAIHAN_ENV'] === 'production' && providerParam === 'TEST') {
+      throw new ContractError('UNAUTHORIZED', 'The test payment provider is disabled in production.');
+    }
     const providerAdapter =
       providerParam === 'STRIPE'
         ? new StripePaymentProvider()

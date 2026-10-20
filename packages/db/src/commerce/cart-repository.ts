@@ -338,6 +338,7 @@ export async function addItemToCart(
       p.id,
       p.slug,
       p.title,
+      p.kind::text AS kind,
       p.state,
       p.availability,
       p.structured_extra,
@@ -365,6 +366,7 @@ export async function addItemToCart(
     id: string;
     slug: string;
     title: string;
+    kind: string;
     state: string;
     availability?: boolean;
     structured_extra?: Record<string, unknown> | null;
@@ -382,6 +384,13 @@ export async function addItemToCart(
     const maxStock = product.structured_extra?.['inventory_quantity'];
     if (typeof maxStock === 'number' && quantity > maxStock) {
       throw new ContractError('UNPROCESSABLE', `Requested quantity (${quantity}) exceeds available stock (${maxStock}).`);
+    }
+    if (
+      (product.kind === 'LOOSE_STONE' || product.kind === 'STONE_PAIR') &&
+      typeof maxStock !== 'number' &&
+      quantity > 1
+    ) {
+      throw new ContractError('UNPROCESSABLE', 'A unique stone or pair can only be purchased once per line.');
     }
   }
 

@@ -257,9 +257,12 @@ export async function createDyoPriceQuote(
     throw new Error('DYO_CURRENCY_MISMATCH');
   }
 
+  const componentBase = Number(stone.price) + Number(variant.price);
+  const makingFee = Math.round(componentBase * 0.15 * 100) / 100;
   const calculated = calculateDyoPrice({
     gemstoneBasePrice: Number(stone.price),
     settingBasePrice: Number(variant.price),
+    makingFee,
     currency: stone.currency.trim(),
   });
 

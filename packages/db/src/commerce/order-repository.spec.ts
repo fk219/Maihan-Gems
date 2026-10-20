@@ -97,7 +97,8 @@ describe('Order repository DYO snapshots', () => {
         if (text.includes('SELECT count(*)::int AS cnt FROM orders')) return { rows: [{ cnt: 0 }] };
         if (text.includes('SELECT id FROM orders WHERE order_number')) return { rows: [] };
         if (text.includes('INSERT INTO orders')) return { rows: [{ id: orderRow.id }] };
-        if (text.includes('FROM products p')) return { rows: [{ id: 'gem-1', gem_ref: 'GEM-1', variety: 'Sapphire', shape: 'OVAL', carat_weight: '2.50' }] };
+        if (text.includes('FROM products p')) return { rows: [{ id: 'gem-1', gem_ref: 'GEM-1', variety: 'Sapphire', shape: 'OVAL', carat_weight: '2.50', product_state: 'ACTIVE', product_availability: true }] };
+        if (text.includes('UPDATE products') && text.includes('state = CASE WHEN state')) return { rows: [{ id: productId }] };
         if (text.includes('FROM certificates c')) return { rows: [] };
         if (text.includes('FROM dyo_configurations c')) {
           configurationLookup = { text, params };

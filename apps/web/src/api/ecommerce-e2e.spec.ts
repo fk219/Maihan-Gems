@@ -964,7 +964,7 @@ describe('Full Ecommerce End-to-End Journeys (Auth, RBAC, Vendor, Admin, Cart, C
 
     // Verify audit logs recorded privileged mutations
     const auditRes = await api(
-      new Request('http://localhost/api/v1/admin/audit-logs', {
+      new Request('http://localhost/api/v1/admin/audit-logs?limit=500', {
         headers: { 'x-admin-sub': 'super@maihan.test' },
       }),
     );

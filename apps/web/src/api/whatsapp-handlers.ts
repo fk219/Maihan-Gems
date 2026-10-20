@@ -65,7 +65,11 @@ export const whatsappVerificationHandler: RouteHandler = async (ctx) => {
   const token = url.searchParams.get('hub.verify_token');
   const challenge = url.searchParams.get('hub.challenge');
 
-  const expectedToken = process.env['WHATSAPP_VERIFY_TOKEN'] ?? WHATSAPP_VERIFY_TOKEN_DEFAULT;
+  const configuredToken = process.env['WHATSAPP_VERIFY_TOKEN'];
+  if (process.env['MAIHAN_ENV'] === 'production' && !configuredToken) {
+    throw new ContractError('INTERNAL', 'WhatsApp verification is not configured.');
+  }
+  const expectedToken = configuredToken ?? WHATSAPP_VERIFY_TOKEN_DEFAULT;
 
   if (mode === 'subscribe' && token === expectedToken && challenge) {
     return {
@@ -93,7 +97,11 @@ export const whatsappWebhookHandler: RouteHandler = async (ctx) => {
   const rawBody = await req.text();
   const signature = req.headers.get('x-hub-signature-256') || req.headers.get('X-Hub-Signature-256');
 
-  const appSecret = process.env['WHATSAPP_APP_SECRET'] ?? WHATSAPP_APP_SECRET_DEFAULT;
+  const configuredSecret = process.env['WHATSAPP_APP_SECRET'];
+  if (process.env['MAIHAN_ENV'] === 'production' && !configuredSecret) {
+    throw new ContractError('INTERNAL', 'WhatsApp webhook secret is not configured.');
+  }
+  const appSecret = configuredSecret ?? WHATSAPP_APP_SECRET_DEFAULT;
 
   // Verify HMAC signature
   const isValidSignature = verifyMetaSignature(rawBody, signature, appSecret);
@@ -247,6 +255,50 @@ export const whatsappSendTemplateHandler: RouteHandler = async (ctx) => {
         `Marketing send refused: customer ${recipientPhone} has not opted in.`,
       );
     }
+  }
+
+  const accessToken = process.env['WHATSAPP_ACCESS_TOKEN']?.trim();
+  const phoneNumberId = process.env['WHATSAPP_PHONE_NUMBER_ID']?.trim();
+  if (process.env['MAIHAN_ENV'] === 'production' && (!accessToken || !phoneNumberId)) {
+    throw new ContractError('INTERNAL', 'WhatsApp outbound delivery is not configured.');
+  }
+
+  if (accessToken && phoneNumberId) {
+    const graphRes = await fetch(
+      `https://graph.facebook.com/v20.0/${encodeURIComponent(phoneNumberId)}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          to: recipientPhone,
+          type: 'template',
+          template: {
+            name: templateName,
+            language: { code: body['languageCode'] ?? 'en_US' },
+          },
+        }),
+        signal: AbortSignal.timeout(10000),
+      },
+    );
+    if (!graphRes.ok) {
+      throw new ContractError('INTERNAL', `WhatsApp Graph API rejected the send (HTTP ${graphRes.status}).`);
+    }
+    const graphBody = (await graphRes.json().catch(() => null)) as {
+      messages?: Array<{ id?: string }>;
+    } | null;
+    return {
+      status: 200,
+      body: {
+        status: 'sent',
+        recipientPhone,
+        templateName,
+        providerMessageId: graphBody?.messages?.[0]?.id ?? null,
+      },
+    };
   }
 
   return {

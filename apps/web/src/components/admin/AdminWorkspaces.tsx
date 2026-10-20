@@ -816,7 +816,7 @@ export function AdminCmsWorkspace({
   const [pages, setPages] = useState(initialPages);
   const [slug, setSlug] = useState('');
   const [title, setTitle] = useState('');
-  const [pageKind, setPageKind] = useState<'GEMSTONE_EDUCATION' | 'GUIDE' | 'EDITORIAL' | 'LEGAL' | 'FAQ'>('GEMSTONE_EDUCATION');
+  const [pageKind, setPageKind] = useState<'STATIC' | 'EDUCATION' | 'BLOG' | 'POLICY' | 'LANDING' | 'SHOWROOM'>('EDUCATION');
   const [bodyText, setBodyText] = useState('');
   const [busy, setBusy] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -961,11 +961,12 @@ export function AdminCmsWorkspace({
               value={pageKind}
               onChange={(e) => setPageKind(e.target.value as typeof pageKind)}
             >
-              <option value="GEMSTONE_EDUCATION">Gemstone Education (Trust-Bearing)</option>
-              <option value="GUIDE">Buying Guide (Trust-Bearing)</option>
-              <option value="EDITORIAL">Editorial Feature</option>
-              <option value="FAQ">FAQ</option>
-              <option value="LEGAL">Legal / Policy (Trust-Bearing)</option>
+              <option value="EDUCATION">Gemstone Education</option>
+              <option value="BLOG">Journal / Editorial</option>
+              <option value="POLICY">Legal / Policy</option>
+              <option value="STATIC">Static Page</option>
+              <option value="LANDING">Landing Page</option>
+              <option value="SHOWROOM">Showroom Page</option>
             </select>
           </div>
           <div className="lx-account-field">
@@ -1118,7 +1119,7 @@ export function AdminCertificatesWorkspace({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  async function handleReview(certId: string, decision: 'APPROVED' | 'REJECTED') {
+  async function handleReview(certId: string, decision: 'APPROVE' | 'REJECT') {
     setBusyId(certId);
     setError(null);
     setMessage(null);
@@ -1127,10 +1128,8 @@ export function AdminCertificatesWorkspace({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          reviewer_id: 'trust.reviewer@maihangems.com',
           decision,
           notes: `Certificate ${decision} via Trust Review Console`,
-          resolve_anomaly_ids: [],
         }),
       });
       const body = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
@@ -1138,7 +1137,7 @@ export function AdminCertificatesWorkspace({
         setError(body?.error?.message ?? 'Certificate review decision failed.');
         return;
       }
-      setMessage(`Certificate ${certId.slice(0, 8)}… marked ${decision === 'APPROVED' ? 'VERIFIED' : 'REJECTED'}.`);
+      setMessage(`Certificate ${certId.slice(0, 8)}… marked ${decision === 'APPROVE' ? 'VERIFIED' : 'REJECTED'}.`);
       const listRes = await fetch('/api/v1/admin/certificates');
       if (listRes.ok) {
         const listBody = (await listRes.json()) as { data?: BackOfficeCertificateRow[] };
@@ -1213,7 +1212,7 @@ export function AdminCertificatesWorkspace({
                         className="lx-btn lx-btn--solid"
                         style={{ padding: '0.3rem 0.6rem', fontSize: '0.7rem' }}
                         disabled={busyId === c.id}
-                        onClick={() => void handleReview(c.id, 'APPROVED')}
+                        onClick={() => void handleReview(c.id, 'APPROVE')}
                       >
                         Verify (INV-07)
                       </button>
@@ -1224,7 +1223,7 @@ export function AdminCertificatesWorkspace({
                         className="lx-btn lx-btn--ghost"
                         style={{ padding: '0.3rem 0.6rem', fontSize: '0.7rem' }}
                         disabled={busyId === c.id}
-                        onClick={() => void handleReview(c.id, 'REJECTED')}
+                        onClick={() => void handleReview(c.id, 'REJECT')}
                       >
                         Reject
                       </button>

@@ -93,6 +93,37 @@ export async function createPaymentRecord(
   return res.rows[0] as unknown as PaymentRecordRow;
 }
 
+export async function getPaymentById(
+  db: CatalogDatabase,
+  paymentId: string,
+): Promise<PaymentRecordRow | null> {
+  const res = await db.execute(sql`
+    SELECT
+      id,
+      order_id,
+      provider,
+      provider_payment_id,
+      state::text AS state,
+      amount::text AS amount,
+      captured_amount::text AS captured_amount,
+      refunded_amount::text AS refunded_amount,
+      currency,
+      method_type,
+      method_last4,
+      failure_code,
+      failure_message,
+      idempotency_key,
+      created_at,
+      updated_at,
+      captured_at
+    FROM payments
+    WHERE id = ${paymentId}
+    LIMIT 1
+  `);
+  if (res.rows.length === 0) return null;
+  return res.rows[0] as unknown as PaymentRecordRow;
+}
+
 export async function getPaymentByProviderPaymentId(
   db: CatalogDatabase,
   provider: string,

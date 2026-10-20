@@ -359,16 +359,27 @@ export const reviewCertificateHandler: RouteHandler = async (ctx) => {
   }
 
   const extraction = rawBody['extraction'] as CertificateExtractionSchema | undefined;
-  if (!extraction) {
-    throw new ContractError('VALIDATION_FAILED', 'extraction payload required to verify approval.');
-  }
-
-  const canVerify = canPromoteToVerified(extraction, false, true);
-  if (!canVerify) {
-    throw new ContractError(
-      'UNPROCESSABLE',
-      'Whole-document verification requires every material field >= 0.90 and human approval.',
-    );
+  if (extraction) {
+    const canVerify = canPromoteToVerified(extraction, false, true);
+    if (!canVerify) {
+      throw new ContractError(
+        'UNPROCESSABLE',
+        'Whole-document verification requires every material field >= 0.90 and human approval.',
+      );
+    }
+  } else {
+    // The admin queue approves a document whose persisted extraction has
+    // already been cross-checked. Re-sending the extraction from a browser is
+    // not required and was the reason the console button always failed.
+    const cert = await getCertificateById(db, certId);
+    if (!cert) throw new ContractError('NOT_FOUND', `Certificate ${certId} not found.`);
+    const confidence = Number(cert.confidence_overall ?? 0);
+    if (cert.verification_status !== 'CROSS_CHECKED' || !Number.isFinite(confidence) || confidence < 0.9) {
+      throw new ContractError(
+        'UNPROCESSABLE',
+        'Certificate must be CROSS_CHECKED with confidence >= 0.90 before human verification.',
+      );
+    }
   }
 
   await recordHumanReview(db, {

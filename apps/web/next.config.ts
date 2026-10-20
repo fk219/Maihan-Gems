@@ -32,8 +32,61 @@
  */
 import type { NextConfig } from 'next';
 
+const SECURITY_HEADERS = [
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=()' },
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+  {
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "frame-ancestors 'none'",
+      "img-src 'self' data: https:",
+      "media-src 'self' https: blob:",
+      "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      "connect-src 'self' https:",
+      "worker-src 'self' blob:",
+      "form-action 'self'",
+    ].join('; '),
+  },
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  async headers() {
+    const isDev = process.env.NODE_ENV !== 'production';
+    const headers = SECURITY_HEADERS.map((header) => {
+      if (header.key !== 'Content-Security-Policy') return header;
+      const csp = [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "object-src 'none'",
+        "frame-ancestors 'none'",
+        "img-src 'self' data: https:",
+        "media-src 'self' https: blob:",
+        `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ''}`,
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com data:",
+        `connect-src 'self' https:${isDev ? ' ws: wss:' : ''}`,
+        "worker-src 'self' blob:",
+        "form-action 'self'",
+      ].join('; ');
+      return { ...header, value: csp };
+    });
+    if (process.env['MAIHAN_ENV'] === 'production') {
+      headers.push({
+        key: 'Strict-Transport-Security',
+        value: 'max-age=63072000; includeSubDomains; preload',
+      });
+    }
+    return [{ source: '/:path*', headers }];
+  },
   // Next 16 still mounts a shadow-DOM "Issue" chip unless this is false AND
   // the nextjs-portal host is CSS-hidden in globals.css.
   devIndicators: false,

@@ -309,7 +309,7 @@ describe('Payment Webhooks & Reconciliation (Phase 6 Task 6)', () => {
       fetchImpl: async (url) => {
         const u = String(url);
         if (u.endsWith('/v1/payment_intents')) {
-          return new Response(JSON.stringify({ id: 'pi_test_123', amount: 125000, currency: 'usd' }), {
+          return new Response(JSON.stringify({ id: 'pi_test_123', amount: 125000, currency: 'usd', status: 'requires_capture' }), {
             status: 200,
           });
         }

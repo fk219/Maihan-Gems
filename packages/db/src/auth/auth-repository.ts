@@ -88,10 +88,12 @@ const LOCKOUT_MINUTES = 15;
 const SESSION_TTL_HOURS = 24 * 7;
 
 function getSessionSecret(): string {
-  return (
-    process.env['MAIHAN_SESSION_SECRET']?.trim() ||
-    'maihan_gems_session_hmac_secret_v1_local_dev'
-  );
+  const configured = process.env['MAIHAN_SESSION_SECRET']?.trim();
+  if (configured) return configured;
+  if (process.env['MAIHAN_ENV'] === 'production') {
+    throw new Error('MAIHAN_SESSION_SECRET must be configured in production.');
+  }
+  return 'maihan_gems_session_hmac_secret_v1_local_dev';
 }
 
 export function sha256Hex(input: string): string {
