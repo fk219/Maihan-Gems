@@ -12,7 +12,7 @@
  *   82 tables (74 locked + the 0018 CMS review-ledger expansion + the 0019
  *   jobs-normalization expansion: auth_credentials, auth_sessions, auth_tokens,
  *   favorites, checkout_sessions, inventory_reservations, notifications),
- *   33 enums, 103 FKs, 645 CHECK-class constraints, 283 indexes,
+ *   33 enums, 104 FKs, 658 CHECK-class constraints, 287 indexes,
  *   9 named invariant constraints, 6 RLS tables with 6 policies and
  *   0 policy-less tables, 2 HNSW indexes, 1 trigger, 1 view, 2 functions.
  *
@@ -57,7 +57,7 @@ export const EXPECTED_EXTENSIONS: readonly string[] = [
   'pg_stat_statements'
 ];
 
-/** The 82 public tables: 74 locked + 0018 CMS ledger + 0019 ADR-027 expansion. */
+/** The 83 public tables: 74 locked + 0018 CMS ledger + 0019/0020 ADR-027 expansion. */
 export const EXPECTED_TABLES: readonly string[] = [
   'addresses',
   'ai_evaluations',
@@ -277,6 +277,7 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'settings_style_id_fkey',
   'staging_conflicts_import_batch_id_fkey',
   'staging_parsed_urls_import_batch_id_fkey',
+  'vendor_onboarding_owner_customer_id_fkey',
   'staging_source_pages_import_batch_id_fkey',
   'tool_calls_conversation_id_fkey',
   'tool_calls_message_id_fkey',
@@ -321,16 +322,16 @@ export const EXPECTED_VECTOR_COLUMNS: readonly string[] = ['knowledge_chunks.emb
 
 /** Aggregate counts — the locked architecture numbers + the ADR-027 expansion. */
 export const EXPECTED_COUNTS = {
-  tables: 82,
+  tables: 83,
   enums: 33,
-  primary_key: 82,
-  foreign_key: 103,
+  primary_key: 83,
+  foreign_key: 104,
   unique: 64,
-  check: 32,
-  not_null_columns: 613,
+  check: 33,
+  not_null_columns: 625,
   /** check + not_null_columns: the documented CHECK-class total. */
-  check_class_total: 645,
-  indexes: 283,
+  check_class_total: 658,
+  indexes: 287,
   hnsw: 2,
   vector_columns: 2,
   triggers: 1,

@@ -19,7 +19,7 @@ Those fixes are not repeated here. What remains is:
 4. Certificate upload/storage/OCR.
 5. Real AI/RAG/WhatsApp delivery.
 6. Admin/CMS completion.
-7. Vendor normalization and uploads.
+7. Vendor uploads and payouts.
 8. 3D/AR asset production.
 9. Security hardening that still depends on decisions or deployment.
 10. Verification and operational evidence.
@@ -36,7 +36,8 @@ Last verified after remediation slice 1:
 | `pnpm run build` (`tsc -b`) | PASS |
 | `pnpm --filter @maihan/web run build` | PASS |
 | `pnpm run lint` | PASS, 0 errors, 211 warnings |
-| `pnpm -r run test` | 901 passed, 98 skipped, 0 failed |
+| `pnpm run schema-fidelity` | PASS on fresh DB: 83 tables, 21 migrations |
+| `pnpm -r run test` | 909 passed, 98 skipped, 0 failed |
 | Domain | 240 passed / 11 skipped |
 | Contracts | 43 passed |
 | AI | 14 passed |
@@ -44,7 +45,7 @@ Last verified after remediation slice 1:
 | DB | 101 passed / 52 skipped |
 | Worker | 0 passed / 3 skipped |
 | Migration tooling | 20 passed / 11 skipped |
-| Web | 471 passed / 21 skipped |
+| Web | 479 passed / 21 skipped |
 | Bundle budgets | PASS: category 150.4/170 KB, product 150.0/190 KB |
 | Playwright / load / Lighthouse / security matrix | NOT PRESENT |
 | Full corpus migration | NOT RUN |
@@ -179,7 +180,6 @@ Live DB remains fixture-scale and incomplete:
 
 | Item | Status | Required work | Acceptance |
 |---|---|---|---|
-| Vendor normalization | Open | Add `vendors` table via approved ADR + expand migration; backfill `jobs` payloads | No permanent vendor state in 90-day queue |
 | Vendor uploads | Open | Presigned upload, sniff, scan, storage keys | No arbitrary remote URL assets |
 | Vendor notifications | Partial | Status/moderation/order notifications delivered | Vendor sees decisions |
 | Payouts/commission | Open | Decide and model vendor payout/commission/tax | Vendor statements reconcile |
@@ -313,7 +313,7 @@ These are recommendations, not approved plan additions.
 
 ### Stage 4 — Admin, vendor and 3D
 
-13. Vendor table ADR/migration/backfill; vendor uploads.
+13. Vendor uploads; payout/commission decision.
 14. CMS renderers, nav/SEO/redirect, catalogue/inventory/bulk admin.
 15. Conflict resolution, AI operations, saved designs.
 16. GLB pipeline, ring asset set, real AR, device matrix.

@@ -1,3 +1,41 @@
+# =============================================================================
+# Maihan Gems - source archive exclusion
+# =============================================================================
+# The reverse-engineering source archive must NEVER be committed.
+# Restored after upstream 2a41141 removed these protections.
+naturalgemstones/
+naturalgemstones/**
+/naturalgemstones
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+**/secrets/
+
+# Generated Next.js type file
+next-env.d.ts
+
+# Migration working data
+*.sql.gz
+migrations-local/
+staging-dump/
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+
+# OpenCode local runtime state (memory remains tracked)
+.opencode/cache/
+.opencode/tmp/
+.opencode/logs/
+.opencode/*.log
+.opencode/sessions/
+
 build/
 *.tsbuildinfo
 .next/
