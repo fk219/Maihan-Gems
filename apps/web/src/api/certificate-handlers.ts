@@ -30,6 +30,7 @@ import {
   type VerificationStatus,
 } from '@maihan/domain';
 import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
+import { isDevSeamEnabled } from '@maihan/config';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
@@ -52,7 +53,8 @@ async function assertCertificateReviewer(ctx: RouteContext): Promise<string | un
     }
     return actor.customer_id;
   }
-  if (process.env['MAIHAN_ENV'] === 'production') {
+  // R1-1 fail-closed: certificate ops need auth unless explicit dev seam.
+  if (!isDevSeamEnabled()) {
     throw new ContractError('UNAUTHORIZED', 'Authentication required for certificate operations.');
   }
   return undefined;

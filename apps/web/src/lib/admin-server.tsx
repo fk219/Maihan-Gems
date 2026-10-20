@@ -12,6 +12,7 @@ import 'server-only';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { ADMIN_ROLES, hasCapability, type AdminAction, type AdminModule, type AdminRole } from '@maihan/domain';
+import { isFailClosedMode } from '@maihan/config';
 import type { AdminActor } from '@maihan/contracts';
 import { authorizeAdmin } from '../api/admin/authz.js';
 import { getAuthenticatedSessionActor } from './account-server.js';
@@ -31,7 +32,7 @@ export async function requireAdminAccess(
       return {
         ok: false,
         status: 403,
-        environment: process.env['MAIHAN_ENV'] === 'production' ? 'locked' : 'development',
+        environment: isFailClosedMode() ? 'locked' : 'development',
       };
     }
     const adminRole = sessionActor.role as AdminRole;
@@ -39,7 +40,7 @@ export async function requireAdminAccess(
       return {
         ok: false,
         status: 403,
-        environment: process.env['MAIHAN_ENV'] === 'production' ? 'locked' : 'development',
+        environment: isFailClosedMode() ? 'locked' : 'development',
       };
     }
     return {
@@ -56,8 +57,9 @@ export async function requireAdminAccess(
     };
   }
 
-  // In production, never fall back to unverified x-admin-* headers
-  if (process.env['MAIHAN_ENV'] === 'production') {
+  // R1-1 fail-closed: without an explicit developer seam, never fall back to
+  // unverified x-admin-* headers. Absence of MAIHAN_ENV now means locked.
+  if (isFailClosedMode()) {
     return { ok: false, status: 401, environment: 'locked' };
   }
 

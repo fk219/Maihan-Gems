@@ -28,6 +28,7 @@ import {
   withPoolRlsSession,
 } from '@maihan/db';
 import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
+import { isDevSeamEnabled } from '@maihan/config';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
@@ -330,7 +331,7 @@ export const aiChatHandler: RouteHandler = async (ctx) => {
     if (callerCustomerId && conv.customer_id !== callerCustomerId) {
       throw new ContractError('FORBIDDEN', 'You do not have permission to access another customer’s AI conversation.');
     }
-    if (!callerCustomerId && process.env['MAIHAN_ENV'] === 'production') {
+    if (!callerCustomerId && !isDevSeamEnabled()) {
       throw new ContractError('UNAUTHORIZED', 'Authentication required to continue this customer conversation.');
     }
   }
@@ -518,7 +519,7 @@ export const aiGetConversationHandler: RouteHandler = async (ctx) => {
     if (callerCustomerId && conv.customer_id !== callerCustomerId) {
       throw new ContractError('FORBIDDEN', 'You do not have permission to read another customer’s conversation.');
     }
-    if (!callerCustomerId && process.env['MAIHAN_ENV'] === 'production') {
+    if (!callerCustomerId && !isDevSeamEnabled()) {
       throw new ContractError('UNAUTHORIZED', 'Authentication required to read this customer conversation.');
     }
   }

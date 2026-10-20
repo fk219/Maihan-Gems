@@ -29,27 +29,25 @@
  * API's documented identity contract.
  */
 import { NextResponse } from 'next/server';
-
+import { SPOOFABLE_IDENTITY_HEADERS, isDevSeamEnabled } from '@maihan/config';
 export const dynamic = 'force-dynamic';
 
 const HOP_BY_HOP = new Set(['host', 'connection']);
-const SPOOFABLE_IDENTITY_HEADERS = new Set([
-  'x-admin-sub',
-  'x-admin-role',
-  'x-admin-session',
-  'x-customer-id',
-]);
 
 /** Paths whose calls carry the verified client reference as the identity header. */
 const IDENTITY_COOKIE_PREFIXES = ['/account', '/favorites', '/compare'];
 
 function buildForwardHeaders(request: Request, path: string): Headers {
   const headers = new Headers();
-  const isProd = process.env['MAIHAN_ENV'] === 'production';
+  // R1-1 fail-closed: spoofable identity headers are ALWAYS stripped at the
+  // gateway unless an explicit developer seam is opted into. Previously this
+  // was keyed on MAIHAN_ENV==='production', so a deployment that forgot the
+  // variable honoured client-supplied x-customer-id / x-admin-* headers.
+  const seam = isDevSeamEnabled();
   request.headers.forEach((value, name) => {
     const lower = name.toLowerCase();
     if (HOP_BY_HOP.has(lower)) return;
-    if (isProd && SPOOFABLE_IDENTITY_HEADERS.has(lower)) return;
+    if (!seam && SPOOFABLE_IDENTITY_HEADERS.has(lower)) return;
     headers.append(name, value);
   });
   if (IDENTITY_COOKIE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) {

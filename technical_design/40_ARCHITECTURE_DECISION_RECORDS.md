@@ -322,6 +322,14 @@ never part of this decision and remains open.
 
 ---
 
+**ADR-025b - (numbering defect note)** The heading immediately below was
+mistakenly numbered ADR-026 a second time when it was appended; the preceding
+record already owns ADR-026's slot in this file's history. It is renumbered to
+ADR-027 here to restore a monotonic registry, matching migration
+`0019_jobs_normalization.sql`, which has always cited ADR-027.
+
+---
+
 **ADR-026 - Gem preview uses three-mesh-bvh refraction, not MeshPhysicalMaterial**
 - **Context:** Loose-stone and DYO 3D previews must look like cut gems (internal reflection, fire, absorption), not matte PBR plastic. Three.js is already the approved WebGL renderer (ADR-004, tech stack row 20). MeshPhysicalMaterial transmission cannot model bounce-limited total internal reflection.
 - **Alternatives:** (a) keep hand-tuned MeshPhysicalMaterial lights; (b) add `@react-three/drei` + R3F for `MeshRefractionMaterial`; (c) add `three-mesh-bvh` only and port the diamond / MeshRefractionMaterial shader into `apps/web`.
@@ -330,6 +338,17 @@ never part of this decision and remains open.
 - **Consequences:** Gem preview requires WebGL2 (`isampler2D` / `usampler2D`). Antialiasing is off on this canvas because edge interpolation breaks BVH entry rays. `three-mesh-bvh` stays out of any server bundle.
 - **Evidence:** Explicit user request 2026-10-13; three-mesh-bvh MIT; drei MeshRefractionMaterial and gkjohnson diamond example as the shader approach.
 - **Status:** Accepted by explicit user authorization (2026-10-13).
+
+---
+
+**ADR-027 - Normalize permanent state out of the jobs queue into real tables**
+- **Context:** Audit findings F-06/M-03 established that several PERMANENT entities were stored as rows in the `jobs` table — a transient work queue with a documented 90-day retention sweep (technical_design/27 §1: jobs is a queue, not a system of record). Any retention sweep would have silently destroyed live auth sessions, credentials, favorites, checkout sessions, inventory reservations, notifications and vendor profiles. Migration `0019_jobs_normalization.sql` created `auth_credentials`, `auth_sessions`, `auth_tokens`, `favorites`, `checkout_sessions`, `inventory_reservations`, `notifications`; migration `0020_vendor_onboarding.sql` completes the cut-over with `vendor_onboarding`.
+- **Alternatives:** (a) exempt `queue='vendors'` rows from the retention sweep by special-casing the sweeper; (b) keep payload JSONB but move it to a dedicated table; (c) full normalization to typed columns.
+- **Decision:** (c). Each permanent entity gets a real table with typed columns, FK constraints (`owner_customer_id REFERENCES customers(id) ON DELETE CASCADE`), uniqueness indexes and CHECK-constrained status enums. Expand-then-contract per ADR-020 discipline: create + idempotent backfill preserving ids/timestamps, repository cut-over in the same release, then deletion of ONLY the migrated rows from `jobs`.
+- **Reason:** Retention semantics of a queue can never be trusted for systems-of-record data; typed columns restore referential integrity and let Postgres constraints (not application code) enforce INV-01-class rules. Special-casing the sweeper (a) leaves the schema lie in place.
+- **Consequences:** Public table count grows beyond the doc-04 baseline (82 declared); the expected-schema drift gate must include these tables. Reads/writes in `packages/db` repositories are cut over atomically with the migrations; no dual-write window remains after release.
+- **Evidence:** Original acceptance recorded in the header of `packages/db/migrations/0019_jobs_normalization.sql` ("Accepted 2026-10-19 by explicit user authorization"). This registry entry ratifies the decision retroactively per the audit finding C1/PB-2 (documentation conflict: migration asserted an ADR absent from the registry). Renumbered to preserve a monotonic registry after the duplicate-ADR-026 heading defect.
+- **Status:** Accepted by explicit user authorization (2026-09-19, recorded 2026-10-20). Ratification date reflects the governance reconciliation performed during the completeness audit remediation Phase R1.
 
 ---
 

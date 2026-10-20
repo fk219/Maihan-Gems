@@ -54,6 +54,8 @@ approved. `DEFERRED` = deliberately postponed.
 | WebAR is **client-side only**. Camera frames never leave the device. | ACCEPTED | ADR-004 |
 | MediaPipe HandLandmarker for tracking; Three.js + WebGL2 for rendering; Draco GLB and KTX2 for assets. | ACCEPTED | `technical_design/02`, ADR-004 |
 | Gem 3D preview uses `three-mesh-bvh` internal-reflection (not MeshPhysicalMaterial; not R3F/drei). | ACCEPTED | ADR-026 |
+| Permanent state normalized out of the 90-day `jobs` queue into real tables (`auth_*`, `favorites`, `checkout_sessions`, `inventory_reservations`, `notifications`, `vendor_onboarding`). Migrations 0019+0020. | ACCEPTED | ADR-027 |
+| Security mode is fail-closed by default: dev seam only via `MAIHAN_DEV_SEAM='1'` or `NODE_ENV=test\|development`; `MAIHAN_ENV` absence now means production behaviour (R1-1). Authority: `packages/config/src/security-mode.ts`. | ACCEPTED | AGENTS.md §10 |
 
 ---
 

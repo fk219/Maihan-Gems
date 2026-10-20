@@ -21,6 +21,11 @@
  */
 
 export { STOREFRONT_CONTACT } from './storefront.js';
+export {
+  SPOOFABLE_IDENTITY_HEADERS,
+  isDevSeamEnabled,
+  isFailClosedMode,
+} from './security-mode.js';
 
 export interface RuntimeConfig {
   /** PostgreSQL connection string — the source of truth (ADR-002). */

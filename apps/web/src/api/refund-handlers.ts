@@ -28,6 +28,7 @@ import { ADMIN_ROLES } from '@maihan/domain';
 import { StripePaymentProvider } from '../integrations/payment/stripe-payment-provider.js';
 import { TestPaymentProvider } from '../integrations/payment/test-payment-provider.js';
 import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
+import { isDevSeamEnabled } from '@maihan/config';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
@@ -68,7 +69,8 @@ async function assertAdminRefundCapability(ctx: RouteContext): Promise<string | 
     }
     return actor.customer_id;
   }
-  if (process.env['MAIHAN_ENV'] === 'production') {
+  // R1-1 fail-closed: admin auth enforced unless explicit dev seam.
+  if (!isDevSeamEnabled()) {
     throw new ContractError('UNAUTHORIZED', 'Administrative authentication required.');
   }
   return undefined;
@@ -98,7 +100,7 @@ export const REFUND_HANDLERS: Record<string, RouteHandler> = {
         if (effectiveCustomerId && order.customer_id !== effectiveCustomerId) {
           throw new ContractError('FORBIDDEN', 'You do not have permission to request a refund for another customer’s order.');
         }
-        if (!effectiveCustomerId && process.env['MAIHAN_ENV'] === 'production') {
+        if (!effectiveCustomerId && !isDevSeamEnabled()) {
           throw new ContractError('UNAUTHORIZED', 'Authentication required to request a refund.');
         }
       }
@@ -140,7 +142,7 @@ export const REFUND_HANDLERS: Record<string, RouteHandler> = {
         if (effectiveCustomerId && order.customer_id !== effectiveCustomerId) {
           throw new ContractError('FORBIDDEN', 'You do not have permission to view refunds for another customer’s order.');
         }
-        if (!effectiveCustomerId && process.env['MAIHAN_ENV'] === 'production') {
+        if (!effectiveCustomerId && !isDevSeamEnabled()) {
           throw new ContractError('UNAUTHORIZED', 'Authentication required to view order refunds.');
         }
       }
