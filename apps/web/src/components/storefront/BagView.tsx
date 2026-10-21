@@ -34,7 +34,6 @@ type UnifiedBagItem = AtelierItem & {
 export function BagView({
   forceEmpty = false,
 }: {
-  demoItems: AtelierItem[];
   forceEmpty?: boolean;
 }) {
   const { currency, rates } = useStorefront();

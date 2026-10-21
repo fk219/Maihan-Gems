@@ -102,7 +102,10 @@ export async function reserveStockForCart(
         }
       }
 
-      // Upsert reservation with the 30-minute TTL
+      // P1-10 theft-proof hold: the upsert may only (re)claim rows owned by
+      // THIS session. A competing session's stored row wins the ON CONFLICT
+      // — the postcheck proves ownership and surfaces ALREADY_RESERVED
+      // instead of silently overwriting the other session's hold.
       await db.execute(sql`
         INSERT INTO inventory_reservations (
           job_key, gemstone_id, session_id, cart_id, expires_at
@@ -121,7 +124,23 @@ export async function reserveStockForCart(
           state = 'ACTIVE',
           reserved_at = now(),
           released_at = NULL
+        WHERE inventory_reservations.session_id = ${sessionId}::text
+          OR inventory_reservations.state <> 'ACTIVE'
+          OR inventory_reservations.expires_at <= now()
       `);
+
+      const holdRes = await db.execute(sql`
+        SELECT session_id FROM inventory_reservations
+        WHERE job_key = ${jobKey} AND state = 'ACTIVE' AND expires_at > now()
+      `);
+      const holdOwner = (holdRes.rows[0] as { session_id: string | null } | undefined)?.session_id ?? null;
+      if (holdOwner !== sessionId) {
+        throw new ContractError(
+          'ALREADY_RESERVED',
+          `Gemstone ${stone.gem_ref} is currently held under an active reservation.`,
+          [{ field: 'gem_ref', value: stone.gem_ref }],
+        );
+      }
     }
 
     // Pair reservation (atomic: both stones of pair must be available)
@@ -172,6 +191,7 @@ export async function reserveStockForCart(
         }
       }
 
+      // P1-10 theft-proof hold (pair path): same ownership rule as singles.
       await db.execute(sql`
         INSERT INTO inventory_reservations (
           job_key, gemstone_id, session_id, cart_id, expires_at
@@ -190,7 +210,23 @@ export async function reserveStockForCart(
           state = 'ACTIVE',
           reserved_at = now(),
           released_at = NULL
+        WHERE inventory_reservations.session_id = ${sessionId}::text
+          OR inventory_reservations.state <> 'ACTIVE'
+          OR inventory_reservations.expires_at <= now()
       `);
+
+      const pairHoldRes = await db.execute(sql`
+        SELECT session_id FROM inventory_reservations
+        WHERE job_key = ${jobKey} AND state = 'ACTIVE' AND expires_at > now()
+      `);
+      const pairOwner = (pairHoldRes.rows[0] as { session_id: string | null } | undefined)?.session_id ?? null;
+      if (pairOwner !== sessionId) {
+        throw new ContractError(
+          'PAIR_RESERVATION_FAILED',
+          `Atomic pair reservation failed: pair ${pair.gem_ref} is already reserved by another customer. Neither stone is reserved.`,
+          [{ field: 'gem_ref', value: pair.gem_ref }],
+        );
+      }
     }
   }
 }

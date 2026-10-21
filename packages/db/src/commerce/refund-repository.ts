@@ -334,7 +334,14 @@ export async function executeRefund(
   refundId: string,
   providerRefundId?: string,
 ): Promise<RefundDto> {
-  const checkRes = await db.execute(sql`
+  // P1-9: the whole state march (refund SUCCEEDED, payment refunded_amount,
+  // order transition, event) is one transaction and the row is locked, so a
+  // concurrent double-execute either sees the same row first (single
+  // SUCCEEDED) or fails on the state guard — it can never double-count the
+  // payment's refunded_amount, and the order never moves to REFUNDED from a
+  // state the domain machine forbids (e.g. a resurrected CANCELLED order).
+  return db.transaction(async (tx) => {
+    const checkRes = await tx.execute(sql`
     SELECT
       r.id,
       r.payment_id,
@@ -348,44 +355,60 @@ export async function executeRefund(
     JOIN payments p ON p.id = r.payment_id
     JOIN orders o ON o.id = r.order_id
     WHERE r.id = ${refundId}
+    FOR NO KEY UPDATE OF r
     LIMIT 1
   `);
 
-  if (checkRes.rows.length === 0) {
-    throw new ContractError('NOT_FOUND', `Refund "${refundId}" not found.`);
-  }
+    if (checkRes.rows.length === 0) {
+      throw new ContractError('NOT_FOUND', `Refund "${refundId}" not found.`);
+    }
 
-  const row = checkRes.rows[0] as {
-    id: string;
-    payment_id: string;
-    order_id: string;
-    amount: string;
-    state: string;
-    captured_amount: string;
-    current_refunded_amount: string;
-    order_state: string;
-  };
+    const row = checkRes.rows[0] as {
+      id: string;
+      payment_id: string;
+      order_id: string;
+      amount: string;
+      state: string;
+      captured_amount: string;
+      current_refunded_amount: string;
+      order_state: string;
+    };
 
-  if (row.state !== 'APPROVED' && row.state !== 'PROCESSING') {
-    throw new ContractError('UNPROCESSABLE', `Cannot execute refund in "${row.state}" state.`);
-  }
+    if (row.state !== 'APPROVED' && row.state !== 'PROCESSING') {
+      throw new ContractError('UNPROCESSABLE', `Cannot execute refund in "${row.state}" state.`);
+    }
 
-  const refundAmount = Number(row.amount);
-  const newRefundedTotal = Number(row.current_refunded_amount) + refundAmount;
-  const isFullyRefunded = newRefundedTotal >= Number(row.captured_amount);
+    // The order must be in a refundable state (PAID / IN_FULFILLMENT /
+    // FULFILLED / PARTIALLY_REFUNDED); the domain order state machine
+    // (`VALID_STATE_TRANSITIONS`) forbids REFUNDED from CANCELLED, so a
+    // CANCELLED order is refused instead of being rewritten.
+    const REFUNDABLE_ORDER_STATES = new Set(['PAID', 'IN_FULFILLMENT', 'FULFILLED', 'PARTIALLY_REFUNDED']);
+    if (!REFUNDABLE_ORDER_STATES.has(row.order_state)) {
+      throw new ContractError(
+        'UNPROCESSABLE',
+        `Order state "${row.order_state}" does not permit refunds. The state machine forbids refunding from this state.`,
+      );
+    }
 
-  const newPaymentState = isFullyRefunded ? 'REFUNDED' : 'PARTIALLY_REFUNDED';
-  const newOrderState = isFullyRefunded ? 'REFUNDED' : 'PARTIALLY_REFUNDED';
+    const refundAmount = Number(row.amount);
+    const newRefundedTotal = Number(row.current_refunded_amount) + refundAmount;
+    if (newRefundedTotal > Number(row.captured_amount)) {
+      throw new ContractError('UNPROCESSABLE', 'Refund execution would exceed the captured amount.');
+    }
+    const isFullyRefunded = newRefundedTotal >= Number(row.captured_amount);
 
-  const refProviderId = providerRefundId ?? `re_test_${Date.now()}`;
+    const newPaymentState = isFullyRefunded ? 'REFUNDED' : 'PARTIALLY_REFUNDED';
+    const newOrderState = isFullyRefunded ? 'REFUNDED' : 'PARTIALLY_REFUNDED';
 
-  // 1. Update refund
-  const refundUpdateRes = await db.execute(sql`
+    const refProviderId = providerRefundId ?? `re_test_${Date.now()}`;
+
+    // 1. Update refund (state-guarded so a racing update cannot re-execute)
+    const refundUpdateRes = await tx.execute(sql`
     UPDATE refunds
     SET state = 'SUCCEEDED',
         provider_refund_id = ${refProviderId},
         processed_at = now()
-    WHERE id = ${refundId}
+    WHERE id = ${refundId} AND state IN ('APPROVED'::refund_state, 'PROCESSING'::refund_state)
     RETURNING
       id,
       payment_id,
@@ -401,8 +424,12 @@ export async function executeRefund(
       processed_at
   `);
 
-  // 2. Update payment
-  await db.execute(sql`
+    if ((refundUpdateRes.rowCount ?? 0) === 0) {
+      throw new ContractError('IDEMPOTENCY_CONFLICT', 'Refund state changed concurrently; execution aborted.');
+    }
+
+    // 2. Update payment (row-locked by payment FOR NO KEY UPDATE)
+    await tx.execute(sql`
     UPDATE payments
     SET refunded_amount = ${newRefundedTotal.toFixed(2)},
         state = ${newPaymentState},
@@ -410,17 +437,27 @@ export async function executeRefund(
     WHERE id = ${row.payment_id}
   `);
 
-  // 3. Update order state
-  await db.execute(sql`
+    // 3. Update order state — guarded from_state + version so the transition
+    // can never resurrect a CANCELLED order.
+    const orderUpdateRes = await tx.execute(sql`
     UPDATE orders
-    SET state = ${newOrderState},
+    SET state = ${newOrderState}::order_state,
         version = version + 1,
         updated_at = now()
     WHERE id = ${row.order_id}
+      AND state = ${row.order_state}::order_state
+      AND state IN ('PAID'::order_state, 'IN_FULFILLMENT'::order_state, 'FULFILLED'::order_state, 'PARTIALLY_REFUNDED'::order_state)
+    RETURNING id
   `);
+    if ((orderUpdateRes.rowCount ?? 0) === 0) {
+      throw new ContractError(
+        'IDEMPOTENCY_CONFLICT',
+        `Order state changed concurrently (was "${row.order_state}"); execution aborted.`,
+      );
+    }
 
-  // 4. Log event
-  await db.execute(sql`
+    // 4. Log event
+    await tx.execute(sql`
     INSERT INTO order_events (
       order_id,
       from_state,
@@ -438,7 +475,8 @@ export async function executeRefund(
     )
   `);
 
-  return mapRefundRow(refundUpdateRes.rows[0] as unknown as RefundRow);
+    return mapRefundRow(refundUpdateRes.rows[0] as unknown as RefundRow);
+  });
 }
 
 export async function getOrderRefunds(

@@ -27,7 +27,7 @@ import {
   type RlsSessionContext,
 } from '@maihan/db';
 import type { RouteHandler, RouteContext } from './handlers.js';
-import { resolveRequestActor } from './auth-handlers.js';
+import { resolveRequestActorWithCsrf } from './auth-handlers.js';
 import { isDevSeamEnabled } from '@maihan/config';
 import { requireIdentifier } from './query.js';
 
@@ -46,7 +46,7 @@ async function requireActor(ctx: RouteContext): Promise<{
   customerId: string;
   rls: RlsSessionContext;
 }> {
-  const actor = await resolveRequestActor(ctx);
+  const actor = await resolveRequestActorWithCsrf(ctx);
   const headerCustomerId =
     ctx.request?.headers.get('x-customer-id') ??
     ctx.url.searchParams.get('customer_id');
@@ -72,7 +72,7 @@ async function requireActor(ctx: RouteContext): Promise<{
 }
 
 async function requireCustomerId(ctx: RouteContext): Promise<string> {
-  const actor = await resolveRequestActor(ctx);
+  const actor = await resolveRequestActorWithCsrf(ctx);
   const headerCustomerId =
     ctx.request?.headers.get('x-customer-id') ??
     ctx.url.searchParams.get('customer_id');

@@ -153,7 +153,20 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
           }
         }
         if (query.includes('INSERT INTO dyo_price_snapshots')) {
-          return { rows: [{ id: 'snap-1', total: '4700.00', configuration_id: 'dyo-cfg-uuid-1', currency: 'USD' }] };
+          return {
+            rows: [{
+              id: 'snap-1',
+              total: '5405.00',
+              gemstone_component: '3500.00',
+              setting_component: '1200.00',
+              side_stone_component: '0.00',
+              making_component: '705.00',
+              discount_component: '0.00',
+              tax_component: '0.00',
+              configuration_id: 'dyo-cfg-uuid-1',
+              currency: 'USD',
+            }],
+          };
         }
         if (query.includes('INSERT INTO dyo_quotes')) {
           quoteToken = 'quote_test';
@@ -167,11 +180,37 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
           return { rows: [{ id: 'quote-row-1' }] };
         }
         if (query.includes('FROM dyo_price_snapshots')) {
-          if (query.includes('INSERT INTO')) return { rows: [{ id: 'snap-1', total: '4700.00' }] };
-          return { rows: [{ id: 'snap-1', total: '4700.00', currency: 'USD' }] };
+          if (query.includes('INSERT INTO')) {
+            return {
+              rows: [{
+                id: 'snap-1',
+                total: '5405.00',
+                gemstone_component: '3500.00',
+                setting_component: '1200.00',
+                side_stone_component: '0.00',
+                making_component: '705.00',
+                discount_component: '0.00',
+                tax_component: '0.00',
+                currency: 'USD',
+              }],
+            };
+          }
+          return {
+            rows: [{
+              id: 'snap-1',
+              total: '5405.00',
+              gemstone_component: '3500.00',
+              setting_component: '1200.00',
+              side_stone_component: '0.00',
+              making_component: '705.00',
+              discount_component: '0.00',
+              tax_component: '0.00',
+              currency: 'USD',
+            }],
+          };
         }
         if (query.includes('INSERT INTO products')) {
-          configuredProduct = { id: 'product-configured-1', slug: 'dyo-short-code-123', price_amount: '4700.00' };
+          configuredProduct = { id: 'product-configured-1', slug: 'dyo-short-code-123', price_amount: '5405.00' };
           return { rows: [configuredProduct] };
         }
         if (query.includes('FROM products')) {
@@ -181,11 +220,11 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
           return { rows: [{ id: storedCart.id, cart_token: storedCart.cart_token, customer_id: null, anonymous_session_id: null, currency: 'USD', state: 'ACTIVE', pricing_snapshot: null, expires_at: new Date(Date.now() + 86400000), converted_order_id: null, created_at: new Date(), updated_at: new Date() }] };
         }
         if (query.includes('FROM cart_items')) {
-          return { rows: cartItem ? [{ ...cartItem, cart_id: storedCart.id, product_slug: 'dyo-short-code-123', product_title: 'Custom RING short-code-123', product_state: 'ACTIVE', product_price_amount: '4700.00', price_entry_amount: null, price_snapshot_id: 'snap-1', dyo_snapshot_amount: '4700.00', added_at: new Date() }] : [] };
+          return { rows: cartItem ? [{ ...cartItem, cart_id: storedCart.id, product_slug: 'dyo-short-code-123', product_title: 'Custom RING short-code-123', product_state: 'ACTIVE', product_price_amount: '5405.00', price_entry_amount: null, price_snapshot_id: 'snap-1', dyo_snapshot_amount: '5405.00', added_at: new Date() }] : [] };
         }
         if (query.includes('INSERT INTO cart_items')) {
           insertedCartSnapshotId = queryChunks(statement).find((value) => value === 'snap-1') as string ?? null;
-          cartItem = { id: 'item-1', product_id: 'product-configured-1', configuration_id: 'dyo-cfg-uuid-1', quantity: 1, unit_price: '4700.00', price_snapshot_id: insertedCartSnapshotId };
+          cartItem = { id: 'item-1', product_id: 'product-configured-1', configuration_id: 'dyo-cfg-uuid-1', quantity: 1, unit_price: '5405.00', price_snapshot_id: insertedCartSnapshotId };
           storedCart.items = [cartItem];
           return { rows: [] };
         }
@@ -246,7 +285,7 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
     const quoteRes = await api(quoteReq);
     expect(quoteRes.status).toBe(200);
     const quoteData = (await quoteRes.json()) as any;
-    expect(Number(quoteData.data.priceSnapshot.total)).toBe(4700);
+    expect(Number(quoteData.data.priceSnapshot.total)).toBe(5405);
     expect(quoteData.data.quoteToken).toContain('quote_');
     quoteToken = quoteData.data.quoteToken;
 
@@ -254,7 +293,7 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
     const priceChangedQuoteRes = await api(priceChangedQuoteReq);
     expect(priceChangedQuoteRes.status).toBe(200);
     const refreshedQuote = (await priceChangedQuoteRes.json() as any).data;
-    expect(refreshedQuote.priceSnapshot.total).toBe('4700.00');
+    expect(refreshedQuote.priceSnapshot.total).toBe('5405.00');
     quoteToken = refreshedQuote.quoteToken;
 
     forceStaleQuote = true;
@@ -292,9 +331,9 @@ describe('Design Your Own (DYO) HTTP API & Cart Conversion (Phase 7)', () => {
     expect(addCartData.data.cart.items[0]).toMatchObject({
       product_id: 'product-configured-1',
       configuration_id: 'dyo-cfg-uuid-1',
-      unit_price: '4700.00',
+      unit_price: '5405.00',
     });
-    expect(configuredProduct).toMatchObject({ price_amount: '4700.00' });
+    expect(configuredProduct).toMatchObject({ price_amount: '5405.00' });
     expect(insertedCartSnapshotId).toBe('snap-1');
     expect(consumedQuote).toBe(true);
 

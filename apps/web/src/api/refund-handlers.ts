@@ -27,8 +27,8 @@ import {
 import { ADMIN_ROLES } from '@maihan/domain';
 import { StripePaymentProvider } from '../integrations/payment/stripe-payment-provider.js';
 import { TestPaymentProvider } from '../integrations/payment/test-payment-provider.js';
-import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
-import { isDevSeamEnabled } from '@maihan/config';
+import { extractSessionToken, resolveRequestActor, resolveRequestActorWithCsrf } from './auth-handlers.js';
+import { isDevSeamEnabled, isFailClosedMode } from '@maihan/config';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
@@ -81,27 +81,29 @@ export const REFUND_HANDLERS: Record<string, RouteHandler> = {
     const db = getDb(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
     const sessionToken = extractSessionToken(ctx.request);
-    const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+    const actor = sessionToken ? await resolveRequestActorWithCsrf(ctx) : null;
     if (sessionToken && !actor) {
       throw new ContractError('UNAUTHORIZED', 'Valid session required.');
     }
     if (actor?.role === 'VENDOR') {
       throw new ContractError('FORBIDDEN', 'Vendors cannot request customer order refunds.');
     }
-    const headerCustomerId = ctx.request?.headers.get('x-customer-id')?.trim() || null;
-    if (actor && headerCustomerId && headerCustomerId !== actor.customer_id) {
-      throw new ContractError('FORBIDDEN', 'You do not have permission to request a refund for another customer’s order.');
-    }
+    // P1-4 identity contract: the session is the ONLY customer identity.
     const isAdmin = actor && (ADMIN_ROLES as readonly string[]).includes(actor.role);
     if (!isAdmin) {
       const order = await getOrderById(db, orderId);
-      const effectiveCustomerId = actor?.customer_id ?? headerCustomerId;
       if (order.customer_id) {
-        if (effectiveCustomerId && order.customer_id !== effectiveCustomerId) {
+        if (actor?.customer_id && order.customer_id !== actor.customer_id) {
           throw new ContractError('FORBIDDEN', 'You do not have permission to request a refund for another customer’s order.');
         }
-        if (!effectiveCustomerId && !isDevSeamEnabled()) {
+        if (!actor?.customer_id && !isDevSeamEnabled()) {
           throw new ContractError('UNAUTHORIZED', 'Authentication required to request a refund.');
+        }
+      } else {
+        // Guest orders have no owner to match against: only administrators
+        // may request refunds on them (guests are directed to support).
+        if (!isDevSeamEnabled()) {
+          throw new ContractError('UNAUTHORIZED', 'Please contact support to request a refund for this order.');
         }
       }
     }
@@ -123,28 +125,26 @@ export const REFUND_HANDLERS: Record<string, RouteHandler> = {
     const db = getDb(ctx);
     const orderId = requireIdentifier(ctx.params['orderId'], 'orderId');
     const sessionToken = extractSessionToken(ctx.request);
-    const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+    const actor = sessionToken ? await resolveRequestActorWithCsrf(ctx) : null;
     if (sessionToken && !actor) {
       throw new ContractError('UNAUTHORIZED', 'Valid session required.');
     }
     if (actor?.role === 'VENDOR') {
       throw new ContractError('FORBIDDEN', 'Vendors cannot view customer order refunds.');
     }
-    const headerCustomerId = ctx.request?.headers.get('x-customer-id')?.trim() || null;
-    if (actor && headerCustomerId && headerCustomerId !== actor.customer_id) {
-      throw new ContractError('FORBIDDEN', 'You do not have permission to view refunds for another customer’s order.');
-    }
+    // P1-4 identity contract: the session is the ONLY customer identity.
     const isAdmin = actor && (ADMIN_ROLES as readonly string[]).includes(actor.role);
     if (!isAdmin) {
       const order = await getOrderById(db, orderId);
-      const effectiveCustomerId = actor?.customer_id ?? headerCustomerId;
       if (order.customer_id) {
-        if (effectiveCustomerId && order.customer_id !== effectiveCustomerId) {
+        if (actor?.customer_id && order.customer_id !== actor.customer_id) {
           throw new ContractError('FORBIDDEN', 'You do not have permission to view refunds for another customer’s order.');
         }
-        if (!effectiveCustomerId && !isDevSeamEnabled()) {
+        if (!actor?.customer_id && !isDevSeamEnabled()) {
           throw new ContractError('UNAUTHORIZED', 'Authentication required to view order refunds.');
         }
+      } else if (!isDevSeamEnabled()) {
+        throw new ContractError('UNAUTHORIZED', 'Please contact support to view refunds for this order.');
       }
     }
     const refunds = await getOrderRefunds(db, orderId);
@@ -200,8 +200,10 @@ export const REFUND_HANDLERS: Record<string, RouteHandler> = {
       throw new ContractError('UNPROCESSABLE', 'The refund payment record does not exist.');
     }
 
-    if (process.env['MAIHAN_ENV'] === 'production' && payment.provider === 'TEST') {
-      throw new ContractError('INTERNAL', 'The test payment provider cannot refund money in production.');
+    // P1-6 fail-closed: the TEST provider never moves money at scale; refuse
+    // in every unseamed (production-shaped) environment.
+    if (isFailClosedMode() && payment.provider === 'TEST') {
+      throw new ContractError('INTERNAL', 'The test payment provider cannot refund money in fail-closed mode.');
     }
     if (payment.provider === 'STRIPE' && !process.env['STRIPE_SECRET_KEY']) {
       throw new ContractError('INTERNAL', 'Stripe credentials are not configured.');

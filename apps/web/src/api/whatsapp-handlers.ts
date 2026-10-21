@@ -12,6 +12,8 @@
  */
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { ContractError } from '@maihan/contracts';
+import { isDevSeamEnabled, isFailClosedMode } from '@maihan/config';
+import { ADMIN_ROLES } from '@maihan/domain';
 import {
   AiOrchestrator,
   splitWhatsAppMessage,
@@ -29,6 +31,7 @@ import {
 } from '@maihan/db';
 import type { RouteHandler } from './handlers.js';
 import { getDb, buildToolServices } from './ai-handlers.js';
+import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
 
 export const WHATSAPP_VERIFY_TOKEN_DEFAULT = 'maihan_gems_wa_secret_verify_2026';
 export const WHATSAPP_APP_SECRET_DEFAULT = 'maihan_gems_wa_app_secret_test_token';
@@ -66,7 +69,7 @@ export const whatsappVerificationHandler: RouteHandler = async (ctx) => {
   const challenge = url.searchParams.get('hub.challenge');
 
   const configuredToken = process.env['WHATSAPP_VERIFY_TOKEN'];
-  if (process.env['MAIHAN_ENV'] === 'production' && !configuredToken) {
+  if (isFailClosedMode() && !configuredToken) {
     throw new ContractError('INTERNAL', 'WhatsApp verification is not configured.');
   }
   const expectedToken = configuredToken ?? WHATSAPP_VERIFY_TOKEN_DEFAULT;
@@ -98,7 +101,7 @@ export const whatsappWebhookHandler: RouteHandler = async (ctx) => {
   const signature = req.headers.get('x-hub-signature-256') || req.headers.get('X-Hub-Signature-256');
 
   const configuredSecret = process.env['WHATSAPP_APP_SECRET'];
-  if (process.env['MAIHAN_ENV'] === 'production' && !configuredSecret) {
+  if (isFailClosedMode() && !configuredSecret) {
     throw new ContractError('INTERNAL', 'WhatsApp webhook secret is not configured.');
   }
   const appSecret = configuredSecret ?? WHATSAPP_APP_SECRET_DEFAULT;
@@ -193,20 +196,64 @@ export const whatsappWebhookHandler: RouteHandler = async (ctx) => {
     latencyMs: outcome.latencyMs,
   });
 
-  // 10. Record AI Interaction telemetry
+  // 10. Record AI Interaction telemetry — P1-15: label the provider truthfully.
+  const llmKeyed = Boolean(
+    process.env['OPENAI_API_KEY'] || process.env['OPENROUTER_API_KEY'] || process.env['AI_GATEWAY_API_KEY'],
+  );
   await recordAiInteraction(db, {
     requestId: ctx.ids.requestId,
     conversationId: conv.id,
     channel: 'WHATSAPP',
     surface: 'whatsapp',
-    provider: 'VERCEL_AI_GATEWAY',
-    modelName: 'gemini-1.5-pro',
+    provider: llmKeyed
+      ? process.env['OPENROUTER_API_KEY'] ? 'OPENROUTER' : 'VERCEL_AI_GATEWAY'
+      : 'DEGRADED_NO_MODEL_PROVIDER',
+    modelName: llmKeyed ? process.env['AI_MODEL'] ?? 'gemini-1.5-pro' : 'unavailable',
     promptVersion: '1.0.0',
     toolCallCount: outcome.toolCallsExecuted.length,
     groundedRatio: outcome.groundedRatio,
     handoffTriggered: outcome.handoff !== undefined,
     latencyMs: outcome.latencyMs,
   });
+
+  // 10a. P1-16: actually DELIVER the reply through the WhatsApp Cloud API —
+  // the inbound path previously stopped at the HTTP 200 ack, so customers
+  // never received the AI's answer on-channel. Degraded (unconfigured or
+  // failed) dispositions are reported honestly in the response.
+  const waAccessToken = process.env['WHATSAPP_ACCESS_TOKEN']?.trim();
+  const waPhoneId = process.env['WHATSAPP_PHONE_NUMBER_ID']?.trim();
+  let deliveryStatus: 'sent' | 'not_configured' | 'failed' = 'not_configured';
+  if (waAccessToken && waPhoneId) {
+    deliveryStatus = 'sent';
+    for (const chunk of splitResult.chunks) {
+      try {
+        const sendRes = await fetch(
+          `https://graph.facebook.com/v20.0/${encodeURIComponent(waPhoneId)}/messages`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${waAccessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              messaging_product: 'whatsapp',
+              to: senderPhone,
+              type: 'text',
+              text: { body: chunk },
+            }),
+            signal: AbortSignal.timeout(10000),
+          },
+        );
+        if (!sendRes.ok) {
+          deliveryStatus = 'failed';
+          break;
+        }
+      } catch {
+        deliveryStatus = 'failed';
+        break;
+      }
+    }
+  }
 
   // Mark receipt processed
   if (receipt.id) {
@@ -219,6 +266,7 @@ export const whatsappWebhookHandler: RouteHandler = async (ctx) => {
       status: 'success',
       conversationKey: conv.conversation_key,
       recipient: senderPhone,
+      reply_delivery_status: deliveryStatus,
       chunks: splitResult.chunks,
       handoff: outcome.handoff,
       capabilities: WHATSAPP_CAPABILITIES,
@@ -233,6 +281,23 @@ export const whatsappWebhookHandler: RouteHandler = async (ctx) => {
 export const whatsappSendTemplateHandler: RouteHandler = async (ctx) => {
   const db = getDb(ctx);
   const req = ctx.request;
+
+  // P1-16 auth gate: template sending is an OPERATOR surface. Allow only the
+  // explicit developer seam, an ADMIN session, or a loopback caller
+  // (server-side jobs). The previously unauthenticated route let anyone
+  // trigger template sends to arbitrary MSISDNs.
+  const sessionToken = extractSessionToken(ctx.request);
+  const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+  if (sessionToken && !actor) throw new ContractError('UNAUTHORIZED', 'Valid session required.');
+  const remoteAddr =
+    (ctx.request?.headers.get('x-client-ip') ?? '').trim() ||
+    (ctx.request?.headers.get('x-forwarded-for')?.split(',')[0] ?? '').trim();
+  const isLoopback =
+    remoteAddr === '' || remoteAddr === '127.0.0.1' || remoteAddr === '::1' || remoteAddr.endsWith('127.0.0.1');
+  const isAdmin = Boolean(actor && (ADMIN_ROLES as readonly string[]).includes(actor.role));
+  if (!isDevSeamEnabled() && !isAdmin && !isLoopback) {
+    throw new ContractError('UNAUTHORIZED', 'Administrative authentication required for template sends.');
+  }
 
   let body: any = {};
   if (req) {
@@ -259,7 +324,7 @@ export const whatsappSendTemplateHandler: RouteHandler = async (ctx) => {
 
   const accessToken = process.env['WHATSAPP_ACCESS_TOKEN']?.trim();
   const phoneNumberId = process.env['WHATSAPP_PHONE_NUMBER_ID']?.trim();
-  if (process.env['MAIHAN_ENV'] === 'production' && (!accessToken || !phoneNumberId)) {
+  if (isFailClosedMode() && (!accessToken || !phoneNumberId)) {
     throw new ContractError('INTERNAL', 'WhatsApp outbound delivery is not configured.');
   }
 
@@ -304,10 +369,12 @@ export const whatsappSendTemplateHandler: RouteHandler = async (ctx) => {
   return {
     status: 200,
     body: {
-      status: 'queued',
+      // P1-16 honesty: nothing was queued anywhere — no fabricated provider
+      // message id.
+      status: 'queued_no_provider',
       recipientPhone,
       templateName,
-      providerMessageId: `wamid.HBgL${Date.now()}`,
+      providerMessageId: null,
     },
   };
 };

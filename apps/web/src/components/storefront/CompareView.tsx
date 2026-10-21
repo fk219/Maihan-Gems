@@ -39,7 +39,6 @@ function cell(item: AtelierItem, key: (typeof ROWS)[number]['key'], currency: 'U
 export function CompareView({
   forceEmpty = false,
 }: {
-  demoItems: AtelierItem[];
   forceEmpty?: boolean;
 }) {
   const { currency, rates } = useStorefront();

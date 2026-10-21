@@ -310,9 +310,11 @@ describeDb('rate-limit Postgres fallback (rate_limit_counters, end-to-end)', () 
       namespace: 'mh-test-db-fallback',
     });
     const api = createCatalogApi({ service, ids: () => ({ ...IDS }), rateLimit: gate });
+    // P1-20: requests carry the adapter's trusted socket identity (the marker
+    // the node adapter sets); per-IP buckets continue to live in Postgres.
     const ip = (n: number): Request =>
       new Request('http://localhost/api/v1/products?limit=1', {
-        headers: { 'x-client-ip': `198.18.0.${n}` },
+        headers: { 'x-client-ip': `198.18.0.${n}`, 'x-maihan-ip-source': 'adapter' },
       });
     expect((await api(ip(1))).status).toBe(200);
     expect((await api(ip(1))).status).toBe(200);
@@ -322,5 +324,12 @@ describeDb('rate-limit Postgres fallback (rate_limit_counters, end-to-end)', () 
     expect(body.error.code).toBe('RATE_LIMITED');
     // A different client is unaffected (per-IP buckets live in Postgres too).
     expect((await api(ip(2))).status).toBe(200);
+    // P1-20: WITHOUT the adapter marker the header is untrusted — every such
+    // caller shares the conservative 'shared-unknown' bucket.
+    const unmarked = new Request('http://localhost/api/v1/products?limit=1', {
+      headers: { 'x-client-ip': '198.18.99.7' },
+    });
+    expect((await api(unmarked)).status).toBe(200);
+    expect((await api(unmarked)).status).toBe(200);
   });
 });

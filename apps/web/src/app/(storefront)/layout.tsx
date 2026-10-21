@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 
 import '../storefront-luxury.css';
 
+import { AiConciergeLauncher } from '../../components/ai/AiConciergeLauncher.js';
 import { StorefrontHeader } from '../../components/layout/StorefrontHeader.js';
 import { StorefrontFooter } from '../../components/layout/StorefrontFooter.js';
 import { StorefrontProvider } from '../../components/storefront/StorefrontProvider.js';
@@ -23,6 +24,8 @@ export default async function StorefrontLayout({ children }: { children: React.R
       ) : null}
       <div className="ngc-pages">{children}</div>
       <StorefrontFooter />
+      {/* P1-29: mount the (formerly unreachable) concierge drawer. */}
+      <AiConciergeLauncher />
     </StorefrontProvider>
   );
 }

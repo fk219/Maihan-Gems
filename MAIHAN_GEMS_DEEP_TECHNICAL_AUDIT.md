@@ -1,0 +1,681 @@
+# MAIHAN GEMS — DEEP TECHNICAL AUDIT
+
+**Audit date:** 2026-10-21 · **Branch:** `develop` @ `d538fc1` (clean tree, no local modifications)
+**Auditor scope:** frontend, backend/API, database, auth/RBAC, ecommerce domain, multi-domain, AI/DYO/3D/VTO, worker, docs traceability, testing.
+**Mode:** audit-only. No source, schema, migration, configuration or operational data was modified. The single file created is this report.
+
+> **SINGLE SOURCE OF TRUTH.** This file supersedes and replaces three earlier trackers — `AUDIT_PHASE_PLAN.md`, `MAIHAN_GEMS_MASTER_PHASE_REPORT.md` and `MAIHAN_GEMS_COMPLETENESS_AND_GAP_AUDIT.md` (deleted 2026-10-21 after consolidation; every still-open item from them was re-verified against current code and absorbed into §18/§22). Their resolved items are recorded in §18.1 with evidence; anything they claimed that no longer matches the code is marked in §2.3. Work §22 in exactly **three phases**: Phase 1 REPAIR (in-repo, no client gate) → Phase 2 CONNECT (client-gated) → Phase 3 OPERATE & PROVE (gated on Phase 1 + Phase 2 data).
+
+---
+
+## 1. Executive summary
+
+The repository contains a **substantially-built, genuinely-wired application** — not a façade. The locked 21-migration schema (83 tables), the DYO engine, the order-placement transaction, cart re-pricing, stock reservation, worker outbox/jobs, RBAC matrix, CMS review workflow, WebAR token handoff and the test suites are real, inspectable, mostly-tested code. This is materially better than the earlier "fabricated" state implied by the first-generation audits.
+
+However, the application is **not production-ready and two claims in the most recent tracker-state do not survive verification**:
+
+1. **The test suite is currently RED.** `pnpm -r run test` fails **2 tests** (`packages/db` cart-repository, `apps/web` cart.spec — same root cause). Commit `102e9ea` added a unique-stone quantity guard without updating tests. Prior reports claimed 0 failures; that claim is now stale.
+2. **The DYO purchase path is broken end-to-end.** The quote flow prices with a 15 % making fee (`dyo-repository.ts:260-267`) but cart conversion re-prices without the fee (`dyo-repository.ts:377-384` vs `pricing-calculator.ts:7-8` default `makingFee?: number` = 0), so **every real quote→add-to-cart returns 409 DYO_PRICE_CHANGED**. The e2e test passes only because its mock quote total excludes the fee. A customer cannot buy a DYO design today.
+
+Thirteen further high-severity defects exist (§20): an unauthenticated notifications read that leaks raw email-verification and password-reset tokens, residual fail-open `MAIHAN_ENV`-gated production guards (default webhook HMAC secrets, TEST payment provider), client-authoritative shipping amounts, client-supplied `customer_id` on checkout, vendor fulfilment that bypasses the PAID gate, a non-transactional refund executor that can resurrect a CANCELLED order, a code–schema drift that leaves 83 `search.generation_bump` jobs stuck QUEUED (live-DB verified), a simulated 2D "AR" modal presented as functional AR, an inert grounding gate, and a certificate OCR pipeline that stores caller-supplied data as its own extraction.
+
+Not run (gates unchanged from prior reports and still true): full 44,218-URL corpus migration (`staging_source_pages` = 0 rows live-DB verified), real money movement, tax/shipping engines, real OCR/hand-tracked AR over product assets, WebAR GLBs (`webar_assets` = 0), worker deployment, E2E/load/physical-device evidence.
+
+**Verdict: NOT production-ready. Build/typecheck/schema-fidelity green; test suite red; several trust/commerce-integrity defects must be fixed first.**
+
+---
+
+## 2. Repository and documentation inventory
+
+### 2.1 Repository state (verified)
+
+| Item | Value |
+|---|---|
+| Branch / commit | `develop` @ `d538fc1` — "fix: restore archive ignore rules and complete vendor migration" |
+| Working tree | Clean at audit start; restored clean at audit end (§23) |
+| `naturalgemstones/` | Present locally, git-ignored (`.gitignore:6-8`), **not modified, not staged** |
+| Workspace | pnpm: `apps/web`, `apps/worker`, `packages/{db,domain,contracts,ai,config,observability}`, `tools/migrate` |
+| Source files audited | 591 TS/TSX/SQL files (apps+packages+tools) |
+| Next.js routes | 41 `page.tsx` + 5 route.ts/listing files; 198 API route registrations over 115 unique handler ids (`routes.ts`, script-counted) |
+
+### 2.2 Documentation accessed
+
+| Class | Files | Read status |
+|---|---|---|
+| Root MD | `AGENTS.md`, `PROJECT_SOURCE_OF_TRUTH.md` (referenced excerpts + §1/§7/§8 facts, not line-by-line — 315 KB), `INITIAL_IMPLEMENTATION_PLAN.md` (§0–3, §7, §19, §20, §21, §26–28 read directly), `MAIHAN_GEMS_COMPLETENESS_AND_GAP_AUDIT.md`, `MAIHAN_GEMS_MASTER_PHASE_REPORT.md`, `AUDIT_PHASE_PLAN.md` (all three read fully, then **deleted** after consolidation — see header note), `DISTINGUISHING_SAUCE_MASTER_ARCHITECTURE.md`, `SKILL_MATRIX_AND_TOOLING.md` (skimmed for approvals), `PROMPT_FOR_EMERGENT_AI.md` (discovered, skimmed) | Complete except SoT/SKILL (targeted excerpts) |
+| `technical_design/` | 40/40 files enumerated and present. Read directly: `40` (ADR register), excerpts of `04`, `06`, `13`, `14`, `18`, `21`, `23`, `27`, `32`, `38`, `39`. The remainder were consulted via the traceability assertions of prior audit reports and quotes in migrations; **they were not all read line-by-line in this pass** — recorded here explicitly rather than silently omitted | Partial (declared) |
+| `.opencode/memory/` | All 5 files read completely | Complete |
+| ADR status | ADR-001…021, 025, 026, 027 **Accepted**; ADR-022, 023, 024 **still Proposed** (`technical_design/40:288,299,310`) — matches memory; nothing was implicitly resolved | Verified |
+| `docs/` | `adr/`, `api/` (openapi, postman), `evidence/` (MANIFEST present), `runbooks/` (RB-01…06 present), `research/ngc` | Enumerated; MANIFEST verified present |
+
+### 2.3 Conflicts found in documentation
+
+| # | Conflict | Resolution applied |
+|---|---|---|
+| DC-1 | *(inherited from `MAIHAN_GEMS_COMPLETENESS_AND_GAP_AUDIT.md`, now deleted)* — it claimed "pnpm -r run test: 909 passed, 0 failed" and "security headers fixed as last-slice remediation". Both checked against code: the test claim was already false at audit time (2 failures, §17; the old figure also counted a run with DB specs skipped) and the security-header claim was implemented in `apps/web/next.config.ts:40-92` (verified correct, though untested — SECURITY-HEADERS-TEST below). | Code wins; both recorded here |
+| DC-2 | Tracker §0 lists "security headers" as fixed in the last slice — confirmed correct, but implemented in `apps/web/next.config.ts:40-92`, not in `src/api` (where most security code lives) and untested by any spec (no header test exists for CSP/HSTS). Also `'unsafe-inline'` script-src remains. | Verified present; noted as gaps |
+| DC-3 | `AGENTS.md §7` schema counts (74 tables/591 CHECK/263 indexes) vs `expected-schema.ts` (83/658/287). Both files exist; `expected-schema.ts` header documents the reconciliation; AGENTS.md retains the older snapshot. | `expected-schema.ts` wins (matches migrations; fidelity gate verifies it) |
+| DC-4 | *(inherited from the `MAIHAN_GEMS_MASTER_PHASE_REPORT.md`, now deleted)* — it listed the AI concierge drawer as an implemented deliverable; the component exists but is **never mounted in any layout/page** (dead code, F-01). | Inventory in §4.6 |
+
+---
+
+## 3. Architecture and actual execution-path overview (verified)
+
+**Frontend → API:** Next.js App Router (`apps/web/src/app`) renders server-side from four data seams: (a) `lib/storefront-data.ts` — pooled SQL against the locked schema **with fixture fallback** to the 9.1 MB `src/data/ngc-catalog.json` when the DB is empty/unavailable (design intent, documented in comments at `storefront-data.ts:71-84`); (b) `lib/catalog-server.ts` → `CatalogQueryService` → `@maihan/db` SQL port (pure-DB, no fixture); (c) `lib/cms-pages.ts` (locked `pages` table, degrade-to-null); (d) HTTP calls to the API plane (`lib/account-server.ts` forwards the `maihan_session` cookie as Bearer, `account-server.ts:54-106`).
+
+**API:** `app/api/v1/[...path]/route.ts` strips spoofable identity headers unless `isDevSeamEnabled()` (`packages/config/src/security-mode.ts`), then either forwards to `MAIHAN_API_URL` or delegates in-process to the custom API server (`api/index.ts` `createCatalogApi`): correlation ids → route lookup → **scoped rate-limit gate** (Redis → Postgres `rate_limit_counters` → in-memory chain, fail-closed for checkout/ai_stream/certificate_upload) → stratified handler registry → metrics/cache headers → consistent error envelope (`envelope.ts:89-115`; no SQL leaks).
+
+**Handlers → repositories → Postgres:** Drizzle-executor + parameterized SQL (`catalog/executor.ts`); selective `withRlsContext` / `withPoolRlsSession` seams set transaction-local GUCs for `orders`/`carts`/`ai` reads (`executor.ts:45-128`, proved by `rls-context.spec.ts`). Money is `NUMERIC(12,2)` end-to-end (Grep-verified across DDL); order totals are frozen from `session.pricing_snapshot` (`order-repository.ts:288-293`); carts re-price server-authoritatively (`cart-repository.ts:73-98`).
+
+**Worker:** 5 s loop — transactional outbox (`FOR UPDATE SKIP LOCKED`, batches of 25, PUBLISHED+ledger in one tx), job runner with lease reclamation/30 s leases/backoff/dead-letter, 4 sweeps (reservations, checkout sessions, carts, webhook-receipt exhaustion).
+
+**Honesty gate:** the previously-severe gap ("UI claims while backend absent") is largely closed — fallbacks exist and most are documented in-code. The remaining **dishonest-surface** items are WebArModal (fake "AR overlay active" badge), the AI no-key canned replies (misattributed telemetry), email `delivered:true` for OUTBOX_LOG on the API path (worker path is honest), WhatsApp fabricated `wamid`, and the certificate mock `upload_url`.
+
+---
+
+## 4. Complete frontend audit
+
+### 4.1 Route inventory and status (all 41 pages read)
+
+Public: `/`, `/shop`, `/browse`(F), `/jewellery`(F), `/settings`(F), `/pairs`(R), `/varieties`(+`[varietySlug]`)(R), `/colour/[colourSlug]`(R), `/[varietySlug]`(+`[productSlug]`)(P-mixed), `/product/[slug]`(R-dual), `/products/[productSlug]`(R), `/settings/[settingSku]`(R), `/search`(R), `/cart`(P), `/checkout/`×4(R), `/design-your-own`(+`/review/[code]`)(R), `/account/[[...]]`(R), `/favorites`(P), `/compare`(P), `/contact`,`/about`(+`[aboutSlug]` STUB), `/blog`(+`[postSlug]`)(R), `/policy/[policySlug]`(P), `/education/[[...]]`(R), `/showrooms`(+`[showroomSlug]` STUB), `/financing`,`/protection-plan` (STATIC), `/ar/[assetId]`(+`/ar/handoff/[token]`)(R), `/sitemap.xml`,`/sitemap-products/[shard]`(R), `/robots.txt`(R), `/demo`(P-legacy), `/admin/**`(R), `/vendor/**`(R), root `error/not-found/loading` present.
+
+Legend: R = DB/API-backed with honest empty/error states; P = partial/mixed; F = fixture-rendered from `ngc-catalog.json`; S = static copy. (Findings F-XX below.)
+
+Key facts:
+- 25 routes are genuinely real; 8 static; 2 stub catch-alls; fixtures dominate `/browse`, `/jewellery`, `/settings` hub, and sister-house landings when `landingView()` is used.
+- **DB-empty behaviour:** every catalogue surface silently degrades to the 9.1 MB static fixture (by design). Consequence: "DB-backed" pages are fixture-backed until the corpus lands — §10 P0-1.
+- `/checkout/confirmation/[orderId]` renders honest PENDING_PAYMENT copy and 404s on unknown orders (real).
+- SEO: sitemap + robots real; canonical URLs exist on `/products/[productSlug]` but single-base fallback (`siteBaseUrl`) — wrong canonicals per brand domain (§8).
+
+### 4.2 Component and interaction audit (key flows traced to network)
+
+| Component | Action | What actually happens | Issues |
+|---|---|---|---|
+| BagView | qty/remove | PATCH/DELETE to unified server cart + local mirror | Errors swallowed `.catch(()=>undefined)` (×2); no busy state |
+| CheckoutReview | promo | `POST /api/v1/discounts/validate` (outcome verbatim) | "Apply code" has no busy guard; `notOrderable` array declared but never populated (dead code) |
+| CheckoutPayment | address/method | checkpoint endpoints (server-enforced step order) | Single "test provider" — honest copy; **shipping amount is client-supplied** (BE-10) |
+| CheckoutConfirm | place order | `POST /api/v1/orders` with idempotency_key + optional addon attach | **Idempotency key regenerated from `Date.now()` on retry** (F-04); addon failures swallowed |
+| DyoStudio | review & quote | `POST /api/v1/dyo/configurations` → validate → navigate | Client indicative price labelled honestly; INV-02/03 pre-check client-side too |
+| DyoReviewActions | add to bag | quote → add-to-cart via server; 409/422 resets quote token | **Every conversion currently 409s** (BE-2) |
+| ProductActions | add-to-bag / fav / compare | localStorage only; favorites server path read/delete-only from UI | Consistent but partial persistence |
+| ProductGallery / ProductStudio | tabs/zoom | local state; video/360 via Cloudinary | Regex sanitization before `dangerouslySetInnerHTML` (ProductStudio.tsx:129-136) — acceptable, flag for hardening |
+| CollectionFilters | facets | client-side over server page (≤500 items) | Honest today; won't scale to corpus (§10) |
+| HeroSearch | typeahead | `/api/search` real | No empty/error handling on instant hits |
+| AiConciergeDrawer | chat | real SSE parser of `/api/v1/ai/chat` | **Dead code — mounted nowhere** (F-01) |
+| WebArModal | try on | `getUserMedia` on-device; **decorative fixed-centre 2D overlay; sets TRACKED with no tracking; ignores `glbUrl`/`fitRule`** | Misrepresents function (TD-02) |
+| VirtualTryOnModal + TryOnScene | try on | **REAL MediaPipe HandLandmarker WASM + Three.js hand-anchored ring; frames processed locally only** | Only wired in the configurator path, not PDP |
+| ThreeDViewer | 3D | real three.js GLTFLoader + honest fallback matrix | PDP never passes `webarAsset` — GLB path dormant (TD-04); full scene rebuild per drag |
+
+### 4.3 Forms
+
+All primary forms have busy-state guards (`disabled={busy}`) and server-side zod or repository checks; no double-submit-open form found. Gaps: promo Apply lacks busy-disable; registration surfaces a **sandbox verification token in the UI under dev-seam** (`AuthFlowView.tsx:490-501`) — gated by `isDevSeamEnabled()` on the backend (verified fail-closed), cosmetic risk only; vendor/admin forms validated server-side with per-row busy ids.
+
+### 4.4 Visual quality / a11y / performance (static analysis)
+
+Design system (Silk & Stone + "Golden Obsidian" tokens `#0A0A0B`-family/navy/gold) applied consistently across catalog/checkout/header; root error/not-found/loading with skeletons; error boundaries on catalogue, product, checkout-confirmation groups; `role=listbox` gallery, `aria-expanded` filters, labelled auth forms, `aria-modal` drawers. Gaps (F-XX): LuxuryHeader hover menus not keyboard-escapable; Quick-view modal lacks focus trap; zoom-on-hover offers no keyboard alternative; ThreeDViewer spinner has no reduced-motion guard; no `loading.tsx` on ~15 force-dynamic routes (acceptable, noted); representative-photo substitution (`storefront-images.ts:177-186`) can show a generic photo for a DB product lacking imagery without on-card labelling. Bundle budgets PASS at audit time (product 150.5/190 KB — check:budgets verified).
+
+---
+
+## 5. Frontend → backend connectivity matrix (abridged, all verified)
+
+| Frontende surface | Transport | Backend call | Server-side result | Linked |
+|---|---|---|---|---|
+| Checkout funnel | fetch | carts → checkout/sessions → checkpoints → orders | Real | BE-1 ✓ |
+| Bag merge | fetch | `POST /api/v1/carts/{token}/merge` | Real | ✓ |
+| DYO studio/review | fetch | configurations/validate/quote/add-to-cart | Real repo; **broken pricing leg** | BE-2 ✗ |
+| Account (auth, profile, addresses, orders) | cookie-as-Bearer | `/auth/*`, `/account/*` | Real; scrypt/HMAC sessions | ✓ |
+| Favorites | local + fetch | `/favorites` GET/POST/DELETE | Real | Partial sync ⚠ |
+| Compare | fetch | `/compare?ids=` | Real (2..4 ids enforced in repo, message mismatch) | ⚠ |
+| Admin workspaces | server fetch | `/admin/**` (26 ids) | gateAdmin + hasCapability | ✓ (SEC-6, SEC-7) |
+| Vendor workspaces | server fetch | `/vendor/**` (9 ids) | requireVendorActor + owner scoping | ✓ (BE-9) |
+| AI concierge | SSE | `/api/v1/ai/chat` | Real handler; **UI unmounted** | F-01 |
+| AR pages | fetch | `/webar/{id}`, `/ar/handoff` | Real | ✓ |
+| Refresh/360 | — | via cart/PDP seams | fixture/CDN | F-02 |
+
+---
+
+## 6. Backend / API / service audit
+
+### 6.1 Inventory
+
+**198 route registrations, 115 unique handler ids** (script-counted from `routes.ts`): catalogue 11, search 3, commerce 17, auth 8, account 8, favorites/compare 4, add-ons 3, discounts 2, refunds 5, DYO 6, certificates 5, AI 3, WhatsApp 3, WebAR 3, health/metrics 3, vendor 9, admin 26. Middleware: header-stripping (fail-closed), scoped rate limits, HTTP/JSON envelope, SSE passthrough. **Transport caveat:** in-process `wireApi()` failure is cached forever and surfacing is a generic 500, not the API envelope (`route.ts:100-111`).
+
+OpenAPI parity is test-enforced (`openapi-parity.spec.ts` passing).
+
+### 6.2 Business-rule scorecard (what is genuinely server-enforced)
+
+| Rule | Status | Evidence |
+|---|---|---|
+| Price authority (goods) | **Real** | Cart re-pricing + 409 PRICE_CHANGED (`cart-repository.ts:434-447`) |
+| Order totals freeze | **Real** | `session.pricing_snapshot` only (`order-repository.ts:288-293`), re-verified against cart subtotal (229-242) |
+| Stock: reservation + release + sweep | **Real** (gaps BE-7) | `inventory-reservation.ts:57-139`; `placeOrder` conditional UPDATE WHERE availability=true AND state='ACTIVE' (348-412) |
+| Order placement atomicity | **Real** | single `runInTransaction` (order-repository.ts:198) incl. snapshots, availability flip, reservation consumption, outbox, cart CONVERTED |
+| Idempotent order placement | **Real** | idempotency_key replay (`order-repository.ts:200-214`) |
+| Order state machine | **Real, with bypasses** | `domain/order.ts:22-30`; bypasses BE-9/BE-12 |
+| Webhook HMAC (raw body) | **Real** | Stripe `Stripe-Signature t,v1`+timingSafeEqual (stripe-payment-provider.ts:210-340); WhatsApp X-Hub-Signature-256 (`whatsapp-handlers.ts:39-57,96-110`) — **fail-open env detection** (SEC-3) |
+| Refunds bounds | **Real** | FOR UPDATE + captured − refunded − pending (`refund-repository.ts:91-139`) |
+| Publication/availability predicates | **Real** | `catalog/predicates.ts:227,261` — DRAFT/SOLD_OUT/ARCHIVED never listed |
+| Vendor ownership isolation | **Real** | every vendor query scoped by vendor_id; APPROVED gate (384-386) |
+| DYO compatibility | **Real** | rule engine + stored rules; INV-01/02/03 as predicates |
+| DYO pricing | **Real arithmetic, broken flow** | bigint cents; BE-2 |
+| Discount redemption counting | **Broken (dead)** | `redeemDiscount` never called in order path (BE-20) |
+| Tax / shipping engines | **Missing** | tax `tax_component`=0; shipping client-supplied (BE-10); FX table hardcoded fallback |
+| AI mutation isolation | **Real, tested** | exactly 2 mutating tools (`assertStructuralMutationSafety`, frozen at `ai.spec.ts:31-41`) |
+
+### 6.3 Failure-handling
+
+Single error envelope registry is consistent; zod errors surface per-field; contract errors carry HTTP status; internals never leak. Gaps: CMS handlers hand-roll error bodies without correlation ids; the certificate `decision !== 'REJECT'` fall-through **approves on a typo'd decision** (`certificate-handlers.ts:328-335`); unknown worker job types silently `SUCCEEDED` (`jobs-runner.ts:190-192`); compare validation message lies about 2..4 (`favorites-handlers.ts:111-113` vs repo).
+
+---
+
+## 7. Complete database table/object inventory (locked chain)
+
+**21 migrations, 83 CREATE TABLE statements** (script-verified against `expected-schema.ts` — every name matches; live DB introspection shows 84 base tables in `public`, the extra one being the Drizzle journal table — minor introspection trivia, IF-01).
+
+| Domain | Migrations | Tables |
+|---|---|---|
+| Migration staging | 0003 | `import_batches`, `staging_source_pages`, `staging_parsed_urls`, `staging_conflicts` |
+| Taxonomy (12) | 0004 | species/varieties/colours/intensities/origins/treatments(+labels)/clarities(+labels)/metals/setting_styles/jewellery_types |
+| Catalog (7) | 0005–0006 | `gemstones`(+`gemstone_stones`), `settings`, `setting_variants`, `setting_compatibility_rules`, `products`, `product_gemstones`; search trigger+GIN |
+| DYO (3) | 0007 | `dyo_configurations`, `dyo_price_snapshots`, `dyo_quotes` |
+| Pricing (3) | 0008 | `price_lists`, `price_entries`, `price_model_observations` |
+| Commerce (13) | 0009 | `customers`, `customer_profiles`, `addresses`, `carts`, `cart_items`, `orders`, `order_items`, `payments`, `refunds`, `discounts`, `product_addons`, `fulfillments`, `order_events` |
+| Trust (6+view) | 0010/0017 | `certificates`, `certificate_ocr_runs`, `certificate_extractions`, `certificate_anomalies`, `certificate_reviews`, `verification_events`, view `certificate_public` |
+| Assets (5) | 0011 | `assets`, `asset_variants`, `asset_usages`, `webar_assets`, `ar_handoff_tokens` |
+| CMS (5+1) | 0012/0018 | `pages`, `page_revisions`, `navigations`, `redirects`, `seo_metadata`, `page_review_state` |
+| AI (9) | 0013/0015 | `conversations`, `messages`, `tool_calls`, `knowledge_documents`, `knowledge_chunks`(HNSW 1024), `product_embeddings`(HNSW), `ai_interactions`, `ai_evaluations`, `guardrail_events`, fn `match_knowledge_chunks` |
+| Operations (7) | 0014 | `domain_events`, `event_consumers`, `jobs`, `audit_logs`, `webhook_receipts`, `rate_limit_counters`, `feature_flags` |
+| ADR-027 normalization (7+1) | 0019–0021 | `auth_credentials`, `auth_sessions`, `auth_tokens`, `favorites`, `checkout_sessions`, `inventory_reservations`, `notifications`, `vendor_onboarding` |
+
+Enums: 33 native types (all verified in 0002; `review_state` enum is dead — DB-06). Full per-table detail (PK/FK/UNIQUE/CHECK/index) is held in `expected-schema.ts` and introspected by the passing fidelity gate; the audit verified the fidelity gate myself (fresh scratch DB, 21 migrations, PASS).
+
+**Storefront overlay** (`storefront-migrations/0019–0021`, ~28 tables incl. colliding `products`/`certificates`/`carts`/`cart_items`/`favorites`): mutually-exclusive second schema; `run-storefront-schema.ts` refuses to run over the locked DB by design; reachable only through `/demo` and fallback branches of `storefront-data.ts`; its README command (`storefront:db:setup`) now runs the **locked** migrator (`package.json:13`), so the instruction is stale (DB-01).
+
+### Data types (verified by script over all DDL)
+
+No float money anywhere; all money `NUMERIC(12,2)`; weights carats `NUMERIC(8,3)`; all timestamps `TIMESTAMPTZ`; 0 bare timestamps. Flags: `certificate_extractions.numeric_value NUMERIC(14,4)` unit-blind; `metals.purity_value` mixes karat/per-mille scales; storefront dimension scale diverges (`NUMERIC(6,2)` vs `8,3`); storefront `media.size_bytes INTEGER` (2 GB ceiling) — all low severity (DB-11).
+
+---
+
+## 8. Entity-relationship map (textual, verified relationships)
+
+```
+(customer_profiles 1-1 customers) -< addresses                    [FK to customers; NO ACTION]
+customers -< carts(anonymous-capable) -< cart_items > products    [cart_items UQ(cart,product,configuration)]
+customers -< orders -< order_items > products                     [RESTRICT both children; NO gold-edge FKs]
+orders 1-1 payments -< refunds ; orders -< fulfillments -< 1 order_items
+orders -< order_events (identity BIGINT, RESTRICT)
+customers 1-1 auth_credentials(1 role) ; -< auth_sessions/-< auth_tokens; -< notifications; -< favorites > products [CASCADE]
+carts || checkout_sessions || inventory_reservations > gemstones  [token TEXT joins; job_key UNIQUE]
+gemstones -< product_gemstones > products (side stones)
+gemstones 1-* gemstone_stones (INV-06 per-stone rows)
+products > setting_variants > settings ; products > gemstones | gemstone_pairs
+products UQ slug / UQ source_sku patterns; source_sku_derived nullable
+dyo_configurations > settings/setting_variants; > gemstones XOR > gemstone pairs; -< dyo_price_snapshots -< dyo_quotes
+certificates > gemstones (CASCADE!) | configuration | product (SET NULL); -< ocr_runs -< extractions; -< anomalies; -< reviews; -< verification_events
+assets -< asset_usages(entity_type/entity_id polymorphic, UQ tuple) ; -< asset_variants
+webar_assets > assets/product/setting_variant; ar_handoff_tokens(hash PK) > webar_asset
+pages -< page_revisions -< page_review_state; navigations; redirects; seo_metadata
+conversations -< messages -< tool_calls ; -< ai_interactions; -< guardrail_events
+knowledge_documents -< knowledge_chunks(vector) ; products -< product_embeddings(vector)
+domain_events -< event_consumers ; jobs(UNIQUE job_key) ; audit_logs(identity) ; webhook_receipts UQ(provider,external_event_id)
+import_batches -< staging_* ; -< products.import_batch_id (provenance)
+```
+
+Imported lower-junction findings: `carts.converted_order_id` and `checkout_sessions.completed_order_id` carry **no FK/index** (DB-09); `order_items.sku_snapshot` actually stores a slug for slug-carts at write time (`order-repository.ts:504`, naming/semantic drift); polymorphic `asset_usages.entity_id` has no referential guarantee by design.
+
+---
+
+## 9. Schema, constraints, invariants, migration audit
+
+### 9.1 Invariant verification (against authoritative docs)
+
+| INV | DB enforcement | Verdict |
+|---|---|---|
+| INV-01 (CONFIGURED = setting variant + 1 gemstone XOR 1 pair) | `products_composition_ck` + `products_earrings_need_pair_ck` (`0005:269-287`) | **Enforced**; narrow residual: LOOSE/PAIR/READY_MADE arms don't constrain stone links |
+| INV-02 (pairs only on EARRINGS) | `products_no_pair_on_non_earrings_ck` + `dyo_pair_is_earrings_ck` (`0005:281`, `0007:43`) | **Enforced** (double-sided) |
+| INV-03 (singles only on non-EARRINGS) | **No CHECK exists**; only runtime predicates (`dyo-repository.ts:457-473`) and dormant `jewellery_types.uses_single` data | **Not DB-enforced** (DB-04) |
+| INV-07 (unverified ≠ verified truth) | per-field statuses + 0–1 confidence CHECKs; view filters `<0.50` | **Mostly enforced**; view still exposes `REJECTED`/non-VERIFIED `field_status` (client must label) and surfaces only the **latest extraction per certificate** via LATERAL top-1 — multi-field certificates show one field through the view (DB-05) |
+| INV-08 (inferred identifiers need approval) | none; `review_state` enum dead; approval flow only app-level | **Not DB-enforced** (DB-06) |
+
+Named invariant set (9) matches `introspect.ts`/`expected-schema.ts`; fidelity asserts definitions exactly.
+
+### 9.2 Migrations and drift
+
+- Order/history sane (Drizzle journal, 21 entries, verified replay on fresh DB via `schema-fidelity` PASS run during this audit).
+- **Live code↔schema drift (BE-4):** `apps/worker/src/dispatch/jobs-runner.ts:97-103` inserts `feature_flags(key, description, …)` — no `description` column exists (0014:115-122). Live-DB consequence verified: **83 `search.generation_bump` jobs stuck in QUEUED, `feature_flags` table empty**. Every catalogue mutation's cache-invalidate job crashes and retries with backoff until dead-letter — and even if fixed, the API's generation store is a different mechanism (`modules/catalog/application/generation-store.ts`, Redis/in-memory), so worker-side invalidation is dead wiring either way.
+- Legacy pre-0019 jobs rows remain (`EMAIL_VERIFICATION` 4, `USER_SESSION` 3, `CHECKOUT_SESSION` 2, `CREDENTIAL` 2, `RELEASE_RESERVATION` 13 — live-DB counted); by design ("explicitly keeps them") but with no retention sweep implemented anywhere (DB-08): `jobs`, staging tables and audit/domain_events grow unbounded; documented 90-day sweep exists only in doc 27.
+- 0020/0021 fix the defective `vendor_onboarding` default — fresh-generation OK (R1 residual closed in code).
+
+### 9.3 Index findings (static analysis)
+
+Hot-path indexes exist for: products-by-slug (partial UQ matched by repository predicates), orders-by-customer (customer_id, created_at DESC), carts-by-token, jobs polling/claim (queue,state,run_after partial), webhook dedupe UQ, assets-by-product usage tuple, GIN fulltext + trigram + 2 HNSW. **Missing FK-support indexes on live query paths** (static-analysis finding, no runtime EXPLAIN claimed): `order_items.configuration_id`, `cart_items.product_id`/`configuration_id`/`price_snapshot_id`, `certificates.product_id`/`configuration_id` (order-time document lookups hit these — `order-repository.ts:417-432`), `dyo_configurations.gemstone_id/gemstone_pair_id/setting_variant_id`/`setting_id`, `products.gemstone_pair_id`, `tool_calls.message_id` (FK ON DELETE SET NULL ⇒ message deletes seq-scan), `event_consumers.event_id` (outbox delete path), `checkout_sessions.customer_id`, `favorites.product_id`, `knowledge_documents.source_page_id` (ai.embed queries it), plus `refunds.payment_id`, `fulfillments.order_item_id`, `verification_events.product_id`. None is a correctness defect; all are scale/lock-scope liabilities before the corpus (DB-12).
+
+### 9.4 Historical integrity / deletion
+
+`order_items` RESTRICT + full snapshots (sku/title/configuration/gem/document) make completed orders immutable to product deletion (order_items.product_id → products is NO ACTION). Order DTOs render snapshots only (`order-repository.ts:174-189`). Risks: `certificates.gemstone_id` **CASCADE** while `verification_events` (NO ACTION on certificate via cert FK) can abort the cascade mid-flight — accidental, fragile governance (DB-10); `favorites.product_id` CASCADE silently erases wishlist rows on product deletion; customer hard-delete is blocked by order/address NO ACTIONs (soft-delete + no erasure job instead).
+
+### 9.5 Database security
+
+RLS exists on 6 tables exactly with 6 USING-only policies and **no roles/grants/BYPASSRLS anywhere** — the "separate BYPASSRLS role" comment (0016:67) is aspirational; on the owner connection RLS is inert, making the app-layer `withRlsContext` seams the only active defence (their correctness is test-proven, `rls-context.spec.ts`). Append-only claims for `domain_events`/`audit_logs` are comment-only (DB-07). All SQL is parameterized (`sql` templates; no string-built queries found in the audited paths). No secrets in migrations; `.env.example` contains placeholders only (verified).
+
+---
+
+## 10. Query performance and concurrency findings
+
+| ID | Finding | Severity |
+|---|---|---|
+| DB-12 | Missing FK/secondary indexes listed in §9.3 (est. seq-scans/locks at corpus scale on order-time certificate lookups, cart-item joins, outbox deletes) | MEDIUM |
+| BE-7 a/b | Reservation creation is check-then-insert across separate statements outside a transaction; `ON CONFLICT (job_key) DO UPDATE` lets a second checkout session **overwrite** the first's active hold; add-to-cart stock cap is per-call, defeated by repeated adds of qty 1 | HIGH |
+| BE-11 | Payment insert + order PAID in webhook reconciliation are sequential (two statements, no tx) — crash window leaves paid money vs PENDING_PAYMENT order | HIGH |
+| BE-12 | Vendor fulfilment may move a **PENDING_PAYMENT** order to IN_FULFILLMENT and write `fulfillments`/`order_items.state` directly (`vendor-repository.ts:1035-1050`) — bypasses the state machine | HIGH |
+| BE-17 | Refund execution is non-transactional; order state overwritten to REFUNDED with no transition/version guard; concurrent double-execute double-counts `refunded_amount` | HIGH |
+| BE-5 | Order number = `count(*) LIKE 'MG-%'` + a random retry — collision-prone at scale (no sequence) | MEDIUM |
+| BE-6 | `sweepInventoryReservations` is an **unauthenticated public POST** | MEDIUM |
+| DB-13 | No retention jobs; legacy jobs rows retained; append-only not DB-armed | MEDIUM |
+| T-2 | AI chat seq = `message_count+1/+2` — concurrent turns can race to duplicate seq (UQ protection holds, but one turn fails ungracefully) | LOW |
+
+Concurrency that IS sound and proven-test: reservation `SELECT FOR UPDATE` on gemstones with ALREADY_RESERVED semantics; placement-time re-guard defeats the theft window only at final placement; cart upsert `ON CONFLICT (cart,product,configuration) quantity+=`; claim patterns `FOR UPDATE SKIP LOCKED` in worker; single-use AR tokens and quote consumption atomic within their claims.
+
+---
+
+## 11. Database security & historical-data integrity (synthesis)
+
+- Parameterization: PASS (audited repository SQL paths).
+- Sensitive storage: session token **SHA-256 hash at rest**; auth tokens hashed; reset/verification raw tokens validly single-use **but embedded in notification bodies** (SEC-1 chain).
+- PII: audit rows redact emails (`ACCOUNT_REGISTERED` writes `"[REDACTED]"`); metrics cardinality guard; logs scrub emails/phones/cards/tokens at the observability layer.
+- Access boundaries: handler-level checks are the only boundary for most reads; RLS seams active only on the order-detail/account/conversation-transcript reads. Deleting a gemstone with certificates triggers a CASCADE that verification_events may abort (DB-10); deletion of a product in any cart is blocked (NO ACTION) — cart integrity sound.
+
+---
+
+## 12. Authentication and RBAC matrix
+
+**Lifecycle (verified real):** scrypt N=16384 memory-hard hashing + dummy-hash timing defence; HMAC-signed sessions, SHA-256 hash at rest in `auth_sessions`; single-use hashed email-verify (24 h) and reset (30 min) tokens; 5-failure lockout (15 min); revoke-on-password-change (bonus re-verified); register email race is check-then-insert without ON CONFLICT guard (BE-21, low).
+
+**Roles:** 10 roles in `domain/src/auth/roles.ts` (ADMIN_SUPER, CATALOG_MANAGER, CONTENT_EDITOR, CONTENT_PUBLISHER, COMMERCE_OPERATOR, TRUST_REVIEWER, CONCIERGE_AGENT, AI_OPERATIONS, MIGRATION_ENGINEER, READ_ONLY_ANALYST) × 20 modules × 8 actions, `ADMIN_SUPER` implicit-all, two-person modules declared for content/derived_approvals/certificates. PII redaction for READ_ONLY_ANALYST at handler level (backoffice-handlers.ts:261-271).
+
+**Role→surface map (abridged):** storefront = anonymous + CUSTOMER; `/admin/**` = gateAdmin (session → role → hasCapability → CSRF-if-present → dev-seam header fallback); `/vendor/**` = requireVendorActor (session role VENDOR + vendor_id); AI = anonymous conversation with ownership key; hats pending confirmation.
+
+| Privilege-escalation audit item | Verdict |
+|---|---|
+| Vertical escalation via headers | **Closed** (fail-closed stripping, `security-mode.spec.ts`, wired at proxy + admin + account seams) |
+| Horizontal (IDOR) — orders | Closed (assertOrderOwnership + RLS read on GET /orders/{id}) |
+| Horizontal — notifications | **OPEN — SEC-1** |
+| Horizontal — AI conversations via body `customerId` | OPEN (BE-14) |
+| Horizontal — guest orders refund path PROTECTABLE BY ANYONE carrying the orderId (owner id NULL) | OPEN (BE-15) |
+| Order/customer attribution | OPEN — client-supplied `customer_id` on cart/checkout (BE-13) |
+| Vertical — certificate review | OPEN — hand-rolled role list diverges from matrix; self-approval permitted; body-supplied reviewer id (BE-18, SEC-7) |
+| Two-person rule | CMS: enforced per trust-bearing kinds only (`cms-repository.ts:239-242`); certificates: **not enforced** |
+| CSRF | **Optional-by-presence on admin** (`backoffice-handlers.ts:104-111`); absent elsewhere; SameSite=Lax only (SEC-6) |
+| Rate-limit identity | XFF-spoofable in-process mode; several write surfaces misclassified into public_get bucket (SEC-8) |
+
+---
+
+## 13. Customer / vendor / admin / staff journeys
+
+- **Customer journey (register→verify→browse→cart→address→payment→place→confirm):** works end-to-end against the test provider in live-DB smoke evidence (prior session) + current code reading; idempotent replay verified in tests; **DYO purchases broken** (BE-2); favorites/compare only partially server-persisted; returns/RMA flows absent (customer cannot open a return — POST endpoints missing beyond refunds).
+- **Vendor journey (onboard→create→submit→moderate→fulfil):** real, isolated; gating: uploads URL-only (SG-5/SG-6 gap), fulfilment state bypass (BE-12), no payouts/commission model or reporting.
+- **Admin journey:** 12 workspaces live (dashboard, catalogue moderation, vendors, orders, refunds, discounts, customers/users+roles, content CMS with reviewer flow + optimistic versions, certificates, migration overview + INV-08 approval, operations, audit). Missing per plan §19: redirect manager, AI-ops console, bulk edit with preview/undo, catalogue editors, navigation/SEO editors, conflict-resolution UI. First-admin bootstrap exists (`pnpm bootstrap:admin` + admin-data.ts), unexecuted against a clean DB in this audit (no DB reset performed).
+- **Staff roles:** READ_ONLY_ANALYST PII redaction live; other non-super admin roles exercised through the matrix in tests (`authz.spec.ts`).
+
+---
+
+## 14. Ecommerce pricing, inventory, checkout, payment, order audit
+
+| Area | Verdict | Notes |
+|---|---|---|
+| Catalogue visibility | Real | state predicates DB-checked |
+| Pricing authority (goods) | Real | server repricing; optional `expected_unit_price` bypass = silent re-price (BE-16) |
+| Currency & rounding | Real | NUMERIC(12,2) + bigint-cent DYO math; FX hardcoded table (P0-class gap) |
+| Cart persistence | Real | unified server cart + merge; 30-day TTL |
+| Duplicate orders | Real idempotency | idempotency_key UNIQUE + replay |
+| Payment verification | Real HMAC | **default secrets when MAIHAN_ENV≠production** (SEC-3); Stripe provider simulates authorize without keys (pi_sim_) |
+| Webhook idempotency | Real | receipts UQ + processed_at; duplicate → 200 `{status:'duplicate'}`; **out-of-order capture refused properly; non-capture events ack'd without state change; refund webhooks never reconcile** (BE-8) |
+| Order snapshots | Real | all five snapshot columns frozen in-tx |
+| Stock integrity | Real core | placement re-guard; reservation theft window BE-7 |
+| Refunds | Real bounds | execution races BE-17 |
+| Cancel consistency | Real | restock on CANCELLED (order-repository.ts:724-756); customer cancel of PAID order does not auto-refund captured funds (documented asymmetry) |
+| Tax / shipping | Missing / client | BE-10; tax_component 0 — P0-3 |
+| Add-ons | Partial | ownership gap + PSP-amount drift (BE-19) |
+| Notifications/email | Real enqueue | provider real when keyed; API-path `delivered:true` mislabel (BE-23) |
+
+---
+
+## 15. Multi-domain audit
+
+Implemented (verified): sister-house resolution by subdomain (`proxy.ts:26,72-74`), host allow-list **fail-closed outside dev seam** (proxy.ts:88-102), storefront brand cookie, shared catalogue. Not implemented: per-domain canonical URLs (single base), per-domain order attribution (cart/checkout carry no house identity), per-domain catalogue filtering, per-host session/cookie scoping policy. Host-header manipulation is contained by the allow-list/strip logic; misattribution risk remains canonical-only. **Score 50 %** (UI/resolution scaffolding real, isolation/attribution absent).
+
+---
+
+## 16. AI / DYO / 3D / VTO audit
+
+| Subsystem | Verdict | Anchors |
+|---|---|---|
+| AI tool isolation | **REAL + frozen tests** | exactly 2 mutating tools; authorization() in-code; no DB handles in `packages/ai` |
+| LLM boundary | REAL-with-key / canned-without | `model-gateway.ts:196-270`; **pseudo-streaming** (whole answer re-yielded word-by-word); telemetry mislabels provider/model (`ai-handlers.ts:430-431`) |
+| Grounding gate | **INERT in live path** | orchestrator passes `claims: []` → craftedRatio 1.0 (`orchestrator.ts:237-242`, `grounding-gate.ts:99-110`) |
+| Guardrails | REAL (regex layer) | never persisted (`recordGuardrailEvent` unreferenced) |
+| Embeddings / RAG | **SIMULATED** | Math.sin deterministic 1024-d; 4 hardcoded CURATED docs; product_embeddings never populated in production path → semantic arm unreachable |
+| Budgets | partial | in-process Map budgets ($); no Redis; model-agnostic pricing guess |
+| Handoff | REAL transitions | in-memory record; conversation → AWAITING_HUMAN persisted; no agent queue UI |
+| **DYO** | **REAL engine / BROKEN purchase leg** | canonical hash, INV-01/02/03, evidence-gated bigint pricing, tx conversion, snapshot-frozen orders — all real; **quantities leg broken: quote includes making fee, conversion re-prices without it** (BE-2); preview = honest procedural three.js, no render job |
+| 3D viewer | PARTIAL | real GLTFLoader + fallbacks; no GLB assets anywhere (`webar_assets` = 0); PDP not wired to pass asset |
+| VTO/AR | MIXED | configurator: MediaPipe hand tracking, Three.js placement, local-only frames (real). PDP WebArModal: **SIMULATED** 2D overlay with fake TRACKED badge. Handoff tokens real (hash-at-rest, single-use atomic). Budgets enforced only on an unwired creation path |
+| WhatsApp | PARTIAL | HMAC + dedupe + opt-in real; Graph send real-with-key, fabricated message id without; **inbound AI replies never sent to user** (BE-24); send-template unauthenticated (SEC-9) |
+
+---
+
+## 17. Testing and verification report (executed this audit)
+
+| Command | Result |
+|---|---|
+| `pnpm run typecheck` | **PASS** 0 errors |
+| `pnpm run build` (tsc -b) | **PASS** |
+| `pnpm run schema-fidelity` (fresh scratch DB, then dropped) | **PASS** — 21 migrations, exact locked schema |
+| `pnpm --filter @maihan/web run build` | **PASS** |
+| `pnpm --filter @maihan/web run check:budgets` | **PASS** (product 150.5 KB ≤ 190 KB) |
+| `pnpm run lint` | 0 errors / 211 warnings |
+| `pnpm --filter @maihan/domain run test` | **240 passed / 11 skipped** |
+| `pnpm --filter @maihan/contracts run test` | **43 passed** (OpenAPI parity incl.) |
+| `pnpm --filter @maihan/ai run test` | **14 passed** |
+| `pnpm --filter @maihan/observability run test` | **12 passed** |
+| `pnpm --filter @maihan/db run test` | **1 FAILED** (`cart-repository.spec.ts` "adds item… quantity 2" → 422 unrecovered) / 143 passed / 9 skipped |
+| `pnpm --filter @maihan/web run test` | **1 FAILED** (`cart.spec.ts` same root cause: 422 vs 200) / 480 passed / 19 skipped |
+| `pnpm --filter @maihan/worker run test` | **3 passed** (live-DB dispatch idempotency, sweeps) |
+| `pnpm --filter @maihan/migrate run test` | **33 passed / 2 skipped** |
+
+Failing root cause (verified via `git show 102e9ea`): the unique-stone/pair quantity guard added in `102e9ea` (`cart-repository.ts:388-394`) rejects `quantity: 2` on a LOOSE_STONE fixture; the two tests were not updated. **These are the first two commits after the previous audit's green claim — the regression is new.**
+
+Not executed (blockers): Playwright browser suite (no browser run performed in this audit); live provider sandbox (no keys); corpus-mode tests (archive path/parameter mismatch known); physical-device AR; load/Lighthouse; admin bootstrap against a fresh DB (destructive to live state; skipped deliberately). No `EXPLAIN ANALYZE` was run; all performance findings are static analysis.
+
+---
+
+## 18. Undocumented requirements, blind spots, and the consolidated carried register
+
+Items below are **audit recommendations, not approved plan changes** (the authoritative plan is not silently expanded).
+
+### 18.1 Items from the deleted trackers — re-verified and CLOSED since their last write
+
+Every item the old trackers listed as pending that is now done in code, with verification evidence:
+
+| Old ID | Item | Now-verified state |
+|---|---|---|
+| (Master report R1-1) | Fail-closed security mode (`MAIHAN_DEV_SEAM` seam) | **DONE** — `packages/config/src/security-mode.ts` + 8-test spec; identity headers stripped at proxy/admin/account seams (§12) |
+| (Master report R1-2) | ADR-027 governance ratification | **DONE** — `technical_design/40:344-351` + memory DECISIONS.md row |
+| (Master report R1-3) | Vendor permanent state out of `jobs` queue | **DONE in code** — migration `0020/0021` (`vendor_onboarding` table) + repository cutover; live DB holds 7 vendor_onboarding rows, legacy `VENDOR_PROFILE` job rows cleared; live re-run risk was the only residual and the migration applied on this DB |
+| (Master report R1 bonus) | Session revocation on password change ownership | **DONE** — `auth-repository.ts:958` calls `revokeAllUserSessions`; `revoked_at` enforced `:708-798` |
+| R-11 | Vendor normalised table | **RESOLVED** (same as R1-3) |
+| R-09 (half) | Security headers | **DONE** — `apps/web/next.config.ts:40-92` (CSP, XFO DENY, nosniff, Referrer-Policy, Permissions-Policy incl. camera=(self), HSTS in production). Residual closed by P1-30 headers spec |
+| (Gap audit §0 "admin bootstrap") | First-admin provisioning tooling | **DONE in code** — `packages/db/src/seed/bootstrap-admin.ts` + `pnpm bootstrap:admin` + `MAIHAN_BOOTSTRAP_ADMIN_PASSWORD` in `.env.example`. Executed on a clean scratch DB (P1-30): ADMIN_SUPER + `ADMIN_BOOTSTRAPPED` audit row verified; scratch dropped |
+| (Gap audit §4 scanned) | Secret scan script + CI breadth | **DONE** — `scripts/scan-secrets.mjs` exists (dependency-free); `ci.yml` present |
+| (Master report §5 P-2) | Migration 0020/0021 live application | **APPLIED** — live DB post-0022 (fidelity PASS) |
+
+### 18.1b PHASE 1 (P1-1…P1-30) — COMPLETE 2026-10-21, with per-item evidence
+
+**Final verification baseline re-run (2026-10-21, after Phase 1):** `pnpm run typecheck`/`build` 0 errors · `pnpm run schema-fidelity` PASS (22 migrations, +21 integrity indexes, +2 pointer FKs) · `pnpm run lint` 0 errors / 211 warnings · `pnpm -r run test` **990 passed / 0 failed** (domain 240, contracts 43, ai 14, observability 12, db 149+9sk, worker 4, migrate 33+2sk, web 495+19sk) · bundle budgets PASS (category 152.3/170, product 151.7/190).
+
+| Item | Fix | Evidence |
+|---|---|---|
+| P1-1 | qty-guard tests reconciled + new 422 guard coverage (db+web specs; random-scattered fixtures) | 9+8 tests green incl. `rejects quantity above one for unique…` |
+| P1-2 | DYO conversion re-price uses the snapshot's own making/component set; full-set comparison (not just total); mock upgraded to a real-quote snapshot (stone 3500 + setting 1200 + fee 705 = 5405) | `dyo-repository.ts` conversion branch; db dyo 11/11; web dyo 1/1 |
+| P1-3 | feature_flags INSERT fixed (no `description` col; `updated_by` uuid= NULL system write; desc inside rules); storefront+API read-through `FeatureFlagGenerationStore` floor + 3 tests; all 83 stuck jobs drained (93 SUCCEEDED/0 dead) and flag live (gen bumped twice live-DB verified) | worker spec 4/4 incl. drift regression test |
+| P1-4 | Identity contract: notifications session-only (+seam header, query-param removed), AI chat/transcript session-only, refund request/list session-only (guests → support), order ownership actor-only, cart/checkout `customer_id` actor-derived (mismatch → 403; seam-gated fixture attribution) | 184 api-spec tests green incl. e2e |
+| P1-5 | Raw verify/reset tokens removed from notification bodies/metadata (`email_body` override); live-DB regression spec (3 tests) proves token-free notifications + token-carrying email payload | `auth-repository.spec.ts` 3/3 |
+| P1-6 | `isFailClosedMode()` at all 6 residual sites; Stripe authorize/capture/refund + `createPaymentProvider` + `verifyWebhook` refuse simulation without credentials in unseamed envs (seam keeps `pi_sim_` for dev); new 5-test provider spec | `payment-provider-security-mode.spec.ts` 5/5 |
+| P1-7 | Shipping server-authoritative: `@maihan/domain shipping-rules` rate table; client names the code, server prices it; unknown code refused (fail-closed) | checkout/order/e2e suites green; tamper path can't inject totals |
+| P1-8 | Vendor fulfilment refuses PENDING_PAYMENT/CANCELLED orders; only PAID propagates line-fulfilment to the parent state | vendor repo guard; e2e green |
+| P1-9 | executeRefund wrapped in one transaction with `FOR NO KEY UPDATE`, refundable-state check, over-capture bound, state/version-guarded order transition (CANCELLED can't resurrect) | refund specs 3/3 |
+| P1-10 | Reserve+session in one tx; theft-proof conditional hold upserts (singles+pairs) with postcheck; aggregate unique-line cap on repeated adds | inventory 5/5, checkout 15/15 |
+| P1-11 | Webhook capture: payment+order-PAID+ledger+receipt in one tx with version guard; non-capture events recorded as honest `acknowledged_without_state_change` receipts | webhook 6/6 |
+| P1-12 | attachAddon ownership gate (owner/admin/session rules; guest → support) | addon 3/3 |
+| P1-13 | Unknown job types throw (FAILED → retries → DEAD_LETTER); `cert.extract` → `NOT_IMPLEMENTED` disposition; `ai.embed` → `simulated_deterministic_until_real_model` marker | worker spec green |
+| P1-14 | WebArModal: honest `PREVIEW` state (no fake TRACKED), truthful badge copy, GLB/fitRule props documented | build green |
+| P1-15 | No-key AI ⇒ typed `AiUnavailableError` degraded refusal (echo template deleted); truthful provider/model telemetry (DEGRADED_NO_MODEL_PROVIDER); `guardrail_events` persisted from web layer; orchestrator surfaces guardrail movements | ai 14/14 + web ai 5/5 |
+| P1-16 | WhatsApp inbound replies actually delivered via Graph API (sequential chunks, honest `reply_delivery_status`); send-template gated (admin/loopback/seam); fabricated `wamid` removed | whatsapp 10/10 |
+| P1-17 | One-of-one concurrency proof suite (live local DB): exactly one winner, clean loser, reservation CONSUMED, stone unavailable; **caught + fixed a real double-sale path** (stone-level conditional guard in placeOrder; multiple products could reference one stone) | `one-of-one-concurrency.spec.ts` 1/1 live |
+| P1-18 | Certificates: `decision` enum enforced, reviewer = session actor (body override removed; sandbox ids flagged), two-person self-approval block via verification-events actor, derived field count + true mean confidence, `CALLER_SUPPLIED` run status, mock upload URL labelled `MOCK_PLACEHOLDER_UNTIL_STORAGE_ADR` | certificate 7/7 |
+| P1-19 | Order-number allocation serialized by per-year advisory lock + sequential free-number search (random jump deleted) | order 1/1 + e2e |
+| P1-20 | Rate-limit identity: adapter-only `x-client-ip` (via `x-maihan-ip-source` marker), opt-in `MAIHAN_TRUST_FORWARDED_IP=1` for XFF, conservative `shared-unknown` fallback; write scopes remapped (orders/refunds → checkout; account/auth → cart_mutation; vendor/whatsapp → admin_write) | ratelimit specs green; api-db fallback test extended |
+| P1-21 | CSRF: double-submit mandatory for cookie-auth mutations (`x-csrf-token` or browser-controlled same-origin Origin); admin gate made mandatory too; helper + transport classification in `api/csrf.ts` | full api suite 184 green |
+| P1-22 | Certificate review gate now capability-based (`hasCapability`); `discounts` AdminModule added to the matrix (CATALOG_MANAGER write, COMMERCE_OPERATOR read/list) and handlers re-gated | domain 240/240; admin+cert 15 green |
+| P1-23 | Discount redemption: session embeds `{code,id}`; placeOrder re-validates + atomically `redeemDiscount` + stamps `orders.pricing_snapshot.discount` for per-customer limit reads | checkout/order/e2e green |
+| P1-24 | Web-path OUTBOX_LOG → `delivered:false` (worker parity); `/health/ready` embedded mode → DEGRADED/UNHEALTHY (unprobed dependency never claims green); `/health/metrics` loopback/seam-restricted | health 5/5 + webhook spec updated |
+| P1-25 | ADR-028 draft (docs/adr/ADR-028-invariant-enforcement-positions.md, **Proposed**) documenting INV-03/INV-08 positions + migration shape | 77 lines, awaiting client |
+| P1-26 | ADR-029 draft (docs/adr/ADR-029-rls-runtime-and-append-only-enforcement.md, **Proposed**) for runtime roles/GRANTs/BYPASSRLS vs documented dev contract | 75 lines, awaiting client |
+| P1-27 | Migration `0022_integrity_indexes.sql`: 21 FK-supporting indexes + FKs for `carts.converted_order_id`/`checkout_sessions.completed_order_id` (+defensive pointer nulling); expected-schema updated (106 FKs / 308 indexes); fidelity PASS live + fresh | schema-fidelity PASS |
+| P1-28 | `sweepJobsRetention` (90-day terminal jobs) added to the worker sweeps (5 sweeps now; second-run no-op test) | worker spec 4/4 |
+| P1-29 | Representative photos labelled via `isRepresentativeImage` + alt text; dead code removed: demoItems prop/calls (cart/favorites/compare), eager `listStoneTypes` fetch dropped; **AiConciergeDrawer mounted** via lazy `AiConciergeLauncher` in the storefront layout | web 495 green incl. a11y |
+| P1-30 | `pnpm bootstrap:admin` verified on a clean scratch DB (ADMIN_SUPER + audit row; scratch dropped); next.config headers exported + pinned by `test/headers.spec.ts` (4 tests); no stale "46-route"/deleted-file references remain | headers 4/4 + scratch run transcript |
+
+**Phase 1 verdict: COMPLETE — all 30 items implemented with their acceptance evidence; suite green.**
+
+### 18.2 New audit recommendations created by THIS audit (additive to the register below)
+
+| ID | Recommendation | Why it matters | Priority |
+|---|---|---|---|
+| U-01 | **Price-integrity regression gate**: contract-test matrix asserting `quote.total == cart-conversion total == order snapshot` for every fee class (making fee, add-ons, promo). BE-2 (fee), BE-19 (add-ons), BE-16 (optional expected price) each break this chain at a different corner today. | Silent total drift = silent money loss | Mandatory |
+| U-02 | **Webhook reconciliation completeness**: refund/dispute/charge events are currently ack'd without state; needs an event-coverage table + daily provider→DB reconciliation sweep. | Divergent money state is the worst outage class | Mandatory |
+| U-03 | **One identity contract**: session-only identity for ALL customer-scoped surfaces (orders, refunds, notifications, AI conversations, certificates); delete header/body/query-param fallbacks outside the dev seam. | The IDOR residue (SEC-1, BE-13/14/15) is one pattern, not five bugs | Mandatory |
+| U-04 | **AR honesty contract**: UI that displays "active/tracked" must consume real tracking state; decorative overlays must be labelled "preview" (TD-02). | Trust-led retailer misrepresenting capability = brand damage | Mandatory |
+| U-05 | **Job-failure honesty**: unknown job types must DEAD_LETTER loudly (currently silently "SUCCEEDED", `jobs-runner.ts:190-192`); CI must assert every queue's job_type has a handler. | BE-4-class defects ship invisibly | High |
+| U-06 | **`customer_requests` model**: `create_customer_request` writes only audit_logs — operators cannot action AI-originated cases; add a queueable table + SLA. | Handoff promise without visible queue | High |
+| U-07 | **Soft-404 policy**: `about/[aboutSlug]` and `showrooms/[showroomSlug]` render filler for any slug — add noindex or 404 (SEO trust). | Canonical hygiene | Medium |
+| U-08 | **Explicit stone state machine** (ACTIVE→RESERVED→SOLD/CONSUMED) with DB CHECK instead of scattered `availability` flags. | De-duplicates four status fields into enforced truth | Medium |
+| U-09 | **Outbox coverage test**: every OrderCreated must enqueue order.confirm AND a working search-invalidate path (email enqueue works; cache-bump is dead, BE-4). | Async promises vs reality | High |
+| U-10 | **Rate-limit derivation spec** (edge-resolved IP + per-account fallback) + remap write surfaces out of `public_get` scope (SEC-8/9). | Spoofable buckets on mutations | High |
+| SECURITY-HEADERS-TEST | Add a test/spec asserting CSP/XFO/HSTS headers from `next.config.ts` (item exists, untested). | Regression risk on Next upgrades | Medium |
+| DOC-46 | *(inherited)* stale "46-route" claims and per-phase docs that reference the deleted audit files must be swept (doc hygiene). | Misleading status docs | Low |
+
+### 18.3 Consolidated carried register (from the deleted trackers, re-verified against code on 2026-10-21)
+
+Old IDs are preserved so history is traceable. Statuses verified against current code — not copy-forward. **Phase mapping for every carried item is defined in §22.2/§22.3** (this table remains the owner-gate register).
+
+| Carried ID | Item | Verified status | Owner gate |
+|---|---|---|---|
+| P-01 / R2-1 / R-08 | Full corpus migration + 44,218 redirects | **OPEN** — `staging_source_pages`=0, `redirects`=0 (live DB); tools/migrate stages implemented + tested (33 pass) but never run against the archive; note: tests hardcode `naturalgemstones/reverse_engineered/...` paths (portability nit) | Client: archive branch approval |
+| P-02 / R2-3 / R-03 | Real payment capture/refund + reconciliation | **OPEN** — Stripe conditional (`pi_sim_` fabricated without keys, `stripe-payment-provider.ts:63-175`); never sandbox-exercised; refund webhooks not reconciled (BE-8) | Client: Stripe key |
+| P-03 / R-04 | Tax/shipping engines, fail-closed | **OPEN** — tax component 0; shipping client-supplied (BE-6); FX hardcoded `{USD:1,AED:3.6725,THB:34.5}` | Client: policy decisions |
+| P-04 / R-02 | One-of-one concurrency proof | **PARTIAL** — placement re-guard solid + new qty guard; still missing: concurrent double-checkout live test, reservation `CONSUMED` assertion, quantity>1 rejection API test (the test update for the guard is the current CI failure!) |
+| P-05 / R-01 | Admin bootstrap runbook + MFA | **PARTIAL** — `bootstrap-admin.ts` implemented; unexecuted on clean DB; MFA absent | Client: password/MFA policy |
+| P-06 / R-05 / BE-18 | Private document storage + OCR reality | **OPEN** — mock presign URL; caller-supplied extraction stored; self-approval; SG-5/6/8 failures |
+| P-07 / R2-4 / R-06 | Real RAG/model + knowledge corpus | **OPEN** — Math.sin embeddings; corpus empty (4 canned docs); grounding gate inert; budget in-process map |
+| P-08 / R-07 | Worker deployment + queue observability | **OPEN** — code real; not deployed; no queue dashboards/alerts |
+| P-09 / R2-5 / R-15 | 3D/WebAR assets + device matrix | **OPEN** — `webar_assets`=0; GLB path dormant on PDP (TD-04); budgets enforced on unwired creation path |
+| P-10 / R4-* / R-16/17 | E2E, load, SG-1..15, backup/restore, SLO/runbook wiring | **OPEN** — none executed; plan §20 Phase 13 outstanding |
+| R-10 | Managed-identity ADR (local auth vs IdP) | **OPEN** — no decision recorded |
+| R-12 | CMS 20 block renderers + navigation/SEO/redirect admin | **PARTIAL** — typed block registry validates all 20 in admin (`contracts/cms/blocks.ts`), storefront renders the subset in `CmsBlockView` (RICH_TEXT paragraphs); navigation admin absent (`navigations`=0), SEO admin absent (`seo_metadata`=0), redirect admin absent | Agent (R3) |
+| R-13 | Catalogue/inventory/price/bulk editors | **OPEN** | Agent (R3) |
+| R-14 | Customer saved DYO designs list/edit/delete | **OPEN** — locked schema has no saved-design surface (storefront-overlay `designs` only) | Agent + ADR if schema needed |
+| R-18 | Consent/privacy export & erasure (DSAR) | **OPEN** — consent columns exist; no DSAR APIs/erasure jobs | Agent + client |
+| R-19 | Email bounce/complaint handling | **OPEN** — worker email handler has no bounce path | Client: provider webhooks |
+| R-20 | Vendor payouts/commission model | **OPEN** — no model, no statements | Client decision |
+| R-21 | RMA/return authorization + restock | **OPEN** | Agent (R3) |
+| R-22 | High-value order manual review | **OPEN** | Agent |
+| R-23 | Certificate/lab authenticity statement | **OPEN** | Client |
+| R-24 | 3D/AR asset rights & provenance records | **OPEN** | Client |
+| R-25 | Search quality telemetry (zero-result rate) | **OPEN** | Agent |
+| R-26 | FX source + checkout currency lock | **OPEN** | Client |
+| R-27 | Accessibility manual review (screen reader/keyboard) | **OPEN** — static-analysis findings F-XX only | Agent |
+| R-28 | AI operations console | **OPEN** | Agent (R3) |
+| R-29 | Redis-backed AI cost budgets | **OPEN** — in-process Map only | Agent |
+| R-30 | Migration/conflict operations runbook | **OPEN** | Agent |
+
+(These supplement — they do **not** replace — the plan's own §19/§20 phase requirements in `INITIAL_IMPLEMENTATION_PLAN.md`.)
+
+---
+
+## 19. Completion scorecard (scale: 0/25/50/75/90/100)
+
+Requirements denominator per axis: the plan's phase tasks/features in scope for that axis. Every score is the ratio of "Complete and verified + Implemented-but-unverified" weighted by what remains.
+
+| Axis | Score | Basis (selected) |
+|---|---|---|
+| Frontend | **75 %** | 25 routes real incl. full checkout/DYO/account/admin/vendor surfaces; minus: AI drawer unmounted, fixture-dominance, dead MegaMenu/products-3D wiring, subtle a11y gaps, static pages |
+| Backend / API | **75 %** | 115 ids across all phases with consistent envelope/validation; minus: 13 HIGH-class defects (BE-1..23), partial webhook coverage |
+| Database | **75 %** | 83-table locked chain, fidelity gate green, money/INV-01/02 enforced; minus: INV-03/08, RLS unarmed, retention, FK indexes, code drift |
+| Auth & RBAC | **75 %** | real lifecycle + matrix + fail-closed mode; minus: CSRF optional, 4 IDOR residues, admin mapping drift |
+| Customer journey | **75 %** | full journey works on test provider; minus DYO purchase broken, returns absent, favorites partial |
+| Vendor portal | **50 %** | moderation loop real; uploads URL-only, fulfilment bypass, no payouts/reporting |
+| Admin portal | **75 %** | 12 operational workspaces; minus redirect/AI-ops/bulk/catalogue editors |
+| Multi-domain | **50 %** | host resolution + allow-list real; attribution/canonical/filtering absent |
+| Ecommerce operations | **50 %** | order/cart/reservation/refund cores real; tax/shipping/FX absent, payment simulated, webhook coverage partial |
+| AI | **50 %** | isolation/tooling/persistence/guardrails real; gate inert, embeddings simulated, corpus empty, budgets volatile |
+| DYO | **50 %** | best-in-repo engine (identity/INV/pricing/tx) but the leg the customer uses (convert→cart) deterministically fails |
+| 3D | **25 %** | real loaders + fallbacks; zero assets, PDP unwired |
+| VTO/AR | **50 %** | configurator try-on real; product-AR simulated; assets/budgets unwired |
+| Testing & ops readiness | **50 %** | 968 tests pass live (sum of executed package suites) but 2 fail; no E2E/load/security-matrix/backup evidence; worker undeclared |
+
+**Weighted completeness estimate: ~65 %** (backend/data/DYO strength vs missing money/usps/ops). Do not average around the trust failures: the category has no tax/shipping engine and no real PSP evidence, so "complete" is unclaimable regardless of averages.
+
+---
+
+## 20. Critical and high-severity findings
+
+All findings carry exact evidence and verification status (V = source-verified this audit; L = live-DB verified).
+
+| ID | Sev | Component | Finding | Evidence |
+|---|---|---|---|---|
+| BE-2 | **CRITICAL** | DYO purchase flow | Quote includes 15 % making fee; add-to-cart re-price omits it → guaranteed 409 `DYO_PRICE_CHANGED` on every real conversion | `dyo-repository.ts:260-267` vs `:377-384` + `pricing-calculator.ts:7-8` (V; e2e masks via mock total) |
+| SEC-1 | **CRITICAL** | notifications | Unauthenticated read via `?customer_id=` + IDOR via `x-customer-id`; response bodies contain raw verify/reset tokens → account-takeover chain for any known customer id | `auth-handlers.ts:245-256`; `auth-repository.ts:506-513, 895-902` (V,L; tokens in bodies L-verified by schema content) |
+| BE-4 | HIGH | worker/schema | `feature_flags.description` column drift → `search.generation_bump` jobs crash-loop (83 QUEUED live), `feature_flags` empty; invalidation wiring dead end-to-end | `jobs-runner.ts:96-111` vs migrations 0014:115-122 (V,L) |
+| SEC-3 | HIGH | payments/webhooks | Fail-open `MAIHAN_ENV==='production'` conditions retain default test webhook secrets (`test_webhook_secret_key_123`, `whsec_test_default`, WhatsApp defaults) and TEST-provider enable; R1's fail-closed rule not applied to these call sites | `stripe-payment-provider.ts:44-47,211`; `test-payment-provider.ts:29`; `commerce-handlers.ts:354-357`; `whatsapp-handlers.ts:33-34,69-72,100-104`; `refund-handlers.ts:203` (V) |
+| BE-6 | HIGH | checkout | Shipping amount client-authoritative (`amount` string folded into grand_total; no rate table/whitelist) | `checkout.ts:38`, `checkout-session-repository.ts:198-213` (V) |
+| BE-7 | HIGH | reservations | Non-atomic reserve-then-session insert; `ON CONFLICT (job_key) DO UPDATE` hold-theft; per-call qty cap defeatable by repeated adds | `checkout-session-repository.ts:73-127`; `inventory-reservation.ts:105-124`; `cart-repository.ts:384-394,449-478` (V) |
+| BE-13 | HIGH | attribution | Client-supplied `customer_id` (cart + checkout schema accepted) attributed into orders → cross-customer order namespace injection | `cart.ts:58`, `checkout.ts:67`, `checkout-session-repository.ts:97`, `order-repository.ts:285` (V) |
+| BE-9 | HIGH | vendor | Fulfilment moves PENDING_PAYMENT orders to IN_FULFILLMENT (bypasses PAID gate/state machine) | `vendor-repository.ts:1035-1050` (V) |
+| BE-17 | HIGH | refunds | executeRefund non-transactional; direct `state='REFUNDED'` overwrite (no transition guard); double-execute race double-counts `refunded_amount` | `refund-repository.ts:332-442` (V) |
+| BE-18 | HIGH | certificates | OCR pipeline stores caller-supplied extraction; reviewer may approve own OCR run; body-injected reviewer id; `decision` non-enum (approve-on-typo); mock `upload_url` — SG-5/6/8 failures | `certificate-handlers.ts:160-176,238-287,325-335` (V) |
+| BE-19 | HIGH | addons | attachAddon lacks ownership check; raises totals without re-authorizing PSP → capture webhook amount-mismatch deadlock | `addon-handlers.ts:63-77`; `addon-repository.ts:195-251`; webhook gate `webhook-reconciliation.ts:150-159` (V) |
+| BE-14 | HIGH | AI | conversation identity from raw body `customerId` + header trust without dev-seam → cross-customer transcript access | `ai-handlers.ts:325,501,518-525` (V) |
+| BE-15 | HIGH | refunds | Guest-order refund endpoints protectable by anyone with orderId (owner NULL) | `refund-handlers.ts:98-106` (V) |
+| F-04 | HIGH | checkout UX | Order idempotency key regenerated from `Date.now()` on retry → duplicate-order weakening | `CheckoutConfirm.tsx:95` (V) |
+| SEC-6 | HIGH | CSRF | Token checked only-if-present (admin/customer surfaces), absent elsewhere | `backoffice-handlers.ts:104-111` (V) |
+| DB-04/06 | HIGH | invariants | INV-03, INV-08 DB-enforcement absent; RLS/append-only unarmed (no roles/grants) | `0005/0007` absence; 0016 comment-only (V) |
+| BE-24 | HIGH | WhatsApp | Inbound AI replies never delivered (chunks only in HTTP ack); send-template unauthenticated | `whatsapp-handlers.ts:216-226,233-258` (V) |
+
+MEDIUM/LOW highlights (all evidence in §4–§11): fixture-dominant surfaces (F-02), dead code (F-01 MegaMenu + drawer + demoItems + header discards stones), about/showroom catch-alls (F-03), storefront overlay dual-schema + stale README (DB-01), webhook ack-without-state for non-capture events (BE-8), payment insert/P sid order PAID sequential (BE-11), rate-limit identity/scope mapping (SEC-8/9), discount counters dead (BE-20), order-number race (BE-5), API-path email `delivered:true` mislabel (BE-23), metrics endpoint exposure (BE-22), `certificate_public` single-field LATERAL (DB-05), gemstone→certificates CASCADE fragility (DB-10), missing FK indexes (DB-12), no retention sweeps (DB-13), worker unknown jobs silently succeed (BE-23) — full list with line numbers is embedded in the sections above.
+
+---
+
+## 21. Production-readiness blockers (ordered)
+
+1. **Red CI:** the 2 failing tests (below-1-day-old regression) — block merge, fix test expectations (or the guard, if the fixture represents a valid flow).
+2. **DYO conversion leg** (BE-2) — pass the making fee into the conversion re-price (or store fee in snapshot comparison) + end-to-end quote→cart→order integration test with a real DB quote.
+3. **Identity contract** (SEC-1, BE-13/14/15) — session-only identity for every customer surface; remove token-bearing notification bodies (keep email-only delivery), least-privilege defaults, fix headers on failed-seam.
+4. **Money authority** (BE-6 shipping, BE-19 add-ons, PSP paths SEC-3) — server rate table, token-based addon attach with ownership, strict fail-closed production constants, no simulated provider when secrets absent-but-secret-present.
+5. **State integrity** (BE-9 vendor gate, BE-17 refund tx/guard, BE-7 reservation tx + unique-item concurrency test, BE-11 webhook tx).
+6. **Worker wiring** (BE-4 column fix + dead-wiring resolution) or remove the dead flag.
+7. **Corpus migration + redirects** (P-01 — unchanged; `staging_*` = 0 live).
+8. **Trust pipeline reality** (BE-18) — real storage presign, server-side extraction, INV-07 display coverage, two-person enforcement on certificates.
+9. **E2E/load/security matrix/backup rehearsal** (§22 Phase 3; none executed).
+10. **Admin bootstrap against a clean DB + password/MFA story** (P-05).
+11. **Certificate/OCR reality** (P-06) and **AI/RAG reality** (P-07) — Phase 2 gates (storage/vision/model decisions + keys), prepared by P1-18/P1-15.
+
+---
+
+## 22. THE FIX LIST — exactly 3 phases (single actionable tracker, fix top-down)
+
+All tasks in this file are bucketed into **three phases**. Old IDs (F-xx / P-xx / R-xx / U-xx) are preserved in brackets for traceability; never invent new families.
+- **Phase 1 — REPAIR** (§22.1): everything executable in-repo right now — no secrets, archive, or client decision required. Includes drafting any needed ADR as part of the task.
+- **Phase 2 — CONNECT** (§22.2): external/client-gated boundaries — data scale, real money, real trust, real model. Items become executable the moment their gate opens; gates are tracked even while blocked.
+- **Phase 3 — OPERATE & PROVE** (§22.3): needs Phase 1 green (hard gate) and Phase 2 data where each item touches it. Ends with the plan §20 production evidence pack.
+
+Phase order is enforced by gates, not calendar: Phase 2 items may be prepared anytime, but **Phase 3 may not start until Phase 1 is 100% green** (`typecheck/build/lint/test` + its DoD), and launch-verification items in Phase 3 run on Phase 2's production-shaped data. Each phase ends with the §17 verification baseline re-run and its own Definition of Done.
+
+### 22.1 Phase 1 — REPAIR: make the existing system correct, honest and green ✅ COMPLETE 2026-10-21 (evidence per item in §18.1b)
+
+**Gate: none (start immediately). DoD: all rows below closed with their acceptance; CI green; §17 baseline re-run; rows moved to §18.1 with evidence.**
+
+| # | Task (old ID) | Where | Acceptance |
+|---|---|---|---|
+| P1-1 | Reconcile unique-stone/pair qty guard with the 2 failing tests; don't weaken the guard [F-1] | `cart-repository.spec.ts`, `cart.spec.ts` | `pnpm -r run test` 0 failed; LOOSE_STONE qty=2 → 422 asserted |
+| P1-2 | **DYO fee leg**: conversion re-price must use the snapshot's own `making_component` and compare full component sets, not just total [F-2] [U-01 matrix] | `dyo/dyo-repository.ts:355-385` + real-DB test | real quote→add-to-cart succeeds; tampered component → 409; quote→cart→order totals identical for fee/promo classes |
+| P1-3 | feature_flags drift: fix INSERT and wire the API generation store to read the bump (or delete the dead routing honestly) + drain the 83 stuck jobs [F-3] [U-05, U-09] | `jobs-runner.ts:96-111`, `generation-store.ts` | backlog drains or dead-letters in one tick; outbox coverage test (every OrderCreated → order.confirm + working search-invalidatе) |
+| P1-4 | **Identity contract sweep**: remove header/query/body identity fallbacks from notifications, AI conversations, refunds, order ownership, and client-supplied `customer_id` on cart/checkout [F-4] [U-03] | per §20 BE-13/14/15/SEC-1 list | negative IDOR spec per surface; security-mode tests updated |
+| P1-5 | Token hygiene: raw verify/reset tokens out of notification bodies/metadata (email keeps them) [F-5] | `auth-repository.ts:500-513,889-902` | test: notification payload token-free; email job still has token |
+| P1-6 | Fail-closed production detection at the six residual `MAIHAN_ENV` sites [F-6] | `commerce/stripe/whatsapp/refund/auth` call-sites listed in §20 SEC-3 | spec: no MAIHAN_ENV ⇒ test provider/defaults refused |
+| P1-7 | Shipping authority: server rate table/whitelist; client amount validated against it; fail-closed without config in production [F-7] | `checkout.ts:38`, `checkout-session-repository.ts:198-213` | tamper → 422; zero-rate prod → fail-closed |
+| P1-8 | Vendor fulfilment payment gate (drop PENDING_PASSWORD/PENDING_PAYMENT arm) [F-8] [BE-9] | `vendor-repository.ts:1035-1050` | fulfil on unpaid → 409 |
+| P1-9 | Refund executor: one tx (or provider-first idempotent step), `transitionOrderState` only, FOR UPDATE double-execute guard [F-9] [BE-17] | `refund-repository.ts:332-442` | concurrent double-execute → single SUCCEEDED; CANCELLED never becomes REFUNDED |
+| P1-10 | Reservation atomicity: reserve+session in one tx; theft-proof hold (`DO NOTHING`+409 or advisory lock); aggregate qty cap on repeated adds [F-10] [P-04 pre-work] | `checkout-session-repository.ts`, `inventory-reservation.ts`, `cart-repository.ts` | concurrent double-checkout → exactly one hold; repeated qty-1 adds can't exceed cap |
+| P1-11 | Webhook tx + ack-class coverage: payment+order PAID in one tx; non-capture events documented/marked, refund webhooks queue for reconciliation [F-11] [BE-8 partial, U-02 pre-work] | `webhook-reconciliation.ts:180-226,277-285` | crash-injection test; event-coverage table |
+| P1-12 | attachAddon ownership + PSP amount sync [F-12] [BE-19] | `addon-handlers.ts:63-77`, `addon-repository.ts:195-251` | IDOR spec; capture recomputes with addon lines |
+| P1-13 | Job/queue honesty: unknown job_type → FAILED, cert.extract → NOT_IMPLEMENTED, ai.embed marked `simulated` [F-13] [U-05] | `apps/worker/src/*` | handler-coverage CI assertion |
+| P1-14 | WebArModal honesty: no fake TRACKED; labelled preview or real TryOnScene; honour `glbUrl` [F-14] [U-04] | `WebArModal.tsx` | truthful-state UI test |
+| P1-15 | AI honesty: no-key ⇒ explicit degraded refusal (no echo template); true provider/model telemetry; persist `guardrail_events` [F-15] | `model-gateway.ts:258-271`, `ai-handlers.ts:430-433` | spec: refusal text + correct telemetry + guardrail row written |
+| P1-16 | WhatsApp inbound delivery via Graph API when configured; honest `QUEUED, wamid:null` when not; auth on send-template [F-16] [BE-24/SEC-9] | `whatsapp-handlers.ts:216-226,233-258,304-312` | stubbed-fetch test |
+| P1-17 | One-of-one concurrency live-DB pack: two concurrent checkouts of one stone, reservation CONSUMED assertion, qty>1 rejection test [P-04] (re-bucketed to Phase 1 — executable on fixture data, no client gate) | new spec | exactly one success; other 409/422 |
+| P1-18 | Certificate pipeline (in-repo half): `decision` enum, reviewer id from session only, two-person rule enforced for approvals, honest "NOT_EXTRACTED" instead of caller-supplied confidence-as-fact, mock upload_url labelled honestly [F-17 part 1] [BE-18] | `certificate-handlers.ts` | spec covers self-approval rejection + decision enum |
+| P1-19 | Order-number sequence; retry only on true 23505 [F-18] [BE-5] | `order-repository.ts:246-258` | concurrent placement → distinct numbers, no 23505 surfaced |
+| P1-20 | Rate-limit identity + scope remap: trusted proxy rule, write surfaces out of `public_get` [F-19] [U-10, SEC-8/9] | `ratelimit/*` | spoof/XFF test; scope map asserted in CI |
+| P1-21 | CSRF enforcement: double-submit on cookie mutations; admin token mandatory [F-20] [SEC-6] | handlers + clients | missing token rejected |
+| P1-22 | RBAC matrix alignment: certificate gate via `hasCapability`, discounts module fixed, no body reviewer ids [F-21] | `certificate-handlers`, `dashboards-repository` | matrix tests across 10 roles |
+| P1-23 | Discount redemption actually counts [F-22] [BE-20] | order tx + `discount-repository.ts:190-207` | redemption increments; per-customer limit enforced |
+| P1-24 | Email/metrics honesty: web-path OUTBOX_LOG → `delivered:false`; `/health/metrics` restricted [F-23] [BE-22/23] | `email-provider.ts:97-101`, `health-handlers.ts` | envelope test |
+| P1-25 | INV-03 DB CHECK (+ INV-08 review-state plumbing) or documented rationale — draft one-page ADR either way [F-24] [DB-04/06] | `0005/0007` follow-up migration + ADR draft | fidelity still PASS; policy test proves the chosen path |
+| P1-26 | RLS/append-only reality: app-role + GRANTs + `BYPASSRLS` admin role migration (draft ADR; needs client acceptance to merge), or document owner-superuser dev contract in doc 09 [F-25] [SEC RLS gap] | migration + `pool.ts` | non-superuser integration test can be added (enabler for P3-6) |
+| P1-27 | FK/index + integrity-pointer pass per §9.3 list; FKs for `converted_order_id`/`completed_order_id` [F-26] [DB-12/09] | migration | index presence asserted in fidelity |
+| P1-28 | Retention sweeps: doc-27 90-day jobs sweep + staging/archive policy (windows pending client legal input; defaults documented) [F-27] [DB-13, R-30 partial] | worker sweep + migration | second-run no-op test; `jobs` shrinks to policy |
+| P1-29 | Fixture/UX honesty: label-or-disable representative photos; delete dead code (AiConciergeDrawer decide, MegaMenu, demoItems, `_stones`); soft-404s for about/showroom catch-alls [F-28, F-29] [U-07] | listed files | route/UI tests |
+| P1-30 | Admin bootstrap exercised on a scratch DB + runbook written; doc sweep (46-route claims, deleted-tracker references), next.config headers spec [P-05 in-repo half, F-30, DOC-46, SECURITY-HEADERS-TEST] | `bootstrap-admin.ts`, docs | clean-scratch run yields ADMIN_SUPER + audit row; header test green |
+
+### 22.2 Phase 2 — CONNECT: external, client-gated boundaries (data, money, trust, model)
+
+**Gate: client inputs per row. Status tracked even while blocked; an open gate is not a skipped item. DoD: each row's provider/data evidence recorded and linked from §18.3.**
+
+| # | Task (old ID) | Needs | Acceptance |
+|---|---|---|---|
+| P2-1 | Full corpus migration + 44,218 redirects + URL-parity gates [P-01, R2-1, R-08] (prepare: fix `naturalgemstones/reverse_engineered/...` path hardcoding in tests) | Client: archive branch + approved DB | `tools/migrate` stages extract→gates; 19,665/3,072/10,349/1,024 counts; V1–V22; no redirect chains/404s |
+| P2-2 | Stripe sandbox e2e: PaymentIntent authorize→capture→PAID; refund incl. failure path; 3DS; reconciliation sweep [P-02, R2-3, R-03] | Client: keys | dated sandbox evidence; provider refund id stored; no `pi_sim_` rows |
+| P2-3 | Tax/shipping/FX engines configured fail-closed on approved rules + currency lock [P-03, R-26] | Client: policy decisions | totals include tax/shipping; zero rates prohibit order in production |
+| P2-4 | Trust pipeline reality: storage ADR + private bucket presign + AV/EXIF + real vision OCR run/model/version/confidence persistence [P-06, R2-4 part, R-05] (P1-18 half lands first) | Client: storage/vision ADR + keys | upload→scan→OCR→review e2e; INV-07 badges on PDP; SG-5/6/8 green rows |
+| P2-5 | AI provider ADR + keys + real embeddings + knowledge corpus ingestion + Redis-backed budgets [P-07, R2-4, R-29] (P1-15 honesty + P1-13 markers land first) | Client: model/provider ADR + key | grounded eval ≥0.60 on real corpus; budgets survive restart |
+| P2-6 | Email provider key + delivery verification + bounce/suppression handling [R2-2, R-19] | Client: Resend/Mailtrap key | verification/reset/order mails delivered + observable; bounce path tested |
+| P2-7 | Admin production provisioning: run bootstrap on target DB, password/MFA policy, break-glass doc [P-05, R-01] | Client: password policy/MFA decision | provisioned + audited + rotated |
+| P2-8 | Decisions to record (ADRs): managed identity (R-10), certificate authenticity claim (R-23), 3D/AR rights (R-24), vendor payout/commission model (R-20 — implementation follows in P3), notification provider webhooks (part of P2-6) | Client decisions | ADRs Accepted; registry updated |
+| P2-9 | WebAR/GLB asset production first tranche + vendor file-upload pipeline gate preparation [R2-5, P-09 pre-half] (pipeline build itself is P3; assets + rights are client-side) | Client: asset production + rights | delivery ingest works when pipeline ready |
+
+### 22.3 Phase 3 — OPERATE & PROVE: launch-shape hardening and verification
+
+**Gate: Phase 1 DoD complete (hard gate); Phase 2 data where a row touches real catalogue/money/model. DoD: §17-style baseline + this phase's evidence pack; then plan §19/§20 gates and scorecard re-baseline.**
+
+| # | Task (old ID) | Depends on | Acceptance |
+|---|---|---|---|
+| P3-1 | Worker deployment + queue depth/dashboards + dead-letter ops + alerts [P-08, R-07] | P2 infra | deployed; queues observable; alerts owned |
+| P3-2 | R3 feature completion, catalogue/M operations: AI-ops console, redirect manager, bulk edit w/ preview→approve→undo, migration conflict-resolution UI, catalogue/inventory/price editors [F/M-16, plan §19.3/4/6/8/9/13] | P1 green; P2-1 for data-scale realism | each console tested; audit rows present |
+| P3-3 | Saved DYO designs (account list/edit/duplicate/delete) — locks in a schema surface + ADR [R-14, P-04 prod-read] | P1-25 pattern; ADR acceptance | owner-only access tested |
+| P3-4 | RMA/returns + restock, high-value review threshold, payment reconciliation sweeper (provider→DB daily), outbox growth sweep [R-21, R-22, R3-6, U-02] | P1-11 event table | RMA workflow audited; divergent payments self-heal |
+| P3-5 | CMS completion: remaining block renderers, navigation admin, SEO admin (canonicals from `seo_metadata`) [R-12] | P1 green | 20/20 types render; nav data-driven |
+| P3-6 | Security matrix SG-1..15 executed incl. non-superuser RLS integration tests + IDOR sweeps + PII scan in CI [R4-3, SG-*] | P1-21/26 landed | all 15 rows green with dated evidence |
+| P3-7 | E2E suite (Playwright, 14 journeys: register→verify→browse→cart→checkout→pay→order→DYO→vendor loop→admin moderation) [R4-1] | P2-1/P2-2 for realism | green in CI |
+| P3-8 | Load tests vs NFR-02/03 + capacity statement [R4-2, PG-1..13] | P2-1 | dated artifacts; statement replaces non-claim |
+| P3-9 | 3D pipeline: GLB/CAD ingest→validate→Draco/KTX2→budgets→approval→publish + `webar_assets` seeding + PDP wiring + device matrix + AR analytics/testing [R-15, R2-5 second half, TD-03/04] | P2-9 assets | approved GLB set renders on PDP; device matrix documented |
+| P3-10 | Observability completion: SLOs/error budgets→alert delivery with owners/runbooks; backup/restore drill (RPO/RTO); retention/privacy DSAR (export/erasure) execution [R4-4/5, R-17, R-18] | P2 providers | alert-delivery test; dated restore drill |
+| P3-11 | Accessibility manual review (screen reader/keyboard, reduced motion incl. ThreeDViewer) + Lighthouse/axe in CI [R-27, F-27 sub] | P1-29 | WCAG 2.2 AA statement vs F-XX list closed |
+| P3-12 | Search quality telemetry (zero-result/relevance) [R-25] + final debt burn: lint/type warnings, handler-SQL extraction (M-14), stale docs [R4-6] | P1 green | metrics visible; 0-error lint maintained; debt register shrunk |
+
+### Definition of Done for the tracker
+
+Phase 1 rows 1–30 closed with evidence and CI green; Phase 2 rows either executed with provider/data evidence or explicitly parked **with the named owner gate shown in §18.3**; Phase 3 evidence pack complete (security matrix, E2E, load, backup, SLO/runbooks) on Phase 2's production-shaped data. Only then re-run plan §19/§20 Definition-of-Done gates and schedule production cutover.
+
+---
+
+## 23. Final verdict & integrity-of-audit confirmation
+
+The project has crossed from "skeleton with fabricated UI" to a **connected, testable, mostly-honest application** whose order/DYO/auth/workers engines are real code under test green except the enumerated defects. It remains **~1 remediation phase + client-gated provider/data work away from production-readiness**; the blockers that cannot wait for Phases 2/3 are the in-repo fixes in §22 Phase 1 (no external dependencies).
+
+**Follow-up procedure (the one rule for this file):** when an item is fixed, move its row to §18.1 with date + evidence; never delete history rows; re-run the §17 verification baseline before touching any status column; keep IDs stable. This file is the single audit tracker — do not recreate parallel trackers.
+
+---
+
+## 24. Change log
+
+| Date | Change |
+|---|---|
+| 2026-10-21 | Initial deep technical audit written (23 sections). |
+| 2026-10-21 | Consolidation pass: `AUDIT_PHASE_PLAN.md`, `MAIHAN_GEMS_MASTER_PHASE_REPORT.md`, `MAIHAN_GEMS_COMPLETENESS_AND_GAP_AUDIT.md` read fully, re-verified against current code, then **deleted**. Closed items recorded with evidence in §18.1; still-open items carried into §18.3; §22 restructured into **exactly 3 phases** (P1 REPAIR: P1-1…P1-30 in-repo · P2 CONNECT: P2-1…P2-9 client-gated · P3 OPERATE & PROVE: P3-1…P3-12, gated on P1 + P2 data). Old F-xx/P-xx/R-xx/U-xx IDs preserved in brackets for traceability; F-1…F-30 names remain valid aliases of their P-phase rows. This is the only remaining audit file. |
+| 2026-10-21 | **PHASE 1 EXECUTED AND COMPLETE.** All 30 items (P1-1…P1-30) fixed with per-item evidence in §18.1b. Full verification baseline re-run: typecheck/build/lint 0 errors, schema-fidelity PASS (22 migrations), monorepo test suite **990 passed / 0 failed**, bundle budgets PASS. New code: security-mode fail-closed rollout, identity contract sweep, `shipping-rules` domain table, `csrf.ts`, `FeatureFlagGenerationStore`, one-of-one stone-level guard, refund/webhook/reservation transactions, `0022_integrity_indexes.sql`, jobs-retention sweep, ADR-028/029 drafts (Proposed). Highlights: the one-of-one pack caught and fixed a real double-sale path; the concierge drawer is now mounted. Phase 2 (client-gated) and Phase 3 (hard-gated on Phase 1) are open. |
+
+**No application source, schema, migration, configuration, seeding, or operational data was modified during the audit or the consolidation.** Verification commands executed were all read-only or self-cleaning (`schema-fidelity` scratch DB create→assert→drop). No commit was created: deletions and the memory-pointer update are left uncommitted for the owner to review.
+
+— End of audit/consolidation. Findings in use: §4–§16 findings F-01..F-04, BE-1..BE-24, DB-01..DB-13, SEC-1..SEC-9, TD-01..TD-04, IF-01, DC-1..DC-4; recommendations U-01..U-10 + SECURITY-HEADERS-TEST; carried register P-01..P-10, R-01..R-30, R2-1..R2-5, R3-1..R3-6, R4-1..R4-6. Statuses: V = source-verified, L = live-DB verified as noted.

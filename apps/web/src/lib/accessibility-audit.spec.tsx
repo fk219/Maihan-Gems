@@ -36,6 +36,12 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: () => undefined, replace: () => undefined, prefetch: () => undefined }),
   usePathname: () => '/',
   useSearchParams: () => new URLSearchParams(),
+  // The canonical product page resolves DB-first and 404s missing slugs;
+  // Next's notFound() throws its sentinel — the a11y render only exercises
+  // found templates, so a deterministic stub keeps axe on renderable trees.
+  notFound: () => {
+    throw new Error('NEXT_NOT_FOUND');
+  },
 }));
 
 vi.mock('next/headers', () => ({

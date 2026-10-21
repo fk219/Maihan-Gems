@@ -298,12 +298,24 @@ describe('defaultIdentify', () => {
   const withHeaders = (headers: Record<string, string>): Request =>
     new Request('http://localhost/api/v1/products', { headers });
 
-  it('prefers x-client-ip, then the first X-Forwarded-For hop, then "unknown"', () => {
-    expect(defaultIdentify(withHeaders({ 'x-client-ip': '10.0.0.1' }))).toBe('10.0.0.1');
+  it('identity hardening: adapter-only x-client-ip, opt-in XFF, shared fallback (P1-20)', () => {
+    // The adapter value (with its provenance marker) is trusted.
+    expect(
+      defaultIdentify(withHeaders({ 'x-client-ip': '10.0.0.1', 'x-maihan-ip-source': 'adapter' })),
+    ).toBe('10.0.0.1');
+    // A client-supplied x-client-ip WITHOUT the marker (the in-process Next
+    // path) is not trusted — the caller can set that header.
+    expect(defaultIdentify(withHeaders({ 'x-client-ip': '10.0.0.1' }))).toBe('shared-unknown');
+    const prevTrust = process.env['MAIHAN_TRUST_FORWARDED_IP'];
+    delete process.env['MAIHAN_TRUST_FORWARDED_IP'];
+    expect(defaultIdentify(withHeaders({ 'x-forwarded-for': ' 198.51.100.9 , 10.0.0.2' }))).toBe('shared-unknown');
+    process.env['MAIHAN_TRUST_FORWARDED_IP'] = '1';
     expect(
       defaultIdentify(withHeaders({ 'x-forwarded-for': ' 198.51.100.9 , 10.0.0.2' })),
     ).toBe('198.51.100.9');
-    expect(defaultIdentify(withHeaders({}))).toBe('unknown');
+    if (prevTrust === undefined) delete process.env['MAIHAN_TRUST_FORWARDED_IP'];
+    else process.env['MAIHAN_TRUST_FORWARDED_IP'] = prevTrust;
+    expect(defaultIdentify(withHeaders({}))).toBe('shared-unknown');
   });
 });
 

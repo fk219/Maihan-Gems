@@ -20,8 +20,10 @@ import {
   recordHumanReview,
   getPublicCertificatesForGemstone,
 } from '@maihan/db';
+import { sql } from '@maihan/db';
 import {
   ADMIN_ROLES,
+  hasCapability,
   runCertificateCrossChecks,
   canAutomateCrossCheckTransition,
   canPromoteToVerified,
@@ -34,7 +36,10 @@ import { isDevSeamEnabled } from '@maihan/config';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
-async function assertCertificateReviewer(ctx: RouteContext): Promise<string | undefined> {
+async function assertCertificateReviewer(
+  ctx: RouteContext,
+  options: { readonly requireSession?: boolean } = {},
+): Promise<string | undefined> {
   const sessionToken = extractSessionToken(ctx.request);
   const headerCustomerId = ctx.request?.headers.get('x-customer-id');
   if (headerCustomerId && !sessionToken) {
@@ -45,15 +50,22 @@ async function assertCertificateReviewer(ctx: RouteContext): Promise<string | un
     if (!actor) {
       throw new ContractError('UNAUTHORIZED', 'Valid session required.');
     }
-    if (!(ADMIN_ROLES as readonly string[]).includes(actor.role)) {
-      throw new ContractError('FORBIDDEN', 'Administrative role required for certificate review operations.');
-    }
-    if (actor.role !== 'ADMIN_SUPER' && actor.role !== 'TRUST_REVIEWER' && actor.role !== 'CATALOG_MANAGER') {
-      throw new ContractError('FORBIDDEN', 'Role TRUST_REVIEWER or ADMIN_SUPER is required for certificate operations.');
+    // P1-22: capability-based decision from the RBAC matrix instead of a
+    // hand-maintained role list, so the matrix is the single source.
+    if (
+      !hasCapability(actor.role as never, 'certificates', 'approve') &&
+      !hasCapability(actor.role as never, 'certificates', 'read')
+    ) {
+      throw new ContractError('FORBIDDEN', 'Trust-review capability required for certificate operations.');
     }
     return actor.customer_id;
   }
-  // R1-1 fail-closed: certificate ops need auth unless explicit dev seam.
+  // P1-18: when a session is REQUIRED (OCR — the two-person chain needs a
+  // first party), an anonymous caller is refused even under the developer
+  // seam. For review endpoints, seam credentials are tolerated as sandbox.
+  if (options.requireSession) {
+    throw new ContractError('UNAUTHORIZED', 'Sign in as a trust reviewer to run certificate OCR.');
+  }
   if (!isDevSeamEnabled()) {
     throw new ContractError('UNAUTHORIZED', 'Authentication required for certificate operations.');
   }
@@ -189,7 +201,10 @@ export const createCertificateHandler: RouteHandler = async (ctx) => {
       body: {
         data: {
           certificate: cert,
-          upload_url: `https://storage.maihan.internal/certificates/${cert.id}/presigned-put`,
+          // P1-18 honesty: no private storage integration exists yet (P2-4);
+          // this URL is a labelled placeholder, not a working presign.
+          upload_url: `mock://storage.maihan.internal/certificates/${cert.id}/presigned-put`,
+          upload_mode: 'MOCK_PLACEHOLDER_UNTIL_STORAGE_ADR',
         },
       },
     };
@@ -232,7 +247,10 @@ export const getCertificateHandler: RouteHandler = async (ctx) => {
 };
 
 export const processOcrRunHandler: RouteHandler = async (ctx) => {
-  await assertCertificateReviewer(ctx);
+  // P1-18: the OCR actor is recorded whenever a signed-in actor is present
+  // so a two-person chain (OCR by A → review by B) is provable. The
+  // `requireSession` hard-stop arrives with the P2-4 pipeline work.
+  const actorOcrId = await assertCertificateReviewer(ctx);
   const db = getDb(ctx);
   const certId = requireIdentifier(ctx.params['certificateId'], 'certificateId');
   const rawBody = (await parseBody(ctx.request)) as Record<string, any>;
@@ -243,10 +261,13 @@ export const processOcrRunHandler: RouteHandler = async (ctx) => {
   }
 
   const runId = rawBody['runId'] ?? `run_${Date.now().toString(36)}`;
-  const provider = rawBody['modelProvider'] ?? 'VERCEL_AI_GATEWAY';
-  const modelName = rawBody['modelName'] ?? 'gemini-1.5-pro';
-  const modelVersion = rawBody['modelVersion'] ?? 'v1.0';
-  const promptVersion = rawBody['promptVersion'] ?? 'p1.0';
+  // P1-18 honesty: the extraction input is caller-supplied data entry until
+  // the real vision pipeline (P2-4) — the model labels are recorded as
+  // DECLARATIONS, never as a provider execution certificate.
+  const provider = rawBody['modelProvider'] ?? 'DECLARED_BY_CALLER';
+  const modelName = rawBody['modelName'] ?? 'declared_extraction_v0';
+  const modelVersion = rawBody['modelVersion'] ?? 'declared';
+  const promptVersion = rawBody['promptVersion'] ?? 'declared';
 
   const structured: StructuredGemstoneData = rawBody['structuredGemstone'] ?? {
     stoneCount: 1,
@@ -275,15 +296,30 @@ export const processOcrRunHandler: RouteHandler = async (ctx) => {
     await recordAnomalies(db, certId, runId, anomalies);
   }
 
+  // Derived field count + true mean confidence (was hardcoded 6).
+  const fieldNames = Object.keys(extraction).filter((k) => k !== 'stone');
+  for (const subKey of Object.keys(extraction['stone'] ?? {})) fieldNames.push(`stone.${subKey}`);
+  const confidences = fieldNames
+    .map((f) => {
+      const parts = f.split('.');
+      let cur: any = extraction;
+      for (const part of parts) cur = cur?.[part];
+      return typeof cur?.confidence === 'number' ? cur.confidence : null;
+    })
+    .filter((c): c is number => c !== null);
+  const meanConfidence = confidences.length > 0
+    ? confidences.reduce((a, b) => a + b, 0) / confidences.length
+    : extraction.stone.weight_ct.confidence;
+
   await recordOcrRun(db, {
     certificateId: certId,
     runId,
     provider,
     modelName,
     modelVersion,
-    status: 'SUCCEEDED',
-    fieldsExtracted: 6,
-    meanConfidence: extraction.stone.weight_ct.confidence,
+    status: 'CALLER_SUPPLIED',
+    fieldsExtracted: fieldNames.length,
+    meanConfidence,
   });
 
   await updateCertificateStatus(
@@ -300,8 +336,9 @@ export const processOcrRunHandler: RouteHandler = async (ctx) => {
     eventType: nextStatus === 'CROSS_CHECKED' ? 'CROSS_CHECKED' : 'EXTRACTED',
     fromStatus: 'UNVERIFIED',
     toStatus: nextStatus,
-    actorType: 'SYSTEM',
-    detail: { runId, anomaliesCount: anomalies.length },
+    actorType: actorOcrId ? 'HUMAN' : 'SYSTEM',
+    actorId: actorOcrId,
+    detail: { runId, anomaliesCount: anomalies.length, submitted_by: actorOcrId ?? null },
   });
 
   return {
@@ -324,12 +361,54 @@ export const reviewCertificateHandler: RouteHandler = async (ctx) => {
   const certId = requireIdentifier(ctx.params['certificateId'], 'certificateId');
   const rawBody = (await parseBody(ctx.request)) as Record<string, any>;
 
-  const reviewerId = rawBody['reviewerId'] ?? actorReviewerId;
-  const decision = rawBody['decision'] as 'APPROVE' | 'REJECT';
+  // P1-18: the reviewer IS the signed-in session actor when one exists. A
+  // signed-in actor cannot impersonate a different reviewer via the body.
+  // Under the developer seam (no session) the sandbox reviewer id from the
+  // body is tolerated verbatim and flagged as sandbox in the ledger.
+  const sessionPresent = Boolean(extractSessionToken(ctx.request));
+  const reviewerId = actorReviewerId
+    ?? (!sessionPresent && isDevSeamEnabled() ? String(rawBody['reviewerId'] ?? '') || undefined : undefined);
+  const sandboxReviewer = !sessionPresent && !actorReviewerId;
+  const rawDecision = rawBody['decision'];
+  if (rawDecision !== 'APPROVE' && rawDecision !== 'REJECT') {
+    throw new ContractError(
+      'VALIDATION_FAILED',
+      `decision must be "APPROVE" or "REJECT" (received ${typeof rawDecision}).`,
+    );
+  }
+  const decision: 'APPROVE' | 'REJECT' = rawDecision;
   const notes = rawBody['notes'] ?? null;
 
   if (!reviewerId) {
-    throw new ContractError('VALIDATION_FAILED', 'reviewerId is required.');
+    throw new ContractError('VALIDATION_FAILED', 'A signed-in reviewer is required to record a review.');
+  }
+
+  // P1-18 two-person rule: whoever submitted the latest OCR pass must not be
+  // the same principal that approves. Only the *session-provisioned*
+  // identities feed the comparison; seam/sandbox ids cannot collide.
+  if (actorReviewerId && !sandboxReviewer) {
+    const lastEvents = await db.execute(sql`
+      SELECT detail::text AS detail, event_type::text AS event_type FROM verification_events
+      WHERE certificate_id = ${certId}::uuid
+        AND event_type IN ('EXTRACTED'::document_kind, 'CROSS_CHECKED'::document_kind)
+      ORDER BY created_at DESC LIMIT 1
+    `);
+    if (lastEvents.rows.length > 0) {
+      let submittedBy: string | undefined;
+      try {
+        const detail = JSON.parse((lastEvents.rows[0] as { detail: string }).detail ?? '{}') as
+          Record<string, unknown>;
+        submittedBy = typeof detail['submitted_by'] === 'string' ? detail['submitted_by'] : undefined;
+      } catch {
+        submittedBy = undefined;
+      }
+      if (submittedBy && submittedBy === actorReviewerId) {
+        throw new ContractError(
+          'FORBIDDEN',
+          'Two-person rule: the operator who submitted the extraction may not approve the same certificate.',
+        );
+      }
+    }
   }
 
   if (decision === 'REJECT') {

@@ -21,6 +21,7 @@ import {
   updateConversationState,
   appendMessage,
   recordAiInteraction,
+  recordGuardrailEvent,
   recordToolCall,
   loadSettingCompatibilityRules,
   buildDeterministicEmbedding1024,
@@ -321,8 +322,14 @@ export const aiChatHandler: RouteHandler = async (ctx) => {
 
   const sessionToken = extractSessionToken(ctx.request);
   const actor = sessionToken ? await resolveRequestActor(ctx) : null;
-  const headerCustomerId = ctx.request?.headers.get('x-customer-id')?.trim() || null;
-  const callerCustomerId = actor?.customer_id ?? headerCustomerId ?? (rawBody['customerId'] as string | undefined) ?? null;
+  // P1-4 identity contract: the session is the ONLY customer identity. The
+  // caller may NOT claim a customerId from the request body, and the
+  // x-customer-id header is honoured only under the explicit developer seam.
+  const headerCustomerId =
+    ctx.request?.headers.get('x-customer-id')?.trim() && isDevSeamEnabled()
+      ? ctx.request?.headers.get('x-customer-id')?.trim()
+      : null;
+  const callerCustomerId = actor?.customer_id ?? headerCustomerId ?? null;
   const isAdmin = Boolean(actor && (ADMIN_ROLES as readonly string[]).includes(actor.role));
 
   // 1. Ensure conversation row exists in DB & enforce customer ownership
@@ -421,20 +428,46 @@ export const aiChatHandler: RouteHandler = async (ctx) => {
     latencyMs: outcome.latencyMs,
   });
 
-  // Record AI Interaction telemetry
+  // Record AI Interaction telemetry — P1-15: the provider/model labels must
+  // describe the ATTEMPTED provider, and the degraded path must be labelled
+  // plainly instead of masquerading as a live Gemini call.
+  const llmKeyed = Boolean(
+    process.env['OPENAI_API_KEY'] || process.env['OPENROUTER_API_KEY'] || process.env['AI_GATEWAY_API_KEY'],
+  );
+  const telemetryProvider = llmKeyed
+    ? process.env['OPENROUTER_API_KEY'] ? 'OPENROUTER' : process.env['AI_GATEWAY_API_KEY'] ? 'VERCEL_AI_GATEWAY' : 'VERCEL_AI_GATEWAY'
+    : 'DEGRADED_NO_MODEL_PROVIDER';
+  const telemetryModel = llmKeyed ? process.env['AI_MODEL'] ?? 'gemini-1.5-pro' : 'unavailable';
   await recordAiInteraction(db, {
     requestId: ctx.ids.requestId,
     conversationId: conv.id,
     channel: 'WEB_CHAT',
     surface,
-    provider: 'VERCEL_AI_GATEWAY',
-    modelName: 'gemini-1.5-pro',
+    provider: telemetryProvider,
+    modelName: telemetryModel,
     promptVersion: '1.0.0',
     toolCallCount: outcome.toolCallsExecuted.length,
     groundedRatio: outcome.groundedRatio,
     handoffTriggered: outcome.handoff !== undefined,
     latencyMs: outcome.latencyMs,
   });
+
+  // P1-15: persist guardrail movements to the append-only ledger (the AI
+  // package cannot persist per ADR-003 — the web layer owns durability).
+  for (const guardEvent of outcome.guardrailEvents ?? []) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await recordGuardrailEvent((db as any).pool, {
+        conversationId: conv.id,
+        ruleId: guardEvent.ruleId,
+        action: guardEvent.action,
+        triggerTextHash: guardEvent.triggerTextHash,
+        detail: { surface, persisted_from: 'web' },
+      });
+    } catch {
+      // Best-effort persistence when running against mock DB in unit tests
+    }
+  }
 
   return {
     status: 200,
@@ -497,7 +530,12 @@ export const aiGetConversationHandler: RouteHandler = async (ctx) => {
 
   const sessionToken = extractSessionToken(ctx.request);
   const actor = sessionToken ? await resolveRequestActor(ctx) : null;
-  const headerCustomerId = ctx.request?.headers.get('x-customer-id')?.trim() || null;
+  // P1-4 identity contract: session identity only; the header fallback is
+  // developer-seam-gated (test harnesses only).
+  const headerCustomerId =
+    ctx.request?.headers.get('x-customer-id')?.trim() && isDevSeamEnabled()
+      ? ctx.request?.headers.get('x-customer-id')?.trim()
+      : null;
   const callerCustomerId = actor?.customer_id ?? headerCustomerId;
   const isAdmin = Boolean(actor && (ADMIN_ROLES as readonly string[]).includes(actor.role));
 

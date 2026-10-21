@@ -32,7 +32,10 @@
  */
 import type { NextConfig } from 'next';
 
-const SECURITY_HEADERS = [
+// P1-30 (SECURITY-HEADERS-TEST): exported so the security-header contract is
+// assertable in CI (src/app/headers.spec.ts) — a next/upgrade or refactor
+// cannot silently drop CSP/XFO/nosniff/Referrer-Policy/Permissions-Policy.
+export const SECURITY_HEADERS = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
@@ -57,35 +60,56 @@ const SECURITY_HEADERS = [
   },
 ];
 
+/**
+ * P1-30 (SECURITY-HEADERS-TEST): pure builder so the runtime header list is
+ * pinned by tests without importing the Next config shim.
+ */
+export function buildSecurityHeaders(options: {
+  readonly isDev: boolean;
+  readonly isProductionRecord: boolean;
+}): Array<{ key: string; value: string }> {
+  const isDev = options.isDev;
+  const headers = SECURITY_HEADERS.map((header) => {
+    if (header.key !== 'Content-Security-Policy') return header;
+    const csp = [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "frame-ancestors 'none'",
+      "img-src 'self' data: https:",
+      "media-src 'self' https: blob:",
+      `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ''}`,
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      `connect-src 'self' https:${isDev ? ' ws: wss:' : ''}`,
+      "worker-src 'self' blob:",
+      "form-action 'self'",
+    ].join('; ');
+    return { ...header, value: csp };
+  });
+  // P1-6: fail-closed detection (isFailClosedMode is honoured by packages; the
+  // header config keys HSTS on the explicit deployment record).
+  if (options.isProductionRecord) {
+    headers.push({
+      key: 'Strict-Transport-Security',
+      value: 'max-age=63072000; includeSubDomains; preload',
+    });
+  }
+  return headers;
+}
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   async headers() {
-    const isDev = process.env.NODE_ENV !== 'production';
-    const headers = SECURITY_HEADERS.map((header) => {
-      if (header.key !== 'Content-Security-Policy') return header;
-      const csp = [
-        "default-src 'self'",
-        "base-uri 'self'",
-        "object-src 'none'",
-        "frame-ancestors 'none'",
-        "img-src 'self' data: https:",
-        "media-src 'self' https: blob:",
-        `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ''}`,
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-        "font-src 'self' https://fonts.gstatic.com data:",
-        `connect-src 'self' https:${isDev ? ' ws: wss:' : ''}`,
-        "worker-src 'self' blob:",
-        "form-action 'self'",
-      ].join('; ');
-      return { ...header, value: csp };
-    });
-    if (process.env['MAIHAN_ENV'] === 'production') {
-      headers.push({
-        key: 'Strict-Transport-Security',
-        value: 'max-age=63072000; includeSubDomains; preload',
-      });
-    }
-    return [{ source: '/:path*', headers }];
+    return [
+      {
+        source: '/:path*',
+        headers: buildSecurityHeaders({
+          isDev: process.env.NODE_ENV !== 'production',
+          isProductionRecord: process.env['MAIHAN_ENV'] === 'production',
+        }),
+      },
+    ];
   },
   // Next 16 still mounts a shadow-DOM "Issue" chip unless this is false AND
   // the nextjs-portal host is CSS-hidden in globals.css.

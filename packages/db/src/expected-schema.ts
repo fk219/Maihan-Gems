@@ -182,7 +182,7 @@ export const EXPECTED_ENUMS: readonly { name: string; members: readonly string[]
   { name: 'verification_status', members: ['UNVERIFIED', 'EXTRACTED', 'CROSS_CHECKED', 'VERIFIED', 'REJECTED'] },
 ];
 
-/** The 103 foreign-key constraint names of the locked schema + ADR-027 expansion. */
+/** The foreign-key constraint names of the locked schema + ADR-027 expansion + P1-27 pointer FKs. */
 export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'addresses_customer_id_fkey',
   'ai_interactions_conversation_id_fkey',
@@ -278,6 +278,8 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'staging_conflicts_import_batch_id_fkey',
   'staging_parsed_urls_import_batch_id_fkey',
   'vendor_onboarding_owner_customer_id_fkey',
+  'carts_converted_order_fk',
+  'checkout_sessions_completed_order_fk',
   'staging_source_pages_import_batch_id_fkey',
   'tool_calls_conversation_id_fkey',
   'tool_calls_message_id_fkey',
@@ -320,18 +322,18 @@ export const EXPECTED_VIEWS: readonly string[] = ['certificate_public'];
 /** The 2 vector(1024) columns (ADR-018). */
 export const EXPECTED_VECTOR_COLUMNS: readonly string[] = ['knowledge_chunks.embedding', 'product_embeddings.embedding'];
 
-/** Aggregate counts — the locked architecture numbers + the ADR-027 expansion. */
+/** Aggregate counts — the locked architecture numbers + the ADR-027 expansion + P1-27 integrity pass. */
 export const EXPECTED_COUNTS = {
   tables: 83,
   enums: 33,
   primary_key: 83,
-  foreign_key: 104,
+  foreign_key: 106,
   unique: 64,
   check: 33,
   not_null_columns: 625,
   /** check + not_null_columns: the documented CHECK-class total. */
   check_class_total: 658,
-  indexes: 287,
+  indexes: 287 + 21,
   hnsw: 2,
   vector_columns: 2,
   triggers: 1,

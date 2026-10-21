@@ -19,7 +19,7 @@ import {
   type CatalogDatabase,
 } from '@maihan/db';
 import type { RouteHandler, RouteContext } from './handlers.js';
-import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
+import { extractSessionToken, resolveRequestActorWithCsrf } from './auth-handlers.js';
 import { isDevSeamEnabled } from '@maihan/config';
 import { requireIdentifier } from './query.js';
 
@@ -32,7 +32,7 @@ function getDb(ctx: RouteContext): CatalogDatabase {
 
 async function requireCustomerId(ctx: RouteContext): Promise<string> {
   const sessionToken = extractSessionToken(ctx.request);
-  const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+  const actor = sessionToken ? await resolveRequestActorWithCsrf(ctx) : null;
   const headerCustomerId =
     ctx.request?.headers.get('x-customer-id')?.trim() ||
     ctx.url.searchParams.get('customer_id')?.trim() ||

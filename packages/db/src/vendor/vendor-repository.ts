@@ -999,6 +999,16 @@ export async function updateVendorOrderFulfillment(
     throw new ContractError('VALIDATION_FAILED', 'Carrier and tracking number are required when marking an item as SHIPPED.');
   }
 
+  // P1-8: vendors must not advance an UNPAID order. The previous condition
+  // (also a typo'd 'PENDING_PASSWORD' arm) moved PENDING_PAYMENT orders to
+  // IN_FULFILLMENT, bypassing the order state machine and the payment gate.
+  if (itemRow.order_state === 'PENDING_PAYMENT' || itemRow.order_state === 'CANCELLED') {
+    throw new ContractError(
+      'UNPROCESSABLE',
+      `Order state "${itemRow.order_state}" does not permit fulfilment — payment must be settled first.`,
+    );
+  }
+
   await db.execute(sql`
     UPDATE order_items
     SET state = ${input.state}
@@ -1035,8 +1045,11 @@ export async function updateVendorOrderFulfillment(
   let nextOrderState: string | null = null;
   if (allDelivered && itemRow.order_state !== 'FULFILLED') {
     nextOrderState = 'FULFILLED';
-  } else if (anyFulfillingOrShipped && (itemRow.order_state === 'PAID' || itemRow.order_state === 'PENDING_PAYMENT')) {
+  } else if (anyFulfillingOrShipped && itemRow.order_state === 'PAID') {
+    // P1-8: only a PAID order may propagate line-fulfilment to the parent.
     nextOrderState = 'IN_FULFILLMENT';
+  } else if (anyFulfillingOrShipped && itemRow.order_state === 'IN_FULFILLMENT') {
+    nextOrderState = null;
   }
 
   if (nextOrderState) {

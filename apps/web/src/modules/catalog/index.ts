@@ -70,3 +70,8 @@ export {
 } from './infrastructure/cache-store.js';
 
 export { RedisCacheStore, RedisGenerationStore } from './infrastructure/redis-store.js';
+
+export {
+  createFeatureFlagGenerationStore,
+  type FeatureFlagGenerationStoreOptions,
+} from './infrastructure/feature-flag-generation-store.js';

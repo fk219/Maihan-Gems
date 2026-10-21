@@ -40,7 +40,7 @@ export function WebArModal({
   const [cameraState, setCameraState] = useState<
     'UNINITIALIZED' | 'PREFLIGHT' | 'STREAMING' | 'DENIED' | 'UNSUPPORTED'
   >('PREFLIGHT');
-  const [trackingState, setTrackingState] = useState<'SEARCHING' | 'TRACKED' | 'LOST'>('SEARCHING');
+  const [trackingState, setTrackingState] = useState<'SEARCHING' | 'PREVIEW' | 'LOST'>('SEARCHING');
   const [qrHandoffUrl, setQrHandoffUrl] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState<boolean>(false);
 
@@ -135,7 +135,10 @@ export function WebArModal({
   };
 
   const startArRenderLoop = () => {
-    setTrackingState('TRACKED');
+    // P1-14 honesty: this render loop is a PREVIEW illustration anchored to the
+    // canvas centre — it performs no hand placement. The state cannot claim
+    // "TRACKED"; truthful copy is rendered by the badge below.
+    setTrackingState('PREVIEW');
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = 0;
@@ -422,16 +425,16 @@ export function WebArModal({
                 padding: '0.4rem 0.8rem',
                 borderRadius: '12px',
                 fontSize: '0.8rem',
-                color: trackingState === 'TRACKED' ? '#10B981' : '#FBBF24',
+                color: trackingState === 'PREVIEW' ? '#FBBF24' : '#94A3B8',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.4rem',
               }}
             >
               <span>
-                {trackingState === 'TRACKED'
-                  ? 'AR overlay active · On-device camera stream (zero frame upload)'
-                  : 'Aligning hand reticle…'}
+                {trackingState === 'PREVIEW'
+                  ? 'PREVIEW simulation — a scaled, fixed-centre illustration, NOT position-tracked AR. On-device camera only (zero frame upload).'
+                  : 'Static 3D preview available below — live try-on opens in the configurator.'}
               </span>
             </div>
           </>

@@ -1,5 +1,9 @@
 # MASTER TRUTH AUDIT + REMEDIATION ROUND 2 (2026-10-19)
 
+> **TRACKER POINTER (2026-10-21):** the single active audit/tracker is now `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` (repo root). `AUDIT_PHASE_PLAN.md`, `MAIHAN_GEMS_MASTER_PHASE_REPORT.md` and `MAIHAN_GEMS_COMPLETENESS_AND_GAP_AUDIT.md` were deleted after their open items were re-verified against code and absorbed there (§18.3 carried register, §22 three-phase fix plan: Phase 1 REPAIR P1-1…P1-30 in-repo, Phase 2 CONNECT P2-1…P2-9 client-gated, Phase 3 OPERATE & PROVE P3-1…P3-12). `MAIHAN_GEMS_COMPLETE_PRODUCT_AUDIT.md` is superseded by the same file. Do not recreate parallel trackers; move fixed rows to that file's §18.1 with evidence.
+
+> **PHASE 1 STATUS (2026-10-21): COMPLETE.** All 30 REPAIR items implemented and verified (per-item evidence in that file's §18.1b). Final baseline: typecheck/build/lint 0 errors; schema-fidelity PASS (22 migrations incl. `0022_integrity_indexes.sql`); `pnpm -r run test` 990 passed / 0 failed; bundle budgets PASS. NEXT: Phase 2 (client-gated: archive restore, Stripe/Resend/AI keys, policy decisions) and Phase 3 (hardening/verification; requires Phase 1 green — it is). ADR-028/029 are DRAFTS in docs/adr/ awaiting client ratification before their migrations may merge.
+
 Full product audit written to `MAIHAN_GEMS_COMPLETE_PRODUCT_AUDIT.md` (≈72% weighted,
 NOT production-ready). Immediately after it, the following audit findings were FIXED
 (all verified: build/typecheck/lint 0 errors, schema-fidelity PASS, all suites green —

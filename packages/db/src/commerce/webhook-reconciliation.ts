@@ -10,8 +10,8 @@
  *   Re-derive amounts server-side from orders.
  */
 import { sql } from 'drizzle-orm';
+import { ContractError, type VerifiedWebhook } from '@maihan/contracts';
 import type { CatalogDatabase } from '../catalog/executor.js';
-import type { VerifiedWebhook } from '@maihan/contracts';
 
 export interface WebhookReceiptResult {
   id: number;
@@ -177,7 +177,11 @@ export async function reconcilePaymentWebhook(
     const providerPaymentId =
       verified.providerPaymentId ?? `pay_${verified.provider.toLowerCase()}_${verified.externalEventId}`;
 
-    await db.execute(sql`
+    // P1-11: payment row + order PAID + ledger + receipt closure are ONE
+    // transaction — a crash between two statements can no longer leave real
+    // captured money pointing at a PENDING_PAYMENT order.
+    await db.transaction(async (tx) => {
+      await tx.execute(sql`
       INSERT INTO payments (
         order_id,
         provider,
@@ -205,8 +209,8 @@ export async function reconcilePaymentWebhook(
         updated_at = now()
     `);
 
-    // Update order to PAID with optimistic concurrency and a state guard.
-    const paidRes = await db.execute(sql`
+      // Update order to PAID with optimistic concurrency and a state guard.
+      const paidRes = await tx.execute(sql`
       UPDATE orders
       SET state = 'PAID', paid_at = now(), updated_at = now(), version = version + 1
       WHERE id = ${order.id}
@@ -214,19 +218,13 @@ export async function reconcilePaymentWebhook(
         AND version = ${order.version}
       RETURNING id
     `);
-    if (paidRes.rows.length === 0) {
-      const err = 'Concurrent order state change detected during payment reconciliation';
-      await db.execute(sql`
-        UPDATE webhook_receipts
-        SET processing_error = ${err}
-        WHERE provider = ${verified.provider}
-          AND external_event_id = ${verified.externalEventId}
-      `);
-      return { reconciled: false, orderId: order.id, error: err };
-    }
+      if (paidRes.rows.length === 0) {
+        const err = 'Concurrent order state change detected during payment reconciliation';
+        throw new ContractError('IDEMPOTENCY_CONFLICT', err);
+      }
 
-    // Append to order_events timeline
-    await db.execute(sql`
+      // Append to order_events timeline
+      await tx.execute(sql`
       INSERT INTO order_events (
         order_id,
         from_state,
@@ -244,8 +242,8 @@ export async function reconcilePaymentWebhook(
       )
     `);
 
-    // Write audit log
-    await db.execute(sql`
+      // Write audit log
+      await tx.execute(sql`
       INSERT INTO audit_logs (
         actor_type,
         action,
@@ -263,21 +261,37 @@ export async function reconcilePaymentWebhook(
       )
     `);
 
-    // Mark webhook receipt processed
-    await db.execute(sql`
+      // Mark webhook receipt processed
+      await tx.execute(sql`
       UPDATE webhook_receipts
       SET processed_at = now()
       WHERE provider = ${verified.provider}
         AND external_event_id = ${verified.externalEventId}
     `);
+    }).catch(async (err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err);
+      await db.execute(sql`
+      UPDATE webhook_receipts
+      SET processing_error = ${message.slice(0, 480)}
+      WHERE provider = ${verified.provider}
+        AND external_event_id = ${verified.externalEventId}
+    `);
+      return { reconciled: false, orderId: order.id, error: message } as const;
+    });
 
     return { reconciled: true, orderId: order.id };
   }
 
-  // Other events mark processed
+  // P1-11 ack-class coverage: state-relevant non-capture events are recorded
+  // as visible ack-without-state-change receipts (not silent no-ops) so the
+  // reconciliation sweep can distinguish them from handled captures.
+  const ackClass = verified.eventType.startsWith('refund') || verified.eventType.startsWith('dispute')
+    ? `${verified.eventType}:awaiting_reconciliation_sweep`
+    : verified.eventType;
   await db.execute(sql`
     UPDATE webhook_receipts
-    SET processed_at = now()
+    SET processed_at = now(),
+        processing_error = ${`acknowledged_without_state_change: ${ackClass}`}
     WHERE provider = ${verified.provider}
       AND external_event_id = ${verified.externalEventId}
   `);

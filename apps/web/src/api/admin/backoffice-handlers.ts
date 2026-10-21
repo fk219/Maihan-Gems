@@ -38,6 +38,7 @@ import { extractSessionToken, resolveRequestActor } from '../auth-handlers.js';
 import { isDevSeamEnabled } from '@maihan/config';
 import type { HandlerOutcome, RouteContext } from '../handlers.js';
 import { requireIdentifier } from '../query.js';
+import { sameOriginRequest, sessionTransport } from '../csrf.js';
 import { authorizeAdmin, authzFailureResponse, type CapabilityRequest } from './authz.js';
 
 export interface BackOfficeHandlerDeps {
@@ -101,11 +102,20 @@ export async function gateAdmin(
     if (!(ADMIN_ROLES as readonly string[]).includes(sessionActor.role)) {
       return { failure: authzFailureResponse(403, ctx.ids) };
     }
-    // Verify CSRF token if supplied on state-changing requests
+    // Verify CSRF token — P1-21: MANDATORY for cookie-authenticated state
+    // changes. Accepted when the double-submit header matches OR the
+    // browser-controlled same-origin Origin matches the Host. Token-bearing
+    // transports (Bearer/x-session-token) are exempt via the shared helper.
     const method = (ctx.request?.method ?? 'GET').toUpperCase();
     if (method !== 'GET' && method !== 'HEAD') {
-      const csrfHeader = ctx.request?.headers.get('x-csrf-token')?.trim();
-      if (csrfHeader !== undefined && csrfHeader !== '' && csrfHeader !== sessionActor.csrf_token) {
+      const transport = sessionTransport(ctx.request);
+      const csrfHeader = ctx.request?.headers.get('x-csrf-token')?.trim() ?? '';
+      const isSameOrigin = sameOriginRequest(ctx.request);
+      if (transport === 'cookie') {
+        if (!((csrfHeader !== '' && csrfHeader === sessionActor.csrf_token) || isSameOrigin)) {
+          return { failure: authzFailureResponse(403, ctx.ids) };
+        }
+      } else if (csrfHeader !== '' && csrfHeader !== sessionActor.csrf_token) {
         return { failure: authzFailureResponse(403, ctx.ids) };
       }
     }
@@ -230,7 +240,7 @@ export async function adminDiscountsListHandler(
   ctx: RouteContext,
   deps: BackOfficeHandlerDeps = {},
 ): Promise<HandlerOutcome> {
-  const g = await gateAdmin(ctx, { module: 'orders', action: 'list' }, deps);
+  const g = await gateAdmin(ctx, { module: 'discounts', action: 'list' }, deps);
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const rows = await listBackOfficeDiscounts(getDb(ctx), 100);
   return { status: 200, body: { data: rows, meta: { limit: 100, count: rows.length } } };
@@ -240,7 +250,7 @@ export async function adminCreateDiscountHandler(
   ctx: RouteContext,
   deps: BackOfficeHandlerDeps = {},
 ): Promise<HandlerOutcome> {
-  const g = await gateAdmin(ctx, { module: 'inventory', action: 'write' }, deps);
+  const g = await gateAdmin(ctx, { module: 'discounts', action: 'write' }, deps);
   if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
   const body = await parseBody(ctx.request);
   const input = CreateDiscountSchema.parse(body);

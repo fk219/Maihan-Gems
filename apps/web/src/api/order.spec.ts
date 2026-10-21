@@ -29,6 +29,7 @@ describe('Order Placement & Immutable Snapshots (Phase 6 Task 4)', () => {
   let api: CatalogApi | undefined;
   let hasDb = false;
   let sampleProductId: string | undefined;
+  let sampleStoneRestore: { gemstone_id: string | null; productId: string; prevState: string } | undefined;
   const createdCartTokens: string[] = [];
   const createdSessionIds: string[] = [];
   const createdOrderIds: string[] = [];
@@ -40,7 +41,8 @@ describe('Order Placement & Immutable Snapshots (Phase 6 Task 4)', () => {
       pool = createPool(url, { max: 2 });
       const client = await pool.connect();
       const res = await client.query(`
-        SELECT p.id, p.price_amount::text AS price_amount
+        SELECT p.id, p.price_amount::text AS price_amount, p.kind::text AS kind,
+               p.state::text AS product_state, p.gemstone_id
         FROM products p
         JOIN gemstones g ON g.id = p.gemstone_id
         WHERE p.price_amount IS NOT NULL
@@ -53,11 +55,16 @@ describe('Order Placement & Immutable Snapshots (Phase 6 Task 4)', () => {
               AND r.state = 'ACTIVE'
               AND r.expires_at > now()
           )
-        ORDER BY p.product_number
+        ORDER BY random()
         LIMIT 1;
       `);
       if (res.rows.length > 0) {
         sampleProductId = res.rows[0].id;
+        sampleStoneRestore = {
+          gemstone_id: res.rows[0].gemstone_id,
+          productId: res.rows[0].id,
+          prevState: res.rows[0].product_state as string,
+        };
       }
       client.release();
 
@@ -88,7 +95,18 @@ describe('Order Placement & Immutable Snapshots (Phase 6 Task 4)', () => {
           await client.query(`DELETE FROM audit_logs WHERE entity_id = $1`, [orderId]);
           await client.query(`DELETE FROM order_events WHERE order_id = $1`, [orderId]);
           await client.query(`DELETE FROM order_items WHERE order_id = $1`, [orderId]);
+          // P1-27 FK hygiene: detach the conversion pointers before removing
+          // the order row itself.
+          await client.query(`UPDATE carts SET converted_order_id = NULL WHERE converted_order_id = $1`, [orderId]);
+          await client.query(`UPDATE checkout_sessions SET completed_order_id = NULL WHERE completed_order_id = $1`, [orderId]);
           await client.query(`DELETE FROM orders WHERE id = $1`, [orderId]);
+        }
+        // P1-17 lifecycle: the sample stone was sold by a successful order.
+        // Restore availability/state so other suites (catalog, a11y) do not
+        // observe SOLD_LEFT residue in the shared dev database.
+        if (sampleStoneRestore) {
+          await client.query(`UPDATE gemstones SET availability = true, availability_checked_at = NULL WHERE id = $1`, [sampleStoneRestore.gemstone_id]);
+          await client.query(`UPDATE products SET availability = true, state = $1::product_state WHERE id = $2`, [sampleStoneRestore.prevState, sampleStoneRestore.productId]);
         }
         for (const token of createdCartTokens) {
           await client.query(`DELETE FROM carts WHERE cart_token = $1`, [token]);

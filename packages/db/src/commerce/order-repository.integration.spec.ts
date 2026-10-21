@@ -236,6 +236,18 @@ describeWithLocalDatabase('Order repository DYO snapshot integration (local Post
            (SELECT id FROM orders WHERE idempotency_key = $1)`,
         [fixture.orderIdempotencyKey],
       );
+      // P1-27 FK hygiene: detach the conversion pointers before removing
+      // the order row.
+      await client.query(
+        `UPDATE carts SET converted_order_id = NULL
+         WHERE converted_order_id IN (SELECT id FROM orders WHERE idempotency_key = $1)`,
+        [fixture.orderIdempotencyKey],
+      );
+      await client.query(
+        `UPDATE checkout_sessions SET completed_order_id = NULL
+         WHERE completed_order_id IN (SELECT id FROM orders WHERE idempotency_key = $1)`,
+        [fixture.orderIdempotencyKey],
+      );
       await client.query('DELETE FROM orders WHERE idempotency_key = $1', [fixture.orderIdempotencyKey]);
       await client.query('DELETE FROM carts WHERE id = $1', [fixture.cartId]);
       await client.query('DELETE FROM checkout_sessions WHERE id = $1', [fixture.checkoutSessionId]);

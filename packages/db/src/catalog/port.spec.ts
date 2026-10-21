@@ -81,7 +81,12 @@ beforeAll(async () => {
       const row = dataRes.rows[0] as { settings: string; variants: string; active_products: string };
       hasData = Number(row.settings) > 0 && Number(row.variants) > 0;
       activeProductCount = Number(row.active_products);
-      const gemRes = await probe.query(`SELECT gem_ref FROM gemstones WHERE deleted_at IS NULL ORDER BY gem_ref LIMIT 1`);
+      // Prefer a provenance-carrying (seeded) gemstone — the sample feeds
+      // the verbatim-evidence assertion; a leftover ad-hoc fixture row
+      // (import_batch NULL) would otherwise defeat it.
+      const gemRes = await probe.query(
+        `SELECT gem_ref FROM gemstones WHERE deleted_at IS NULL AND import_batch_id IS NOT NULL ORDER BY gem_ref LIMIT 1`,
+      );
       sampleGemRef = (gemRes.rows[0] as { gem_ref: string } | undefined)?.gem_ref ?? null;
       const db = createCatalogDatabase(pool);
       port = createCatalogQueryPort(db);

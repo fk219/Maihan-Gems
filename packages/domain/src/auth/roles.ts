@@ -39,6 +39,7 @@ export const ADMIN_MODULES = Object.freeze([
   'orders',
   'refunds',
   'inventory',
+  'discounts',
   'certificates',
   'anomalies',
   'conversations',
@@ -85,6 +86,7 @@ export const ROLE_SCOPES: Readonly<Record<AdminRole, RoleScope>> = Object.freeze
     settings: ['read', 'list', 'write'],
     taxonomy: ['read', 'list', 'write'],
     media: ['read', 'list', 'write'],
+    discounts: ['read', 'list', 'write'],
   }),
   CONTENT_EDITOR: scope({
     content: ['read', 'list', 'write'],
@@ -100,6 +102,7 @@ export const ROLE_SCOPES: Readonly<Record<AdminRole, RoleScope>> = Object.freeze
     orders: ['read', 'list'],
     refunds: ['read', 'list', 'write', 'approve'],
     inventory: ['read', 'list', 'write', 'bulk'],
+    discounts: ['read', 'list'],
   }),
   TRUST_REVIEWER: scope({
     certificates: ['read', 'list', 'approve'],

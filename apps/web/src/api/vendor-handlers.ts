@@ -21,7 +21,7 @@ import {
   type AuthenticatedActor,
   type CatalogDatabase,
 } from '@maihan/db';
-import { resolveRequestActor } from './auth-handlers.js';
+import { resolveRequestActorWithCsrf } from './auth-handlers.js';
 import type { RouteContext, RouteHandler } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
@@ -90,7 +90,7 @@ async function parseBody(request?: Request): Promise<unknown> {
 }
 
 async function requireVendorActor(ctx: RouteContext): Promise<AuthenticatedActor & { vendor_id: string }> {
-  const actor = await resolveRequestActor(ctx);
+  const actor = await resolveRequestActorWithCsrf(ctx);
   if (!actor) {
     throw new ContractError('UNAUTHORIZED', 'Vendor authentication required.');
   }

@@ -20,7 +20,7 @@
 import { createHash, createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { sql } from 'drizzle-orm';
 import { ContractError } from '@maihan/contracts';
-import { isDevSeamEnabled } from '@maihan/config';
+import { isDevSeamEnabled, isFailClosedMode } from '@maihan/config';
 import { ADMIN_ROLES, ROLE_SCOPES, type AdminRole } from '@maihan/domain';
 import type { CatalogDatabase } from '../catalog/executor.js';
 
@@ -91,8 +91,10 @@ const SESSION_TTL_HOURS = 24 * 7;
 function getSessionSecret(): string {
   const configured = process.env['MAIHAN_SESSION_SECRET']?.trim();
   if (configured) return configured;
-  if (process.env['MAIHAN_ENV'] === 'production') {
-    throw new Error('MAIHAN_SESSION_SECRET must be configured in production.');
+  // P1-6 fail-closed: required in every unseamed (production-shaped)
+  // environment, not only when MAIHAN_ENV is explicitly 'production'.
+  if (isFailClosedMode()) {
+    throw new Error('MAIHAN_SESSION_SECRET must be configured in fail-closed mode.');
   }
   return 'maihan_gems_session_hmac_secret_v1_local_dev';
 }
@@ -216,6 +218,14 @@ export async function recordNotification(
       | 'PRODUCT_MODERATION';
     subject: string;
     body: string;
+    /**
+     * Overrides the body used for the QUEUED `notify.email` job ONLY. Use it
+     * whenever `body` must stay free of secrets (one-time tokens, reset
+     * links): the in-app notifications table is readable through the account
+     * notifications API and must never become a second copy of a raw token
+     * that the email is already carrying.
+     */
+    email_body?: string;
     metadata?: Record<string, unknown>;
     dedupe_key?: string;
   },
@@ -266,7 +276,7 @@ export async function recordNotification(
         email: input.email,
         kind: input.kind,
         subject: input.subject,
-        text: input.body,
+        text: input.email_body ?? input.body,
         category: input.kind,
         created_at: new Date().toISOString(),
       })}::jsonb,
@@ -508,8 +518,11 @@ export async function registerAccount(
     email: normalizedEmail,
     kind: 'EMAIL_VERIFICATION',
     subject: 'Verify your Maihan Gems account',
-    body: `Welcome to Maihan Gems. Verify your email with token: ${rawVerifyToken}`,
-    metadata: { verification_path: `/account/verify-email?token=${rawVerifyToken}` },
+    // P1-5: the in-app notification is token-free (P1-4 keeps it behind the
+    // session identity anyway); the raw token travels only in the email job.
+    body: 'Welcome to Maihan Gems. Check your email for your single-use verification link — it is valid for 24 hours.',
+    email_body: `Welcome to Maihan Gems. Verify your email with token: ${rawVerifyToken}`,
+    metadata: { verification_cta: '/account/verify-email' },
   });
 
   await db.execute(sql`
@@ -897,8 +910,10 @@ export async function requestPasswordReset(
     email: cust.email,
     kind: 'PASSWORD_RESET',
     subject: 'Maihan Gems password recovery',
-    body: `A password reset was requested for your account. Token (valid 30 minutes, single use): ${rawResetToken}`,
-    metadata: { reset_path: `/account/reset-password?token=${rawResetToken}` },
+    // P1-5: token-free in-app copy; the raw token travels only in the email.
+    body: 'A password reset was requested for your account. Check your email for the single-use reset token — it is valid for 30 minutes.',
+    email_body: `A password reset was requested for your account. Token (valid 30 minutes, single use): ${rawResetToken}`,
+    metadata: { reset_cta: '/account/reset-password' },
   });
 
   // R1-1 fail-closed: the reset token is returned in the internal result ONLY

@@ -94,8 +94,11 @@ export class TransactionalEmailProvider {
       };
     }
 
+    // P1-24 honesty: with no provider configured nothing was delivered. The
+    // worker's handler marks the same disposition as `delivered:false` — the
+    // API path must not misreport it as a successful send.
     return {
-      delivered: true,
+      delivered: false,
       provider: 'OUTBOX_LOG',
       messageId: `outbox_${Date.now()}`,
     };

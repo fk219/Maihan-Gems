@@ -255,18 +255,18 @@ export class DefaultModelGateway implements ModelGateway {
       };
     }
 
-    // Default simulated generative outcome when no external API key or mockHandler is injected
-    const lastMsg = req.messages[req.messages.length - 1]?.content ?? '';
-    return {
-      content: `I am the Maihan Gems advisory concierge. Based on our verified archives: ${lastMsg.slice(0, 100)}`,
-      finishReason: 'stop',
-      usage: {
-        inputTokens: 120,
-        outputTokens: 45,
-        costUsd: 0.00035,
-      },
-      modelName: req.model ?? this.defaultModel,
-      provider,
-    };
+    // P1-15 honesty: with no provider key (and no mock handler) the system
+    // DEGRADES — it does not impersonate a live model. The orchestrator turns
+    // this typed disposition into the canonical degraded-mode refusal, so
+    // every consumer can distinguish "answered" from "unavailable".
+    throw new AiUnavailableError(
+      'No model provider is configured (set OPENAI_API_KEY/OPENROUTER_API_KEY/AI_GATEWAY_API_KEY). ' +
+      'The concierge is unwilling to answer without evidence-backed generation; request a human handoff instead.',
+    );
   }
+}
+
+/** Typed degraded-mode marker so callers can branch on honest unavailability. */
+export class AiUnavailableError extends Error {
+  override readonly name = 'AiUnavailableError';
 }

@@ -12,17 +12,19 @@
  *   request bytes BEFORE JSON parsing, with replay-window enforcement.
  */
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
-import type {
-  PaymentAuthorizeInput,
-  PaymentAuthorizeResult,
-  PaymentCaptureInput,
-  PaymentCaptureResult,
-  PaymentProvider,
-  PaymentRefundInput,
-  PaymentRefundResult,
-  RawWebhookRequest,
-  VerifiedWebhook,
+import {
+  ContractError,
+  type PaymentAuthorizeInput,
+  type PaymentAuthorizeResult,
+  type PaymentCaptureInput,
+  type PaymentCaptureResult,
+  type PaymentProvider,
+  type PaymentRefundInput,
+  type PaymentRefundResult,
+  type RawWebhookRequest,
+  type VerifiedWebhook,
 } from '@maihan/contracts';
+import { isFailClosedMode } from '@maihan/config';
 import { TestPaymentProvider } from './test-payment-provider.js';
 
 export interface StripePaymentProviderOptions {
@@ -62,6 +64,15 @@ export class StripePaymentProvider implements PaymentProvider {
 
   async authorize(input: PaymentAuthorizeInput): Promise<PaymentAuthorizeResult> {
     if (!this.secretKey) {
+      // P1-6 fail-closed: in any unseamed (production-shaped) environment the
+      // missing key is a configuration failure, never a silent simulated
+      // payment. The simulation stays dev/seam-only.
+      if (isFailClosedMode()) {
+        throw new ContractError(
+          'INTERNAL',
+          'Stripe credentials are not configured; refusing to simulate a payment in fail-closed mode.',
+        );
+      }
       return {
         provider: this.providerName,
         provider_payment_id: `pi_sim_${randomBytes(16).toString('hex')}`,
@@ -121,6 +132,12 @@ export class StripePaymentProvider implements PaymentProvider {
 
   async capture(input: PaymentCaptureInput): Promise<PaymentCaptureResult> {
     if (!this.secretKey) {
+      if (isFailClosedMode()) {
+        throw new ContractError(
+          'INTERNAL',
+          'Stripe credentials are not configured; refusing to simulate a capture in fail-closed mode.',
+        );
+      }
       return {
         provider: this.providerName,
         provider_payment_id: input.provider_payment_id,
@@ -166,6 +183,12 @@ export class StripePaymentProvider implements PaymentProvider {
 
   async refund(input: PaymentRefundInput): Promise<PaymentRefundResult> {
     if (!this.secretKey) {
+      if (isFailClosedMode()) {
+        throw new ContractError(
+          'INTERNAL',
+          'Stripe credentials are not configured; refusing to simulate a refund in fail-closed mode.',
+        );
+      }
       return {
         provider: this.providerName,
         provider_payment_id: input.provider_payment_id,
@@ -208,8 +231,10 @@ export class StripePaymentProvider implements PaymentProvider {
   }
 
   verifyWebhook(req: RawWebhookRequest, secret?: string): VerifiedWebhook {
-    if (process.env['MAIHAN_ENV'] === 'production' && !secret && !process.env['STRIPE_WEBHOOK_SECRET']) {
-      throw new Error('STRIPE_WEBHOOK_SECRET must be configured in production.');
+    // P1-6 fail-closed: the secret is required in every unseamed
+    // (production-shaped) environment — not only when MAIHAN_ENV is set.
+    if (isFailClosedMode() && !secret && !process.env['STRIPE_WEBHOOK_SECRET']) {
+      throw new Error('STRIPE_WEBHOOK_SECRET must be configured in fail-closed mode.');
     }
     const rawBodyBuffer =
       typeof req.rawBody === 'string' ? Buffer.from(req.rawBody, 'utf8') : req.rawBody;
@@ -356,7 +381,8 @@ export function createPaymentProvider(): PaymentProvider {
   if (process.env['STRIPE_SECRET_KEY'] || process.env['STRIPE_WEBHOOK_SECRET']) {
     return new StripePaymentProvider();
   }
-  if (process.env['MAIHAN_ENV'] === 'production') {
+  // P1-6 fail-closed: no defaults anywhere outside the explicit dev seam.
+  if (isFailClosedMode()) {
     throw new Error('No live payment provider is configured.');
   }
   return new TestPaymentProvider();

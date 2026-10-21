@@ -104,9 +104,12 @@ export function scopeForRoute(
   const p = path.startsWith('/api/v1/') ? path.slice('/api/v1'.length) : path;
   if (p.startsWith('/webhooks/')) return 'webhook';
   if (p.startsWith('/admin')) return isWrite ? 'admin_write' : 'public_get';
-  if (p.startsWith('/ai')) return 'ai_stream';
+  // P1-20 scope remap: write surfaces that were previously misfiled into the
+  // generous 'public_get' 300/min bucket get their own tighter buckets so an
+  // attacker cannot rotate identities against money/identity endpoints.
+  if (p.startsWith('/ai')) return isWrite ? 'ai_stream' : 'public_get';
   if (p.startsWith('/certificates')) return isWrite ? 'certificate_upload' : 'public_get';
-  if (p.startsWith('/checkout')) return 'checkout';
+  if (p.startsWith('/checkout') && isWrite) return 'checkout';
   if (
     (p.startsWith('/carts') && isWrite) ||
     (p.startsWith('/favorites') && isWrite) ||
@@ -115,6 +118,12 @@ export function scopeForRoute(
     return 'cart_mutation';
   }
   if (p.startsWith('/search')) return 'search';
+  // P1-20: identity/money writes with their own tighter scope.
+  if (isWrite && (p.startsWith('/orders') || p.startsWith('/refunds'))) return 'checkout';
+  if (isWrite && (p.startsWith('/account') || p.startsWith('/auth'))) return 'cart_mutation';
+  if (isWrite && (p.startsWith('/vendor') || p.startsWith('/whatsapp'))) return 'admin_write';
+  if (p.startsWith('/search')) return 'search';
+  if (isWrite && !p.startsWith('/inventory/sweep-expired')) return 'cart_mutation';
   return 'public_get';
 }
 

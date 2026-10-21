@@ -76,20 +76,34 @@ export type RequestRateLimiter = (request: Request) => Promise<RateLimitOutcome>
 
 /**
  * Client identity for bucketing. `x-client-ip` is set by OUR node adapter
- * from the socket (a client cannot spoof it on a direct connection);
- * `x-forwarded-for` is the fallback for framework adapters (Phase 4) and
- * proxy deployments. Which proxies are trusted is a deployment-time
- * decision, recorded rather than guessed here.
+ * from the socket (a client cannot spoof it on a direct connection).
+ * P1-20 identity hardening:
+ *   - If OUR adapter did NOT set `x-client-ip`, a client-supplied
+ *     `x-forwarded-for` would otherwise choose the bucket; that is only
+ *     honoured when the deployment explicitly opted in via
+ *     `MAIHAN_TRUST_FORWARDED_IP=1` (documented proxy deployments). A second
+ *     `x-client-ip` must come from the trusted adaptation layer: a
+ *     client-supplied header never overrides the adapter value
+ *     (the adapter overwrites it last, and in the in-process Next path,
+ *     where no adapter runs, the header is treated UNTRUSTED).
+ *   - Otherwise every unproxied caller may share one 'shared-unknown'
+ *     bucket — conservative (favours stricter limiting) rather than a
+ *     spoofable per-client choice.
  */
 export function defaultIdentify(request: Request): string {
   const clientIp = request.headers.get('x-client-ip');
-  if (clientIp !== null && clientIp !== '') return clientIp;
+  if (clientIp !== null && clientIp !== '') {
+    // Trusted only when marked authoritative by our own adapter; the adapter
+    // sets this marker header.
+    const trusted = request.headers.get('x-maihan-ip-source') === 'adapter';
+    if (trusted) return clientIp;
+  }
   const forwarded = request.headers.get('x-forwarded-for');
-  if (forwarded !== null && forwarded !== '') {
+  if (forwarded !== null && forwarded !== '' && process.env['MAIHAN_TRUST_FORWARDED_IP'] === '1') {
     const first = forwarded.split(',')[0];
     if (first !== undefined && first.trim() !== '') return first.trim();
   }
-  return 'unknown';
+  return 'shared-unknown';
 }
 
 const rateLimitHeaders = (

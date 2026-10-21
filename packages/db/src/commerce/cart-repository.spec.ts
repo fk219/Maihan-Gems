@@ -45,6 +45,7 @@ describe('Cart Repository & Authoritative Re-pricing (Phase 6 Task 1)', () => {
   let hasDb = false;
   let sampleProductId: string | undefined;
   let sampleProductPrice: string | undefined;
+  let sampleProductKind: string | undefined;
   const createdCartTokens: string[] = [];
 
   beforeAll(async () => {
@@ -55,7 +56,7 @@ describe('Cart Repository & Authoritative Re-pricing (Phase 6 Task 1)', () => {
       const client = await pool.connect();
       // Find an active product with a price to use for testing
       const res = await client.query(`
-        SELECT p.id, p.price_amount::text AS price_amount
+        SELECT p.id, p.price_amount::text AS price_amount, p.kind::text AS kind
         FROM products p
         JOIN gemstones g ON g.id = p.gemstone_id
         WHERE p.price_amount IS NOT NULL
@@ -76,6 +77,7 @@ describe('Cart Repository & Authoritative Re-pricing (Phase 6 Task 1)', () => {
       if (res.rows.length > 0) {
         sampleProductId = res.rows[0].id;
         sampleProductPrice = Number(res.rows[0].price_amount).toFixed(2);
+        sampleProductKind = res.rows[0].kind as string;
       }
       client.release();
       db = createCatalogDatabase(pool);
@@ -169,21 +171,60 @@ describe('Cart Repository & Authoritative Re-pricing (Phase 6 Task 1)', () => {
 
     const updated = await addItemToCart(db, cart.cart_token, {
       product_id: sampleProductId,
-      quantity: 2,
+      quantity: 1,
       expected_unit_price: sampleProductPrice,
       engraving_text: 'Test Love 2026',
     });
 
     expect(updated.items).toHaveLength(1);
     expect(updated.items[0]?.product_id).toBe(sampleProductId);
-    expect(updated.items[0]?.quantity).toBe(2);
+    expect(updated.items[0]?.quantity).toBe(1);
     expect(updated.items[0]?.unit_price).toBe(sampleProductPrice);
     expect(updated.items[0]?.engraving_text).toBe('Test Love 2026');
 
-    const expectedSubtotal = (Number(sampleProductPrice) * 2).toFixed(2);
+    const expectedSubtotal = (Number(sampleProductPrice) * 1).toFixed(2);
     expect(updated.pricing_snapshot.subtotal).toBe(expectedSubtotal);
     expect(updated.pricing_snapshot.grand_total).toBe(expectedSubtotal);
-    expect(updated.pricing_snapshot.item_count).toBe(2);
+    expect(updated.pricing_snapshot.item_count).toBe(1);
+  });
+
+  it('rejects quantity above one for unique loose stones and pairs with 422 (one-of-one guard)', async () => {
+    // The guard added in the unique-stone quantity policy applies to
+    // LOOSE_STONE and STONE_PAIR products without an explicit inventory
+    // quantity; the gemstone-joined fixture is always in that family.
+    if (
+      !hasDb ||
+      !db ||
+      !sampleProductId ||
+      !sampleProductKind ||
+      (sampleProductKind !== 'LOOSE_STONE' && sampleProductKind !== 'STONE_PAIR')
+    ) {
+      return;
+    }
+
+    const cart = await createCart(db);
+    createdCartTokens.push(cart.cart_token);
+
+    await expect(
+      addItemToCart(db, cart.cart_token, {
+        product_id: sampleProductId,
+        quantity: 2,
+        expected_unit_price: sampleProductPrice,
+      }),
+    ).rejects.toThrow(ContractError);
+
+    try {
+      await addItemToCart(db, cart.cart_token, {
+        product_id: sampleProductId,
+        quantity: 2,
+        expected_unit_price: sampleProductPrice,
+      });
+    } catch (err) {
+      const contractErr = err as ContractError;
+      expect(contractErr.code).toBe('UNPROCESSABLE');
+      expect(contractErr.httpStatus).toBe(422);
+      expect(contractErr.message).toContain('unique stone or pair');
+    }
   });
 
   it('uses the referenced DYO snapshot rather than the configured product price when reading a cart', async () => {

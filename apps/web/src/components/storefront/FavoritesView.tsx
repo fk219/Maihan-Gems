@@ -18,7 +18,6 @@ import { VaultEmpty } from './VaultEmpty.js';
 export function FavoritesView({
   forceEmpty = false,
 }: {
-  demoItems: AtelierItem[];
   forceEmpty?: boolean;
 }) {
   const { currency, rates } = useStorefront();

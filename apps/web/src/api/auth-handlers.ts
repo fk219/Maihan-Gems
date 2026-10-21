@@ -21,6 +21,7 @@ import {
 } from '@maihan/db';
 import type { RouteContext, RouteHandler } from './handlers.js';
 import { isDevSeamEnabled } from '@maihan/config';
+import { assertCsrfForCookieSession } from './csrf.js';
 
 export const SESSION_COOKIE_NAME = 'maihan_session';
 
@@ -99,6 +100,19 @@ export async function resolveRequestActor(ctx: RouteContext): Promise<Authentica
   if (!token) return null;
   const db = getDb(ctx);
   return verifySession(db, token);
+}
+
+/**
+ * P1-21: resolve the actor AND enforce the cookie-CSRF double-submit rule
+ * for state-changing requests. Every customer/vendor session surface calls
+ * this instead of raw resolveRequestActor.
+ */
+export async function resolveRequestActorWithCsrf(ctx: RouteContext): Promise<AuthenticatedActor | null> {
+  const actor = await resolveRequestActor(ctx);
+  if (actor) {
+    assertCsrfForCookieSession(ctx, actor);
+  }
+  return actor;
 }
 
 function buildSessionSetCookie(sessionToken: string, maxAgeSeconds = 7 * 24 * 3600): string {
@@ -245,8 +259,14 @@ export const AUTH_HANDLERS: Record<string, RouteHandler> = {
   async listNotificationsHandler(ctx) {
     const db = getDb(ctx);
     const actor = await resolveRequestActor(ctx);
+    // P1-4 identity contract: session identity only. The x-customer-id header
+    // is honoured solely under the developer seam (test harnesses), and the
+    // former `?customer_id=` query fallback is removed entirely — it made
+    // this endpoint readable by anyone holding (or guessing) a customer id.
     const fallbackCustomerId =
-      ctx.request?.headers.get('x-customer-id') ?? ctx.url.searchParams.get('customer_id');
+      ctx.request?.headers.get('x-customer-id')?.trim() && isDevSeamEnabled()
+        ? ctx.request?.headers.get('x-customer-id')?.trim()
+        : null;
     const customerId = actor?.customer_id ?? fallbackCustomerId;
     if (!customerId) {
       throw new ContractError('UNAUTHORIZED', 'Authentication required to view notifications.');

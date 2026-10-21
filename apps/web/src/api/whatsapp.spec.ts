@@ -385,7 +385,10 @@ describe('Phase 10 — WhatsApp Channel & Shared Brain Integration', () => {
 
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json.status).toBe('queued');
+    // P1-16 honesty: with no provider configured the send is NOT queued
+    // anywhere and no fabricated provider message id is minted.
+    expect(json.status).toBe('queued_no_provider');
+    expect(json.providerMessageId).toBeNull();
     expect(json.recipientPhone).toBe('15551234567');
   });
 });

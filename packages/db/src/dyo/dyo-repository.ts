@@ -342,14 +342,30 @@ export async function addDyoConfigurationToCart(
     if (!quote) throw new Error('DYO_QUOTE_INVALID');
 
     const snapRes = await tx.execute(sql`
-      SELECT id, total::text AS total, currency
+      SELECT id, total::text AS total, currency,
+             gemstone_component::text AS gemstone_component,
+             setting_component::text AS setting_component,
+             side_stone_component::text AS side_stone_component,
+             making_component::text AS making_component,
+             discount_component::text AS discount_component,
+             tax_component::text AS tax_component
       FROM dyo_price_snapshots
       WHERE id = ${quote.price_snapshot_id}
         AND configuration_id = ${config.id}
         AND (expires_at IS NULL OR expires_at > now())
       LIMIT 1;
     `);
-    const snapshot = snapRes.rows[0] as { id: string; total: string; currency: string } | undefined;
+    const snapshot = snapRes.rows[0] as {
+      id: string;
+      total: string;
+      currency: string;
+      gemstone_component: string;
+      setting_component: string;
+      side_stone_component: string;
+      making_component: string;
+      discount_component: string;
+      tax_component: string;
+    } | undefined;
     if (!snapshot || snapshot.total == null) throw new Error('DYO_PRICE_SNAPSHOT_EXPIRED');
 
     const [stonePriceRes, settingPriceRes] = await Promise.all([
@@ -374,13 +390,27 @@ export async function addDyoConfigurationToCart(
       || stonePrice.currency !== settingPrice.currency) {
       throw new Error('DYO_PRICE_CHANGED');
     }
+    // Re-price with the snapshot's own making fee so the comparison covers the
+    // full component set the quote priced (stone + setting + making fee). If
+    // any live component moved since the quote, the totals diverge and the
+    // conversion is refused instead of silently adopting a different price.
     const currentPrice = calculateDyoPrice({
       gemstoneBasePrice: Number(stonePrice.price),
       settingBasePrice: Number(settingPrice.price),
+      makingFee: Number(snapshot.making_component),
       currency: stonePrice.currency.trim(),
     });
-    if (!Number.isFinite(Number(stonePrice.price)) || !Number.isFinite(Number(settingPrice.price))
-      || currentPrice.total.toFixed(2) !== Number(snapshot.total).toFixed(2)) {
+    const matches =
+      Number.isFinite(Number(stonePrice.price)) &&
+      Number.isFinite(Number(settingPrice.price)) &&
+      currentPrice.gemstoneComponent.toFixed(2) === Number(snapshot.gemstone_component).toFixed(2) &&
+      currentPrice.settingComponent.toFixed(2) === Number(snapshot.setting_component).toFixed(2) &&
+      currentPrice.sideStoneComponent.toFixed(2) === Number(snapshot.side_stone_component ?? '0').toFixed(2) &&
+      currentPrice.makingComponent.toFixed(2) === Number(snapshot.making_component).toFixed(2) &&
+      currentPrice.discountComponent.toFixed(2) === Number(snapshot.discount_component ?? '0').toFixed(2) &&
+      currentPrice.taxComponent.toFixed(2) === Number(snapshot.tax_component ?? '0').toFixed(2) &&
+      currentPrice.total.toFixed(2) === Number(snapshot.total).toFixed(2);
+    if (!matches) {
       throw new Error('DYO_PRICE_CHANGED');
     }
 

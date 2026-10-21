@@ -148,6 +148,13 @@
       "when": 1791158400021,
       "tag": "0021_vendor_onboarding_id_default",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791683200000,
+      "tag": "0022_integrity_indexes",
+      "breakpoints": true
     }
   ]
 }

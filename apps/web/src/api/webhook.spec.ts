@@ -45,7 +45,8 @@ describe('Payment Webhooks & Reconciliation (Phase 6 Task 6)', () => {
       pool = createPool(url, { max: 2 });
       const client = await pool.connect();
       const res = await client.query(`
-        SELECT p.id, p.price_amount::text AS price_amount
+        SELECT p.id, p.price_amount::text AS price_amount,
+               p.state::text AS product_state, p.gemstone_id
         FROM products p
         JOIN gemstones g ON g.id = p.gemstone_id
         WHERE p.price_amount IS NOT NULL
@@ -58,7 +59,7 @@ describe('Payment Webhooks & Reconciliation (Phase 6 Task 6)', () => {
               AND r.state = 'ACTIVE'
               AND r.expires_at > now()
           )
-        ORDER BY p.product_number
+        ORDER BY random()
         OFFSET 1
         LIMIT 1;
       `);
@@ -98,7 +99,23 @@ describe('Payment Webhooks & Reconciliation (Phase 6 Task 6)', () => {
           await client.query(`DELETE FROM audit_logs WHERE entity_id = $1`, [orderId]);
           await client.query(`DELETE FROM order_events WHERE order_id = $1`, [orderId]);
           await client.query(`DELETE FROM order_items WHERE order_id = $1`, [orderId]);
+          // P1-27 FK hygiene: detach the conversion pointers before removing
+          // the order row itself.
+          await client.query(`UPDATE carts SET converted_order_id = NULL WHERE converted_order_id = $1`, [orderId]);
+          await client.query(`UPDATE checkout_sessions SET completed_order_id = NULL WHERE completed_order_id = $1`, [orderId]);
           await client.query(`DELETE FROM orders WHERE id = $1`, [orderId]);
+        }
+        // P1-17 lifecycle restore for the shared dev DB (see order.spec).
+        if (hasDb && sampleProductId) {
+          await pool.query(
+            `UPDATE gemstones SET availability = true, availability_checked_at = NULL
+             WHERE id = (SELECT gemstone_id FROM products WHERE id = $1)`,
+            [sampleProductId],
+          );
+          await pool.query(
+            `UPDATE products SET availability = true, state = 'ACTIVE' WHERE id = $1`,
+            [sampleProductId],
+          );
         }
         for (const token of createdCartTokens) {
           await client.query(`DELETE FROM carts WHERE cart_token = $1`, [token]);
@@ -393,7 +410,8 @@ describe('Payment Webhooks & Reconciliation (Phase 6 Task 6)', () => {
       text: 'Your piece is reserved.',
       category: 'order_confirmation',
     });
-    expect(fallbackRes.delivered).toBe(true);
+    // P1-24 honesty: with no provider configured nothing was delivered.
+    expect(fallbackRes.delivered).toBe(false);
     expect(fallbackRes.provider).toBe('OUTBOX_LOG');
 
     const resendMailer = new TransactionalEmailProvider({

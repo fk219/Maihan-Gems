@@ -43,7 +43,7 @@ describe.skipIf(!dbReachable)('worker dispatch + sweeps (live database)', () => 
     const db = createCatalogDatabase(pool!);
     const first = await runSweeps(db);
     const second = await runSweeps(db);
-    expect(first.length).toBe(4);
+    expect(first.length).toBe(5);
     for (const sweep of second) {
       expect(sweep.changed).toBe(0);
     }
@@ -61,5 +61,43 @@ describe.skipIf(!dbReachable)('worker dispatch + sweeps (live database)', () => 
     const jobRes = await processOperationalJobs(db, 'worker.spec');
     expect(jobRes.succeeded).toBeGreaterThanOrEqual(1);
     expect(jobRes.deadLettered).toBe(0);
+  });
+
+  it('bumps the search generation flag successfully (no column drift regressions)', async () => {
+    // Regression: jobs-runner once INSERTed feature_flags.description, a
+    // column that does not exist in the locked schema (0014_operations.sql),
+    // which dead-lettered every search.generation_bump job.
+    const db = createCatalogDatabase(pool!);
+    const before = await db.execute(sql`
+      SELECT COALESCE((rules->>'generation')::bigint, 0) AS generation
+      FROM feature_flags WHERE key = 'search_cache_generation'
+    `);
+    const beforeGen = Number((before.rows[0] as { generation?: string } | undefined)?.generation ?? 0);
+
+    // Enqueue directly with front-of-line priority so the claim picks this
+    // job deterministically (the operational queue may carry a backlog).
+    await db.execute(sql`
+      INSERT INTO jobs (job_key, queue, job_type, payload, state, priority, run_after, max_attempts)
+      VALUES (
+        ${'worker.spec:generation_bump:' + Date.now()},
+        'search',
+        'search.generation_bump',
+        '{"event_id": null, "event_type": "ProductStateChanged", "aggregate_id": null}'::jsonb,
+        'QUEUED',
+        -100,
+        now(),
+        3
+      )
+    `);
+
+    const jobRes = await processOperationalJobs(db, 'worker.spec');
+    expect(jobRes.deadLettered).toBe(0);
+
+    const after = await db.execute(sql`
+      SELECT (rules->>'generation')::bigint AS generation
+      FROM feature_flags WHERE key = 'search_cache_generation'
+    `);
+    const afterGen = Number((after.rows[0] as { generation?: string } | undefined)?.generation ?? 0);
+    expect(afterGen).toBeGreaterThan(beforeGen);
   });
 });

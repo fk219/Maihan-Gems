@@ -15,7 +15,6 @@ import type { CatalogDatabase } from '../catalog/executor.js';
 import {
   ContractError,
   ShippingAddressDtoSchema,
-  ShippingMethodDtoSchema,
   type CheckoutSessionDto,
   type ConfirmCheckpointInput,
   type CreateCheckoutSessionInput,
@@ -31,6 +30,7 @@ import {
   computeReservationExpiry,
   fromCents,
   isReservationExpired,
+  resolveAuthoritativeShippingMethod,
   RESERVATION_TTL_MINUTES,
   toCents,
 } from '@maihan/domain';
@@ -42,91 +42,112 @@ export async function createCheckoutSession(
   db: CatalogDatabase,
   input: CreateCheckoutSessionInput,
 ): Promise<CheckoutSessionDto> {
-  const cart = await getCartByToken(db, input.cart_token);
+  // P1-10: cart read, price check, stock reservation and the session insert
+  // commit atomically — a mid-flow failure can no longer orphan reservations,
+  // and the session insert cannot race the reservation it documents.
+  return db.transaction(async (tx) => {
+    const cart = await getCartByToken(tx, input.cart_token);
 
-  if (!cart.items || cart.items.length === 0) {
-    throw new ContractError('UNPROCESSABLE', 'Cannot create checkout session for an empty cart.');
-  }
-
-  assertCartNotExpired(cart.expires_at);
-
-  if (input.expected_total !== undefined) {
-    const matches = comparePriceMatch(input.expected_total, cart.pricing_snapshot.grand_total);
-    if (!matches) {
-      throw new ContractError(
-        'PRICE_CHANGED',
-        'The price of one or more items in your cart has changed.',
-        [
-          {
-            field: 'expected_total',
-            expected: input.expected_total,
-            authoritative: cart.pricing_snapshot.grand_total,
-          },
-        ],
-      );
+    if (!cart.items || cart.items.length === 0) {
+      throw new ContractError('UNPROCESSABLE', 'Cannot create checkout session for an empty cart.');
     }
-  }
 
-  const sessionId = `cs_${randomBytes(24).toString('hex')}`;
+    assertCartNotExpired(cart.expires_at);
 
-  // Reserve inventory in Postgres (atomic pair reservation + lock)
-  await reserveStockForCart(db, sessionId, cart.id, cart.items);
-
-  const reservationExpiresAt = computeReservationExpiry(new Date(), RESERVATION_TTL_MINUTES).toISOString();
-
-  let sessionPricingSnapshot: PricingSnapshotDto = cart.pricing_snapshot;
-  if (input.discount_code && input.discount_code.trim().length > 0) {
-    const discountValidation = await validateDiscount(db, {
-      code: input.discount_code.trim(),
-      subtotal: Number(cart.pricing_snapshot.subtotal),
-      customer_id: input.customer_id ?? cart.customer_id ?? undefined,
-    });
-    if (discountValidation.valid) {
-      sessionPricingSnapshot = {
-        ...cart.pricing_snapshot,
-        discount_total: discountValidation.discount_amount,
-        grand_total: discountValidation.final_subtotal,
-        computed_at: new Date().toISOString(),
-      };
+    if (input.expected_total !== undefined) {
+      const matches = comparePriceMatch(input.expected_total, cart.pricing_snapshot.grand_total);
+      if (!matches) {
+        throw new ContractError(
+          'PRICE_CHANGED',
+          'The price of one or more items in your cart has changed.',
+          [
+            {
+              field: 'expected_total',
+              expected: input.expected_total,
+              authoritative: cart.pricing_snapshot.grand_total,
+            },
+          ],
+        );
+      }
     }
-  }
 
-  const session: CheckoutSessionDto = {
-    id: sessionId,
-    cart_token: cart.cart_token,
-    customer_id: input.customer_id ?? cart.customer_id ?? null,
-    email: input.email ?? null,
-    current_step: 'SHIPPING',
-    pricing_snapshot: sessionPricingSnapshot,
-    shipping_address: null,
-    shipping_method: null,
-    payment_intent_id: null,
-    reservation_expires_at: reservationExpiresAt,
-    created_at: new Date().toISOString(),
-    completed_order_id: null,
-  };
+    const sessionId = `cs_${randomBytes(24).toString('hex')}`;
 
-  await db.execute(sql`
-    INSERT INTO checkout_sessions (
-      id,
-      cart_token,
-      customer_id,
-      email,
-      current_step,
-      payload,
-      reservation_expires_at
-    ) VALUES (
-      ${sessionId},
-      ${session.cart_token},
-      ${session.customer_id}::uuid,
-      ${session.email},
-      ${session.current_step},
-      ${JSON.stringify(session)}::jsonb,
-      ${reservationExpiresAt}::timestamptz
-    )
-  `);
+    // Reserve inventory inside the same transaction (conditional upserts +
+    // FOR UPDATE locks — see inventory-reservation.ts)
+    await reserveStockForCart(tx, sessionId, cart.id, cart.items);
 
-  return session;
+    const reservationExpiresAt = computeReservationExpiry(new Date(), RESERVATION_TTL_MINUTES).toISOString();
+
+    let sessionPricingSnapshot: PricingSnapshotDto = cart.pricing_snapshot;
+    let appliedDiscount: { code: string | null; id: string } | undefined = undefined;
+    if (input.discount_code && input.discount_code.trim().length > 0) {
+      const discountCustomerId: string | undefined =
+        input.customer_id ?? (cart.customer_id == null ? undefined : cart.customer_id);
+      const discountValidation = await validateDiscount(tx, {
+        code: input.discount_code.trim(),
+        subtotal: Number(cart.pricing_snapshot.subtotal),
+        customer_id: discountCustomerId,
+      });
+      if (discountValidation.valid) {
+        appliedDiscount = {
+          code: discountValidation.discount.code,
+          id: discountValidation.discount.id,
+        };
+        sessionPricingSnapshot = {
+          ...cart.pricing_snapshot,
+          discount_total: discountValidation.discount_amount,
+          grand_total: discountValidation.final_subtotal,
+          computed_at: new Date().toISOString(),
+          // P1-23: the applied-code reference embeds in the session payload
+          // so order placement can (a) re-validate, (b) redeem the counter
+          // atomically, and (c) stamp orders.pricing_snapshot->'discount'
+          // for future per-customer limit reads.
+          discount: appliedDiscount,
+          // The PricingSnapshotDto contract has no discount field; the extra
+          // key lives in the persisted payload only and is stripped before
+          // the validated order snapshot is written.
+        } as PricingSnapshotDto;
+      }
+    }
+
+    const session: CheckoutSessionDto = {
+      id: sessionId,
+      cart_token: cart.cart_token,
+      customer_id: input.customer_id ?? cart.customer_id ?? null,
+      email: input.email ?? null,
+      current_step: 'SHIPPING',
+      pricing_snapshot: sessionPricingSnapshot,
+      shipping_address: null,
+      shipping_method: null,
+      payment_intent_id: null,
+      reservation_expires_at: reservationExpiresAt,
+      created_at: new Date().toISOString(),
+      completed_order_id: null,
+    };
+
+    await tx.execute(sql`
+      INSERT INTO checkout_sessions (
+        id,
+        cart_token,
+        customer_id,
+        email,
+        current_step,
+        payload,
+        reservation_expires_at
+      ) VALUES (
+        ${sessionId},
+        ${session.cart_token},
+        ${session.customer_id}::uuid,
+        ${session.email},
+        ${session.current_step},
+        ${JSON.stringify(session)}::jsonb,
+        ${reservationExpiresAt}::timestamptz
+      )
+    `);
+
+    return session;
+  });
 }
 
 export async function getCheckoutSession(
@@ -191,8 +212,12 @@ export async function submitShippingCheckpoint(
   const session = await getCheckoutSession(db, sessionId);
 
   const shippingAddress: ShippingAddressDto = ShippingAddressDtoSchema.parse(input.shipping_address);
+  // P1-7 server authority: the client NAMES a shipping method; the server
+  // PRICES it. A client-supplied amount is never folded into totals — the
+  // approved rate table (@maihan/domain shipping-rules) decides, and an
+  // unknown method code is refused (fail-closed).
   const shippingMethod: ShippingMethodDto | null = input.shipping_method
-    ? ShippingMethodDtoSchema.parse(input.shipping_method)
+    ? resolveAuthoritativeShippingMethod(input.shipping_method)
     : session.shipping_method ?? null;
 
   let updatedSnapshot: PricingSnapshotDto = session.pricing_snapshot;

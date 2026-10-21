@@ -50,8 +50,8 @@ import {
   StripePaymentProvider,
 } from '../integrations/payment/stripe-payment-provider.js';
 import { ADMIN_ROLES } from '@maihan/domain';
-import { extractSessionToken, resolveRequestActor } from './auth-handlers.js';
-import { isDevSeamEnabled } from '@maihan/config';
+import { extractSessionToken, resolveRequestActorWithCsrf } from './auth-handlers.js';
+import { isDevSeamEnabled, isFailClosedMode } from '@maihan/config';
 import type { RouteHandler, RouteContext } from './handlers.js';
 import { requireIdentifier } from './query.js';
 
@@ -62,7 +62,7 @@ async function assertOrderOwnership(
   requireAuthInProd = true,
 ): Promise<{ actorId?: string; actorType: string }> {
   const sessionToken = extractSessionToken(ctx.request);
-  const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+  const actor = sessionToken ? await resolveRequestActorWithCsrf(ctx) : null;
   if (sessionToken && !actor) {
     throw new ContractError('UNAUTHORIZED', 'Invalid or expired session token.');
   }
@@ -72,21 +72,22 @@ async function assertOrderOwnership(
   if (actor && actor.role === 'VENDOR') {
     throw new ContractError('FORBIDDEN', `Vendors cannot ${actionDesc} via customer order endpoints.`);
   }
-  const headerCustomerId = ctx.request?.headers.get('x-customer-id')?.trim() || null;
-  if (actor && headerCustomerId && headerCustomerId !== actor.customer_id) {
-    throw new ContractError('FORBIDDEN', `You do not have permission to ${actionDesc}.`);
-  }
-  const effectiveCustomerId = actor?.customer_id ?? headerCustomerId;
+  // P1-4 identity contract: the session is the ONLY customer identity. The
+  // former `x-customer-id` fallback (deleted) would attribute anonymous
+  // callers by a spoofable header.
+  const actorId = actor?.customer_id;
   if (orderCustomerId) {
-    if (effectiveCustomerId && effectiveCustomerId !== orderCustomerId) {
+    if (actorId && actorId !== orderCustomerId) {
       throw new ContractError('FORBIDDEN', `You do not have permission to ${actionDesc}.`);
     }
-    // R1-1 fail-closed: auth required unless an explicit dev seam opts out.
-    if (!effectiveCustomerId && requireAuthInProd && !isDevSeamEnabled()) {
+    // Guest orders (order_customer_id NULL) fall back to bearer-by-order-id
+    // reads ONLY; cancelling or paying against another identity is never
+    // possible because money-mutating handlers resolve identity below.
+    if (!actorId && requireAuthInProd && !isDevSeamEnabled()) {
       throw new ContractError('UNAUTHORIZED', `Authentication required to ${actionDesc}.`);
     }
   }
-  return { actorId: effectiveCustomerId ?? undefined, actorType: 'CUSTOMER' };
+  return { actorId, actorType: 'CUSTOMER' };
 }
 
 function getDb(ctx: RouteContext): CatalogDatabase {
@@ -94,6 +95,27 @@ function getDb(ctx: RouteContext): CatalogDatabase {
   const svc = ctx.service as unknown as { port?: { db?: CatalogDatabase } };
   if (svc.port?.db) return svc.port.db;
   throw new ContractError('INTERNAL', 'Database connection not available for commerce operations.');
+}
+
+/**
+ * P1-4 identity contract for attributed carts/checkout sessions: the
+ * authenticated session is the customer identity; a client-supplied id may
+ * only fill in the attribution under the explicit developer seam (test
+ * harnesses attribute fixtures that way). Mismatching both is a 403 — an
+ * attacker cannot re-attribute their checkout into another customer's
+ * namespace by sending an extra field.
+ */
+function resolveMutatingCustomerId(
+  actorCustomerId: string | null | undefined,
+  inputCustomerId: string | undefined,
+  surface: string,
+): string | undefined {
+  if (actorCustomerId && inputCustomerId && actorCustomerId !== inputCustomerId) {
+    throw new ContractError('FORBIDDEN', `${surface} cannot be attributed to another customer.`);
+  }
+  if (actorCustomerId) return actorCustomerId;
+  if (inputCustomerId && isDevSeamEnabled()) return inputCustomerId;
+  return undefined;
 }
 
 async function parseBody(request?: Request): Promise<unknown> {
@@ -110,9 +132,13 @@ async function parseBody(request?: Request): Promise<unknown> {
 export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
   async createCart(ctx) {
     const db = getDb(ctx);
+    const actor = await resolveRequestActorWithCsrf(ctx);
     const body = await parseBody(ctx.request);
     const input = CreateCartInputSchema.parse(body);
-    const cart = await createCart(db, input);
+    const cart = await createCart(db, {
+      ...input,
+      customer_id: resolveMutatingCustomerId(actor?.customer_id, input.customer_id, 'Cart'),
+    });
     return {
       status: 201,
       body: { data: cart },
@@ -179,12 +205,12 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
 
   async createCheckoutSession(ctx) {
     const db = getDb(ctx);
-    const actor = await resolveRequestActor(ctx);
+    const actor = await resolveRequestActorWithCsrf(ctx);
     const body = await parseBody(ctx.request);
     const input = CreateCheckoutSessionInputSchema.parse(body);
     const session = await createCheckoutSession(db, {
       ...input,
-      customer_id: input.customer_id ?? actor?.customer_id,
+      customer_id: resolveMutatingCustomerId(actor?.customer_id, input.customer_id, 'Checkout session'),
       email: input.email ?? actor?.email,
     });
     return {
@@ -300,7 +326,7 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
     // customer the read runs inside an RLS session carrying their identity
     // subject, so the orders_own policy bites for non-bypass app roles.
     const sessionToken = extractSessionToken(ctx.request);
-    const actor = sessionToken ? await resolveRequestActor(ctx) : null;
+    const actor = sessionToken ? await resolveRequestActorWithCsrf(ctx) : null;
     const isCustomer = actor?.role === 'CUSTOMER';
     const order = isCustomer
       ? await withRlsContext(
@@ -352,8 +378,10 @@ export const COMMERCE_HANDLERS: Record<string, RouteHandler> = {
   async handlePaymentWebhook(ctx) {
     const db = getDb(ctx);
     const providerParam = (ctx.params['provider'] ?? 'TEST').toUpperCase();
-    if (process.env['MAIHAN_ENV'] === 'production' && providerParam === 'TEST') {
-      throw new ContractError('UNAUTHORIZED', 'The test payment provider is disabled in production.');
+    // P1-6 fail-closed: the TEST provider is refused in every unseamed
+    // (production-shaped) environment — not just when MAIHAN_ENV is set.
+    if (isFailClosedMode() && providerParam === 'TEST') {
+      throw new ContractError('UNAUTHORIZED', 'The test payment provider is disabled in fail-closed mode.');
     }
     const providerAdapter =
       providerParam === 'STRIPE'

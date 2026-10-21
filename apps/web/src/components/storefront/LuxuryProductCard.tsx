@@ -6,12 +6,24 @@ import Link from 'next/link';
 import { addToBag, getBag, isCompared, isFav, subscribeAtelier, toggleCompare, toggleFav } from '../../lib/atelier-store.js';
 import { cardSpecs, cardToAtelier } from '../../lib/atelier-item.js';
 import { formatMoney } from '../../lib/currency.js';
-import { productImage } from '../../lib/storefront-images.js';
 import type { StorefrontCard } from '../../lib/storefront-types.js';
+import { isRepresentativeImage, productImage } from '../../lib/storefront-images.js';
 import { useStorefront } from './StorefrontProvider.js';
 
 export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
   const { currency, rates } = useStorefront();
+  const representative = isRepresentativeImage({
+    kind: product.kind,
+    stoneType: product.stoneType,
+    jewelryType: product.jewelryType,
+    settingFor: product.settingFor,
+    style: product.style,
+    title: product.title,
+    colorHue: product.colorHue,
+    variety: product.variety,
+    quantityType: product.quantityType,
+    imageUrl: product.imageUrl,
+  });
   const image = productImage({
     kind: product.kind,
     stoneType: product.stoneType,
@@ -47,7 +59,7 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
       <article className="lx-card">
         <div className="lx-card__media">
           <Link href={`/product/${product.slug}`}>
-            <img src={image} alt={product.title} />
+            <img src={image} alt={representative ? `Representative image — ${product.title}` : product.title} />
             {hover ? <img src={hover} alt="" className="lx-card__hover" /> : null}
           </Link>
           <button
@@ -105,7 +117,7 @@ export function LuxuryProductCard({ product }: { product: StorefrontCard }) {
       {open ? (
         <div className="lx-modal" role="dialog" aria-modal="true" onClick={() => setOpen(false)}>
           <div className="lx-modal__panel" onClick={(e) => e.stopPropagation()}>
-            <img src={image} alt={product.title} />
+            <img src={image} alt={representative ? `Representative image — ${product.title}` : product.title} />
             <div className="lx-modal__copy">
               <p className="lx-kicker">{product.kind}</p>
               <h3 className="lx-h2" style={{ fontSize: '2rem' }}>{product.title}</h3>

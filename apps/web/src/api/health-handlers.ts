@@ -11,6 +11,8 @@
 import type { RouteContext, HandlerOutcome } from './handlers.js';
 import { globalRegistry, withSpan } from '@maihan/observability';
 import { sql } from '@maihan/db';
+import { isDevSeamEnabled } from '@maihan/config';
+import { ContractError } from '@maihan/contracts';
 import type { HealthCheckResponse } from '@maihan/contracts';
 
 const PROCESS_START_TIME = Date.now();
@@ -73,11 +75,16 @@ export async function healthReadyHandler(ctx: RouteContext): Promise<HandlerOutc
       };
     }
   } else {
+    // P1-24 honesty: with no pool in this process the database was NOT
+    // probed — report DEGRADED rather than unconditionally "UP", and let the
+    // readiness verdict reflect that (a probe that cannot verify the
+    // dependency must not claim HEALTHY).
     components['database'] = {
-      status: 'UP',
+      status: 'DEGRADED',
       latencyMs: 0,
-      message: 'Embedded/Direct mode (no pool passed)',
+      message: 'UNKNOWN — no database handle in this process (embedded mode); database was not probed',
     };
+    overallHealthy = false;
   }
 
   // 2. Memory / Process state
@@ -106,8 +113,19 @@ export async function healthReadyHandler(ctx: RouteContext): Promise<HandlerOutc
 
 /**
  * Metrics exposition endpoint: returns Prometheus/OpenMetrics text format.
+ * P1-24: restricted — metric cardinalities are internal operational data
+ * (per-route request counters), never public. Loopback and the explicit dev
+ * seam only.
  */
-export async function metricsHandler(_ctx: RouteContext): Promise<HandlerOutcome> {
+export async function metricsHandler(ctx: RouteContext): Promise<HandlerOutcome> {
+  const remoteAddr =
+    (ctx.request?.headers.get('x-client-ip') ?? '').trim() ||
+    (ctx.request?.headers.get('x-forwarded-for')?.split(',')[0] ?? '').trim();
+  const isLoopback =
+    remoteAddr === '' || remoteAddr === '127.0.0.1' || remoteAddr === '::1' || remoteAddr.endsWith('127.0.0.1');
+  if (!isLoopback && !isDevSeamEnabled()) {
+    throw new ContractError('FORBIDDEN', 'Metrics are internal — not exposed beyond loopback.');
+  }
   const samples = globalRegistry.collectAll();
   const lines: string[] = [];
 

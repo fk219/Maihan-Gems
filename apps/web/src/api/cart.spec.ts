@@ -30,11 +30,16 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
   let hasDb = false;
   let sampleProductIds: string[] = [];
   let sampleProductPrices: string[] = [];
+  const sampleProductKinds: string[] = [];
   let sampleProductCursor = 0;
-  function nextSampleProduct(): { id: string | undefined; price: string | undefined } {
-    if (sampleProductIds.length === 0) return { id: undefined, price: undefined };
+  function nextSampleProduct(): { id: string | undefined; price: string | undefined; kind: string | undefined } {
+    if (sampleProductIds.length === 0) return { id: undefined, price: undefined, kind: undefined };
     const index = sampleProductCursor++ % sampleProductIds.length;
-    return { id: sampleProductIds[index]!, price: sampleProductPrices[index] };
+    return {
+      id: sampleProductIds[index]!,
+      price: sampleProductPrices[index],
+      kind: sampleProductKinds[index],
+    };
   }
   const createdCartTokens: string[] = [];
 
@@ -45,7 +50,7 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
       pool = createPool(url, { max: 2 });
       const client = await pool.connect();
       const res = await client.query(`
-        SELECT p.id, p.price_amount::text AS price_amount
+        SELECT p.id, p.price_amount::text AS price_amount, p.kind::text AS kind
         FROM products p
         JOIN gemstones g ON g.id = p.gemstone_id
         WHERE p.price_amount IS NOT NULL
@@ -198,7 +203,7 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         product_id: sampleProductId,
-        quantity: 2,
+        quantity: 1,
         expected_unit_price: sampleProductPrice,
       }),
     });
@@ -212,12 +217,46 @@ describe('Cart HTTP API Endpoints (Phase 6 Task 1)', () => {
       };
     };
     expect(json.data.items).toHaveLength(1);
-    expect(json.data.items[0]?.quantity).toBe(2);
+    expect(json.data.items[0]?.quantity).toBe(1);
     expect(json.data.items[0]?.unit_price).toBe(sampleProductPrice);
 
-    const expectedSubtotal = (Number(sampleProductPrice) * 2).toFixed(2);
+    const expectedSubtotal = (Number(sampleProductPrice) * 1).toFixed(2);
     expect(json.data.pricing_snapshot.subtotal).toBe(expectedSubtotal);
-    expect(json.data.pricing_snapshot.item_count).toBe(2);
+    expect(json.data.pricing_snapshot.item_count).toBe(1);
+  });
+
+  it('POST /api/v1/carts/{cartToken}/items rejects quantity above one for unique products with 422', async () => {
+    const sample = nextSampleProduct();
+    const sampleProductId = sample.id;
+    const sampleProductPrice = sample.price;
+    if (!hasDb || !api || !sampleProductId || !sampleProductPrice || !sample.kind) return;
+    if (sample.kind !== 'LOOSE_STONE' && sample.kind !== 'STONE_PAIR') return;
+
+    const createReq = new Request('http://localhost/api/v1/carts', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    const createRes = await api(createReq);
+    const createJson = (await createRes.json()) as { data: { cart_token: string } };
+    const cartToken = createJson.data.cart_token;
+    createdCartTokens.push(cartToken);
+
+    const addReq = new Request(`http://localhost/api/v1/carts/${cartToken}/items`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        product_id: sampleProductId,
+        quantity: 2,
+        expected_unit_price: sampleProductPrice,
+      }),
+    });
+
+    const addRes = await api(addReq);
+    expect(addRes.status).toBe(422);
+    const errorJson = (await addRes.json()) as { error: { code: string; message: string } };
+    expect(errorJson.error.code).toBe('UNPROCESSABLE');
+    expect(errorJson.error.message).toContain('unique stone or pair');
   });
 
   it('PATCH /api/v1/carts/{cartToken}/items/{itemId} updates quantity', async () => {

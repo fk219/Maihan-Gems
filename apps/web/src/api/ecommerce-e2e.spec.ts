@@ -105,6 +105,9 @@ describe('Full Ecommerce End-to-End Journeys (Auth, RBAC, Vendor, Admin, Cart, C
         await client.query(`DELETE FROM order_events WHERE order_id = $1`, [oid]);
         await client.query(`DELETE FROM order_items WHERE order_id = $1`, [oid]);
         await client.query(`DELETE FROM audit_logs WHERE entity_id = $1`, [oid]);
+        // P1-27 FK hygiene: detach the conversion pointers first.
+        await client.query(`UPDATE carts SET converted_order_id = NULL WHERE converted_order_id = $1`, [oid]);
+        await client.query(`UPDATE checkout_sessions SET completed_order_id = NULL WHERE completed_order_id = $1`, [oid]);
         await client.query(`DELETE FROM orders WHERE id = $1`, [oid]);
       }
       for (const token of createdCartTokens) {

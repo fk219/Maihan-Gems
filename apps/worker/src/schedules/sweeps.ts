@@ -82,5 +82,27 @@ export async function runSweeps(db: CatalogDatabase): Promise<SweepResult[]> {
     await sweepCheckoutSessions(db),
     await sweepCarts(db),
     await sweepWebhookReceipts(db),
+    await sweepJobsRetention(db),
   ];
+}
+
+/**
+ * P1-28 jobs retention (doc 27 §1: the operational `jobs` table is 90-day
+ * transient state — terminal rows (SUCCEEDED / DEAD_LETTER with their result
+ * payloads, including email copies) older than the window are removed).
+ * Terminal rows only: QUEUED/RUNNING/FAILED entries are never swept here —
+ * claim lease and retry state protect those.
+ */
+export async function sweepJobsRetention(db: CatalogDatabase): Promise<SweepResult> {
+  const res = await db.execute(sql`
+    DELETE FROM jobs
+    WHERE state IN ('SUCCEEDED', 'DEAD_LETTER')
+      AND (updated_at < now() - interval '90 days'
+           OR (state = 'SUCCEEDED' AND finished_at IS NOT NULL AND finished_at < now() - interval '90 days'))
+  `);
+  return {
+    name: 'jobs-retention',
+    changed: res.rowCount ?? 0,
+    detail: '90-day terminal-jobs retention sweep (doc 27)',
+  };
 }

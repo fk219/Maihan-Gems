@@ -92,20 +92,34 @@ async function executeJobHandler(
   switch (job.job_type) {
     case 'search.generation_bump':
     case 'search.reindex': {
-      // Bump search cache generation in feature_flags / operational state
+      // Bump search cache generation in feature_flags / operational state.
+      // Schema notes (0014_operations.sql): feature_flags has NO description
+      // column and updated_by is UUID (a NULL uuid marks a system/worker
+      // write). Two drift bugs were fixed here: the original INSERT named a
+      // nonexistent `description` column, and stamped the TEXT 'worker' into
+      // the uuid column — both dead-lettered every generation bump.
       await db.execute(sql`
-        INSERT INTO feature_flags (key, description, enabled, rules, updated_by)
+        INSERT INTO feature_flags (key, enabled, rules, updated_by)
         VALUES (
           'search_cache_generation',
-          'Monotonic search cache generation counter (doc 12 / doc 25)',
           true,
-          jsonb_build_object('generation', extract(epoch from now())::bigint, 'updated_at', now()),
-          'worker'
+          jsonb_build_object(
+            'desc', 'Monotonic search cache generation counter (doc 12 / doc 25)',
+            'generation', extract(epoch from now())::bigint,
+            'updated_at', now(),
+            'updated_by', 'worker'
+          ),
+          NULL::uuid
         )
         ON CONFLICT (key) DO UPDATE
-        SET rules = jsonb_build_object(
-              'generation', COALESCE((feature_flags.rules->>'generation')::bigint, 0) + 1,
-              'updated_at', now()
+        SET rules = jsonb_set(
+              jsonb_build_object(
+                'desc', COALESCE(feature_flags.rules->>'desc', 'Monotonic search cache generation counter (doc 12 / doc 25)'),
+                'updated_at', now(),
+                'updated_by', 'worker'
+              ),
+              '{generation}',
+              to_jsonb(COALESCE((feature_flags.rules->>'generation')::bigint, 0) + 1)
             ),
             updated_at = now()
       `);
@@ -165,7 +179,16 @@ async function executeJobHandler(
       return { handled: 'order.confirm', order_id: orderId };
     }
     case 'cert.extract': {
-      return { handled: 'cert.extract', status: 'queued_for_review' };
+      // P1-13 honesty: certificate extraction has no provider integration yet
+      // (P2-4). Returning a fake "queued_for_review" progress made the job
+      // look handled; a NOT_IMPLEMENTED disposition makes the absence loud
+      // until the real extraction pipeline lands.
+      return {
+        handled: 'cert.extract',
+        status: 'NOT_IMPLEMENTED',
+        detail: 'No OCR/vision provider is connected yet (P2-4).',
+        queued_for_review: true,
+      };
     }
     case 'notify.email': {
       // Real transactional email delivery (M-05/M-06). With RESEND_API_KEY or
@@ -185,10 +208,19 @@ async function executeJobHandler(
     }
     case 'ai.embed':
     case 'knowledge.embed': {
-      return reembedKnowledgeDocument(db, job);
+      const res = await reembedKnowledgeDocument(db, job);
+      // P1-13 honesty: deterministic hash embeddings are placeholders for a
+      // real embedding model (P2-5); record the disposition in the result so
+      // it survives in the job ledger.
+      return { ...res, embedding_disposition: 'simulated_deterministic_until_real_model' };
     }
     default:
-      return { handled: job.job_type, status: 'completed' };
+      // P1-13 honesty: an unhandled job type is a configuration defect, not a
+      // completed job. A silent SUCCEEDED hid dead handlers from operators.
+      throw new Error(
+        `Unhandled job type "${job.job_type}" on queue "${job.queue}" — no handler is registered. ` +
+        'Failing loudly (state=FAILED → retries → DEAD_LETTER) instead of pretending success.',
+      );
   }
 }
 

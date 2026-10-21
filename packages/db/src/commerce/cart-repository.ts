@@ -394,6 +394,26 @@ export async function addItemToCart(
     }
   }
 
+  // P1-10 aggregate cap: repeated single-quantity adds must never stack a
+  // unique stone/pair line above 1 — the per-call guard alone was defeatable
+  // by repeated qty-1 adds that bump the existing row on conflict.
+  if (input.configuration_id === undefined && (product.kind === 'LOOSE_STONE' || product.kind === 'STONE_PAIR')) {
+    const existingRes = await db.execute(sql`
+      SELECT quantity::int AS quantity FROM cart_items
+      WHERE cart_id = ${cartRow.id} AND product_id = ${product.id} AND configuration_id IS NULL
+      LIMIT 1
+    `);
+    const existingQty = Number((existingRes.rows[0] as { quantity: number } | undefined)?.quantity ?? 0);
+    const maxStock = product.structured_extra?.['inventory_quantity'];
+    const lineCap = typeof maxStock === 'number' ? maxStock : 1;
+    if (existingQty + quantity > lineCap) {
+      throw new ContractError(
+        'UNPROCESSABLE',
+        `Aggregate quantity for a unique stone or pair is capped at ${lineCap} (requested line total: ${existingQty + quantity}).`,
+      );
+    }
+  }
+
   if (input.configuration_id !== undefined && !input.price_snapshot_id) {
     throw new ContractError('UNPROCESSABLE', 'Configured cart items require a DYO price snapshot.');
   }

@@ -27,12 +27,13 @@
  */
 import 'server-only';
 import { loadRuntimeConfig } from '@maihan/config';
-import { createCatalogDatabase, createCatalogQueryPort, createPool } from '@maihan/db';
+import { createCatalogDatabase, createCatalogQueryPort, createPool, sql } from '@maihan/db';
 import {
   MemoryGenerationStore,
   NullCacheStore,
   cacheNamespace,
   createCatalogQueryService,
+  createFeatureFlagGenerationStore,
   type CatalogQueryService,
 } from '../modules/catalog/index.js';
 
@@ -51,16 +52,37 @@ function getService(): CatalogQueryService {
 
   const config = loadRuntimeConfig();
   const pool = createPool(config.databaseUrl);
-  const port = createCatalogQueryPort(createCatalogDatabase(pool));
+  const catalogDatabase = createCatalogDatabase(pool);
+  const port = createCatalogQueryPort(catalogDatabase);
 
   // Redis is OPTIONAL for the storefront (Task 7 degradation semantics):
   // without REDIS_URL the service runs its documented bypass — Postgres
   // remains truth on every read. Wiring the Redis store here is a
   // deployment-configuration step, not new architecture.
+  // The worker's `feature_flags.search_cache_generation` counter is lifted as
+  // a floor over the per-process generation so a worker-side bump (e.g. after
+  // an import or product change) retires cached catalogue reads cross-process.
+  const generations = createFeatureFlagGenerationStore({
+    base: new MemoryGenerationStore(),
+    readFlagGeneration: async () => {
+      try {
+        const res = await catalogDatabase.execute(sql`
+          SELECT (rules->>'generation')::bigint AS generation
+          FROM feature_flags WHERE key = 'search_cache_generation'
+        `);
+        const raw = (res.rows[0] as { generation?: string | number } | undefined)?.generation;
+        const value = typeof raw === 'string' ? Number(raw) : raw;
+        return typeof value === 'number' && Number.isFinite(value) ? value : null;
+      } catch {
+        return null;
+      }
+    },
+  });
+
   const service = createCatalogQueryService({
     port,
     store: new NullCacheStore(),
-    generations: new MemoryGenerationStore(),
+    generations,
     namespace: cacheNamespace(config.environment),
   });
 

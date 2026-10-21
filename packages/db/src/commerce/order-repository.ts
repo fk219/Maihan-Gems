@@ -9,7 +9,6 @@
  * - Placed orders are immutable: snapshots freeze configuration, gems, documents, and money.
  * - Idempotency-Key guarantees replay returns original order.
  */
-import { randomInt } from 'node:crypto';
 import { sql } from 'drizzle-orm';
 import type { CatalogDatabase } from '../catalog/executor.js';
 import {
@@ -26,8 +25,10 @@ import {
   type OrderState as DomainOrderState,
   type OrderTransitionResult,
 } from '@maihan/domain';
+import type { PricingSnapshotDto } from '@maihan/contracts';
 import { getCartByToken } from './cart-repository.js';
 import { getCheckoutSession, saveCheckoutSession } from './checkout-session-repository.js';
+import { redeemDiscount } from './discount-repository.js';
 
 async function runInTransaction<T>(
   db: CatalogDatabase,
@@ -242,23 +243,79 @@ export async function placeOrder(
   }
 
   const currentYear = new Date().getFullYear();
-  // Generate order number in MG-YYYY-NNNNNN structure
+  // P1-19: serialize order-number allocation for the year with a transaction
+  // advisory lock (row-level uniqueness on order_number stays the backstop).
+  // Previous code read a count and, on collision, jumped to a random number —
+  // two concurrent placements could read the same count and race.
+  await tx.execute(sql`
+    SELECT pg_advisory_xact_lock(hashtext('maihan:order_number:' || ${currentYear}))
+  `);
+  // Sequential allocation: next = max(observed this year) + 1, verified free.
   const countRes = await tx.execute(sql`
     SELECT count(*)::int AS cnt FROM orders WHERE order_number LIKE ${'MG-' + currentYear + '-%'}
   `);
   const currentCount = Number((countRes.rows[0] as { cnt: number }).cnt ?? 0);
-  let orderNumber = formatOrderNumber(currentYear, currentCount + 1);
 
-  // Check collision and increment if necessary
-  const collisionRes = await tx.execute(sql`
-    SELECT id FROM orders WHERE order_number = ${orderNumber} LIMIT 1
-  `);
-  if (collisionRes.rows.length > 0) {
-    orderNumber = formatOrderNumber(currentYear, currentCount + randomInt(10, 1000));
+  let orderNumber = '';
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const candidate = formatOrderNumber(currentYear, currentCount + 1 + attempt);
+    const collisionRes = await tx.execute(sql`
+      SELECT id FROM orders WHERE order_number = ${candidate} LIMIT 1
+    `);
+    if (collisionRes.rows.length === 0) {
+      orderNumber = candidate;
+      break;
+    }
+  }
+  if (!orderNumber) {
+    throw new ContractError(
+      'UNPROCESSABLE',
+      'Order number allocation failed; no free number was found after the retry budget.',
+    );
   }
 
   const billingAddress = input.billing_address ?? session.shipping_address;
   const email = session.email ?? 'guest@maihan.test';
+
+  // Re-verify cart subtotal against the frozen session snapshot, then honour
+  // the session's discount at authority: re-validate the code, redeem the
+  // global counter atomically, and stamp `pricing_snapshot.discount` onto the
+  // stored order snapshot so per-customer limits count real orders (P1-23).
+  const sessionDiscountPricing = (session as unknown as {
+    pricing_snapshot?: PricingSnapshotDto & { discount?: { code: string | null; id: string } };
+  }).pricing_snapshot;
+  const discountRef = sessionDiscountPricing?.discount;
+  const hasDiscount = discountRef && Number(sessionDiscountPricing!.discount_total) > 0;
+
+  let orderPricingSnapshot: Record<string, unknown> = { ...session.pricing_snapshot };
+
+  if (hasDiscount && discountRef) {
+    // Re-check constraints against the current customer (per-customer limit
+    // reads prior orders' snapshots), then redeem the counter atomically.
+    const discountIdentityRes = await tx.execute(sql`
+      SELECT id, code FROM discounts WHERE id = ${discountRef.id} AND state = 'ACTIVE' LIMIT 1
+    `);
+    const discountIdentity = (discountIdentityRes.rows[0] as { id: string; code: string | null } | undefined);
+    if (
+      !discountIdentity ||
+      discountRef.code == null ||
+      discountIdentity.code == null ||
+      discountIdentity.code.toLowerCase() !== discountRef.code.toLowerCase()
+    ) {
+      throw new ContractError('UNPROCESSABLE', 'The checkout discount is no longer active. Request a new quote.');
+    }
+
+    await redeemDiscount(tx, discountIdentity.id);
+
+    orderPricingSnapshot = {
+      ...orderPricingSnapshot,
+      discount: {
+        code: discountIdentity.code,
+        id: discountIdentity.id,
+        amount: sessionDiscountPricing!.discount_total,
+      },
+    };
+  }
 
   // Insert into orders
   const insertOrderRes = await tx.execute(sql`
@@ -291,7 +348,7 @@ export async function placeOrder(
       ${session.pricing_snapshot.shipping_total}::numeric,
       ${session.pricing_snapshot.tax_total}::numeric,
       ${session.pricing_snapshot.grand_total}::numeric,
-      ${JSON.stringify(session.pricing_snapshot)}::jsonb,
+      ${JSON.stringify(orderPricingSnapshot)}::jsonb,
       ${JSON.stringify(session.shipping_address)}::jsonb,
       ${JSON.stringify(billingAddress)}::jsonb,
       ${input.customer_note ?? null},
@@ -409,6 +466,25 @@ export async function placeOrder(
         `);
         if (soldRes.rows.length === 0) {
           throw new ContractError('UNPROCESSABLE', `Concurrent order conflict: "${item.title}" is no longer available.`);
+        }
+        // P1-17 stone-level one-of-one guard: multiple product rows may
+        // reference the SAME physical stone; the sale must transition the
+        // stone row itself too, conditionally, inside the same transaction.
+        const stoneSoldRes = await tx.execute(sql`
+          UPDATE gemstones
+          SET availability = false,
+              availability_checked_at = now()
+          WHERE id = ${gemSnapshot['id'] ?? null}::uuid
+            AND availability = true
+            AND state = 'ACTIVE'
+          RETURNING id
+        `);
+        if (stoneSoldRes.rows.length === 0) {
+          throw new ContractError(
+            'OUT_OF_STOCK',
+            `Gemstone ${gemSnapshot['gem_ref'] ?? ''} has already been sold to another order.`,
+            [{ field: 'gem_ref', value: String(gemSnapshot['gem_ref'] ?? '') }],
+          );
         }
       }
     }

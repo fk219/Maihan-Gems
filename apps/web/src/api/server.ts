@@ -24,7 +24,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { pathToFileURL } from 'node:url';
 import type { Server } from 'node:http';
 import { loadRuntimeConfig, type RuntimeConfig } from '@maihan/config';
-import { createCatalogDatabase, createCatalogQueryPort, createPool } from '@maihan/db';
+import { createCatalogDatabase, createCatalogQueryPort, createPool, sql } from '@maihan/db';
 import { createRedisClient, type RedisHandle } from '../integrations/redis.js';
 import {
   MemoryGenerationStore,
@@ -33,6 +33,7 @@ import {
   RedisGenerationStore,
   cacheNamespace,
   createCatalogQueryService,
+  createFeatureFlagGenerationStore,
 } from '../modules/catalog/index.js';
 import { createCatalogApi, type CatalogApi } from './index.js';
 import { createScopedRateLimitGate } from './ratelimit/gate.js';
@@ -55,6 +56,10 @@ async function toRequest(req: IncomingMessage): Promise<Request> {
   const remote = req.socket.remoteAddress;
   if (remote !== undefined && remote !== null && remote !== '') {
     headers.set('x-client-ip', remote);
+    // P1-20: this adapter WRITES the socket address last, so a client-supplied
+    // header can never spoof the bucket; the marker tells the limiter this is
+    // the trusted adapter value (not a client header).
+    headers.set('x-maihan-ip-source', 'adapter');
   }
   const method = req.method ?? 'GET';
   const url = `http://${host}${req.url ?? '/'}`;
@@ -127,7 +132,27 @@ export async function wireApi(config: RuntimeConfig = loadRuntimeConfig()): Prom
     generations = new RedisGenerationStore(redis.client, namespace);
   }
 
-  const service = createCatalogQueryService({ port: catalogPort, store, generations, namespace });
+  // Read-through wiring of the worker's search-cache generation flag: the
+  // monotonic `feature_flags.search_cache_generation` counter is a floor for
+  // every catalogue cache scope so cross-process bumps retire cached reads.
+  const flagGenerations = createFeatureFlagGenerationStore({
+    base: generations,
+    readFlagGeneration: async () => {
+      try {
+        const res = await catalogDatabase.execute(sql`
+          SELECT (rules->>'generation')::bigint AS generation
+          FROM feature_flags WHERE key = 'search_cache_generation'
+        `);
+        const raw = (res.rows[0] as { generation?: string | number } | undefined)?.generation;
+        const value = typeof raw === 'string' ? Number(raw) : raw;
+        return typeof value === 'number' && Number.isFinite(value) ? value : null;
+      } catch {
+        return null;
+      }
+    },
+  });
+
+  const service = createCatalogQueryService({ port: catalogPort, store, generations: flagGenerations, namespace });
 
   // Task 9: the request-boundary rate limiter (SoT 11.11 full scope table).
   // Backend chain per scope: Redis primary when configured, the LOCKED

@@ -348,3 +348,5 @@ export function AiConciergeDrawer() {
     </>
   );
 }
+
+export default AiConciergeDrawer;

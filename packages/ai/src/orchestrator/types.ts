@@ -47,6 +47,12 @@ export interface OrchestrationResult {
     readonly input: Record<string, unknown>;
     readonly decision: string;
   }>;
+  /** P1-15: guardrail movements of the turn, for durable persistence. */
+  readonly guardrailEvents?: ReadonlyArray<{
+    readonly ruleId: string;
+    readonly action: 'ALLOW' | 'SANITIZE' | 'BLOCK' | 'ESCALATE';
+    readonly triggerTextHash?: string;
+  }>;
   readonly handoff?: HandoffRecord;
   readonly latencyMs: number;
 }

@@ -174,6 +174,17 @@ function jewelryKey(input: ProductImageInput): string {
   return 'ring-sapphire';
 }
 
+/**
+ * P1-29 honesty: distinguishes a product's OWN media from the keyword-matched
+ * representative photo. Product cards may keep the representative imagery for
+ * layout stability but consumers (card footers, PDP galleries) can use this
+ * flag to append a visible "representative image" note instead of presenting
+ * a generic photo as the piece's own record.
+ */
+export function isRepresentativeImage(input: ProductImageInput): boolean {
+  return !(input.imageUrl && /^https?:\/\//i.test(input.imageUrl));
+}
+
 export function productImage(input: ProductImageInput): string {
   if (input.imageUrl && /^https?:\/\//i.test(input.imageUrl)) return input.imageUrl;
   if (input.kind === 'gemstone') {

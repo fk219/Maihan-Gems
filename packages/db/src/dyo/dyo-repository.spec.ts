@@ -285,7 +285,21 @@ describe('DYO Database Repository (Phase 7 Task 2 & 5)', () => {
         if (query.includes('FROM gemstones')) return { rows: [{ variety_id: 'variety-1', colour_id: 'colour-1', shape: 'OVAL', weight: 2.5, kind: 'SINGLE' }] };
         if (query.includes('UPDATE dyo_configurations') && query.includes('compatibility_status')) return { rows: [{ id: 'config-1', compatibility_status: 'COMPATIBLE' }] };
         if (query.includes('FROM dyo_quotes')) return { rows: [{ id: 'quote-row-1', price_snapshot_id: snapshotId }] };
-        if (query.includes('FROM dyo_price_snapshots')) return { rows: [{ id: snapshotId, total: '4700.00', currency: 'USD' }] };
+        if (query.includes('FROM dyo_price_snapshots')) {
+          return {
+            rows: [{
+              id: snapshotId,
+              total: '5405.00',
+              gemstone_component: '3500.00',
+              setting_component: '1200.00',
+              side_stone_component: '0.00',
+              making_component: '705.00',
+              discount_component: '0.00',
+              tax_component: '0.00',
+              currency: 'USD',
+            }],
+          };
+        }
         if (query.includes('FROM gemstones')) return { rows: [{ variety_id: 'variety-1', colour_id: 'colour-1', shape: 'OVAL', weight: 2.5, kind: 'SINGLE' }] };
         if (query.includes('FROM setting_variants')) return { rows: [{ price: '1200.00', currency: 'USD', price_evidence: 'OBSERVED' }] };
         if (query.includes('FROM carts')) return { rows: [{ id: 'cart-1', state: 'ACTIVE', expires_at: new Date(Date.now() + 60_000) }] };

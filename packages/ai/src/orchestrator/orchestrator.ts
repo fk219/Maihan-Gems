@@ -64,6 +64,23 @@ export class AiOrchestrator {
 
     // ── STAGE 8 (Pre): POLICY on incoming user input ──────────────────────────
     const inputGuard = this.guardrailEngine.evaluate(input.message);
+    // P1-15: durable persistence hook — non-ALLOW movements are surfaced to
+    // the HTTP layer for `guardrail_events` persistence (the AI package
+    // itself never touches the database per ADR-003).
+    const guardrailEvents: Array<{
+      ruleId: string;
+      action: 'ALLOW' | 'SANITIZE' | 'BLOCK' | 'ESCALATE';
+      triggerTextHash?: string;
+    }> = [];
+    if (inputGuard.action !== 'ALLOW') {
+      guardrailEvents.push({
+        ruleId: inputGuard.ruleId,
+        action: inputGuard.action,
+        triggerTextHash: inputGuard.triggerTextHash ?? undefined,
+      });
+    } else {
+      guardrailEvents.push({ ruleId: inputGuard.ruleId, action: 'ALLOW' });
+    }
     if (inputGuard.action === 'BLOCK') {
       return {
         conversationKey: input.conversationKey,
@@ -71,6 +88,7 @@ export class AiOrchestrator {
         citations: [],
         groundedRatio: 0,
         toolCallsExecuted: [],
+        guardrailEvents,
         latencyMs: Date.now() - startTime,
       };
     }
@@ -264,6 +282,7 @@ export class AiOrchestrator {
       citations: groundingOutcome.survivingCitations,
       groundedRatio: groundingOutcome.groundedRatio,
       toolCallsExecuted: toolExecutions,
+      guardrailEvents,
       handoff: handoffRecord,
       latencyMs,
     };
