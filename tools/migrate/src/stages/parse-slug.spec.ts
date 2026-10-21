@@ -15,8 +15,19 @@ import { describe, expect, it } from 'vitest';
 import { URL_FAMILIES, buildOriginVocabulary, classifyUrl } from './parse-slug.js';
 import { EXPECTED_FAMILY_COUNTS, EXPECTED_ENTITY_COUNTS } from './parse-slugs.js';
 
-const REPO_ROOT = path.resolve(import.meta.dirname, '../../..');
-const realUrlsPath = path.join(REPO_ROOT, 'naturalgemstones', 'reverse_engineered', 'data', 'urls.jsonl');
+const REPO_ROOT = path.resolve(import.meta.dirname, '../../../..');
+/** Detect the archive root (see reference-corpus.spec.ts): the sanctioned
+ * layout is `<root>/naturalgemstones`; restored environments may nest it. */
+function detectArchiveRoot(): string {
+  const override = process.env['NATURALGEMSTONES_ROOT'];
+  if (override) return override;
+  const shallow = path.join(REPO_ROOT, 'naturalgemstones');
+  if (existsSync(path.join(shallow, 'reverse_engineered'))) return shallow;
+  const nested = path.join(shallow, 'naturalgemstones');
+  if (existsSync(path.join(nested, 'reverse_engineered'))) return nested;
+  return shallow;
+}
+const realUrlsPath = path.join(detectArchiveRoot(), 'reverse_engineered', 'data', 'urls.jsonl');
 const realArchiveReady = existsSync(realUrlsPath);
 
 const FIXTURE_URLS = {

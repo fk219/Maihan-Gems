@@ -1,0 +1,214 @@
+/* ============================================================================
+   Ultra-premium minimalist pass — gold gradient material, hairline discipline
+   Appended over everything above (and storefront-luxury.css).
+   ========================================================================== */
+
+:root {
+  --radius-hairline: 2px;
+  --gold-sheen: linear-gradient(
+    115deg,
+    #f6e3a6 0%,
+    #d4a437 38%,
+    #f6e3a6 52%,
+    #d4a437 72%,
+    #8a5e12 100%
+  );
+  --gold-sheen-size: 220% 100%;
+}
+
+/* ── Buttons: the gold gradient is the brand material ───────────────────── */
+
+.mgh-btn--gold,
+.lx-btn--solid,
+.vault-cta {
+  background-image: var(--gold-sheen);
+  background-size: var(--gold-sheen-size);
+  background-position: 0% 50%;
+  color: #14100a;
+  border: none;
+  border-radius: var(--radius-hairline);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  transition: background-position 0.5s cubic-bezier(0.22, 0.68, 0.32, 1),
+    box-shadow 0.5s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+
+.mgh-btn--gold:hover,
+.lx-btn--solid:hover,
+.vault-cta:hover {
+  background-position: 95% 50%;
+  box-shadow: 0 14px 34px -14px rgba(212, 164, 55, 0.55);
+}
+
+.mgh-btn--ghost,
+.lx-btn,
+.vault-cta--ghost {
+  background: transparent;
+  border: 1px solid var(--vault-hairline, var(--btn-secondary-border));
+  border-radius: var(--radius-hairline);
+  color: inherit;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.mgh-btn--ghost:hover,
+.lx-btn:hover,
+.vault-cta--ghost:hover {
+  border-color: var(--vault-hairline-strong, var(--card-border-hover));
+  background: var(--gold-hover-wash);
+}
+
+/* On dark bands the ghost button reads ivory */
+.mgh-btn--ghost,
+.vault-hero__actions .mgh-btn--ghost {
+  color: var(--vault-ink);
+  border-color: var(--vault-hairline);
+}
+
+/* ── Typography: oversized, quiet, tight ────────────────────────────────── */
+
+.mgh-h2,
+.lx-h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: var(--display-2);
+  line-height: 1.05;
+  letter-spacing: -0.012em;
+  color: var(--text-primary);
+  margin-bottom: 0.9rem;
+}
+
+.mgh-lede,
+.lx-lede {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 62ch;
+}
+
+.mgh-eyebrow,
+.lx-kicker,
+.page-eyebrow {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* a gold tick before eyebrows — a mark, not noise */
+.mgh-eyebrow::before,
+.lx-kicker::before,
+.page-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 0.85rem;
+  height: 1px;
+  background: var(--gold);
+  vertical-align: middle;
+  margin-right: 0.55rem;
+}
+
+/* Hairline rule after section titles — structure, not decoration */
+.mgh-h2::after {
+  content: '';
+  display: block;
+  width: 2.6rem;
+  height: 1px;
+  background-image: linear-gradient(90deg, #d4a437 0%, rgba(212, 164, 55, 0) 100%);
+  margin-top: 0.65rem;
+}
+
+/* ── Cards: borderless until touched ────────────────────────────────────── */
+
+.lx-card,
+.mgh-gem__frame {
+  border-radius: var(--radius-hairline);
+}
+
+.lx-card {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.lx-card:hover {
+  border-color: var(--card-border-hover);
+}
+
+.lx-card__media img,
+.mgh-jew img {
+  border-radius: var(--radius-hairline);
+}
+
+/* Prices: quiet, exact */
+.lx-card [class*='price'],
+.lx-price {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.86rem;
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
+}
+
+/* ── The vitrine, more minimal ──────────────────────────────────────────── */
+
+.vault-vitrine {
+  padding: clamp(1rem, 2vw, 1.6rem);
+  background: var(--vault-surface);
+  box-shadow: var(--vitrine-shadow);
+}
+
+.vault-vitrine__plate {
+  padding-top: 0.85rem;
+}
+
+.vault-vitrine__plate-id {
+  background-image: var(--gold-sheen);
+  background-size: var(--gold-sheen-size);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.26em;
+}
+
+/* ── Header: quieter ────────────────────────────────────────────────────── */
+
+.lx-header {
+  border-bottom: 1px solid transparent;
+  background: color-mix(in srgb, var(--header-canvas) 82%, transparent);
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.lx-header.is-scrolled,
+.lx-header:hover {
+  border-bottom-color: var(--hairline-border);
+}
+
+/* ── Footer: hairline top, small caps ───────────────────────────────────── */
+
+.lx-footer,
+.site-footer {
+  border-top: 1px solid var(--hairline-border);
+}
+
+/* ── Inputs: quiet fields ───────────────────────────────────────────────── */
+
+.mgh-hero .mgh-hero__search input,
+.checkout-shell input,
+.auth-shell input,
+.vault-input {
+  border-radius: var(--radius-hairline);
+}
+
+/* ── Locomotion ─────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .mgh-btn--gold,
+  .lx-btn--solid,
+  .vault-cta {
+    transition: none;
+  }
+}

@@ -1,0 +1,576 @@
+/* ============================================================================
+   Maihan Gems — "The Private Vault at Midnight" redesign layer
+   ============================================================================
+   DESIGN BRIEF (committed per the frontend-design skill process):
+
+   Purpose   Make a rare gemstone feel like a museum object you can buy in two
+             clicks; the audience is the collector deciding on a five-figure
+             stone (and the jeweller sourcing matched pairs).
+   Register  Brand — the design IS the product.
+   Direction Minimalist ultra-premium luxury editorial / vitrine. Mandated
+             tokens win where pinned: obsidian #0A0A0B, gold #D4AF37 (carried
+             as the BRAND GOLD GRADIENT material on primary actions and
+             accent marks), warm white, restrained neutrals. Composition:
+             white reading pages with obsidian vitrine bands — the drama is
+             band-level, not a whole-page inversion, so every existing light
+             component keeps its contrast.
+   The one   THE VITRINE LIGHT: a single orchestrated page-load moment where
+   memorable the hero gem is lit like museum lighting (one gold breath), the
+   thing     headline typesets with one clip-reveal. Nothing else moves.
+   Type      Cormorant Garamond (display, 500/600) + Jost (UI, 300/400).
+             Fluid scale; display leading 0.98–1.05; tabular numerals for
+             money. Deliberate tell-removal: no single-word italic accent in
+             the headline; eyebrows carry real coordinates, not decoration.
+   Minimalist rules (the restraint pass)
+     - Borders exist only as 1px hairlines; radius 2px.
+     - No default shadows — a shadow is earned by hover or by the vitrine.
+     - One gold voice per viewport: gradient on the primary action, plain
+       gold everywhere else.
+     - Negative space is the layout: rows breathe, measures stay < 80ch.
+   Principles
+     1. The gem is the hero; the chrome whispers.
+     2. Provenance is the ornament — evidence strips replace flourish.
+     3. One orchestrated moment per page; motion answers actions elsewhere.
+     4. Numbers never lie: tabular figures, exact decimals, no invented data.
+
+   This layer APPENDS over storefront-luxury.css; all earlier class names
+   remain valid for the specs (data-states / a11y / route-manifest).
+   ========================================================================== */
+
+:root {
+  /* Vault tokens (mandated hexes preserved; neutrals tinted, never pure) */
+  --vault-obsidian: #0a0a0b;
+  --vault-surface: #141416;
+  --vault-surface-2: #1a1a1d;
+  --vault-ink: #f6f2e9;
+  --vault-pearl: rgba(246, 242, 233, 0.64);
+  --vault-pearl-dim: rgba(246, 242, 233, 0.38);
+  --vault-hairline: rgba(212, 175, 55, 0.22);
+  --vault-hairline-strong: rgba(212, 175, 55, 0.45);
+  --vitrine-halo: radial-gradient(
+    62% 58% at 50% 42%,
+    rgba(212, 175, 55, 0.16) 0%,
+    rgba(212, 175, 55, 0.05) 42%,
+    rgba(10, 10, 11, 0) 72%
+  );
+  --vitrine-shadow: 0 44px 90px -34px rgba(212, 175, 55, 0.22);
+
+  /* Fluid display scale */
+  --display-1: clamp(2.9rem, 6.2vw, 5.4rem);
+  --display-2: clamp(2rem, 3.6vw, 3.1rem);
+  --reading-measure: 65ch;
+}
+
+/* ── One orchestrated reveal (guarded) ───────────────────────────────────── */
+
+@keyframes vitrine-breathe {
+  0% { opacity: 0.55; }
+  45% { opacity: 1; }
+  100% { opacity: 0.85; }
+}
+
+@keyframes headline-reveal {
+  from { clip-path: inset(0 0 100% 0); transform: translateY(0.35em); opacity: 0; }
+  to { clip-path: inset(0 0 -0.4em 0); transform: translateY(0); opacity: 1; }
+}
+
+@keyframes vitrine-settle {
+  from { opacity: 0; transform: scale(0.985); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ── Hero — the vitrine ─────────────────────────────────────────────────── */
+
+.vault-hero__grid {
+  max-width: var(--content-max, 80rem);
+  margin: 0 auto;
+  padding: clamp(3.2rem, 7vh, 5.5rem) var(--container-pad, 1.5rem) clamp(2.6rem, 6vh, 4.6rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: center;
+}
+
+@media (max-width: 979px) {
+  .vault-hero__grid {
+    grid-template-columns: 1fr;
+    gap: 2.4rem;
+  }
+}
+
+.mgh-hero {
+  background:
+    linear-gradient(180deg, var(--vault-obsidian) 0%, #0d0d0f 62%, #101012 100%);
+  color: var(--vault-ink);
+  position: relative;
+  overflow: hidden;
+}
+
+.mgh-hero::after {
+  /* faint stone-dust grain so the black is not a flat solid */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(246, 242, 233, 0.028) 1px, transparent 1.4px);
+  background-size: 26px 26px;
+  pointer-events: none;
+}
+
+.vault-hero__eyebrow {
+  color: var(--vault-pearl);
+}
+
+.vault-hero__eyebrow::after {
+  content: '';
+  display: inline-block;
+  width: 3.4rem;
+  height: 1px;
+  background: var(--vault-hairline-strong);
+  vertical-align: middle;
+  margin-left: 0.9rem;
+}
+
+.vault-hero__title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: var(--display-1);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  color: var(--vault-ink);
+  margin: 1.1rem 0 1.35rem;
+  max-width: 14ch;
+  animation: headline-reveal 1.05s cubic-bezier(0.22, 0.68, 0.32, 1) 0.12s both;
+}
+
+.vault-hero__title em {
+  font-style: normal;
+  color: var(--gold);
+}
+
+.vault-hero__lede {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: clamp(1.02rem, 1.35vw, 1.22rem);
+  line-height: 1.65;
+  color: var(--vault-pearl);
+  max-width: 46ch;
+  margin: 0 0 2.1rem;
+}
+
+.vault-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.9rem;
+}
+
+.vault-hero__search {
+  max-width: 34rem;
+}
+
+.mgh-hero .mgh-hero__search input {
+  background: var(--vault-surface);
+  border-color: var(--vault-hairline);
+  color: var(--vault-ink);
+}
+
+.mgh-hero .mgh-hero__search input::placeholder {
+  color: var(--vault-pearl-dim);
+}
+
+/* ── Vitrine figure ─────────────────────────────────────────────────────── */
+
+.vault-vitrine {
+  position: relative;
+  margin: 0;
+  padding: clamp(1.4rem, 2.6vw, 2.4rem);
+  border: 1px solid var(--vault-hairline);
+  background:
+    linear-gradient(160deg, rgba(246, 242, 233, 0.035) 0%, rgba(246, 242, 233, 0) 38%),
+    var(--vault-surface);
+  box-shadow: var(--vitrine-shadow);
+  animation: vitrine-settle 0.9s cubic-bezier(0.22, 0.68, 0.32, 1) 0.2s both;
+}
+
+.vault-vitrine::before {
+  /* museum lighting */
+  content: '';
+  position: absolute;
+  inset: -6% -8%;
+  background: var(--vitrine-halo);
+  animation: vitrine-breathe 2.6s ease-in-out 0.4s 1 both;
+  pointer-events: none;
+}
+
+.vault-vitrine__img {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #0f0f10;
+}
+
+.vault-vitrine__plate {
+  position: relative;
+  display: grid;
+  gap: 0.18rem;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--vault-hairline);
+  margin-top: 1rem;
+}
+
+.vault-vitrine__plate-id {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.vault-vitrine__plate-name {
+  font-family: var(--font-serif);
+  font-size: 1.28rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--vault-ink);
+}
+
+.vault-vitrine__plate-facts {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 0.85rem;
+  color: var(--vault-pearl);
+}
+
+/* Evidence strip — provenance as ornament (INV-07-native) */
+
+.vault-evidence {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+  margin: 1.1rem 0 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--vault-hairline);
+}
+
+.vault-evidence > div {
+  min-width: 0;
+}
+
+.vault-evidence dt {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--vault-pearl-dim);
+}
+
+.vault-evidence dd {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.86rem;
+  color: var(--vault-ink);
+  margin: 0.22rem 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .vault-evidence {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Reduced motion: the reveal lands as plain presence */
+@media (prefers-reduced-motion: reduce) {
+  .vault-hero__title,
+  .vault-vitrine,
+  .vault-vitrine::before {
+    animation: none;
+  }
+  .vault-hero__title {
+    clip-path: none;
+    transform: none;
+    opacity: 1;
+  }
+  .vault-vitrine {
+    opacity: 1;
+    transform: none;
+  }
+  .vault-vitrine::before {
+    opacity: 0.8;
+  }
+}
+
+/* ── Vault sections on the dark band ────────────────────────────────────── */
+
+.mgh-hero + .mgh-section {
+  border-top: 1px solid rgba(10, 10, 11, 0.06);
+}
+
+.mgh-gem {
+  transition: transform 0.35s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+
+.mgh-gem__frame {
+  transition: box-shadow 0.35s cubic-bezier(0.22, 0.68, 0.32, 1), border-color 0.35s ease;
+  border: 1px solid var(--card-border);
+}
+
+.mgh-gem:hover .mgh-gem__frame {
+  border-color: var(--card-border-hover);
+  box-shadow: 0 18px 44px -20px rgba(212, 175, 55, 0.4);
+}
+
+.mgh-gem:hover {
+  transform: translateY(-2px);
+}
+
+.mgh-jew img {
+  transition: transform 0.6s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+
+.mgh-jew:hover img {
+  transform: scale(1.025);
+}
+
+.mgh-set__row {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.mgh-set__row:hover {
+  background: var(--gold-hover-wash);
+}
+
+.mgh-set__num {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+  font-weight: 400;
+}
+
+/* ── Collection surfaces (lx-*) ─────────────────────────────────────────── */
+
+.lx-card__media {
+  position: relative;
+  overflow: hidden;
+}
+
+.lx-card__media img {
+  transition: transform 0.55s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+
+.lx-card:hover .lx-card__media img {
+  transform: scale(1.03);
+}
+
+.lx-card {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lx-card:hover {
+  border-color: var(--card-border-hover);
+  box-shadow: 0 24px 60px -30px rgba(212, 175, 55, 0.35);
+}
+
+.lx-price,
+.tabular-num,
+[class*='price'] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Product dossier (PDP) ──────────────────────────────────────────────── */
+
+.product-detail__layout,
+.pdp-dossier {
+  align-items: start;
+}
+
+.product-detail__title,
+.pdp-dossier h1 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+}
+
+.product-detail__specs table,
+.spec-table {
+  font-variant-numeric: tabular-nums;
+}
+
+.product-detail__provenance,
+.provenance-list {
+  border-left: 1px solid var(--vault-hairline);
+  padding-left: 1.2rem;
+}
+
+/* Gallery frames the way a vitrine would */
+.product-gallery__stage img,
+.pdp-media img {
+  background: #f1ece1;
+}
+
+/* ── Checkout — the checkpoint rail ─────────────────────────────────────── */
+
+.checkout-shell {
+  position: relative;
+}
+
+.checkout-steps {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 0.4rem;
+  counter-reset: checkpoint;
+}
+
+.checkout-step {
+  font-variant-numeric: tabular-nums;
+}
+
+.checkout-step::before {
+  counter-increment: checkpoint;
+  content: counter(checkpoint, decimal-leading-zero);
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+  margin-right: 0.45rem;
+}
+
+.checkout-step.is-current::before,
+.checkout-step[aria-current='step']::before {
+  color: var(--gold);
+}
+
+.checkout-shell input,
+.checkout-shell select,
+.checkout-shell textarea {
+  background: var(--studio-white, #fdfbf5);
+  border: 1px solid var(--search-border);
+}
+
+.checkout-shell input:focus-visible,
+.checkout-shell select:focus-visible,
+.checkout-shell textarea:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+  border-color: var(--card-border-hover);
+}
+
+/* ── DYO — the price ledger ─────────────────────────────────────────────── */
+
+.dyo-ledger,
+.dyo-price-breakdown {
+  font-variant-numeric: tabular-nums;
+}
+
+.dyo-ledger__row,
+.dyo-price-breakdown li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.42rem 0;
+  border-bottom: 1px solid var(--subtle-divider);
+}
+
+.dyo-ledger__row:last-child,
+.dyo-price-breakdown li:last-child {
+  border-bottom: none;
+  font-weight: 500;
+}
+
+.dyo-configurator__caption,
+.dyo-caption {
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+/* ── Content / CMS reading pages ────────────────────────────────────────── */
+
+.cms-reading,
+.blog-body,
+.education-body,
+.policy-body {
+  max-width: var(--reading-measure);
+}
+
+.cms-reading p,
+.blog-body p,
+.education-body p,
+.policy-body p {
+  font-family: var(--font-serif);
+  font-size: 1.06rem;
+  line-height: 1.72;
+  color: var(--text-primary);
+}
+
+.cms-reading h2,
+.blog-body h2,
+.education-body h2,
+.policy-body h2 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 2.2rem;
+}
+
+/* ── Portals (restraint polish only — admin/vendor stay utilitarian) ───── */
+
+.admin-shell,
+.vendor-shell {
+  line-height: 1.55;
+}
+
+.admin-shell table,
+.vendor-shell table {
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-shell th,
+.vendor-shell th {
+  font-family: var(--font-sans);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── States ─────────────────────────────────────────────────────────────── */
+
+.vault-empty,
+[data-empty-state] {
+  text-align: left;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(212, 175, 55, 0.28);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -18,6 +18,7 @@ import { Badge } from '../design-system/Badge.js';
 import { SpecTable, type SpecRow } from '../design-system/SpecTable.js';
 import { ProductGallery } from './ProductGallery.js';
 import { ProductActions } from '../storefront/ProductActions.js';
+import { VaultReveal } from '../storefront/VaultReveal.js';
 import type { AtelierItem } from '../../lib/atelier-item.js';
 import { atelierItemFromDetail } from '../../lib/atelier-item.js';
 
@@ -69,15 +70,18 @@ export function ProductDetailContent({ detail, webarAsset }: ProductDetailConten
       />
 
       <article className="product-detail__layout">
-        <ProductGallery
-          media={detail.media.map((m) => ({ url: m.url, kind: m.kind, role: m.role, alt: m.alt }))}
-          title={detail.title}
-        />
+        <VaultReveal stagger={0} className="product-detail__media">
+          <ProductGallery
+            media={detail.media.map((m) => ({ url: m.url, kind: m.kind, role: m.role, alt: m.alt }))}
+            title={detail.title}
+          />
+        </VaultReveal>
 
-        <section className="product-detail__summary" aria-busy="false">
-          <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
-            {KIND_LABEL[detail.kind]}
-          </span>
+        <VaultReveal stagger={70}>
+          <section className="product-detail__summary" aria-busy="false">
+            <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
+              {KIND_LABEL[detail.kind]}
+            </span>
           <h1>{detail.title}</h1>
           {detail.subtitle !== null && <p className="product-detail__subtitle">{detail.subtitle}</p>}
 
@@ -155,6 +159,7 @@ export function ProductDetailContent({ detail, webarAsset }: ProductDetailConten
             )}
           </dl>
         </section>
+        </VaultReveal>
       </article>
     </main>
   );

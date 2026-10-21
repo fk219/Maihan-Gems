@@ -14,6 +14,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import { VaultReveal } from '../storefront/VaultReveal.js';
+
 export type AuthMode =
   | 'sign-in'
   | 'register'
@@ -219,7 +221,7 @@ export function AuthFlowView({
   }
 
   return (
-    <section className="lx-account-card" aria-labelledby="auth-flow-heading">
+    <VaultReveal as="section" stagger={70} className="lx-account-card" aria-labelledby="auth-flow-heading">
       <div className="lx-account-nav" style={{ marginTop: 0 }}>
         <button
           type="button"
@@ -539,6 +541,6 @@ export function AuthFlowView({
       <p className="lx-account-note" style={{ marginTop: '1.5rem' }}>
         Need advisory assistance? <Link href="/contact">Contact Private Client Advisory</Link>.
       </p>
-    </section>
+    </VaultReveal>
   );
 }

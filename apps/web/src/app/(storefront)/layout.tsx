@@ -1,6 +1,10 @@
 import { cookies } from 'next/headers';
 
 import '../storefront-luxury.css';
+import '../../styles/vault-vitrine.css';
+import '../../styles/vault-premium.css';
+import '../../styles/vault-composition.css';
+import '../../styles/vault-motion.css';
 
 import { AiConciergeLauncher } from '../../components/ai/AiConciergeLauncher.js';
 import { StorefrontHeader } from '../../components/layout/StorefrontHeader.js';

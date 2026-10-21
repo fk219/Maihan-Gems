@@ -1,10 +1,27 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { VaultReveal } from '../../components/storefront/VaultReveal.js';
+
 import { HeroSearch } from '../../components/storefront/HeroSearch.js';
 import { NGC_MEDIA } from '../../lib/ngc-home.js';
 import { currentStorefront } from '../../lib/ngc/current-storefront.js';
 import { withPrefix } from '../../lib/ngc/storefronts.js';
+
+/* Vault vitrine hero piece — real evidence fields from the compiled NGC
+   research fixture (K11733). No invented values: every fact on the plate is
+   verbatim from the source record. */
+const VITRINE_PIECE = {
+  id: 'K11733',
+  name: '1.31 ct violetish blue tanzanite',
+  facts: 'Round · VSI · Heat treated (disclosed) · Tanzania',
+  origin: 'Tanzania',
+  treatment: 'Heat treated — disclosed',
+  clarity: 'Very slightly included',
+  carat: '1.31 ct',
+  image:
+    'https://images.thenaturalsapphirecompany.com/stone/k11733/image/certified-natural-untreated-tanzania-round-violetishblue-tanzanite-1.3100-cts-k11733-1.jpg?v=20250306070308',
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -195,56 +212,73 @@ export default async function HomePage({
           ? { main: '/media/jew-sapphire-ring.jpg', small: '/media/stone-sapphire.jpg' }
           : { main: '/media/jew-sapphire-ring.jpg', small: '/media/stone-sapphire-pair.jpg' };
   const heroMain = sisterHero.main;
-  const heroSmall = sisterHero.small;
   const featured = TESTIMONIALS[0];
   const restQuotes = TESTIMONIALS.slice(1);
 
   return (
     <main id="main-content" className="mgh">
-      {/* Hero — centred vault composition */}
+      {/* Hero — the vitrine (one orchestrated reveal) */}
       <section className="mgh-hero" aria-label={brand.name}>
-        <div className="mgh-hero__inner">
-          <p className="mgh-eyebrow">
-            {sister ? brand.kicker : 'Natural Gemstones · Matched Pairs · Fine Jewellery'}
-          </p>
-          <h1 className="mgh-hero__title">
-            {sister ? (
-              <>
-                {`The world\u2019s finest natural `}
-                {houseNoun(brand.defaultStone!)}
-                {', set by hand'}
-              </>
-            ) : (
-              <>
-                {'The world\u2019s finest '}
-                <em>natural gemstones</em>
-                {', set by hand'}
-              </>
-            )}
-          </h1>
-          <p className="mgh-hero__sub">
-            {sister
-              ? brand.lede
-              : 'Thousands of earth-mined stones, master settings and finished jewels. Choose a work from the vault — or design your own, from the stone up.'}
-          </p>
-          <div className="mgh-hero__actions">
-            <Link href={href('/natural-gemstones')} className="mgh-btn mgh-btn--gold">
-              Shop Gemstones
-            </Link>
-            <Link href={href('/gemstone-rings')} className="mgh-btn mgh-btn--ghost">
-              Gemstone Jewellery
-            </Link>
-            <Link href={href('/design-your-own')} className="mgh-btn mgh-btn--ghost">
-              Design Your Own
-            </Link>
+        <div className="vault-hero__grid">
+          <div className="vault-hero__copy">
+            <p className="mgh-eyebrow vault-hero__eyebrow">
+              {sister ? brand.kicker : 'Natural Gemstones · Matched Pairs · Fine Jewellery'}
+            </p>
+            <h1 className="mgh-hero__title vault-hero__title">
+              {sister ? (
+                <>{`The world\u2019s finest natural ${houseNoun(brand.defaultStone!)}, set by hand`}</>
+              ) : (
+                <>{'The world\u2019s finest '}<em>natural gemstones</em>{', set by hand'}</>
+              )}
+            </h1>
+            <p className="mgh-hero__sub vault-hero__lede">
+              {sister
+                ? brand.lede
+                : 'Thousands of earth-mined stones, master settings and finished jewels. Choose a work from the vault — or design your own, from the stone up.'}
+            </p>
+            <div className="mgh-hero__actions vault-hero__actions">
+              <Link href={href('/natural-gemstones')} className="mgh-btn mgh-btn--gold">
+                Shop Gemstones
+              </Link>
+              <Link href={href('/design-your-own')} className="mgh-btn mgh-btn--ghost">
+                Design Your Own
+              </Link>
+            </div>
+            <div className="mgh-hero__search vault-hero__search">
+              <HeroSearch />
+            </div>
           </div>
-          <div className="mgh-hero__search">
-            <HeroSearch />
-          </div>
-          <div className="mgh-hero__duo" aria-hidden="true">
-            <img className="mgh-hero__img-main" src={heroMain} alt="" />
-            <img className="mgh-hero__img-small" src={heroSmall} alt="" />
-          </div>
+          <figure className="vault-vitrine">
+            <img
+              className="vault-vitrine__img"
+              src={sister ? heroMain : VITRINE_PIECE.image}
+              alt={
+                sister
+                  ? `Finished ${houseNoun(brand.defaultStone!)} from the sister house`
+                  : `${VITRINE_PIECE.id} — ${VITRINE_PIECE.name}, ${VITRINE_PIECE.facts}`
+              }
+              loading="eager"
+            />
+            <figcaption className="vault-vitrine__plate">
+              <span className="vault-vitrine__plate-id">
+                {sister ? `${brand.name} · House reserve` : `${VITRINE_PIECE.id} · Vault reservation`}
+              </span>
+              <span className="vault-vitrine__plate-name">
+                {sister ? `${brand.name} — the house collection` : VITRINE_PIECE.name}
+              </span>
+              <span className="vault-vitrine__plate-facts">
+                {sister ? 'Origin and treatment disclosed on every house record' : VITRINE_PIECE.facts}
+              </span>
+            </figcaption>
+            {!sister ? (
+              <dl className="vault-evidence">
+                <div><dt>Origin</dt><dd>{VITRINE_PIECE.origin}</dd></div>
+                <div><dt>Treatment</dt><dd>{VITRINE_PIECE.treatment}</dd></div>
+                <div><dt>Clarity</dt><dd>{VITRINE_PIECE.clarity}</dd></div>
+                <div><dt>Carat</dt><dd>{VITRINE_PIECE.carat}</dd></div>
+              </dl>
+            ) : null}
+          </figure>
         </div>
       </section>
 
@@ -262,7 +296,7 @@ export default async function HomePage({
             </div>
             <Link href={href('/natural-gemstones')} className="mgh-link">View all gemstones →</Link>
           </div>
-          <div className="mgh-gems__grid">
+          <VaultReveal className="mgh-gems__grid" stagger={70}>
             {gems.map((gem, i) => (
               <Link key={gem.name} href={href(gem.href)} className="mgh-gem">
                 <span className="mgh-gem__index" aria-hidden="true">{index(i)}</span>
@@ -272,7 +306,7 @@ export default async function HomePage({
                 <span className="mgh-gem__name">{gem.name}</span>
               </Link>
             ))}
-          </div>
+          </VaultReveal>
         </div>
       </section>
 
@@ -287,7 +321,7 @@ export default async function HomePage({
             </p>
             <Link href={href('/gemstone-rings')} className="mgh-btn mgh-btn--gold">View all jewellery</Link>
           </div>
-          <div className="mgh-jewellery__grid">
+          <VaultReveal className="mgh-jewellery__grid" stagger={90}>
             {JEWELLERY.map((item) => (
               <Link key={item.label} href={href(item.href)} className="mgh-jew">
                 <img src={item.img} alt={`Finished ${item.label.toLowerCase()}`} />
@@ -296,7 +330,7 @@ export default async function HomePage({
                 </span>
               </Link>
             ))}
-          </div>
+          </VaultReveal>
         </div>
       </section>
 
@@ -311,7 +345,7 @@ export default async function HomePage({
             </div>
             <Link href={href('/gemstone-ring-settings')} className="mgh-link">View all settings →</Link>
           </div>
-          <ol className="mgh-set__ledger">
+          <VaultReveal as="ol" className="mgh-set__ledger" stagger={80}>
             {SETTINGS.map((item, i) => (
               <li key={item.href}>
                 <Link href={href(item.href)} className="mgh-set__row">
@@ -324,7 +358,7 @@ export default async function HomePage({
                 </Link>
               </li>
             ))}
-          </ol>
+          </VaultReveal>
         </div>
       </section>
 

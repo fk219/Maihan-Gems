@@ -16,6 +16,7 @@ import type { SettingForDyo, StorefrontCard } from '../../lib/storefront-types.j
 import { JewelryConfiguratorCanvas, type MetalFinish } from '../configurator/JewelryConfiguratorCanvas.js';
 import { VirtualTryOnModal } from '../webar/VirtualTryOnModal.js';
 import { useStorefront } from './StorefrontProvider.js';
+import { VaultReveal } from './VaultReveal.js';
 
 type MetalName = '18K Yellow Gold' | '18K White Gold' | '18K Rose Gold' | 'Platinum';
 const SIZES = ['5', '5.5', '6', '6.5', '7', '7.5', '8', '8.5', '9'];
@@ -199,7 +200,7 @@ export function DyoStudio({
         </ol>
       </header>
 
-      <div className="atelier__layout">
+      <VaultReveal as="section" stagger={80} className="atelier__layout">
         <section className="atelier__stage" aria-live="polite">
           {panel === 1 ? (
             settingList.length === 0 ? (
@@ -353,7 +354,7 @@ export function DyoStudio({
             <p className="atelier__kicker">Camera try-on is available for rings. This mounting stays in the 3D studio.</p>
           )}
         </aside>
-      </div>
+      </VaultReveal>
       <VirtualTryOnModal
         open={tryOn}
         onClose={() => setTryOn(false)}

@@ -39,9 +39,18 @@ const dbReady = databaseUrl.includes('@') && !(new URL(databaseUrl).host.endsWit
 const d = describe.skipIf(!dbReady);
 
 // The REAL corpus, reached ONLY through its manifest-verified path.
-const REPO_ROOT = path.resolve(import.meta.dirname, '../../..');
-const REAL_ARCHIVE = path.join(REPO_ROOT, 'naturalgemstones');
-const realUrlsPath = path.join(REAL_ARCHIVE, 'reverse_engineered', 'data', 'urls.jsonl');
+const REPO_ROOT = path.resolve(import.meta.dirname, '../../../..');
+/** Detect the archive root (restored environments may nest it one level deeper). */
+function detectArchiveRoot(): string {
+  const override = process.env['NATURALGEMSTONES_ROOT'];
+  if (override) return override;
+  const shallow = path.join(REPO_ROOT, 'naturalgemstones');
+  if (existsSync(path.join(shallow, 'reverse_engineered'))) return shallow;
+  const nested = path.join(shallow, 'naturalgemstones');
+  if (existsSync(path.join(nested, 'reverse_engineered'))) return nested;
+  return shallow;
+}
+const realUrlsPath = path.join(detectArchiveRoot(), 'reverse_engineered', 'data', 'urls.jsonl');
 const realArchiveReady = existsSync(realUrlsPath);
 
 function scratchConnectionString(): string {
@@ -215,13 +224,19 @@ d('fixture contract (archive-independent)', () => {
 
 d('REAL corpus gates (skips without the archive)', () => {
   it.skipIf(!realArchiveReady)('stages exactly the spine count with byte-identical payloads', async () => {
+    // 44,218 verbatim records load in seconds — far beyond the 5s default
+    // test timeout, which aborts mid-load and tears the scratch down under
+    // the runner. Give the corpus gate a corpus-sized budget.
     // Force the stage to re-run against the real archive: mark FAILED so the
     // runner executes it (idempotent; either way the stored rows reconcile).
     await scratch.query(`DELETE FROM staging_source_pages`);
+    // Reset the durable stage state as well — a previously-completed batch
+    // (same artifact hashes) makes the runner skip instead of re-running.
+    await scratch.query(`DELETE FROM import_batches WHERE batch_key = 'stage:extract-staging'`);
     const outcomes = await runStages({
       databaseUrl: scratchDatabaseUrl,
       repoRoot: REPO_ROOT,
-      archiveRoot: REAL_ARCHIVE,
+      archiveRoot: detectArchiveRoot(),
       onlyStageIds: ['extract-staging'],
     });
     expect(outcomes).toHaveLength(1);
@@ -258,9 +273,10 @@ d('REAL corpus gates (skips without the archive)', () => {
     // Deep idempotency on the REAL corpus: re-execute; zero NEW rows; digest identical.
     const digestBefore = await stagedDigest();
     await scratch.query(`UPDATE import_batches SET status='FAILED', notes='forced deep rerun' WHERE batch_key='stage:extract-staging'`);
-    const outcomes2 = await runStages({ databaseUrl: scratchDatabaseUrl, repoRoot: REPO_ROOT, archiveRoot: REAL_ARCHIVE, onlyStageIds: ['extract-staging'] });
+    const outcomes2 = await runStages({ databaseUrl: scratchDatabaseUrl, repoRoot: REPO_ROOT, archiveRoot: detectArchiveRoot(), onlyStageIds: ['extract-staging'] });
     expect(outcomes2[0]?.action).toBe('RAN');
     expect(await stagedCount()).toBe(EXPECTED_EXTRACT_ROWS);
     expect(await stagedDigest()).toBe(digestBefore);
-  });
+  }, 240_000);
+
 });

@@ -67,19 +67,18 @@ describe('homepage redesign', () => {
 
   it('photographs each sister house with its own stone', async () => {
     const cases = [
-      ['sapphire', '/media/jew-sapphire-ring.jpg', '/media/stone-sapphire.jpg'],
-      ['ruby', '/media/jew-ruby-ring.jpg', '/media/stone-ruby.jpg'],
-      ['emerald', '/media/jew-emerald-necklace.jpg', '/media/stone-emerald.jpg'],
+      ['sapphire', '/media/jew-sapphire-ring.jpg'],
+      ['ruby', '/media/jew-ruby-ring.jpg'],
+      ['emerald', '/media/jew-emerald-necklace.jpg'],
     ] as const;
-    for (const [slug, main, small] of cases) {
+    for (const [slug, main] of cases) {
       const page = await HomePage({ brand: storefrontBySlug(slug) });
       const html = renderToStaticMarkup(
         createElement(StorefrontProvider, { rates: DEFAULT_FX, children: page }),
       );
       const container = document.createElement('div');
       container.innerHTML = html;
-      expect(container.querySelector('.mgh-hero__img-main')?.getAttribute('src'), slug).toBe(main);
-      expect(container.querySelector('.mgh-hero__img-small')?.getAttribute('src'), slug).toBe(small);
+      expect(container.querySelector('.vault-vitrine__img')?.getAttribute('src'), slug).toBe(main);
     }
   });
 });

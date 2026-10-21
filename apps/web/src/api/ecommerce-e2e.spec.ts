@@ -735,7 +735,9 @@ describe('Full Ecommerce End-to-End Journeys (Auth, RBAC, Vendor, Admin, Cart, C
     placedOrderItemId = placedOrder.items[0].id;
     createdOrderIds.push(placedOrderId);
     expect(placedOrder.order_number).toMatch(/^MG-\d{4}-\d{6}$/);
-    expect(placedOrder.grand_total).toBe('9000.00');
+    // P2-3: the AE destination applies the approved 5% VAT server-side
+    // (9000.00 goods → 450.00 tax → 9450.00).
+    expect(placedOrder.grand_total).toBe('9450.00');
     expect(placedOrder.state).toBe('PENDING_PAYMENT');
 
     // Idempotent replay returns identical order without error
@@ -782,7 +784,7 @@ describe('Full Ecommerce End-to-End Journeys (Auth, RBAC, Vendor, Admin, Cart, C
       id: evtId,
       type: 'payment.captured',
       order_id: placedOrderId,
-      amount: '9000.00',
+      amount: '9450.00',
       currency: 'USD',
       created_at: new Date().toISOString(),
     };

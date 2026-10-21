@@ -10,6 +10,7 @@ import type { Metadata } from 'next';
 
 import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
 import { CheckoutPayment } from '../../../../components/checkout/CheckoutPayment.js';
+import { VaultReveal } from '../../../../components/storefront/VaultReveal.js';
 
 export const metadata: Metadata = {
   title: 'Payment Order | Maihan Gems Checkout',
@@ -35,7 +36,7 @@ export default async function CheckoutPaymentOrderPage({
       />
 
       <div className="checkout-shell">
-        <div className="checkout-steps">
+        <VaultReveal stagger={0} className="checkout-steps">
           <div className="checkout-step checkout-step--completed">
             <span>✓</span>
             <span>Order Summary</span>
@@ -48,7 +49,7 @@ export default async function CheckoutPaymentOrderPage({
             <span>3</span>
             <span>Review &amp; Place</span>
           </div>
-        </div>
+        </VaultReveal>
 
         <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
           Checkpoint Funnel · Step 2 of 3

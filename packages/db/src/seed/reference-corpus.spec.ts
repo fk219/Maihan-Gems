@@ -37,7 +37,20 @@ import {
 } from './reference-data.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
-const archiveRoot = process.env['NATURALGEMSTONES_ROOT'] ?? path.join(repoRoot, 'naturalgemstones');
+/** Auto-detect the archive root: the sanctioned layout is `<root>/naturalgemstones`,
+ * but restored environments may nest it one level deeper
+ * (`naturalgemstones/naturalgemstones`). Never MOVE the archive — detect it. */
+function detectArchiveRoot(): string {
+  const override = process.env['NATURALGEMSTONES_ROOT'];
+  if (override) return override;
+  const shallow = path.join(repoRoot, 'naturalgemstones');
+  if (existsSync(path.join(shallow, 'reverse_engineered'))) return shallow;
+  const nested = path.join(shallow, 'naturalgemstones');
+  if (existsSync(path.join(nested, 'reverse_engineered'))) return nested;
+  return shallow;
+}
+
+const archiveRoot = detectArchiveRoot();
 const MANIFEST_PATH = path.join(repoRoot, 'docs', 'evidence', 'MANIFEST.md');
 
 function manifestDigest(relativePath: string): string | null {

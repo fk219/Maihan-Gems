@@ -1,0 +1,191 @@
+/* ============================================================================
+   Page-level composition pass — category landings, PDP stage, vault index
+   The final append: the ecommerce layout itself.
+   ========================================================================== */
+
+/* ── Page shells: more air, hairline rhythm ─────────────────────────────── */
+
+.page {
+  padding-top: 3.2rem;
+}
+
+.page h1 {
+  font-weight: 500;
+  line-height: 1.08;
+  max-width: 18ch;
+}
+
+.page-eyebrow {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.page-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 0.85rem;
+  height: 1px;
+  background: var(--gold);
+  vertical-align: middle;
+  margin-right: 0.55rem;
+}
+
+.page-subtitle {
+  font-weight: 300;
+  font-size: 1.04rem;
+}
+
+.result-count {
+  font-weight: 500;
+  letter-spacing: 0.24em;
+}
+
+/* ── Grids: the vault index — calmer, larger frames ─────────────────────── */
+
+.product-grid,
+.settings-grid,
+.varieties-grid {
+  gap: 2.4rem 1.6rem;
+}
+
+/* ── Cards earn a shadow only on touch ──────────────────────────────────── */
+
+.settings-card,
+.variety-card {
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-hairline);
+  transition: border-color 0.3s ease, transform 0.45s cubic-bezier(0.22, 0.68, 0.32, 1),
+    box-shadow 0.5s cubic-bezier(0.22, 0.68, 0.32, 1);
+  background: #ffffff;
+}
+
+.settings-card:hover,
+.variety-card:hover {
+  border-color: var(--card-border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 30px 60px -34px rgba(212, 175, 55, 0.45);
+}
+
+.settings-card__title,
+.variety-card h2,
+.variety-card h3 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.settings-card__action:hover {
+  color: #0a0a0b;
+}
+
+/* ── PDP: the vitrine stage ─────────────────────────────────────────────── */
+
+.vault-stage {
+  position: relative;
+  border: 1px solid var(--vault-hairline);
+  border-radius: var(--radius-hairline);
+  background:
+    radial-gradient(58% 52% at 50% 44%, rgba(212, 175, 55, 0.10) 0%, rgba(10, 10, 11, 0) 74%),
+    #f3eee3;
+  overflow: hidden;
+}
+
+.vault-stage img {
+  mix-blend-mode: multiply;
+}
+
+/* ── Section dividers between homepage bands ────────────────────────────── */
+
+.mgh-section + .mgh-section {
+  position: relative;
+}
+
+.mgh-section + .mgh-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(72rem, 92vw);
+  height: 1px;
+  background-image: linear-gradient(
+    90deg,
+    rgba(212, 175, 55, 0) 0%,
+    rgba(212, 175, 55, 0.35) 18%,
+    rgba(212, 175, 55, 0.22) 55%,
+    rgba(212, 175, 55, 0) 100%
+  );
+}
+
+/* ── Ceremonial CTA row on the obsidian band ────────────────────────────── */
+
+.vault-band-cta {
+  background: var(--vault-obsidian);
+  color: var(--vault-ink);
+  padding: clamp(2.4rem, 6vh, 4rem) 1.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.vault-band-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--vitrine-halo);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.vault-band-cta h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  line-height: 1.12;
+  color: var(--vault-ink);
+  position: relative;
+  margin-bottom: 1.4rem;
+}
+
+.vault-band-cta .vault-hero__actions {
+  justify-content: center;
+  position: relative;
+}
+
+/* ── Forms: the auth/account shells inherit the quiet field look ────────── */
+
+.auth-shell input,
+.vault-input,
+.mgh-input {
+  background: #ffffff;
+  border: 1px solid var(--search-border);
+  border-radius: var(--radius-hairline);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.auth-shell input:focus-visible,
+.vault-input:focus-visible,
+.mgh-input:focus-visible {
+  border-color: var(--card-border-hover);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  outline: none;
+}
+
+/* ── Tables on the portals: quiet numbers ───────────────────────────────── */
+
+.admin-shell td,
+.vendor-shell td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Reduce motion: no lift, no sheen shift ─────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-card,
+  .variety-card,
+  .mgh-jew img,
+  .lx-card__media img {
+    transition: none;
+    transform: none;
+  }
+}

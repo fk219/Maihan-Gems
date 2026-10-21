@@ -26,6 +26,7 @@ import {
 } from '@maihan/contracts';
 import {
   assertCartNotExpired,
+  assessTax,
   comparePriceMatch,
   computeReservationExpiry,
   fromCents,
@@ -220,21 +221,43 @@ export async function submitShippingCheckpoint(
     ? resolveAuthoritativeShippingMethod(input.shipping_method)
     : session.shipping_method ?? null;
 
+  // P2-3: server-authoritative tax, assessed from the approved rate table by
+  // the shipping destination (never a client field). UNCONFIGURED
+  // jurisdictions stay at '0.00' with the honest marker in the snapshot.
   let updatedSnapshot: PricingSnapshotDto = session.pricing_snapshot;
   if (shippingMethod) {
     const subtotalCents = toCents(session.pricing_snapshot.subtotal);
     const discountCents = toCents(session.pricing_snapshot.discount_total);
-    const taxCents = toCents(session.pricing_snapshot.tax_total);
     const shippingCents = toCents(shippingMethod.amount);
-    let grandTotalCents = subtotalCents - discountCents + taxCents + shippingCents;
+    const tax = assessTax(shippingAddress.country_code, subtotalCents - discountCents + shippingCents);
+    let grandTotalCents = subtotalCents - discountCents + shippingCents + toCents(tax.taxTotal);
     if (grandTotalCents < 0n) grandTotalCents = 0n;
 
     updatedSnapshot = {
       ...session.pricing_snapshot,
       shipping_total: fromCents(shippingCents),
+      tax_total: tax.taxTotal,
       grand_total: fromCents(grandTotalCents),
       computed_at: new Date().toISOString(),
-    };
+    } as PricingSnapshotDto;
+  } else {
+    // No method selected yet: still assess tax on the goods subtotal so the
+    // review page shows the destination-honest number as soon as an address
+    // exists.
+    const subtotalCents = toCents(session.pricing_snapshot.subtotal);
+    const discountCents = toCents(session.pricing_snapshot.discount_total);
+    const shippingCents = toCents(session.pricing_snapshot.shipping_total);
+    const tax = assessTax(shippingAddress.country_code, subtotalCents - discountCents + shippingCents);
+    let grandTotalCents = subtotalCents - discountCents + shippingCents + toCents(tax.taxTotal);
+    if (grandTotalCents < 0n) grandTotalCents = 0n;
+    if (session.pricing_snapshot.tax_total !== tax.taxTotal) {
+      updatedSnapshot = {
+        ...session.pricing_snapshot,
+        tax_total: tax.taxTotal,
+        grand_total: fromCents(grandTotalCents),
+        computed_at: new Date().toISOString(),
+      } as PricingSnapshotDto;
+    }
   }
 
   const updatedSession: CheckoutSessionDto = {

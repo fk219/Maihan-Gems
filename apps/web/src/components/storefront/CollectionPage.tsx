@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { EmptyState } from '../design-system/EmptyState.js';
 import type { StorefrontCard } from '../../lib/storefront-types.js';
 import { CollectionBrowser } from './CollectionFilters.js';
+import { VaultReveal } from './VaultReveal.js';
 
 const FACET_LINKS = [
   { suffix: '', label: 'Stones' },
@@ -58,16 +59,18 @@ export function CollectionPage({
       </header>
       <div className="lx-section">
         <div className="lx-wrap lx-wrap--wide">
-          {stoneSlug ? (
-            <nav className="lx-facets" aria-label="Collection facets">
-              {FACET_LINKS.map((link) => (
-                <Link key={link.suffix || 'stone'} href={`/${stoneSlug}${link.suffix}`}>
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          ) : null}
-          {chips ? <nav className="lx-facets" aria-label="Stone types">{chips}</nav> : null}
+          <VaultReveal stagger={60}>
+            {stoneSlug ? (
+              <nav className="lx-facets" aria-label="Collection facets">
+                {FACET_LINKS.map((link) => (
+                  <Link key={link.suffix || 'stone'} href={`/${stoneSlug}${link.suffix}`}>
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+            ) : null}
+            {chips ? <nav className="lx-facets" aria-label="Stone types">{chips}</nav> : null}
+          </VaultReveal>
           {products.length > 0 ? (
             <CollectionBrowser products={products} />
           ) : (
