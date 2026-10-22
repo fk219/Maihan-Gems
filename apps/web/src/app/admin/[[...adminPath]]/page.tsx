@@ -33,7 +33,7 @@ import type {
   VendorProfileDto,
 } from '@maihan/db';
 
-import { OperatorChart, OperatorEmpty } from '../../../components/admin/OperatorDesk.js';
+import { OperatorEmpty } from '../../../components/admin/OperatorDesk.js';
 import { Button } from '../../../components/ui/button.js';
 import { requireAdminAccess, AdminGateScreen } from '../../../lib/admin-server.js';
 import { AdminSidebar } from '../../../components/admin/AdminSidebar.js';
@@ -255,6 +255,7 @@ async function AdminDashboard() {
   ];
 
   const quiet = tiles.every((tile) => tile.value <= 0);
+  const peak = Math.max(1, ...tiles.map((tile) => Math.max(0, tile.value)));
   return (
     <AdminFrame
       active="dashboard"
@@ -268,11 +269,7 @@ async function AdminDashboard() {
           href="/admin/catalogue"
           action="Open the catalogue"
         />
-      ) : (
-        <OperatorChart
-          rows={tiles.map((tile) => ({ label: tile.label, value: Math.max(0, tile.value) }))}
-        />
-      )}
+      ) : null}
       <table className="operator-table">
         <thead>
           <tr>
@@ -282,13 +279,21 @@ async function AdminDashboard() {
           </tr>
         </thead>
         <tbody>
-          {tiles.map((tile) => (
-            <tr key={tile.label}>
-              <td>{tile.label}</td>
-              <td>{fmt(tile.value)}</td>
-              <td>{tile.note ?? ''}</td>
-            </tr>
-          ))}
+          {tiles.map((tile) => {
+            const value = Math.max(0, tile.value);
+            return (
+              <tr key={tile.label}>
+                <td>{tile.label}</td>
+                <td>
+                  <span className="operator-meter" aria-hidden="true">
+                    <i style={{ width: `${(value / peak) * 100}%` }} />
+                  </span>
+                  {fmt(tile.value)}
+                </td>
+                <td>{tile.note ?? ''}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       <Button asChild variant="outline">

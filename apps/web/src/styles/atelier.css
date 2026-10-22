@@ -117,7 +117,7 @@ body .ngc-cta::after {
   width: 100%;
   height: 1px;
   background: currentColor;
-  transform: scaleX(0.28);
+  transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -190,6 +190,32 @@ body .ngc-iconbtn {
   height: 2.4rem;
 }
 
+body .ngc-tools {
+  gap: 0.9rem;
+}
+
+body .ngc-cta {
+  margin-inline-end: 0.85rem;
+}
+
+body .ngc-pages .lx-view-toggle {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body .ngc-pages .lx-view-toggle button,
+body .ngc-pages .lx-view-toggle button.is-on {
+  border-radius: 0;
+  background: transparent;
+  color: #16110c;
+  box-shadow: none;
+}
+
+body .ngc-pages .lx-view-toggle button.is-on {
+  box-shadow: inset 0 -1px 0 #16110c;
+}
+
 /* ── Hero: type in columns 1–5, air in 6, photograph in 7–12 ───────────── */
 
 body .ngc-pages .vitrine {
@@ -238,6 +264,9 @@ body .ngc-pages .vitrine__stone .vault-vitrine__img {
   height: 116%;
   object-fit: cover;
   display: block;
+  animation: none;
+  opacity: 1;
+  background: #f4f0e8;
 }
 
 /* ── Shop by stone ──────────────────────────────────────────────────────── */
@@ -387,11 +416,17 @@ body .ngc-pages .mgh-gem:focus-visible .mgh-gem__name {
 }
 
 .atelier-strip__card img {
+  position: relative;
   width: 100%;
   aspect-ratio: 3 / 4;
-  object-fit: cover;
+  object-fit: contain;
   background: #efe8dc;
   display: block;
+}
+
+.atelier-strip__card span {
+  position: relative;
+  background: #f6f1e8;
 }
 
 .atelier-strip__card span {
@@ -837,6 +872,103 @@ body .admin-shell [data-slot="button"] {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-size: 0.7rem;
+  background: #16110c;
+  color: #f6f1e8;
+}
+
+body .admin-shell [data-slot="button"][data-variant="outline"] {
+  background: transparent;
+  color: #16110c;
+  border: 1px solid rgba(22, 17, 12, 0.28);
+}
+
+body .ngc-fx__btn {
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+body .lx-empty {
+  margin: 1rem 4vw 3rem;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  text-align: left;
+  box-shadow: none;
+}
+
+body .atelier__steps button {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  color: #5c5344;
+}
+
+body .atelier__steps .is-on button {
+  background: transparent;
+  color: #16110c;
+  border-bottom-color: #16110c;
+}
+
+body .atelier__steps span,
+body .atelier__steps .is-on span,
+body .atelier__steps .is-done span {
+  background: transparent;
+  color: inherit;
+  border-radius: 0;
+}
+
+body .ai-concierge-trigger {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: #16110c;
+  color: #f6f1e8;
+  box-shadow: none;
+  justify-content: center;
+  gap: 0;
+}
+
+body .ai-concierge-trigger__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+body .ai-concierge-trigger__icon {
+  color: #f6f1e8;
+  font-size: 1rem;
+}
+
+.operator-meter {
+  display: inline-block;
+  width: 4.5rem;
+  height: 2px;
+  margin-right: 0.7rem;
+  vertical-align: middle;
+  background: rgba(22, 17, 12, 0.08);
+}
+
+.operator-meter i {
+  display: block;
+  height: 2px;
+  background: #16110c;
 }
 
 body .admin-shell [data-slot="card"] {
