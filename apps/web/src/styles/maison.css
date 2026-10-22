@@ -584,7 +584,7 @@ body .mgh-peace p {
   color: #f6f2e9;
 }
 
-body .home-footer__legal {
+body .home-footer p.home-footer__legal {
   opacity: 1;
   color: #cfc6b6;
 }

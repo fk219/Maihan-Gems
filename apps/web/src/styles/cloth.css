@@ -1,5 +1,10 @@
 /* Cloth: the homepage is one length of jeweller's cloth, not a stack of equal panels. */
 
+body .ngc-pages {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
 body .ngc-pages .cloth-stage {
   position: relative;
   min-height: 100vh;
