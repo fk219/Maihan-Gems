@@ -21,6 +21,7 @@ body .ngc-pages .cloth-stage__bleed {
   gap: 0.35rem;
   padding: 0 2.5rem 18rem 4vw;
   pointer-events: none;
+  overflow: hidden;
 }
 
 body .ngc-pages .cloth-stage__photo {
@@ -145,6 +146,12 @@ body .ngc-pages .cloth-jewels__index .mgh-jew {
 
 body .ngc-pages .cloth-jewels__index .mgh-jew img {
   display: none;
+}
+
+body .ngc-pages .cloth-jewels .mgh-link,
+body .ngc-pages .cloth-jewels .mgh-h2 {
+  color: #f6f2e9;
+  border-bottom-color: rgba(246, 242, 233, 0.45);
 }
 
 .maison-mobile-nav header.maison-immersive-bar {

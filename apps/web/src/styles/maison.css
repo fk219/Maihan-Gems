@@ -575,6 +575,18 @@ body .mgh-charity {
 
 body .mgh-peace {
   background: var(--navy);
+  color: #f6f2e9;
+}
+
+body .mgh-peace .mgh-h2,
+body .mgh-peace h3,
+body .mgh-peace p {
+  color: #f6f2e9;
+}
+
+body .home-footer__legal {
+  opacity: 1;
+  color: #cfc6b6;
 }
 
 body .mgh-history__timeline {

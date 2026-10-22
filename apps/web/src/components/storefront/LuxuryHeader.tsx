@@ -238,7 +238,7 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
             }}
           />
         </div>
-        <Link href={href('/')} className="ngc-logo" aria-label={house?.name ?? 'Maihan Gems'}>
+        <Link href={href('/')} className="ngc-logo">
           <span className="ngc-logo__word">{house?.wordmark ?? 'MAIHAN'}</span>
           <span className="ngc-logo__sub">{house?.kicker ?? 'GEMS · Atelier'}</span>
         </Link>
