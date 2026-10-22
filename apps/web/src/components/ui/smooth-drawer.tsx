@@ -66,6 +66,8 @@ export interface SmoothDrawerProps {
   /** ISO 4217 currency code. */
   currency?: string;
   triggerLabel?: string;
+  /** When false, the sheet opens only from outside (the header bag). */
+  showTrigger?: boolean;
   confirmLabel?: string;
   /** Called with the final breakdown; the sheet closes afterwards. */
   onConfirm?: (summary: OrderSummary) => void;
@@ -163,6 +165,7 @@ export default function SmoothDrawer({
   taxRate = 0,
   currency = "USD",
   triggerLabel = "Review order",
+  showTrigger = true,
   confirmLabel = "Pay",
   onConfirm,
   open,
@@ -274,11 +277,13 @@ export default function SmoothDrawer({
       setActiveSnapPoint={(point) => setSnap(point === 1)}
       snapPoints={snapPoints}
     >
-      <DrawerTrigger asChild>
-        <Button className="h-10 rounded-lg px-4" variant="outline">
-          {triggerLabel}
-        </Button>
-      </DrawerTrigger>
+      {showTrigger ? (
+        <DrawerTrigger asChild>
+          <Button className="h-10 rounded-none px-4" variant="outline">
+            {triggerLabel}
+          </Button>
+        </DrawerTrigger>
+      ) : null}
       <DrawerContent
         className={cn(
           "mx-auto w-full max-w-[420px] rounded-t-2xl border border-zinc-200 border-b-0 bg-white outline-none dark:border-zinc-800 dark:bg-zinc-950",

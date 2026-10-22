@@ -12,6 +12,14 @@ import { Textarea } from '../ui/textarea.js';
 export function ViewingRequest({ email }: { email: string }) {
   const [name, setName] = useState('');
   const [note, setNote] = useState('');
+  if (!email || /example\.(com|test)/i.test(email)) {
+    return (
+      <section className="salon-note">
+        <h2>Request a viewing</h2>
+        <p>A public inbox is not published yet. Visits stay by appointment.</p>
+      </section>
+    );
+  }
 
   return (
     <form

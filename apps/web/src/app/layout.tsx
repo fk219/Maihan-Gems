@@ -12,23 +12,35 @@ import { organizationJsonLdPayload } from '../lib/jsonld.js';
 import { JsonLd } from '../components/seo/JsonLd.js';
 import './globals.css';
 import '../styles/maison.css';
+import '../styles/atelier.css';
 import { MAIHAN_THEME_CSS } from '../lib/theme-styles.js';
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { Cormorant_Garamond, JetBrains_Mono, Jost } from 'next/font/google';
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const jost = Jost({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-jost',
+  display: 'swap',
+});
 
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-cormorant',
+  display: 'swap',
+});
+
+const mono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
+    <html lang="en" className={`${jost.variable} ${cormorant.variable} ${mono.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Jost:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
         <script
           id="theme-init"
           dangerouslySetInnerHTML={{

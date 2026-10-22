@@ -39,7 +39,7 @@ export const MenuItem = ({
     >
       <button
         type="button"
-        className="cursor-pointer bg-transparent font-[family-name:var(--font-sans)] text-[0.72rem] uppercase tracking-[0.16em] text-[#1d1710]"
+        className="cursor-pointer border-0 bg-transparent p-0 font-[family-name:var(--font-sans)] text-[0.92rem] normal-case tracking-normal text-[#16110c] shadow-none"
         aria-expanded={active === item}
         onClick={() => setActive(active === item ? null : item)}
       >

@@ -13,3 +13,17 @@ export const STOREFRONT_CONTACT = {
   region: 'United Arab Emirates',
   addressLine: 'Atelier by appointment · Dubai',
 } as const;
+
+const PLACEHOLDER_CONTACT = /000\s*0000|example\.(com|test)/i;
+
+/** A configured phone, or null when the value is still a placeholder. */
+export function publishedPhone(): { display: string; href: string } | null {
+  if (PLACEHOLDER_CONTACT.test(STOREFRONT_CONTACT.phoneDisplay)) return null;
+  return { display: STOREFRONT_CONTACT.phoneDisplay, href: STOREFRONT_CONTACT.phoneHref };
+}
+
+/** A configured inbox, or null when the value is still a placeholder. */
+export function publishedEmail(): string | null {
+  if (PLACEHOLDER_CONTACT.test(STOREFRONT_CONTACT.email)) return null;
+  return STOREFRONT_CONTACT.email;
+}

@@ -401,7 +401,17 @@ export function VendorProductWorkspace({
       </Sheet>
 
       {products.length === 0 ? (
-        <div className="admin-empty">No products created under your vendor account yet.</div>
+        <div className="operator-empty">
+          <p>The bench is empty.</p>
+          <span>Drafts stay off the storefront until moderation publishes them.</span>
+          {isApprovedVendor ? (
+            <Button type="button" onClick={startCreate}>
+              Add your first piece
+            </Button>
+          ) : (
+            <span>Publishing opens once this desk is approved.</span>
+          )}
+        </div>
       ) : (
         <Table>
           <TableHeader>
@@ -526,7 +536,12 @@ export function VendorOrdersWorkspace({
   }
 
   if (orders.length === 0) {
-    return <div className="admin-empty">No customer orders contain your products yet.</div>;
+    return (
+      <div className="operator-empty">
+        <p>No orders yet.</p>
+        <span>A line appears here after a client reserves one of your pieces.</span>
+      </div>
+    );
   }
 
   return (

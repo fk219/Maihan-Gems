@@ -5,8 +5,6 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
-import { STOREFRONT_CONTACT } from '@maihan/config';
-
 import { COLOR_SWATCH } from '../../lib/ngc/colors.js';
 import { SISTER_SLUGS, storefrontBySlug, withPrefix } from '../../lib/ngc/storefronts.js';
 import type { StorefrontBrand } from '../../lib/ngc/types.js';
@@ -208,15 +206,7 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
   const href = (path: string) => withPrefix(path, prefix);
 
   return (
-    <header className="ngc-header">
-      <div className="ngc-top">
-        <div className="ngc-top__inner">
-          <span>{STOREFRONT_CONTACT.appointmentLabel} · {STOREFRONT_CONTACT.hours}</span>
-          <a href={STOREFRONT_CONTACT.phoneHref}>{STOREFRONT_CONTACT.phoneDisplay}</a>
-          <Link href="/showrooms">Make appointment</Link>
-          <Link href="/contact">Contact us</Link>
-        </div>
-      </div>
+    <header className="ngc-header atelier-nav">
       <div className="ngc-bar">
         <div className="maison-mobile-nav">
           <ImmersiveFullscreenNav
@@ -266,10 +256,15 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
           <Link href="/compare" className="ngc-iconbtn" aria-label="Compare">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M12 9v11M17 13v7" /></svg>
           </Link>
-          <Link href="/cart" className="ngc-iconbtn" aria-label={bagCount > 0 ? `Bag, ${bagCount}` : 'Bag'}>
+          <button
+            type="button"
+            className="ngc-iconbtn"
+            aria-label={bagCount > 0 ? `Bag, ${bagCount}` : 'Bag'}
+            onClick={() => window.dispatchEvent(new Event('maihan-open-bag'))}
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z" /><path d="M9 8V7a3 3 0 0 1 6 0v1" /></svg>
             {bagCount > 0 ? <em>{bagCount}</em> : null}
-          </Link>
+          </button>
           <Link href="/account" className="ngc-iconbtn" aria-label="Account">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" /><path d="M5 19c1.4-3 3.8-4.5 7-4.5S17.6 16 19 19" /></svg>
           </Link>

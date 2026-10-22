@@ -1,0 +1,974 @@
+/* The vitrine. Loaded last. Bone ground, ink type, one gold hairline.
+   Nav links have no box. Focus is visible only on :focus-visible. */
+
+html,
+body {
+  background: #f6f1e8;
+  color: #16110c;
+}
+
+body {
+  font-family: var(--font-sans), sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid #9a7b45;
+  outline-offset: 3px;
+}
+
+.ink-cta,
+body .lx-btn.lx-btn--solid,
+body a.lx-btn--solid,
+body button.lx-btn--solid,
+body .mgh-btn.mgh-btn--gold,
+body .mgh-btn.mgh-btn--dark,
+body .btn-primary,
+body .atelier__bag,
+body .admin-shell .lx-btn.lx-btn--solid,
+body .admin-gate a.lx-btn.lx-btn--solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.85rem;
+  padding: 0 1.35rem;
+  background: #16110c;
+  background-image: none;
+  color: #f6f1e8;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.ink-cta:hover,
+body .lx-btn.lx-btn--solid:hover,
+body a.lx-btn--solid:hover,
+body button.lx-btn--solid:hover,
+body .mgh-btn.mgh-btn--gold:hover,
+body .btn-primary:hover {
+  background: #3a3128;
+  color: #f6f1e8;
+  transform: translateY(-1px);
+}
+
+.line-link,
+body .lx-btn--ghost,
+body .mgh-btn--ghost,
+body .mgh-btn--outline,
+body .ngc-cta,
+body .admin-shell .lx-btn--ghost,
+body .admin-gate a.lx-btn.lx-btn--ghost {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 2.25rem;
+  padding: 0;
+  background: transparent;
+  background-image: none;
+  color: #16110c;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-size: 0.95rem;
+  font-weight: 400;
+  text-decoration: none;
+  position: relative;
+}
+
+.line-link::after,
+body .lx-btn--ghost::after,
+body .mgh-btn--ghost::after,
+body .ngc-cta::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0.35rem;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0.28);
+  transform-origin: left center;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.line-link:hover::after,
+body .lx-btn--ghost:hover::after,
+body .ngc-cta:hover::after {
+  transform: scaleX(1);
+}
+
+.atelier-label {
+  margin: 0 0 0.8rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #5c5344;
+}
+
+/* ── Nav: text only, bone when the page moves ──────────────────────────── */
+
+body .ngc-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  animation: atelier-bar linear both;
+  animation-timeline: scroll(root);
+  animation-range: 0 64px;
+}
+
+@keyframes atelier-bar {
+  to {
+    background-color: #f6f1e8;
+    border-bottom-color: rgba(22, 17, 12, 0.12);
+  }
+}
+
+body .ngc-top {
+  display: none;
+}
+
+body .ngc-bar {
+  min-height: 4.5rem;
+  align-items: center;
+}
+
+body .ngc-nav button,
+body .ngc-iconbtn,
+body .ngc-nav a {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  color: #16110c;
+  text-decoration: none;
+}
+
+body .ngc-nav button {
+  padding: 0.35rem 0;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+body .ngc-iconbtn {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+/* ── Hero: type in columns 1–5, air in 6, photograph in 7–12 ───────────── */
+
+body .ngc-pages .vitrine {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  min-height: calc(100vh - 4.5rem);
+  background: #f6f1e8;
+  color: #16110c;
+}
+
+body .ngc-pages .vitrine__copy {
+  grid-column: 1 / 6;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2.2rem;
+  padding: 10vh 3vw 12vh 4vw;
+}
+
+body .ngc-pages .vitrine__copy .mgh-hero__title {
+  margin: 0;
+  max-width: 14ch;
+  color: #16110c;
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(3.4rem, 5.4vw, 6.2rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  text-indent: 0;
+  text-wrap: pretty;
+}
+
+body .ngc-pages .vitrine__stone {
+  grid-column: 7 / 13;
+  position: relative;
+  margin: 0;
+  min-height: 72vh;
+  overflow: hidden;
+  background: #efe8dc;
+}
+
+body .ngc-pages .vitrine__stone .vault-vitrine__img {
+  position: absolute;
+  inset: -8% 0;
+  width: 100%;
+  height: 116%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Shop by stone ──────────────────────────────────────────────────────── */
+
+body .ngc-pages .atelier-stones {
+  padding: 8vh 4vw 10vh;
+}
+
+body .ngc-pages .atelier-stones__head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: end;
+  margin-bottom: 2rem;
+}
+
+body .ngc-pages .atelier-stones__head h2 {
+  grid-column: 1 / 7;
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2.8rem, 5vw, 4.6rem);
+  line-height: 0.92;
+}
+
+body .ngc-pages .atelier-stones__head .line-link {
+  grid-column: 10 / 13;
+  justify-self: end;
+}
+
+body .ngc-pages .atelier-stones__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+body .ngc-pages .atelier-stones__grid .mgh-gem {
+  grid-column: span 3;
+  position: relative;
+  display: block;
+  min-height: 28vh;
+  overflow: hidden;
+  color: #f6f1e8;
+  background: #efe8dc;
+}
+
+body .ngc-pages .atelier-stones__grid .mgh-gem:first-child {
+  grid-column: span 6;
+  min-height: 68vh;
+}
+
+body .ngc-pages .atelier-stones__grid .mgh-gem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body .ngc-pages .atelier-stones__grid .mgh-gem:hover img {
+  transform: scale(1.04);
+}
+
+body .ngc-pages .mgh-gem__name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  background: #16110c;
+  color: #f6f1e8;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.55rem;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0;
+  transform: translateY(0.4rem);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+body .ngc-pages .mgh-gem:hover .mgh-gem__name,
+body .ngc-pages .mgh-gem:focus-visible .mgh-gem__name {
+  opacity: 1;
+  transform: none;
+}
+
+@media (hover: none) {
+  body .ngc-pages .mgh-gem__name {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Signature strip (Aceternity carousel, horizontal) ──────────────────── */
+
+.atelier-strip {
+  padding: 2vh 0 10vh 4vw;
+  overflow: hidden;
+}
+
+.atelier-strip__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  padding-right: 4vw;
+  margin-bottom: 1.5rem;
+}
+
+.atelier-strip__head h2 {
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2.8rem, 5vw, 4.6rem);
+}
+
+.atelier-strip__nav {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.atelier-strip__nav button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-bottom: 1px solid rgba(22, 17, 12, 0.35);
+  color: #16110c;
+}
+
+.atelier-strip__viewport {
+  overflow: hidden;
+}
+
+.atelier-strip__track {
+  display: flex;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.atelier-strip__track > li {
+  list-style: none;
+  flex: none;
+}
+
+.atelier-strip__card {
+  display: block;
+  margin-right: 1rem;
+  color: #16110c;
+}
+
+.atelier-strip__card img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  background: #efe8dc;
+  display: block;
+}
+
+.atelier-strip__card span {
+  display: block;
+  margin-top: 0.85rem;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.45rem;
+}
+
+/* ── Story ──────────────────────────────────────────────────────────────── */
+
+body .ngc-pages .atelier-story {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  background: #f6f1e8;
+}
+
+body .ngc-pages .atelier-story__photo {
+  grid-column: 1 / 7;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+}
+
+body .ngc-pages .atelier-story__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+body .ngc-pages .atelier-story__copy {
+  grid-column: 7 / 13;
+  padding: 8vh 6vw 8vh 4vw;
+}
+
+body .ngc-pages .atelier-story__copy h2 {
+  margin: 0 0 1.5rem;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  font-weight: 500;
+}
+
+body .ngc-pages .atelier-story span.flex {
+  font-size: clamp(1.7rem, 2.6vw, 2.7rem);
+  padding: 0;
+  max-width: 18ch;
+}
+
+/* ── Design your own, full bleed ────────────────────────────────────────── */
+
+body .ngc-pages .atelier-dyo {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  min-height: 70vh;
+  background: #16110c;
+  color: #f6f1e8;
+}
+
+body .ngc-pages .atelier-dyo__copy {
+  grid-column: 1 / 7;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 1.2rem;
+  padding: 10vh 4vw;
+}
+
+body .ngc-pages .atelier-dyo .atelier-label,
+body .ngc-pages .atelier-dyo h2,
+body .ngc-pages .atelier-dyo p {
+  color: #f6f1e8;
+}
+
+body .ngc-pages .atelier-dyo h2 {
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(3rem, 6vw, 5.4rem);
+  line-height: 0.92;
+}
+
+body .ngc-pages .atelier-dyo .ink-cta {
+  background: #f6f1e8;
+  color: #16110c;
+  align-self: flex-start;
+}
+
+body .ngc-pages .atelier-dyo .ink-cta:hover {
+  background: #c6a46a;
+  color: #16110c;
+}
+
+body .ngc-pages .atelier-dyo__photo {
+  grid-column: 7 / 13;
+  margin: 0;
+  min-height: 52vh;
+  overflow: hidden;
+}
+
+body .ngc-pages .atelier-dyo__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+
+body .home-footer {
+  background: #f6f1e8;
+  color: #16110c;
+  border-top: 1px solid rgba(22, 17, 12, 0.12);
+  padding: 0;
+}
+
+body .atelier-note {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 8vh 4vw 4vh;
+  border-bottom: 1px solid rgba(22, 17, 12, 0.12);
+}
+
+body .atelier-note h2 {
+  grid-column: 1 / 7;
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2.6rem, 5vw, 4.4rem);
+}
+
+body .atelier-note p {
+  grid-column: 1 / 6;
+  max-width: 36rem;
+  color: #5c5344;
+}
+
+body .atelier-note .ink-cta {
+  grid-column: 1 / 4;
+}
+
+body .home-footer__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1.5rem 1rem;
+  padding: 4vh 4vw 2vh;
+}
+
+body .home-footer__grid > div {
+  grid-column: span 3;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+body .home-footer__grid h3 {
+  margin: 0 0 0.6rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #5c5344;
+}
+
+body .home-footer__grid a {
+  color: #16110c;
+  text-decoration: none;
+}
+
+body .home-footer__grid a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+
+body .home-footer p.home-footer__legal {
+  padding: 1.5rem 4vw 2rem;
+  color: #5c5344;
+  opacity: 1;
+}
+
+/* ── Inner routes share the window ──────────────────────────────────────── */
+
+body .ngc-pages .lx-page-hero {
+  display: block;
+  position: relative;
+  min-height: 0;
+  padding: 6vh 4vw 2vh;
+  background: transparent;
+  color: #16110c;
+}
+
+body .ngc-pages .lx-page-hero__photo,
+body .ngc-pages .lx-page-hero__veil {
+  display: none;
+}
+
+body .ngc-pages .lx-page-hero__copy,
+body .ngc-pages .lx-h1,
+body .ngc-pages .lx-lede,
+body .ngc-pages .lx-kicker,
+body .ngc-pages .lx-crumb,
+body .ngc-pages .lx-crumb a {
+  position: relative;
+  color: #16110c;
+  text-shadow: none;
+}
+
+body .ngc-pages .lx-h1,
+body .ngc-pages .ngc-pdp h1,
+body .ngc-pages .atelier h1,
+body .checkout-page h1,
+body .page h1 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(3rem, 6vw, 5.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  max-width: 14ch;
+}
+
+body .ngc-pages .lx-grid {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1.6rem 1rem;
+}
+
+body .ngc-pages .lx-grid .lx-card {
+  grid-column: span 3;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+body .ngc-pages .lx-card__media {
+  background: #efe8dc;
+  border-radius: 0;
+  aspect-ratio: 3 / 4;
+}
+
+body .ngc-pages .lx-card__title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+body .ngc-pages .ngc-pdp__grid,
+body .ngc-pages .lx-pdp {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 2rem;
+  align-items: start;
+}
+
+body .ngc-pages .ngc-gallery,
+body .ngc-pages .lx-pdp__media {
+  grid-column: 1 / 8;
+}
+
+body .ngc-pages .ngc-pdp__buy,
+body .ngc-pages .lx-pdp > div:last-child {
+  grid-column: 8 / 13;
+}
+
+body .ngc-pages .lx-bag {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 2rem;
+  padding: 2vh 4vw 8vh;
+}
+
+body .ngc-pages .lx-bag__lines {
+  grid-column: 1 / 8;
+  border-top: 1px solid rgba(22, 17, 12, 0.12);
+}
+
+body .ngc-pages .lx-bag__line {
+  border-bottom: 1px solid rgba(22, 17, 12, 0.12);
+  background: transparent;
+  box-shadow: none;
+}
+
+body .ngc-pages .lx-summary {
+  grid-column: 9 / 13;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid rgba(22, 17, 12, 0.12);
+  box-shadow: none;
+  border-radius: 0;
+}
+
+body .checkout-shell {
+  background: transparent;
+}
+
+body .checkout-page {
+  background: #f6f1e8;
+  padding-bottom: 6vh;
+}
+
+body .ngc-pages .atelier__head h1 {
+  max-width: 12ch;
+}
+
+/* Concierge stays off the hero pane, then returns. */
+body:has(.vitrine) .ai-concierge-trigger {
+  opacity: 0;
+  pointer-events: none;
+  animation: atelier-concierge linear both;
+  animation-timeline: scroll(root);
+  animation-range: 70vh 100vh;
+}
+
+@keyframes atelier-concierge {
+  to {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* ── Desks ──────────────────────────────────────────────────────────────── */
+
+body .admin-shell {
+  background: #f6f1e8;
+  color: #16110c;
+}
+
+body .admin-shell a {
+  color: inherit;
+  text-decoration: none;
+}
+
+body .admin-layout {
+  grid-template-columns: 16rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+body .admin-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow: auto;
+  background: #fbf8f3;
+  border-right: 1px solid rgba(22, 17, 12, 0.12);
+  padding: 1.6rem 1rem 2rem;
+}
+
+body .admin-sidebar__group {
+  color: #5c5344;
+  letter-spacing: 0.18em;
+}
+
+body .admin-sidebar nav a {
+  border-left: 0;
+  border-radius: 0;
+  color: #16110c;
+  text-decoration: none;
+  min-height: 2.25rem;
+}
+
+body .admin-sidebar nav a.is-on {
+  background: transparent;
+  color: #16110c;
+  box-shadow: inset 2px 0 0 #16110c;
+}
+
+body .operator-pagehead {
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(22, 17, 12, 0.12);
+}
+
+body .operator-pagehead h1,
+body .admin-main h1 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+body .operator-chart {
+  margin: 0 0 2rem;
+}
+
+body .operator-chart svg {
+  width: min(100%, 36rem);
+  height: auto;
+}
+
+body .admin-empty {
+  margin: 0;
+  padding: 2.5rem 0;
+  border-top: 1px solid rgba(22, 17, 12, 0.12);
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.8rem;
+  color: #16110c;
+  background: transparent;
+}
+
+body .operator-empty {
+  display: grid;
+  gap: 0.8rem;
+  justify-items: start;
+  padding: 2.5rem 0;
+  border-top: 1px solid rgba(22, 17, 12, 0.12);
+}
+
+body .operator-empty p {
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 2rem;
+}
+
+body .operator-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 2.5rem;
+}
+
+body .operator-table th,
+body .operator-table td {
+  text-align: left;
+  padding: 0.75rem 0.6rem;
+  border-bottom: 1px solid rgba(22, 17, 12, 0.12);
+  font-size: 0.92rem;
+}
+
+body .operator-table th {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #5c5344;
+}
+
+body .admin-shell [data-slot="button"] {
+  border-radius: 0;
+  height: 2.75rem;
+  padding-inline: 1rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+body .admin-shell [data-slot="card"] {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 800px) {
+  body .ngc-pages .vitrine {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  body .ngc-pages .vitrine__stone {
+    grid-column: 1;
+    order: -1;
+    height: 46vh;
+    min-height: 0;
+  }
+
+  body .ngc-pages .vitrine__copy {
+    grid-column: 1;
+    padding: 1.6rem 1.25rem 2.5rem;
+  }
+
+  body .ngc-pages .vitrine__copy .mgh-hero__title {
+    font-size: clamp(2.5rem, 12vw, 3.5rem);
+    max-width: 11ch;
+  }
+
+  body .ngc-pages .atelier-stones__head,
+  body .ngc-pages .atelier-story,
+  body .ngc-pages .atelier-dyo,
+  body .home-footer__grid,
+  body .atelier-note,
+  body .ngc-pages .lx-grid,
+  body .ngc-pages .lx-pdp,
+  body .ngc-pages .ngc-pdp__grid,
+  body .ngc-pages .lx-bag {
+    grid-template-columns: 1fr;
+  }
+
+  body .ngc-pages .atelier-stones__head h2,
+  body .ngc-pages .atelier-stones__head .line-link,
+  body .ngc-pages .atelier-story__photo,
+  body .ngc-pages .atelier-story__copy,
+  body .ngc-pages .atelier-dyo__copy,
+  body .ngc-pages .atelier-dyo__photo,
+  body .home-footer__grid > div,
+  body .atelier-note h2,
+  body .atelier-note p,
+  body .atelier-note .ink-cta,
+  body .ngc-pages .lx-grid .lx-card,
+  body .ngc-pages .ngc-gallery,
+  body .ngc-pages .lx-pdp__media,
+  body .ngc-pages .ngc-pdp__buy,
+  body .ngc-pages .lx-bag__lines,
+  body .ngc-pages .lx-summary {
+    grid-column: 1;
+  }
+
+  body .ngc-pages .atelier-stones__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  body .ngc-pages .atelier-stones__grid .mgh-gem,
+  body .ngc-pages .atelier-stones__grid .mgh-gem:first-child {
+    grid-column: span 1;
+    min-height: 24vh;
+  }
+
+  body .ngc-pages .atelier-stones__grid .mgh-gem:first-child {
+    grid-column: span 2;
+    min-height: 42vh;
+  }
+
+  body .ngc-pages .atelier-story__photo {
+    position: relative;
+    height: 42vh;
+  }
+
+  body .admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  body .admin-sidebar {
+    position: relative;
+    height: auto;
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(22, 17, 12, 0.12);
+  }
+
+  body .admin-sidebar__group {
+    display: none;
+  }
+
+  body .admin-sidebar nav {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  body .admin-sidebar nav a {
+    white-space: nowrap;
+    box-shadow: none;
+  }
+
+  body .admin-sidebar nav a.is-on {
+    box-shadow: inset 0 -1px 0 #16110c;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .ngc-header,
+  body:has(.vitrine) .ai-concierge-trigger,
+  .atelier-strip__track,
+  body .ngc-pages .mgh-gem__name,
+  body .ngc-pages .atelier-stones__grid .mgh-gem img {
+    animation: none;
+    transition: none;
+  }
+
+  body:has(.vitrine) .ai-concierge-trigger {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  body .ngc-header {
+    background: #f6f1e8;
+    border-bottom-color: rgba(22, 17, 12, 0.12);
+  }
+}

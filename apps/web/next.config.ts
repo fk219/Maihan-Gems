@@ -100,6 +100,12 @@ export function buildSecurityHeaders(options: {
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/o1zwhvbi/**' },
+    ],
+  },
   async headers() {
     return [
       {

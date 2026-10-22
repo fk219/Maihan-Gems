@@ -69,10 +69,10 @@ export const MAIHAN_THEME_CSS = `
   --radius-control: 6px;
   --radius-menu: 6px;
   --radius-inner: 4px;
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-body: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-serif: var(--font-cormorant), Georgia, serif;
+  --font-sans: var(--font-jost), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: var(--font-jost), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
   --shadow-rest: 0 2px 12px -2px rgba(28, 20, 8, 0.05);
   --shadow-hover: 0 24px 48px -16px rgba(138, 94, 18, 0.14);
   --shadow-card-hover: 0 18px 40px -14px rgba(138, 94, 18, 0.16);

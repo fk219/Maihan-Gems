@@ -1,4 +1,4 @@
-import { STOREFRONT_CONTACT } from '@maihan/config';
+import { STOREFRONT_CONTACT, publishedEmail, publishedPhone } from '@maihan/config';
 import Link from 'next/link';
 
 import { currentStorefront } from '../../lib/ngc/current-storefront.js';
@@ -8,17 +8,16 @@ export async function StorefrontFooter() {
   const year = new Date().getFullYear();
   const brand = await currentStorefront();
   const href = (path: string) => withPrefix(path, brand.pathPrefix);
+  const phone = publishedPhone();
+  const email = publishedEmail();
   return (
     <footer className="home-footer">
-      <div className="home-footer__top">
-        <div>
-          <p>{brand.name}</p>
-          <h2>Natural stones, set with care.</h2>
-        </div>
-        <Link href={href('/design-your-own')} className="home-footer__cta">
-          Design Your Own
-        </Link>
-      </div>
+      <form className="atelier-note" action={href('/contact')}>
+        <p className="atelier-label">Correspondence</p>
+        <h2>A private note</h2>
+        <p>The house does not keep a public mailing list. Write when you want a stone brought out.</p>
+        <button className="ink-cta" type="submit">Write to the house</button>
+      </form>
       <div className="home-footer__grid">
         <div>
           <h3>Shop</h3>
@@ -36,17 +35,18 @@ export async function StorefrontFooter() {
         </div>
         <div>
           <h3>The house</h3>
-          <Link href={href('/about')}>About us</Link>
+          <Link href={href('/about')}>About</Link>
           <Link href={href('/education')}>Education</Link>
           <Link href={href('/account')}>Account</Link>
-          <Link href={href('/search')}>Vault search</Link>
+          <Link href={href('/search')}>Search</Link>
         </div>
         <div>
           <h3>Visit</h3>
-          <p>{STOREFRONT_CONTACT.addressLine}</p>
+          <p>{STOREFRONT_CONTACT.appointmentLabel}</p>
           <p>{STOREFRONT_CONTACT.hours}</p>
-          <a href={STOREFRONT_CONTACT.phoneHref}>{STOREFRONT_CONTACT.phoneDisplay}</a>
-          <a href={`mailto:${STOREFRONT_CONTACT.email}`}>{STOREFRONT_CONTACT.email}</a>
+          <p>{STOREFRONT_CONTACT.city}</p>
+          {phone ? <a href={phone.href}>{phone.display}</a> : null}
+          {email ? <a href={`mailto:${email}`}>{email}</a> : null}
         </div>
       </div>
       <p className="home-footer__legal">

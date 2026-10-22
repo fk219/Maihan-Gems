@@ -20,7 +20,7 @@
  * ADR — SKILL_MATRIX_AND_TOOLING.md §13).
  */
 
-export { STOREFRONT_CONTACT } from './storefront.js';
+export { STOREFRONT_CONTACT, publishedEmail, publishedPhone } from './storefront.js';
 export {
   SPOOFABLE_IDENTITY_HEADERS,
   isDevSeamEnabled,

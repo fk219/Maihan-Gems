@@ -11,6 +11,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { VendorOrderLineDto, VendorProductDto, VendorProfileDto } from '@maihan/db';
+import { OperatorChart, OperatorEmpty } from '../../../components/admin/OperatorDesk.js';
+import { Button } from '../../../components/ui/button.js';
 import { accountApi, getAuthenticatedSessionActor } from '../../../lib/account-server.js';
 import {
   VendorOrdersWorkspace,
@@ -53,12 +55,12 @@ export default async function VendorPortalPage({ params }: PageProps) {
           vendor inventory, product moderation, and fulfilment workflows.
         </p>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
-          <Link href="/account/sign-in" className="lx-btn lx-btn--solid">
-            Sign in
-          </Link>
-          <Link href="/account/register" className="lx-btn lx-btn--ghost">
-            Apply as Trade Partner
-          </Link>
+          <Button asChild>
+            <Link href="/account/sign-in">Sign in</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/account/register">Apply as trade partner</Link>
+          </Button>
         </div>
       </div>
     );
@@ -74,12 +76,12 @@ export default async function VendorPortalPage({ params }: PageProps) {
           Partner vendor. Customer and administrative accounts are isolated from vendor workspaces.
         </p>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
-          <Link href="/account" className="lx-btn lx-btn--solid">
-            Return to Account
-          </Link>
-          <Link href="/" className="lx-btn lx-btn--ghost">
-            Storefront
-          </Link>
+          <Button asChild>
+            <Link href="/account">Return to account</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/">Storefront</Link>
+          </Button>
         </div>
       </div>
     );
@@ -102,7 +104,13 @@ export default async function VendorPortalPage({ params }: PageProps) {
     );
   }
 
-  const { vendor, summary } = dashRes.data;
+  const {
+    vendor,
+    summary,
+    recent_products: recentProducts = [],
+    recent_orders: recentOrders = [],
+  } = dashRes.data;
+  const productCount = Number(summary['total_products'] ?? 0);
 
   switch (section) {
     case undefined:
@@ -120,55 +128,98 @@ export default async function VendorPortalPage({ params }: PageProps) {
             </div>
           ) : null}
 
-          <div className="admin-tilegrid">
-            <div className="admin-tile">
-              <span className="admin-tile__label">Total Products</span>
-              <p className="admin-tile__value">{summary['total_products'] ?? 0}</p>
-            </div>
-            <div className="admin-tile">
-              <span className="admin-tile__label">Drafts</span>
-              <p className="admin-tile__value">{summary['draft_products'] ?? 0}</p>
-            </div>
-            <div className="admin-tile">
-              <span className="admin-tile__label">Pending Review</span>
-              <p className="admin-tile__value">{summary['submitted_products'] ?? 0}</p>
-            </div>
-            <div className="admin-tile">
-              <span className="admin-tile__label">Published Live</span>
-              <p className="admin-tile__value">{summary['published_products'] ?? 0}</p>
-            </div>
-            <div className="admin-tile">
-              <span className="admin-tile__label">Rejected</span>
-              <p className="admin-tile__value">{summary['rejected_products'] ?? 0}</p>
-            </div>
-            <div className="admin-tile">
-              <span className="admin-tile__label">Out of Stock</span>
-              <p className="admin-tile__value">{summary['out_of_stock_products'] ?? 0}</p>
-            </div>
-            <div className="admin-tile">
-              <span className="admin-tile__label">Order Lines</span>
-              <p className="admin-tile__value">{summary['total_order_lines'] ?? 0}</p>
-            </div>
-            <div className="admin-tile">
-              <span className="admin-tile__label">Revenue (USD)</span>
-              <p className="admin-tile__value">${summary['total_revenue_usd'] ?? '0.00'}</p>
-            </div>
-          </div>
+          {productCount === 0 ? (
+            <OperatorEmpty
+              title="The bench is empty."
+              copy="Nothing is on file for this desk yet."
+              href="/vendor/products"
+              action="Add your first piece"
+            />
+          ) : (
+            <OperatorChart
+              rows={[
+                { label: 'Pieces', value: productCount },
+                { label: 'Drafts', value: Number(summary['draft_products'] ?? 0) },
+                { label: 'In review', value: Number(summary['submitted_products'] ?? 0) },
+                { label: 'Published', value: Number(summary['published_products'] ?? 0) },
+                { label: 'Orders', value: Number(summary['total_order_lines'] ?? 0) },
+              ]}
+            />
+          )}
 
-          <section className="admin-panel">
-            <h2>Quick Actions</h2>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <Link href="/vendor/products" className="lx-btn lx-btn--solid">
-                Manage Products &amp; Submissions
-              </Link>
-              <Link href="/vendor/orders" className="lx-btn lx-btn--ghost">
-                Manage Order Fulfilment
-              </Link>
-              <Link href="/vendor/profile" className="lx-btn lx-btn--ghost">
-                Partner Profile
-              </Link>
-            </div>
+          <section>
+            <h2>Recent pieces</h2>
+            <table className="operator-table">
+              <thead>
+                <tr>
+                  <th>Piece</th>
+                  <th>SKU</th>
+                  <th>State</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={4}>No pieces yet.</td>
+                  </tr>
+                ) : (
+                  recentProducts.slice(0, 6).map((piece) => (
+                    <tr key={piece.id}>
+                      <td>{piece.title}</td>
+                      <td>{piece.sku}</td>
+                      <td>{piece.moderation_status}</td>
+                      <td>
+                        {piece.price_amount} {piece.currency}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </section>
+
+          <section>
+            <h2>Recent orders</h2>
+            <table className="operator-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Piece</th>
+                  <th>Qty</th>
+                  <th>State</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={4}>No orders yet.</td>
+                  </tr>
+                ) : (
+                  recentOrders.slice(0, 6).map((line) => (
+                    <tr key={line.order_item_id}>
+                      <td>{line.order_number}</td>
+                      <td>{line.title_snapshot}</td>
+                      <td>{line.quantity}</td>
+                      <td>{line.fulfillment_state}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </section>
+
+          <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+            <Button asChild>
+              <Link href="/vendor/products">Open products</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/vendor/orders">Open orders</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/vendor/profile">Partner profile</Link>
+            </Button>
+          </div>
         </VendorFrame>
       );
 
@@ -262,11 +313,11 @@ function VendorFrame({
         </nav>
       </aside>
       <main className="admin-main" id="main-content">
-        <span className="admin-eyebrow">
-          Maihan Gems · Trade Partner ({vendor.status})
-        </span>
-        <h1>{title}</h1>
-        <p className="admin-lede">{lede}</p>
+        <header className="operator-pagehead">
+          <span className="admin-eyebrow">Trade partner · {vendor.status}</span>
+          <h1>{title}</h1>
+          <p className="admin-lede">{lede}</p>
+        </header>
         {children}
       </main>
     </div>

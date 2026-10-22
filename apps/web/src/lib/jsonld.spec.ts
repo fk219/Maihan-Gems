@@ -83,7 +83,9 @@ describe('organizationNode — storefront identity from config', () => {
     expect(org['url']).toBe(`${BASE}/`);
     const contact = org['contactPoint'] as Array<Record<string, unknown>>;
     expect(contact).toHaveLength(1);
-    expect(contact[0]!['telephone']).toBe(ORGANIZATION_EVIDENCE.telephone);
+    expect(contact[0]!['telephone']).toBe(
+      ORGANIZATION_EVIDENCE.telephone === '' ? undefined : ORGANIZATION_EVIDENCE.telephone,
+    );
     // No invented fields: no logo, no sameAs, no openingHours, no geo.
     const keys = Object.keys(org);
     expect(keys.sort()).toEqual(['@type', 'contactPoint', 'name', 'url']);

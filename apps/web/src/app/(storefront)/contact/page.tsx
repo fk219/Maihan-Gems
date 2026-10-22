@@ -6,7 +6,7 @@
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { STOREFRONT_CONTACT } from '@maihan/config';
+import { publishedEmail, publishedPhone, STOREFRONT_CONTACT } from '@maihan/config';
 
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
 import { ViewingRequest } from '../../../components/storefront/ViewingRequest.js';
@@ -36,7 +36,7 @@ export default function ContactPage() {
       <div className="salon-grid">
         <section className="salon-note">
           <p className="page-eyebrow">{STOREFRONT_CONTACT.appointmentLabel}</p>
-          <h2>Direct line</h2>
+          <h2>The salon</h2>
           <p>
             {STOREFRONT_CONTACT.addressLine}
             <br />
@@ -44,11 +44,13 @@ export default function ContactPage() {
             <br />
             {STOREFRONT_CONTACT.hours}
           </p>
-          <p>
-            <a href={STOREFRONT_CONTACT.phoneHref}>{STOREFRONT_CONTACT.phoneDisplay}</a>
-            <br />
-            <a href={`mailto:${STOREFRONT_CONTACT.email}`}>{STOREFRONT_CONTACT.email}</a>
-          </p>
+          {publishedPhone() || publishedEmail() ? (
+            <p>
+              {publishedPhone() ? <a href={publishedPhone()!.href}>{publishedPhone()!.display}</a> : null}
+              {publishedPhone() && publishedEmail() ? <br /> : null}
+              {publishedEmail() ? <a href={`mailto:${publishedEmail()}`}>{publishedEmail()}</a> : null}
+            </p>
+          ) : null}
         </section>
 
         <section className="salon-note">
@@ -61,7 +63,7 @@ export default function ContactPage() {
         </section>
       </div>
 
-      <ViewingRequest email={STOREFRONT_CONTACT.email} />
+      <ViewingRequest email={publishedEmail() ?? ''} />
       <Accordion className="salon-note">
         <AccordionItem value="shipping">
           <AccordionTrigger className="flex w-full justify-between py-3 text-left font-[family-name:var(--font-serif)] text-2xl">Shipping</AccordionTrigger>
@@ -78,7 +80,7 @@ export default function ContactPage() {
         <AccordionItem value="viewing">
           <AccordionTrigger className="flex w-full justify-between py-3 text-left font-[family-name:var(--font-serif)] text-2xl">A private viewing</AccordionTrigger>
           <AccordionContent>
-            <p>Showroom visits are by appointment. Write to {STOREFRONT_CONTACT.email} or call {STOREFRONT_CONTACT.phoneDisplay}. There is no live booking calendar yet.</p>
+            <p>Showroom visits are by appointment. A public telephone and inbox are not published yet, and there is no live booking calendar.</p>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

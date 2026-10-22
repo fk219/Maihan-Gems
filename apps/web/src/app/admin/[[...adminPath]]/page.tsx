@@ -33,9 +33,10 @@ import type {
   VendorProfileDto,
 } from '@maihan/db';
 
+import { OperatorChart, OperatorEmpty } from '../../../components/admin/OperatorDesk.js';
+import { Button } from '../../../components/ui/button.js';
 import { requireAdminAccess, AdminGateScreen } from '../../../lib/admin-server.js';
 import { AdminSidebar } from '../../../components/admin/AdminSidebar.js';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card.js';
 import {
   AdminAiOpsWorkspace,
   AdminCertificatesWorkspace,
@@ -253,40 +254,46 @@ async function AdminDashboard() {
     { label: 'CMS Pages in Review', value: s['cms_pages_in_review'] ?? -1 },
   ];
 
+  const quiet = tiles.every((tile) => tile.value <= 0);
   return (
     <AdminFrame
       active="dashboard"
       title="Executive Dashboard"
       lede="Operational counts read live from the database. No invented metrics."
     >
-      <div className="operator-ledger">
-        <div className="operator-ledger__lead">
-          {tiles.slice(0, 3).map((tile) => (
-            <Card key={tile.label}>
-              <CardHeader>
-                <CardTitle>{tile.label}</CardTitle>
-                {tile.note ? <CardDescription>{tile.note}</CardDescription> : null}
-              </CardHeader>
-              <CardContent>
-                <p className="operator-figure">{fmt(tile.value)}</p>
-              </CardContent>
-            </Card>
+      {quiet ? (
+        <OperatorEmpty
+          title="The catalogue is quiet."
+          copy="Counts stay at zero until a piece or an order is recorded."
+          href="/admin/catalogue"
+          action="Open the catalogue"
+        />
+      ) : (
+        <OperatorChart
+          rows={tiles.map((tile) => ({ label: tile.label, value: Math.max(0, tile.value) }))}
+        />
+      )}
+      <table className="operator-table">
+        <thead>
+          <tr>
+            <th>Ledger</th>
+            <th>Count</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tiles.map((tile) => (
+            <tr key={tile.label}>
+              <td>{tile.label}</td>
+              <td>{fmt(tile.value)}</td>
+              <td>{tile.note ?? ''}</td>
+            </tr>
           ))}
-        </div>
-        <div className="operator-ledger__rest">
-          {tiles.slice(3).map((tile) => (
-            <Card key={tile.label}>
-              <CardHeader>
-                <CardTitle>{tile.label}</CardTitle>
-                {tile.note ? <CardDescription>{tile.note}</CardDescription> : null}
-              </CardHeader>
-              <CardContent>
-                <p className="operator-figure">{fmt(tile.value)}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+        </tbody>
+      </table>
+      <Button asChild variant="outline">
+        <a href="/admin/orders">Open orders</a>
+      </Button>
     </AdminFrame>
   );
 }
@@ -798,9 +805,11 @@ function AdminFrame({
     <div className="admin-layout">
       <AdminSidebar active={active} />
       <main className="admin-main" id="main-content">
-        <span className="admin-eyebrow">Maihan Gems · Back Office</span>
-        <h1>{title}</h1>
-        <p className="admin-lede">{lede}</p>
+        <header className="operator-pagehead">
+          <span className="admin-eyebrow">Back office</span>
+          <h1>{title}</h1>
+          <p className="admin-lede">{lede}</p>
+        </header>
         {children}
       </main>
     </div>

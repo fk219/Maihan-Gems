@@ -22,7 +22,7 @@
  *     element or inject markup.
  *   - Builders are pure and deterministic for identical input.
  */
-import { STOREFRONT_CONTACT } from '@maihan/config';
+import { publishedPhone, STOREFRONT_CONTACT } from '@maihan/config';
 import type { ProductDetailReadModel } from '@maihan/contracts';
 
 import { siteBaseUrl } from './sitemap.js';
@@ -64,7 +64,7 @@ export function absoluteUrl(base: string, path: string): string {
  */
 export const ORGANIZATION_EVIDENCE = {
   name: STOREFRONT_CONTACT.brand,
-  telephone: STOREFRONT_CONTACT.phoneDisplay.replace(/\s+/g, ''),
+  telephone: publishedPhone()?.display.replace(/\s+/g, '') ?? '',
   streetAddress: STOREFRONT_CONTACT.addressLine,
   addressLocality: STOREFRONT_CONTACT.city,
   addressRegion: STOREFRONT_CONTACT.region,
@@ -94,7 +94,7 @@ export function organizationNode(base: string): Record<string, unknown> {
     contactPoint: [
       {
         '@type': 'ContactPoint',
-        telephone: a.telephone,
+        ...(a.telephone ? { telephone: a.telephone } : {}),
         contactType: 'customer service',
         address: {
           '@type': 'PostalAddress',

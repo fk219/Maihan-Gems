@@ -20,6 +20,12 @@ vi.mock('next/headers', () => ({
   cookies: async () => ({ get: () => undefined }),
 }));
 
+vi.mock('server-only', () => ({}));
+
+vi.mock('next/image', () => ({
+  default: (props: { src?: string; alt?: string }) => createElement('img', { src: props.src ?? '', alt: props.alt ?? '' }),
+}));
+
 const HomePage = (await import('../../app/(storefront)/page.js')).default;
 
 describe('homepage redesign', () => {
@@ -36,22 +42,15 @@ describe('homepage redesign', () => {
 
     expect(container.querySelectorAll('main.mgh').length).toBe(1);
     expect(container.querySelector('.mgh-hero__title')?.textContent).toContain('natural gemstones');
+    expect(container.querySelector('.vitrine .ink-cta')).not.toBeNull();
+    expect(container.querySelector('.vitrine form')).toBeNull();
     expect(container.querySelector('.mgh-gems h2')?.textContent).toBe('Gemstones');
     expect(container.querySelectorAll('.mgh-gem').length).toBeGreaterThanOrEqual(10);
-    expect(container.querySelector('.mgh-jewellery h2')?.textContent).toContain('Jewellery');
-    expect(container.querySelectorAll('.mgh-jewellery .mgh-jew').length).toBe(4);
-    expect(container.querySelector('#mgh-set-h')?.textContent).toBe('Settings');
-    expect(container.querySelector('.mgh-pack h2')?.textContent).toContain('Packaging');
-    expect(container.querySelectorAll('.mgh-pack__item').length).toBe(5);
-    expect(container.querySelector('.mgh-dyo h2')?.textContent).toContain('Design Your Own');
-    expect(container.querySelectorAll('.mgh-steps li').length).toBe(3);
-    expect(container.querySelector('.mgh-history h2')?.textContent).toContain('History');
-    expect(container.querySelectorAll('.mgh-history__card').length).toBe(3);
-    expect(container.querySelector('.mgh-peace h2')?.textContent).toContain('Peace');
-    expect(container.querySelectorAll('.mgh-peace__card').length).toBe(4);
-    expect(container.querySelector('.mgh-about h2')?.textContent).toContain('About');
-    expect(container.querySelector('.mgh-charity h2')?.textContent).toContain('Charity');
+    expect(container.querySelector('#atelier-pieces-h')?.textContent).toBe('Signature pieces');
+    expect(container.querySelector('#atelier-story-h')?.textContent).toContain('disclosed');
+    expect(container.querySelector('.mgh-dyo h2')?.textContent).toContain('Design your own');
     expect(container.querySelectorAll('.mgh-quote').length).toBe(0);
+    expect(container.textContent).not.toContain('+971 4 000 0000');
 
     const results = await new AxeBuilder().analyze();
     const blocking = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');

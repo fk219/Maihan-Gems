@@ -30,15 +30,15 @@ export function CartDrawer() {
   if (pathname.startsWith('/checkout') || pathname.startsWith('/cart')) return null;
 
   return (
-    <div className="cloth-bag-anchor">
+    <div className="cloth-bag-host">
       <SmoothDrawer
         open={open}
         onOpenChange={setOpen}
+        showTrigger={false}
         title="The bag"
         description={items.length === 0 ? 'Nothing is held yet.' : undefined}
         currency={currency}
         taxRate={0}
-        triggerLabel={items.length > 0 ? `Bag ${items.length}` : 'Bag'}
         confirmLabel="Review the bag"
         items={items.map((item) => ({
           id: item.id,

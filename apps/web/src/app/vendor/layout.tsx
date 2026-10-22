@@ -7,6 +7,7 @@
 import '../../styles/admin.css';
 import '../../styles/maison.css';
 import '../../styles/operator.css';
+import '../../styles/atelier.css';
 
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
   return (
