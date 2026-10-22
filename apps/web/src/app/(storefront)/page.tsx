@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { VaultReveal } from '../../components/storefront/VaultReveal.js';
 
 import { HeroSearch } from '../../components/storefront/HeroSearch.js';
-import { NGC_MEDIA } from '../../lib/ngc-home.js';
 import { currentStorefront } from '../../lib/ngc/current-storefront.js';
 import { withPrefix } from '../../lib/ngc/storefronts.js';
 
@@ -62,10 +61,15 @@ const SETTINGS: readonly { label: string; href: string; meta: string; img: strin
   { label: 'Bracelet settings', href: '/gemstone-bracelet-settings', meta: 'Tennis & bangle seats', img: '/media/setting-ring.jpg' },
 ];
 
-const PACKAGING: readonly { src: string; alt: string }[] = [1, 2, 3, 4, 5].map((n) => ({
-  src: `${NGC_MEDIA}/images/hi-res-webp/packaging/package${n}@2x.webp`,
-  alt: `Maihan presentation packaging ${n}`,
-}));
+/* The legacy packaging CDN answers 403 in this environment. These are real
+   house photographs already shipped with the storefront. */
+const PACKAGING: readonly { src: string; alt: string }[] = [
+  { src: '/media/jew-sapphire-ring.jpg', alt: 'Sapphire ring from the house collection' },
+  { src: '/media/jew-sapphire-studs.jpg', alt: 'Sapphire studs from the house collection' },
+  { src: '/media/jew-sapphire-pendant.jpg', alt: 'Sapphire pendant from the house collection' },
+  { src: '/media/jew-tennis-bracelet.jpg', alt: 'Tennis bracelet from the house collection' },
+  { src: '/media/jew-ruby-band.jpg', alt: 'Ruby band from the house collection' },
+];
 
 const HISTORY: readonly { eyebrow: string; title: string; text: string; img: string }[] = [
   {
@@ -371,8 +375,8 @@ export default async function HomePage({
               <h2 id="mgh-pack-h" className="mgh-h2">Our Packaging</h2>
             </div>
             <p className="mgh-lede">
-              Every piece travels with the full ceremony — lacquered presentation cases, satin
-              pouches, grading papers and certificates.
+              Finished pieces leave with their papers. The old ceremony photographs are not
+              available from the previous host, so the row shows house jewels instead.
             </p>
           </div>
           <div className="mgh-pack__row">

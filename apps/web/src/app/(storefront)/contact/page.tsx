@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="page contact-page">
+    <main className="page contact-page" id="main-content">
       <Breadcrumbs
         crumbs={[
           { label: 'Home', href: '/' },
@@ -25,56 +25,52 @@ export default function ContactPage() {
         ]}
       />
 
-      <span className="page-eyebrow">Private Client Advisory</span>
-      <h1>Contact Atelier Concierge</h1>
+      <span className="page-eyebrow">Private client advisory</span>
+      <h1>Contact the atelier</h1>
       <p className="page-subtitle">
-        Schedule a private gemstone viewing or commission a bespoke high-jewellery mounting with our master goldsmiths.
+        Arrange a private viewing, or commission a mounting with the goldsmiths.
       </p>
 
-      <div className="concierge-shell">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
-          <div style={{ padding: '1.75rem', background: '#F6F2E9', borderRadius: '12px', border: '1px solid rgba(212, 164, 55, 0.2)' }}>
-            <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>Direct Line</span>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', margin: '0 0 0.5rem 0' }}>{STOREFRONT_CONTACT.appointmentLabel}</h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-              {STOREFRONT_CONTACT.addressLine}<br />
-              {STOREFRONT_CONTACT.city}, {STOREFRONT_CONTACT.region}<br />
-              {STOREFRONT_CONTACT.hours}<br />
-              <strong className="font-mono" style={{ color: 'var(--gold-dark)', display: 'block', marginTop: '0.5rem' }}>
-                {STOREFRONT_CONTACT.phoneDisplay}
-              </strong>
-              <a href={`mailto:${STOREFRONT_CONTACT.email}`} style={{ display: 'block', marginTop: '0.35rem', color: 'var(--gold-dark)' }}>
-                {STOREFRONT_CONTACT.email}
-              </a>
-            </p>
-          </div>
-
-          <div style={{ padding: '1.75rem', background: '#F6F2E9', borderRadius: '12px', border: '1px solid rgba(212, 164, 55, 0.2)' }}>
-            <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>Appointments</span>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', margin: '0 0 0.5rem 0' }}>Private viewing</h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-              Showroom visits are by appointment. Write or call using the placeholders above until the house publishes live contact details.
-            </p>
-          </div>
-        </div>
-
-        <div style={{ padding: '2rem', background: '#F6F2E9', borderRadius: '12px', border: '1px solid rgba(212, 164, 55, 0.2)' }}>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
-            Request Private Gemstone Viewing
-          </h2>
-          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-            Our gemmologists arrange armored transit and secure salon viewings for qualified collectors and private clients.
+      <div className="salon-grid">
+        <section className="salon-note">
+          <p className="page-eyebrow">{STOREFRONT_CONTACT.appointmentLabel}</p>
+          <h2>Direct line</h2>
+          <p>
+            {STOREFRONT_CONTACT.addressLine}
+            <br />
+            {STOREFRONT_CONTACT.city}, {STOREFRONT_CONTACT.region}
+            <br />
+            {STOREFRONT_CONTACT.hours}
           </p>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <Link href="/design-your-own" className="btn-primary">
-              Launch Bespoke Configurator
-            </Link>
-            <Link href="/showrooms" className="btn-secondary">
-              View International Salons
-            </Link>
-          </div>
-        </div>
+          <p>
+            <a href={STOREFRONT_CONTACT.phoneHref}>{STOREFRONT_CONTACT.phoneDisplay}</a>
+            <br />
+            <a href={`mailto:${STOREFRONT_CONTACT.email}`}>{STOREFRONT_CONTACT.email}</a>
+          </p>
+        </section>
+
+        <section className="salon-note">
+          <p className="page-eyebrow">Appointments</p>
+          <h2>Private viewing</h2>
+          <p>
+            Showroom visits are by appointment. Write or call using the details above until the house
+            publishes a live booking calendar.
+          </p>
+        </section>
       </div>
+
+      <section className="salon-note">
+        <h2>Request a viewing</h2>
+        <p>The configurator keeps the composition honest. The salons are listed separately.</p>
+        <div className="maison-missing__actions">
+          <Link href="/design-your-own" className="lx-btn lx-btn--solid">
+            Design your own
+          </Link>
+          <Link href="/showrooms" className="lx-btn lx-btn--ghost">
+            View the salons
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

@@ -6,7 +6,15 @@
  * re-checks its own capability through requireAdminAccess.
  */
 import '../../styles/admin.css';
+import '../../styles/maison.css';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <div className="admin-shell">{children}</div>;
+  return (
+    <>
+      <a className="maison-skip" href="#main-content">
+        Skip to content
+      </a>
+      <div className="admin-shell">{children}</div>
+    </>
+  );
 }

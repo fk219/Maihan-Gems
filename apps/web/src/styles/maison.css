@@ -1,0 +1,1127 @@
+/* ============================================================================
+   Maihan Gems — Daylight Salon
+   Appended last. Silk & Stone tokens stay: alabaster, ink, night, metal.
+   Gold is a hairline. Primary actions are night ink. The photograph is the
+   colour. One load motion: the hero stone settles into its tray.
+   ========================================================================== */
+
+body {
+  background: var(--warm-alabaster);
+}
+
+body :focus-visible {
+  outline: 2px solid var(--gold-dark);
+  outline-offset: 3px;
+}
+
+.maison-skip {
+  position: absolute;
+  left: 1rem;
+  top: 0.75rem;
+  z-index: 200;
+  transform: translateY(-160%);
+  padding: 0.65rem 1rem;
+  background: var(--navy-deep);
+  color: var(--warm-white);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+}
+
+.maison-skip:focus {
+  transform: none;
+}
+
+/* ── Header: a quiet bar, sentence case ─────────────────────────────────── */
+
+body .ngc-header {
+  background: rgba(246, 242, 233, 0.94);
+  border-bottom: 1px solid rgba(29, 23, 16, 0.08);
+  box-shadow: none;
+  backdrop-filter: saturate(1.2) blur(10px);
+}
+
+body .ngc-top {
+  background: var(--navy-deep);
+  letter-spacing: 0.02em;
+  font-size: 0.75rem;
+}
+
+body .ngc-logo__word {
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  font-size: clamp(1.55rem, 2vw, 1.85rem);
+}
+
+body .ngc-logo__sub {
+  letter-spacing: 0.18em;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+body .ngc-nav__link {
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-weight: 400;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+body .ngc-nav__link::after {
+  height: 1px;
+  bottom: 1.35rem;
+  background: var(--text-primary);
+}
+
+body .ngc-cta,
+body .ngc-drawer__cta {
+  background: var(--navy-deep);
+  color: var(--warm-white);
+  box-shadow: none;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: 0;
+}
+
+body .ngc-cta:hover,
+body .ngc-drawer__cta:hover {
+  transform: translateY(-1px);
+  filter: none;
+  background: var(--gold-dark);
+  color: var(--warm-white);
+}
+
+body .ngc-iconbtn {
+  border-radius: 0;
+  width: 2.6rem;
+  height: 2.6rem;
+}
+
+body .mega-panel {
+  background: var(--studio-white);
+  border-top: 1px solid rgba(29, 23, 16, 0.08);
+  box-shadow: 0 28px 50px -32px rgba(22, 17, 12, 0.45);
+}
+
+body .mega-tile span,
+body .mega-more {
+  background: var(--media-canvas);
+  border-radius: 0;
+}
+
+body .mega-styles a {
+  border-radius: 0;
+}
+
+/* ── Primary actions: ink, not a gold wash ──────────────────────────────── */
+
+body .mgh-btn,
+body .lx-btn,
+body .btn-primary,
+body .btn-secondary,
+body .btn-outline {
+  border-radius: 0;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  box-shadow: none;
+}
+
+body .mgh-btn.mgh-btn--gold,
+body .lx-btn.lx-btn--solid,
+body .ngc-pages .lx-btn--solid,
+body .btn-primary,
+body .atelier__bag,
+body .lx-account-form .lx-btn.lx-btn--solid,
+body .checkout-shell .lx-btn.lx-btn--solid {
+  background: var(--navy-deep);
+  background-image: none;
+  color: var(--warm-white);
+  border: 1px solid var(--navy-deep);
+  filter: none;
+  box-shadow: none;
+}
+
+body .mgh-btn.mgh-btn--gold:hover,
+body .lx-btn.lx-btn--solid:hover,
+body .ngc-pages .lx-btn--solid:hover,
+body .btn-primary:hover,
+body .atelier__bag:hover,
+body .lx-account-form .lx-btn.lx-btn--solid:hover {
+  background: var(--gold-dark);
+  background-image: none;
+  border-color: var(--gold-dark);
+  color: var(--warm-white);
+  transform: translateY(-1px);
+  filter: none;
+  box-shadow: none;
+}
+
+body .mgh-btn--ghost,
+body .lx-btn--ghost,
+body .btn-secondary,
+body .btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid rgba(29, 23, 16, 0.28);
+}
+
+body .mgh-hero .mgh-btn--ghost {
+  color: var(--text-primary);
+  border-color: rgba(29, 23, 16, 0.28);
+}
+
+body .mgh-btn--ghost:hover,
+body .lx-btn--ghost:hover,
+body .btn-secondary:hover {
+  background: var(--navy-deep);
+  color: var(--warm-white);
+  border-color: var(--navy-deep);
+}
+
+body .mgh-btn--dark {
+  background: var(--navy-deep);
+  color: var(--warm-white);
+}
+
+body .mgh-btn--outline:hover {
+  background: var(--navy-deep);
+  color: var(--warm-white);
+  border-color: var(--navy-deep);
+}
+
+/* ── Homepage: the stone on a paper tray ─────────────────────────────────── */
+
+body .mgh-hero {
+  background: var(--warm-alabaster);
+  color: var(--text-primary);
+  border-bottom: 0;
+}
+
+body .mgh-hero::before,
+body .mgh-hero::after {
+  display: none;
+}
+
+body .vault-hero__grid {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  min-height: min(92vh, 54rem);
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: 0;
+  align-items: stretch;
+}
+
+body .vault-hero__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2.5rem, 6vh, 5.5rem) clamp(1.4rem, 4.5vw, 4.5rem);
+}
+
+body .vault-hero__eyebrow,
+body .mgh-hero .mgh-eyebrow {
+  justify-content: flex-start;
+  color: var(--text-secondary);
+  letter-spacing: 0.14em;
+  animation: none;
+}
+
+body .vault-hero__eyebrow::before,
+body .mgh-hero .mgh-eyebrow::before {
+  display: block;
+  background: var(--gold-dark);
+}
+
+body .vault-hero__eyebrow::after,
+body .mgh-hero .mgh-eyebrow::after {
+  display: none;
+}
+
+body .vault-hero__title,
+body .mgh-hero__title {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: clamp(2.8rem, 5.4vw, 5.1rem);
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+  max-width: 11ch;
+  margin: 0.6rem 0 1.1rem;
+  animation: none;
+  clip-path: none;
+}
+
+body .vault-hero__title em,
+body .mgh-h2 em,
+body .mgh-hero__title em {
+  font-style: italic;
+  font-weight: 500;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: var(--text-primary);
+}
+
+body .vault-hero__lede,
+body .mgh-hero__sub {
+  color: var(--text-secondary);
+  font-weight: 400;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 36ch;
+  animation: none;
+}
+
+body .vault-hero__actions,
+body .mgh-hero__actions {
+  justify-content: flex-start;
+  animation: none;
+}
+
+body .mgh-hero .mgh-hero__search input,
+body .mgh-hero .lx-search__box {
+  background: var(--studio-white);
+  color: var(--text-primary);
+  border-color: rgba(29, 23, 16, 0.12);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body .lx-search__box button,
+body .ngc-pages .lx-search__box button {
+  background: var(--navy-deep);
+  background-image: none;
+  color: var(--warm-white);
+  border-radius: 0;
+  box-shadow: none;
+  text-transform: none;
+  letter-spacing: 0.06em;
+}
+
+body .vault-vitrine {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--media-canvas);
+  box-shadow: none;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: none;
+}
+
+body .vault-vitrine::before {
+  display: none;
+}
+
+body .vault-vitrine__img {
+  width: 100%;
+  height: 100%;
+  min-height: 22rem;
+  aspect-ratio: auto;
+  object-fit: cover;
+  background: var(--media-canvas);
+  animation: maison-settle 1.05s var(--ease-luxury) both;
+}
+
+body .vault-vitrine__plate {
+  position: static;
+  max-width: none;
+  margin: 0;
+  padding: 1rem 1.25rem 0.35rem;
+  background: var(--studio-white);
+  border-top: 0;
+  border-left: 0;
+}
+
+body .vault-vitrine__plate-id {
+  color: var(--gold-dark);
+  letter-spacing: 0.12em;
+}
+
+body .vault-vitrine__plate-name,
+body .vault-vitrine__plate-facts {
+  color: var(--text-primary);
+}
+
+body .vault-vitrine__plate-facts {
+  color: var(--text-secondary);
+}
+
+body .vault-evidence {
+  position: static;
+  width: auto;
+  margin: 0;
+  padding: 0.75rem 1.25rem 1.15rem;
+  background: var(--studio-white);
+  border-top: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem 0.8rem;
+}
+
+body .vault-evidence dt {
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+}
+
+body .vault-evidence dd {
+  color: var(--text-primary);
+  white-space: normal;
+}
+
+@keyframes maison-settle {
+  from { clip-path: inset(6% 0 0 0); }
+  to { clip-path: inset(0); }
+}
+
+@media (max-width: 979px) {
+  body .vault-hero__grid {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  body .vault-hero__title,
+  body .mgh-hero__title {
+    font-size: clamp(2.5rem, 12vw, 3.6rem);
+    max-width: 12ch;
+  }
+
+  body .vault-vitrine__img {
+    min-height: 18rem;
+    max-height: 24rem;
+  }
+
+  body .vault-evidence {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ── Cabinet, jewellery, ledger ──────────────────────────────────────────── */
+
+body .mgh-eyebrow {
+  letter-spacing: 0.16em;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+body .mgh-h2 {
+  font-size: clamp(2.1rem, 4vw, 3.4rem);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+body .mgh-gem {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body .mgh-gem:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+body .mgh-gem__index {
+  display: none;
+}
+
+body .mgh-gem__frame {
+  border: 0;
+  background: var(--media-canvas);
+}
+
+body .mgh-gem__name {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  padding: 0.75rem 0.1rem 0;
+}
+
+body .mgh-gem__name::after {
+  display: none;
+}
+
+body .mgh-gem:hover .mgh-gem__frame img {
+  transform: scale(1.03);
+}
+
+body .mgh-jewellery {
+  background: var(--navy-deep);
+}
+
+body .mgh-jew {
+  border: 0;
+  border-radius: 0;
+}
+
+body .mgh-jew__label {
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+}
+
+@media (min-width: 800px) {
+  body .mgh-jewellery__grid {
+    grid-template-columns: 1.35fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  body .mgh-jew:first-child {
+    grid-row: 1 / span 2;
+  }
+
+  body .mgh-jew:first-child img {
+    height: 100%;
+    aspect-ratio: auto;
+    min-height: 28rem;
+  }
+}
+
+body .mgh-set__row {
+  border-bottom-color: rgba(29, 23, 16, 0.1);
+  padding-left: 0;
+}
+
+body .mgh-set__row:hover {
+  background: transparent;
+  padding-left: 0.35rem;
+}
+
+body .mgh-set__label {
+  font-size: clamp(1.6rem, 2.4vw, 2.15rem);
+}
+
+body .mgh-set__row:hover .mgh-set__label {
+  color: var(--text-primary);
+}
+
+body .mgh-set__num {
+  color: var(--text-muted);
+}
+
+body .mgh-set__thumb {
+  border-radius: 0;
+}
+
+body .mgh-pack {
+  background: var(--studio-white);
+}
+
+body .mgh-pack__item {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--media-canvas);
+}
+
+body .mgh-dyo__panel {
+  background: var(--studio-white);
+  border: 1px solid rgba(29, 23, 16, 0.08);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body .mgh-history__card,
+body .mgh-peace,
+body .mgh-quote,
+body .mgh-charity {
+  border-radius: 0;
+}
+
+body .mgh-peace {
+  background: var(--navy);
+}
+
+body .mgh-history__timeline {
+  display: grid;
+  gap: 1.75rem;
+}
+
+body .mgh-history__timeline::before,
+body .mgh-history__timeline li::before {
+  content: none;
+}
+
+body .mgh-history__timeline li,
+body .mgh-history__timeline li:nth-child(odd),
+body .mgh-history__timeline li:nth-child(even),
+body .mgh-history__timeline li:not(:first-child) {
+  position: static;
+  width: auto;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 900px) {
+  body .mgh-history__timeline {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  body .mgh-history__timeline::before,
+  body .mgh-history__timeline li::before {
+    content: none;
+  }
+
+  body .mgh-history__timeline li,
+  body .mgh-history__timeline li:nth-child(odd),
+  body .mgh-history__timeline li:nth-child(even),
+  body .mgh-history__timeline li:not(:first-child) {
+    width: auto;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+body .mgh-history__card {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+body .mgh-history__card img {
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  margin-bottom: 0.9rem;
+}
+
+body .mgh-quote {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid rgba(29, 23, 16, 0.12);
+  box-shadow: none;
+  padding: 1.25rem 0 0;
+}
+
+body .mgh-quote--feature {
+  border-top: 0;
+  padding-top: 0;
+}
+
+body .mgh-quote p {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+body .mgh-link {
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  border-bottom-color: var(--text-primary);
+}
+
+body .mgh-cta {
+  background: var(--media-canvas);
+}
+
+body .mgh-cta .mgh-h2,
+body .mgh-cta .mgh-lede,
+body .mgh-cta .mgh-eyebrow {
+  color: var(--text-primary);
+}
+
+/* ── Listings and product pages ──────────────────────────────────────────── */
+
+body .lx-page-hero {
+  min-height: 0;
+  display: grid;
+  align-items: stretch;
+  background: var(--warm-alabaster);
+}
+
+body .lx-page-hero:has(.lx-page-hero__photo) {
+  grid-template-columns: 1fr;
+}
+
+body .lx-page-hero__photo {
+  position: relative;
+  inset: auto;
+  opacity: 1;
+  width: 100%;
+  height: 16rem;
+  object-fit: cover;
+}
+
+body .lx-page-hero__veil {
+  display: none;
+}
+
+body .lx-page-hero__copy,
+body .lx-page-hero .lx-h1,
+body .lx-page-hero .lx-h2,
+body .lx-page-hero .lx-lede,
+body .lx-page-hero .lx-kicker,
+body .lx-crumb--on-hero,
+body .lx-crumb--on-hero a,
+body .lx-crumb--on-hero span {
+  color: var(--text-primary);
+}
+
+body .lx-page-hero .lx-lede,
+body .lx-page-hero .lx-kicker {
+  color: var(--text-secondary);
+}
+
+body .lx-page-hero__copy {
+  padding-top: 2.2rem;
+  padding-bottom: 1.5rem;
+}
+
+@media (min-width: 900px) {
+  body .lx-page-hero:has(.lx-page-hero__photo) {
+    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.85fr);
+    min-height: 26rem;
+  }
+
+  body .lx-page-hero__photo {
+    height: 100%;
+    min-height: 26rem;
+    order: 2;
+  }
+
+  body .lx-page-hero__copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+body .lx-kicker,
+body .page-eyebrow {
+  letter-spacing: 0.16em;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+body .lx-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body .lx-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+body .lx-card__media {
+  background: var(--media-canvas);
+  border-radius: 0;
+}
+
+body .lx-card__title {
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+body .lx-card:hover .lx-card__title a,
+body .lx-card__title a:hover {
+  color: var(--text-primary);
+}
+
+body .lx-card__price {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--text-primary);
+}
+
+body .lx-card__meta {
+  letter-spacing: 0.08em;
+}
+
+body .lx-quick {
+  background: var(--navy-deep);
+  color: var(--warm-white);
+  border-radius: 0;
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+
+body .lx-heart,
+body .lx-compare-icon {
+  border-radius: 0;
+  background: rgba(253, 251, 245, 0.92);
+}
+
+body .ngc-gallery__stage {
+  border-radius: 0;
+  min-height: min(72vh, 42rem);
+  background: var(--media-canvas);
+}
+
+body .ngc-thumbs button,
+body .ngc-gallery__tabs button {
+  border-radius: 0;
+}
+
+body .ngc-pdp .lx-h1,
+body .ngc-pdp h1 {
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+
+body .page {
+  padding-top: 2.75rem;
+}
+
+body .page h1 {
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  max-width: 18ch;
+}
+
+body .page p,
+body .page li {
+  max-width: 68ch;
+}
+
+/* ── Bag, checkout, account, atelier ─────────────────────────────────────── */
+
+body .lx-account-card,
+body .checkout-shell,
+body .lx-bag,
+body .concierge-shell > div {
+  border-radius: 0;
+  box-shadow: none;
+  border: 0;
+  border-top: 1px solid rgba(29, 23, 16, 0.1);
+  background: transparent;
+}
+
+body .lx-account-field input,
+body .lx-account-field select,
+body .lx-account-field textarea,
+body .checkout-shell input,
+body .checkout-shell select,
+body .checkout-shell textarea {
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(29, 23, 16, 0.22);
+  background: transparent;
+  min-height: 2.8rem;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+body .lx-account-field input:focus-visible,
+body .lx-account-field select:focus-visible,
+body .checkout-shell input:focus-visible,
+body .checkout-shell select:focus-visible,
+body .checkout-shell textarea:focus-visible {
+  border-color: var(--text-primary);
+  box-shadow: none;
+  outline: 2px solid var(--gold-dark);
+  outline-offset: 4px;
+}
+
+body .lx-account-nav a {
+  border-radius: 0;
+  min-height: 2.75rem;
+}
+
+body .lx-account-nav a.is-on,
+body .lx-text-btn.is-on,
+body .ngc-pages .lx-text-btn.is-on {
+  background: transparent;
+  color: var(--text-primary);
+  box-shadow: inset 0 -1px 0 var(--text-primary);
+}
+
+body .checkout-step::before {
+  content: none;
+}
+
+body .checkout-step span:first-child {
+  border-radius: 0;
+  background: transparent;
+}
+
+body .checkout-step--active span:first-child {
+  background: var(--navy-deep);
+  color: var(--warm-white);
+  border-color: var(--navy-deep);
+}
+
+body .atelier,
+body .dyo-container {
+  padding-top: 1.5rem;
+}
+
+body .atelier-card,
+body .atelier__stage {
+  border-radius: 0;
+}
+
+body .atelier-card.is-on {
+  outline: 1px solid var(--gold-dark);
+  outline-offset: 0;
+}
+
+body .atelier__metals button,
+body .atelier__sizes button {
+  border-radius: 0;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+
+body .home-footer {
+  border-top: 0;
+  padding-top: 4rem;
+}
+
+body .home-footer::before {
+  display: none;
+}
+
+body .home-footer__cta {
+  border-radius: 0;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: 0.95rem;
+  color: var(--warm-white);
+  border-color: rgba(246, 242, 233, 0.35);
+}
+
+body .home-footer__cta:hover {
+  background: var(--warm-white);
+  color: var(--navy-deep);
+  transform: translateY(-1px);
+}
+
+body .home-footer a:hover {
+  color: var(--warm-white);
+}
+
+/* ── Missing page ────────────────────────────────────────────────────────── */
+
+.maison-missing {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  padding: 4rem 1.5rem 5rem;
+  background: var(--warm-alabaster);
+  color: var(--text-primary);
+}
+
+.maison-missing__panel {
+  max-width: 36rem;
+}
+
+.maison-missing h1 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  letter-spacing: -0.03em;
+  line-height: 0.98;
+  margin: 0.4rem 0 0.8rem;
+}
+
+.maison-missing p {
+  color: var(--text-secondary);
+  max-width: 36ch;
+}
+
+.maison-missing__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+/* ── Contact salon notes ─────────────────────────────────────────────────── */
+
+.salon-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+@media (min-width: 800px) {
+  .salon-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .salon-split {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 3rem;
+    align-items: end;
+  }
+}
+
+.salon-note {
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(29, 23, 16, 0.12);
+}
+
+.salon-note h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.7rem;
+  margin: 0.35rem 0 0.6rem;
+}
+
+.salon-note p,
+.salon-note a {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.salon-note a {
+  color: var(--text-primary);
+}
+
+.salon-figure {
+  margin: 0;
+  background: var(--media-canvas);
+}
+
+.salon-figure img {
+  display: block;
+  width: 100%;
+  height: min(70vh, 36rem);
+  object-fit: cover;
+}
+
+/* ── Back office: a paper ledger ─────────────────────────────────────────── */
+
+body .admin-gate {
+  border-color: rgba(29, 23, 16, 0.1);
+  box-shadow: none;
+}
+
+body .admin-gate a.lx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+}
+
+body .admin-gate a.lx-btn.lx-btn--ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid rgba(29, 23, 16, 0.28);
+}
+
+body .admin-shell {
+  background: var(--warm-alabaster);
+}
+
+body .admin-topbar {
+  background: var(--navy-deep);
+  border-bottom: 0;
+}
+
+body .admin-sidebar {
+  background: transparent;
+  border-color: rgba(29, 23, 16, 0.08);
+}
+
+body .admin-sidebar nav a {
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  border-left-width: 1px;
+  border-radius: 0;
+}
+
+body .admin-sidebar nav a.is-on {
+  background: transparent;
+  color: var(--text-primary);
+  border-left-color: var(--text-primary);
+}
+
+body .admin-tile,
+body .admin-table {
+  border-radius: 0;
+  border-color: rgba(29, 23, 16, 0.1);
+  background: var(--studio-white);
+}
+
+body .admin-tile__value {
+  font-family: var(--font-serif);
+  font-size: 2.4rem;
+  font-weight: 500;
+}
+
+body .admin-table th {
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--warm-alabaster);
+  position: sticky;
+  top: 0;
+}
+
+body .admin-main {
+  padding: 1.75rem 1.25rem 3.5rem;
+}
+
+@media (max-width: 899px) {
+  body .admin-sidebar nav {
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    padding-bottom: 0.4rem;
+  }
+
+  body .admin-sidebar__group {
+    display: none;
+  }
+
+  body .admin-sidebar nav a {
+    white-space: nowrap;
+    border-left: 0;
+    border-bottom: 1px solid transparent;
+    padding: 0.4rem 0.7rem;
+  }
+
+  body .admin-sidebar nav a.is-on {
+    border-bottom-color: var(--text-primary);
+  }
+
+  body .admin-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  body .ngc-bar .ngc-cta {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .vault-vitrine__img,
+  body .vault-hero__title,
+  body .mgh-hero__title,
+  body .vault-reveal__item {
+    animation: none;
+    transition: none;
+    clip-path: none;
+    transform: none;
+    opacity: 1;
+  }
+}

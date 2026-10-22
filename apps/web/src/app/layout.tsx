@@ -11,6 +11,7 @@
 import { organizationJsonLdPayload } from '../lib/jsonld.js';
 import { JsonLd } from '../components/seo/JsonLd.js';
 import './globals.css';
+import '../styles/maison.css';
 import { MAIHAN_THEME_CSS } from '../lib/theme-styles.js';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

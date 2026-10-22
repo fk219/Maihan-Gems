@@ -5,6 +5,7 @@ import '../../styles/vault-vitrine.css';
 import '../../styles/vault-premium.css';
 import '../../styles/vault-composition.css';
 import '../../styles/vault-motion.css';
+import '../../styles/maison.css';
 
 import { AiConciergeLauncher } from '../../components/ai/AiConciergeLauncher.js';
 import { StorefrontHeader } from '../../components/layout/StorefrontHeader.js';
@@ -20,6 +21,9 @@ export default async function StorefrontLayout({ children }: { children: React.R
   const offline = isCatalogueOffline() && loadNgcCatalog().length === 0;
   return (
     <StorefrontProvider rates={rates} initialCurrency={initialCurrency}>
+      <a className="maison-skip" href="#main-content">
+        Skip to content
+      </a>
       <StorefrontHeader />
       {offline ? (
         <p className="ngc-offline">
