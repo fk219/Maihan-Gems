@@ -1,5 +1,9 @@
 # MASTER TRUTH AUDIT + REMEDIATION ROUND 2 (2026-10-19)
 
+> **2026-10-22 UPDATE 10 — GRAFF PASS.** Studio photographs multiply onto bone, so the hero, the story, and the listing no longer sit in white slabs. Listing cards, the toolbar, gallery tabs and the catalogue empty state have no boxes. The phone product page leads with the jewel. The story reveal rests in readable muted ink. Nothing pushed.
+
+> **2026-10-22 UPDATE 9 — THE VITRINE.** Homepage rebuilt as a 12-column window: headline in clear space, one Cloudinary stone with GSAP parallax, one ink button. Shop-by-stone grid, signature carousel of real jewels, 50/50 TextReveal, full-bleed design-your-own band. No testimonials. Placeholder phone and example inbox stay unpublished. Nav has no boxes; focus is `:focus-visible` only. Vendor and admin desks use a sidebar, live counts, tables, and an empty state when the bench is empty. `atelier.css` is the visual system. Nothing pushed.
+
 > **2026-10-22 UPDATE 8 — HERO ORDER AND OPERATOR NAV.** Phone hero is a column: stone, then headline and both calls to action, then the K11733 plate. The desktop stone zoom is only on the photograph, so the K11733 plate stays inside the frame and above the concierge. Admin and vendor sidebars scroll as one row under 900px. Checkout keeps a single stepper; breadcrumbs are a quiet trail. About and DYO sentence dashes are gone. Nothing pushed.
 
 > **2026-10-22 UPDATE 7 — STATUS, CONTRAST, COPY.** Unknown one-segment URLs now return HTTP 404 from the proxy before a loading boundary can flush 200. Variety, browse, jewellery, settings, and pairs pages carry meta descriptions taken from existing ledes. Logo subline and evidence labels use `#5C5344` so small text clears AA on the ground. Visible homepage em dashes are removed. `DESIGN.md` records the cloth concept. Local API on :3001 must run with `NODE_ENV=development` (or `MAIHAN_DEV_SEAM=1`) or session verification fail-closes without `MAIHAN_SESSION_SECRET`.

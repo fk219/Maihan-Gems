@@ -275,7 +275,7 @@ export function ProductStudio({
             <TabsList variant="line" className="ngc-gallery__tabs">
               <AnimatedBackground
                 defaultValue={tab}
-                className="border-b-2 border-[#d4a437]"
+                className="border-b border-[#16110c]"
                 transition={{ duration: 0.3, bounce: 0 }}
                 onValueChange={(id) => {
                   if (id === 'piece' || id === 'preview3d' || id === 'reports') {

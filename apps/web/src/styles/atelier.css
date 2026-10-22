@@ -200,8 +200,10 @@ body .ngc-cta {
 
 body .ngc-pages .lx-view-toggle {
   background: transparent;
+  border: 0;
   border-radius: 0;
   box-shadow: none;
+  overflow: visible;
 }
 
 body .ngc-pages .lx-view-toggle button,
@@ -254,7 +256,8 @@ body .ngc-pages .vitrine__stone {
   margin: 0;
   min-height: 72vh;
   overflow: hidden;
-  background: #efe8dc;
+  background: #f6f1e8;
+  isolation: isolate;
 }
 
 body .ngc-pages .vitrine__stone .vault-vitrine__img {
@@ -266,7 +269,8 @@ body .ngc-pages .vitrine__stone .vault-vitrine__img {
   display: block;
   animation: none;
   opacity: 1;
-  background: #f4f0e8;
+  background: transparent;
+  mix-blend-mode: multiply;
 }
 
 /* ── Shop by stone ──────────────────────────────────────────────────────── */
@@ -413,6 +417,8 @@ body .ngc-pages .mgh-gem:focus-visible .mgh-gem__name {
   display: block;
   margin-right: 1rem;
   color: #16110c;
+  background: #f6f1e8;
+  isolation: isolate;
 }
 
 .atelier-strip__card img {
@@ -420,7 +426,8 @@ body .ngc-pages .mgh-gem:focus-visible .mgh-gem__name {
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: contain;
-  background: #efe8dc;
+  background: transparent;
+  mix-blend-mode: multiply;
   display: block;
 }
 
@@ -451,12 +458,17 @@ body .ngc-pages .atelier-story__photo {
   height: 100vh;
   margin: 0;
   overflow: hidden;
+  background: #f6f1e8;
+  isolation: isolate;
 }
 
 body .ngc-pages .atelier-story__photo img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center bottom;
+  mix-blend-mode: multiply;
+  background: transparent;
 }
 
 body .ngc-pages .atelier-story__copy {
@@ -663,9 +675,15 @@ body .ngc-pages .lx-grid .lx-card {
 }
 
 body .ngc-pages .lx-card__media {
-  background: #efe8dc;
+  background: #f6f1e8;
   border-radius: 0;
   aspect-ratio: 3 / 4;
+  isolation: isolate;
+}
+
+body .ngc-pages .lx-card__media img {
+  mix-blend-mode: multiply;
+  background: transparent;
 }
 
 body .ngc-pages .lx-card__title {
@@ -822,6 +840,7 @@ body .operator-chart svg {
 body .admin-empty {
   margin: 0;
   padding: 2.5rem 0;
+  border: 0;
   border-top: 1px solid rgba(22, 17, 12, 0.12);
   font-family: var(--font-serif), Georgia, serif;
   font-size: 1.8rem;
@@ -1102,5 +1121,170 @@ body .admin-shell [data-slot="card"] {
   body .ngc-header {
     background: #f6f1e8;
     border-bottom-color: rgba(22, 17, 12, 0.12);
+  }
+}
+
+/* ── Graff pass: no card chrome, photograph on bone, image before chrome ── */
+
+body .ngc-pages {
+  background: #f6f1e8;
+}
+
+body .ngc-pages .lx-section,
+body .ngc-pages .lx-section--studio {
+  background: transparent;
+  padding-top: 1.25rem;
+  padding-bottom: 4rem;
+}
+
+body .ngc-pages .lx-catalog .lx-toolbar,
+body .ngc-pages .lx-toolbar.lx-toolbar {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(22, 17, 12, 0.12);
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0.85rem 0;
+  position: static;
+}
+
+body .ngc-pages .lx-pdp-price {
+  color: #16110c;
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+}
+
+body .ngc-pages .lx-heart,
+body .ngc-pages .lx-compare-icon {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: #16110c;
+}
+
+body .ngc-pages .lx-card__price {
+  color: #16110c;
+}
+
+body .ngc-pages .lx-card__actions .lx-text-btn,
+body .ngc-pages .lx-card__actions .lx-text-btn:first-child {
+  flex: none;
+  background: transparent;
+  background-image: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 -1px 0 #16110c;
+  color: #16110c;
+  padding: 0.2rem 0;
+}
+
+body .ngc-pages .ngc-gallery__tabs,
+body .ngc-pages .ngc-gallery__tabs [data-slot="tabs-list"] {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  height: auto;
+  padding: 0;
+  gap: 1.25rem;
+}
+
+body .ngc-pages .ngc-gallery__tabs button,
+body .ngc-pages .ngc-thumbs button {
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  color: #5c5344;
+}
+
+body .ngc-pages .ngc-gallery__tabs button[data-state="active"],
+body .ngc-pages .ngc-thumbs button.is-on {
+  color: #16110c;
+  border: 0;
+  box-shadow: inset 0 -1px 0 #16110c;
+}
+
+body .ngc-pages .ngc-gallery__stage {
+  border: 0;
+  border-radius: 0;
+  background: #efe8dc;
+  box-shadow: none;
+}
+
+body .ngc-pages .ngc-stepper .is-on {
+  color: #16110c;
+}
+
+body .ngc-pages .atelier__preview {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+body .ngc-pages .atelier__hero {
+  background: #efe8dc;
+  border: 0;
+  border-radius: 0;
+}
+
+body .ngc-pages .atelier__metals button,
+body .ngc-pages .atelier__sizes button {
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: #5c5344;
+}
+
+body .ngc-pages .atelier__metals button.is-on,
+body .ngc-pages .atelier__sizes button.is-on {
+  border-bottom-color: #16110c;
+  background: transparent;
+  color: #16110c;
+}
+
+@media (max-width: 800px) {
+  body .ngc-pages .ngc-pdp > .lx-wrap {
+    display: flex;
+    flex-direction: column;
+  }
+
+  body .ngc-pages .ngc-pdp .lx-crumb {
+    order: -2;
+  }
+
+  body .ngc-pages .ngc-pdp .ngc-pdp__grid {
+    display: contents;
+  }
+
+  body .ngc-pages .ngc-pdp .ngc-gallery {
+    order: -1;
+  }
+
+  body .ngc-pages .ngc-gallery [data-slot="tabs"] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  body .ngc-pages .ngc-gallery__layout {
+    order: -1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body .ngc-pages .ngc-gallery__stage {
+    order: -1;
+    min-height: 78vw;
+    aspect-ratio: 1;
+    max-height: none;
+  }
+
+  body .ngc-pages .ngc-pdp .ngc-stepper,
+  body .ngc-pages .ngc-pdp .ngc-pdp__buy {
+    order: 0;
   }
 }
