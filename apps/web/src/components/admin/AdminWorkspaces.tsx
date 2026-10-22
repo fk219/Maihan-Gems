@@ -11,8 +11,16 @@
  * - AdminDiscountsWorkspace: Create & view promotional discount codes
  * - AdminUsersTable: View accounts & assign RBAC roles (ADMIN_SUPER only)
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+import { Badge } from '../ui/badge.js';
+import { Button } from '../ui/button.js';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog.js';
+import { Input } from '../ui/input.js';
+import { Label } from '../ui/label.js';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table.js';
+import { Textarea } from '../ui/textarea.js';
 import type {
   BackOfficeCertificateRow,
   BackOfficeDiscountRow,
@@ -50,6 +58,18 @@ export function AdminProductModerationTable({
   const [rejectReason, setRejectReason] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const shown = useMemo(
+    () =>
+      rows.filter((row) => {
+        const hay = `${row.title} ${row.sku} ${row.vendor_name ?? ''}`.toLowerCase();
+        const matchesQuery = query.trim() === '' || hay.includes(query.trim().toLowerCase());
+        const matchesStatus = statusFilter === 'ALL' || row.moderation_status === statusFilter;
+        return matchesQuery && matchesStatus;
+      }),
+    [rows, query, statusFilter],
+  );
 
   async function moderate(
     productId: string,
@@ -103,90 +123,88 @@ export function AdminProductModerationTable({
         </p>
       ) : null}
 
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>SKU</th>
-            <th>Vendor</th>
-            <th>Kind</th>
-            <th>Moderation</th>
-            <th>Storefront</th>
-            <th>Stock</th>
-            <th>Price</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id}>
-              <td>
+      <div className="operator-toolbar">
+        <div>
+          <Label htmlFor="moderation-query">Find a record</Label>
+          <Input id="moderation-query" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Title, SKU, or vendor" />
+        </div>
+        <div>
+          <Label htmlFor="moderation-status">Moderation</Label>
+          <select id="moderation-status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+            <option value="ALL">All statuses</option>
+            {Array.from(new Set(rows.map((row) => row.moderation_status))).map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>SKU</TableHead>
+            <TableHead>Vendor</TableHead>
+            <TableHead>Kind</TableHead>
+            <TableHead>Moderation</TableHead>
+            <TableHead>Storefront</TableHead>
+            <TableHead>Stock</TableHead>
+            <TableHead>Price</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {shown.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell>
                 <strong>{row.title}</strong>
-                {row.rejection_reason ? (
-                  <div style={{ color: '#8a2424', fontSize: '0.75rem' }}>
-                    Reason: {row.rejection_reason}
-                  </div>
-                ) : null}
-              </td>
-              <td>
+                {row.rejection_reason ? <div>Reason: {row.rejection_reason}</div> : null}
+              </TableCell>
+              <TableCell>
                 <code>{row.sku}</code>
-              </td>
-              <td>{row.vendor_name ?? 'Maihan Vault'}</td>
-              <td>{row.kind}</td>
-              <td>
-                <span
-                  className={`admin-badge ${
+              </TableCell>
+              <TableCell>{row.vendor_name ?? 'Maihan Vault'}</TableCell>
+              <TableCell>{row.kind}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={
                     row.moderation_status === 'PUBLISHED' || row.moderation_status === 'APPROVED'
-                      ? 'admin-badge--ok'
+                      ? 'default'
                       : row.moderation_status === 'REJECTED'
-                        ? 'admin-badge--danger'
-                        : ''
-                  }`}
+                        ? 'destructive'
+                        : 'secondary'
+                  }
                 >
                   {row.moderation_status}
-                </span>
-              </td>
-              <td>
-                <span className={`admin-badge ${row.state === 'ACTIVE' ? 'admin-badge--ok' : ''}`}>
-                  {row.state}
-                </span>
-              </td>
-              <td>{row.inventory_quantity}</td>
-              <td>{row.price_amount ? `$${row.price_amount}` : '—'}</td>
-              <td>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant={row.state === 'ACTIVE' ? 'default' : 'secondary'}>{row.state}</Badge>
+              </TableCell>
+              <TableCell>{row.inventory_quantity}</TableCell>
+              <TableCell>{row.price_amount ? `$${row.price_amount}` : '—'}</TableCell>
+              <TableCell>
+                <div className="flex flex-wrap gap-2">
                   {row.moderation_status !== 'APPROVED' && row.moderation_status !== 'PUBLISHED' ? (
-                    <button
-                      type="button"
-                      className="lx-text-btn"
-                      disabled={busyId === row.id}
-                      onClick={() => void moderate(row.id, 'APPROVE')}
-                    >
+                    <Button type="button" size="sm" variant="outline" disabled={busyId === row.id} onClick={() => void moderate(row.id, 'APPROVE')}>
                       Approve
-                    </button>
+                    </Button>
                   ) : null}
                   {row.state !== 'ACTIVE' ? (
-                    <button
-                      type="button"
-                      className="lx-text-btn"
-                      disabled={busyId === row.id}
-                      onClick={() => void moderate(row.id, 'PUBLISH')}
-                    >
+                    <Button type="button" size="sm" variant="outline" disabled={busyId === row.id} onClick={() => void moderate(row.id, 'PUBLISH')}>
                       Publish
-                    </button>
+                    </Button>
                   ) : (
-                    <button
-                      type="button"
-                      className="lx-text-btn"
-                      disabled={busyId === row.id}
-                      onClick={() => void moderate(row.id, 'UNPUBLISH')}
-                    >
+                    <Button type="button" size="sm" variant="ghost" disabled={busyId === row.id} onClick={() => void moderate(row.id, 'UNPUBLISH')}>
                       Unpublish
-                    </button>
+                    </Button>
                   )}
-                  <button
+                  <Button
                     type="button"
-                    className="lx-text-btn"
+                    size="sm"
+                    variant="destructive"
                     disabled={busyId === row.id}
                     onClick={() => {
                       setRejectingId(row.id);
@@ -194,42 +212,39 @@ export function AdminProductModerationTable({
                     }}
                   >
                     Reject
-                  </button>
+                  </Button>
                   {row.state !== 'ARCHIVED' ? (
-                    <button
-                      type="button"
-                      className="lx-text-btn"
-                      disabled={busyId === row.id}
-                      onClick={() => void moderate(row.id, 'ARCHIVE')}
-                    >
+                    <Button type="button" size="sm" variant="ghost" disabled={busyId === row.id} onClick={() => void moderate(row.id, 'ARCHIVE')}>
                       Archive
-                    </button>
+                    </Button>
                   ) : null}
                 </div>
-                {rejectingId === row.id ? (
-                  <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.4rem' }}>
-                    <input
-                      aria-label="Rejection reason"
-                      placeholder="Rejection reason (required)"
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                      style={{ padding: '0.35rem 0.5rem', fontSize: '0.75rem' }}
-                    />
-                    <button
-                      type="button"
-                      className="lx-btn lx-btn--solid"
-                      disabled={busyId === row.id || !rejectReason.trim()}
-                      onClick={() => void moderate(row.id, 'REJECT', rejectReason)}
-                    >
-                      Confirm Reject
-                    </button>
-                  </div>
-                ) : null}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
+      <Dialog open={rejectingId !== null} onOpenChange={(open) => { if (!open) setRejectingId(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject this piece</DialogTitle>
+            <DialogDescription>The reason is stored with the audit row. It is required.</DialogDescription>
+          </DialogHeader>
+          <Label htmlFor="reject-reason">Reason</Label>
+          <Textarea id="reject-reason" value={rejectReason} onChange={(event) => setRejectReason(event.target.value)} />
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={busyId !== null || !rejectReason.trim() || rejectingId === null}
+            onClick={() => {
+              if (rejectingId) void moderate(rejectingId, 'REJECT', rejectReason);
+            }}
+          >
+            Confirm rejection
+          </Button>
+        </DialogContent>
+      </Dialog>
+      {shown.length === 0 ? <p className="admin-lede">No rows match this filter.</p> : null}
     </div>
   );
 }

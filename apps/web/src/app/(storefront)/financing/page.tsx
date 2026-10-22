@@ -23,7 +23,7 @@ export default function FinancingPage() {
         Transparent multi-currency pricing in USD, AED, and THB with structured payment and custodial reservation options.
       </p>
 
-      <div className="lx-account-grid" style={{ marginTop: '2rem' }}>
+      <div className="salon-essay">
         <section className="lx-account-card">
           <h2 className="lx-account-card__title">Direct Settlement &amp; Wire</h2>
           <p className="lx-account-note" style={{ margin: 0 }}>

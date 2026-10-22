@@ -35,6 +35,7 @@ import type {
 
 import { requireAdminAccess, AdminGateScreen } from '../../../lib/admin-server.js';
 import { AdminSidebar } from '../../../components/admin/AdminSidebar.js';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card.js';
 import {
   AdminAiOpsWorkspace,
   AdminCertificatesWorkspace,
@@ -258,14 +259,33 @@ async function AdminDashboard() {
       title="Executive Dashboard"
       lede="Operational counts read live from the database — no invented metrics."
     >
-      <div className="admin-tilegrid">
-        {tiles.map((tile) => (
-          <div key={tile.label} className="admin-tile">
-            <span className="admin-tile__label">{tile.label}</span>
-            <p className="admin-tile__value">{fmt(tile.value)}</p>
-            {tile.note ? <p className="admin-tile__note">{tile.note}</p> : null}
-          </div>
-        ))}
+      <div className="operator-ledger">
+        <div className="operator-ledger__lead">
+          {tiles.slice(0, 3).map((tile) => (
+            <Card key={tile.label}>
+              <CardHeader>
+                <CardTitle>{tile.label}</CardTitle>
+                {tile.note ? <CardDescription>{tile.note}</CardDescription> : null}
+              </CardHeader>
+              <CardContent>
+                <p className="operator-figure">{fmt(tile.value)}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="operator-ledger__rest">
+          {tiles.slice(3).map((tile) => (
+            <Card key={tile.label}>
+              <CardHeader>
+                <CardTitle>{tile.label}</CardTitle>
+                {tile.note ? <CardDescription>{tile.note}</CardDescription> : null}
+              </CardHeader>
+              <CardContent>
+                <p className="operator-figure">{fmt(tile.value)}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </AdminFrame>
   );

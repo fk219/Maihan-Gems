@@ -6,6 +6,12 @@ import '../../styles/vault-premium.css';
 import '../../styles/vault-composition.css';
 import '../../styles/vault-motion.css';
 import '../../styles/maison.css';
+import '../../styles/routes-salon.css';
+import '../../styles/operator.css';
+import '../../styles/cloth.css';
+import { StorefrontMotion } from '../../components/storefront/StorefrontMotion.js';
+import { CartDrawer } from '../../components/storefront/CartDrawer.js';
+import { Toaster } from '../../components/ui/sonner.js';
 
 import { AiConciergeLauncher } from '../../components/ai/AiConciergeLauncher.js';
 import { StorefrontHeader } from '../../components/layout/StorefrontHeader.js';
@@ -30,7 +36,10 @@ export default async function StorefrontLayout({ children }: { children: React.R
           Catalogue database is empty or not set up. Run: docker compose up -d, then pnpm storefront:db:setup
         </p>
       ) : null}
-      <div className="ngc-pages">{children}</div>
+      <StorefrontMotion />
+      <CartDrawer />
+      <Toaster />
+      <div className="ngc-pages operator">{children}</div>
       <StorefrontFooter />
       {/* P1-29: mount the (formerly unreachable) concierge drawer. */}
       <AiConciergeLauncher />

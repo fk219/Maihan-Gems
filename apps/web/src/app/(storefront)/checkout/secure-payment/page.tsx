@@ -10,6 +10,7 @@ import type { Metadata } from 'next';
 
 import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
 import { CheckoutConfirm } from '../../../../components/checkout/CheckoutConfirm.js';
+import { CheckoutTrust } from '../../../../components/checkout/CheckoutTrust.js';
 import { VaultReveal } from '../../../../components/storefront/VaultReveal.js';
 
 export const metadata: Metadata = {
@@ -35,7 +36,8 @@ export default async function CheckoutSecurePaymentPage({
         ]}
       />
 
-      <div className="checkout-shell">
+      <div className="checkout-shell checkout-salon">
+        <div className="checkout-salon__main">
         <VaultReveal stagger={0} className="checkout-steps">
           <div className="checkout-step checkout-step--completed">
             <span>✓</span>
@@ -68,6 +70,8 @@ export default async function CheckoutSecurePaymentPage({
             <a href="/checkout/order-summary" className="lx-btn lx-btn--solid">Start checkout</a>
           </div>
         )}
+        </div>
+        <CheckoutTrust step={3} />
       </div>
     </main>
   );

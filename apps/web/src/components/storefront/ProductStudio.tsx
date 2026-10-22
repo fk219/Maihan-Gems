@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { STOREFRONT_CONTACT } from '@maihan/config';
 
 import type { NgcMediaItem, NgcProduct } from '../../lib/ngc/types.js';
 import { catalogImageSrc, fallbackMediaUrl, galleryImages, galleryPoster, galleryReports, galleryVideos, spinFrameUrl, spinMedia } from '../../lib/ngc/media.js';
@@ -17,7 +16,12 @@ import { ThreeDViewer } from '../webar/ThreeDViewer.js';
 import { JewelryConfiguratorCanvas, type MetalFinish } from '../configurator/JewelryConfiguratorCanvas.js';
 import { CatalogImage } from './CatalogImage.js';
 import { ProductActions } from './ProductActions.js';
-import { LuxuryProductCard } from './LuxuryProductCard.js';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/motion-accordion.js';
+import { AnimatedBackground } from '../ui/animated-background.js';
+import { GalleryCarousel } from '../ui/gallery-carousel.js';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs.js';
+import { TextEffect } from '../ui/text-effect.js';
+import { ReadMore } from './ReadMore.js';
 import { useStorefront } from './StorefrontProvider.js';
 
 function specRows(
@@ -267,38 +271,24 @@ export function ProductStudio({
 
         <div className="lx-pdp ngc-pdp__grid">
           <div className="ngc-gallery">
-            <div className="ngc-gallery__tabs">
-              <button
-                type="button"
-                className={tab === 'piece' ? 'is-on' : ''}
-                onClick={() => {
-                  setTab('piece');
-                  setActive(0);
+            <Tabs value={tab} onValueChange={(value) => { setTab(value as typeof tab); setActive(0); }}>
+            <TabsList variant="line" className="ngc-gallery__tabs">
+              <AnimatedBackground
+                defaultValue={tab}
+                className="border-b-2 border-[#d4a437]"
+                transition={{ duration: 0.3, bounce: 0 }}
+                onValueChange={(id) => {
+                  if (id === 'piece' || id === 'preview3d' || id === 'reports') {
+                    setTab(id);
+                    setActive(0);
+                  }
                 }}
               >
-                {pieceLabel} {pieceSlides.length}
-              </button>
-              <button
-                type="button"
-                className={tab === 'preview3d' ? 'is-on' : ''}
-                onClick={() => {
-                  setTab('preview3d');
-                  setActive(0);
-                }}
-              >
-                3D
-              </button>
-              <button
-                type="button"
-                className={tab === 'reports' ? 'is-on' : ''}
-                onClick={() => {
-                  setTab('reports');
-                  setActive(0);
-                }}
-              >
-                Reports {reportSlides.length}
-              </button>
-            </div>
+                <TabsTrigger value="piece" data-id="piece">{pieceLabel} {pieceSlides.length}</TabsTrigger>
+                <TabsTrigger value="preview3d" data-id="preview3d">3D</TabsTrigger>
+                <TabsTrigger value="reports" data-id="reports">Reports {reportSlides.length}</TabsTrigger>
+              </AnimatedBackground>
+            </TabsList>
             <div className={`ngc-gallery__layout${tab === 'preview3d' ? ' ngc-gallery__layout--solo' : ''}`}>
               {tab !== 'preview3d' ? (
                 <div className="ngc-thumbs">
@@ -368,11 +358,12 @@ export function ProductStudio({
                   : 'Loose stone preview from colour, cut and millimetres. It rotates on the studio canvas.'}
               </p>
             ) : null}
+            </Tabs>
           </div>
 
           <div className="ngc-pdp__buy">
             <p className="lx-kicker">{product.availability}</p>
-            <h1 className="lx-h2">{title}</h1>
+            <TextEffect as="h1" per="word" preset="fade" speedReveal={0.8} className="lx-h2">{title}</TextEffect>
             <p className="lx-card__specs">Item ID: {product.id}</p>
             {product.shipDaysMin ? (
               <p className="lx-lede">Est. ship: {product.shipDaysMin}–{product.shipDaysMax} days. Rush service may be available upon request.</p>
@@ -395,6 +386,17 @@ export function ProductStudio({
                 </Link>
               </p>
             ) : null}
+            <section className="ngc-details">
+              <h2 className="lx-h3">Product details</h2>
+              <dl className="lx-dossier">
+                {detailRows(product, product.pricePerCt ? formatMoney(product.pricePerCt, currency, rates) : '').map((row) => (
+                  <div key={row.label}>
+                    <dt>{row.label}</dt>
+                    <dd>{row.values.join(' · ')}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
             {mode === 'hand' ? (
               <button type="button" className="lx-btn lx-btn--solid" onClick={() => setTryOn(true)}>
                 Virtual try-on
@@ -406,24 +408,40 @@ export function ProductStudio({
           </div>
         </div>
 
-        <section className="ngc-details">
-          <h2 className="lx-h3">Product details</h2>
-          <dl className="lx-dossier">
-            {detailRows(product, product.pricePerCt ? formatMoney(product.pricePerCt, currency, rates) : '').map((row) => (
-              <div key={row.label}>
-                <dt>{row.label}</dt>
-                <dd>{row.values.join(' · ')}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-
-        {product.descriptionHtml ? (
-          <section className="ngc-copy">
-            <h2 className="lx-h3">Product description</h2>
-            <div className="ngc-copy__body" dangerouslySetInnerHTML={{ __html: sanitizeDescriptionHtml(product.descriptionHtml) }} />
-          </section>
-        ) : null}
+        <Accordion className="border-t border-[#d4a437]/30">
+          <AccordionItem value="specs" className="border-b border-[#d4a437]/30">
+            <AccordionTrigger className="flex w-full items-center justify-between py-4 text-left font-[family-name:var(--font-serif)] text-2xl">
+              Specifications
+            </AccordionTrigger>
+            <AccordionContent>
+              <dl className="lx-dossier">
+                {detailRows(product, product.pricePerCt ? formatMoney(product.pricePerCt, currency, rates) : '').map((row) => (
+                  <div key={row.label}>
+                    <dt>{row.label}</dt>
+                    <dd>{row.values.join(', ')}</dd>
+                  </div>
+                ))}
+              </dl>
+            </AccordionContent>
+          </AccordionItem>
+          {product.descriptionHtml ? (
+            <AccordionItem value="description" className="border-b border-[#d4a437]/30">
+              <AccordionTrigger className="flex w-full items-center justify-between py-4 text-left font-[family-name:var(--font-serif)] text-2xl">Product description</AccordionTrigger>
+              <AccordionContent>
+                <ReadMore html={sanitizeDescriptionHtml(product.descriptionHtml)} />
+              </AccordionContent>
+            </AccordionItem>
+          ) : null}
+          <AccordionItem value="shipping" className="border-b border-[#d4a437]/30">
+            <AccordionTrigger className="flex w-full items-center justify-between py-4 text-left font-[family-name:var(--font-serif)] text-2xl">Shipping and returns</AccordionTrigger>
+            <AccordionContent>
+              <p>
+                Free shipping worldwide. Loose gemstones and ready-to-ship jewellery may be returned within 14 days.
+                Custom pieces follow the same window unless they are made to order.
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         {reports.length > 0 ? (
           <section className="ngc-copy ngc-certificate">
@@ -439,18 +457,6 @@ export function ProductStudio({
           </section>
         ) : null}
 
-        <section className="ngc-copy ngc-shipping">
-          <h2 className="lx-h3">Shipping & returns</h2>
-          <p className="ngc-copy__body">
-            Free shipping worldwide. Loose gemstones and ready-to-ship jewellery may be returned within 14 days.
-            Custom pieces follow the same window unless they are made to order. Rush service may be available upon request.
-            For Saturday delivery, call{' '}
-            <a href={STOREFRONT_CONTACT.phoneHref}>{STOREFRONT_CONTACT.phoneDisplay}</a>
-            {' '}or write to{' '}
-            <a href={`mailto:${STOREFRONT_CONTACT.email}`}>{STOREFRONT_CONTACT.email}</a>.
-          </p>
-        </section>
-
         <section className="ngc-trust">
           <h2 className="lx-h3">Quality, value & heart</h2>
           <ul>
@@ -464,11 +470,14 @@ export function ProductStudio({
         {related.length > 0 ? (
           <section>
             <h2 className="lx-h3">You may also like</h2>
-            <div className="lx-grid">
-              {related.slice(0, 4).map((card) => (
-                <LuxuryProductCard key={card.id} product={card} />
-              ))}
-            </div>
+            <GalleryCarousel
+              slides={related.slice(0, 6).map((card) => ({
+                title: card.title,
+                button: 'View the piece',
+                src: card.imageUrl || '/media/stone-sapphire.jpg',
+                href: `/product/${card.slug}`,
+              }))}
+            />
           </section>
         ) : null}
       </div>

@@ -14,6 +14,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { VendorOrderLineDto, VendorProductDto, VendorProfileDto } from '@maihan/db';
 
+import { Badge } from '../ui/badge.js';
+import { Button } from '../ui/button.js';
+import { Input } from '../ui/input.js';
+import { Label } from '../ui/label.js';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../ui/sheet.js';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table.js';
+
 export function VendorProductWorkspace({
   vendorStatus,
   initialProducts,
@@ -191,17 +198,29 @@ export function VendorProductWorkspace({
         </p>
       ) : null}
 
-      {isApprovedVendor && !showForm ? (
+      {isApprovedVendor ? (
         <div style={{ marginBottom: '1.5rem' }}>
-          <button type="button" className="lx-btn lx-btn--solid" onClick={startCreate}>
-            + Create New Product
-          </button>
+          <Button type="button" onClick={startCreate}>
+            Create a product
+          </Button>
         </div>
       ) : null}
 
-      {showForm ? (
-        <form className="admin-panel" onSubmit={handleSaveProduct}>
-          <h2>{editingId ? 'Edit Product' : 'New Vault Product'}</h2>
+      <Sheet
+        open={showForm}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowForm(false);
+            setEditingId(null);
+          }
+        }}
+      >
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>{editingId ? 'Edit product' : 'New vault product'}</SheetTitle>
+            <SheetDescription>Saved as a draft. It stays off the storefront until moderation publishes it.</SheetDescription>
+          </SheetHeader>
+          <form onSubmit={handleSaveProduct}>
           <div className="lx-account-form">
             <div className="lx-account-form__row lx-account-form__row--two">
               <div className="lx-account-field">
@@ -332,13 +351,23 @@ export function VendorProductWorkspace({
                 />
               </div>
               <div className="lx-account-field">
-                <label htmlFor="vp-image">Primary Product Image URL (JPEG/PNG/WebP)</label>
-                <input
+                <Label htmlFor="vp-image">Primary image</Label>
+                <Input
                   id="vp-image"
-                  placeholder="https://res.cloudinary.com/..."
+                  placeholder="https://"
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                 />
+                <p className="operator-upload">
+                  <strong>
+                    {imageUrl.trim() === ''
+                      ? 'Awaiting a file address'
+                      : /^https?:\/\/\S+$/.test(imageUrl.trim())
+                        ? 'Address linked'
+                        : 'Not a usable URL'}
+                  </strong>
+                  JPEG, PNG or WebP. The house does not upload bytes from this form — paste the hosted address.
+                </p>
               </div>
             </div>
 
@@ -368,84 +397,70 @@ export function VendorProductWorkspace({
             </div>
           </div>
         </form>
-      ) : null}
+        </SheetContent>
+      </Sheet>
 
       {products.length === 0 ? (
         <div className="admin-empty">No products created under your vendor account yet.</div>
       ) : (
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>SKU</th>
-              <th>Kind</th>
-              <th>Price (USD)</th>
-              <th>Stock</th>
-              <th>Moderation</th>
-              <th>Storefront</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>SKU</TableHead>
+              <TableHead>Kind</TableHead>
+              <TableHead>Price (USD)</TableHead>
+              <TableHead>Stock</TableHead>
+              <TableHead>Moderation</TableHead>
+              <TableHead>Storefront</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {products.map((p) => (
-              <tr key={p.id}>
-                <td>
+              <TableRow key={p.id}>
+                <TableCell>
                   <strong>{p.title}</strong>
-                  {p.rejection_reason ? (
-                    <div style={{ color: '#8a2424', fontSize: '0.75rem', marginTop: '0.2rem' }}>
-                      Rejection note: {p.rejection_reason}
-                    </div>
-                  ) : null}
-                </td>
-                <td>
+                  {p.rejection_reason ? <div>Rejection note: {p.rejection_reason}</div> : null}
+                </TableCell>
+                <TableCell>
                   <code>{p.sku}</code>
-                </td>
-                <td>{p.kind}</td>
-                <td>${p.price_amount}</td>
-                <td>{p.inventory_quantity}</td>
-                <td>
-                  <span
-                    className={`admin-badge ${
+                </TableCell>
+                <TableCell>{p.kind}</TableCell>
+                <TableCell>${p.price_amount}</TableCell>
+                <TableCell>{p.inventory_quantity}</TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
                       p.moderation_status === 'PUBLISHED' || p.moderation_status === 'APPROVED'
-                        ? 'admin-badge--ok'
+                        ? 'default'
                         : p.moderation_status === 'REJECTED'
-                          ? 'admin-badge--danger'
-                          : ''
-                    }`}
+                          ? 'destructive'
+                          : 'secondary'
+                    }
                   >
                     {p.moderation_status}
-                  </span>
-                </td>
-                <td>{p.state}</td>
-                <td>
-                  <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  </Badge>
+                </TableCell>
+                <TableCell>{p.state}</TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-2">
                     {isApprovedVendor ? (
-                      <button
-                        type="button"
-                        className="lx-text-btn"
-                        disabled={busy}
-                        onClick={() => startEdit(p)}
-                      >
+                      <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => startEdit(p)}>
                         Edit
-                      </button>
+                      </Button>
                     ) : null}
-                    {isApprovedVendor &&
-                    (p.moderation_status === 'DRAFT' || p.moderation_status === 'REJECTED') ? (
-                      <button
-                        type="button"
-                        className="lx-text-btn"
-                        disabled={busy}
-                        onClick={() => void handleSubmitForReview(p.id)}
-                      >
+                    {isApprovedVendor && (p.moderation_status === 'DRAFT' || p.moderation_status === 'REJECTED') ? (
+                      <Button type="button" size="sm" disabled={busy} onClick={() => void handleSubmitForReview(p.id)}>
                         Submit for review
-                      </button>
+                      </Button>
                     ) : null}
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       )}
     </div>
   );

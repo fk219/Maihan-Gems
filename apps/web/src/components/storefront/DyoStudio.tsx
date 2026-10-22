@@ -17,6 +17,8 @@ import { JewelryConfiguratorCanvas, type MetalFinish } from '../configurator/Jew
 import { VirtualTryOnModal } from '../webar/VirtualTryOnModal.js';
 import { useStorefront } from './StorefrontProvider.js';
 import { VaultReveal } from './VaultReveal.js';
+import { Spotlight } from '../ui/spotlight.js';
+import { Tilt } from '../ui/tilt.js';
 
 type MetalName = '18K Yellow Gold' | '18K White Gold' | '18K Rose Gold' | 'Platinum';
 const SIZES = ['5', '5.5', '6', '6.5', '7', '7.5', '8', '8.5', '9'];
@@ -185,7 +187,15 @@ export function DyoStudio({
             The live preview is a faceted studio render.
           </p>
         </div>
-        <ol className="atelier__steps">
+        <div>
+          <p className="atelier__guide">
+            {panel === 1
+              ? 'Step 1 of 3. Choose the mounting first. Seats that cannot hold the stone you arrived with are omitted.'
+              : panel === 2
+                ? 'Step 2 of 3. Choose a stone the seat can hold. “Needs review” means a jeweller checks the prongs before the piece is made.'
+                : 'Step 3 of 3. Set metal and size. This total is indicative. The server writes the quote on the next page.'}
+          </p>
+          <ol className="atelier__steps">
           {(['Setting', 'Stone', 'Finish'] as const).map((label, i) => {
             const n = (i + 1) as 1 | 2 | 3;
             return (
@@ -197,7 +207,8 @@ export function DyoStudio({
               </li>
             );
           })}
-        </ol>
+          </ol>
+        </div>
       </header>
 
       <VaultReveal as="section" stagger={80} className="atelier__layout">
@@ -225,7 +236,9 @@ export function DyoStudio({
                 {matches.map((item) => {
                   const status = setting ? stoneFitStatus(setting, item) : 'fits';
                   return (
-                    <button key={item.id} type="button" className={`atelier-card${stoneId === item.id ? ' is-on' : ''}`} onClick={() => chooseStone(item.id)}>
+                    <Tilt key={item.id} rotationFactor={5} className="relative">
+                    <Spotlight size={180} />
+                    <button type="button" className={`atelier-card${stoneId === item.id ? ' is-on' : ''}`} onClick={() => chooseStone(item.id)}>
                       <span className="atelier-card__media"><img src={imageFor(item)} alt="" /></span>
                       <span className="atelier-card__kicker">{[item.caratTotal ? `${item.caratTotal} ct` : null, item.shape, item.originCountry].filter(Boolean).join(' · ')}</span>
                       <strong>{item.title}</strong>
@@ -234,6 +247,7 @@ export function DyoStudio({
                         {status === 'needs_review' ? 'Needs review' : 'Fits'}
                       </span>
                     </button>
+                    </Tilt>
                   );
                 })}
               </div>
@@ -303,6 +317,18 @@ export function DyoStudio({
                 </p>
               ) : null}
               {fit === 'fits' ? <p className="atelier__fit">Compatible — shape and carat sit inside the seat.</p> : null}
+            </div>
+          ) : null}
+          {panel < 3 ? (
+            <div className="atelier__advance">
+              <button
+                type="button"
+                className="atelier__bag"
+                disabled={(panel === 1 && !setting) || (panel === 2 && !stone)}
+                onClick={() => setPanel((current) => (current === 1 ? 2 : 3))}
+              >
+                Continue
+              </button>
             </div>
           ) : null}
         </section>

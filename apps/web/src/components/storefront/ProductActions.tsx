@@ -58,6 +58,7 @@ export function ProductActions({ item }: { item: AtelierItem }) {
           onClick={() => {
             addToBag(item, quantity);
             setHeld(true);
+            window.dispatchEvent(new Event('maihan-open-bag'));
           }}
         >
           {held ? 'Held in bag (+add)' : 'Add to bag'}

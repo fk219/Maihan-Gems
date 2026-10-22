@@ -176,7 +176,7 @@ export function BagView({
                   <Link href={`/product/${item.slug}`}>{item.title}</Link>
                 </h2>
                 {item.specs ? <p className="lx-card__specs">{item.specs}</p> : null}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.5rem' }}>
+                <div className="lx-bag__qty">
                   <button
                     type="button"
                     className="lx-text-btn"
@@ -185,7 +185,7 @@ export function BagView({
                   >
                     −
                   </button>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>Qty {qty}</span>
+                  <span>Qty {qty}</span>
                   <button
                     type="button"
                     className="lx-text-btn"
@@ -208,7 +208,7 @@ export function BagView({
 
       <aside className="lx-summary">
         <span className="lx-kicker">Reservation</span>
-        <h2 className="lx-h2" style={{ fontSize: '1.8rem', marginBottom: '1.4rem' }}>Summary</h2>
+        <h2 className="lx-h2">Summary</h2>
         <dl className="lx-summary__rows">
           <div>
             <dt>Subtotal · {totalPieceCount} piece{totalPieceCount === 1 ? '' : 's'}</dt>

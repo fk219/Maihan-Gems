@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
@@ -12,6 +13,9 @@ import type { StorefrontBrand } from '../../lib/ngc/types.js';
 import { NGC_MEDIA } from '../../lib/ngc-home.js';
 import { CurrencySwitcher } from './CurrencySwitcher.js';
 import { useStorefront } from './StorefrontProvider.js';
+import { Menu, MenuItem } from '../ui/navbar-menu.js';
+
+const ImmersiveFullscreenNav = dynamic(() => import('../ui/immersive-nav.js'), { ssr: false });
 
 export interface LuxuryHeaderProps {
   readonly stones: readonly { stoneType: string; pairCount: number }[];
@@ -196,7 +200,6 @@ function MenuPanel({ id, close, href }: { id: NavId; close: () => void; href: (p
 export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
   const { bagCount, favCount } = useStorefront();
   const [open, setOpen] = useState<string | null>(null);
-  const [drawer, setDrawer] = useState(false);
   const pathname = usePathname() ?? '';
   const first = pathname.split('/').filter(Boolean)[0] ?? '';
   const fromPath = (SISTER_SLUGS as readonly string[]).includes(first) ? storefrontBySlug(first) : null;
@@ -215,29 +218,39 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
         </div>
       </div>
       <div className="ngc-bar">
-        <button className="ngc-burger" type="button" aria-label="Menu" aria-expanded={drawer} onClick={() => setDrawer((v) => !v)}>
-          <span />
-          <span />
-          <span />
-        </button>
+        <div className="maison-mobile-nav">
+          <ImmersiveFullscreenNav
+            navConfig={{
+              brand: house?.wordmark ?? 'MAIHAN',
+              brandHref: href('/'),
+              overlayBg: '#16110c',
+              headerOpenColor: '#f6f2e9',
+              linkHoverColor: '#d4a437',
+              headerClassName: 'maison-immersive-bar',
+            }}
+            navContent={{
+              agencyName: house?.name ?? 'Maihan Gems',
+              tagline: 'Earth-mined stones, disclosed as they are.',
+              location: 'By appointment',
+              links: NAV.map((item) => ({ label: item.label, href: href(item.href) })),
+              images: ['/media/jew-sapphire-ring.jpg', '/media/stone-sapphire.jpg', '/media/jew-emerald-necklace.jpg'],
+              socials: [],
+            }}
+          />
+        </div>
         <Link href={href('/')} className="ngc-logo" aria-label={house?.name ?? 'Maihan Gems'}>
           <span className="ngc-logo__word">{house?.wordmark ?? 'MAIHAN'}</span>
           <span className="ngc-logo__sub">{house?.kicker ?? 'GEMS · Atelier'}</span>
         </Link>
-        <nav className="ngc-nav" aria-label="Primary" onMouseLeave={() => setOpen(null)}>
-          {NAV.map((item) => (
-            <div
-              key={item.id}
-              className={`ngc-nav__item${open === item.id ? ' is-open' : ''}`}
-              onMouseEnter={() => setOpen(item.id)}
-            >
-              <Link href={href(item.href)} className="ngc-nav__link" onClick={() => setOpen(null)}>
-                {item.label}
-              </Link>
-              {open === item.id ? <MenuPanel id={item.id} close={() => setOpen(null)} href={href} /> : null}
-            </div>
-          ))}
-        </nav>
+        <div className="ngc-nav">
+          <Menu setActive={setOpen}>
+            {NAV.map((item) => (
+              <MenuItem key={item.id} item={item.label} active={open} setActive={setOpen}>
+                <MenuPanel id={item.id} close={() => setOpen(null)} href={href} />
+              </MenuItem>
+            ))}
+          </Menu>
+        </div>
         <div className="ngc-tools">
           <Link href={href('/design-your-own')} className="ngc-cta">
             Bespoke Atelier
@@ -262,16 +275,6 @@ export function LuxuryHeader({ stones: _stones, brand }: LuxuryHeaderProps) {
           </Link>
         </div>
       </div>
-      {drawer ? (
-        <div className="ngc-drawer">
-          {NAV.map((item) => (
-            <Link key={item.id} href={href(item.href)} onClick={() => setDrawer(false)}>{item.label}</Link>
-          ))}
-          <Link href={href('/design-your-own')} className="ngc-drawer__cta" onClick={() => setDrawer(false)}>
-            Bespoke Atelier
-          </Link>
-        </div>
-      ) : null}
     </header>
   );
 }

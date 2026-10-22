@@ -6,6 +6,7 @@
  */
 import '../../styles/admin.css';
 import '../../styles/maison.css';
+import '../../styles/operator.css';
 
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,7 +14,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
       <a className="maison-skip" href="#main-content">
         Skip to content
       </a>
-      <div className="admin-shell">{children}</div>
+      <div className="admin-shell operator">{children}</div>
     </>
   );
 }

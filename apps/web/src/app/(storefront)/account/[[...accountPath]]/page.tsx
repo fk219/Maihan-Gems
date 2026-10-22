@@ -143,13 +143,13 @@ function AccountShell({
     notifications: 'Notifications & alerts',
   };
   return (
-    <main className="lx-section" id="main-content">
-      <div className="lx-wrap lx-wrap--narrow">
+    <main className="salon-account" id="main-content">
+      <aside className="salon-account__rail">
         <span className="lx-kicker">Client portfolio</span>
         <h1 className="lx-h2">{headingMap[section]}</h1>
         <AccountNav active={section} />
-        {children}
-      </div>
+      </aside>
+      <div className="salon-account__stage">{children}</div>
     </main>
   );
 }
@@ -171,8 +171,8 @@ async function AccountOverview() {
     'Client';
 
   return (
-    <main className="lx-section" id="main-content">
-      <div className="lx-wrap lx-wrap--narrow">
+    <main className="salon-account" id="main-content">
+      <aside className="salon-account__rail">
         <span className="lx-kicker">Client portfolio</span>
         <h1 className="lx-h2">{displayName}</h1>
         <p className="lx-lede">
@@ -191,7 +191,8 @@ async function AccountOverview() {
           ) : null}
         </p>
         <AccountNav active="" />
-
+      </aside>
+      <div className="salon-account__stage">
         <div className="lx-account-grid">
           <section className="lx-account-card">
             <h2 className="lx-account-card__title">Profile &amp; security</h2>

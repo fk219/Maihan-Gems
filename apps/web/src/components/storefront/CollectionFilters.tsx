@@ -14,6 +14,8 @@ import {
   type FacetValue,
 } from '../../lib/collection-filters.js';
 import type { StorefrontCard } from '../../lib/storefront-types.js';
+import { AnimatedBackground } from '../ui/animated-background.js';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../ui/sheet.js';
 import { ProductGrid } from './LuxuryProductCard.js';
 import { ShapeIcon } from './ShapeIcon.js';
 
@@ -190,13 +192,46 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
     setState((prev) => ({ ...prev, [key]: toggleValue(prev[key], value) }));
   };
 
+  const clearChip = (value: string) => {
+    setPage(1);
+    setState((prev) => ({
+      ...prev,
+      shapes: prev.shapes.filter((item) => item !== value),
+      colours: prev.colours.filter((item) => item !== value),
+      origins: prev.origins.filter((item) => item !== value),
+      treatments: prev.treatments.filter((item) => item !== value),
+      metals: prev.metals.filter((item) => item !== value),
+      caratBuckets: prev.caratBuckets.filter((item) => item !== value),
+      clarities: prev.clarities.filter((item) => item !== value),
+      cuts: prev.cuts.filter((item) => item !== value),
+    }));
+  };
+
+  const chips = [
+    ...state.shapes,
+    ...state.colours,
+    ...state.origins,
+    ...state.treatments,
+    ...state.metals,
+    ...state.caratBuckets,
+    ...state.clarities,
+    ...state.cuts,
+  ];
+
+  const pageButtons = Array.from({ length: pages }, (_, index) => index + 1).filter((n) => {
+    if (pages <= 7) return true;
+    return n === 1 || n === pages || Math.abs(n - page) <= 1;
+  });
+
   const filters = (
-    <aside className={`lx-filters${open ? ' is-open' : ''}`} aria-label="Collection filters">
+    <Sheet open={open} onOpenChange={setOpen}>
+    <SheetContent side="left" className="lx-filters lx-filters--sheet" aria-label="Collection filters">
+      <SheetHeader>
+        <SheetTitle>Refine</SheetTitle>
+        <SheetDescription>Shape, carat, colour and price, counted from the pieces on this page.</SheetDescription>
+      </SheetHeader>
       <div className="lx-filters__head">
-        <h2>Filter</h2>
-        <button type="button" className="lx-text-btn" onClick={() => { setPage(1); setState(emptyFilterState(facets)); }}>
-          Clear
-        </button>
+        <h2>Refine</h2>
       </div>
 
       {facets.shapes.length > 0 ? (
@@ -303,25 +338,40 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
           onHi={(n) => patch({ maxPrice: n })}
         />
       </FilterSection>
-    </aside>
+      <div className="lx-filters__foot">
+        <button type="button" className="lx-btn lx-btn--solid" onClick={() => setOpen(false)}>
+          Show {visible.length}
+        </button>
+        <button
+          type="button"
+          className="lx-btn lx-btn--ghost"
+          onClick={() => {
+            setPage(1);
+            setState(emptyFilterState(facets));
+          }}
+        >
+          Clear
+        </button>
+      </div>
+    </SheetContent>
+    </Sheet>
   );
 
   return (
     <div className="lx-catalog">
-      {open ? <button type="button" className="lx-filters-scrim" aria-label="Close filters" onClick={() => setOpen(false)} /> : null}
       {filters}
       <div>
         <div className="lx-toolbar">
           <span className="lx-toolbar__count">
             {visible.length} piece{visible.length === 1 ? '' : 's'}
-            {visible.length > pageSize ? ` · page ${page} of ${pages}` : ''}
+            {visible.length > pageSize ? ` · ${page} of ${pages}` : ''}
           </span>
           <div className="lx-toolbar__tools">
             <button type="button" className="lx-btn lx-btn--ghost lx-drawer-btn" onClick={() => setOpen(true)}>
-              Filters
+              Refine{chips.length > 0 ? ` · ${chips.length}` : ''}
             </button>
             <label>
-              <span className="visually-hidden">Sort</span>
+              Sort
               <select aria-label="Sort" value={state.sort} onChange={(e) => patch({ sort: e.target.value as CatalogSort })}>
                 <option value="price-desc">Featured first</option>
                 <option value="title-asc">New first</option>
@@ -330,27 +380,51 @@ export function CollectionBrowser({ products }: { products: StorefrontCard[] }) 
               </select>
             </label>
             <div className="lx-view-toggle" role="group" aria-label="Layout">
-              <button type="button" className={state.view === 'grid' ? 'is-on' : ''} onClick={() => patch({ view: 'grid' as CatalogView })}>
-                Grid
-              </button>
-              <button type="button" className={state.view === 'list' ? 'is-on' : ''} onClick={() => patch({ view: 'list' as CatalogView })}>
-                List
-              </button>
+              <AnimatedBackground
+                defaultValue={state.view}
+                className="bg-[#16110c]/10"
+                transition={{ duration: 0.3, bounce: 0 }}
+                onValueChange={(id) => {
+                  if (id === 'grid' || id === 'list') patch({ view: id });
+                }}
+              >
+                <button type="button" data-id="grid" className={state.view === 'grid' ? 'is-on' : ''}>Grid</button>
+                <button type="button" data-id="list" className={state.view === 'list' ? 'is-on' : ''}>List</button>
+              </AnimatedBackground>
             </div>
           </div>
         </div>
+        {chips.length > 0 ? (
+          <ul className="lx-chips">
+            {chips.map((chip) => (
+              <li key={chip}>
+                <button type="button" onClick={() => clearChip(chip)}>
+                  {chip} ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
         {paged.length > 0 ? (
           <>
             <ProductGrid products={paged} view={state.view} />
             {pages > 1 ? (
               <nav className="lx-pager" aria-label="Catalogue pages">
-                <button type="button" className="lx-btn lx-btn--ghost" disabled={page <= 1} onClick={() => setPage((n) => n - 1)}>
+                <button type="button" disabled={page <= 1} onClick={() => setPage((n) => n - 1)}>
                   Previous
                 </button>
-                <span>
-                  {page} / {pages}
-                </span>
-                <button type="button" className="lx-btn lx-btn--ghost" disabled={page >= pages} onClick={() => setPage((n) => n + 1)}>
+                {pageButtons.map((n, index) => {
+                  const prev = pageButtons[index - 1];
+                  return (
+                    <span key={n}>
+                      {prev !== undefined && n - prev > 1 ? <span aria-hidden="true">…</span> : null}
+                      <button type="button" aria-current={n === page ? 'page' : undefined} onClick={() => setPage(n)}>
+                        {n}
+                      </button>
+                    </span>
+                  );
+                })}
+                <button type="button" disabled={page >= pages} onClick={() => setPage((n) => n + 1)}>
                   Next
                 </button>
               </nav>

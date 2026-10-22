@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { STOREFRONT_CONTACT } from '@maihan/config';
 
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
+import { ViewingRequest } from '../../../components/storefront/ViewingRequest.js';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../../components/ui/motion-accordion.js';
 
 export const metadata: Metadata = {
   title: 'Contact Atelier Concierge | Maihan Gems',
@@ -59,8 +61,28 @@ export default function ContactPage() {
         </section>
       </div>
 
+      <ViewingRequest email={STOREFRONT_CONTACT.email} />
+      <Accordion className="salon-note">
+        <AccordionItem value="shipping">
+          <AccordionTrigger className="flex w-full justify-between py-3 text-left font-[family-name:var(--font-serif)] text-2xl">Shipping</AccordionTrigger>
+          <AccordionContent>
+            <p>Free for all U.S. deliveries, and insured for orders over $300 anywhere in the world. The checkout page confirms the figure for the bag you are holding.</p>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="returns">
+          <AccordionTrigger className="flex w-full justify-between py-3 text-left font-[family-name:var(--font-serif)] text-2xl">Returns</AccordionTrigger>
+          <AccordionContent>
+            <p>Loose gemstones, ready-to-ship jewellery, and most custom jewellery may be returned within 14 days.</p>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="viewing">
+          <AccordionTrigger className="flex w-full justify-between py-3 text-left font-[family-name:var(--font-serif)] text-2xl">A private viewing</AccordionTrigger>
+          <AccordionContent>
+            <p>Showroom visits are by appointment. Write to {STOREFRONT_CONTACT.email} or call {STOREFRONT_CONTACT.phoneDisplay}. There is no live booking calendar yet.</p>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
       <section className="salon-note">
-        <h2>Request a viewing</h2>
         <p>The configurator keeps the composition honest. The salons are listed separately.</p>
         <div className="maison-missing__actions">
           <Link href="/design-your-own" className="lx-btn lx-btn--solid">

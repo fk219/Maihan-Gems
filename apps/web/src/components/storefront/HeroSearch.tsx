@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { formatMoney, type StorefrontCurrency } from '../../lib/currency.js';
+import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command.js';
 import { useStorefront } from './StorefrontProvider.js';
 
 interface InstantHit {
@@ -24,6 +25,7 @@ export function HeroSearch() {
   const router = useRouter();
   const { currency, rates } = useStorefront();
   const [q, setQ] = useState('');
+  const [palette, setPalette] = useState(false);
   const [hits, setHits] = useState<InstantHit[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -52,6 +54,33 @@ export function HeroSearch() {
 
   return (
     <div className="lx-search">
+      <button type="button" className="lx-text-btn" onClick={() => setPalette(true)}>
+        Open the stone index
+      </button>
+      <CommandDialog open={palette} onOpenChange={setPalette} title="Stone index" description="Search the vault or start from a known request.">
+        <Command>
+          <CommandInput placeholder="Stone, cut, or setting" value={q} onValueChange={setQ} />
+          <CommandList>
+            <CommandEmpty>No indexed match yet. Search still runs against the catalogue.</CommandEmpty>
+            <CommandGroup heading="Known requests">
+              {PROMPTS.map((prompt) => (
+                <CommandItem key={prompt} value={prompt} onSelect={() => { setPalette(false); go(prompt); }}>
+                  {prompt}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            {hits.length > 0 ? (
+              <CommandGroup heading="Catalogue">
+                {hits.map((hit) => (
+                  <CommandItem key={hit.slug} value={hit.title} onSelect={() => { setPalette(false); router.push(`/product/${hit.slug}`); }}>
+                    {hit.title}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ) : null}
+          </CommandList>
+        </Command>
+      </CommandDialog>
       <form
         className="lx-search__box"
         onSubmit={(e) => {

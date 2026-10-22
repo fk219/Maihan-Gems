@@ -135,7 +135,7 @@ export default async function PolicyPage({ params }: PageProps) {
       <span className="page-eyebrow">{entry.eyebrow}</span>
       <h1>{cmsPage?.title ?? entry.title}</h1>
       {cmsPage && cmsPage.blocks.length > 0 ? (
-        <div className="lx-account-grid" style={{ marginTop: '2rem' }}>
+        <div className="salon-essay">
           <section className="lx-account-card">
             <CmsBlockList blocks={cmsPage.blocks} />
           </section>
@@ -143,7 +143,7 @@ export default async function PolicyPage({ params }: PageProps) {
       ) : (
         <>
           <p className="page-subtitle">{entry.summary}</p>
-          <div className="lx-account-grid" style={{ marginTop: '2rem' }}>
+          <div className="salon-essay">
             {entry.sections.map((s) => (
               <section key={s.heading} className="lx-account-card">
                 <h2 className="lx-account-card__title">{s.heading}</h2>

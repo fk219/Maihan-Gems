@@ -10,6 +10,7 @@ import type { Metadata } from 'next';
 
 import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
 import { CheckoutReview } from '../../../../components/checkout/CheckoutReview.js';
+import { CheckoutTrust } from '../../../../components/checkout/CheckoutTrust.js';
 import { VaultReveal } from '../../../../components/storefront/VaultReveal.js';
 
 export const metadata: Metadata = {
@@ -28,7 +29,8 @@ export default function CheckoutOrderSummaryPage() {
         ]}
       />
 
-      <div className="checkout-shell">
+      <div className="checkout-shell checkout-salon">
+        <div className="checkout-salon__main">
         <VaultReveal stagger={0} className="checkout-steps">
           <div className="checkout-step checkout-step--active">
             <span>1</span>
@@ -54,6 +56,8 @@ export default function CheckoutOrderSummaryPage() {
         </p>
 
         <CheckoutReview />
+        </div>
+        <CheckoutTrust step={1} />
       </div>
     </main>
   );

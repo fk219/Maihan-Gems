@@ -4,6 +4,16 @@ import Link from 'next/link';
 import { VaultReveal } from '../../components/storefront/VaultReveal.js';
 
 import { HeroSearch } from '../../components/storefront/HeroSearch.js';
+import { BlurFade } from '../../components/ui/blur-fade.js';
+import { GalleryCarousel } from '../../components/ui/gallery-carousel.js';
+import { Magnetic } from '../../components/ui/magnetic.js';
+import { Marquee } from '../../components/ui/marquee.js';
+import { ScrollExpandMedia } from '../../components/ui/scroll-expand-media.js';
+import { ShinyButton } from '../../components/ui/shiny-button.js';
+import { Spotlight } from '../../components/ui/spotlight.js';
+import { TextEffect } from '../../components/ui/text-effect.js';
+import { TextReveal } from '../../components/ui/text-reveal.js';
+import { Tilt } from '../../components/ui/tilt.js';
 import { currentStorefront } from '../../lib/ngc/current-storefront.js';
 import { withPrefix } from '../../lib/ngc/storefronts.js';
 
@@ -115,27 +125,6 @@ const PEACE: readonly { title: string; body: string; icon: 'truck' | 'returns' |
   },
 ];
 
-const TESTIMONIALS: readonly { quote: string; name: string; role: string }[] = [
-  {
-    quote:
-      'The stone arrived even finer than its photographs — and the provenance held up to my own gemologist without a single question.',
-    name: 'A. K.',
-    role: 'Collector · Dubai',
-  },
-  {
-    quote:
-      'I was guided through every step of the design. The finished ring now lives in its presentation case, and I in a small state of disbelief.',
-    name: 'D. R.',
-    role: 'Bespoke client · London',
-  },
-  {
-    quote:
-      'Papers above and beyond, an advisor who answered before I asked, and a piece I now never take off.',
-    name: 'P. S.',
-    role: 'Private client · New York',
-  },
-];
-
 const CHARITY: readonly { title: string; text: string }[] = [
   { title: 'Education', text: 'Lapidary and gem-cutting schools at the source.' },
   { title: 'Clean Water', text: 'Wells and clean-water access for mining communities.' },
@@ -216,34 +205,68 @@ export default async function HomePage({
           ? { main: '/media/jew-sapphire-ring.jpg', small: '/media/stone-sapphire.jpg' }
           : { main: '/media/jew-sapphire-ring.jpg', small: '/media/stone-sapphire-pair.jpg' };
   const heroMain = sisterHero.main;
-  const featured = TESTIMONIALS[0];
-  const restQuotes = TESTIMONIALS.slice(1);
+  const heroLine = sister
+    ? `The world's finest natural ${houseNoun(brand.defaultStone!)}, set by hand`
+    : "The world's finest natural gemstones, set by hand";
 
   return (
     <main id="main-content" className="mgh">
       {/* Hero — the vitrine (one orchestrated reveal) */}
-      <section className="mgh-hero" aria-label={brand.name}>
-        <div className="vault-hero__grid">
-          <div className="vault-hero__copy">
+      <section className="mgh-hero cloth-stage" data-cloth-pin aria-label={brand.name}>
+        <figure className="vault-vitrine cloth-stage__bleed" data-cloth-settle>
+          <img
+            className="vault-vitrine__img"
+            data-parallax="6"
+            data-cloth-idle
+            src={sister ? heroMain : VITRINE_PIECE.image}
+            alt={
+              sister
+                ? `Finished ${houseNoun(brand.defaultStone!)} from the sister house`
+                : `${VITRINE_PIECE.id} — ${VITRINE_PIECE.name}, ${VITRINE_PIECE.facts}`
+            }
+          />
+          <figcaption className="vault-vitrine__plate">
+            <span className="vault-vitrine__plate-id">
+              {sister ? `${brand.name} · House reserve` : `${VITRINE_PIECE.id} · Vault reservation`}
+            </span>
+            <span className="vault-vitrine__plate-name">
+              {sister ? `${brand.name} — the house collection` : VITRINE_PIECE.name}
+            </span>
+            <span className="vault-vitrine__plate-facts">
+              {sister ? 'Origin and treatment disclosed on every house record' : VITRINE_PIECE.facts}
+            </span>
+          </figcaption>
+          {!sister ? (
+            <dl className="vault-evidence">
+              <div><dt>Origin</dt><dd>{VITRINE_PIECE.origin}</dd></div>
+              <div><dt>Treatment</dt><dd>{VITRINE_PIECE.treatment}</dd></div>
+              <div><dt>Clarity</dt><dd>{VITRINE_PIECE.clarity}</dd></div>
+              <div><dt>Carat</dt><dd>{VITRINE_PIECE.carat}</dd></div>
+            </dl>
+          ) : null}
+        </figure>
+        <div className="cloth-stage__type">
             <p className="mgh-eyebrow vault-hero__eyebrow">
               {sister ? brand.kicker : 'Natural Gemstones · Matched Pairs · Fine Jewellery'}
             </p>
-            <h1 className="mgh-hero__title vault-hero__title">
-              {sister ? (
-                <>{`The world\u2019s finest natural ${houseNoun(brand.defaultStone!)}, set by hand`}</>
-              ) : (
-                <>{'The world\u2019s finest '}<em>natural gemstones</em>{', set by hand'}</>
-              )}
-            </h1>
+            <TextEffect
+              as="h1"
+              per="word"
+              preset="fade-in-blur"
+              speedReveal={0.6}
+              className="mgh-hero__title vault-hero__title"
+            >
+              {heroLine}
+            </TextEffect>
             <p className="mgh-hero__sub vault-hero__lede">
               {sister
                 ? brand.lede
-                : 'Thousands of earth-mined stones, master settings and finished jewels. Choose a work from the vault — or design your own, from the stone up.'}
+                : 'Thousands of earth-mined stones, master settings and finished jewels. Choose a work from the vault, or design your own from the stone up.'}
             </p>
             <div className="mgh-hero__actions vault-hero__actions">
-              <Link href={href('/natural-gemstones')} className="mgh-btn mgh-btn--gold">
-                Shop Gemstones
-              </Link>
+              <Magnetic intensity={0.25} range={120} springOptions={{ stiffness: 26, damping: 7, mass: 0.2 }}>
+                <ShinyButton href={href('/natural-gemstones')}>Explore the vault</ShinyButton>
+              </Magnetic>
               <Link href={href('/design-your-own')} className="mgh-btn mgh-btn--ghost">
                 Design Your Own
               </Link>
@@ -252,90 +275,61 @@ export default async function HomePage({
               <HeroSearch />
             </div>
           </div>
-          <figure className="vault-vitrine">
-            <img
-              className="vault-vitrine__img"
-              src={sister ? heroMain : VITRINE_PIECE.image}
-              alt={
-                sister
-                  ? `Finished ${houseNoun(brand.defaultStone!)} from the sister house`
-                  : `${VITRINE_PIECE.id} — ${VITRINE_PIECE.name}, ${VITRINE_PIECE.facts}`
-              }
-              loading="eager"
-            />
-            <figcaption className="vault-vitrine__plate">
-              <span className="vault-vitrine__plate-id">
-                {sister ? `${brand.name} · House reserve` : `${VITRINE_PIECE.id} · Vault reservation`}
-              </span>
-              <span className="vault-vitrine__plate-name">
-                {sister ? `${brand.name} — the house collection` : VITRINE_PIECE.name}
-              </span>
-              <span className="vault-vitrine__plate-facts">
-                {sister ? 'Origin and treatment disclosed on every house record' : VITRINE_PIECE.facts}
-              </span>
-            </figcaption>
-            {!sister ? (
-              <dl className="vault-evidence">
-                <div><dt>Origin</dt><dd>{VITRINE_PIECE.origin}</dd></div>
-                <div><dt>Treatment</dt><dd>{VITRINE_PIECE.treatment}</dd></div>
-                <div><dt>Clarity</dt><dd>{VITRINE_PIECE.clarity}</dd></div>
-                <div><dt>Carat</dt><dd>{VITRINE_PIECE.carat}</dd></div>
-              </dl>
-            ) : null}
-          </figure>
-        </div>
       </section>
 
       {/* Gemstones — cabinet rail */}
-      <section className="mgh-section mgh-gems" aria-labelledby="mgh-gems-h">
-        <div className="mgh-wrap">
-          <div className="mgh-head">
-            <div>
-              <p className="mgh-eyebrow">The Vault</p>
-              <h2 id="mgh-gems-h" className="mgh-h2">Gemstones</h2>
-              <p className="mgh-lede">
-                Earth-mined and disclosed as they are — every stone carries its origin, treatment
-                status and laboratory papers.
-              </p>
-            </div>
-            <Link href={href('/natural-gemstones')} className="mgh-link">View all gemstones →</Link>
-          </div>
-          <VaultReveal className="mgh-gems__grid" stagger={70}>
-            {gems.map((gem, i) => (
-              <Link key={gem.name} href={href(gem.href)} className="mgh-gem">
-                <span className="mgh-gem__index" aria-hidden="true">{index(i)}</span>
+      <section className="mgh-section mgh-gems cloth-marquee" aria-labelledby="mgh-gems-h">
+        <div className="cloth-marquee__head">
+          <h2 id="mgh-gems-h" className="mgh-h2">Gemstones</h2>
+          <Link href={href('/natural-gemstones')} className="mgh-link">View all gemstones</Link>
+        </div>
+        <Marquee pauseOnHover className="[--duration:48s] [--gap:1.4rem]">
+          {gems.map((gem) => (
+            <Link key={gem.name} href={href(gem.href)} className="mgh-gem">
+              <BlurFade inView delay={0.02}>
                 <span className="mgh-gem__frame">
                   <img src={gem.img} alt="" />
                 </span>
-                <span className="mgh-gem__name">{gem.name}</span>
-              </Link>
-            ))}
-          </VaultReveal>
-        </div>
+              </BlurFade>
+              <span className="mgh-gem__name">{gem.name}</span>
+            </Link>
+          ))}
+        </Marquee>
       </section>
 
       {/* Gemstone Jewellery — sticky rail + mosaic */}
-      <section className="mgh-section mgh-jewellery" aria-labelledby="mgh-jewellery-h">
-        <div className="mgh-wrap mgh-jewellery__layout">
-          <div className="mgh-jewellery__rail">
-            <p className="mgh-eyebrow mgh-eyebrow--light">Finished Works</p>
-            <h2 id="mgh-jewellery-h" className="mgh-h2 mgh-h2--light">Gemstone Jewellery</h2>
-            <p className="mgh-lede mgh-lede--light">
-              Ready-to-ship jewels set by master goldsmiths — or the same pieces, made yours.
-            </p>
-            <Link href={href('/gemstone-rings')} className="mgh-btn mgh-btn--gold">View all jewellery</Link>
-          </div>
-          <VaultReveal className="mgh-jewellery__grid" stagger={90}>
-            {JEWELLERY.map((item) => (
-              <Link key={item.label} href={href(item.href)} className="mgh-jew">
-                <img src={item.img} alt={`Finished ${item.label.toLowerCase()}`} />
-                <span className="mgh-jew__label">
-                  {item.label} <em aria-hidden="true">→</em>
-                </span>
-              </Link>
-            ))}
-          </VaultReveal>
+      <section className="mgh-section mgh-jewellery cloth-jewels" aria-labelledby="mgh-jewellery-h">
+        <Tilt rotationFactor={5} className="relative min-h-[70vh]">
+          <Spotlight size={240} />
+          <Link href={href(JEWELLERY[0]?.href ?? '/jewellery')} className="mgh-jew cloth-jewels__lead">
+            <BlurFade inView>
+              <img src={JEWELLERY[0]?.img} alt={JEWELLERY[0] ? `Finished ${JEWELLERY[0].label.toLowerCase()}` : ''} />
+            </BlurFade>
+          </Link>
+        </Tilt>
+        <div className="cloth-jewels__index">
+          <TextEffect id="mgh-jewellery-h" as="h2" per="word" preset="fade" className="mgh-h2 mgh-h2--light">
+            Gemstone Jewellery
+          </TextEffect>
+          {JEWELLERY.slice(1).map((item) => (
+            <Link key={item.label} href={href(item.href)} className="mgh-jew">
+              <img src={item.img} alt="" />
+              <span className="mgh-jew__label">{item.label}</span>
+            </Link>
+          ))}
+          <Link href={href('/gemstone-rings')} className="mgh-link">All finished jewels</Link>
         </div>
+      </section>
+
+      <section className="mgh-section" aria-label="Collections">
+        <GalleryCarousel
+          slides={JEWELLERY.map((item) => ({
+            title: item.label,
+            button: 'View the collection',
+            src: item.img,
+            href: href(item.href),
+          }))}
+        />
       </section>
 
       {/* Settings — numbered ledger */}
@@ -379,13 +373,15 @@ export default async function HomePage({
               available from the previous host, so the row shows house jewels instead.
             </p>
           </div>
-          <div className="mgh-pack__row">
-            {PACKAGING.map((item) => (
-              <figure key={item.src} className="mgh-pack__item">
-                <img src={item.src} alt={item.alt} loading="lazy" />
-              </figure>
-            ))}
-          </div>
+          <ScrollExpandMedia mediaSrc="/media/jew-emerald-necklace.jpg" title="The cloth opens" kicker="House jewels">
+            <div className="mgh-pack__stage">
+              {PACKAGING.map((item, i) => (
+                <figure key={item.src} className={i === 0 ? 'mgh-pack__item mgh-pack__item--lead' : 'mgh-pack__item'}>
+                  <img src={item.src} alt={item.alt} />
+                </figure>
+              ))}
+            </div>
+          </ScrollExpandMedia>
         </div>
       </section>
 
@@ -471,15 +467,9 @@ export default async function HomePage({
           <div className="mgh-about__copy">
             <p className="mgh-eyebrow">The House</p>
             <h2 id="mgh-about-h" className="mgh-h2">About Us</h2>
-            <p className="mgh-lede">
-              Maihan is a private vault of earth-mined gemstones, matched pairs and master
-              settings. Stones are disclosed as they are — origin, treatment and laboratory
-              papers — never dressed as something they are not.
-            </p>
-            <p className="mgh-lede">
-              The atelier pairs a setting to a stone, or the reverse, and keeps the composition
-              honest from first sketch to finished piece.
-            </p>
+            <TextReveal>
+              Maihan is a private vault of earth-mined gemstones, matched pairs and master settings. Stones are disclosed as they are, origin, treatment and laboratory papers, never dressed as something they are not.
+            </TextReveal>
             <Link href={href('/about')} className="mgh-btn mgh-btn--outline">Our Story</Link>
           </div>
         </div>
@@ -505,51 +495,12 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* Customer Feedback — featured quote + stack */}
-      <section className="mgh-section mgh-feedback" aria-labelledby="mgh-feedback-h">
-        <div className="mgh-wrap">
-          <div className="mgh-head">
-            <div>
-              <p className="mgh-eyebrow">Client Words</p>
-              <h2 id="mgh-feedback-h" className="mgh-h2">Customer Feedback</h2>
-            </div>
-            <Link href={href('/contact')} className="mgh-link">Speak with our advisors →</Link>
-          </div>
-          <div className="mgh-feedback__layout">
-            {featured && (
-              <figure className="mgh-quote mgh-quote--feature">
-                <blockquote>
-                  <p>&ldquo;{featured.quote}&rdquo;</p>
-                </blockquote>
-                <figcaption>
-                  <strong>{featured.name}</strong>
-                  <span>{featured.role}</span>
-                </figcaption>
-              </figure>
-            )}
-            <div className="mgh-feedback__stack">
-              {restQuotes.map((t) => (
-                <figure key={t.name} className="mgh-quote">
-                  <blockquote>
-                    <p>&ldquo;{t.quote}&rdquo;</p>
-                  </blockquote>
-                  <figcaption>
-                    <strong>{t.name}</strong>
-                    <span>{t.role}</span>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Final CTA */}
       <section className="mgh-cta" aria-labelledby="mgh-cta-h">
         <div className="mgh-wrap">
           <p className="mgh-eyebrow mgh-eyebrow--light">The Vault Awaits</p>
           <h2 id="mgh-cta-h" className="mgh-h2 mgh-h2--light">
-            Find the stone that <em>finds you</em>.
+            Find the stone that suits the setting.
           </h2>
           <p className="mgh-lede mgh-lede--light mgh-lede--center">
             Browse the vault as it stands today, or sit with our advisors and design the piece

@@ -51,8 +51,7 @@ describe('homepage redesign', () => {
     expect(container.querySelectorAll('.mgh-peace__card').length).toBe(4);
     expect(container.querySelector('.mgh-about h2')?.textContent).toContain('About');
     expect(container.querySelector('.mgh-charity h2')?.textContent).toContain('Charity');
-    expect(container.querySelector('.mgh-feedback h2')?.textContent).toContain('Feedback');
-    expect(container.querySelectorAll('.mgh-quote').length).toBe(3);
+    expect(container.querySelectorAll('.mgh-quote').length).toBe(0);
 
     const results = await new AxeBuilder().analyze();
     const blocking = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
