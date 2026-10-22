@@ -6,6 +6,21 @@ import { siteBaseUrl, productJsonLd } from '../../../../lib/jsonld.js';
 import { JsonLd } from '../../../../components/seo/JsonLd.js';
 import { ProductDetailContent } from '../../../../components/catalog/ProductDetailContent.js';
 import { adaptGemstoneToProductDetail } from '../../../../lib/gemstone-adapter.js';
+import { loadWebarAssetByAssetId } from '../../../../lib/webar-server.js';
+
+/** Colour text → GLB hue file (mirrors gemHexFor's matching order). */
+function colourHueForAsset(text: string): string | null {
+  if (text.includes('tanzanite') || text.includes('violet')) return 'violet';
+  if (text.includes('emerald') || text.includes('green')) return 'green';
+  if (text.includes('ruby') || text.includes('red')) return 'red';
+  if (text.includes('pink') || text.includes('padparadscha')) return 'pink';
+  if (text.includes('yellow') || text.includes('citrine') || text.includes('heliodor')) return 'yellow';
+  if (text.includes('orange') || text.includes('spessart')) return 'orange';
+  if (text.includes('purple') || text.includes('amethyst')) return 'purple';
+  if (text.includes('white') || text.includes('colorless') || text.includes('diamond')) return 'white';
+  if (text.includes('blue') || text.includes('sapphire') || text.includes('spinel')) return 'blue';
+  return null;
+}
 
 // Route segment config. Catalog views render per request from the cached
 // CatalogQueryService (doc 12.3: Server-rendered, cacheable, no per-user
@@ -45,6 +60,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
     if (isProductNotFound(resolved.error)) notFound();
     throw resolved.error; // route error boundary renders the recovery view (Task 5)
   }
+  // P2-9: resolve the gem's WebAR asset by colour hue (`brilliant-<hue>`),
+  // seeded READY by `seed:webar`; only READY assets render the 3D/AR action.
+  const colourText = `${resolved.value.color?.name ?? ''} ${resolved.value.variety?.name ?? ''}`.toLowerCase();
+  const hue = colourHueForAsset(colourText);
+  const webarAsset = hue ? await loadWebarAssetByAssetId(`brilliant-${hue}`).catch(() => null) : null;
   // Task 8: JSON-LD from the SAME server data the page renders — the contract
   // DTO plus the breadcrumb trail the page itself builds. SITE_URL provides the
   // canonical base; without it the page must not emit wrong canonical URLs.
@@ -59,7 +79,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   return (
     <>
       <JsonLd payload={productJsonLd(base, resolved.value, crumbs)} />
-      <ProductDetailContent detail={resolved.value} />
+      <ProductDetailContent detail={resolved.value} webarAsset={webarAsset} />
     </>
   );
 }

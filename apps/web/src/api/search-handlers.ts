@@ -18,6 +18,7 @@ import {
 } from '@maihan/contracts';
 import type { RouteHandler } from './handlers.js';
 import { requireIdentifier } from './query.js';
+import { globalRegistry } from '@maihan/observability';
 
 export const SEARCH_HANDLERS: Record<string, RouteHandler> = {
   async search(ctx) {
@@ -35,6 +36,14 @@ export const SEARCH_HANDLERS: Record<string, RouteHandler> = {
 
     const query = SearchQuerySchema.parse(rawBody);
     const result = await ctx.service.search(query);
+    // P3-12 search-quality telemetry: zero-result searches are the first
+    // signal of a relevance gap; counted per definite facet so the metric
+    // stays bounded-cardinality (registry enforces the label allowlist).
+    if (result.value.items.length === 0) {
+      globalRegistry
+        .counter('search_zero_results_total', 'Search queries that returned no items')
+        .inc({ surface: ctx.url.pathname });
+    }
     return {
       status: 200,
       body: {

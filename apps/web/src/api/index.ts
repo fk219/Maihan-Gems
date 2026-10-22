@@ -116,6 +116,18 @@ import {
   adminDecideDerivedRefHandler,
   adminOperationsOverviewHandler,
 } from './admin/backoffice-handlers.js';
+import {
+  adminSeoListHandler,
+  adminSeoUpsertHandler,
+  adminNavigationListHandler,
+  adminNavigationUpdateHandler,
+  adminRedirectsListHandler,
+  adminRedirectCreateHandler,
+  adminRedirectDeleteHandler,
+  adminJobsListHandler,
+  adminJobRequeueHandler,
+  adminAiLogsTailHandler,
+} from './admin/console-handlers.js';
 import type { RateLimitDecision, RateLimitGate } from './ratelimit/gate.js';
 import type { CatalogQueryService } from '../modules/catalog/index.js';
 import type { CatalogDatabase } from '@maihan/db';
@@ -249,6 +261,16 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       adminMigrationOverviewHandler,
       adminDecideDerivedRefHandler,
       adminOperationsOverviewHandler,
+      adminSeoListHandler,
+      adminSeoUpsertHandler,
+      adminNavigationListHandler,
+      adminNavigationUpdateHandler,
+      adminRedirectsListHandler,
+      adminRedirectCreateHandler,
+      adminRedirectDeleteHandler,
+      adminJobsListHandler,
+      adminJobRequeueHandler,
+      adminAiLogsTailHandler,
     };
 
     const handler =

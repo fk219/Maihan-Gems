@@ -143,7 +143,7 @@ export default tseslint.config(
     // Root tooling scripts also run under plain `node` (URL/fetch/Buffer are
     // Node 18+ globals), and the worker is a long-running daemon whose
     // process.stdout logging is its observability surface.
-    files: ['scripts/**/*.mjs', 'apps/worker/src/**/*.ts'],
+    files: ['scripts/**/*.mjs', 'tools/*.mjs', 'apps/worker/src/**/*.ts'],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',

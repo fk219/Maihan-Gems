@@ -37,8 +37,13 @@ afterAll(async () => {
   if (pool) await pool.end().catch(() => undefined);
 });
 
-describe.skipIf(!reachable)('RLS session context (runtime seam)', () => {
-  it('withRlsContext sets the app.* GUCs inside its transaction and leaves no residue', async () => {
+describe('RLS session context (runtime seam)', () => {
+  it('withRlsContext sets the app.* GUCs inside its transaction and leaves no residue', (ctx) => {
+    if (!reachable || !pool) return ctx.skip();
+    return theWithRlsContextTest();
+  });
+
+  async function theWithRlsContextTest(): Promise<void> {
     const db = createCatalogDatabase(pool!);
     let seenInside: Record<string, string | null> | undefined;
     await withRlsContext(
@@ -59,13 +64,20 @@ describe.skipIf(!reachable)('RLS session context (runtime seam)', () => {
     expect(seenInside?.['staff']).toBe('true');
 
     // Transaction-local settings are gone once the transaction committed.
+    // PG's current_setting(…, missing_ok=TRUE) reports an UNSET setting as
+    // the empty string (not SQL NULL).
     const after = await db.execute(sql`
       SELECT current_setting('app.user_subject', true) AS subject
     `);
-    expect((after.rows[0] as { subject: string | null }).subject).toBeNull();
+    expect((after.rows[0] as { subject: string | null }).subject).toBe('');
+  }
+
+  it('withPoolRlsSession applies the GUCs and rolls back cleanly on throw', (ctx) => {
+    if (!reachable || !pool) return ctx.skip();
+    return theWithPoolRlsSessionTest();
   });
 
-  it('withPoolRlsSession applies the GUCs and rolls back cleanly on throw', async () => {
+  async function theWithPoolRlsSessionTest(): Promise<void> {
     await expect(
       withPoolRlsSession(pool!, { userSubject: 'usr_rls_pool_subject' }, async (client) => {
         const res = await (client as { query: (t: string) => Promise<{ rows: unknown[] }> }).query(
@@ -81,5 +93,5 @@ describe.skipIf(!reachable)('RLS session context (runtime seam)', () => {
     // The pool is healthy after the rollback (client released, not leaked).
     const probe = await pool!.query('SELECT 1 AS ok');
     expect(probe.rows[0]).toEqual({ ok: 1 });
-  });
+  }
 });

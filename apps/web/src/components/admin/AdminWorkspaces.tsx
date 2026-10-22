@@ -1537,3 +1537,415 @@ export function AdminOperationsWorkspace({
     </div>
   );
 }
+
+/**
+ * P3-2/P3-5 console workspaces: SEO metadata + redirects, navigation items,
+ * and the AI-ops jobs/dead-letter views. Fetch-then-refresh forms talk to the
+ * console API (same-origin), every write is audit-backed in the DB layer.
+ */
+interface SeoRow {
+  id: string;
+  entity_kind: string;
+  entity_id: string;
+  title: string | null;
+  description: string | null;
+  canonical_path: string | null;
+  robots: string | null;
+  noindex: boolean;
+  updated_at: string;
+}
+
+interface RedirectItem {
+  id: string;
+  from_path: string;
+  to_path: string;
+  status_code: number;
+  reason: string | null;
+  created_at: string;
+}
+
+interface NavItem {
+  id: string;
+  key: string;
+  label: string;
+  items: unknown;
+  locale: string;
+  updated_at: string;
+}
+
+interface JobRow {
+  id: string;
+  job_key: string | null;
+  queue: string;
+  job_type: string;
+  state: string;
+  attempts: number;
+  last_error: string | null;
+  updated_at: string;
+}
+
+interface AiLogItem {
+  id: string;
+  module: string;
+  action: string;
+  latency_ms: number | null;
+  tokens_in: number | null;
+  tokens_out: number | null;
+  success: boolean;
+  degraded: boolean;
+  created_at: string;
+}
+
+export function AdminSeoWorkspace({
+  seo,
+  redirects,
+}: {
+  seo: SeoRow[];
+  redirects: RedirectItem[];
+}) {
+  return (
+    <div>
+      <section className="admin-panel" style={{ marginBottom: '1.5rem' }}>
+        <h2>SEO Metadata</h2>
+        {seo.length === 0 ? (
+          <div className="admin-empty">No SEO metadata rows yet — the storefront falls back to its honest defaults.</div>
+        ) : (
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Entity</th>
+                <th>Entity ID</th>
+                <th>Title</th>
+                <th>Robots</th>
+                <th>noindex</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              {seo.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.entity_kind}</td>
+                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{row.entity_id}</td>
+                  <td>{row.title ?? '—'}</td>
+                  <td>{row.robots ?? 'default'}</td>
+                  <td>{row.noindex ? 'yes' : 'no'}</td>
+                  <td>{new Date(row.updated_at).toLocaleString('en-GB')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      <AdminRedirectManager initialRedirects={redirects} />
+    </div>
+  );
+}
+
+export function AdminRedirectManager({ initialRedirects }: { initialRedirects: RedirectItem[] }) {
+  const [rows, setRows] = useState(initialRedirects);
+  const [fromPath, setFromPath] = useState('');
+  const [toPath, setToPath] = useState('');
+  const [statusCode, setStatusCode] = useState(301);
+  const [message, setMessage] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function refresh(): Promise<void> {
+    const res = await fetch('/api/v1/admin/redirects?limit=200');
+    if (!res.ok) return;
+    const body = (await res.json()) as { data?: RedirectItem[] };
+    setRows(body.data ?? []);
+  }
+
+  async function create(event: React.FormEvent): Promise<void> {
+    event.preventDefault();
+    setBusy(true);
+    setMessage(null);
+    const res = await fetch('/api/v1/admin/redirects', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ fromPath, toPath, statusCode }),
+    });
+    setBusy(false);
+    if (res.status === 409) {
+      setMessage('A redirect already exists for that path.');
+      return;
+    }
+    if (!res.ok) {
+      setMessage('Redirect rejected — check the paths.');
+      return;
+    }
+    setFromPath('');
+    setToPath('');
+    setMessage('Redirect created and audited.');
+    await refresh();
+  }
+
+  async function remove(id: string): Promise<void> {
+    const res = await fetch(`/api/v1/admin/redirects/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      setMessage('Redirect removed (audit row written).');
+      await refresh();
+    }
+  }
+
+  return (
+    <section className="admin-panel">
+      <h2>Redirect Manager</h2>
+      {message ? <p className="admin-lede">{message}</p> : null}
+      <form className="admin-panel" onSubmit={create} style={{ marginBottom: '1rem' }}>
+        <label style={{ marginRight: '0.5rem' }}>
+          From path{' '}
+          <input value={fromPath} onChange={(e) => setFromPath(e.target.value)} required style={{ width: '220px' }} />
+        </label>
+        <label style={{ marginRight: '0.5rem' }}>
+          To path{' '}
+          <input value={toPath} onChange={(e) => setToPath(e.target.value)} required style={{ width: '220px' }} />
+        </label>
+        <label style={{ marginRight: '0.5rem' }}>
+          Status{' '}
+          <select value={statusCode} onChange={(e) => setStatusCode(Number(e.target.value))}>
+            <option value={301}>301 permanent</option>
+            <option value={302}>302 temporary</option>
+            <option value={307}>307 temporary (preserve method)</option>
+            <option value={308}>308 permanent (preserve method)</option>
+          </select>
+        </label>
+        <button type="submit" disabled={busy} className="admin-btn">
+          Create redirect
+        </button>
+      </form>
+      {rows.length === 0 ? (
+        <div className="admin-empty">No redirects yet — the corpus run populates this table.</div>
+      ) : (
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>From</th>
+              <th>To</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.id}>
+                <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{row.from_path}</td>
+                <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{row.to_path}</td>
+                <td>{row.status_code}</td>
+                <td>{new Date(row.created_at).toLocaleDateString('en-GB')}</td>
+                <td>
+                  <button type="button" className="admin-btn admin-btn--quiet" onClick={() => void remove(row.id)}>
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
+}
+
+export function AdminNavigationWorkspace({ navigations }: { navigations: NavItem[] }) {
+  return (
+    <div>
+      {navigations.length === 0 ? (
+        <div className="admin-empty">No navigation sets stored — the storefront renders its structural defaults.</div>
+      ) : (
+        navigations.map((nav) => <AdminNavigationEditor key={`${nav.key}:${nav.locale}`} navigation={nav} />)
+      )}
+    </div>
+  );
+}
+
+function AdminNavigationEditor({ navigation }: { navigation: NavItem }) {
+  const [items, setItems] = useState(() => (Array.isArray(navigation.items) ? navigation.items : []) as NavEntry[]);
+  const [message, setMessage] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  function patch(index: number, field: 'label' | 'href', value: string): void {
+    setItems((prev) => prev.map((entry, i) => (i === index ? { ...entry, [field]: value } : entry)));
+  }
+
+  function add(): void {
+    setItems((prev) => [...prev, { label: '', href: '/' }]);
+  }
+
+  function removeAt(index: number): void {
+    setItems((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  async function save(): Promise<void> {
+    setBusy(true);
+    setMessage(null);
+    const res = await fetch('/api/v1/admin/navigation', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ key: navigation.key, locale: navigation.locale, items }),
+    });
+    setBusy(false);
+    setMessage(res.ok ? 'Navigation saved and audited.' : 'Save rejected — validate every label and href.');
+  }
+
+  return (
+    <section className="admin-panel" style={{ marginBottom: '1.25rem' }}>
+      <h2>
+        {navigation.key} <span className="admin-tile__note">({navigation.locale})</span>
+      </h2>
+      {items.length === 0 ? (
+        <div className="admin-empty">Empty set.</div>
+      ) : (
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Href</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((entry, index) => (
+              <tr key={index}>
+                <td>
+                  <input value={entry.label ?? ''} onChange={(e) => patch(index, 'label', e.target.value)} />
+                </td>
+                <td>
+                  <input value={entry.href ?? ''} onChange={(e) => patch(index, 'href', e.target.value)} />
+                </td>
+                <td>
+                  <button type="button" className="admin-btn admin-btn--quiet" onClick={() => removeAt(index)}>
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
+        <button type="button" className="admin-btn admin-btn--quiet" onClick={add}>
+          Add item
+        </button>
+        <button type="button" className="admin-btn" disabled={busy} onClick={() => void save()}>
+          Save & audit
+        </button>
+      </div>
+      {message ? <p className="admin-lede">{message}</p> : null}
+    </section>
+  );
+}
+
+interface NavEntry {
+  label?: string;
+  href?: string;
+}
+
+export function AdminAiOpsWorkspace({ jobs, aiLogs }: { jobs: JobRow[]; aiLogs: AiLogItem[] }) {
+  const [rows, setRows] = useState(jobs);
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function requeue(id: string): Promise<void> {
+    const res = await fetch(`/api/v1/admin/jobs/${id}/requeue`, { method: 'POST' });
+    if (res.ok) {
+      setMessage('Job requeued (guarded transition, audit row written).');
+      const list = await fetch('/api/v1/admin/jobs?limit=100');
+      if (list.ok) {
+        const body = (await list.json()) as { data?: JobRow[] };
+        setRows(body.data ?? []);
+      }
+    } else if (res.status === 409) {
+      setMessage('Only DEAD_LETTER jobs can be requeued.');
+    } else {
+      setMessage('Requeue failed.');
+    }
+  }
+
+  return (
+    <div>
+      <section className="admin-panel" style={{ marginBottom: '1.5rem' }}>
+        <h2>Job Queues</h2>
+        {message ? <p className="admin-lede">{message}</p> : null}
+        {rows.length === 0 ? (
+          <div className="admin-empty">No job rows recorded.</div>
+        ) : (
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Queue</th>
+                <th>Type</th>
+                <th>State</th>
+                <th>Attempts</th>
+                <th>Updated</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.queue}</td>
+                  <td>{row.job_type}</td>
+                  <td>
+                    {row.state === 'DEAD_LETTER' ? <strong>{row.state}</strong> : row.state}
+                    {row.last_error ? (
+                      <p className="admin-tile__note" title={row.last_error}>
+                        {row.last_error.slice(0, 120)}
+                      </p>
+                    ) : null}
+                  </td>
+                  <td>{row.attempts}</td>
+                  <td>{new Date(row.updated_at).toLocaleString('en-GB')}</td>
+                  <td>
+                    {row.state === 'DEAD_LETTER' ? (
+                      <button type="button" className="admin-btn admin-btn--quiet" onClick={() => void requeue(row.id)}>
+                        Requeue
+                      </button>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      <section className="admin-panel">
+        <h2>AI Interaction Log</h2>
+        {aiLogs.length === 0 ? (
+          <div className="admin-empty">No AI interactions logged yet.</div>
+        ) : (
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Module</th>
+                <th>Action</th>
+                <th>Latency</th>
+                <th>Tokens in/out</th>
+                <th>Status</th>
+                <th>At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {aiLogs.map((log) => (
+                <tr key={log.id}>
+                  <td>{log.module}</td>
+                  <td>{log.action}</td>
+                  <td>{log.latency_ms ?? '—'} ms</td>
+                  <td>
+                    {log.tokens_in ?? '—'} / {log.tokens_out ?? '—'}
+                  </td>
+                  <td>
+                    {log.success ? (log.degraded ? 'degraded' : 'ok') : 'failed'}
+                  </td>
+                  <td>{new Date(log.created_at).toLocaleString('en-GB')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+    </div>
+  );
+}

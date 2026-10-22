@@ -24,6 +24,8 @@ const GROUPS: { group: string; links: { href: string; label: string; key: string
       { href: '/admin/vendors', label: 'Trade Vendors', key: 'vendors' },
       { href: '/admin/certificates', label: 'Certificates & OCR', key: 'certificates' },
       { href: '/admin/content', label: 'CMS Pages', key: 'content' },
+      { href: '/admin/seo', label: 'SEO & Redirects', key: 'seo' },
+      { href: '/admin/navigation', label: 'Navigation', key: 'navigation' },
     ],
   },
   {
@@ -33,6 +35,7 @@ const GROUPS: { group: string; links: { href: string; label: string; key: string
       { href: '/admin/users', label: 'Roles & Permissions', key: 'users' },
       { href: '/admin/migration', label: 'Migration & INV-08', key: 'migration' },
       { href: '/admin/operations', label: 'Operations & Queues', key: 'operations' },
+      { href: '/admin/ai-ops', label: 'AI-Ops', key: 'ai-ops' },
       { href: '/admin/audit', label: 'Audit Logs', key: 'audit' },
     ],
   },

@@ -18,6 +18,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type {
+  AiLogRow,
   BackOfficeAuditLogRow,
   BackOfficeCertificateRow,
   BackOfficeDiscountRow,
@@ -25,19 +26,26 @@ import type {
   BackOfficeOperationsOverview,
   BackOfficeRefundRow,
   CatalogueProductRow,
+  JobOpsRow,
+  NavigationRow,
+  RedirectRow,
+  SeoMetadataRow,
   VendorProfileDto,
 } from '@maihan/db';
 
 import { requireAdminAccess, AdminGateScreen } from '../../../lib/admin-server.js';
 import { AdminSidebar } from '../../../components/admin/AdminSidebar.js';
 import {
+  AdminAiOpsWorkspace,
   AdminCertificatesWorkspace,
   AdminCmsWorkspace,
   AdminDiscountsWorkspace,
   AdminMigrationWorkspace,
+  AdminNavigationWorkspace,
   AdminOperationsWorkspace,
   AdminProductModerationTable,
   AdminRefundsTable,
+  AdminSeoWorkspace,
   AdminUsersTable,
   AdminVendorModerationTable,
 } from '../../../components/admin/AdminWorkspaces.js';
@@ -139,9 +147,83 @@ export default async function AdminPage({ params }: PageProps) {
       if (!access.ok) return <AdminGateScreen status={access.status} />;
       return <AdminOperations />;
     }
+    case 'seo': {
+      const access = await requireAdminAccess('seo', 'read');
+      if (!access.ok) return <AdminGateScreen status={access.status} />;
+      return <AdminSeo />;
+    }
+    case 'navigation': {
+      const access = await requireAdminAccess('navigation', 'read');
+      if (!access.ok) return <AdminGateScreen status={access.status} />;
+      return <AdminNavigation />;
+    }
+    case 'ai-ops': {
+      const access = await requireAdminAccess('ai_logs', 'read');
+      if (!access.ok) return <AdminGateScreen status={access.status} />;
+      return <AdminAiOps />;
+    }
     default:
       notFound();
   }
+}
+
+async function AdminSeo() {
+  const [seoRes, redirectRes] = await Promise.all([
+    adminOriginFetch('/api/v1/admin/seo?limit=100'),
+    adminOriginFetch('/api/v1/admin/redirects?limit=200'),
+  ]);
+  if (!seoRes.ok || !redirectRes.ok) {
+    return <AdminUnavailable status={seoRes.ok ? redirectRes.status : seoRes.status} />;
+  }
+  const seoBody = (await seoRes.json()) as { data?: SeoMetadataRow[] };
+  const redirectBody = (await redirectRes.json()) as { data?: RedirectRow[] };
+  return (
+    <AdminFrame
+      active="seo"
+      title="SEO Metadata & Redirects"
+      lede="Canonical titles, descriptions, robots and the 44,218-row redirect manager — audit rows land on every edit."
+    >
+      <AdminSeoWorkspace seo={seoBody.data ?? []} redirects={redirectBody.data ?? []} />
+    </AdminFrame>
+  );
+}
+
+async function AdminNavigation() {
+  const response = await adminOriginFetch('/api/v1/admin/navigation');
+  if (!response.ok) {
+    return <AdminUnavailable status={response.status} />;
+  }
+  const body = (await response.json()) as { data?: NavigationRow[] };
+  return (
+    <AdminFrame
+      active="navigation"
+      title="Navigation"
+      lede="Header, footer, mega-menu and mobile navigation are data-driven from the `navigations` table — the storefront renders whatever is stored."
+    >
+      <AdminNavigationWorkspace navigations={body.data ?? []} />
+    </AdminFrame>
+  );
+}
+
+async function AdminAiOps() {
+  const [jobsRes, logsRes] = await Promise.all([
+    adminOriginFetch('/api/v1/admin/jobs?limit=100'),
+    adminOriginFetch('/api/v1/admin/ai-logs?limit=50'),
+  ]);
+  if (!jobsRes.ok || !logsRes.ok) {
+    return <AdminUnavailable status={jobsRes.ok ? logsRes.status : jobsRes.status} />;
+  }
+  const jobsBody = (await jobsRes.json()) as { data?: JobOpsRow[] };
+  const logsBody = (await logsRes.json()) as { data?: AiLogRow[] };
+  return (
+    <AdminFrame
+      active="ai-ops"
+      title="AI-Ops"
+      lede="Job queues with honest states, dead-letter requeue (guarded, audited), and the AI interaction log tail."
+    >
+      <AdminAiOpsWorkspace jobs={jobsBody.data ?? []} aiLogs={logsBody.data ?? []} />
+    </AdminFrame>
+  );
 }
 
 function fmt(value: number): string {

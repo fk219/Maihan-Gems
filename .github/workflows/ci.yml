@@ -56,6 +56,11 @@ jobs:
       - name: Secret scan
         run: node scripts/scan-secrets.mjs
 
+      # SG-14: "No PII in logs, analytics or embeddings." Tripwire scan over
+      # the runtime sources (tests excluded — they are the SG-14 proof).
+      - name: PII scan
+        run: node scripts/pii-scan.mjs
+
       - name: Build
         run: pnpm run build
 

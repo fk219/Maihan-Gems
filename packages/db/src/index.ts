@@ -84,6 +84,12 @@ export {
   type RateLimitIncrement,
 } from './operations/rate-limit-counter.js';
 export {
+  reconcileDanglingCapturedPayments,
+  flagHighValueOrders,
+  sweepPublishedOutbox,
+  type ReconciliationCatchUpResult,
+} from './operations/reconciliation-sweeps.js';
+export {
   createCatalogQueryPort,
 } from './catalog/port.js';
 export {
@@ -228,9 +234,26 @@ export {
   createArHandoffToken,
   redeemArHandoffToken,
   validateWebarAssetBudgets,
+  findWebarAssetByStorageKey,
   type InsertWebarAssetParams,
   type DbClient,
 } from './webar/webar-repository.js';
+export { seedWebarAssets, type WebarSeedCounts } from './seed/webar-seed.js';
+export {
+  createSeoNavRepository,
+  isRedirectConflict,
+  type SeoNavRepository,
+  type SeoMetadataRow,
+  type NavigationRow,
+  type RedirectRow,
+  type SeoEntityKind,
+} from './cms/seo-nav-repository.js';
+export {
+  createJobsOpsRepository,
+  type JobsOpsRepository,
+  type JobOpsRow,
+  type AiLogRow,
+} from './operations/jobs-ops-repository.js';
 export {
   createCmsRepository,
   TRUST_BEARING_KINDS,

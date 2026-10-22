@@ -18,6 +18,7 @@ import {
   ErrorEnvelopeSchema,
 } from '@maihan/contracts';
 import { createCatalogApi, type CatalogApi } from './index.js';
+import { globalRegistry } from '@maihan/observability';
 import {
   MemoryCacheStore,
   MemoryGenerationStore,
@@ -134,6 +135,42 @@ describe('Search HTTP Endpoints (Phase 5 Task 11)', () => {
       meta: body.meta,
     };
     expect(() => SearchResultSchema.parse(reconstructed)).not.toThrow();
+  });
+
+  it('P3-12 telemetry: a zero-result search increments search_zero_results_total (bounded-cardinality labels)', async () => {
+    const { api, port } = buildSearchApi();
+    port.setSearchResult({
+      items: [],
+      facets: { variety: [], color: [], jewellery_type: [], metal: [], settingStyle: [], shape: [], origin: [], treatment: [] },
+      rejected_filters: [],
+      meta: {
+        limit: 24,
+        has_more: false,
+        next_cursor: null,
+        search_version: 'search-v1',
+        strategy: 'FULLTEXT_HYBRID',
+        intent: 'PRODUCT_SEARCH',
+        degraded: false,
+        candidate_count: 0,
+        degradation_reason: undefined,
+      },
+    });
+    const res = await api(
+      new Request('http://localhost/search', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ query: 'nonexistent violet widget' }),
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(port.calls.search).toBe(1);
+    // The counter must be readable on the shared registry (loopback-scraped
+    // metrics); a non-zero-result search must NOT increment it.
+    const samples = globalRegistry.collectAll().filter((s) => s.name === 'search_zero_results_total');
+    expect(samples.length).toBe(1);
+    const sample = samples[0]!;
+    expect(sample.labels['surface']).toBe('/search');
+    expect(sample.value).toBe(1);
   });
 
   it('POST /api/v1/search serves identical endpoint with versioned prefix', async () => {

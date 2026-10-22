@@ -23,7 +23,7 @@ export type RouteHandlerId = string;
 
 export interface RouteDefinition {
   readonly id: RouteHandlerId;
-  readonly method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  readonly method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
   /** OpenAPI path template, `/api/v1` base included. */
   readonly path: string;
   /** Cache surface (Task 6 policy: scope, TTL, visibility). */
@@ -291,6 +291,16 @@ export const ADMIN_ROUTES: readonly RouteDefinition[] = [
   { id: 'adminMigrationOverviewHandler', method: 'GET', path: '/api/v1/admin/migration' },
   { id: 'adminDecideDerivedRefHandler', method: 'POST', path: '/api/v1/admin/derived-refs/{id}/approve' },
   { id: 'adminOperationsOverviewHandler', method: 'GET', path: '/api/v1/admin/operations' },
+  { id: 'adminSeoListHandler', method: 'GET', path: '/api/v1/admin/seo' },
+  { id: 'adminSeoUpsertHandler', method: 'PUT', path: '/api/v1/admin/seo' },
+  { id: 'adminNavigationListHandler', method: 'GET', path: '/api/v1/admin/navigation' },
+  { id: 'adminNavigationUpdateHandler', method: 'PUT', path: '/api/v1/admin/navigation' },
+  { id: 'adminRedirectsListHandler', method: 'GET', path: '/api/v1/admin/redirects' },
+  { id: 'adminRedirectCreateHandler', method: 'POST', path: '/api/v1/admin/redirects' },
+  { id: 'adminRedirectDeleteHandler', method: 'DELETE', path: '/api/v1/admin/redirects/{redirectId}' },
+  { id: 'adminJobsListHandler', method: 'GET', path: '/api/v1/admin/jobs' },
+  { id: 'adminJobRequeueHandler', method: 'POST', path: '/api/v1/admin/jobs/{jobId}/requeue' },
+  { id: 'adminAiLogsTailHandler', method: 'GET', path: '/api/v1/admin/ai-logs' },
 ];
 
 export const ALL_ROUTES: readonly RouteDefinition[] = [

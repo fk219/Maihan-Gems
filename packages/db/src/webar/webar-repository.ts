@@ -147,6 +147,21 @@ export async function createWebarAsset(
   return mapWebarAssetRow(res.rows[0]);
 }
 
+/** P2-9: the seeded hue assets are resolved by their storage key
+ * (`/models/gems/brilliant-<hue>.glb`) — the asset_id FK column is reserved
+ * for bespoke asset records and stays NULL for procedural models. */
+export async function findWebarAssetByStorageKey(
+  db: DbClient,
+  storageKey: string,
+): Promise<WebarAssetReadModel | null> {
+  const res = await db.query(
+    "SELECT * FROM webar_assets WHERE storage_key = $1 AND state = 'READY' ORDER BY created_at DESC LIMIT 1;",
+    [storageKey],
+  );
+  if (!res.rows[0]) return null;
+  return mapWebarAssetRow(res.rows[0]);
+}
+
 export async function findWebarAssetById(
   db: DbClient,
   id: string,

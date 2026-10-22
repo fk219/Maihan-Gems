@@ -16,7 +16,13 @@
  *    signature is deliberately NOT attempted (security: no replay without
  *    verification).
  */
-import { sql, sweepExpiredReservations } from '@maihan/db';
+import {
+  flagHighValueOrders,
+  reconcileDanglingCapturedPayments,
+  sql,
+  sweepExpiredReservations,
+  sweepPublishedOutbox,
+} from '@maihan/db';
 
 import type { CatalogDatabase } from '../dispatch/catalog-db.js';
 
@@ -77,12 +83,32 @@ export async function sweepWebhookReceipts(db: CatalogDatabase): Promise<SweepRe
 }
 
 export async function runSweeps(db: CatalogDatabase): Promise<SweepResult[]> {
+  const [dangling, highValue, outbox] = await Promise.all([
+    reconcileDanglingCapturedPayments(db),
+    flagHighValueOrders(db),
+    sweepPublishedOutbox(db),
+  ]);
   return [
     await sweepReservations(db),
     await sweepCheckoutSessions(db),
     await sweepCarts(db),
     await sweepWebhookReceipts(db),
     await sweepJobsRetention(db),
+    {
+      name: 'reconciliation-catchup',
+      changed: dangling.reconciled,
+      detail: 'dangling captured payments → guarded PAID transition (dropped-webhook control)',
+    },
+    {
+      name: 'high-value-flags',
+      changed: highValue.flagged,
+      detail: 'orders at/above the manual-review threshold flagged to audit',
+    },
+    {
+      name: 'outbox-growth',
+      changed: outbox.deleted,
+      detail: 'PUBLISHED outbox rows past retention deleted (consumer ledger persists)',
+    },
   ];
 }
 

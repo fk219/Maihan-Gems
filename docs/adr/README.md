@@ -12,6 +12,10 @@
 #     "the ADRs described in doc 40" and "a copy of doc 40".
 #   - Whether the accepted ADRs are MOVED into docs/adr/ as individual files, or
 #     whether doc 40 stays canonical and docs/adr/ holds only future ADRs, is a
+#
+# Drafts added during the audit remediation (all Proposed until ratified):
+#   ADR-028 invariants, ADR-029 RLS runtime, ADR-030 identity, ADR-031 payouts,
+#   ADR-032 authenticity claim, ADR-033 FX/currency lock, ADR-034 RMA+saved-DYO.
 #     plan-owner decision. Moving them would break the rank-3 authority chain in
 #     AGENTS.md section 3, and every cross-document "doc 40" reference.
 #

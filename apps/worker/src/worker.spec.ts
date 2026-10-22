@@ -43,10 +43,44 @@ describe.skipIf(!dbReachable)('worker dispatch + sweeps (live database)', () => 
     const db = createCatalogDatabase(pool!);
     const first = await runSweeps(db);
     const second = await runSweeps(db);
-    expect(first.length).toBe(5);
+    expect(first.length).toBe(8);
     for (const sweep of second) {
       expect(sweep.changed).toBe(0);
     }
+  });
+
+  it('OrderCreated coverage: dispatch enqueues BOTH order.confirm and the search bump with both consumer-ledger rows (U-09)', async () => {
+    const db = createCatalogDatabase(pool!);
+    const orderId = crypto.randomUUID();
+    await db.execute(sql`
+      INSERT INTO domain_events (event_id, event_type, aggregate_type, aggregate_id, payload)
+      VALUES (gen_random_uuid(), 'OrderCreated', 'order', ${orderId}, '{"order_number":"K-COVERAGE"}'::jsonb)
+    `);
+    await dispatchOutbox(db, 'worker.spec');
+
+    const confirm = await pool!.query(
+      "SELECT job_type, queue FROM jobs WHERE payload::text LIKE '%" + orderId + "%' AND job_type = 'order.confirm'",
+    );
+    expect(confirm.rows.length).toBe(1);
+    expect(confirm.rows[0].queue).toBe('critical');
+
+    const bump = await pool!.query(
+      "SELECT job_type FROM jobs WHERE payload::text LIKE '%" + orderId + "%' AND job_type = 'search.generation_bump'",
+    );
+    expect(bump.rows.length).toBe(1);
+
+    const ledger = await pool!.query(
+      `SELECT consumer_name FROM event_consumers ec
+       JOIN domain_events de ON de.id = ec.event_id
+       WHERE de.aggregate_id = $1::uuid AND de.event_type = 'OrderCreated'
+       ORDER BY consumer_name`,
+      [orderId],
+    );
+    // The dispatcher itself ('worker.spec') also appears in the ledger; the
+    // coverage contract is that BOTH business consumers landed.
+    const consumers = ledger.rows.map((r) => r.consumer_name);
+    expect(consumers).toContain('order-confirmation-dispatcher');
+    expect(consumers).toContain('search-cache-invalidator');
   });
 
   it('routes ProductStateChanged outbox events into operational queues and processes them to SUCCEEDED', async () => {
