@@ -280,7 +280,7 @@ export function TextEffect({
     <AnimatePresence mode='popLayout'>
       {trigger && (
         <MotionTag
-          initial='hidden'
+          initial='visible'
           animate='visible'
           exit='exit'
           variants={computedVariants.container}
