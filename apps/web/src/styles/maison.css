@@ -405,7 +405,7 @@ body .vault-evidence dd {
 body .mgh-eyebrow {
   letter-spacing: 0.16em;
   font-weight: 500;
-  color: var(--text-muted);
+  color: #5c5344;
 }
 
 body .mgh-h2 {

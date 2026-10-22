@@ -194,26 +194,49 @@ body .ngc-pages .cloth-bag__lines + a {
     display: block;
     min-height: 0;
     background: #f6f2e9;
+    padding-bottom: 1rem;
   }
   body .ngc-pages .cloth-stage__bleed {
     position: relative;
-    height: 46vh;
+    height: auto;
     inset: auto;
+  }
+  body .ngc-pages .cloth-stage__bleed .vault-vitrine__img {
+    height: 30vh;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: auto;
   }
   body .ngc-pages .cloth-stage .mgh-hero__title {
     font-size: clamp(2.4rem, 12vw, 3.6rem);
   }
   body .ngc-pages .cloth-stage__type {
-    margin: 0;
+    position: relative;
+    z-index: 2;
+    margin: 1rem 1rem 0;
     max-width: none;
   }
   body .ngc-pages .cloth-stage .vault-vitrine__plate,
   body .ngc-pages .cloth-stage .vault-evidence {
     position: static;
+    right: auto;
+    bottom: auto;
     max-width: none;
-    margin: 0.8rem 1rem 0;
+    margin: 0.75rem 1rem 0;
+    background: transparent;
+  }
+  body .ngc-pages .cloth-stage .vault-evidence {
+    grid-template-columns: 1fr 1fr;
   }
   body .ngc-pages .cloth-jewels {
     grid-template-columns: 1fr;
+  }
+  /* The header bag stays. Floating controls were covering the headline. */
+  body .ai-concierge-trigger,
+  .cloth-bag-anchor {
+    display: none;
+  }
+  body .ngc-tools a[href="/compare"] {
+    display: none;
   }
 }
