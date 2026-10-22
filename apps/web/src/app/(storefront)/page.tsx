@@ -47,7 +47,7 @@ const GEMS: readonly { name: string; href: string; img: string }[] = [
   { name: 'Spinel', href: '/spinel', img: '/media/stone-spinel-blue.jpg' },
   { name: 'Tanzanite', href: '/tanzanite', img: '/media/stone-tanzanite.jpg' },
   { name: 'Paraíba', href: '/paraiba-tourmaline', img: '/media/stone-paraiba.jpg' },
-  { name: 'Padparadscha', href: '/padparadscha', img: '/media/stone-padparadscha.jpg' },
+  { name: 'Padparadscha', href: '/padparadscha-gemstones', img: '/media/stone-padparadscha.jpg' },
   { name: 'Tsavorite', href: '/tsavorite-garnet', img: '/media/stone-tsavorite.jpg' },
   { name: 'Alexandrite', href: '/alexandrite', img: '/media/stone-alexandrite.jpg' },
   { name: 'Opal', href: '/opal', img: '/media/stone-opal.jpg' },
