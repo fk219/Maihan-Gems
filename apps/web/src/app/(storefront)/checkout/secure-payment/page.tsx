@@ -53,10 +53,7 @@ export default async function CheckoutSecurePaymentPage({
           </div>
         </VaultReveal>
 
-        <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
-          Checkpoint Funnel · Step 3 of 3
-        </span>
-        <h1 style={{ color: 'var(--text-primary)', marginTop: 0 }}>Final Review &amp; Order</h1>
+        <h1 style={{ color: 'var(--text-primary)', marginTop: '1.25rem' }}>Final Review &amp; Order</h1>
         <p className="page-subtitle" style={{ color: 'var(--text-secondary)' }}>
           Placing the order is idempotent and atomic: immutable price, gemstone and setting snapshots are taken
           at placement, and the state timeline is append-only.

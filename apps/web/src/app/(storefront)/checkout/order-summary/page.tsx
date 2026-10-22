@@ -46,10 +46,7 @@ export default function CheckoutOrderSummaryPage() {
           </div>
         </VaultReveal>
 
-        <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
-          Checkpoint Funnel · Step 1 of 3
-        </span>
-        <h1 style={{ color: 'var(--text-primary)', marginTop: 0 }}>Review Your Order</h1>
+        <h1 style={{ color: 'var(--text-primary)', marginTop: '1.25rem' }}>Review Your Order</h1>
         <p className="page-subtitle" style={{ color: 'var(--text-secondary)' }}>
           Starting checkout opens a server-side session: the atelier re-confirms every price and reserves the
           1-of-1 stock for 30 minutes.

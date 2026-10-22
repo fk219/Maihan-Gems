@@ -16,7 +16,7 @@ export default function AboutPage() {
             <h1 className="lx-h2">Maihan Gems</h1>
             <p className="lx-lede" style={{ marginTop: '1.25rem' }}>
               Maihan is a private vault of earth-mined gemstones, matched pairs and master settings.
-              Stones are disclosed as they are — origin, treatment and laboratory papers — never dressed
+              Stones are disclosed as they are: origin, treatment and laboratory papers, never dressed
               as something they are not.
             </p>
             <p className="lx-lede" style={{ marginTop: '1rem' }}>

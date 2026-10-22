@@ -14,13 +14,23 @@ body .ngc-pages .cloth-stage__bleed {
   position: absolute;
   inset: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  padding: 0 11rem 7.5rem 4vw;
+  pointer-events: none;
 }
 
 body .ngc-pages .cloth-stage__bleed .vault-vitrine__img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
 }
 
 body .ngc-pages .cloth-stage__type {
@@ -44,18 +54,20 @@ body .ngc-pages .cloth-stage .mgh-hero__title {
   line-height: 0.88;
   letter-spacing: -0.045em;
   margin: 0 0 0.8rem;
+  max-width: none;
 }
 
 body .ngc-pages .cloth-stage .vault-vitrine__plate,
 body .ngc-pages .cloth-stage .vault-evidence {
-  position: absolute;
+  position: relative;
   z-index: 2;
-  right: 4vw;
-  bottom: 7.5rem;
+  width: min(16rem, 28vw);
   max-width: 16rem;
+  margin: 0;
   color: #1d1710;
   background: #fdfbf5;
   padding: 0.9rem 1rem;
+  pointer-events: auto;
 }
 
 body .ngc-pages .cloth-marquee {
@@ -191,42 +203,51 @@ body .ngc-pages .cloth-bag__lines + a {
 
 @media (max-width: 800px) {
   body .ngc-pages .cloth-stage {
-    display: block;
+    display: flex;
+    flex-direction: column;
     min-height: 0;
     background: #f6f2e9;
-    padding-bottom: 1rem;
+    padding-bottom: 1.25rem;
   }
   body .ngc-pages .cloth-stage__bleed {
-    position: relative;
-    height: auto;
-    inset: auto;
+    display: contents;
   }
   body .ngc-pages .cloth-stage__bleed .vault-vitrine__img {
-    height: 30vh;
+    position: relative;
+    inset: auto;
+    order: 1;
+    width: 100%;
+    height: 26vh;
     min-height: 0;
-    max-height: none;
+    max-height: 11rem;
     aspect-ratio: auto;
   }
   body .ngc-pages .cloth-stage .mgh-hero__title {
-    font-size: clamp(2.4rem, 12vw, 3.6rem);
+    font-size: clamp(2.15rem, 11vw, 3.2rem);
+    line-height: 0.92;
   }
   body .ngc-pages .cloth-stage__type {
+    order: 2;
     position: relative;
     z-index: 2;
-    margin: 1rem 1rem 0;
+    margin: 0.85rem 1rem 0;
     max-width: none;
+  }
+  body .ngc-pages .cloth-stage .vault-vitrine__plate {
+    order: 3;
+  }
+  body .ngc-pages .cloth-stage .vault-evidence {
+    order: 4;
+    grid-template-columns: 1fr 1fr;
   }
   body .ngc-pages .cloth-stage .vault-vitrine__plate,
   body .ngc-pages .cloth-stage .vault-evidence {
     position: static;
-    right: auto;
-    bottom: auto;
+    width: auto;
     max-width: none;
-    margin: 0.75rem 1rem 0;
+    margin: 0.65rem 1rem 0;
+    padding: 0;
     background: transparent;
-  }
-  body .ngc-pages .cloth-stage .vault-evidence {
-    grid-template-columns: 1fr 1fr;
   }
   body .ngc-pages .cloth-jewels {
     grid-template-columns: 1fr;
@@ -237,6 +258,21 @@ body .ngc-pages .cloth-bag__lines + a {
     display: none;
   }
   body .ngc-tools a[href="/compare"] {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  body .ngc-bar {
+    gap: 0.35rem;
+    padding-left: 0.7rem;
+    padding-right: 0.7rem;
+  }
+  body .ngc-iconbtn {
+    width: 2.15rem;
+    height: 2.15rem;
+  }
+  body .ngc-tools a[href="/favorites"] {
     display: none;
   }
 }

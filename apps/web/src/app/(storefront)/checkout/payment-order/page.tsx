@@ -53,12 +53,9 @@ export default async function CheckoutPaymentOrderPage({
           </div>
         </VaultReveal>
 
-        <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
-          Checkpoint Funnel · Step 2 of 3
-        </span>
-        <h1 style={{ color: 'var(--text-primary)', marginTop: 0 }}>Delivery &amp; Settlement</h1>
+        <h1 style={{ color: 'var(--text-primary)', marginTop: '1.25rem' }}>Delivery &amp; Settlement</h1>
         <p className="page-subtitle" style={{ color: 'var(--text-secondary)' }}>
-          Each checkpoint is validated by the atelier system in order — details are stored server-side and the
+          Each checkpoint is validated by the atelier system in order. Details are stored server-side and the
           stock reservation clock keeps running.
         </p>
 

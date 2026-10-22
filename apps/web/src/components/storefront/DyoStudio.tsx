@@ -299,7 +299,7 @@ export function DyoStudio({
                 <div className="is-total"><dt>Indicative total</dt><dd>{formatMoney(total, currency, rates)}</dd></div>
               </dl>
               <p className="atelier__note">
-                The authoritative price is the server quote on the review page — component prices here are indicative.
+                The authoritative price is the server quote on the review page. Component prices here are indicative.
               </p>
               <button
                 type="button"
@@ -316,7 +316,7 @@ export function DyoStudio({
                   This pairing sits near the seat’s size band. A jeweller will review the prongs before the piece is made.
                 </p>
               ) : null}
-              {fit === 'fits' ? <p className="atelier__fit">Compatible — shape and carat sit inside the seat.</p> : null}
+              {fit === 'fits' ? <p className="atelier__fit">Compatible. Shape and carat sit inside the seat.</p> : null}
             </div>
           ) : null}
           {panel < 3 ? (
