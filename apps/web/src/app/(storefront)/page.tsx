@@ -213,7 +213,8 @@ export default async function HomePage({
     <main id="main-content" className="mgh">
       {/* Hero — the vitrine (one orchestrated reveal) */}
       <section className="mgh-hero cloth-stage" data-cloth-pin aria-label={brand.name}>
-        <figure className="vault-vitrine cloth-stage__bleed" data-cloth-settle>
+        <figure className="vault-vitrine cloth-stage__bleed">
+          <div className="cloth-stage__photo" data-cloth-settle>
           <img
             className="vault-vitrine__img"
             data-parallax="6"
@@ -225,6 +226,7 @@ export default async function HomePage({
                 : `${VITRINE_PIECE.id}, ${VITRINE_PIECE.name}, ${VITRINE_PIECE.facts}`
             }
           />
+          </div>
           <figcaption className="vault-vitrine__plate">
             <span className="vault-vitrine__plate-id">
               {sister ? `${brand.name} · House reserve` : `${VITRINE_PIECE.id} · Vault reservation`}
