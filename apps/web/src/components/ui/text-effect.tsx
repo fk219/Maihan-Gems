@@ -228,7 +228,11 @@ export function TextEffect({
   style,
 }: TextEffectProps) {
   const reduce = useReducedMotion();
-  if (reduce) {
+  const [shown, setShown] = React.useState(false);
+  React.useEffect(() => {
+    setShown(true);
+  }, []);
+  if (reduce || !shown) {
     return React.createElement(as, { className, style, id }, children);
   }
   const segments = splitText(children, per);

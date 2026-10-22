@@ -26,13 +26,20 @@ body .ngc-pages .cloth-stage__bleed .vault-vitrine__img {
 body .ngc-pages .cloth-stage__type {
   position: relative;
   z-index: 2;
-  max-width: 46rem;
-  padding: 8vh 6vw 7vh;
-  background: linear-gradient(to top, rgba(22, 17, 12, 0.78), transparent 70%);
+  max-width: 34rem;
+  margin: auto 4vw 8vh;
+  padding: 0;
+  background: transparent;
+  color: #1d1710;
+}
+
+body .ngc-pages .cloth-stage .mgh-hero__title,
+body .ngc-pages .cloth-stage .mgh-hero__sub,
+body .ngc-pages .cloth-stage .mgh-eyebrow {
+  color: #1d1710;
 }
 
 body .ngc-pages .cloth-stage .mgh-hero__title {
-  color: #f6f2e9;
   font-size: clamp(3.4rem, 8vw, 7.4rem);
   line-height: 0.88;
   letter-spacing: -0.045em;
@@ -183,8 +190,22 @@ body .ngc-pages .cloth-bag__lines + a {
 }
 
 @media (max-width: 800px) {
+  body .ngc-pages .cloth-stage {
+    display: block;
+    min-height: 0;
+    background: #f6f2e9;
+  }
+  body .ngc-pages .cloth-stage__bleed {
+    position: relative;
+    height: 46vh;
+    inset: auto;
+  }
   body .ngc-pages .cloth-stage .mgh-hero__title {
-    font-size: clamp(2.6rem, 14vw, 4rem);
+    font-size: clamp(2.4rem, 12vw, 3.6rem);
+  }
+  body .ngc-pages .cloth-stage__type {
+    margin: 0;
+    max-width: none;
   }
   body .ngc-pages .cloth-stage .vault-vitrine__plate,
   body .ngc-pages .cloth-stage .vault-evidence {

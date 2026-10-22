@@ -38,17 +38,7 @@ export const ShinyButton = React.forwardRef<HTMLAnchorElement, ShinyButtonProps>
         }
         {...props}
       >
-        <span
-          className="relative block font-[family-name:var(--font-sans)] text-[0.72rem] uppercase tracking-[0.18em]"
-          style={
-            reduce
-              ? undefined
-              : {
-                  maskImage:
-                    'linear-gradient(-75deg,#f6f2e9 calc(var(--x) + 20%),transparent calc(var(--x) + 30%),#f6f2e9 calc(var(--x) + 100%))',
-                }
-          }
-        >
+        <span className="relative block font-[family-name:var(--font-sans)] text-[0.72rem] uppercase tracking-[0.18em] text-[#f6f2e9]">
           {children}
         </span>
         <span
