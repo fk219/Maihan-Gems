@@ -88,7 +88,7 @@ export function AdminGateScreen({ status }: AdminGateProps) {
       : 'Your account role does not hold the required administrative capability.';
   return (
     <div className="admin-gate" role="alert">
-      <span className="admin-eyebrow">Maihan Gems — Back Office</span>
+      <span className="admin-eyebrow">Maihan Gems · Back Office</span>
       <h1>{status === 401 ? 'Operator Authentication Required' : 'Not Permitted (403)'}</h1>
       <p>{message}</p>
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>

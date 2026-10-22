@@ -257,7 +257,7 @@ async function AdminDashboard() {
     <AdminFrame
       active="dashboard"
       title="Executive Dashboard"
-      lede="Operational counts read live from the database — no invented metrics."
+      lede="Operational counts read live from the database. No invented metrics."
     >
       <div className="operator-ledger">
         <div className="operator-ledger__lead">
@@ -798,7 +798,7 @@ function AdminFrame({
     <div className="admin-layout">
       <AdminSidebar active={active} />
       <main className="admin-main" id="main-content">
-        <span className="admin-eyebrow">Maihan Gems — Back Office</span>
+        <span className="admin-eyebrow">Maihan Gems · Back Office</span>
         <h1>{title}</h1>
         <p className="admin-lede">{lede}</p>
         {children}

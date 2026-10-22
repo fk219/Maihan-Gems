@@ -19,7 +19,7 @@ body .ngc-pages .cloth-stage__bleed {
   align-items: flex-end;
   justify-content: flex-end;
   gap: 0.35rem;
-  padding: 0 11rem 7.5rem 4vw;
+  padding: 0 1.5rem 14rem 4vw;
   pointer-events: none;
 }
 
@@ -155,8 +155,8 @@ body .ngc-pages .cloth-jewels__index .mgh-jew img {
 .cloth-bag-anchor {
   position: fixed;
   z-index: 40;
-  right: 1rem;
-  bottom: 1rem;
+  right: 16.5rem;
+  bottom: 2rem;
 }
 
 body .ngc-pages .cloth-bag {

@@ -46,7 +46,7 @@ export default async function VendorPortalPage({ params }: PageProps) {
   if (!actor) {
     return (
       <div className="admin-gate" role="alert">
-        <span className="admin-eyebrow">Maihan Gems — Trade Partner Console</span>
+        <span className="admin-eyebrow">Maihan Gems · Trade Partner Console</span>
         <h1>Vendor Authentication Required</h1>
         <p>
           Sign in with an authorized Trade Partner account or register as a Bourse Dealer to access
@@ -67,7 +67,7 @@ export default async function VendorPortalPage({ params }: PageProps) {
   if (actor.role !== 'VENDOR' || !actor.vendor_id) {
     return (
       <div className="admin-gate" role="alert">
-        <span className="admin-eyebrow">Maihan Gems — Trade Partner Console</span>
+        <span className="admin-eyebrow">Maihan Gems · Trade Partner Console</span>
         <h1>Not Permitted (403)</h1>
         <p>
           Your account ({actor.email}, role <code>{actor.role}</code>) is not registered as a Trade
@@ -95,7 +95,7 @@ export default async function VendorPortalPage({ params }: PageProps) {
   if (!dashRes.ok || !dashRes.data) {
     return (
       <div className="admin-gate" role="alert">
-        <span className="admin-eyebrow">Maihan Gems — Trade Partner Console</span>
+        <span className="admin-eyebrow">Maihan Gems · Trade Partner Console</span>
         <h1>Vendor Service Unavailable</h1>
         <p>{dashRes.message ?? 'Could not load vendor workspace.'}</p>
       </div>
