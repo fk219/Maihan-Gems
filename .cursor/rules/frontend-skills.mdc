@@ -1,0 +1,10 @@
+---
+description: How to use the storefront design skills on Maihan Gems
+alwaysApply: true
+---
+
+Read `.cursor/skills/frontend-design/SKILL.md` before changing storefront UI. Use it as the baseline. Use `.cursor/skills/awwwards/SKILL.md` only to raise visual polish on marketing surfaces, and use `.cursor/skills/shadcn/SKILL.md` when adding or fixing shadcn components.
+
+Scale the award-site theatre down. Do not add loaders, WebGL, or page-transition hijacks on cart, checkout, account, or admin pages. Keep bold motion to the homepage hero and product reveals. Honour `prefers-reduced-motion`.
+
+Keep the existing Silk & Stone tokens and the current Next.js, React, and Three.js stack. Do not invent a new palette or a parallel design system. Do not show fake reviews, ratings, or metrics. Stay inside the skill limits: visible keyboard focus, mobile layout, mobile LCP under 2.5s, and CLS under 0.05.

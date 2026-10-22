@@ -294,6 +294,18 @@ Fix the memory file.**
 
 ---
 
+## 14. Storefront design skills
+
+Skills live in `.cursor/skills/` (sources in `.cursor/skills/SOURCES.md`).
+
+- `frontend-design` is the baseline for any storefront UI change.
+- `awwwards` is for visual polish only, scaled down. No loaders, WebGL, or page-transition hijacks on cart, checkout, account, or admin. Bold motion stays on the homepage hero and product reveals.
+- `shadcn` is for shadcn components. MCP servers are declared in `.cursor/mcp.json`. `API_KEY_21ST` comes from 21st.dev/mcp and is never committed.
+
+Keep the existing Silk & Stone tokens and this repo's Next.js, React, and Three.js stack. Do not invent reviews, ratings, or metrics. Respect reduced motion, visible keyboard focus, mobile LCP under 2.5s, and CLS under 0.05.
+
+---
+
 ## Cursor Cloud specific instructions
 
 Cloud Agents boot a local PostgreSQL 16 cluster with pgvector on `127.0.0.1:5433`, database `maihan_dev`. The throwaway role and password are the ones already published in `compose.yaml` (`postgres` / `maihan_local_dev_only`). That is the same URL CI uses. `shared_preload_libraries` includes `pg_stat_statements` so migration `0001` can create the optional extension. Redis is not required; an absent `REDIS_URL` bypasses the cache.
