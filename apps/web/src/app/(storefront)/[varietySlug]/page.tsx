@@ -26,7 +26,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: house.name, description: house.lede };
   }
   const view = landingView(varietySlug);
-  return { title: view ? `${view.title} | Maihan Gems` : 'Collection | Maihan Gems' };
+  if (!view) {
+    return {
+      title: 'Not found | Maihan Gems',
+      description: 'This page is not in the vault.',
+    };
+  }
+  return {
+    title: `${view.title} | Maihan Gems`,
+    description: view.lede,
+  };
 }
 
 export default async function VarietyPage({ params, searchParams }: PageProps) {

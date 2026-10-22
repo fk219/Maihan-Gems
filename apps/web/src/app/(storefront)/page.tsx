@@ -25,7 +25,7 @@ const VITRINE_PIECE = {
   name: '1.31 ct violetish blue tanzanite',
   facts: 'Round · VSI · Heat treated (disclosed) · Tanzania',
   origin: 'Tanzania',
-  treatment: 'Heat treated — disclosed',
+  treatment: 'Heat treated (disclosed)',
   clarity: 'Very slightly included',
   carat: '1.31 ct',
   image:
@@ -35,7 +35,7 @@ const VITRINE_PIECE = {
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Maihan Gems — Natural Gemstones & Fine Jewellery',
+  title: 'Maihan Gems | Natural Gemstones & Fine Jewellery',
   description:
     'A private vault of earth-mined gemstones, matched pairs, master settings and bespoke atelier jewellery.',
 };
@@ -85,7 +85,7 @@ const HISTORY: readonly { eyebrow: string; title: string; text: string; img: str
   {
     eyebrow: 'The Origin',
     title: 'Sourcing at the mine',
-    text: 'We buy at the source — river terraces, pit heads and cutting houses — where a stone’s character is set long before it reaches the bench.',
+    text: 'We buy at the source, river terraces, pit heads and cutting houses, where a stone’s character is set long before it reaches the bench.',
     img: '/media/stone-rubellite.jpg',
   },
   {
@@ -97,7 +97,7 @@ const HISTORY: readonly { eyebrow: string; title: string; text: string; img: str
   {
     eyebrow: 'The Craft',
     title: 'The atelier',
-    text: 'Master goldsmiths pair setting to stone — or stone to setting — keeping the composition honest, and finish every jewel by hand.',
+    text: 'Master goldsmiths pair setting to stone, or stone to setting, keeping the composition honest, and finish every jewel by hand.',
     img: '/media/jew-ruby-band.jpg',
   },
 ];
@@ -222,7 +222,7 @@ export default async function HomePage({
             alt={
               sister
                 ? `Finished ${houseNoun(brand.defaultStone!)} from the sister house`
-                : `${VITRINE_PIECE.id} — ${VITRINE_PIECE.name}, ${VITRINE_PIECE.facts}`
+                : `${VITRINE_PIECE.id}, ${VITRINE_PIECE.name}, ${VITRINE_PIECE.facts}`
             }
           />
           <figcaption className="vault-vitrine__plate">
@@ -230,7 +230,7 @@ export default async function HomePage({
               {sister ? `${brand.name} · House reserve` : `${VITRINE_PIECE.id} · Vault reservation`}
             </span>
             <span className="vault-vitrine__plate-name">
-              {sister ? `${brand.name} — the house collection` : VITRINE_PIECE.name}
+              {sister ? `${brand.name}, the house collection` : VITRINE_PIECE.name}
             </span>
             <span className="vault-vitrine__plate-facts">
               {sister ? 'Origin and treatment disclosed on every house record' : VITRINE_PIECE.facts}
@@ -394,7 +394,7 @@ export default async function HomePage({
               <h2 id="mgh-dyo-h" className="mgh-h2">Design Your Own Gemstone Piece</h2>
               <p className="mgh-lede">
                 Three steps between you and a jewel that exists for no one else. Our goldsmiths take
-                over from the review — and the result is unmistakably yours.
+                over from the review, and the result is unmistakably yours.
               </p>
               <Link href={href('/design-your-own')} className="mgh-btn mgh-btn--dark">
                 Begin Designing
@@ -422,7 +422,7 @@ export default async function HomePage({
             <p className="mgh-eyebrow">Since the First Stone</p>
             <h2 id="mgh-history-h" className="mgh-h2">Our History</h2>
             <p className="mgh-lede mgh-lede--center">
-              From the mines to the marketplace — the path a stone takes before it reaches the bench.
+              From the mines to the marketplace, the path a stone takes before it reaches the bench.
             </p>
           </div>
           <ol className="mgh-history__timeline">
@@ -481,7 +481,7 @@ export default async function HomePage({
           <p className="mgh-eyebrow mgh-eyebrow--gold">Giving Back</p>
           <h2 id="mgh-charity-h" className="mgh-h2">Charity Work</h2>
           <p className="mgh-lede">
-            A portion of every sale returns to the places our stones come from — supporting the
+            A portion of every sale returns to the places our stones come from, supporting the
             communities and landscapes that make this work possible.
           </p>
           <ul className="mgh-charity__row">

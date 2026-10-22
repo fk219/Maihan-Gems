@@ -1,26 +1,36 @@
-# Maihan Gems — Daylight Salon
+# Maihan Gems — The cloth
 
-Idea: A private gemstone house shown the way a stone is examined, on a warm paper tray in daylight.
+The brief locks Silk & Stone. Cream and a serif are not a choice to undo. Uniqueness is the layout: one length of jeweller's cloth, not a stack of equal panels.
 
-Metaphor: the jeweller's tray. Finished jewels sit in one night case. Everything else is paper, ink, and the stone's own colour.
+## Concepts considered
 
-Signature: On the homepage the stone fills a full-height tray. A paper plate of real provenance sits on the photograph. The image settles in once. Nothing else moves on load.
+1. **The loupe.** The page is the instrument. A circular mask tracks the stone. Original, but it hides the jewel and fights a catalogue. Scores: originality 4, fit 3, feasibility 3, portability 3.
+2. **The name.** Maihan as a wordmark that unfolds into the inventory. Typographic, portable to any house. Scores: originality 3, fit 2, feasibility 4, portability 4.
+3. **The cloth.** Chosen. A stone is shown the way a bench shows it: laid on cloth, facts on a paper plate, the rest of the house unrolled as you pull the cloth toward you. Anchor: the real K11733 record (1.31 ct violetish blue tanzanite, round, VSI, heat treated and disclosed, Tanzania). Scores: originality 4, fit 5, feasibility 4, portability 2.
 
-Emotion: quiet, exact, expensive.
+## Concept card
 
-Motion verb: settle. A hover moves 1px and the fill changes to the darker metal. Reduced motion shows the settled frame at once.
+```
+Idea:        The house is a length of cloth. The stone is already on it.
+Metaphor:    the jeweller's cloth on the bench
+Signature:   a sticky scroll opens the cloth around one real jewel (K11733)
+Emotion:     quiet, exact, expensive
+Motion verb: settle
+Screenshot:  the tanzanite full-bleed, ink headline, paper plate of facts
+```
 
-Palette, locked Silk & Stone tokens:
+## System
 
-- Ground `#F6F2E9`
-- Paper `#FDFBF5`
-- Ink `#1D1710`
-- Night `#16110C` (utility bar, jewellery band, footer, primary buttons)
-- Metal `#D4A437` as a 1px line
-- Muted `#5C5344`
+- Ground `#F6F2E9`, paper `#FDFBF5`, ink `#1D1710`, night `#16110C`, metal `#D4A437` as a line, muted `#5C5344` (small text must clear AA on ground and paper).
+- Cormorant Garamond for display, Jost for interface. Sentence case in navigation. No italic one-word accents.
+- One clock: GSAP ticker. Lenis rides that ticker on the storefront and is absent on checkout, account, admin, and vendor. Reduced motion shows every section at full opacity with no smooth scroll.
+- Shape: no shared card radius. The cloth sections change family: full-bleed, marquee, asymmetric night index, sticky expand, text reveal.
+- Eyebrows only where they name a real house function (atelier, vault), not above every heading.
 
-Type: Cormorant Garamond for display, Jost for interface. Navigation is sentence case. Prices are serif, not monospace gold.
+## Genericness test
 
-Genericness test: the previous layer was a near-black page with a gold-gradient button. That is the default luxury template, so this pass returns the ground to alabaster and reserves night for one band. Gradient text and gradient buttons are removed.
+A generic luxury prompt lands on a black page, a gold gradient button, and three equal cards. This pass keeps the locked daylight ground and spends the layout on the cloth. Numbered steps stay only on Design Your Own, because that flow is a sequence.
 
-Stack: the existing Next.js App Router, React, and Three.js. No new runtime dependency. shadcn is not installed in this app. The 21st catalog search did not return in this environment, so no registry block was pasted in.
+## Tooling (owner-authorised)
+
+shadcn (radix-nova) is initialised for `apps/web`. The attached 21st.dev picks are installed under `components/ui` and restyled to these tokens. Animated testimonials is installed and not rendered: there are no consented quotes. ADR-022 stays open; the owner ordered these primitives explicitly.

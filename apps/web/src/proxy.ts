@@ -18,6 +18,7 @@
  */
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { isServedSingleSegment } from './lib/ngc/public-path.js';
 import { createRedirectResolver } from './lib/redirects.js';
 import { isDevSeamEnabled } from '@maihan/config';
 import { GENERATED_REDIRECT_ROWS } from './lib/redirects-rows.generated';
@@ -156,6 +157,11 @@ export function proxy(request: NextRequest): NextResponse {
 
   const decision = resolver.resolve(pathname, search);
   if (decision === null) {
+    const only = pathname.split('/').filter(Boolean);
+    const segment = only[0] ?? '';
+    if (only.length === 1 && !isServedSingleSegment(segment)) {
+      return missingVaultResponse();
+    }
     return stampStorefront(
       NextResponse.next({ request: { headers: withStorefront(request, house) } }),
       house,
@@ -183,6 +189,47 @@ export function proxy(request: NextRequest): NextResponse {
  * including paths that will legitimately serve a route or a 404 — goes through
  * the resolver, which returns `next()` unless the path is a real legacy URL.
  */
+function missingVaultResponse(): NextResponse {
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Not found | Maihan Gems</title>
+  <meta name="description" content="This page is not in the vault.">
+  <meta name="robots" content="noindex">
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; min-height: 100vh; background: #f6f2e9; color: #1d1710; font-family: "Iowan Old Style", Palatino, Georgia, serif; }
+    main { max-width: 36rem; margin: 0 auto; padding: 18vh 1.5rem 4rem; }
+    p { font-family: system-ui, sans-serif; font-size: 1rem; line-height: 1.5; }
+    h1 { font-weight: 500; font-size: clamp(2.4rem, 6vw, 4rem); line-height: 0.95; letter-spacing: -0.03em; margin: 0 0 1rem; }
+    a { color: #1d1710; }
+    nav { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; margin-top: 1.75rem; font-family: system-ui, sans-serif; }
+  </style>
+</head>
+<body>
+  <main id="main-content">
+    <p>Maihan Gems</p>
+    <h1>This page is not in the vault.</h1>
+    <p>It may have been sold, renamed, or the address may be incorrect.</p>
+    <nav>
+      <a href="/browse">Browse the vault</a>
+      <a href="/search">Search gemstones</a>
+      <a href="/">Return home</a>
+    </nav>
+  </main>
+</body>
+</html>`;
+  return new NextResponse(html, {
+    status: 404,
+    headers: {
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'no-store',
+    },
+  });
+}
+
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|media/|api/).*)'],
 };

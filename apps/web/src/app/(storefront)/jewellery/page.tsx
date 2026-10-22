@@ -7,7 +7,10 @@ import { LuxuryProductCard } from '../../../components/storefront/LuxuryProductC
 import { jewelleryHub, landingView } from '../../../lib/ngc/landing.js';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Jewellery | Maihan Gems' };
+export const metadata: Metadata = {
+  title: 'Jewellery | Maihan Gems',
+  description: 'Ready-to-ship jewels and custom designs built from a setting and a stone.',
+};
 
 export default async function JewelleryPage({
   searchParams,

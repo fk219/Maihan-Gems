@@ -8,7 +8,10 @@ import { EmptyState } from '../../../components/design-system/EmptyState.js';
 import { landingView, settingsHub } from '../../../lib/ngc/landing.js';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Settings | Maihan Gems' };
+export const metadata: Metadata = {
+  title: 'Settings | Maihan Gems',
+  description: 'Master settings in platinum, gold and silver, priced without the centre stone.',
+};
 
 export default async function SettingsPage({
   searchParams,

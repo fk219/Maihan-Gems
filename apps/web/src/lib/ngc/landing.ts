@@ -76,7 +76,7 @@ export function settingsHub(): LandingView {
   return {
     kicker: 'Atelier mountings',
     title: 'Settings',
-    lede: 'Master settings in platinum, gold and silver — priced without the centre stone. Choose a seat, then a compatible gem.',
+    lede: 'Master settings in platinum, gold and silver, priced without the centre stone. Choose a seat, then a compatible gem.',
     cta: { href: '/gemstone-ring-settings', label: 'View the settings catalogue' },
     tiles,
     products: ngcCards({ kind: 'setting', limit: 8 }),
@@ -140,7 +140,7 @@ export function landingView(slug: string | undefined): LandingView | null {
     return {
       kicker: 'The vault',
       title: 'Gemstones',
-      lede: 'Every variety we cut and keep — loose stones, matched pairs, and the jewellery they become.',
+      lede: 'Every variety we cut and keep: loose stones, matched pairs, and the jewellery they become.',
       cta: { href: '/all-natural-gemstones', label: 'View all gemstones' },
       tiles: gems.map((gem) => ({
         href: `/${gem.slug}`,
@@ -172,7 +172,7 @@ export function landingView(slug: string | undefined): LandingView | null {
     return {
       kicker: 'Matched pairs',
       title: 'Gemstone pairs',
-      lede: 'Pairs kept together for colour, cut and size — for earrings, and only for earrings.',
+      lede: 'Pairs kept together for colour, cut and size, for earrings, and only for earrings.',
       cta: { href: '/all-natural-gemstones', label: 'View all gemstones' },
       tiles: gems.filter((g) => filterNgc({ stoneSlug: g.slug, kind: 'stone_pair' }).length > 0).map((gem) => ({
         href: `/${gem.slug}-pairs`,
@@ -216,7 +216,7 @@ export function landingView(slug: string | undefined): LandingView | null {
     return {
       kicker: 'Loose stones',
       title: name,
-      lede: `Natural ${name.toLowerCase()} from the vault — origin, treatment and laboratory papers as they stand.`,
+      lede: `Natural ${name.toLowerCase()} from the vault. Origin, treatment and laboratory papers as they stand.`,
       cta: { href: '/all-natural-gemstones', label: 'View all gemstones' },
       tiles: [],
       colours: tax.colors.map((c) => ({ name: c.name, href: `/${c.slug}-gemstones` })),

@@ -5,7 +5,10 @@ import { CollectionPage } from '../../../components/storefront/CollectionPage.js
 import { landingView } from '../../../lib/ngc/landing.js';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Gemstones | Maihan Gems' };
+export const metadata: Metadata = {
+  title: 'Gemstones | Maihan Gems',
+  description: 'The full vault, sixty pieces to a page, filtered as you wish.',
+};
 
 export default async function BrowsePage() {
   const view = landingView('all-natural-gemstones');

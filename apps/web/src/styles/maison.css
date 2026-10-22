@@ -56,7 +56,7 @@ body .ngc-logo__word {
 body .ngc-logo__sub {
   letter-spacing: 0.18em;
   font-weight: 500;
-  color: var(--text-muted);
+  color: #5c5344;
 }
 
 body .ngc-nav__link {
@@ -364,7 +364,7 @@ body .vault-evidence {
 }
 
 body .vault-evidence dt {
-  color: var(--text-muted);
+  color: #5c5344;
   letter-spacing: 0.12em;
 }
 
