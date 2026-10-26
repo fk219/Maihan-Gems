@@ -19,7 +19,7 @@ import { ProductActions } from './ProductActions.js';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/motion-accordion.js';
 import { AnimatedBackground } from '../ui/animated-background.js';
 import { GalleryCarousel } from '../ui/gallery-carousel.js';
-import { Tabs, TabsList, TabsTrigger } from '../ui/tabs.js';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs.js';
 import { TextEffect } from '../ui/text-effect.js';
 import { ReadMore } from './ReadMore.js';
 import { useStorefront } from './StorefrontProvider.js';
@@ -290,6 +290,12 @@ export function ProductStudio({
               </AnimatedBackground>
             </TabsList>
             <div className={`ngc-gallery__layout${tab === 'preview3d' ? ' ngc-gallery__layout--solo' : ''}`}>
+              {/* Radix a11y: every trigger's aria-controls must resolve to a
+                  real TabsContent id. All three contents stay mounted
+                  (forceMount); radix hides the inactive ones, so only the
+                  active gallery is visible — visuals unchanged. */}
+              {(['piece', 'preview3d', 'reports'] as const).map((val) => (
+              <TabsContent key={val} value={val} forceMount className="contents">
               {tab !== 'preview3d' ? (
                 <div className="ngc-thumbs">
                   {slides.map((slide, index) => (
@@ -348,6 +354,8 @@ export function ProductStudio({
               ) : (
                 <ZoomStage src={src} fallback={fallback} alt={title} />
               )}
+              </TabsContent>
+              ))}
             </div>
             {tab === 'preview3d' ? (
               <p className="lx-card__specs">

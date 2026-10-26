@@ -121,6 +121,12 @@ export default tseslint.config(
       // ECC harness files are tool configuration, not application source.
       '.opencode/**',
       'technical_design/**',
+      // The source applet being migrated into apps/web (reference archive,
+      // to be deleted once the migration completes). Never linted.
+      'MaihanGems Frontend/**',
+      // Skill harness scripts (external tooling, not application source).
+      '.cursor/**',
+      '.agents/**',
     ],
   },
 
@@ -416,6 +422,19 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
+  {
+    // Phase M1 (mgh applet migration namespace): the copied applet sources are
+    // a fixture layer pending real-backend wiring. Files whose strict-mode
+    // deltas (noUncheckedIndexedAccess null-safety) are deferred carry a
+    // greppable @ts-nocheck marker that is cleared at wiring time.
+    files: [
+      'apps/web/src/components/mgh/**/*.tsx',
+      'apps/web/src/lib/mgh/**/*.ts',
+      'apps/web/src/hooks/mgh/**/*.ts',
+    ],
+    rules: { '@typescript-eslint/ban-ts-comment': 'off' },
+  },
+
   {
     // TSX sources: same underscore convention and catch-shape as the TS
     // structural block (which only matches *.ts).

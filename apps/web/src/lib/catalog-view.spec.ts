@@ -162,7 +162,12 @@ describe('catalog pages — server-rendered through the cached service', () => {
       }),
     );
     expect(html).toMatch(/Zircon/i);
-    expect(html).toContain('Filter');
+    // 2026-10-22: the dev DB now carries ACTIVE zircon products (K10379/K10381),
+    // so the page serves the DB listing path ("Refine" toolbar) rather than the
+    // NGC fixture path ("Filter"). Assert on the data-truth markers both paths
+    // share: a real product card price and the collection facet nav.
+    expect(html).toMatch(/USD [0-9]+\.[0-9]{2}/);
+    expect(html).toContain('aria-label="Collection facets"');
   });
 
   it('variety page rejects an unknown or DRAFT variety (taxonomy-gated)', async () => {

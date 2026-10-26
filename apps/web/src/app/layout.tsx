@@ -13,15 +13,32 @@ import { JsonLd } from '../components/seo/JsonLd.js';
 import './globals.css';
 import '../styles/maison.css';
 import { MAIHAN_THEME_CSS } from '../lib/theme-styles.js';
-import { Geist } from "next/font/google";
+import { Geist, EB_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
+// Applet (mgh namespace) fonts — variables referenced by src/styles/mgh-applet.css.
+// EB Garamond's available weights are 400–800 (300 is not offered by Google Fonts),
+// so the applet's proven weight list is kept instead of a 300–700 range.
+const ebGaramondApplet = EB_Garamond({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  style: ['normal', 'italic'],
+  variable: '--font-display-applet',
+  display: 'swap',
+});
+
+const jakartaSansApplet = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-sans-applet',
+  display: 'swap',
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
+    <html lang="en" className={cn("font-sans", geist.variable, ebGaramondApplet.variable, jakartaSansApplet.variable)}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

@@ -9,6 +9,7 @@ import '../../styles/maison.css';
 import '../../styles/routes-salon.css';
 import '../../styles/operator.css';
 import '../../styles/cloth.css';
+import '../../styles/mgh-applet.css';
 import { StorefrontMotion } from '../../components/storefront/StorefrontMotion.js';
 import { CartDrawer } from '../../components/storefront/CartDrawer.js';
 import { Toaster } from '../../components/ui/sonner.js';
