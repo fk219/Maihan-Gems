@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: var(--font-eb-garamond), "EB Garamond", Garamond, Georgia, serif;
+  --font-serif: var(--font-eb-garamond), "EB Garamond", Garamond, Georgia, serif;
+  --font-sans: var(--font-eb-garamond), "EB Garamond", Garamond, Georgia, serif;
+  --font-mono: var(--font-mono), "JetBrains Mono", monospace;
+}
+
+@layer base {
+  :root {
+    --surface-canvas: #FFFFFF;
+    --surface-travertine: #FAF8F4;
+    --surface-elevated: #FFFFFF;
+    --surface-obsidian: #0A0A0B;
+    --surface-vault: #08121E;
+    --ink-primary: #181613;
+    --ink-secondary: #534D43;
+    --ink-muted: #7A7267;
+    --border-hairline: #E8DFCE;
+    --border-gold-hairline: rgba(212, 175, 55, 0.28);
+    --gold-light: #D4AF37;
+    --gold-champagne: #E6C97A;
+    --gold-bronze: #9A7B2C;
+    --accent-sapphire: #1E3A5F;
+    --accent-sapphire-hover: #152944;
+    --status-evidenced: #166534;
+    --status-pending: #9A3412;
+    --status-error: #991B1B;
+  }
+
+  html {
+    background-color: var(--surface-canvas);
+    color: var(--ink-primary);
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto !important;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* Universal visible focus-visible ring for WCAG AA keyboard operability */
+  *:focus-visible {
+    outline: 2px solid #D4AF37 !important;
+    outline-offset: 2px !important;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #F3DFA2 0%, #D4AF37 48%, #9A7B2C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-cta {
+  background: linear-gradient(135deg, #E6C97A 0%, #D4AF37 52%, #A68430 100%);
+  color: #0A0A0B;
+}
+
+.gold-gradient-cta:hover {
+  background: linear-gradient(135deg, #F3DFA2 0%, #DFB942 52%, #B89338 100%);
+}
+
+.obsidian-gold-surface {
+  background: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.14) 0%, rgba(10, 10, 11, 0.96) 65%), #0A0A0B;
+}
+
+/* White Gallery Canvas with Ethereal Golden Cloud Atmosphere */
+.golden-cloud-gallery {
+  background-color: #FFFFFF;
+  background-image:
+    radial-gradient(ellipse 65% 40% at 15% 18%, rgba(235, 206, 132, 0.18) 0%, rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 60% 45% at 85% 32%, rgba(212, 175, 55, 0.14) 0%, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(ellipse 70% 50% at 50% 58%, rgba(230, 201, 122, 0.15) 0%, rgba(255, 255, 255, 0) 75%),
+    radial-gradient(ellipse 60% 40% at 20% 82%, rgba(212, 175, 55, 0.12) 0%, rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 65% 45% at 82% 92%, rgba(235, 206, 132, 0.16) 0%, rgba(255, 255, 255, 0) 72%);
+}
+
+/* Smooth Infinite Marquee for Gemstone Categories */
+@keyframes gem-marquee-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-gem-marquee {
+  display: flex;
+  width: max-content;
+  animation: gem-marquee-scroll 38s linear infinite;
+}
+
+.animate-gem-marquee:hover {
+  animation-play-state: paused;
+}
+
+[data-reveal] {
+  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}

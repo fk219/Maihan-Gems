@@ -1,0 +1,6 @@
+{
+  "name": "Maihan Gems — Fine Gemstone Maison",
+  "description": "Provenance-evidenced loose gemstones, matched earring pairs, architectural settings, and bespoke jewellery configuration.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
