@@ -5,6 +5,12 @@
 
 **This document does not redesign the architecture, does not select tooling the authoritative documents leave open, and does not install anything.**
 
+> **UPDATE 2026-10-28 (ADR-035):** the migration tooling rows in this matrix
+> (corpus-import skills, `tools/migrate` approvals) are **descoped** for future
+> schema work — the fresh clean database uses a one-off cleaning script with an
+> acceptance gate (`technical_design/41` §6). No new tools are approved by this
+> note; existing approvals are unchanged.
+
 ---
 
 ## 1. EXECUTIVE SUMMARY

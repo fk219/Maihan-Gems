@@ -5,6 +5,25 @@ Project rules for any OpenCode (or human) session working in this repository.
 **This file is orientation and rules, not architecture.** The architecture lives in
 `technical_design/` and is authoritative. Do not put architecture detail here.
 
+> **DIRECTION CHANGE — 2026-10-28 (ADR-035, owner-authorized): FRESH CLEAN DATABASE.**
+> The database going forward is designed **by us, for us**: three pillars
+> (Gemstones by variety · Settings by jewellery type · Jewellery incl. nose ring),
+> existing source entries **cleaned** into that model, **zero provenance**
+> (no staging tables, no `evidence_status`, no import metadata), **no redirects**,
+> fresh SEO start. Authoritative design: `technical_design/41_FRESH_CLEAN_DATABASE_DESIGN.md`
+> + `docs/fresh-schema/`. The corpus **data-import pipeline** (doc 33), its
+> provenance model (ADR-024) and URL-parity redirects (doc 34) are **superseded
+> for future schema work** and retained as historical reference. The locked
+> schema stayed live until a cut-over decision. **(2026-10-28, CUT-OVER
+> EXECUTED by owner order:** the locked `public` schema was backed up
+> (`backups/`, gitignored) and dropped from local dev `maihan_dev`;
+> `fresh` (44 tables) is now the project's ONLY database. The old
+> locked-schema app/tests are retired from the runtime — code remains
+> in-repo as history, non-functional against the dev DB. Production/Neon
+> never touched.**) Progress is tracked in
+> `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` (§22 phases, §24 change log) and
+> `.opencode/memory/IMPLEMENTATION_STATE.md`.
+
 ---
 
 ## 1. What this project is
@@ -32,7 +51,10 @@ technical design documents.
   INITIAL_IMPLEMENTATION_PLAN.md     # 13 phases, dependency graph, first 20 tasks
   SKILL_MATRIX_AND_TOOLING.md        # required skills/tools; approval status
   DISTINGUISHING_SAUCE_MASTER_ARCHITECTURE.md   # vision + charter authority
-  technical_design/                  # 40 design documents (01–40)
+  technical_design/                  # 40 design documents (01–40) + 41 fresh clean DB design + 42 semantic code architecture + 43 platform schema increments
+  docs/fresh-schema/                 # fresh clean schema DDL (0001–0009: reference, catalogue, vendors, semantic codes, media/3D/VTO, commerce, vendor portal, trust, CMS/ops)
+  tools/fresh-clean/                 # Phase F2 cleaning script (loads the fresh schema; gate: `check`)
+  MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md  # single audit tracker (§22 phases, §24 change log)
   .opencode/memory/                  # persistent project context (this layer)
   naturalgemstones/                  # SOURCE ARCHIVE — never committed
 ```
@@ -68,10 +90,10 @@ Useful single-document shortcuts:
 |---|---|
 | What can I use? | `technical_design/02_TECH_STACK.md` |
 | How is the code laid out? | `technical_design/03_REPOSITORY_ARCHITECTURE.md` |
-| What is the DB schema? | `technical_design/04_DATABASE_IMPLEMENTATION.md` |
-| Why is this decision made? | `technical_design/40_ARCHITECTURE_DECISION_RECORDS.md` |
+| What is the DB schema? | `technical_design/04_DATABASE_IMPLEMENTATION.md` (live locked schema) · `technical_design/41_FRESH_CLEAN_DATABASE_DESIGN.md` (going-forward fresh design, ADR-035) |
+| Why is this decision made? | `technical_design/40_ARCHITECTURE_DECISION_RECORDS.md` + `docs/adr/` |
 | What is the truth about the source data? | `technical_design/39_GLOSSARY_AND_EVIDENCE_LEDGER.md` |
-| How do I migrate the data? | `technical_design/33_MIGRATION_ARCHITECTURE.md` |
+| How does data get into the database now? | `technical_design/41` §6 (cleaning rules + acceptance gate). The old corpus-import pipeline (`technical_design/33`) is historical. |
 | What is decided vs open? | `technical_design/40` + `SKILL_MATRIX_AND_TOOLING.md` §6 |
 
 ---
@@ -144,13 +166,13 @@ These are not preferences. Violating any of them is a defect.
 | # | Prohibition |
 |---|---|
 | 1 | **No fabricated source data.** Never invent a source value, an observed count or a source behaviour. |
-| 2 | **No manufactured source SKUs.** The 221 derived DYO identities stay `source_sku_derived`, `sku_evidence_status='INFERRED'`, every attribute column null, `state='DRAFT'`, unpublished. See §7. |
+| 2 | **No manufactured source SKUs.** The 221 derived DYO identities stay `source_sku_derived`, `sku_evidence_status='INFERRED'`, every attribute column null, `state='DRAFT'`, unpublished. See §7. **(2026-10-28, ADR-035: under the fresh clean database the 221 are *dropped*, not carried — zero provenance means zero inferred rows anywhere. The law stands: never manufacture a SKU or attribute.)** |
 | 3 | **No silently promoting `INFERRED` to observed.** Never write a proposal as a fact. |
 | 4 | **No managed/production database access** without explicit, current user approval. Migrations run on a **Neon dev branch** or local PostgreSQL 16. |
 | 5 | **No silent technology additions.** Any new runtime dependency, framework or external service requires an ADR. See `SKILL_MATRIX_AND_TOOLING.md` §13–14. |
 | 6 | **No resolving open ADRs implicitly.** ADR-021 to ADR-024 are **Proposed**, not Accepted. |
 | 7 | ~~**No test framework installation** until ADR-021 is resolved.~~ **RESOLVED:** ADR-021 was **Accepted 2026-10-07** (Vitest + Playwright); both are installed and in use. New test tooling beyond them still requires an ADR. |
-| 8 | **No redesigning the locked architecture.** It is LOCKED. Propose a change; do not implement one. |
+| 8 | **No redesigning the locked architecture.** It is LOCKED. Propose a change; do not implement one. **(2026-10-28, ADR-035: partially superseded — the owner authorized the fresh clean database design, `technical_design/41`, which supersedes the locked schema *for future schema work*. The locked schema stays live and unchanged until an explicit cut-over decision.)** |
 | 9 | **No secrets** in the repository, the database, a config table, a log or a trace. |
 | 10 | **No AI/agent writing directly to the database.** See §8. |
 | 11 | **No `git add .` or `git add -A`.** Stage explicit paths only, so the archive can never be swept in. |
@@ -225,6 +247,14 @@ stone type, so this path is common, not exceptional.
 
 ## 9. Migration discipline
 
+> **SUPERSEDED 2026-10-28 (ADR-035) for future schema work.** The corpus
+> data-import pipeline below is descoped and retained as historical record; the
+> fresh clean database adopts **cleaning rules + an acceptance gate** instead
+> (`technical_design/41` §6): unknown → NULL, never invented; counts must match
+> (19,665 stones / 3,072 pairs / 951 designs / 10,349 settings / 88 + 1,024
+> products) before any write; zero inferred rows. The archive protections in §5
+> remain fully in force — cleaning reads `naturalgemstones/` read-only.
+
 | Rule | Detail |
 |---|---|
 | Spine | **`urls.jsonl`**, joined with `specifications.jsonl` and `pages_analyzed.jsonl`. **Never `products.jsonl` alone.** |
@@ -272,6 +302,7 @@ stone type, so this path is common, not exceptional.
 | Session start | `.opencode/memory/SESSION_HANDOFF.md` |
 | What phase are we in? | `.opencode/memory/CURRENT_STATE.md` |
 | What is the exact next task? | `.opencode/memory/IMPLEMENTATION_STATE.md` — **update this after meaningful work** |
+| Progress + audit trail | `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` (§22 phases, §24 change log) — **the single tracker; never create parallel audit files** |
 | Why was X decided? | `.opencode/memory/DECISIONS.md`, then `technical_design/40` |
 | What went wrong before? | `.opencode/memory/LESSONS.md` |
 | Can I install this? | `SKILL_MATRIX_AND_TOOLING.md` §13–14 |

@@ -4,6 +4,21 @@
 
 ---
 
+> **2026-10-28 — CURRENT STATE: FRESH DATABASE IS THE ONLY DATABASE.** ADR-035
+> pivot executed end-to-end: F1 design → F2 cleaning (22,737 gems / 10,349
+> settings / 1,429 products / 10,240 assets) → F2.9 semantic codes → F2.10
+> media limits (≤10/≤5/≤2 + 3D/VTO) → **F3-DB platform increments (commerce,
+> vendor portal, trust/diamond-4C, CMS/ops — 44 tables, 47 FKs)** →
+> **CUT-OVER EXECUTED:** locked `public` schema backed up
+> (`backups/maihan_dev_public_locked_schema_2026-10-28.dump`, SHA-256
+> `408f1240…`) and dropped from local dev `maihan_dev`. The old
+> locked-schema app/tests are retired (code remains in-repo as history).
+> Authority docs: `technical_design/41/42/43` + `docs/fresh-schema/0001–0009`.
+> **NEXT: app layer on `fresh` (F3-V vendor portal UI/API, storefront,
+> commerce APIs).**
+
+---
+
 ## What this project is
 
 A rebuild of **Natural Gemstones → Maihan Gems**, a fine-gemstone e-commerce

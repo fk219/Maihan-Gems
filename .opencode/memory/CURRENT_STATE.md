@@ -1,9 +1,20 @@
 # CURRENT STATE
 
-**Last verified:** 2026-10-10
+**Last verified:** 2026-10-28
 **Repository:** `Maihan-Gems` — https://github.com/fk219/Maihan-Gems.git
 **Branch:** `main`
 **Baseline commit:** `7a3f3c9` — *chore: establish architecture baseline*
+
+> **2026-10-28 — DIRECTION PIVOT: FRESH CLEAN DATABASE (ADR-035, owner-authorized).**
+> The going-forward database is a fresh, business-first design (`technical_design/41`
+> + `docs/fresh-schema/` + `tools/fresh-clean`): three pillars (Gemstones ·
+> Settings · Jewellery), zero provenance, no redirects. **F1 (design+DDL) and F2
+> (cleaning, loaded + verified in `maihan_dev.fresh`: 22,737 gemstones / 10,349
+> settings / 1,429 products / 1,024 priced / 32,956 assets) are COMPLETE.** The
+> corpus import pipeline (doc 33), ADR-024 provenance model and doc-34 redirects
+> are superseded for future schema work; the locked schema stays live until a
+> separate cut-over decision. Everything below predates this note and is
+> retained as history.
 
 ---
 

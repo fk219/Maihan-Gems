@@ -1,5 +1,11 @@
 # 31 RETENTION AND DATA GOVERNANCE
 
+> **UPDATE 2026-10-28 (ADR-035):** the provenance/retention machinery described
+> here (evidence ledger, retention classes tied to the corpus import) is
+> **descoped for future schema work** — the fresh clean database carries zero
+> provenance (`technical_design/41`). The source-archive protections it records
+> remain in force (`naturalgemstones/` is still read-only and never committed).
+
 **Package:** `technical_design/` doc 31 of 40
 **Authority:** `PROJECT_SOURCE_OF_TRUTH.md` section 41, NFR-09, NFR-08.
 **Evidence status:** `[OBSERVED]` for the source-evidence retention classes; `[INFERRED]` for runtime retention policy.

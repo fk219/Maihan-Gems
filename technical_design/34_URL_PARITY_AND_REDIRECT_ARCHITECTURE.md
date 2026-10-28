@@ -1,5 +1,10 @@
 # 34 URL PARITY AND REDIRECT ARCHITECTURE
 
+> **DESCOPED 2026-10-28 (ADR-035, owner-authorized).** The fresh clean database
+> starts SEO fresh: **no redirects table, no old-URL parity work**. This
+> document is retained as historical reference. (Old-domain ranking equity is
+> consciously not being preserved.)
+
 **Package:** `technical_design/` doc 34 of 40
 **Authority:** `PROJECT_SOURCE_OF_TRUTH.md` section 13, NFR-13, INV-09.
 **Evidence status:** `[OBSERVED]` for every URL count and route; `[INFERRED]` for the redirect mechanics.

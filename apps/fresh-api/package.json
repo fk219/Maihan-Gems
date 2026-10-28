@@ -1,0 +1,22 @@
+{
+  "name": "@maihan/fresh-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "F3-V vendor portal API on the fresh clean schema (technical_design/43 §3). Localhost dev service; real auth lands with F3-AUTH.",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pg": "8.23.1",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "@types/pg": "8.23.1",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3"
+  }
+}

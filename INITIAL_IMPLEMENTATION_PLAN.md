@@ -7,6 +7,14 @@
 **Prepared:** 2026-10-04.
 **Companion documents:** `PROJECT_SOURCE_OF_TRUTH.md` (authority for all design decisions), `DISTINGUISHING_SAUCE_MASTER_ARCHITECTURE.md` (authority for vision and charter).
 
+> **UPDATE 2026-10-28 (ADR-035, owner-authorized):** A new direction replaces
+> the corpus data-import scope: the **Fresh Clean Database** (design:
+> `technical_design/41`, DDL: `docs/fresh-schema/`, ADR: `docs/adr/ADR-035`).
+> Three pillars — Gemstones · Settings · Jewellery — zero provenance, no
+> redirects. Phase F1–F3 below (see Appendix A at the end of this file) supersedes
+> any remaining corpus-import task for future schema work. Tracking:
+> `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` §22/§24 + `.opencode/memory/IMPLEMENTATION_STATE.md`.
+
 ---
 
 ## 0. HOW TO READ THIS PLAN
@@ -1408,6 +1416,75 @@ The three rules that matter most on day one:
 1. **The catalogue comes from `urls.jsonl`, never from `products.jsonl`.** Everything else in Phase 2 depends on getting this right.
 2. **The 221 failed-fetch records stay inferred, null and unpublished** until a human approves them.
 3. **Provenance must be answerable for every migrated field.** If we cannot say where a value came from, it does not ship.
+
+---
+
+## APPENDIX A — DIRECTION CHANGE 2026-10-28: FRESH CLEAN DATABASE (ADR-035)
+
+> **Status: ACCEPTED (owner-authorized 2026-10-28).** This appendix supersedes
+> the corpus-import task families (Phase 2 extract/transform/load, §36 tasks
+> 11–20, doc-33 gates as *schema mechanisms*) **for future schema work**. The
+> locked schema stays live until a separate cut-over decision. Authority:
+> `docs/adr/ADR-035-fresh-clean-database-schema.md`, design
+> `technical_design/41_FRESH_CLEAN_DATABASE_DESIGN.md`, DDL `docs/fresh-schema/`.
+
+### A.1 Decisions locked by the owner
+
+| Decision | Value |
+|---|---|
+| Category model | Three pillars: Gemstones (variety-first) · Settings (by jewellery type) · Jewellery (earring, necklace, nose ring, …) |
+| Data | Existing source entries **cleaned** into the pillars |
+| Provenance | **Zero** — no staging, no evidence columns, no import metadata; unknown → NULL, never invented |
+| The 221 inferred DYO identities | **Dropped**, not carried |
+| Redirects / old-URL parity | **None** — fresh SEO start |
+| Existing locked-schema code | **Untouched** ("design first, decide later") |
+
+### A.2 Phase F1 — Fresh clean schema v1 (COMPLETE 2026-10-28)
+
+| Task | Acceptance | Status |
+|---|---|---|
+| F1.1 Census + classification of the locked schema (keep / simplify / drop per table) | Doc 41 §5 table | DONE |
+| F1.2 Fresh design doc 41 (ER model, 17 tables, 5 enums, composition law F-INV-01/02/03) | Doc 41 §3–§4 | DONE |
+| F1.3 Draft DDL `docs/fresh-schema/0001_reference.sql` + `0002_catalogue.sql` | Applies cleanly to a scratch database | DONE |
+| F1.4 Composition-law verification | F-INV-02/F-INV-03 trigger rejects both wrong compositions; READY_MADE/CONFIGURED CHECKs fire | DONE |
+| F1.5 ADR-035 recorded (file + register in doc 40) | Both written | DONE |
+
+### A.3 Phase F2 — Cleaning script (✅ COMPLETE + VERIFIED 2026-10-28)
+
+| Task | Acceptance | Status |
+|---|---|---|
+| F2.1 Deterministic cleaning script (`tools/fresh-clean`, reads `naturalgemstones/` read-only) | Idempotent: refuse-if-loaded; `--force` reload identical | ✅ verified both paths |
+| F2.2 Varieties + reference vocabulary | 76 varieties · 55 colours · 45 origins · 27 shapes · 6 clarities · 5 treatments · 14 metals · 6 jewellery types · 15 styles | ✅ |
+| F2.3 Stones + pairs with per-pair weight sums | 22,737 gemstones (19,665 + 3,072); per-piece rows only where observed (5 DYO pair refs → 10 rows), sums 5/5 exact | ✅ |
+| F2.4 Settings load (951 design codes × metals) | 10,349 rows; UNIQUE(design_code, metal_id) holds | ✅ |
+| F2.5 Products load | **405** ready-made (88 rings-family per SoT + 317 observed other routes) + 1,024 configured from observed DYO; 8,788 unobserved DYO + 221 failed-fetch dropped | ✅ |
+| F2.6 Prices + price_history | 1,024 priced (USD) → products ACTIVE; entities without observed price load as DRAFT | ✅ |
+| F2.7 Assets | 32,956 TNSC product images, deduped per configured product; 0 orphans | ✅ |
+| F2.8 Acceptance gate | All counts matched BEFORE any write; zero invented values (all slug tokens classified); FK/pair-sum/uniqueness checks green on the loaded DB | ✅ PASS |
+
+Target database: local `maihan_dev`, schema `fresh` (additive; locked `public` schema untouched). Gate command: `pnpm --filter @maihan/fresh-clean run check`.
+
+### A.3b Phase F2.9 — Semantic codes + vendors (✅ COMPLETE + VERIFIED 2026-10-28)
+
+Authority: `technical_design/42_SEMANTIC_CODE_ARCHITECTURE.md` (owner-approved master code sheet).
+
+| Task | Acceptance | Status |
+|---|---|---|
+| F2.9.1 DDL `0003_vendors.sql` | `vendors` table + `vendor_id`/`vendor_ref` on gemstones/settings/products + per-vendor unique partial indexes | ✅ applied |
+| F2.9.2 DDL `0004_semantic_codes.sql` | `gemstone_families` (11) · variety `code` + `family_id` + **10 owner-added varieties** (ruby, sapphire, emerald, diamond, amber, labradorite, sunstone, aventurine, cat's-eye chrysoberyl, amazonite) · `origin_type` (NATURAL/LAB_CREATED/SIMULANT) · `gemstone_treatments` join + extended vocabulary (Doublet/Triplet/Coated/Glass-Filled/Oil-Filled/No Indication) · settings `min_ct`/`max_ct` · `code_counters` | ✅ applied (21 tables) |
+| F2.9.3 Cleaning v2 | Semantic minting `G/P-{FAM}-{VAR}-{CCVV}-{NNNNN}`, `S-{JT}-{DSGN}-{MET}-{CCVV}`, `J-{JT}-C/M-{MET}-{CCVV}-{NNNNN}`; HQ = house; word-level name de-doubling; `origin_type=NATURAL`; treatments→join; counters seeded (203 scopes) | ✅ reloaded |
+| F2.9.4 Verify | Counts unchanged (22,737/10,349/1,429) · 0 ref dupes · sku=ref · F-INV-02/03 violations 0 · pair sums 5/5 · names de-doubled (0 left) · reload deterministic (identical codes) | ✅ |
+
+Deferred to F3: diamond 4C grading model (certificates increment). Business rules recorded in doc 42 §8 (DYO sold-only promotion; vendor_ref vendor-only; variety governance; metal in code / carat in DB).
+
+### A.4 Phase F3 — Later increments (each separately owner-approved)
+
+Commerce (carts/orders/payments) · Auth/RBAC · CMS/SEO · AI/knowledge ·
+Ops/events · Certificates · Cut-over of the live implementation to the fresh
+schema (expand-then-migrate plan required at that point).
+
+Tracking for F-phases: `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` §22/§24 +
+`.opencode/memory/IMPLEMENTATION_STATE.md`.
 
 ---
 

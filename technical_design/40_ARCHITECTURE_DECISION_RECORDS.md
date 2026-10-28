@@ -352,6 +352,17 @@ ADR-027 here to restore a monotonic registry, matching migration
 
 ---
 
+**ADR-035 - Fresh clean database: business-first schema, zero migration metadata**
+- **Context:** The owner reviewed the locked, migration-centric schema (staging tables, field-level provenance per ADR-024, observation/label tables, redirects) and decided the database going forward must be designed for the business: three pillars (Gemstones by variety · Settings by jewellery type · Jewellery), existing source entries cleaned into that model, **zero provenance**, no redirects, fresh SEO start.
+- **Alternatives:** (a) keep the locked schema and migrate into it as planned; (b) design fresh while ignoring the locked architecture; (c) design a fresh clean catalogue-first schema informed by the locked learnings, dropping migration machinery, deferring commerce/AI/ops.
+- **Decision:** (c). `technical_design/41_FRESH_CLEAN_DATABASE_DESIGN.md` + `docs/fresh-schema/0001_reference.sql` + `0002_catalogue.sql` (17 tables, 5 enums, composition law F-INV-01/02/03 as CHECKs + one trigger) are the authoritative design for future schema work. Honesty rules move from DB metadata to cleaning acceptance rules (unknown → NULL, never invented; inferred identities dropped). The locked schema and existing code stay untouched; a cut-over is a separate future decision.
+- **Reason:** Migration machinery existed to serve a corpus import the fresh schema will never run; a clean business schema is simpler to reason about and maintain.
+- **Consequences:** Doc 33 (migration pipeline) and doc 34 (redirects) are superseded **for future schema work** and retained as historical reference; ADR-024's provenance model is moot for the fresh schema (stays Proposed). The cleaning script must be acceptance-gated because the DB no longer carries provenance. Full rationale in `docs/adr/ADR-035-fresh-clean-database-schema.md`.
+- **Evidence:** Explicit owner authorization, 2026-10-28; DDL validated on a scratch database the same day (clean apply; both F-INV rejection paths and both composition CHECKs verified firing).
+- **Status:** Accepted by explicit owner authorization (2026-10-28).
+
+---
+
 ## ADR governance
 
 | Rule | Detail |

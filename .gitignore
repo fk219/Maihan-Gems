@@ -57,3 +57,6 @@ yarn-error.log*
 pnpm-debug.log*
 dist/
 node_modules/
+
+# database backups (owner-authorized cut-over artifacts; never committed)
+backups/

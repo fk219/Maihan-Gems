@@ -346,3 +346,27 @@ amendment that preserves the old digests as historical evidence (Amendment A2,
 docs/evidence/MANIFEST.md §10, is the precedent).
 
 ---
+
+## 2026-10-28 — Design the schema for the business, not for the migration
+
+**Lesson: a migration-centric schema carries permanent cost for a one-off job.**
+The locked schema embedded the corpus-import apparatus (4 staging tables,
+field-level provenance per ADR-024, observation/label tables, 44k redirects)
+into the product database. The owner explicitly rejected that: the DB must be
+**designed by us, for us** (ADR-035 — fresh clean database, three pillars, zero
+provenance, no redirects). Migration machinery that exists to serve a pipeline
+the product will never run again is dead weight.
+
+Corollaries:
+1. **Honesty moves from DB metadata to acceptance gates.** Without
+   `evidence_status` columns, "no invented data" is enforced by the cleaning
+   script's acceptance check (unknown → NULL, counts must match before any
+   write, zero inferred rows) — not by schema columns.
+2. **Confirm what "remove the migrations" means before acting.** Three
+   different things were called "migrations" (data pipeline, DDL files, whole
+   architecture). The owner meant: drop the migration *metadata and pipeline*,
+   keep the learnings. Asking first avoided deleting validated work.
+3. **"Design first, decide later" is a real discipline.** The fresh schema
+   (17 tables) was validated on a throwaway scratch DB while the live locked
+   schema and all existing code stayed untouched — no cut-over risk, no
+   parallel tracker, no half-migrated state.

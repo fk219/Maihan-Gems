@@ -1,5 +1,13 @@
 # 33 MIGRATION ARCHITECTURE
 
+> **SUPERSEDED 2026-10-28 (ADR-035, owner-authorized) for future schema work.**
+> The fresh clean database (`technical_design/41` + `docs/fresh-schema/`)
+> replaces the corpus-import pipeline, staging model and provenance gates with
+> cleaning rules + an acceptance gate (doc 41 §6). This document is retained
+> **as historical reference**; its source facts remain valid evidence. The
+> archive protections (AGENTS.md §5) still apply — cleaning reads
+> `naturalgemstones/` read-only.
+
 **Package:** `technical_design/` doc 33 of 40
 **Authority:** `PROJECT_SOURCE_OF_TRUTH.md` sections 13.1, 33, 4.2.
 **Evidence status:** `[OBSERVED]` for every count and defect reference; `[INFERRED]` for the pipeline mechanics.

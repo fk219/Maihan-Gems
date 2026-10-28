@@ -149,7 +149,7 @@ export default tseslint.config(
     // Root tooling scripts also run under plain `node` (URL/fetch/Buffer are
     // Node 18+ globals), and the worker is a long-running daemon whose
     // process.stdout logging is its observability surface.
-    files: ['scripts/**/*.mjs', 'tools/*.mjs', 'apps/worker/src/**/*.ts'],
+    files: ['scripts/**/*.mjs', 'tools/*.mjs', 'tools/*/src/**/*.mjs', 'apps/fresh-api/src/**/*.ts', 'apps/worker/src/**/*.ts'],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',
@@ -205,6 +205,15 @@ export default tseslint.config(
   // ---------------------------------------------------------------------------
   // packages/domain — pure. No I/O, no framework, no config, no model.
   // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // apps/fresh-api — standalone dev service: it IS the logging seam (console ok),
+  // and it is the ONLY app allowed to talk SQL directly to the fresh schema.
+  // ---------------------------------------------------------------------------
+  {
+    files: ['apps/fresh-api/**/*.ts'],
+    rules: { 'no-console': 'off' },
+  },
+
   {
     files: ['packages/domain/**/*.ts'],
     rules: {

@@ -1,0 +1,18 @@
+{
+  "name": "@maihan/fresh-clean",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase F2: deterministic cleaning of the naturalgemstones source into the fresh clean schema (technical_design/41, ADR-035). Read-only against the archive.",
+  "scripts": {
+    "check": "node src/clean.mjs --check",
+    "clean": "node src/clean.mjs",
+    "fresh-clean": "node src/clean.mjs"
+  },
+  "dependencies": {
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/pg": "8.23.1"
+  }
+}

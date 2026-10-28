@@ -1,5 +1,10 @@
 # 04 DATABASE IMPLEMENTATION
 
+> **UPDATE 2026-10-28 (ADR-035):** this document describes the **live locked
+> schema**, which remains in force until a separate cut-over decision. For
+> future schema work the **fresh clean database** supersedes it:
+> `technical_design/41_FRESH_CLEAN_DATABASE_DESIGN.md` + `docs/fresh-schema/`.
+
 **Package:** `technical_design/` doc 04 of 40
 **Authority:** `PROJECT_SOURCE_OF_TRUTH.md` section 8 (validated: 74 tables, 33 enums, 94 FKs, 591 CHECK, 263 indexes, 6 RLS policies, 1 trigger, 2 functions, 1 view, 2 vector columns, both HNSW indexes).
 **Evidence status:** `[INFERRED]` implementation structure over a `[OBSERVED]`-validated schema. The schema is preserved exactly; this document defines how it is applied and queried.

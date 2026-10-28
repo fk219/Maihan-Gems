@@ -12,7 +12,8 @@ approved. `DEFERRED` = deliberately postponed.
 
 | Decision | Status | Source |
 |---|---|---|
-| The architecture is **LOCKED**. Validated by live execution against a disposable PostgreSQL 16.2 instance. | ACCEPTED | Plan §2 |
+| **Fresh clean database (2026-10-28):** business-first schema, three pillars (Gemstones · Settings · Jewellery), zero provenance, no redirects; existing entries cleaned in. Supersedes the corpus-import pipeline (doc 33), ADR-024 provenance model and doc-34 redirects for future schema work. Locked schema stays live until cut-over. | **ACCEPTED** | ADR-035 + `technical_design/41` |
+| The architecture is **LOCKED**. Validated by live execution against a disposable PostgreSQL 16.2 instance. | ACCEPTED (partially superseded 2026-10-28 for future schema work by ADR-035) | Plan §2 |
 | Modular monolith. Extraction requires a named, measured trigger. | ACCEPTED | ADR-019 |
 | Microservices are **rejected** at launch. | ACCEPTED | ADR-019 |
 | Business and domain logic must not depend on Vercel-specific behaviour. Every external dependency sits behind a port. | ACCEPTED | `technical_design/29` |

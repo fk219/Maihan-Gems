@@ -8,6 +8,17 @@
 **Evidence base:** direct inspection of `naturalgemstones/naturalgemstones_dump/` (46,811 files / 2.93 GB), including live read-only queries against `crawler.sqlite` and full scans of every JSONL dataset.
 **Prepared:** 2026-10-04.
 
+> **UPDATE 2026-10-28 (ADR-035, owner-authorized):** The evidence facts in this
+> document remain the validated ground truth about the source, and its business
+> learnings (category structures, invariants, composition law) feed the
+> going-forward design. Its **migration apparatus is descoped**: the corpus
+> data-import pipeline, the field-level provenance model (ADR-024) and URL-parity
+> redirects (doc 34) are superseded for future schema work by the **fresh clean
+> database** — `technical_design/41_FRESH_CLEAN_DATABASE_DESIGN.md` +
+> `docs/fresh-schema/` (three pillars: Gemstones · Settings · Jewellery; zero
+> provenance; no redirects; existing entries cleaned into the new model). The
+> locked schema described here stays live until a separate cut-over decision.
+
 ---
 
 ## 0. HOW TO READ THIS DOCUMENT
