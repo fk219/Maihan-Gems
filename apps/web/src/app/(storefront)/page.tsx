@@ -1,521 +1,718 @@
+import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-
-import { VaultReveal } from '../../components/storefront/VaultReveal.js';
-
-import { HeroSearch } from '../../components/storefront/HeroSearch.js';
-import { BlurFade } from '../../components/ui/blur-fade.js';
-import { GalleryCarousel } from '../../components/ui/gallery-carousel.js';
-import { Magnetic } from '../../components/ui/magnetic.js';
-import { Marquee } from '../../components/ui/marquee.js';
-import { ScrollExpandMedia } from '../../components/ui/scroll-expand-media.js';
-import { ShinyButton } from '../../components/ui/shiny-button.js';
-import { Spotlight } from '../../components/ui/spotlight.js';
-import { TextEffect } from '../../components/ui/text-effect.js';
-import { TextReveal } from '../../components/ui/text-reveal.js';
-import { Tilt } from '../../components/ui/tilt.js';
-import { currentStorefront } from '../../lib/ngc/current-storefront.js';
-import { withPrefix } from '../../lib/ngc/storefronts.js';
-
-/* Vault vitrine hero piece — real evidence fields from the compiled NGC
-   research fixture (K11733). No invented values: every fact on the plate is
-   verbatim from the source record. */
-const VITRINE_PIECE = {
-  id: 'K11733',
-  name: '1.31 ct violetish blue tanzanite',
-  facts: 'Round · VSI · Heat treated (disclosed) · Tanzania',
-  origin: 'Tanzania',
-  treatment: 'Heat treated (disclosed)',
-  clarity: 'Very slightly included',
-  carat: '1.31 ct',
-  image:
-    'https://images.thenaturalsapphirecompany.com/stone/k11733/image/certified-natural-untreated-tanzania-round-violetishblue-tanzanite-1.3100-cts-k11733-1.jpg?v=20250306070308',
-};
+import {
+  ArrowRight,
+  Box,
+  Compass,
+  Gem,
+  HeartHandshake,
+  MessageSquare,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Truck,
+  UserCheck,
+} from 'lucide-react';
+import { getAllVarieties } from '@/lib/mgh/storefront-data';
+import {
+  getHomeCatalogGemstones,
+  getHomeCatalogMatchedPairs,
+} from '@/lib/mgh/adapters/catalog';
+import { ProductCard } from '@/components/mgh/catalog/ProductCard';
+import { HeroAiSearch } from '@/components/mgh/catalog/HeroAiSearch';
+import { HeroBackgroundVideo } from '@/components/mgh/catalog/HeroBackgroundVideo';
+import { GemstoneMarquee } from '@/components/mgh/catalog/GemstoneMarquee';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Maihan Gems | Natural Gemstones & Fine Jewellery',
+  title: 'Maihan Gems — Natural Gemstones & Fine Jewelry',
   description:
-    'A private vault of earth-mined gemstones, matched pairs, master settings and bespoke atelier jewellery.',
+    'Shop natural loose gemstones, matched earring pairs, and custom gold and platinum jewelry.',
+  alternates: {
+    canonical: '/',
+  },
 };
 
-const GEMS: readonly { name: string; href: string; img: string }[] = [
-  { name: 'Sapphire', href: '/sapphire', img: '/media/stone-sapphire.jpg' },
-  { name: 'Ruby', href: '/ruby', img: '/media/stone-ruby.jpg' },
-  { name: 'Emerald', href: '/emerald', img: '/media/stone-emerald.jpg' },
-  { name: 'Spinel', href: '/spinel', img: '/media/stone-spinel-blue.jpg' },
-  { name: 'Tanzanite', href: '/tanzanite', img: '/media/stone-tanzanite.jpg' },
-  { name: 'Paraíba', href: '/paraiba-tourmaline', img: '/media/stone-paraiba.jpg' },
-  { name: 'Padparadscha', href: '/padparadscha', img: '/media/stone-padparadscha.jpg' },
-  { name: 'Tsavorite', href: '/tsavorite-garnet', img: '/media/stone-tsavorite.jpg' },
-  { name: 'Alexandrite', href: '/alexandrite', img: '/media/stone-alexandrite.jpg' },
-  { name: 'Opal', href: '/opal', img: '/media/stone-opal.jpg' },
-  { name: 'Aquamarine', href: '/aquamarine', img: '/media/stone-aquamarine.jpg' },
-  { name: 'Morganite', href: '/morganite', img: '/media/stone-morganite.jpg' },
-  { name: 'Pearl', href: '/pearl', img: '/media/stone-pearl.jpg' },
-  { name: 'Explore All', href: '/all-natural-gemstones', img: '/media/stone-diamond.jpg' },
-];
+const VARIETY_PLAIN_NOTES: Record<string, { colorNote: string; image: string }> = {
+  tanzanite: { colorNote: 'Deep blue & violet from Tanzania', image: '/mgh/images/gems/tanzanite-gem.jpg' },
+  sapphire: { colorNote: 'Classic royal & cornflower blues', image: '/mgh/images/gems/sapphire-gem.jpg' },
+  emerald: { colorNote: 'Rich garden green crystals', image: '/mgh/images/gems/emerald-gem.jpg' },
+  ruby: { colorNote: 'Vibrant natural red stones', image: '/mgh/images/gems/ruby-gem.jpg' },
+  spinel: { colorNote: 'Bright pink, red & cobalt tones', image: '/mgh/images/gems/spinel-gem.jpg' },
+  tourmaline: { colorNote: 'Lagoon blue-green & warm pink', image: '/mgh/images/gems/tourmaline-gem.jpg' },
+  alexandrite: { colorNote: 'Daylight green to evening red', image: '/mgh/images/gems/emerald-gem.jpg' },
+  tsavorite: { colorNote: 'Lively untreated bright green', image: '/mgh/images/gems/tourmaline-gem.jpg' },
+};
 
-const JEWELLERY: readonly { label: string; href: string; img: string }[] = [
-  { label: 'Rings', href: '/jewellery?type=ring', img: '/media/jew-sapphire-ring.jpg' },
-  { label: 'Earrings', href: '/jewellery?type=earrings', img: '/media/jew-sapphire-studs.jpg' },
-  { label: 'Pendants & Necklaces', href: '/jewellery?type=pendant', img: '/media/jew-sapphire-pendant.jpg' },
-  { label: 'Bracelets', href: '/jewellery?type=bracelet', img: '/media/jew-tennis-bracelet.jpg' },
-];
-
-const SETTINGS: readonly { label: string; href: string; meta: string; img: string }[] = [
-  { label: 'Ring settings', href: '/gemstone-ring-settings', meta: 'Solitaire, halo & three-stone', img: '/media/setting-ring.jpg' },
-  { label: 'Earring settings', href: '/gemstone-earring-settings', meta: 'Studs, drops & hoops', img: '/media/setting-earrings.jpg' },
-  { label: 'Pendant settings', href: '/gemstone-necklace-pendant-settings', meta: 'Bails, bezels & slides', img: '/media/setting-pendant.jpg' },
-  { label: 'Bracelet settings', href: '/gemstone-bracelet-settings', meta: 'Tennis & bangle seats', img: '/media/setting-ring.jpg' },
-];
-
-/* The legacy packaging CDN answers 403 in this environment. These are real
-   house photographs already shipped with the storefront. */
-const PACKAGING: readonly { src: string; alt: string }[] = [
-  { src: '/media/jew-sapphire-ring.jpg', alt: 'Sapphire ring from the house collection' },
-  { src: '/media/jew-sapphire-studs.jpg', alt: 'Sapphire studs from the house collection' },
-  { src: '/media/jew-sapphire-pendant.jpg', alt: 'Sapphire pendant from the house collection' },
-  { src: '/media/jew-tennis-bracelet.jpg', alt: 'Tennis bracelet from the house collection' },
-  { src: '/media/jew-ruby-band.jpg', alt: 'Ruby band from the house collection' },
-];
-
-const HISTORY: readonly { eyebrow: string; title: string; text: string; img: string }[] = [
+const JEWELRY_FOUR_WAYS = [
   {
-    eyebrow: 'The Origin',
-    title: 'Sourcing at the mine',
-    text: 'We buy at the source, river terraces, pit heads and cutting houses, where a stone’s character is set long before it reaches the bench.',
-    img: '/media/stone-rubellite.jpg',
+    kicker: 'FINE JEWELRY · 01',
+    title: 'Rings',
+    subtitle: 'PLATINUM 950 & 18K GOLD',
+    description:
+      'Engagement, solitaire, signet, and everyday rings. Every piece clearly lists the exact stone weight, metal purity, and ring size.',
+    image: '/mgh/images/elysian-ring.jpg',
+    href: '/jewellery',
+    tags: [
+      { label: 'ENGAGEMENT', href: '/design-your-own?step=setting' },
+      { label: 'SOLITAIRE', href: '/products/elysian-ring' },
+      { label: 'RING SETTINGS', href: '/settings' },
+    ],
   },
   {
-    eyebrow: 'The House',
-    title: 'A private vault',
-    text: 'Thousands of earth-mined stones, matched pairs and master settings, each disclosed as it is: origin, treatment and laboratory papers.',
-    img: '/media/stone-sapphire-pink.jpg',
+    kicker: 'FINE JEWELRY · 02',
+    title: 'Necklaces',
+    subtitle: 'PENDANTS & GEMSTONE DROPS',
+    description:
+      'Gemstone pendants, solitaire drops, and fine chains, with chain length and gold or platinum weight stated in full.',
+    image: '/mgh/images/verdant-drop.jpg',
+    href: '/jewellery',
+    tags: [
+      { label: 'PENDANTS', href: '/products/verdant-drop' },
+      { label: 'EMERALD DROPS', href: '/varieties/emerald' },
+      { label: 'NECKLACE SETTINGS', href: '/settings' },
+    ],
   },
   {
-    eyebrow: 'The Craft',
-    title: 'The atelier',
-    text: 'Master goldsmiths pair setting to stone, or stone to setting, keeping the composition honest, and finish every jewel by hand.',
-    img: '/media/jew-ruby-band.jpg',
-  },
-];
-
-const PEACE: readonly { title: string; body: string; icon: 'truck' | 'returns' | 'shield' | 'financing' }[] = [
-  {
-    title: 'Free Shipping Worldwide',
-    body: 'Free for all U.S. deliveries, and insured for orders over $300 anywhere in the world.',
-    icon: 'truck',
-  },
-  {
-    title: '14 Day Returns',
-    body: 'For loose gemstones, ready-to-ship jewellery, and most custom jewellery.',
-    icon: 'returns',
+    kicker: 'FINE JEWELRY · 03',
+    title: 'Earrings',
+    subtitle: 'STUDS & MATCHED PAIRS',
+    description:
+      'From everyday studs to matched drop earrings—we list the exact weight and size of each stone in the pair so they sit comfortably.',
+    image: '/mgh/images/gems/earrings-pair.jpg',
+    href: '/pairs',
+    tags: [
+      { label: 'STUDS', href: '/settings/SET-EAR-STUD-05' },
+      { label: 'MATCHED PAIRS', href: '/pairs' },
+      { label: 'DROPS', href: '/settings/SET-EAR-DROP-04' },
+    ],
   },
   {
-    title: 'Extend Protection Plan',
-    body: 'If your jewellery breaks, we repair it. If we cannot repair it, we replace it.',
-    icon: 'shield',
-  },
-  {
-    title: 'Special Financing Available',
-    body: 'Flexible monthly instalments make the piece you want attainable today.',
-    icon: 'financing',
+    kicker: 'CUSTOM STUDIO · 04',
+    title: 'Settings & DYOJ',
+    subtitle: 'DESIGN YOUR OWN JEWELRY',
+    description:
+      'Solid 950 Platinum and 18k Gold settings crafted in Geneva, ready to hold any loose gemstone you choose in our DYOJ studio.',
+    image: '/mgh/images/gems/setting-ring.jpg',
+    href: '/settings',
+    tags: [
+      { label: 'RING SETTINGS', href: '/settings' },
+      { label: '18K GOLD & PLATINUM', href: '/settings' },
+      { label: 'OPEN DYOJ STUDIO', href: '/design-your-own' },
+    ],
   },
 ];
 
-const CHARITY: readonly { title: string; text: string }[] = [
-  { title: 'Education', text: 'Lapidary and gem-cutting schools at the source.' },
-  { title: 'Clean Water', text: 'Wells and clean-water access for mining communities.' },
-  { title: 'Safe Mining', text: 'Fair wages and certified working conditions.' },
+const CLIENT_VOICES = [
+  {
+    quote:
+      'I had been looking for a natural blue sapphire for over a year. Three options came back with clear lab reports, and their team walked me through why one cost more than the others in plain English.',
+    name: 'claire m. · zurich',
+    purchase: 'Loose Sapphire Purchase',
+  },
+  {
+    quote:
+      'I knew nothing about emeralds before visiting. Being told plainly that tiny natural inclusions are normal—and seeing the exact treatment written clearly on the page—is what made me feel comfortable.',
+    name: 'david & elena r. · london',
+    purchase: 'Custom Emerald Necklace',
+  },
+  {
+    quote:
+      'The 3D preview showed me how a 2-carat stone would actually sit on my hand before it was set. I would have guessed the wrong ring setting elsewhere and regretted it.',
+    name: 'tariq a. · dubai',
+    purchase: 'Custom Engagement Ring',
+  },
 ];
 
-function PeaceIcon({ kind }: { kind: 'truck' | 'returns' | 'shield' | 'financing' }) {
-  if (kind === 'truck') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z" />
-        <circle cx="7.5" cy="18.5" r="1.6" />
-        <circle cx="17" cy="18.5" r="1.6" />
-      </svg>
-    );
-  }
-  if (kind === 'returns') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 9V5m0 4h4M4 9a8 8 0 1 1-1 6" />
-        <path d="M9 13l2 2 4-4" />
-      </svg>
-    );
-  }
-  if (kind === 'shield') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 3l7 3v5c0 4.6-3 8.6-7 10-4-1.4-7-5.4-7-10V6z" />
-        <path d="M9 12l2 2 4-4" />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="M3 10h18M7 15h6" />
-    </svg>
-  );
-}
+export default async function HomePage() {
+  const allStones = await getHomeCatalogGemstones();
+  const featuredVarieties = ['tanzanite', 'sapphire', 'emerald', 'ruby', 'spinel', 'tourmaline'];
+  const featuredStones = featuredVarieties
+    .map((vSlug) => allStones.find((s) => s.varietySlug === vSlug))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
+  const varieties = getAllVarieties();
+  const pairs = (await getHomeCatalogMatchedPairs()).slice(0, 1);
 
-function houseNoun(stone: string): string {
-  if (stone === 'ruby') return 'rubies';
-  if (stone === 'sapphire') return 'sapphires';
-  if (stone === 'emerald') return 'emeralds';
-  return `${stone}s`;
-}
-
-function gemsFor(stone: string | null) {
-  if (!stone) return GEMS;
-  return GEMS.filter(
-    (gem) =>
-      gem.name.toLowerCase() === stone
-      || (stone === 'sapphire' && gem.name === 'Padparadscha')
-      || gem.name === 'Explore All',
-  );
-}
-
-function index(n: number): string {
-  return String(n + 1).padStart(2, '0');
-}
-
-export default async function HomePage({
-  brand: brandProp,
-}: {
-  brand?: Awaited<ReturnType<typeof currentStorefront>>;
-} = {}) {
-  const brand = brandProp ?? (await currentStorefront());
-  const prefix = brand.pathPrefix;
-  const href = (path: string) => withPrefix(path, prefix);
-  const sister = Boolean(brand.defaultStone);
-  const gems = gemsFor(brand.defaultStone);
-  const sisterHero =
-    brand.defaultStone === 'ruby'
-      ? { main: '/media/jew-ruby-ring.jpg', small: '/media/stone-ruby.jpg' }
-      : brand.defaultStone === 'emerald'
-        ? { main: '/media/jew-emerald-necklace.jpg', small: '/media/stone-emerald.jpg' }
-        : brand.defaultStone === 'sapphire'
-          ? { main: '/media/jew-sapphire-ring.jpg', small: '/media/stone-sapphire.jpg' }
-          : { main: '/media/jew-sapphire-ring.jpg', small: '/media/stone-sapphire-pair.jpg' };
-  const heroMain = sisterHero.main;
-  const heroLine = sister
-    ? `The world's finest natural ${houseNoun(brand.defaultStone!)}, set by hand`
-    : "The world's finest natural gemstones, set by hand";
+  const marqueeVarieties = varieties.map((v) => ({
+    slug: v.slug,
+    name: v.name,
+    count: v.count,
+    colorNote: VARIETY_PLAIN_NOTES[v.slug]?.colorNote || 'Natural loose gemstones',
+  }));
 
   return (
-    <main id="main-content" className="mgh">
-      {/* Hero — the vitrine (one orchestrated reveal) */}
-      <section className="mgh-hero cloth-stage" data-cloth-pin aria-label={brand.name}>
-        <figure className="vault-vitrine cloth-stage__bleed" data-cloth-settle>
-          <img
-            className="vault-vitrine__img"
-            data-parallax="6"
-            data-cloth-idle
-            src={sister ? heroMain : VITRINE_PIECE.image}
-            alt={
-              sister
-                ? `Finished ${houseNoun(brand.defaultStone!)} from the sister house`
-                : `${VITRINE_PIECE.id}, ${VITRINE_PIECE.name}, ${VITRINE_PIECE.facts}`
-            }
-          />
-          <figcaption className="vault-vitrine__plate">
-            <span className="vault-vitrine__plate-id">
-              {sister ? `${brand.name} · House reserve` : `${VITRINE_PIECE.id} · Vault reservation`}
-            </span>
-            <span className="vault-vitrine__plate-name">
-              {sister ? `${brand.name}, the house collection` : VITRINE_PIECE.name}
-            </span>
-            <span className="vault-vitrine__plate-facts">
-              {sister ? 'Origin and treatment disclosed on every house record' : VITRINE_PIECE.facts}
-            </span>
-          </figcaption>
-          {!sister ? (
-            <dl className="vault-evidence">
-              <div><dt>Origin</dt><dd>{VITRINE_PIECE.origin}</dd></div>
-              <div><dt>Treatment</dt><dd>{VITRINE_PIECE.treatment}</dd></div>
-              <div><dt>Clarity</dt><dd>{VITRINE_PIECE.clarity}</dd></div>
-              <div><dt>Carat</dt><dd>{VITRINE_PIECE.carat}</dd></div>
-            </dl>
-          ) : null}
-        </figure>
-        <div className="cloth-stage__type">
-            <p className="mgh-eyebrow vault-hero__eyebrow">
-              {sister ? brand.kicker : 'Natural Gemstones · Matched Pairs · Fine Jewellery'}
-            </p>
-            <TextEffect
-              as="h1"
-              per="word"
-              preset="fade-in-blur"
-              speedReveal={0.6}
-              className="mgh-hero__title vault-hero__title"
-            >
-              {heroLine}
-            </TextEffect>
-            <p className="mgh-hero__sub vault-hero__lede">
-              {sister
-                ? brand.lede
-                : 'Thousands of earth-mined stones, master settings and finished jewels. Choose a work from the vault, or design your own from the stone up.'}
-            </p>
-            <div className="mgh-hero__actions vault-hero__actions">
-              <Magnetic intensity={0.25} range={120} springOptions={{ stiffness: 26, damping: 7, mass: 0.2 }}>
-                <ShinyButton href={href('/natural-gemstones')}>Explore the vault</ShinyButton>
-              </Magnetic>
-              <Link href={href('/design-your-own')} className="mgh-btn mgh-btn--ghost">
-                Design Your Own
-              </Link>
-            </div>
-            <div className="mgh-hero__search vault-hero__search">
-              <HeroSearch />
-            </div>
+    <div className="golden-cloud-gallery text-[#181613]">
+      {/* =========================================================================
+          SECTION 1: MINIMALIST FULL-SCREEN VIDEO HERO (STACKED BEHIND NAVBAR)
+         ========================================================================= */}
+      <section className="relative min-h-screen flex items-center justify-center bg-[#0A0A0C] text-[#F7F5F0] overflow-hidden pt-40 sm:pt-44 pb-16">
+        <HeroBackgroundVideo />
+
+        {/* Minimalist Centerpiece: 1-Line Brand Name + 2-Line Simple Motto + Clean Search Bar */}
+        <div className="relative z-20 mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 text-center space-y-6 sm:space-y-8">
+          <p className="text-xs sm:text-sm font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.38em] text-[#D4AF37]">
+            MAIHAN GEMS · GENEVA
+          </p>
+
+          <h1 className="font-[family-name:var(--font-eb-garamond)] text-4xl sm:text-7xl lg:text-[5.5rem] font-normal tracking-tight text-white leading-[1.05]">
+            Rare Natural<br />
+            <span className="gold-gradient-text italic">Gemstones.</span>
+          </h1>
+
+          <div className="pt-2 w-full max-w-xl mx-auto">
+            <HeroAiSearch />
           </div>
-      </section>
-
-      {/* Gemstones — cabinet rail */}
-      <section className="mgh-section mgh-gems cloth-marquee" aria-labelledby="mgh-gems-h">
-        <div className="cloth-marquee__head">
-          <h2 id="mgh-gems-h" className="mgh-h2">Gemstones</h2>
-          <Link href={href('/natural-gemstones')} className="mgh-link">View all gemstones</Link>
-        </div>
-        <Marquee pauseOnHover className="[--duration:48s] [--gap:1.4rem]">
-          {gems.map((gem) => (
-            <Link key={gem.name} href={href(gem.href)} className="mgh-gem">
-              <BlurFade inView delay={0.02}>
-                <span className="mgh-gem__frame">
-                  <img src={gem.img} alt="" />
-                </span>
-              </BlurFade>
-              <span className="mgh-gem__name">{gem.name}</span>
-            </Link>
-          ))}
-        </Marquee>
-      </section>
-
-      {/* Gemstone Jewellery — sticky rail + mosaic */}
-      <section className="mgh-section mgh-jewellery cloth-jewels" aria-labelledby="mgh-jewellery-h">
-        <Tilt rotationFactor={5} className="relative min-h-[70vh]">
-          <Spotlight size={240} />
-          <Link href={href(JEWELLERY[0]?.href ?? '/jewellery')} className="mgh-jew cloth-jewels__lead">
-            <BlurFade inView>
-              <img src={JEWELLERY[0]?.img} alt={JEWELLERY[0] ? `Finished ${JEWELLERY[0].label.toLowerCase()}` : ''} />
-            </BlurFade>
-          </Link>
-        </Tilt>
-        <div className="cloth-jewels__index">
-          <TextEffect id="mgh-jewellery-h" as="h2" per="word" preset="fade" className="mgh-h2 mgh-h2--light">
-            Gemstone Jewellery
-          </TextEffect>
-          {JEWELLERY.slice(1).map((item) => (
-            <Link key={item.label} href={href(item.href)} className="mgh-jew">
-              <img src={item.img} alt="" />
-              <span className="mgh-jew__label">{item.label}</span>
-            </Link>
-          ))}
-          <Link href={href('/gemstone-rings')} className="mgh-link">All finished jewels</Link>
         </div>
       </section>
 
-      <section className="mgh-section" aria-label="Collections">
-        <GalleryCarousel
-          slides={JEWELLERY.map((item) => ({
-            title: item.label,
-            button: 'View the collection',
-            src: item.img,
-            href: href(item.href),
-          }))}
-        />
-      </section>
+      {/* =========================================================================
+          SECTION 2: MINIMALIST TRUST BAR (WHITE & GOLD CLOUD GLASS)
+         ========================================================================= */}
+      <section className="border-b border-[#EADBC0]/70 bg-white/80 backdrop-blur-md">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 divide-y md:divide-y-0 md:divide-x divide-[#EADBC0]/60">
+            <div className="flex items-center justify-center gap-3.5 pt-2 md:pt-0">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF5EA] border border-[#E5D4B3] text-[#9A7B2C]">
+                <Truck className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="font-[family-name:var(--font-eb-garamond)] text-base font-medium text-[#181613]">
+                  Free Insured Shipping
+                </p>
+                <p className="text-xs text-[#6E6250] font-[family-name:var(--font-eb-garamond)]">
+                  Safe door-to-door delivery &amp; 30-day returns
+                </p>
+              </div>
+            </div>
 
-      {/* Settings — numbered ledger */}
-      <section className="mgh-section mgh-set" aria-labelledby="mgh-set-h">
-        <div className="mgh-wrap">
-          <div className="mgh-head">
-            <div>
-              <p className="mgh-eyebrow">Mountings</p>
-              <h2 id="mgh-set-h" className="mgh-h2">Settings</h2>
-              <p className="mgh-lede">Ring, earring, pendant and bracelet seats, waiting for a stone.</p>
+            <div className="flex items-center justify-center gap-3.5 pt-4 md:pt-0">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF5EA] border border-[#E5D4B3] text-[#9A7B2C]">
+                <ShieldCheck className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="font-[family-name:var(--font-eb-garamond)] text-base font-medium text-[#181613]">
+                  Certified Natural Stones
+                </p>
+                <p className="text-xs text-[#6E6250] font-[family-name:var(--font-eb-garamond)]">
+                  Every stone comes with an independent lab report
+                </p>
+              </div>
             </div>
-            <Link href={href('/gemstone-ring-settings')} className="mgh-link">View all settings →</Link>
-          </div>
-          <VaultReveal as="ol" className="mgh-set__ledger" stagger={80}>
-            {SETTINGS.map((item, i) => (
-              <li key={item.href}>
-                <Link href={href(item.href)} className="mgh-set__row">
-                  <span className="mgh-set__num" aria-hidden="true">{index(i)}</span>
-                  <span className="mgh-set__label">{item.label}</span>
-                  <span className="mgh-set__meta">{item.meta}</span>
-                  <span className="mgh-set__thumb" aria-hidden="true">
-                    <img src={item.img} alt="" loading="lazy" />
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </VaultReveal>
-        </div>
-      </section>
 
-      {/* Packaging — ceremony strip */}
-      <section className="mgh-section mgh-pack" aria-labelledby="mgh-pack-h">
-        <div className="mgh-wrap">
-          <div className="mgh-head">
-            <div>
-              <p className="mgh-eyebrow">The Ceremony</p>
-              <h2 id="mgh-pack-h" className="mgh-h2">Our Packaging</h2>
-            </div>
-            <p className="mgh-lede">
-              Finished pieces leave with their papers. The old ceremony photographs are not
-              available from the previous host, so the row shows house jewels instead.
-            </p>
-          </div>
-          <ScrollExpandMedia mediaSrc="/media/jew-emerald-necklace.jpg" title="The cloth opens" kicker="House jewels">
-            <div className="mgh-pack__stage">
-              {PACKAGING.map((item, i) => (
-                <figure key={item.src} className={i === 0 ? 'mgh-pack__item mgh-pack__item--lead' : 'mgh-pack__item'}>
-                  <img src={item.src} alt={item.alt} />
-                </figure>
-              ))}
-            </div>
-          </ScrollExpandMedia>
-        </div>
-      </section>
-
-      {/* Design Your Own — gradient atelier panel */}
-      <section className="mgh-section mgh-dyo" aria-labelledby="mgh-dyo-h">
-        <div className="mgh-wrap">
-          <div className="mgh-dyo__panel">
-            <div className="mgh-dyo__copy">
-              <p className="mgh-eyebrow">The Atelier</p>
-              <h2 id="mgh-dyo-h" className="mgh-h2">Design Your Own Gemstone Piece</h2>
-              <p className="mgh-lede">
-                Three steps between you and a jewel that exists for no one else. Our goldsmiths take
-                over from the review, and the result is unmistakably yours.
-              </p>
-              <Link href={href('/design-your-own')} className="mgh-btn mgh-btn--dark">
-                Begin Designing
-              </Link>
-            </div>
-            <div className="mgh-dyo__side">
-              <ol className="mgh-steps">
-                <li><span aria-hidden="true">1</span> Start with a Setting</li>
-                <li><span aria-hidden="true">2</span> Select a Gemstone</li>
-                <li><span aria-hidden="true">3</span> Review Your Design</li>
-              </ol>
-              <div className="mgh-dyo__media" aria-hidden="true">
-                <img className="mgh-dyo__img-back" src="/media/setting-ring.jpg" alt="" loading="lazy" />
-                <img className="mgh-dyo__img-front" src="/media/stone-sapphire.jpg" alt="" loading="lazy" />
+            <div className="flex items-center justify-center gap-3.5 pt-4 md:pt-0">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF5EA] border border-[#E5D4B3] text-[#9A7B2C]">
+                <HeartHandshake className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="font-[family-name:var(--font-eb-garamond)] text-base font-medium text-[#181613]">
+                  Lifetime Care Plan
+                </p>
+                <p className="text-xs text-[#6E6250] font-[family-name:var(--font-eb-garamond)]">
+                  Complimentary cleaning, polishing &amp; prong checks
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Our History — gold timeline */}
-      <section className="mgh-section mgh-history" aria-labelledby="mgh-history-h">
-        <div className="mgh-wrap">
-          <div className="mgh-head mgh-head--center">
-            <p className="mgh-eyebrow">Since the First Stone</p>
-            <h2 id="mgh-history-h" className="mgh-h2">Our History</h2>
-            <p className="mgh-lede mgh-lede--center">
-              From the mines to the marketplace, the path a stone takes before it reaches the bench.
-            </p>
+      {/* =========================================================================
+          SECTION 3: GEMSTONE MARQUEE (PARALLAX-ON-SCROLL + FLOATING STONES)
+         ========================================================================= */}
+      <section data-reveal className="relative py-20 lg:py-24 overflow-hidden">
+        {/* Soft golden cloud aura */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-96 w-[85vw] rounded-full bg-[radial-gradient(circle,rgba(230,201,122,0.22)_0%,transparent_70%)] blur-3xl"
+        />
+
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="space-y-1.5">
+              <p className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.28em] text-[#9A7B2C] font-semibold">
+                BROWSE BY GEMSTONE TYPE
+              </p>
+              <h2 className="font-[family-name:var(--font-eb-garamond)] text-4xl sm:text-5xl font-normal text-[#181613]">
+                Eight Natural Gemstone Families
+              </h2>
+            </div>
+
+            <Link
+              href="/varieties"
+              className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] text-[#8B6B23] hover:text-[#181613] inline-flex items-center gap-1.5 font-semibold"
+            >
+              Explore All Gemstones <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
-          <ol className="mgh-history__timeline">
-            {HISTORY.map((entry) => (
-              <li key={entry.eyebrow}>
-                <article className="mgh-history__card">
-                  <img src={entry.img} alt="" loading="lazy" />
-                  <p className="mgh-eyebrow">{entry.eyebrow}</p>
-                  <h3>{entry.title}</h3>
-                  <p className="mgh-history__text">{entry.text}</p>
-                </article>
-              </li>
+        </div>
+
+        {/* Parallax-on-Scroll Marquee with Individual Gemstones Without Background */}
+        <GemstoneMarquee varieties={marqueeVarieties} />
+
+        {/* Featured Loose Gemstones (Light-Colored Unified Product Cards) */}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.26em] text-[#9A7B2C] font-semibold">
+                HANDPICKED LOOSE STONES
+              </p>
+              <h3 className="font-[family-name:var(--font-eb-garamond)] text-3xl sm:text-4xl font-normal text-[#181613] mt-1">
+                Featured Natural Gemstones
+              </h3>
+            </div>
+            <Link
+              href="/varieties"
+              className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] text-[#181613] hover:text-[#9A7B2C] inline-flex items-center gap-1.5 font-semibold"
+            >
+              View Gemstone Landing Page <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredStones.map((stone) => (
+              <ProductCard key={stone.id} stone={stone} />
             ))}
-          </ol>
+          </div>
         </div>
       </section>
 
-      {/* Shop with Peace in Mind — hairline strip */}
-      <section className="mgh-peace" aria-labelledby="mgh-peace-h">
-        <div className="mgh-wrap">
-          <h2 id="mgh-peace-h" className="mgh-h2 mgh-h2--light">Shop with Peace in Mind</h2>
-          <div className="mgh-peace__grid">
-            {PEACE.map((item) => (
-              <article key={item.title} className="mgh-peace__card">
-                <i className="mgh-peace__icon" aria-hidden="true">
-                  <PeaceIcon kind={item.icon} />
-                </i>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
+      {/* =========================================================================
+          SECTION 4: FINE JEWELRY — "FOUR WAYS IN" FULL-BLEED BRAND CARDS
+         ========================================================================= */}
+      <section data-reveal className="relative py-20 lg:py-28 border-t border-[#EADBC0]/60">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-14">
+          {/* Editorial Section Header */}
+          <div className="max-w-xl space-y-3">
+            <p className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.28em] text-[#9A7B2C] font-semibold">
+              SHOP BY CATEGORY
+            </p>
+            <h2 className="font-[family-name:var(--font-eb-garamond)] text-4xl sm:text-5xl font-normal text-[#181613] tracking-tight">
+              Four ways in
+            </h2>
+            <p className="text-base text-[#5C5346] leading-relaxed font-[family-name:var(--font-eb-garamond)]">
+              If you already know what you are looking for, start here. If you are not sure yet, our AI Gemologist below is the easiest place to begin.
+            </p>
+          </div>
+
+          {/* 2x2 Full-Bleed Brand Cards (Images Covering the Whole Card, Matching ProductCard) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+            {JEWELRY_FOUR_WAYS.map((cat) => (
+              <article
+                key={cat.title}
+                data-testid="shop-by-category-card"
+                className="group relative overflow-hidden rounded-[24px] border border-[#E5D4B3] bg-[#FAF8F4] transition-all duration-500 hover:-translate-y-1 hover:border-[#C5A059] shadow-[0_14px_38px_rgba(185,150,75,0.12)] hover:shadow-[0_24px_56px_rgba(185,150,75,0.24)] flex flex-col justify-between p-6 sm:p-8 min-h-[460px] sm:min-h-[500px]"
+              >
+                {/* 1. Full-Bleed Background Image Covering the Entire Card */}
+                <img
+                  src={cat.image}
+                  alt={cat.title}
+                  referrerPolicy="no-referrer"
+                  className="absolute inset-0 z-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                />
+
+                {/* 2. Luminous Light-Colored Pearl & Golden Cloud Overlays */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#FAF7F0]/90 via-[#FAF7F0]/45 to-transparent z-[1]"
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#FAF7F0]/98 via-[#FAF7F0]/88 to-transparent z-[1]"
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(212,175,55,0.15),transparent_65%)] z-[1]"
+                />
+
+                {/* 3. Top Section: Category Kicker with Gold Line */}
+                <div className="relative z-10 flex items-start justify-between">
+                  <div>
+                    <p className="text-[11px] font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.26em] text-[#8B6B23] font-semibold">
+                      {cat.kicker}
+                    </p>
+                    <div className="w-7 h-[1.5px] bg-[#C5A059] mt-1.5" />
+                  </div>
+                </div>
+
+                {/* Clickable Card Overlay Link */}
+                <Link
+                  href={cat.href}
+                  className="absolute inset-0 z-[5]"
+                  aria-label={`Explore ${cat.title}`}
+                />
+
+                {/* 4. Bottom Section: Gold Line, Title, Subtitle, Description, Sub-Links & Circular Arrow CTA */}
+                <div className="relative z-10 flex flex-col justify-end space-y-3 pointer-events-none">
+                  <div className="w-7 h-[1.5px] bg-[#C5A059] mb-0.5" />
+
+                  <div className="space-y-1">
+                    <h3 className="font-[family-name:var(--font-eb-garamond)] text-3xl sm:text-4xl font-normal text-[#181613] tracking-normal leading-tight group-hover:text-[#7A5C1B] transition-colors">
+                      {cat.title}
+                    </h3>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-[#6E6250] font-[family-name:var(--font-eb-garamond)] font-semibold">
+                      {cat.subtitle}
+                    </p>
+                  </div>
+
+                  <p className="text-sm text-[#4A4236] leading-relaxed font-[family-name:var(--font-eb-garamond)] max-w-lg">
+                    {cat.description}
+                  </p>
+
+                  <div className="pt-2 flex items-center justify-between gap-4">
+                    {/* Sub-category Style Links */}
+                    <div className="pointer-events-auto flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.18em] text-[#7A5E21] font-semibold">
+                      {cat.tags.map((tag, idx) => (
+                        <React.Fragment key={tag.label}>
+                          {idx > 0 && <span aria-hidden="true" className="text-[#C5A059]">·</span>}
+                          <Link
+                            href={tag.href}
+                            className="hover:text-[#181613] underline-offset-4 hover:underline transition-colors"
+                          >
+                            {tag.label}
+                          </Link>
+                        </React.Fragment>
+                      ))}
+                    </div>
+
+                    <Link
+                      href={cat.href}
+                      aria-label={`Explore ${cat.title}`}
+                      className="pointer-events-auto w-12 h-12 rounded-full border border-[#C5A059] bg-white/90 hover:bg-[#D4AF37] hover:border-[#D4AF37] text-[#181613] hover:text-white backdrop-blur-md flex items-center justify-center transition-all duration-300 active:scale-90 shadow-[0_6px_18px_rgba(185,150,75,0.2)] group/btn shrink-0"
+                    >
+                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-0.5" />
+                    </Link>
+                  </div>
+                </div>
               </article>
             ))}
           </div>
+
+          {/* Ready-to-Wear Fine Jewelry Spotlight Cards (Same Light-Colored ProductCard) */}
+          <div className="pt-6 space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.26em] text-[#9A7B2C] font-semibold">
+                  READY TO WEAR
+                </p>
+                <h3 className="font-[family-name:var(--font-eb-garamond)] text-3xl sm:text-4xl font-normal text-[#181613] mt-1">
+                  Signature Rings, Necklaces &amp; Pairs
+                </h3>
+              </div>
+              <Link
+                href="/jewellery"
+                className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] text-[#181613] hover:text-[#9A7B2C] inline-flex items-center gap-1.5 font-semibold"
+              >
+                View Fine Jewelry Landing Page <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <ProductCard
+                category="Rings"
+                name="Elysian Ring"
+                material="Natural Diamond"
+                carat="2.15 CT"
+                price="$12,800"
+                image="/mgh/images/elysian-ring.jpg"
+                href="/products/elysian-ring"
+              />
+              <ProductCard
+                category="Necklaces"
+                name="Verdant Drop"
+                material="Natural Emerald"
+                carat="4.32 CT"
+                price="$18,500"
+                image="/mgh/images/verdant-drop.jpg"
+                href="/products/verdant-drop"
+              />
+              {pairs[0] && (
+                <ProductCard
+                  category="Earring Pair"
+                  name={pairs[0].name}
+                  material={`Natural ${pairs[0].variety}`}
+                  carat={`${pairs[0].totalCarat.toFixed(2)} CT`}
+                  price={pairs[0].price}
+                  image={pairs[0].images[0]}
+                  href="/pairs"
+                />
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* About Us — editorial with offset frame */}
-      <section className="mgh-section mgh-about" aria-labelledby="mgh-about-h">
-        <div className="mgh-wrap mgh-about__grid">
-          <div className="mgh-about__media" aria-hidden="true">
-            <img src="/media/jew-sapphire-pendant.jpg" alt="" loading="lazy" />
-          </div>
-          <div className="mgh-about__copy">
-            <p className="mgh-eyebrow">The House</p>
-            <h2 id="mgh-about-h" className="mgh-h2">About Us</h2>
-            <TextReveal>
-              Maihan is a private vault of earth-mined gemstones, matched pairs and master settings. Stones are disclosed as they are, origin, treatment and laboratory papers, never dressed as something they are not.
-            </TextReveal>
-            <Link href={href('/about')} className="mgh-btn mgh-btn--outline">Our Story</Link>
+      {/* =========================================================================
+          SECTION 5: DYOJ (DESIGN YOUR OWN JEWELRY) — SIMPLE 3-STEP VISUAL BANNER
+         ========================================================================= */}
+      <section data-reveal className="relative py-20 lg:py-28 border-t border-[#EADBC0]/60">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-[28px] border border-[#E2CEAA] bg-gradient-to-br from-[#FFFDF9] via-[#FAF4E6] to-[#F5E8C7]/60 p-8 sm:p-12 lg:p-16 shadow-[0_20px_60px_rgba(185,150,75,0.14)] space-y-12">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+              <div className="space-y-3 max-w-2xl">
+                <span className="inline-flex items-center gap-2 text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.28em] text-[#9A7B2C] font-semibold">
+                  <Compass className="h-4 w-4 text-[#D4AF37]" />
+                  DYOJ · DESIGN YOUR OWN JEWELRY
+                </span>
+                <h2 className="font-[family-name:var(--font-eb-garamond)] text-4xl sm:text-5xl font-normal text-[#181613] leading-tight">
+                  Create a custom piece in three simple steps.
+                </h2>
+                <p className="text-base text-[#5C5346] leading-relaxed font-[family-name:var(--font-eb-garamond)]">
+                  Pick the exact natural gemstone you love, pair it with a solid 18k gold or platinum setting, and our Geneva jewelers will handcraft it to your size.
+                </p>
+              </div>
+
+              <Link
+                href="/design-your-own"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] font-bold gold-gradient-cta shadow-md whitespace-nowrap shrink-0"
+              >
+                Explore DYOJ Studio <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            {/* 3-Step Visual Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <Link
+                href="/design-your-own?step=stone"
+                className="group rounded-2xl border border-[#E5D4B3] bg-white/90 p-6 hover:border-[#C5A059] shadow-sm transition-all duration-300 space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.24em] text-[#9A7B2C] font-semibold">
+                    STEP 01
+                  </span>
+                  <Gem className="h-5 w-5 text-[#C5A059]" />
+                </div>
+                <h3 className="font-[family-name:var(--font-eb-garamond)] text-2xl font-normal text-[#181613] group-hover:text-[#8B6B23] transition-colors">
+                  Pick Your Gemstone
+                </h3>
+                <p className="text-sm text-[#5C5346] leading-relaxed font-[family-name:var(--font-eb-garamond)]">
+                  Choose from certified sapphires, emeralds, rubies, or tanzanites—each with real photos and clear lab details.
+                </p>
+                <span className="inline-flex items-center gap-1 text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] text-[#9A7B2C] font-semibold">
+                  Choose a Stone →
+                </span>
+              </Link>
+
+              <Link
+                href="/design-your-own?step=setting"
+                className="group rounded-2xl border border-[#E5D4B3] bg-white/90 p-6 hover:border-[#C5A059] shadow-sm transition-all duration-300 space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.24em] text-[#9A7B2C] font-semibold">
+                    STEP 02
+                  </span>
+                  <Sparkles className="h-5 w-5 text-[#C5A059]" />
+                </div>
+                <h3 className="font-[family-name:var(--font-eb-garamond)] text-2xl font-normal text-[#181613] group-hover:text-[#8B6B23] transition-colors">
+                  Choose a Setting
+                </h3>
+                <p className="text-sm text-[#5C5346] leading-relaxed font-[family-name:var(--font-eb-garamond)]">
+                  Select a ring, pendant, or earring style in Platinum 950, 18k Yellow Gold, Rose Gold, or White Gold.
+                </p>
+                <span className="inline-flex items-center gap-1 text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] text-[#9A7B2C] font-semibold">
+                  Pick a Setting →
+                </span>
+              </Link>
+
+              <Link
+                href="/design-your-own/review/DYO-MG-8841"
+                className="group rounded-2xl border border-[#E5D4B3] bg-white/90 p-6 hover:border-[#C5A059] shadow-sm transition-all duration-300 space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.24em] text-[#9A7B2C] font-semibold">
+                    STEP 03
+                  </span>
+                  <ShieldCheck className="h-5 w-5 text-[#C5A059]" />
+                </div>
+                <h3 className="font-[family-name:var(--font-eb-garamond)] text-2xl font-normal text-[#181613] group-hover:text-[#8B6B23] transition-colors">
+                  Handcrafted &amp; Delivered
+                </h3>
+                <p className="text-sm text-[#5C5346] leading-relaxed font-[family-name:var(--font-eb-garamond)]">
+                  Add free ring sizing and personal engraving. Your custom piece ships insured to your door in two weeks.
+                </p>
+                <span className="inline-flex items-center gap-1 text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] text-[#9A7B2C] font-semibold">
+                  See Sample Order →
+                </span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Charity Work — inline band */}
-      <section className="mgh-charity" aria-labelledby="mgh-charity-h">
-        <div className="mgh-wrap">
-          <p className="mgh-eyebrow mgh-eyebrow--gold">Giving Back</p>
-          <h2 id="mgh-charity-h" className="mgh-h2">Charity Work</h2>
-          <p className="mgh-lede">
-            A portion of every sale returns to the places our stones come from, supporting the
-            communities and landscapes that make this work possible.
-          </p>
-          <ul className="mgh-charity__row">
-            {CHARITY.map((cause) => (
-              <li key={cause.title}>
-                <h3>{cause.title}</h3>
-                <p>{cause.text}</p>
-              </li>
+      {/* =========================================================================
+          SECTION 6: THE AI GEMOLOGIST — "A GEMOLOGIST'S EYE, ON DEMAND"
+         ========================================================================= */}
+      <section data-reveal className="relative py-20 lg:py-28 border-t border-[#EADBC0]/60">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-14">
+          <div className="max-w-2xl space-y-4">
+            <p className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.28em] text-[#9A7B2C] font-semibold">
+              THE AI GEMOLOGIST
+            </p>
+            <h2 className="font-[family-name:var(--font-eb-garamond)] text-4xl sm:text-5xl font-normal text-[#181613] leading-tight">
+              A gemologist&rsquo;s eye, on demand.
+            </h2>
+            <p className="text-base text-[#5C5346] leading-relaxed font-[family-name:var(--font-eb-garamond)]">
+              Three helpful tools do the work a personal jeweler would—matching your budget, comparing stones honestly, and showing how they look in a setting. And the moment you want a second opinion, a human gemologist is one click away.
+            </p>
+            <div className="pt-2">
+              <Link
+                href="/concierge"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#181613] hover:bg-[#2E2922] text-[#F7F5F0] text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] font-semibold transition-colors shadow-sm"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-[#D4AF37]" />
+                Launch AI Gemologist
+              </Link>
+            </div>
+          </div>
+
+          {/* 3 Plain-English Pillars */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pt-2">
+            <div className="rounded-2xl border border-[#E5D4B3] bg-white/85 p-7 shadow-[0_10px_32px_rgba(185,150,75,0.08)] space-y-4">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#FAF4E6] border border-[#E5D4B3] text-[#9A7B2C]">
+                <MessageSquare className="h-5 w-5" />
+              </div>
+              <h3 className="font-[family-name:var(--font-eb-garamond)] text-2xl font-normal text-[#181613]">
+                Tell it what you&rsquo;re after
+              </h3>
+              <p className="text-sm text-[#5C5346] leading-relaxed font-[family-name:var(--font-eb-garamond)]">
+                Share the occasion, budget, color, or metal you like. It returns a clear shortlist and explains why each stone made the list—no complicated gem vocabulary required.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-[#E5D4B3] bg-white/85 p-7 shadow-[0_10px_32px_rgba(185,150,75,0.08)] space-y-4">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#FAF4E6] border border-[#E5D4B3] text-[#9A7B2C]">
+                <Search className="h-5 w-5" />
+              </div>
+              <h3 className="font-[family-name:var(--font-eb-garamond)] text-2xl font-normal text-[#181613]">
+                Compare stones side by side
+              </h3>
+              <p className="text-sm text-[#5C5346] leading-relaxed font-[family-name:var(--font-eb-garamond)]">
+                Not sure why one sapphire or emerald costs more than another? Ask the AI Gemologist to compare two stones in plain English so you can see the difference clearly.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-[#E5D4B3] bg-white/85 p-7 shadow-[0_10px_32px_rgba(185,150,75,0.08)] space-y-4">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#FAF4E6] border border-[#E5D4B3] text-[#9A7B2C]">
+                <Box className="h-5 w-5" />
+              </div>
+              <h3 className="font-[family-name:var(--font-eb-garamond)] text-2xl font-normal text-[#181613]">
+                See it on you in 3D
+              </h3>
+              <p className="text-sm text-[#5C5346] leading-relaxed font-[family-name:var(--font-eb-garamond)]">
+                Preview how rings, earrings, and pendants look from every angle with our interactive 3D viewer, showing the stone scaled to its true size in millimeters.
+              </p>
+            </div>
+          </div>
+
+          {/* Try a Quick Question Strip */}
+          <div className="flex flex-wrap items-center gap-2.5 pt-2">
+            <span className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] text-[#8B6B23] font-semibold mr-2">
+              Try asking:
+            </span>
+            {[
+              'Show me blue sapphires under $6,000',
+              'Design a custom emerald engagement ring',
+              'Compare unheated rubies and spinels',
+            ].map((prompt) => (
+              <Link
+                key={prompt}
+                href={`/concierge?q=${encodeURIComponent(prompt)}`}
+                className="px-4 py-2 rounded-full border border-[#E5D4B3] bg-[#FFFDF9] hover:bg-[#FAF4E6] hover:border-[#C5A059] text-xs font-[family-name:var(--font-eb-garamond)] text-[#3B3328] transition-colors"
+              >
+                &ldquo;{prompt}&rdquo; →
+              </Link>
             ))}
-          </ul>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="mgh-cta" aria-labelledby="mgh-cta-h">
-        <div className="mgh-wrap">
-          <p className="mgh-eyebrow mgh-eyebrow--light">The Vault Awaits</p>
-          <h2 id="mgh-cta-h" className="mgh-h2 mgh-h2--light">
-            Find the stone that suits the setting.
-          </h2>
-          <p className="mgh-lede mgh-lede--light mgh-lede--center">
-            Browse the vault as it stands today, or sit with our advisors and design the piece
-            that does not exist yet.
-          </p>
-          <div className="mgh-cta__actions">
-            <Link href={href('/natural-gemstones')} className="mgh-btn mgh-btn--gold">
-              Enter the Vault
-            </Link>
-            <Link href={href('/design-your-own')} className="mgh-btn mgh-btn--ghost">
-              Design Your Own
-            </Link>
           </div>
         </div>
       </section>
-    </main>
+
+      {/* =========================================================================
+          SECTION 7: CLIENT VOICES — "BOUGHT BY PEOPLE WHO ASKED A LOT OF QUESTIONS"
+         ========================================================================= */}
+      <section data-reveal className="relative py-20 lg:py-28 border-t border-[#EADBC0]/60">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-14">
+          <div className="max-w-xl space-y-3">
+            <p className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.28em] text-[#9A7B2C] font-semibold">
+              CLIENT VOICES
+            </p>
+            <h2 className="font-[family-name:var(--font-eb-garamond)] text-4xl sm:text-5xl font-normal text-[#181613] leading-tight">
+              Bought by people who asked a lot of questions.
+            </h2>
+            <p className="text-base text-[#5C5346] leading-relaxed font-[family-name:var(--font-eb-garamond)]">
+              Three recent buyers on what they were unsure about at first, and what actually happened.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {CLIENT_VOICES.map((voice) => (
+              <blockquote
+                key={voice.name}
+                className="rounded-2xl border border-[#E5D4B3] bg-white/90 p-7 shadow-[0_12px_36px_rgba(185,150,75,0.09)] flex flex-col justify-between space-y-6"
+              >
+                <p className="font-[family-name:var(--font-eb-garamond)] text-base sm:text-lg text-[#2C261E] leading-relaxed">
+                  &ldquo;{voice.quote}&rdquo;
+                </p>
+
+                <footer className="flex items-center gap-3.5 pt-4 border-t border-[#F0E6D2]">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF4E6] border border-[#E5D4B3] text-[#9A7B2C] shrink-0">
+                    <UserCheck className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <cite className="not-italic font-[family-name:var(--font-eb-garamond)] text-sm font-semibold uppercase tracking-wider text-[#181613] block">
+                      {voice.name}
+                    </cite>
+                    <span className="text-xs text-[#7A7267] font-[family-name:var(--font-eb-garamond)]">
+                      {voice.purchase}
+                    </span>
+                  </div>
+                </footer>
+              </blockquote>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION 8: NEXT STEP — "STILL WEIGHING IT UP? TALK TO A GEMOLOGIST."
+         ========================================================================= */}
+      <section data-reveal className="relative py-16 lg:py-24 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl rounded-[28px] overflow-hidden border border-[#C5A059]/50 bg-gradient-to-br from-[#4A3B1C] via-[#3D3015] to-[#2B210D] text-[#FAF8F4] px-6 py-16 sm:px-12 sm:py-20 text-center shadow-[0_24px_70px_rgba(74,59,28,0.28)] relative">
+          {/* Subtle golden cloud glow */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(230,201,122,0.22),transparent_68%)]"
+          />
+
+          <div className="relative z-10 mx-auto max-w-xl space-y-5">
+            <p className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.32em] text-[#E6C97A] font-semibold">
+              NEXT STEP
+            </p>
+            <h2 className="font-[family-name:var(--font-eb-garamond)] text-4xl sm:text-5xl font-normal text-white leading-tight">
+              Still weighing it up?<br />
+              Talk to a gemologist.
+            </h2>
+            <p className="text-base text-[#E6DEC8] leading-relaxed font-[family-name:var(--font-eb-garamond)]">
+              Fifteen minutes on a video call or in our Geneva, New York, or London showrooms, with the stones you are considering right in front of us. No sales pitch and no obligation—and if what you want isn&rsquo;t in stock, we will tell you honestly.
+            </p>
+
+            <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-white hover:bg-[#FAF4E6] text-[#181613] text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] font-semibold transition-all shadow-md"
+              >
+                Book a Private Appointment
+              </Link>
+              <Link
+                href="/showrooms"
+                className="inline-flex items-center justify-center px-6 py-3.5 rounded-full border border-[#E6C97A]/50 hover:border-white text-[#FAF8F4] text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] transition-all"
+              >
+                View Our Showrooms
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

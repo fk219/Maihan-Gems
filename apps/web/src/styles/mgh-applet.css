@@ -18,6 +18,9 @@
 @source "../components/mgh/**/*.{ts,tsx}";
 @source "../lib/mgh/**/*.{ts,tsx}";
 @source "../hooks/mgh/**/*.ts";
+@source "../app/(storefront)/**/*.{ts,tsx}";
+@source "../app/admin/**/*.{ts,tsx}";
+@source "../app/vendor/**/*.{ts,tsx}";
 
 @theme {
   --font-display: var(--font-eb-garamond), "EB Garamond", Garamond, Georgia, serif;
@@ -151,4 +154,10 @@
   --font-eb-garamond: var(--font-display-applet);
   --font-sans: var(--font-sans-applet);
   --font-serif: var(--font-display-applet), "EB Garamond", Garamond, Georgia, serif;
+}
+
+/* The applet's body-level font reference must resolve OUTSIDE .mgh-theme too
+   (the migrated shell sets it on <body>), so the alias is global. */
+:root {
+  --font-eb-garamond: var(--font-display-applet);
 }

@@ -388,7 +388,7 @@ export async function listCmsPages(
     LEFT JOIN LATERAL (
       SELECT id FROM page_revisions pr
       WHERE pr.page_id = p.id
-      ORDER BY pr.revision_number DESC
+      ORDER BY pr.version DESC
       LIMIT 1
     ) r ON true
     LEFT JOIN page_review_state prs ON prs.revision_id = r.id

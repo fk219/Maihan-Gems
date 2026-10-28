@@ -1,98 +1,79 @@
-/**
- * apps/web/src/app/(storefront)/contact/page.tsx
- *
- * `/contact` — target of the observed /contact-us 301. SoT 12.2
- * `contact/page.tsx`.
- */
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { MapPin } from 'lucide-react';
+import { getAllShowrooms } from '@/lib/mgh/storefront-data';
+import { ContactViewingFormClient } from '@/components/mgh/content/ContactViewingFormClient';
+import { SITE_URL } from '@/lib/mgh/site-url';
 import { STOREFRONT_CONTACT } from '@maihan/config';
 
-import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
-import { ViewingRequest } from '../../../components/storefront/ViewingRequest.js';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../../components/ui/motion-accordion.js';
+const LEDE =
+  'Reserve a private viewing in Geneva, New York, or London.';
 
 export const metadata: Metadata = {
-  title: 'Contact Atelier Concierge | Maihan Gems',
-  description: 'Schedule a private appointment with our gemmologists in Dubai, Geneva, London, or Bangkok.',
+  title: 'Private Viewing Concierge — Maihan Gems',
+  description: LEDE,
+  alternates: { canonical: `${SITE_URL}/contact` },
 };
 
-export default function ContactPage() {
+export default async function ContactPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ salon?: string; sku?: string }>;
+}) {
+  const sp = await searchParams;
+  const showrooms = getAllShowrooms();
+
   return (
-    <main className="page contact-page" id="main-content">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Atelier Concierge' },
-        ]}
-      />
+    <div className="golden-cloud-gallery text-[#181613] font-[family-name:var(--font-eb-garamond)] min-h-[82vh]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 space-y-12">
+        <nav aria-label="Breadcrumb" className="text-xs uppercase tracking-[0.22em] text-[#7A7060]">
+          <ol className="flex items-center gap-2">
+            <li><Link href="/" className="hover:text-[#181613]">Home</Link></li>
+            <li aria-hidden="true">·</li>
+            <li aria-current="page" className="text-[#8B6B23] font-semibold">Private Viewing</li>
+          </ol>
+        </nav>
 
-      <span className="page-eyebrow">Private client advisory</span>
-      <h1>Contact the atelier</h1>
-      <p className="page-subtitle">
-        Arrange a private viewing, or commission a mounting with the goldsmiths.
-      </p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          <div className="lg:col-span-5 space-y-6">
+            <div className="space-y-3">
+              <p className="text-xs uppercase tracking-[0.28em] text-[#9A7B2C] font-semibold">
+                SALON CONCIERGE
+              </p>
+              <div className="w-10 h-[1.5px] bg-[#C5A059]" />
+              <h1 className="text-4xl sm:text-5xl font-normal text-[#181613] tracking-tight">
+                Private Viewing
+              </h1>
+              <p className="text-base text-[#5C5346] leading-relaxed">{LEDE}</p>
+            </div>
 
-      <div className="salon-grid">
-        <section className="salon-note">
-          <p className="page-eyebrow">{STOREFRONT_CONTACT.appointmentLabel}</p>
-          <h2>Direct line</h2>
-          <p>
-            {STOREFRONT_CONTACT.addressLine}
-            <br />
-            {STOREFRONT_CONTACT.city}, {STOREFRONT_CONTACT.region}
-            <br />
-            {STOREFRONT_CONTACT.hours}
-          </p>
-          <p>
-            <a href={STOREFRONT_CONTACT.phoneHref}>{STOREFRONT_CONTACT.phoneDisplay}</a>
-            <br />
-            <a href={`mailto:${STOREFRONT_CONTACT.email}`}>{STOREFRONT_CONTACT.email}</a>
-          </p>
-        </section>
+            <div className="space-y-4">
+              {showrooms.map((s) => (
+                <div
+                  key={s.slug}
+                  className="rounded-[22px] border border-[#E5D4B3] bg-white/95 p-6 shadow-[0_10px_28px_rgba(185,150,75,0.08)] space-y-1.5"
+                >
+                  <p className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.22em] text-[#8B6B23] font-semibold">
+                    <MapPin className="h-3.5 w-3.5 text-[#D4AF37]" />
+                    <span>{s.city}</span>
+                  </p>
+                  <p className="text-xl text-[#181613] font-medium">{s.name}</p>
+                  <p className="text-sm text-[#5C5346]">{s.address}</p>
+                  <p className="text-sm text-[#8B6B23] font-semibold pt-1">{s.phone}</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
-        <section className="salon-note">
-          <p className="page-eyebrow">Appointments</p>
-          <h2>Private viewing</h2>
-          <p>
-            Showroom visits are by appointment. Write or call using the details above until the house
-            publishes a live booking calendar.
-          </p>
-        </section>
-      </div>
-
-      <ViewingRequest email={STOREFRONT_CONTACT.email} />
-      <Accordion className="salon-note">
-        <AccordionItem value="shipping">
-          <AccordionTrigger className="flex w-full justify-between py-3 text-left font-[family-name:var(--font-serif)] text-2xl">Shipping</AccordionTrigger>
-          <AccordionContent>
-            <p>Free for all U.S. deliveries, and insured for orders over $300 anywhere in the world. The checkout page confirms the figure for the bag you are holding.</p>
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="returns">
-          <AccordionTrigger className="flex w-full justify-between py-3 text-left font-[family-name:var(--font-serif)] text-2xl">Returns</AccordionTrigger>
-          <AccordionContent>
-            <p>Loose gemstones, ready-to-ship jewellery, and most custom jewellery may be returned within 14 days.</p>
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="viewing">
-          <AccordionTrigger className="flex w-full justify-between py-3 text-left font-[family-name:var(--font-serif)] text-2xl">A private viewing</AccordionTrigger>
-          <AccordionContent>
-            <p>Showroom visits are by appointment. Write to {STOREFRONT_CONTACT.email} or call {STOREFRONT_CONTACT.phoneDisplay}. There is no live booking calendar yet.</p>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-      <section className="salon-note">
-        <p>The configurator keeps the composition honest. The salons are listed separately.</p>
-        <div className="maison-missing__actions">
-          <Link href="/design-your-own" className="lx-btn lx-btn--solid">
-            Design your own
-          </Link>
-          <Link href="/showrooms" className="lx-btn lx-btn--ghost">
-            View the salons
-          </Link>
+          <div className="lg:col-span-7">
+            <ContactViewingFormClient
+              initialSalon={sp.salon}
+              initialSku={sp.sku}
+              email={STOREFRONT_CONTACT.email}
+            />
+          </div>
         </div>
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }

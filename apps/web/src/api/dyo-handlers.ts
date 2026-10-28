@@ -61,12 +61,15 @@ export const createDyoConfigurationHandler: RouteHandler = async (ctx) => {
     SELECT sv.id, sv.setting_id, s.jewellery_type::text AS jewellery_type
       FROM setting_variants sv
       JOIN settings s ON s.id = sv.setting_id
-     WHERE LOWER(sv.sku) = LOWER(${parsedSku.sku}) AND sv.deleted_at IS NULL
+     WHERE LOWER(sv.sku) = LOWER(${settingVariantSkuText}) AND sv.deleted_at IS NULL
      LIMIT 1
   `);
   const variant = variantRes.rows[0] as { id: string; setting_id: string; jewellery_type: string } | undefined;
   if (!variant) {
-    throw new ContractError('VALIDATION_FAILED', `Unknown setting variant SKU: ${parsedSku.sku}`);
+    // The raw client text is what setting_variants.sku stores (e.g.
+    // "JS1150W14"); parsedSku.sku is the STRUCTURED SKU object and must
+    // never be interpolated into SQL or an error message.
+    throw new ContractError('VALIDATION_FAILED', `Unknown setting variant SKU: ${settingVariantSkuText}`);
   }
 
   let gemstoneId: string | undefined;

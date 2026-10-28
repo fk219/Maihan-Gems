@@ -369,6 +369,14 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     group: 'storefront',
   },
   {
+    fsPath: 'src/app/(storefront)/policy/page.tsx',
+    sotPath: 'app/(storefront)/policy/page.tsx',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 (policy/legal hub surface): the legal-hub index from the reference applet (policy/page.tsx) ported verbatim in the M6 editorial migration; the route previously served only the detail segment.',
+    storefront: true,
+    group: 'storefront',
+  },
+  {
     fsPath: 'src/app/(storefront)/policy/[policySlug]/page.tsx',
     sotPath: 'app/(storefront)/policy/[slug]/page.tsx',
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: policy pages',
@@ -386,6 +394,14 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     fsPath: 'src/app/(storefront)/protection-plan/page.tsx',
     sotPath: 'app/(storefront)/protection-plan',
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 13.1: /extend-protection-plan -> /protection-plan',
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/ai-gemologist/page.tsx',
+    sotPath: 'app/(storefront)/ai-gemologist/page.tsx',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 (concierge chat surface): the AI Gemologist page from the reference applet (ai-gemologist/page.tsx) ported verbatim in the M6 editorial migration and wired to the Phase 9 AI concierge API.',
     storefront: true,
     group: 'storefront',
   },

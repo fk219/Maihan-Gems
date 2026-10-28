@@ -12,10 +12,13 @@ import {
   Sparkles,
   Sun,
 } from 'lucide-react';
-import type { WebArAssetRecord } from '@/lib/mgh/fixtures/types';
+// M3 data seam: the migrated page feeds the REAL vault asset (WebArAssetView —
+// the applet's WebArAssetRecord with the unrecorded calibration fields
+// nullable). Markup and behaviour otherwise verbatim from the reference.
+import type { WebArAssetView } from '@/lib/mgh/adapters/webar-types';
 
 interface ThreeGemstoneStudioProps {
-  asset: WebArAssetRecord;
+  asset: WebArAssetView;
 }
 
 type LightingPreset = 'salon' | 'daylight' | 'vault';
@@ -200,14 +203,16 @@ export default function ThreeGemstoneStudio({ asset }: ThreeGemstoneStudioProps)
     scene.add(subjectGroup);
 
     const gemColorHex =
-      asset.kind === 'setting' ? asset.secondaryColorHex : asset.primaryColorHex;
+      asset.kind === 'setting'
+        ? asset.secondaryColorHex ?? asset.primaryColorHex
+        : asset.primaryColorHex;
     const gemColor = new THREE.Color(gemColorHex || '#2e4583');
     const gemMat = new THREE.MeshPhysicalMaterial({
       color: gemColor,
       roughness: 0.06,
       metalness: 0.02,
       transmission: isSoftwareGl ? 0.55 : 0.88,
-      ior: asset.ior || 1.76,
+      ior: asset.ior ?? 1.76,
       thickness: 1.6,
       reflectivity: 0.95,
       clearcoat: 1.0,
@@ -506,11 +511,13 @@ export default function ThreeGemstoneStudio({ asset }: ThreeGemstoneStudioProps)
 
       <div className="absolute top-4 left-4 z-10 max-w-xs bg-[#141413]/92 border border-[#2E2D2A] text-[#F8F7F4] p-4 rounded-sm pointer-events-auto">
         <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[#B89758]">
-          {asset.assetId} · SKU {asset.sku} · RI {asset.ior.toFixed(3)}
+          {asset.assetId} · SKU {asset.sku} ·{' '}
+          {asset.ior !== null ? `RI ${asset.ior.toFixed(3)}` : 'RI Not evidenced'}
         </p>
         <h2 className="font-serif text-xl mt-1 leading-tight">{asset.title}</h2>
         <p className="text-xs text-[#C7C3B8] mt-1 font-mono tabular-nums">
-          {asset.caratOrScale.toFixed(2)} ct · {asset.dimensionsMm} · {asset.cutGeometry}
+          {asset.caratOrScale !== null ? `${asset.caratOrScale.toFixed(2)} ct` : 'Not evidenced'} ·{' '}
+          {asset.dimensionsMm ?? 'Not evidenced'} · {asset.cutGeometry}
         </p>
         <p className="text-[11px] text-[#9A968C] mt-1">{asset.calibrationNote}</p>
         {cameraError && (

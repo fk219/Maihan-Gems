@@ -6,12 +6,17 @@ import { Calendar, CheckCircle2 } from 'lucide-react';
 export function ContactViewingFormClient({
   initialSalon,
   initialSku,
+  email,
 }: {
   initialSalon?: string;
   initialSku?: string;
+  /** Repo's real atelier address (STOREFRONT_CONTACT.email) — no backend
+   *  contact endpoint exists yet (M6 gap), so the compiled dossier opens the
+   *  client's mail app, mirroring the repo's ViewingRequest seam. */
+  email?: string;
 }) {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [clientEmail, setClientEmail] = useState('');
   const [salon, setSalon] = useState(initialSalon || 'Geneva');
   const [requestedSkus, setRequestedSkus] = useState(initialSku || 'MG-TZ-0131');
   const [preferredDate, setPreferredDate] = useState('2026-11-04');
@@ -28,18 +33,30 @@ export function ContactViewingFormClient({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !email.includes('@')) {
+    if (!name.trim() || !clientEmail.trim() || !clientEmail.includes('@')) {
       setError('Please enter your full name and a valid client email address.');
       return;
     }
     setError(null);
-    setSubmittedRecord({
+    const record = {
       referenceId: `VW-${salon.slice(0, 3).toUpperCase()}-2026-409`,
       name: name.trim(),
       salon,
       requestedSkus: requestedSkus.trim() || 'MG-TZ-0131',
       preferredDate,
-    });
+    };
+    // Repo's real contact path (no backend endpoint exists — repo seam is the
+    // same one the previous ViewingRequest card used: a client mailto).
+    if (email) {
+      const subject = encodeURIComponent(`Private viewing ${record.referenceId}`);
+      const body = encodeURIComponent(
+        `Name: ${record.name}\nEmail: ${email.trim()}\nSalon: ${record.salon}\n` +
+          `Specimen SKUs: ${record.requestedSkus}\nPreferred date: ${record.preferredDate}\n` +
+          `Optical setup: ${lightingPreference}\n\nNotes: ${salonNotes.trim() || '—'}`,
+      );
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    }
+    setSubmittedRecord(record);
   };
 
   if (submittedRecord) {
@@ -50,10 +67,10 @@ export function ContactViewingFormClient({
       >
         <div className="flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-[#E6C97A]">
           <CheckCircle2 className="h-4 w-4 text-[#D4AF37]" />
-          <span>VIEWING LOGGED · {submittedRecord.referenceId}</span>
+          <span>VIEWING REQUEST COMPILED · {submittedRecord.referenceId}</span>
         </div>
         <h2 className="text-3xl font-normal text-[#F7F5F0]">
-          Dossier Reserved for {submittedRecord.name}
+          Viewing Dossier Compiled for {submittedRecord.name}
         </h2>
         <p className="text-sm text-[#C8C3B8] leading-relaxed">
           {submittedRecord.salon} Salon · Specimen{' '}
@@ -61,6 +78,11 @@ export function ContactViewingFormClient({
             {submittedRecord.requestedSkus}
           </strong>{' '}
           · {submittedRecord.preferredDate}.
+        </p>
+        <p className="text-xs text-[#C8C3B8] leading-relaxed">
+          {email
+            ? 'This dossier opens in your mail client addressed to the atelier — the salon confirms appointments by email. No reservation is held until the salon replies.'
+            : 'Keep this dossier — the atelier has not yet published a live booking path, so no reservation is held until you are contacted.'}
         </p>
         <button
           type="button"
@@ -119,8 +141,8 @@ export function ContactViewingFormClient({
             id="vw-email"
             type="email"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={clientEmail}
+            onChange={(e) => setClientEmail(e.target.value)}
             placeholder="elena.vance@domain.com"
             className="w-full rounded-full border border-[#E5D4B3] bg-[#FAF8F4] px-4 py-2.5 text-[#181613]"
           />

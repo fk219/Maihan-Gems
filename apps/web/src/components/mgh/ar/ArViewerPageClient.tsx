@@ -3,7 +3,9 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { ArrowLeft, Smartphone } from 'lucide-react';
-import type { WebArAssetRecord } from '@/lib/mgh/fixtures/types';
+// M3 data seam: the migrated page feeds the REAL vault asset (WebArAssetView);
+// markup verbatim from the reference.
+import type { WebArAssetView } from '@/lib/mgh/adapters/webar-types';
 
 const ThreeGemstoneStudio = dynamic(
   () => import('@/components/mgh/ar/ThreeGemstoneStudio'),
@@ -23,7 +25,7 @@ const ThreeGemstoneStudio = dynamic(
 );
 
 interface ArViewerPageClientProps {
-  asset: WebArAssetRecord;
+  asset: WebArAssetView;
   handoffToken: string | null;
   backHref: string;
 }

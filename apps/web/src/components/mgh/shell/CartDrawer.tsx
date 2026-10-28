@@ -78,7 +78,7 @@ export default function CartDrawer() {
               {cart.map((item) => (
                 <li key={item.id} className="py-4 flex gap-4 items-start">
                   <img
-                    src={item.image || '/images/gems/tanzanite-gem.jpg'}
+                    src={item.image || '/mgh/images/gems/tanzanite-gem.jpg'}
                     alt={item.name}
                     referrerPolicy="no-referrer"
                     className="h-16 w-20 rounded-sm border border-[#E4DFD5] bg-[#EFECE6] object-cover shrink-0"

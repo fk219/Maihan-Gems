@@ -32,10 +32,10 @@ import { EvidenceValue } from '@/components/mgh/ui/EvidenceValue';
 import { FormattedPrice } from '@/components/mgh/ui/FormattedPrice';
 
 const JEWELLERY_GEM_OPTIONS = [
-  { id: 'emerald', label: 'Emerald', image: '/images/gems/emerald-gem.jpg', priceDelta: 0 },
-  { id: 'ruby', label: 'Ruby', image: '/images/gems/ruby-gem.jpg', priceDelta: 450 },
-  { id: 'sapphire', label: 'Sapphire', image: '/images/gems/sapphire-gem.jpg', priceDelta: 250 },
-  { id: 'diamond', label: 'Diamond', image: '/images/elysian-ring.jpg', priceDelta: 650 },
+  { id: 'emerald', label: 'Emerald', image: '/mgh/images/gems/emerald-gem.jpg', priceDelta: 0 },
+  { id: 'ruby', label: 'Ruby', image: '/mgh/images/gems/ruby-gem.jpg', priceDelta: 450 },
+  { id: 'sapphire', label: 'Sapphire', image: '/mgh/images/gems/sapphire-gem.jpg', priceDelta: 250 },
+  { id: 'diamond', label: 'Diamond', image: '/mgh/images/elysian-ring.jpg', priceDelta: 650 },
 ] as const;
 
 const JEWELLERY_METAL_OPTIONS = [
@@ -51,17 +51,17 @@ export function ProductDetailGallery({ stone }: { stone: GemstoneItem }) {
   const isJewellery = stone.varietySlug === 'rings' || stone.varietySlug === 'necklaces';
 
   // Build rich gallery thumbnails (vertical rail) matching the reference screenshots
-  const baseImages = stone.images.length > 0 ? stone.images : ['/images/gems/emerald-gem.jpg'];
+  const baseImages = stone.images.length > 0 ? stone.images : ['/mgh/images/gems/emerald-gem.jpg'];
   const galleryItems = [
     { type: 'image' as const, src: baseImages[0], label: 'Primary Crown View' },
     {
       type: 'image' as const,
-      src: baseImages[1] || (isJewellery ? '/images/gems/setting-ring.jpg' : '/images/gems/sapphire-gem.jpg'),
+      src: baseImages[1] || (isJewellery ? '/mgh/images/gems/setting-ring.jpg' : '/mgh/images/gems/sapphire-gem.jpg'),
       label: isJewellery ? 'Side Gallery Profile' : 'Pavilion & Culet Angle',
     },
     {
       type: 'image' as const,
-      src: isJewellery ? '/images/verdant-drop.jpg' : '/images/gems/emerald-gem.jpg',
+      src: isJewellery ? '/mgh/images/verdant-drop.jpg' : '/mgh/images/gems/emerald-gem.jpg',
       label: isJewellery ? 'On-Body Perspective' : 'Daylight Macro Facets',
     },
     {
@@ -134,7 +134,7 @@ export function ProductDetailGallery({ stone }: { stone: GemstoneItem }) {
                   <div className="absolute inset-0 bg-[#1A150E]/80 flex flex-col items-center justify-center p-1.5 text-center">
                     <Award className="h-4 w-4 text-[#E6C97A] mb-0.5" />
                     <span className="text-[9px] font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#FAF3E3] leading-tight">
-                      {stone.evidence.laboratory || 'GIA'} Cert
+                      {stone.evidence.laboratory || 'Not evidenced'} Cert
                     </span>
                   </div>
                 )}
@@ -154,7 +154,7 @@ export function ProductDetailGallery({ stone }: { stone: GemstoneItem }) {
                       Official Gemological Dossier
                     </p>
                     <h4 className="text-xl font-semibold text-[#1A1612]">
-                      {stone.evidence.laboratory || 'GIA / SSEF'} Laboratory Report
+                      {stone.evidence.laboratory || 'Not evidenced'} Laboratory Report
                     </h4>
                   </div>
                   <Award className="h-8 w-8 text-[#C5A059]" />
@@ -163,7 +163,7 @@ export function ProductDetailGallery({ stone }: { stone: GemstoneItem }) {
                   <div>
                     <span className="text-[#76726A] block">Report Number</span>
                     <span className="font-[family-name:var(--font-mono)] font-semibold text-[#1A1612]">
-                      {stone.evidence.reportNumber || 'MHG-CERT-2025'}
+                      {stone.evidence.reportNumber || 'Not evidenced'}
                     </span>
                   </div>
                   <div>
@@ -173,7 +173,7 @@ export function ProductDetailGallery({ stone }: { stone: GemstoneItem }) {
                   <div>
                     <span className="text-[#76726A] block">Carat &amp; Cut</span>
                     <span className="font-semibold text-[#1A1612]">
-                      {stone.carat.toFixed(2)} ct · {stone.shape}
+                      {stone.carat.toFixed(2)} ct · {stone.shape ?? 'Not evidenced'}
                     </span>
                   </div>
                   <div>
@@ -538,7 +538,7 @@ export function ProductDetailActionsAndAccordion({ stone }: { stone: GemstoneIte
         <div className="border-b border-[#E5D4B3] pb-5 space-y-2.5 text-sm">
           <div className="flex items-center justify-between py-1 border-b border-[#EFE5D1]">
             <span className="text-[#76726A]">Shape:</span>
-            <span className="font-semibold text-[#1A1612]">{stone.shape}</span>
+            <span className="font-semibold text-[#1A1612]">{stone.shape ?? 'Not evidenced'}</span>
           </div>
           <div className="flex items-center justify-between py-1 border-b border-[#EFE5D1]">
             <span className="text-[#76726A]">Carat:</span>
@@ -549,7 +549,7 @@ export function ProductDetailActionsAndAccordion({ stone }: { stone: GemstoneIte
           <div className="flex items-center justify-between py-1 border-b border-[#EFE5D1]">
             <span className="text-[#76726A]">Clarity &amp; Treatment:</span>
             <span className="font-semibold text-[#1A1612]">
-              {stone.clarity} · {stone.treatmentDisclosed}
+              {stone.clarity ?? 'Not evidenced'} · {stone.treatmentDisclosed}
             </span>
           </div>
           <div className="flex items-center justify-between py-1 border-b border-[#EFE5D1]">
@@ -559,9 +559,9 @@ export function ProductDetailActionsAndAccordion({ stone }: { stone: GemstoneIte
           <div className="flex items-center justify-between py-1">
             <span className="text-[#76726A]">Certification:</span>
             <span className="inline-flex items-center gap-2 font-semibold text-[#1A1612]">
-              <span>{stone.evidence.laboratory || 'GIA'} Certified</span>
+              <span>{stone.evidence.laboratory || 'Not evidenced'} Certified</span>
               <span className="rounded-md border border-[#C5A059] bg-[#FAF3E3] px-2 py-0.5 text-[10px] font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#8C6D2F]">
-                {stone.evidence.laboratory || 'GIA'}
+                {stone.evidence.laboratory || 'Not evidenced'}
               </span>
             </span>
           </div>
@@ -585,7 +585,7 @@ export function ProductDetailActionsAndAccordion({ stone }: { stone: GemstoneIte
                   : stone.name,
                 subtitle: isJewellery
                   ? `Size ${selectedSize} · ${stone.origin}`
-                  : `${stone.shape} · ${stone.carat.toFixed(2)} ct · ${stone.origin}`,
+                  : `${stone.shape ?? 'Not evidenced'} · ${stone.carat.toFixed(2)} ct · ${stone.origin}`,
                 price: computedPrice,
                 image: stone.images[0],
                 kind: 'gemstone',
@@ -785,11 +785,11 @@ export function ProductDetailBelowFoldSections({ stone }: { stone: GemstoneItem 
               </div>
               <div className="flex justify-between py-2.5">
                 <dt className="text-[#76726A]">Cut / Shape</dt>
-                <dd className="text-[#1A1612] font-medium">{stone.shape}</dd>
+                <dd className="text-[#1A1612] font-medium">{stone.shape ?? 'Not evidenced'}</dd>
               </div>
               <div className="flex justify-between py-2.5">
                 <dt className="text-[#76726A]">Clarity</dt>
-                <dd className="text-[#1A1612] font-medium">{stone.clarity}</dd>
+                <dd className="text-[#1A1612] font-medium">{stone.clarity ?? 'Not evidenced'}</dd>
               </div>
               <div className="flex justify-between py-2.5">
                 <dt className="text-[#76726A]">Treatment</dt>
@@ -903,7 +903,7 @@ export function ProductDetailBelowFoldSections({ stone }: { stone: GemstoneItem 
               {isJewellery && (
                 <div className="relative aspect-[16/10] rounded-[18px] overflow-hidden border border-[#E5D4B3] bg-[#14100C] shadow-md">
                   <img
-                    src="/images/gems/setting-ring.jpg"
+                    src="/mgh/images/gems/setting-ring.jpg"
                     alt="Geneva Bench Goldsmithing"
                     referrerPolicy="no-referrer"
                     className="h-full w-full object-cover"
@@ -986,11 +986,11 @@ export function ProductDetailBelowFoldSections({ stone }: { stone: GemstoneItem 
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#8C6D2F] font-semibold">
                 <Award className="h-4 w-4 text-[#C5A059]" />
-                <span>{stone.evidence.laboratory || 'GIA / SSEF'} GEMOLOGICAL REPORT</span>
+                <span>{stone.evidence.laboratory || 'Not evidenced'} GEMOLOGICAL REPORT</span>
               </div>
               <p className="text-lg font-semibold text-[#1A1612]">{stone.name}</p>
               <p className="text-xs font-[family-name:var(--font-mono)] text-[#5C4E3C]">
-                Report #{stone.evidence.reportNumber || 'MHG-2025-8841'} · {stone.origin}
+                Report #{stone.evidence.reportNumber || 'Not evidenced'} · {stone.origin}
               </p>
             </div>
             <button
@@ -1021,7 +1021,7 @@ export function ProductDetailBelowFoldSections({ stone }: { stone: GemstoneItem 
             <p className="text-base text-[#D8CEBE] leading-relaxed">
               {isJewellery
                 ? 'Every Maihan Gems jewel is individually forged, balanced, and hand-set in our Rue du Rhône workshop in Geneva to honour the optical geometry of its center stone.'
-                : `Sourced from ${stone.origin} (${stone.evidence.miningDistrict || 'documented mining district'}), this natural ${stone.variety.toLowerCase()} was selected for its exceptional saturation, transparency, and lapidary proportion.`}
+                : `Sourced from ${stone.origin} (${stone.evidence.miningDistrict || 'not evidenced'}), this natural ${stone.variety.toLowerCase()} was selected for its exceptional saturation, transparency, and lapidary proportion.`}
             </p>
           </div>
 
@@ -1074,7 +1074,7 @@ export function ProductDetailBelowFoldSections({ stone }: { stone: GemstoneItem 
                   Verified Laboratory Report
                 </p>
                 <h3 className="text-2xl font-normal mt-0.5">
-                  {stone.evidence.laboratory || 'GIA'} Certificate #{stone.evidence.reportNumber || stone.sku}
+                  {stone.evidence.laboratory || 'Not evidenced'} Certificate #{stone.evidence.reportNumber || stone.sku}
                 </h3>
               </div>
               <button
@@ -1094,7 +1094,7 @@ export function ProductDetailBelowFoldSections({ stone }: { stone: GemstoneItem 
               <div>
                 <span className="text-xs text-[#76726A] block">Carat &amp; Shape</span>
                 <strong className="text-[#1A1612]">
-                  {stone.carat.toFixed(2)} ct · {stone.shape}
+                  {stone.carat.toFixed(2)} ct · {stone.shape ?? 'Not evidenced'}
                 </strong>
               </div>
               <div>
@@ -1108,13 +1108,13 @@ export function ProductDetailBelowFoldSections({ stone }: { stone: GemstoneItem 
               <div>
                 <span className="text-xs text-[#76726A] block">Refractive Index</span>
                 <strong className="font-[family-name:var(--font-mono)] text-xs text-[#1A1612]">
-                  {stone.evidence.refractiveIndex || 'Documented on Vault File'}
+                  {stone.evidence.refractiveIndex || 'Not evidenced'}
                 </strong>
               </div>
               <div>
                 <span className="text-xs text-[#76726A] block">Dimensions</span>
                 <strong className="font-[family-name:var(--font-mono)] text-xs text-[#1A1612]">
-                  {stone.evidence.dimensionsMm || 'Calibrated'}
+                  {stone.evidence.dimensionsMm || 'Not evidenced'}
                 </strong>
               </div>
             </div>

@@ -30,13 +30,13 @@ import { FormattedPrice } from '@/components/mgh/ui/FormattedPrice';
 const QUICK_RING_SIZES = ['4', '5', '6', '7', '8', '9'] as const;
 
 export function SettingDetailGallery({ setting }: { setting: SettingItem }) {
-  const baseImage = setting.images[0] || '/images/gems/setting-ring.jpg';
+  const baseImage = setting.images[0] || '/mgh/images/gems/setting-ring.jpg';
   const galleryViews = [
     { src: baseImage, label: 'Crown & Prong Architecture' },
-    { src: '/images/elysian-ring.jpg', label: 'Cathedral Profile View' },
-    { src: '/images/verdant-drop.jpg', label: 'On-Hand Scale Perspective' },
+    { src: '/mgh/images/elysian-ring.jpg', label: 'Cathedral Profile View' },
+    { src: '/mgh/images/verdant-drop.jpg', label: 'On-Hand Scale Perspective' },
     { src: baseImage, label: 'Geneva Goldsmith Bench' },
-    { src: '/images/elysian-ring.jpg', label: 'Gallery Seat Geometry' },
+    { src: '/mgh/images/elysian-ring.jpg', label: 'Gallery Seat Geometry' },
   ];
 
   const [activeIdx, setActiveIdx] = useState(0);
@@ -593,7 +593,7 @@ export function SettingDetailBelowFoldSections({ setting }: { setting: SettingIt
             </div>
             <div className="aspect-[4/3] rounded-[18px] overflow-hidden border border-[#E5D4B3] bg-[#14100C] shadow-md">
               <img
-                src="/images/elysian-ring.jpg"
+                src="/mgh/images/elysian-ring.jpg"
                 alt="Side gallery architecture"
                 referrerPolicy="no-referrer"
                 className="h-full w-full object-cover"
@@ -601,7 +601,7 @@ export function SettingDetailBelowFoldSections({ setting }: { setting: SettingIt
             </div>
             <div className="aspect-[4/3] rounded-[18px] overflow-hidden border border-[#E5D4B3] bg-[#14100C] shadow-md">
               <img
-                src="/images/verdant-drop.jpg"
+                src="/mgh/images/verdant-drop.jpg"
                 alt="Hand-polished shank"
                 referrerPolicy="no-referrer"
                 className="h-full w-full object-cover"

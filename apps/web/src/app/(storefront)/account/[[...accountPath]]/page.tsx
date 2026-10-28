@@ -10,9 +10,19 @@
  *   /account/reset-password     single-use token password reset
  *   /account/profile            personal information (view + edit)
  *   /account/addresses          address book (add / edit / remove / default)
- *   /account/orders             order history
+ *   /account/orders             order history (applet DOSSIER LEDGER visual)
  *   /account/orders/<orderId>   order detail with timeline, cancellation & refund requests
  *   /account/notifications      account & order notifications
+ *
+ * M5: every per-route workflow stays the repo's REAL session/API stack
+ * (server actions writing the httpOnly `maihan_session` / `maihan_client_ref`
+ * cookies after API verification; /api/v1/auth/*; /api/v1/account/*; RLS'd
+ * /api/v1/orders). The REFERENCE APPLET's dossier/ledger chrome renders on
+ * top as className-level swaps only. What the applet had that this
+ * marketplace must never do is NOT mounted: the AuthPopupModal
+ * (email-inferred roles admin@ → ADMIN), any client-side session pres,
+ * the client-side verification-code comparison, the Google SS technics
+ * buttons, and fixture notifications/addresses/orders.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -73,11 +83,25 @@ export default async function AccountPage({ params, searchParams }: PageProps) {
 
   if (section && section in AUTH_SEGMENT_MAP) {
     return (
-      <main className="lx-section" id="main-content">
-        <div className="lx-wrap lx-wrap--narrow">
-          <span className="lx-kicker">Client &amp; Partner Access</span>
-          <h1 className="lx-h2">Maihan Gems Account</h1>
-          <AuthFlowView initialMode={AUTH_SEGMENT_MAP[section]} initialToken={query.token ?? ''} />
+      <main className="golden-cloud-gallery min-h-screen font-[family-name:var(--font-eb-garamond)] text-[#1A1612]" id="main-content">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-8">
+          <div className="border-b border-[#E5D4B3] pb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-[#8C6D2F] font-semibold">
+                ZERO-TRUST SESSION GATE · GENEVA REGISTRY
+              </p>
+              <h1 className="mt-1.5 text-3xl sm:text-5xl font-normal text-[#1A1612]">
+                Maihan Gems Account
+              </h1>
+            </div>
+            <p className="text-sm text-[#5C4E3C] max-w-md">
+              Authenticate with your email credentials. Roles are issued by the server after API
+              verification — never inferred in the browser.
+            </p>
+          </div>
+          <div className="max-w-2xl rounded-[24px] border border-[#E5D4B3] bg-[#FFFDF9]/95 p-6 sm:p-9 shadow-[0_12px_32px_rgba(36,26,14,0.06)]">
+            <AuthFlowView initialMode={AUTH_SEGMENT_MAP[section]} initialToken={query.token ?? ''} />
+          </div>
         </div>
       </main>
     );
@@ -86,11 +110,24 @@ export default async function AccountPage({ params, searchParams }: PageProps) {
   const clientRef = await getClientRef();
   if (clientRef === null) {
     return (
-      <main className="lx-section" id="main-content">
-        <div className="lx-wrap lx-wrap--narrow">
-          <span className="lx-kicker">Client &amp; Partner Access</span>
-          <h1 className="lx-h2">Sign in to your portfolio</h1>
-          <AuthFlowView initialMode="sign-in" initialToken={query.token ?? ''} />
+      <main className="golden-cloud-gallery min-h-screen font-[family-name:var(--font-eb-garamond)] text-[#1A1612]" id="main-content">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-8">
+          <div className="border-b border-[#E5D4B3] pb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-[#8C6D2F] font-semibold">
+                PRIVATE CLIENT &amp; PARTNER PORTFOLIO · GENEVA REGISTRY
+              </p>
+              <h1 className="mt-1.5 text-3xl sm:text-5xl font-normal text-[#1A1612]">
+                Sign in to your portfolio
+              </h1>
+            </div>
+            <p className="text-sm text-[#5C4E3C] max-w-md">
+              Verified email sessions only. Roles are issued by the server after API verification.
+            </p>
+          </div>
+          <div className="max-w-2xl rounded-[24px] border border-[#E5D4B3] bg-[#FFFDF9]/95 p-6 sm:p-9 shadow-[0_12px_32px_rgba(36,26,14,0.06)]">
+            <AuthFlowView initialMode="sign-in" initialToken={query.token ?? ''} />
+          </div>
         </div>
       </main>
     );
@@ -171,84 +208,109 @@ async function AccountOverview() {
     'Client';
 
   return (
-    <main className="salon-account" id="main-content">
-      <aside className="salon-account__rail">
-        <span className="lx-kicker">Client portfolio</span>
-        <h1 className="lx-h2">{displayName}</h1>
-        <p className="lx-lede">
-          Your private account with the atelier.
-          {sessionActor?.role === 'VENDOR' ? (
-            <>
-              {' '}
-              · <Link href="/vendor">Open Trade Vendor Portal →</Link>
-            </>
-          ) : null}
-          {sessionActor && sessionActor.role !== 'CUSTOMER' && sessionActor.role !== 'VENDOR' ? (
-            <>
-              {' '}
-              · <Link href="/admin">Open Back-Office Console →</Link>
-            </>
-          ) : null}
-        </p>
-        <AccountNav active="" />
-      </aside>
-      <div className="salon-account__stage">
-        <div className="lx-account-grid">
-          <section className="lx-account-card">
-            <h2 className="lx-account-card__title">Profile &amp; security</h2>
-            <dl className="lx-account-rows">
-              <div>
-                <dt>Email</dt>
-                <dd>{profile?.email}</dd>
+    <main className="golden-cloud-gallery min-h-screen font-[family-name:var(--font-eb-garamond)] text-[#1A1612]" id="main-content">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-8">
+        <div className="border-b border-[#E5D4B3] pb-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-[#8C6D2F] font-semibold">
+              PRIVATE CLIENT PORTFOLIO · GENEVA REGISTRY
+            </p>
+            <h1 className="mt-1.5 text-3xl sm:text-5xl font-normal text-[#1A1612]">{displayName}</h1>
+          </div>
+          <div className="text-sm text-[#5C4E3C] max-w-md space-y-1">
+            <p>Your private account with the atelier.</p>
+            <nav aria-label="Role entries" className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.14em] font-semibold">
+              {sessionActor?.role === 'VENDOR' ? (
+                <Link href="/vendor" className="text-[#8C6D2F] underline">
+                  Open Trade Vendor Portal →
+                </Link>
+              ) : null}
+              {sessionActor && sessionActor.role !== 'CUSTOMER' && sessionActor.role !== 'VENDOR' ? (
+                <Link href="/admin" className="text-[#8C6D2F] underline">
+                  Open Back-Office Console →
+                </Link>
+              ) : null}
+            </nav>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <aside className="lg:col-span-3 rounded-[24px] border border-[#E5D4B3] bg-[#1C1610] p-5 shadow-[0_14px_34px_rgba(26,20,14,0.12)]">
+            <p className="text-xs uppercase tracking-[0.2em] text-[#E6C97A] px-2 mb-3 font-semibold">
+              IDENTITY &amp; VAULT MENU
+            </p>
+            <div className="rounded-[16px] bg-transparent">
+              <AccountNav active="" tone="gold" />
+            </div>
+          </aside>
+
+          <div className="lg:col-span-9 rounded-[24px] border border-[#E5D4B3] bg-[#FFFDF9]/95 p-6 sm:p-9 shadow-[0_12px_32px_rgba(36,26,14,0.06)] space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="rounded-[18px] border border-[#E5D4B3] bg-[#FAF3E3]/60 p-5">
+                <p className="text-[#8C6D2F] uppercase tracking-[0.16em] text-xs font-semibold">
+                  Orders
+                </p>
+                <p className="text-3xl font-semibold text-[#1A1612] mt-1">
+                  {ordersRes.ok ? (ordersRes.data?.total_count ?? 0) : '—'}
+                </p>
+                <Link href="/account/orders" className="text-[#8C6D2F] underline block mt-2 text-sm">
+                  Inspect →
+                </Link>
               </div>
-              <div>
-                <dt>Email verification</dt>
-                <dd>
+              <div className="rounded-[18px] border border-[#E5D4B3] bg-[#FAF3E3]/60 p-5">
+                <p className="text-[#8C6D2F] uppercase tracking-[0.16em] text-xs font-semibold">
+                  Email verification
+                </p>
+                <p className="mt-1 text-sm font-medium text-[#1A1612]">
                   {sessionActor?.email_verified ? (
                     'Verified'
                   ) : (
-                    <Link href="/account/verify-email">Verify email →</Link>
+                    <Link href="/account/verify-email" className="text-[#8C6D2F] underline">
+                      Verify email →
+                    </Link>
                   )}
-                </dd>
+                </p>
               </div>
-              <div>
-                <dt>Phone</dt>
-                <dd>{profile?.phone ?? '—'}</dd>
+              <div className="rounded-[18px] border border-[#E5D4B3] bg-[#FAF3E3]/60 p-5">
+                <p className="text-[#8C6D2F] uppercase tracking-[0.16em] text-xs font-semibold">
+                  Notifications
+                </p>
+                <p className="text-3xl font-semibold text-[#1A1612] mt-1">
+                  {notificationsRes.ok ? (notificationsRes.data?.notifications.length ?? 0) : '—'}
+                </p>
+                <Link href="/account/notifications" className="text-[#8C6D2F] underline block mt-2 text-sm">
+                  Read →
+                </Link>
               </div>
-              <div>
-                <dt>Preferred currency</dt>
-                <dd>{profile?.preferred_currency ?? 'USD'}</dd>
-              </div>
-              {profile?.ring_size ? (
-                <div>
-                  <dt>Ring size</dt>
-                  <dd>US {profile.ring_size}</dd>
-                </div>
-              ) : null}
-            </dl>
-            <Link href="/account/profile" className="lx-text-btn">
-              Edit profile
-            </Link>
-          </section>
-
-          <section className="lx-account-card">
-            <h2 className="lx-account-card__title">Orders &amp; notifications</h2>
-            <p className="lx-account-figure">
-              {ordersRes.ok ? (ordersRes.data?.total_count ?? 0) : '—'}
-            </p>
-            <p className="lx-account-note">
-              {ordersRes.ok ? 'orders placed with the atelier' : 'orders unavailable'} ·{' '}
-              {notificationsRes.ok ? `${notificationsRes.data?.notifications.length ?? 0} notifications` : ''}
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <Link href="/account/orders" className="lx-text-btn">
-                View order history
-              </Link>
-              <Link href="/account/notifications" className="lx-text-btn">
-                View notifications
-              </Link>
             </div>
-          </section>
+
+            <section className="rounded-[18px] border border-[#E5D4B3] bg-[#FAF3E3]/40 p-6 space-y-3">
+              <h2 className="lx-account-card__title">Profile &amp; security</h2>
+              <dl className="lx-account-rows">
+                <div>
+                  <dt>Email</dt>
+                  <dd>{profile?.email}</dd>
+                </div>
+                <div>
+                  <dt>Phone</dt>
+                  <dd>{profile?.phone ?? '—'}</dd>
+                </div>
+                <div>
+                  <dt>Preferred currency</dt>
+                  <dd>{profile?.preferred_currency ?? 'USD'}</dd>
+                </div>
+                {profile?.ring_size ? (
+                  <div>
+                    <dt>Ring size</dt>
+                    <dd>US {profile.ring_size}</dd>
+                  </div>
+                ) : null}
+              </dl>
+              <Link href="/account/profile" className="lx-text-btn">
+                Edit profile
+              </Link>
+            </section>
+          </div>
         </div>
       </div>
     </main>
@@ -281,27 +343,25 @@ async function NotificationsPanel() {
   const items = res.data?.notifications ?? [];
   if (items.length === 0) {
     return (
-      <div className="lx-account-card">
-        <p className="lx-account-note">No notifications recorded yet.</p>
+      <div className="rounded-[18px] border border-[#E5D4B3] bg-[#FFFDF9] p-6">
+        <p className="text-sm text-[#5C4E3C]">No notifications recorded yet.</p>
       </div>
     );
   }
   return (
-    <ul className="lx-orders">
+    <ul className="divide-y divide-[#EFE5D1] border border-[#E5D4B3] rounded-[18px] overflow-hidden">
       {items.map((n) => (
-        <li key={n.id} className="lx-account-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.4rem' }}>
-            <span className="lx-order-row__state">{n.kind.replace(/_/g, ' ')}</span>
-            <span className="lx-timeline__when">
+        <li key={n.id} className="p-5 space-y-1.5 bg-[#FFFDF9]">
+          <div className="flex justify-between gap-4">
+            <span className="font-mono text-xs uppercase tracking-wider text-[#8C6D2F]">
+              {n.kind.replace(/_/g, ' ')}
+            </span>
+            <span className="font-mono text-xs text-[#5C4E3C] tabular-nums">
               {new Date(n.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
             </span>
           </div>
-          <h2 className="lx-account-card__title" style={{ fontSize: '1.1rem', marginBottom: '0.35rem' }}>
-            {n.subject}
-          </h2>
-          <p className="lx-account-note" style={{ margin: 0 }}>
-            {n.body}
-          </p>
+          <h2 className="text-base font-semibold text-[#1A1612]">{n.subject}</h2>
+          <p className="text-sm text-[#5C4E3C]">{n.body}</p>
         </li>
       ))}
     </ul>
@@ -314,44 +374,63 @@ async function OrdersPanel() {
   const orders = res.data?.orders ?? [];
   if (orders.length === 0) {
     return (
-      <div className="lx-account-card">
-        <p className="lx-account-note">No orders yet. Pieces you checkout will appear here.</p>
+      <div className="rounded-[18px] border border-[#E5D4B3] bg-[#FFFDF9] p-6 space-y-3">
+        <p className="text-sm text-[#5C4E3C]">No orders yet. Pieces you checkout will appear here.</p>
         <Link href="/browse" className="lx-btn lx-btn--solid">
           Browse the vault
         </Link>
       </div>
     );
   }
+  // The applet's DOSSIER LEDGER row chrome, fed by the REAL order rows.
   return (
-    <ul className="lx-orders">
+    <div className="divide-y divide-[#EFE5D1] border border-[#E5D4B3] rounded-[18px] overflow-hidden">
       {orders.map((order: never) => {
         const row = order as {
           id: string;
           order_number: string;
           state: string;
           grand_total: string;
+          currency: string | null;
           placed_at: string | null;
           items: { title_snapshot: string; quantity: number }[];
         };
         return (
-          <li key={row.id} className="lx-order-row">
-            <Link href={`/account/orders/${row.id}`} className="lx-order-row__link">
-              <span className="lx-order-row__number">{row.order_number}</span>
-              <span className="lx-order-row__items">
-                {row.items.map((item, i) => (
-                  <span key={i}>
-                    {item.title_snapshot}
-                    {i < row.items.length - 1 ? ' · ' : ''}
-                  </span>
-                ))}
+          <div
+            key={row.id}
+            className="p-5 flex flex-wrap items-center justify-between gap-4 text-sm bg-[#FFFDF9]"
+          >
+            <div className="min-w-0">
+              <p className="font-mono font-semibold text-[#1A1612] break-all">{row.order_number}</p>
+              <p className="text-[#5C4E3C] mt-0.5 truncate">
+                {row.items.map((item, i) => `${item.title_snapshot}${i < row.items.length - 1 ? ', ' : ''}`)}
+                {row.items.length === 0 ? 'Pieces you ordered' : ''}
+              </p>
+              <p className="font-mono text-xs text-[#8C6D2F] mt-0.5">
+                {row.placed_at
+                  ? new Date(row.placed_at).toLocaleDateString('en-GB')
+                  : 'Placement pending'}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="font-mono text-xs uppercase tracking-wider text-[#8C6D2F] bg-[#FAF3E3] px-3 py-1 rounded-full border border-[#E5D4B3]">
+                {row.state.replace(/_/g, ' ')}
               </span>
-              <span className="lx-order-row__state">{row.state.replace(/_/g, ' ')}</span>
-              <span className="lx-order-row__total">USD {row.grand_total}</span>
-            </Link>
-          </li>
+              <span className="font-mono tabular-nums font-semibold text-[#1A1612]">
+                {row.currency && row.currency !== 'USD' ? `${row.currency} ` : 'USD '}
+                {row.grand_total}
+              </span>
+              <Link
+                href={`/account/orders/${row.id}`}
+                className="px-4 py-1.5 uppercase tracking-wider text-xs bg-[#1C1610] text-[#E6C97A] rounded-full hover:bg-[#2B2219]"
+              >
+                Inspect
+              </Link>
+            </div>
+          </div>
         );
       })}
-    </ul>
+    </div>
   );
 }
 
@@ -407,132 +486,159 @@ async function OrderDetailPanel({ orderId }: { orderId: string }) {
   const refunds = refundsRes.ok ? (refundsRes.data ?? []) : [];
 
   return (
-    <main className="lx-section" id="main-content">
-      <div className="lx-wrap lx-wrap--narrow">
-        <span className="lx-kicker">Order</span>
-        <h1 className="lx-h2">{order.order_number}</h1>
-        <p className="lx-lede">
-          {order.state.replace(/_/g, ' ')} ·{' '}
-          {order.placed_at
-            ? new Date(order.placed_at).toLocaleString('en-GB', {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-              })
-            : 'placement pending'}
-        </p>
-        <AccountNav active="orders" />
+    <main className="golden-cloud-gallery min-h-screen font-[family-name:var(--font-eb-garamond)] text-[#1A1612]" id="main-content">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-8">
+        <div className="border-b border-[#E5D4B3] pb-6 space-y-2">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#8C6D2F]">{order.order_number}</p>
+          <h1 className="text-3xl sm:text-5xl font-normal text-[#1A1612]">
+            Status: {order.state.replace(/_/g, ' ')}
+          </h1>
+          <p className="text-sm text-[#5C4E3C]">
+            {order.placed_at
+              ? new Date(order.placed_at).toLocaleString('en-GB', {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })
+              : 'Placement pending'}{' '}
+            · {order.currency}
+          </p>
+        </div>
 
-        <section className="lx-account-card">
-          <h2 className="lx-account-card__title">Pieces</h2>
-          <ul className="lx-order-items">
-            {order.items.map((item, index) => (
-              <li key={index}>
-                <span className="lx-order-items__title">{item.title_snapshot}</span>
-                <span className="lx-order-items__sku">{item.sku_snapshot}</span>
-                <span className="lx-order-items__qty">×{item.quantity}</span>
-                <span className="lx-order-items__total">USD {item.line_total}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="lx-account-card">
-          <h2 className="lx-account-card__title">Totals ({order.currency})</h2>
-          <dl className="lx-account-rows">
-            <div>
-              <dt>Subtotal</dt>
-              <dd>{order.subtotal}</dd>
-            </div>
-            <div>
-              <dt>Discounts</dt>
-              <dd>{order.discount_total}</dd>
-            </div>
-            <div>
-              <dt>Shipping</dt>
-              <dd>{order.shipping_total}</dd>
-            </div>
-            <div>
-              <dt>Tax</dt>
-              <dd>{order.tax_total}</dd>
-            </div>
-            <div className="is-total">
-              <dt>Total</dt>
-              <dd>{order.grand_total}</dd>
-            </div>
-          </dl>
-        </section>
-
-        {order.shipping_address ? (
-          <section className="lx-account-card">
-            <h2 className="lx-account-card__title">Delivery</h2>
-            <p className="lx-account-note">
-              {[
-                order.shipping_address['full_name'],
-                order.shipping_address['line1'],
-                order.shipping_address['city'],
-                order.shipping_address['country_code'],
-              ]
-                .filter(Boolean)
-                .join(', ')}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <aside className="lg:col-span-3 rounded-[24px] border border-[#E5D4B3] bg-[#1C1610] p-5 shadow-[0_14px_34px_rgba(26,20,14,0.12)]">
+            <p className="text-xs uppercase tracking-[0.2em] text-[#E6C97A] px-2 mb-3 font-semibold">
+              IDENTITY &amp; VAULT MENU
             </p>
-          </section>
-        ) : null}
+            <div className="rounded-[16px] bg-transparent">
+              <AccountNav active="orders" tone="gold" />
+            </div>
+          </aside>
 
-        <OrderDetailActions
-          orderId={order.id}
-          orderState={order.state}
-          grandTotal={order.grand_total}
-        />
+          <div className="lg:col-span-9 rounded-[24px] border border-[#E5D4B3] bg-[#FFFDF9]/95 p-6 sm:p-9 shadow-[0_12px_32px_rgba(36,26,14,0.06)] space-y-6">
+            <section className="rounded-[18px] border border-[#E5D4B3] bg-[#FAF3E3]/40 p-6 space-y-3">
+              <h2 className="text-xl font-normal text-[#1A1612]">Pieces</h2>
+              <ul className="divide-y divide-[#EFE5D1] border-t border-[#EFE5D1]">
+                {order.items.map((item, index) => (
+                  <li key={index} className="py-3 flex flex-wrap items-center justify-between gap-3 text-sm">
+                    <span className="font-medium text-[#1A1612]">{item.title_snapshot}</span>
+                    <span className="font-mono text-xs text-[#8C6D2F]">
+                      {item.sku_snapshot}
+                    </span>
+                    <span className="font-mono text-xs text-[#5C4E3C]">×{item.quantity}</span>
+                    <span className="font-mono tabular-nums font-semibold text-[#1A1612]">
+                      {order.currency} {item.line_total}
+                    </span>
+                  </li>
+                ))}
+                {order.items.length === 0 ? (
+                  <li className="py-3 text-sm text-[#5C4E3C]">No piece lines recorded.</li>
+                ) : null}
+              </ul>
+            </section>
 
-        {refunds.length > 0 ? (
-          <section className="lx-account-card">
-            <h2 className="lx-account-card__title">Return &amp; refund requests</h2>
-            <ul className="lx-order-items">
-              {refunds.map((rf) => (
-                <li key={rf.id}>
-                  <span className="lx-order-items__title">{rf.reason}</span>
-                  <span className="lx-order-items__sku">{rf.state}</span>
-                  <span className="lx-order-items__qty">
-                    {new Date(rf.requested_at).toLocaleDateString('en-GB')}
-                  </span>
-                  <span className="lx-order-items__total">
-                    {rf.currency} {rf.amount}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
+            <section className="rounded-[18px] border border-[#E5D4B3] bg-[#FAF3E3]/40 p-6 space-y-3">
+              <h2 className="text-xl font-normal text-[#1A1612]">Totals ({order.currency})</h2>
+              <dl className="divide-y divide-[#EFE5D1] border-t border-[#EFE5D1] text-sm">
+                <div className="flex justify-between py-2">
+                  <dt className="text-[#5C4E3C]">Subtotal</dt>
+                  <dd className="font-mono tabular-nums text-[#1A1612]">{order.subtotal}</dd>
+                </div>
+                <div className="flex justify-between py-2">
+                  <dt className="text-[#5C4E3C]">Discounts</dt>
+                  <dd className="font-mono tabular-nums text-[#1A1612]">{order.discount_total}</dd>
+                </div>
+                <div className="flex justify-between py-2">
+                  <dt className="text-[#5C4E3C]">Shipping</dt>
+                  <dd className="font-mono tabular-nums text-[#1A1612]">{order.shipping_total}</dd>
+                </div>
+                <div className="flex justify-between py-2">
+                  <dt className="text-[#5C4E3C]">Tax</dt>
+                  <dd className="font-mono tabular-nums text-[#1A1612]">{order.tax_total}</dd>
+                </div>
+                <div className="flex justify-between py-3 font-semibold">
+                  <dt className="text-[#1A1612]">Total</dt>
+                  <dd className="font-mono text-lg text-[#8C6D2F] tabular-nums">{order.grand_total}</dd>
+                </div>
+              </dl>
+            </section>
 
-        <section className="lx-account-card">
-          <h2 className="lx-account-card__title">Timeline</h2>
-          {events.length === 0 ? (
-            <p className="lx-account-note">No recorded transitions yet.</p>
-          ) : (
-            <ol className="lx-timeline">
-              {events.map((event) => (
-                <li key={event.id}>
-                  <span className="lx-timeline__state">
-                    {event.to_state.replace(/_/g, ' ')}
-                  </span>
-                  <span className="lx-timeline__when">
-                    {new Date(event.created_at).toLocaleString('en-GB', {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
-                    })}
-                  </span>
-                  {event.reason ? (
-                    <span className="lx-timeline__reason">{event.reason}</span>
-                  ) : null}
-                </li>
-              ))}
-            </ol>
-          )}
-        </section>
+            {order.shipping_address ? (
+              <section className="rounded-[18px] border border-[#E5D4B3] bg-[#FAF3E3]/40 p-6 space-y-2">
+                <h2 className="text-xl font-normal text-[#1A1612]">Delivery</h2>
+                <p className="text-sm text-[#5C4E3C]">
+                  {[
+                    order.shipping_address['full_name'],
+                    order.shipping_address['line1'],
+                    order.shipping_address['city'],
+                    order.shipping_address['country_code'],
+                  ]
+                    .filter(Boolean)
+                    .join(', ')}
+                </p>
+              </section>
+            ) : null}
 
-        <Link href="/account/orders" className="lx-text-btn">
-          ← All orders
-        </Link>
+            <div className="rounded-[18px] border border-[#E5D4B3] bg-[#FAF3E3]/40 p-6">
+              <OrderDetailActions
+                orderId={order.id}
+                orderState={order.state}
+                grandTotal={order.grand_total}
+              />
+            </div>
+
+            {refunds.length > 0 ? (
+              <section className="rounded-[18px] border border-[#E5D4B3] bg-[#FAF3E3]/40 p-6 space-y-3">
+                <h2 className="text-xl font-normal text-[#1A1612]">Return &amp; refund requests</h2>
+                <ul className="divide-y divide-[#EFE5D1] border-t border-[#EFE5D1]">
+                  {refunds.map((rf) => (
+                    <li key={rf.id} className="py-3 flex flex-wrap items-center justify-between gap-3 text-sm">
+                      <span className="font-medium text-[#1A1612]">{rf.reason}</span>
+                      <span className="font-mono text-xs text-[#8C6D2F]">{rf.state}</span>
+                      <span className="font-mono text-xs text-[#5C4E3C]">
+                        {new Date(rf.requested_at).toLocaleDateString('en-GB')}
+                      </span>
+                      <span className="font-mono tabular-nums font-semibold text-[#1A1612]">
+                        {rf.currency} {rf.amount}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            <section className="rounded-[18px] border border-[#E5D4B3] bg-[#FAF3E3]/40 p-6 space-y-3">
+              <h2 className="text-xl font-normal text-[#1A1612]">Timeline</h2>
+              {events.length === 0 ? (
+                <p className="text-sm text-[#5C4E3C]">No recorded transitions yet.</p>
+              ) : (
+                <ol className="divide-y divide-[#EFE5D1] border-t border-[#EFE5D1]">
+                  {events.map((event) => (
+                    <li key={event.id} className="py-3 space-y-1">
+                      <div className="flex justify-between gap-4">
+                        <span className="font-mono text-xs uppercase tracking-wider text-[#8C6D2F]">
+                          {event.to_state.replace(/_/g, ' ')}
+                        </span>
+                        <span className="font-mono text-xs text-[#5C4E3C] tabular-nums">
+                          {new Date(event.created_at).toLocaleString('en-GB', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                          })}
+                        </span>
+                      </div>
+                      {event.reason ? (
+                        <p className="text-sm text-[#5C4E3C]">{event.reason}</p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </section>
+
+            <Link href="/account/orders" className="lx-text-btn">
+              ← All orders
+            </Link>
+          </div>
+        </div>
       </div>
     </main>
   );
@@ -548,14 +654,16 @@ function PortfolioUnavailable({
       ? 'Your session has ended or requires sign-in.'
       : result.message ?? 'The account service could not be reached.';
   return (
-    <main className="lx-section" id="main-content">
-      <div className="lx-wrap lx-wrap--narrow">
-        <div className="lx-account-card" role="status">
-          <h2 className="lx-account-card__title">Account session required</h2>
-          <p className="lx-account-note">{honest}</p>
-          <Link href="/account/sign-in" className="lx-btn lx-btn--solid">
-            Sign in
-          </Link>
+    <main className="golden-cloud-gallery min-h-screen font-[family-name:var(--font-eb-garamond)] text-[#1A1612]" id="main-content">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        <div className="max-w-2xl rounded-[24px] border border-[#E5D4B3] bg-[#FFFDF9]/95 p-6 sm:p-9 shadow-[0_12px_32px_rgba(36,26,14,0.06)]">
+          <div className="max-w-xl rounded-[18px] border border-[#E5D4B3] bg-[#FAF3E3]/40 p-6 space-y-3">
+            <h2 className="lx-account-card__title">Account session required</h2>
+            <p className="lx-account-note">{honest}</p>
+            <Link href="/account/sign-in" className="lx-btn lx-btn--solid">
+              Sign in
+            </Link>
+          </div>
         </div>
       </div>
     </main>

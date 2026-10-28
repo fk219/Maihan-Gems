@@ -28,8 +28,18 @@ import { fileURLToPath } from 'node:url';
 import { beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+// M3: the reference PDP view is an async server component (Related pool
+// reads) — the legacy renderToStaticMarkup refuses to walk it ("component
+// suspended…"). React's STATIC renderer supports async trees, so the audit
+// harness falls back to `prerender` and reads the prelude; markup is
+// otherwise identical for every template.
+import { prerender } from 'react-dom/static';
 import { AxeBuilder } from './axe-builder.js';
 import { StorefrontProvider } from '../components/storefront/StorefrontProvider.js';
+// M2a: the migrated homepage renders applet components (ProductCard) that
+// consume the applet cart/currency context. Production mounts both providers
+// (root layout → applet, storefront layout → repo), so the audit mirrors that.
+import { StorefrontProvider as AppletStorefrontProvider } from '../components/mgh/providers/StorefrontProvider.js';
 import { DEFAULT_FX } from './currency.js';
 
 vi.mock('next/navigation', () => ({
@@ -153,6 +163,37 @@ function withStorefront(ui: React.ReactNode): React.ReactElement {
   return createElement(StorefrontProvider, { rates: DEFAULT_FX, children: ui });
 }
 
+/** Static markup, with the React 19 static renderer for async server trees. */
+async function renderStaticMarkup(
+  ui: React.ReactElement,
+  name: string,
+): Promise<string> {
+  try {
+    return renderToStaticMarkup(ui);
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.includes('A component suspended')) {
+      throw error;
+    }
+  }
+  const { prelude } = await prerender(ui, {
+    onError: (err) => {
+      throw err instanceof Error ? err : new Error(String(err));
+    },
+  });
+  const reader = (prelude as unknown as ReadableStream<Uint8Array>).getReader();
+  let out = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) {
+      if (out.trim().length === 0) {
+        throw new Error(`${name}: static prerender produced no markup`);
+      }
+      return out;
+    }
+    out += value.toString();
+  }
+}
+
 async function audit(name: string, ui: React.ReactElement): Promise<void> {
   // SSR the component and load the markup into a live container. The harness
   // mirrors what the root layout really ships: `<html lang="en">` and a
@@ -163,7 +204,7 @@ async function audit(name: string, ui: React.ReactElement): Promise<void> {
   document.documentElement.setAttribute('lang', 'en');
   if (document.title === '') document.title = 'Maihan Gems';
   const container = document.createElement('div');
-  container.innerHTML = renderToStaticMarkup(ui);
+  container.innerHTML = await renderStaticMarkup(ui, name);
   document.body.appendChild(container);
   try {
     const results = await new AxeBuilder().analyze();
@@ -193,7 +234,7 @@ describe('Task 11 accessibility audit — representative templates (axe-core, cr
     port = fullPort();
     wire(port);
     const page = await HomePage();
-    await audit('home', withStorefront(page));
+    await audit('home', withStorefront(createElement(AppletStorefrontProvider, null, page)));
   });
 
   it('mega menu (disclosure semantics, real links)', async () => {
@@ -204,22 +245,26 @@ describe('Task 11 accessibility audit — representative templates (axe-core, cr
   it('variety listing with product cards', async () => {
     port = fullPort();
     wire(port);
-    const page = await VarietyIndexPage({ params: Promise.resolve({ varietySlug: 'tsavorite-garnet' }), searchParams: Promise.resolve({}) });
-    await audit('variety listing', withStorefront(page));
+    // M2b: the variety route migrated to the applet page; its slug key is the
+    // applet variety ledger ('tsavorite'), and it takes params only.
+    const page = await VarietyIndexPage({ params: Promise.resolve({ varietySlug: 'tsavorite' }) });
+    // Applet-migrated template: production mounts the applet provider at the
+    // ROOT, so the audit mirrors that (same double-provider pattern as home).
+    await audit('variety listing', withStorefront(createElement(AppletStorefrontProvider, null, page)));
   });
 
   it('colour listing with product cards', async () => {
     port = fullPort();
     wire(port);
-    const page = await ColourIndexPage({ params: Promise.resolve({ colourSlug: 'green' }), searchParams: Promise.resolve({}) });
-    await audit('colour listing', withStorefront(page));
+    const page = await ColourIndexPage({ params: Promise.resolve({ colourSlug: 'green' }) });
+    await audit('colour listing', withStorefront(createElement(AppletStorefrontProvider, null, page)));
   });
 
   it('settings listing', async () => {
     port = fullPort();
     wire(port);
-    const page = await SettingsIndexPage({ searchParams: Promise.resolve({}) });
-    await audit('settings listing', withStorefront(page));
+    const page = await SettingsIndexPage();
+    await audit('settings listing', withStorefront(createElement(AppletStorefrontProvider, null, page)));
   });
 
   it('varieties hub', async () => {
@@ -232,24 +277,32 @@ describe('Task 11 accessibility audit — representative templates (axe-core, cr
   it('product detail (canonical route)', async () => {
     port = fullPort();
     wire(port);
+    // M3: the canonical route now renders the reference applet PDP
+    // (the migrated ProductDetailView); applet components consume the
+    // applet cart context, mounted at the ROOT in production — the audit
+    // mirrors the double-provider mount like the other migrated templates.
     const page = await ProductDetailPage({ params: Promise.resolve({ productSlug: 'tsavorite-1ct-round' }) });
-    await audit('product detail', withStorefront(page));
+    await audit('product detail', withStorefront(createElement(AppletStorefrontProvider, null, page)));
   });
 
   it('ready-made detail (same renderer, second route)', async () => {
     port = fullPort();
     wire(port);
+    // M3: the variety-scoped ready-made route renders the SAME applet PDP
+    // sourced by productSlug (canonical routes win); provider mount mirrors
+    // production. The ledger variety slug is not required for resolution.
     const page = await VarietyRingDetailPage({
       params: Promise.resolve({ varietySlug: 'tsavorite-garnet', productSlug: 'K5770' }),
     });
-    await audit('ready-made detail', withStorefront(page));
+    await audit('ready-made detail', withStorefront(createElement(AppletStorefrontProvider, null, page)));
   });
 
   it('pairs listing', async () => {
     port = fullPort();
     wire(port);
-    const page = await VarietyPairsPage({ params: Promise.resolve({ varietySlug: 'tsavorite-garnet' }), searchParams: Promise.resolve({}) });
-    await audit('pairs listing', withStorefront(page));
+    // M2b: same applet variety template as the listing audit; ledger slug.
+    const page = await VarietyPairsPage({ params: Promise.resolve({ varietySlug: 'tsavorite' }) });
+    await audit('pairs listing', withStorefront(createElement(AppletStorefrontProvider, null, page)));
   });
 
   it('search page (empty result state)', async () => {
@@ -270,8 +323,11 @@ describe('Task 11 accessibility audit — representative templates (axe-core, cr
       },
     });
     wire(port);
+    // M2b: the migrated search page renders the applet AiConciergeWorkspace
+    // (kart/cart/favourites context needs the applet provider mount, which
+    // production has at the ROOT).
     const page = await SearchPage({ searchParams: Promise.resolve({}) });
-    await audit('search page', withStorefront(page));
+    await audit('search page', withStorefront(createElement(AppletStorefrontProvider, null, page)));
   });
 
   it('not-found state', async () => {

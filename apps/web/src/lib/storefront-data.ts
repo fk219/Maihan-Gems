@@ -551,10 +551,16 @@ export async function listSettingsForDyo(limit = 16): Promise<SettingForDyo[]> {
         s.design_code AS design_code,
         st.code AS style_code,
         st.label AS style_label,
+        sv.sku AS variant_sku,
         m.code AS metal_code,
         m.label AS metal_label,
         m.colour AS metal_colour,
-        rules.shapes AS shapes
+        rules.shapes AS shapes,
+        COALESCE(
+          p.structured_extra #>> '{images,0,url}',
+          p.structured_extra #>> '{images,0}',
+          (SELECT a.cdn_url FROM asset_usages au JOIN assets a ON a.id = au.asset_id WHERE au.entity_type = 'PRODUCT' AND au.entity_id = p.id ORDER BY au.position ASC LIMIT 1)
+        ) AS image_url
       FROM products p
       JOIN setting_variants sv ON sv.id = p.setting_variant_id
       JOIN settings s ON s.id = sv.setting_id
@@ -574,6 +580,10 @@ export async function listSettingsForDyo(limit = 16): Promise<SettingForDyo[]> {
       const card = mapRow(row);
       const shapes = Array.isArray(row['shapes']) ? (row['shapes'] as Array<string | null>) : [];
       const evidenced = shapes.filter((s): s is string => typeof s === 'string' && s.length > 0);
+      // M5 (DYOJ port): the applet configurator needs the REAL setting-variant
+      // SKU (the value the DYO create API resolves against setting_variants),
+      // plus the design/style/metal descriptors — carried as optional seam
+      // fields so every existing consumer of SettingForDyo keeps compiling.
       return {
         ...card,
         // Acceptance rules come verbatim from setting_compatibility_rules;
@@ -583,11 +593,40 @@ export async function listSettingsForDyo(limit = 16): Promise<SettingForDyo[]> {
           ? evidenced.map((shape) => ({ shape: shape.toLowerCase(), minCarat: null, maxCarat: null }))
           : [{ shape: null, minCarat: null, maxCarat: null }],
         settingFor: typeof row['setting_for'] === 'string' ? row['setting_for'] : card.settingFor,
+        designCode: textOrNull(row['design_code']),
+        styleCode: textOrNull(row['style_code']),
+        styleLabel: textOrNull(row['style_label']),
+        variantSku: textOrNull(row['variant_sku']),
+        metalCode: textOrNull(row['metal_code']),
+        metalLabel: textOrNull(row['metal_label']),
+        metalColour: textOrNull(row['metal_colour']),
       } satisfies SettingForDyo;
     });
   });
   if (dbSettings.length > 0) return dbSettings;
   return settingsForDyo(limit);
+}
+
+function textOrNull(value: unknown): string | null {
+  if (value === null || value === undefined) return null;
+  const text = String(value).trim();
+  return text.length > 0 ? text : null;
+}
+
+/**
+ * The newest REAL commission short codes (M5 — the DYOJ ledger panel and the
+ * landing-page "latest commission" CTA render this public ledger; nothing is
+ * substituted when the ledger is empty).
+ */
+export async function listDyoRecentlyCommissioned(limit = 2): Promise<string[]> {
+  return withCatalogue([] as string[], async () => {
+    const shaped = Math.max(1, Math.min(10, limit));
+    const res = await pool.query<{ short_code: string }>(
+      `SELECT short_code FROM dyo_configurations ORDER BY created_at DESC LIMIT $1`,
+      [shaped],
+    );
+    return res.rows.map((row) => row.short_code);
+  });
 }
 
 /** Legacy helpers used by the previous home page. */

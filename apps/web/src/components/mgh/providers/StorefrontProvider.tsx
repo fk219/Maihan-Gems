@@ -26,7 +26,7 @@ export interface CartItem {
   subtitle: string;
   price: number;
   image: string;
-  kind: 'gemstone' | 'pair' | 'setting' | 'dyo';
+  kind: 'gemstone' | 'pair' | 'setting' | 'dyo' | 'vault';
   quantity: number;
   configurationCode?: string;
 }

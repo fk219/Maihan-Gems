@@ -1,53 +1,65 @@
-/**
- * apps/web/src/app/(storefront)/financing/page.tsx
- *
- * `/financing` — private client settlement & financing information (SoT 13.1).
- */
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { SITE_URL } from '@/lib/mgh/site-url';
 
-import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
+// M6 editorial migration: static client-approved marketing copy, ported
+// verbatim from the reference applet (no CMS seam for this page in the repo).
+const LEDE =
+  'Transparent 3-, 6-, and 12-month vault acquisition schedules for loose gemstones and custom Geneva commissions, with zero early-settlement penalties.';
 
 export const metadata: Metadata = {
-  title: 'Settlement & Financing Options | Maihan Gems',
-  description: 'Structured settlement, international bank wire, and private client payment options at Maihan Gems.',
+  title: 'Private Vault Financing & Staged Settlement',
+  description: LEDE,
+  alternates: { canonical: `${SITE_URL}/financing` },
 };
 
 export default function FinancingPage() {
   return (
-    <main className="page" id="main-content">
-      <Breadcrumbs crumbs={[{ label: 'Home', href: '/' }, { label: 'Settlement & Financing' }]} />
-      <span className="page-eyebrow">Private Client Settlement</span>
-      <h1>Settlement &amp; Financing Options</h1>
-      <p className="page-subtitle">
-        Transparent multi-currency pricing in USD, AED, and THB with structured payment and custodial reservation options.
-      </p>
+    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+      <nav aria-label="Breadcrumb" className="text-xs text-[#52504C]">
+        <ol className="flex items-center gap-2">
+          <li><Link href="/" className="hover:text-[#141413]">Home</Link></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" className="font-medium text-[#141413]">Vault Financing</li>
+        </ol>
+      </nav>
 
-      <div className="salon-essay">
-        <section className="lx-account-card">
-          <h2 className="lx-account-card__title">Direct Settlement &amp; Wire</h2>
-          <p className="lx-account-note" style={{ margin: 0 }}>
-            Orders placed through the checkout funnel lock your authoritative USD price snapshot and reserve
-            1-of-1 gemstone inventory during settlement verification.
-          </p>
-        </section>
-        <section className="lx-account-card">
-          <h2 className="lx-account-card__title">Structured Financing Add-On</h2>
-          <p className="lx-account-note" style={{ margin: 0 }}>
-            Eligible acquisitions may attach a structured financing or split-settlement plan modeled as an
-            auditable order add-on line. Contact Private Client Advisory for bespoke institutional terms.
-          </p>
-        </section>
+      <div className="border-b border-[#E2DFD7] pb-6 space-y-2">
+        <p className="text-xs font-[family-name:var(--font-mono)] text-[#78756F]">
+          CLIENT TREASURY SERVICES
+        </p>
+        <h1 className="font-[family-name:var(--font-display)] text-4xl font-semibold text-[#141413]">
+          Private Vault Financing &amp; Staged Settlement
+        </h1>
+        <p className="text-base text-[#52504C] leading-relaxed">{LEDE}</p>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2rem' }}>
-        <Link href="/browse" className="lx-btn lx-btn--solid">
-          Browse the Vault
-        </Link>
-        <Link href="/contact" className="lx-btn lx-btn--ghost">
-          Speak with an Advisor
-        </Link>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+        <div className="rounded border border-[#E2DFD7] bg-white p-6 space-y-2">
+          <p className="font-[family-name:var(--font-mono)] text-[#78756F]">TERM 01 · BESPOKE BENCH</p>
+          <h2 className="text-lg font-semibold text-[#141413]">50% / 50% Commission Split</h2>
+          <p className="text-[#52504C] leading-relaxed">
+            For Design Your Own commissions: 50% deposit upon loose stone reservation and CAD
+            approval; 50% balance upon completed Geneva assay hallmarking prior to dispatch.
+          </p>
+        </div>
+        <div className="rounded border border-[#E2DFD7] bg-white p-6 space-y-2">
+          <p className="font-[family-name:var(--font-mono)] text-[#78756F]">TERM 02 · 3-MONTH VAULT HOLD</p>
+          <h2 className="text-lg font-semibold text-[#141413]">0% APR 3-Tranche Schedule</h2>
+          <p className="text-[#52504C] leading-relaxed">
+            Three equal monthly wire tranches while the specimen remains insured in our Geneva
+            vault. Dispatched immediately upon final tranche reconciliation.
+          </p>
+        </div>
+        <div className="rounded border border-[#E2DFD7] bg-white p-6 space-y-2">
+          <p className="font-[family-name:var(--font-mono)] text-[#78756F]">TERM 03 · INSTITUTIONAL MEMO</p>
+          <h2 className="text-lg font-semibold text-[#141413]">Private Collector Credit Line</h2>
+          <p className="text-[#52504C] leading-relaxed">
+            Available by application through our Geneva, New York, or London salons for acquisitions
+            exceeding $15,000 USD.
+          </p>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

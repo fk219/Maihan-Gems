@@ -95,8 +95,18 @@ describe('EMPTY — listings integrate the shared EmptyState with a next action'
     expect(html).toContain('href="/"');
   });
 
-  it.each(LISTING_ROUTES.slice(0, 4))('%s/page.tsx uses EmptyState for zero results', (route) => {
-    expect(read(`${SF}/${route}/page.tsx`)).toContain('EmptyState');
+  // M2b: the four applet-migrated listings no longer consume the shared
+  // EmptyState — the reference template ships its own zero-result semantics
+  // instead: CollectionExplorer's "no vault specimens match" card with a
+  // reset action (variety/colour), the fixture settings ledger (settings),
+  // and the concierge workspace's own empty/error replies (search).
+  it.each([
+    ['[varietySlug]', 'CollectionExplorer'],
+    ['colour/[colourSlug]', 'CollectionExplorer'],
+    ['settings', 'SETTING_SUBCATEGORIES'],
+    ['search', 'AiConciergeWorkspace'],
+  ])('%s/page.tsx ships its zero-result integration (applet template)', (route, marker) => {
+    expect(read(`${SF}/${route}/page.tsx`)).toContain(marker);
   });
 });
 

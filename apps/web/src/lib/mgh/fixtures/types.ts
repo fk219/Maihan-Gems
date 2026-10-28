@@ -64,11 +64,40 @@ export interface MatchedPairItem {
   evidence: EvidencePlate;
 }
 
+export type SettingMetalCode =
+  // The four applet demo codes…
+  | 'PT950'
+  | '18K_YG'
+  | '18K_RG'
+  | '18K_WG'
+  // …widened in M5 to the REAL Maihan-Gems metal vocabulary (the seeded
+  // metals table). No fixture value is renamed; the union just stops lying
+  // about which codes exist on the wire.
+  | 'PT'
+  | 'W18'
+  | 'Y18'
+  | 'R18'
+  | 'W14'
+  | 'Y14'
+  | 'R14'
+  | 'W10'
+  | 'Y10'
+  | 'R10'
+  | 'SL'
+  | 'YW14'
+  | 'YW18'
+  | 'WY14'
+  | 'WY18'
+  // Vendor/imported rows outside the two vocabularies stay expressive.
+  | (string & {});
+
 export interface SettingMetalOption {
-  code: 'PT950' | '18K_YG' | '18K_RG' | '18K_WG';
+  code: SettingMetalCode;
   label: string;
   hallmark: string | null;
   priceDelta: number;
+  /** The real setting-variant SKU this metal maps to (DYO create API key). */
+  variantSku?: string;
 }
 
 export interface SettingItem {
@@ -89,6 +118,10 @@ export interface SettingItem {
   webarAssetId: string | null;
   lede: string;
   description: string;
+  /** M5 (real-rule seam): the design's acceptance rules straight from
+   *  setting_compatibility_rules (shape/min/max carat): absent rows mean
+   *  any shape; nothing is invented. */
+  accepts?: { shape: string | null; minCarat: number | null; maxCarat: number | null }[];
 }
 
 export interface DyoConfigurationRecord {

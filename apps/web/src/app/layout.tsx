@@ -15,6 +15,7 @@ import '../styles/maison.css';
 import { MAIHAN_THEME_CSS } from '../lib/theme-styles.js';
 import { Geist, EB_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { StorefrontProvider as AppletStorefrontProvider } from '../components/mgh/providers/StorefrontProvider.js';
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -54,7 +55,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <style id="maihan-theme" dangerouslySetInnerHTML={{ __html: MAIHAN_THEME_CSS }} />
       </head>
-      <body>
+      {/* Applet-exact body: background #F8F7F4, ink #141413, EB Garamond as the
+          display face, gold selection. The applet's skip link and provider
+          mount are reproduced verbatim (the applet mounted its provider at the
+          ROOT, so admin/vendor inherit the same cart/currency context). */}
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-[#F8F7F4] text-[#141413] antialiased font-[family-name:var(--font-eb-garamond)] selection:bg-[#D4AF37] selection:text-black"
+      >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-[#141413] focus:text-[#F8F7F4] focus:px-4 focus:py-2.5 focus:text-sm focus:font-medium focus:rounded"
+        >
+          Skip to main content
+        </a>
+        <AppletStorefrontProvider>
         {/* Task 8: the site-wide Organization entity, emitted only when the
             canonical base (SITE_URL) is configured. Statically prerendered
             pages build without it; the honest fallback omits the entity rather
@@ -62,6 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             the base (sitemap, product canonicals) still fail loudly. */}
         {organizationJsonLdPayload() !== null && <JsonLd payload={organizationJsonLdPayload() as string} />}
         {children}
+        </AppletStorefrontProvider>
       </body>
     </html>
   );

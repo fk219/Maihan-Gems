@@ -41,4 +41,15 @@ export interface StorefrontCard {
 
 export interface SettingForDyo extends StorefrontCard {
   accepts: SettingAcceptRule[];
+  /** M5 (DYOJ port): real seams carried for the applet configurator —
+   *  design identity, style descriptor, the SETTING-variant SKU the DYO
+   *  create API resolves, and the row's metal descriptor. Null = the row
+   *  does not evidence it (never substituted). */
+  designCode?: string | null;
+  styleCode?: string | null;
+  styleLabel?: string | null;
+  variantSku?: string | null;
+  metalCode?: string | null;
+  metalLabel?: string | null;
+  metalColour?: string | null;
 }

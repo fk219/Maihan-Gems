@@ -2,7 +2,7 @@
  * apps/web/src/api/admin/console-handlers.ts
  *
  * P3-2/P3-5 admin console API: SEO metadata editor, navigation editor,
- * redirect manager and the AI-ops (jobs/dead-letter + ai_logs) views.
+ * redirect manager and the AI-ops (jobs/dead-letter + ai_interactions tail) views.
  * Every handler goes through the ONE gate (`gateAdmin`) with the module
  * capability from the domain policy, validates with zod, and delegates to
  * the repositories — no SQL in the handler.

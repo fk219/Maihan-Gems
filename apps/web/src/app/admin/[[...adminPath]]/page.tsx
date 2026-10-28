@@ -34,7 +34,8 @@ import type {
 } from '@maihan/db';
 
 import { requireAdminAccess, AdminGateScreen } from '../../../lib/admin-server.js';
-import { AdminSidebar } from '../../../components/admin/AdminSidebar.js';
+import { AdminShell } from '../../../components/mgh/operator/AdminShell.js';
+import type { AdminActor } from '@maihan/contracts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card.js';
 import {
   AdminAiOpsWorkspace,
@@ -85,90 +86,90 @@ export default async function AdminPage({ params }: PageProps) {
     case undefined: {
       const access = await requireAdminAccess('dashboards', 'read');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminDashboard />;
+      return <AdminDashboard actor={access.actor} />;
     }
     case 'catalogue': {
       const access = await requireAdminAccess('products', 'list');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminCatalogue />;
+      return <AdminCatalogue actor={access.actor} />;
     }
     case 'vendors': {
       const access = await requireAdminAccess('products', 'list');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminVendors />;
+      return <AdminVendors actor={access.actor} />;
     }
     case 'content': {
       const access = await requireAdminAccess('content', 'list');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminContent />;
+      return <AdminContent actor={access.actor} />;
     }
     case 'orders': {
       const access = await requireAdminAccess('orders', 'list');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      if (sub !== undefined) return <AdminOrderDetail orderId={sub} />;
-      return <AdminOrders />;
+      if (sub !== undefined) return <AdminOrderDetail actor={access.actor} orderId={sub} />;
+      return <AdminOrders actor={access.actor} />;
     }
     case 'refunds': {
       const access = await requireAdminAccess('refunds', 'list');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminRefunds />;
+      return <AdminRefunds actor={access.actor} />;
     }
     case 'discounts': {
       const access = await requireAdminAccess('orders', 'list');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminDiscounts />;
+      return <AdminDiscounts actor={access.actor} />;
     }
     case 'customers': {
       const access = await requireAdminAccess('orders', 'list');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminCustomers />;
+      return <AdminCustomers actor={access.actor} />;
     }
     case 'users': {
       const access = await requireAdminAccess('dashboards', 'write');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminUsers />;
+      return <AdminUsers actor={access.actor} />;
     }
     case 'audit': {
       const access = await requireAdminAccess('dashboards', 'read');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminAuditLogs />;
+      return <AdminAuditLogs actor={access.actor} />;
     }
     case 'certificates': {
       const access = await requireAdminAccess('certificates', 'list');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminCertificates />;
+      return <AdminCertificates actor={access.actor} />;
     }
     case 'migration': {
       const access = await requireAdminAccess('import_batches', 'read');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminMigration />;
+      return <AdminMigration actor={access.actor} />;
     }
     case 'operations': {
       const access = await requireAdminAccess('dashboards', 'read');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminOperations />;
+      return <AdminOperations actor={access.actor} />;
     }
     case 'seo': {
       const access = await requireAdminAccess('seo', 'read');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminSeo />;
+      return <AdminSeo actor={access.actor} />;
     }
     case 'navigation': {
       const access = await requireAdminAccess('navigation', 'read');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminNavigation />;
+      return <AdminNavigation actor={access.actor} />;
     }
     case 'ai-ops': {
       const access = await requireAdminAccess('ai_logs', 'read');
       if (!access.ok) return <AdminGateScreen status={access.status} />;
-      return <AdminAiOps />;
+      return <AdminAiOps actor={access.actor} />;
     }
     default:
       notFound();
   }
 }
 
-async function AdminSeo() {
+async function AdminSeo({ actor }: { actor: AdminActor }) {
   const [seoRes, redirectRes] = await Promise.all([
     adminOriginFetch('/api/v1/admin/seo?limit=100'),
     adminOriginFetch('/api/v1/admin/redirects?limit=200'),
@@ -181,6 +182,8 @@ async function AdminSeo() {
   return (
     <AdminFrame
       active="seo"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="SEO Metadata & Redirects"
       lede="Canonical titles, descriptions, robots and the 44,218-row redirect manager — audit rows land on every edit."
     >
@@ -189,7 +192,7 @@ async function AdminSeo() {
   );
 }
 
-async function AdminNavigation() {
+async function AdminNavigation({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/navigation');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -198,6 +201,8 @@ async function AdminNavigation() {
   return (
     <AdminFrame
       active="navigation"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Navigation"
       lede="Header, footer, mega-menu and mobile navigation are data-driven from the `navigations` table — the storefront renders whatever is stored."
     >
@@ -206,7 +211,7 @@ async function AdminNavigation() {
   );
 }
 
-async function AdminAiOps() {
+async function AdminAiOps({ actor }: { actor: AdminActor }) {
   const [jobsRes, logsRes] = await Promise.all([
     adminOriginFetch('/api/v1/admin/jobs?limit=100'),
     adminOriginFetch('/api/v1/admin/ai-logs?limit=50'),
@@ -219,6 +224,8 @@ async function AdminAiOps() {
   return (
     <AdminFrame
       active="ai-ops"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="AI-Ops"
       lede="Job queues with honest states, dead-letter requeue (guarded, audited), and the AI interaction log tail."
     >
@@ -231,7 +238,7 @@ function fmt(value: number): string {
   return value < 0 ? '—' : value.toLocaleString('en-US');
 }
 
-async function AdminDashboard() {
+async function AdminDashboard({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/dashboards/summary');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -256,6 +263,8 @@ async function AdminDashboard() {
   return (
     <AdminFrame
       active="dashboard"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Executive Dashboard"
       lede="Operational counts read live from the database — no invented metrics."
     >
@@ -291,7 +300,7 @@ async function AdminDashboard() {
   );
 }
 
-async function AdminCatalogue() {
+async function AdminCatalogue({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/products');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -302,6 +311,8 @@ async function AdminCatalogue() {
   return (
     <AdminFrame
       active="catalogue"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Product Moderation & Catalogue"
       lede="Review vendor submissions, approve or reject with gemmological feedback, and publish verified pieces to the storefront."
     >
@@ -310,7 +321,7 @@ async function AdminCatalogue() {
   );
 }
 
-async function AdminVendors() {
+async function AdminVendors({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/vendors');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -321,6 +332,8 @@ async function AdminVendors() {
   return (
     <AdminFrame
       active="vendors"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Trade Partner Vendors"
       lede="Review vendor onboarding applications, approve bourse dealers, or suspend/reactivate partner access."
     >
@@ -329,7 +342,7 @@ async function AdminVendors() {
   );
 }
 
-async function AdminRefunds() {
+async function AdminRefunds({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/refunds');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -340,6 +353,8 @@ async function AdminRefunds() {
   return (
     <AdminFrame
       active="refunds"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Returns & Refund Requests"
       lede="Multi-stage refund approval workflow (REQUESTED -> APPROVED -> SUCCEEDED / REJECTED) bounded by captured payment amounts."
     >
@@ -348,7 +363,7 @@ async function AdminRefunds() {
   );
 }
 
-async function AdminDiscounts() {
+async function AdminDiscounts({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/discounts');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -359,6 +374,8 @@ async function AdminDiscounts() {
   return (
     <AdminFrame
       active="discounts"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Promotions & Discount Codes"
       lede="Configure scoped percentage, fixed-amount, or complimentary-shipping promotional codes."
     >
@@ -367,7 +384,7 @@ async function AdminDiscounts() {
   );
 }
 
-async function AdminCustomers() {
+async function AdminCustomers({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/customers');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -389,6 +406,8 @@ async function AdminCustomers() {
   return (
     <AdminFrame
       active="customers"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Client Directory"
       lede="Registered customer and partner accounts."
     >
@@ -428,7 +447,7 @@ async function AdminCustomers() {
   );
 }
 
-async function AdminUsers() {
+async function AdminUsers({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/users');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -450,6 +469,8 @@ async function AdminUsers() {
   return (
     <AdminFrame
       active="users"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Roles & Permissions Management"
       lede="Assign least-privilege RBAC roles across administrative and trade accounts. Every role change is recorded in the append-only audit log."
     >
@@ -458,7 +479,7 @@ async function AdminUsers() {
   );
 }
 
-async function AdminAuditLogs() {
+async function AdminAuditLogs({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/audit-logs');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -469,6 +490,8 @@ async function AdminAuditLogs() {
   return (
     <AdminFrame
       active="audit"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Security & Operational Audit Logs"
       lede="Append-only record of privileged actions with before and after states."
     >
@@ -513,7 +536,7 @@ async function AdminAuditLogs() {
   );
 }
 
-async function AdminContent() {
+async function AdminContent({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/content/pages');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -524,6 +547,8 @@ async function AdminContent() {
   return (
     <AdminFrame
       active="content"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Content & Editorial CMS"
       lede="CMS pages under the locking workflow. Approval is two-person for trust-bearing pages and publish requires an approved head revision."
     >
@@ -532,7 +557,7 @@ async function AdminContent() {
   );
 }
 
-async function AdminCertificates() {
+async function AdminCertificates({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/certificates');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -543,6 +568,8 @@ async function AdminCertificates() {
   return (
     <AdminFrame
       active="certificates"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Certificates & OCR Verification (INV-07)"
       lede="Review laboratory certificates and resolve OCR anomalies. Unverified certificate fields are redacted from public storefront responses."
     >
@@ -551,7 +578,7 @@ async function AdminCertificates() {
   );
 }
 
-async function AdminMigration() {
+async function AdminMigration({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/migration');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -562,6 +589,8 @@ async function AdminMigration() {
   return (
     <AdminFrame
       active="migration"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Migration Batches, Conflicts & INV-08 Derived References"
       lede="Inspect deterministic migration batches, unresolved staging conflicts, and approve or reject inferred derived SKUs (INV-08)."
     >
@@ -570,7 +599,7 @@ async function AdminMigration() {
   );
 }
 
-async function AdminOperations() {
+async function AdminOperations({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/operations');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -585,6 +614,8 @@ async function AdminOperations() {
   return (
     <AdminFrame
       active="operations"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Operations, Outbox & Job Queues"
       lede="Monitor transactional outbox delivery, event consumers, and background worker queues."
     >
@@ -593,7 +624,7 @@ async function AdminOperations() {
   );
 }
 
-async function AdminOrders() {
+async function AdminOrders({ actor }: { actor: AdminActor }) {
   const response = await adminOriginFetch('/api/v1/admin/orders');
   if (!response.ok) {
     return <AdminUnavailable status={response.status} />;
@@ -604,6 +635,8 @@ async function AdminOrders() {
   return (
     <AdminFrame
       active="orders"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title="Orders"
       lede="Customer orders with their authoritative payment and fulfilment states."
     >
@@ -662,7 +695,7 @@ async function AdminOrders() {
   );
 }
 
-async function AdminOrderDetail({ orderId }: { orderId: string }) {
+async function AdminOrderDetail({ actor, orderId }: { actor: AdminActor; orderId: string }) {
   const uuidOk = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
     orderId,
   );
@@ -715,6 +748,8 @@ async function AdminOrderDetail({ orderId }: { orderId: string }) {
   return (
     <AdminFrame
       active="orders"
+      actorName={actor.displayName}
+      actorRole={actor.role}
       title={order.order_number}
       lede={`${order.state.replace(/_/g, ' ')} · placed ${
         order.placed_at ? new Date(order.placed_at).toLocaleString('en-GB') : 'pending'
@@ -785,24 +820,26 @@ function AdminUnavailable({ status }: { status: number }) {
 
 function AdminFrame({
   active,
+  actorName,
+  actorRole,
   title,
   lede,
   children,
 }: {
   active: string;
+  actorName: string;
+  actorRole: string;
   title: string;
   lede: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="admin-layout">
-      <AdminSidebar active={active} />
-      <main className="admin-main" id="main-content">
-        <span className="admin-eyebrow">Maihan Gems — Back Office</span>
-        <h1>{title}</h1>
-        <p className="admin-lede">{lede}</p>
-        {children}
-      </main>
-    </div>
+    <AdminShell active={active} actorName={actorName} actorRole={actorRole}>
+      <div className="border-b border-[#E5D4B3] pb-4">
+        <h1 className="text-3xl sm:text-4xl font-normal text-[#1A1612]">{title}</h1>
+        <p className="text-base text-[#5C4E3C] mt-1">{lede}</p>
+      </div>
+      {children}
+    </AdminShell>
   );
 }

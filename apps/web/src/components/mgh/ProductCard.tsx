@@ -82,8 +82,8 @@ export function ProductCard({
     maximumFractionDigits: 0,
   }).format(Math.round(baseUsdPrice * 3.6725));
 
-  const rawImage = image || (stone?.images && stone.images[0]) || '/images/elysian-ring.jpg';
-  const displayImage = imgError ? '/images/gems/tanzanite-gem.jpg' : rawImage;
+  const rawImage = image || (stone?.images && stone.images[0]) || '/mgh/images/elysian-ring.jpg';
+  const displayImage = imgError ? '/mgh/images/gems/tanzanite-gem.jpg' : rawImage;
 
   const targetHref =
     href ||

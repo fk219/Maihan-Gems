@@ -2,20 +2,21 @@
  * apps/web/src/app/(storefront)/checkout/secure-payment/page.tsx
  *
  * `/checkout/secure-payment` — checkout step 3 (target of the observed
- * /cart/secure-payment 301). SoT 12.2. The final review places the order
- * through the real confirm checkpoint and order endpoint; the resulting
- * confirmation is rendered from the authoritative order read model.
+ * /cart/secure-payment 301). SoT 12.2. The RENDERED payload is the reference
+ * applet's final-review step (its "review & place order" visual), wired
+ * through the adapter to the REAL checkpoint + order endpoints — placing the
+ * order is idempotent and lands on the authoritative confirmation page.
+ * URL structure stays the repo's; the applet checkout markup is the payload
+ * only, and no `ORD-LIVE-…` surrogate order is ever fabricated.
  */
 import type { Metadata } from 'next';
 
-import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
-import { CheckoutConfirm } from '../../../../components/checkout/CheckoutConfirm.js';
-import { CheckoutTrust } from '../../../../components/checkout/CheckoutTrust.js';
-import { VaultReveal } from '../../../../components/storefront/VaultReveal.js';
+import { CheckoutPaymentOrderClient } from '@/components/mgh/checkout/CheckoutClient';
 
 export const metadata: Metadata = {
-  title: 'Secure Payment | Maihan Gems Checkout',
-  description: 'Final review and order placement. Settlement state is confirmed by the payment provider, never by this page.',
+  title: 'Step 3: Review & Place Vault Order — Checkout',
+  description: 'Final review of specimen selection and shipping details before placing order.',
+  robots: { index: false, follow: false },
 };
 
 export default async function CheckoutSecurePaymentPage({
@@ -26,53 +27,16 @@ export default async function CheckoutSecurePaymentPage({
   const { session } = await searchParams;
 
   return (
-    <main className="page checkout-page" id="main-content">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Bag', href: '/cart' },
-          { label: 'Order Summary', href: '/checkout/order-summary' },
-          { label: 'Secure Payment' },
-        ]}
-      />
-
-      <div className="checkout-shell checkout-salon">
-        <div className="checkout-salon__main">
-        <VaultReveal stagger={0} className="checkout-steps">
-          <div className="checkout-step checkout-step--completed">
-            <span>✓</span>
-            <span>Order Summary</span>
-          </div>
-          <div className="checkout-step checkout-step--completed">
-            <span>✓</span>
-            <span>Delivery &amp; Payment</span>
-          </div>
-          <div className="checkout-step checkout-step--active">
-            <span>3</span>
-            <span>Review &amp; Place</span>
-          </div>
-        </VaultReveal>
-
-        <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
-          Checkpoint Funnel · Step 3 of 3
-        </span>
-        <h1 style={{ color: 'var(--text-primary)', marginTop: 0 }}>Final Review &amp; Order</h1>
-        <p className="page-subtitle" style={{ color: 'var(--text-secondary)' }}>
-          Placing the order is idempotent and atomic: immutable price, gemstone and setting snapshots are taken
-          at placement, and the state timeline is append-only.
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-6">
+      <div>
+        <p className="text-xs font-[family-name:var(--font-mono)] text-[#78756F]">
+          CHECKOUT · STEP 3 OF 3
         </p>
-
-        {session ? (
-          <CheckoutConfirm sessionId={session} />
-        ) : (
-          <div className="lx-account-card" role="status">
-            <p className="lx-account-note">No checkout session in progress.</p>
-            <a href="/checkout/order-summary" className="lx-btn lx-btn--solid">Start checkout</a>
-          </div>
-        )}
-        </div>
-        <CheckoutTrust step={3} />
+        <h1 className="mt-1 font-[family-name:var(--font-display)] text-4xl font-semibold text-[#141413]">
+          Review &amp; Place Vault Order
+        </h1>
       </div>
-    </main>
+      <CheckoutPaymentOrderClient sessionId={session ?? null} />
+    </div>
   );
 }

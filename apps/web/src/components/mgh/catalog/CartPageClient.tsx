@@ -3,9 +3,26 @@
 import Link from 'next/link';
 import { Trash2, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useStorefront } from '@/components/mgh/providers/StorefrontProvider';
+import { useMergedBag, type MghBagItem } from '@/lib/mgh/adapters/commerce';
 
+/**
+ * M4 — the reference cart page over the repo's REAL commerce seam.
+ *
+ * Markup is the reference applet's own (M1 copy). DATA SEAM only: the tray
+ * renders the MERGED bag — the applet provider's localStorage bag merged
+ * into the authoritative real server cart (`useMergedBag`) — and its
+ * "Empty Bag"/remove actions mutate the real cart API exactly the replaced
+ * BagView did.
+ */
 export function CartPageClient() {
-  const { cart, removeFromCart, clearCart, cartTotal, formatPrice } = useStorefront();
+  const bag = useMergedBag();
+  const { formatPrice } = useStorefront();
+  const cart = bag.items;
+  const cartTotal = bag.subtotal;
+
+  if (bag.loading && cart.length === 0) {
+    return <p aria-busy="true" className="text-xs text-[#4E4C47] font-[family-name:var(--font-mono)]">Loading your vault tray…</p>;
+  }
 
   if (cart.length === 0) {
     return (
@@ -34,11 +51,11 @@ export function CartPageClient() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       <div className="lg:col-span-8 rounded-sm border border-[#E4DFD5] bg-white divide-y divide-[#E4DFD5]">
-        {cart.map((item) => (
-          <div key={item.id} className="p-6 flex items-center justify-between gap-4">
+        {cart.map((item: MghBagItem) => (
+          <div key={item.serverItemId ?? item.id} className="p-6 flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <img
-                src={item.image || '/images/gems/tanzanite-gem.jpg'}
+                src={item.image || '/mgh/images/gems/tanzanite-gem.jpg'}
                 alt={item.name}
                 referrerPolicy="no-referrer"
                 className="h-20 w-24 rounded-sm border border-[#E4DFD5] bg-[#EFECE6] object-cover shrink-0"
@@ -50,7 +67,7 @@ export function CartPageClient() {
                 <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold text-[#121211]">
                   {item.name}
                 </h3>
-                <p className="text-xs text-[#4E4C47] mt-0.5">{item.subtitle}</p>
+                {item.subtitle ? <p className="text-xs text-[#4E4C47] mt-0.5">{item.subtitle}</p> : null}
               </div>
             </div>
 
@@ -60,7 +77,7 @@ export function CartPageClient() {
               </span>
               <button
                 type="button"
-                onClick={() => removeFromCart(item.id)}
+                onClick={() => void bag.removeItem(item)}
                 aria-label={`Remove ${item.name} from cart`}
                 className="p-2 text-[#76726A] hover:text-[#991B1B]"
               >
@@ -75,7 +92,7 @@ export function CartPageClient() {
           </span>
           <button
             type="button"
-            onClick={clearCart}
+            onClick={() => void bag.clearTray()}
             className="text-[#991B1B] underline font-[family-name:var(--font-mono)] uppercase tracking-wider text-[11px]"
           >
             Empty Bag

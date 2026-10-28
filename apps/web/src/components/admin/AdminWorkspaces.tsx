@@ -1601,13 +1601,14 @@ interface JobRow {
 
 interface AiLogItem {
   id: string;
-  module: string;
-  action: string;
+  surface: string;
+  intent: string | null;
   latency_ms: number | null;
-  tokens_in: number | null;
-  tokens_out: number | null;
-  success: boolean;
-  degraded: boolean;
+  input_tokens: number | null;
+  output_tokens: number | null;
+  error_code: string | null;
+  guardrail_action: string | null;
+  handoff_triggered: boolean;
   created_at: string;
 }
 
@@ -1934,8 +1935,8 @@ export function AdminAiOpsWorkspace({ jobs, aiLogs }: { jobs: JobRow[]; aiLogs: 
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Module</th>
-                <th>Action</th>
+                <th>Surface</th>
+                <th>Intent</th>
                 <th>Latency</th>
                 <th>Tokens in/out</th>
                 <th>Status</th>
@@ -1945,14 +1946,18 @@ export function AdminAiOpsWorkspace({ jobs, aiLogs }: { jobs: JobRow[]; aiLogs: 
             <tbody>
               {aiLogs.map((log) => (
                 <tr key={log.id}>
-                  <td>{log.module}</td>
-                  <td>{log.action}</td>
+                  <td>{log.surface}</td>
+                  <td>{log.intent ?? '—'}</td>
                   <td>{log.latency_ms ?? '—'} ms</td>
                   <td>
-                    {log.tokens_in ?? '—'} / {log.tokens_out ?? '—'}
+                    {log.input_tokens ?? '—'} / {log.output_tokens ?? '—'}
                   </td>
                   <td>
-                    {log.success ? (log.degraded ? 'degraded' : 'ok') : 'failed'}
+                    {(() => {
+                      const success = log.error_code === null;
+                      const degraded = log.handoff_triggered || (log.guardrail_action !== null && log.guardrail_action !== 'ALLOW');
+                      return success ? (degraded ? 'degraded' : 'ok') : 'failed';
+                    })()}
                   </td>
                   <td>{new Date(log.created_at).toLocaleString('en-GB')}</td>
                 </tr>

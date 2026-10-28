@@ -8,6 +8,7 @@
 import '../../styles/admin.css';
 import '../../styles/maison.css';
 import '../../styles/operator.css';
+import '../../styles/mgh-applet.css';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

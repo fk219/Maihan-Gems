@@ -2,20 +2,22 @@
  * apps/web/src/app/(storefront)/checkout/payment-order/page.tsx
  *
  * `/checkout/payment-order` — checkout step 2 (target of the observed
- * /cart/payment-order 301). SoT 12.2. Delivery address and settlement
- * method are recorded through the real checkpoint endpoints; the server
- * rejects skipped steps.
+ * /cart/payment-order 301). SoT 12.2. The RENDERED payload is the reference
+ * applet's settlement step (its "secure payment" visual), wired through the
+ * adapter to the REAL payment checkpoint: the settlement instrument shows
+ * the provider state the backend actually has (sandbox TEST provider in dev;
+ * card/escrow are a pending backend decision and render disabled), and the
+ * server's 422 for skipped steps surfaces verbatim. URL structure stays the
+ * repo's; the applet checkout markup is the payload only.
  */
 import type { Metadata } from 'next';
 
-import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
-import { CheckoutPayment } from '../../../../components/checkout/CheckoutPayment.js';
-import { CheckoutTrust } from '../../../../components/checkout/CheckoutTrust.js';
-import { VaultReveal } from '../../../../components/storefront/VaultReveal.js';
+import { CheckoutSecurePaymentClient } from '@/components/mgh/checkout/CheckoutClient';
 
 export const metadata: Metadata = {
-  title: 'Payment Order | Maihan Gems Checkout',
-  description: 'Provide delivery details and record the settlement method through the secure checkout checkpoints.',
+  title: 'Step 2: Secure Payment (Demo Mode) — Checkout',
+  description: 'Simulation-safe settlement step for Maihan Gems vault reservation.',
+  robots: { index: false, follow: false },
 };
 
 export default async function CheckoutPaymentOrderPage({
@@ -26,53 +28,16 @@ export default async function CheckoutPaymentOrderPage({
   const { session } = await searchParams;
 
   return (
-    <main className="page checkout-page" id="main-content">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Bag', href: '/cart' },
-          { label: 'Order Summary', href: '/checkout/order-summary' },
-          { label: 'Delivery & Payment' },
-        ]}
-      />
-
-      <div className="checkout-shell checkout-salon">
-        <div className="checkout-salon__main">
-        <VaultReveal stagger={0} className="checkout-steps">
-          <div className="checkout-step checkout-step--completed">
-            <span>✓</span>
-            <span>Order Summary</span>
-          </div>
-          <div className="checkout-step checkout-step--active">
-            <span>2</span>
-            <span>Delivery &amp; Payment</span>
-          </div>
-          <div className="checkout-step">
-            <span>3</span>
-            <span>Review &amp; Place</span>
-          </div>
-        </VaultReveal>
-
-        <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
-          Checkpoint Funnel · Step 2 of 3
-        </span>
-        <h1 style={{ color: 'var(--text-primary)', marginTop: 0 }}>Delivery &amp; Settlement</h1>
-        <p className="page-subtitle" style={{ color: 'var(--text-secondary)' }}>
-          Each checkpoint is validated by the atelier system in order — details are stored server-side and the
-          stock reservation clock keeps running.
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-6">
+      <div>
+        <p className="text-xs font-[family-name:var(--font-mono)] text-[#78756F]">
+          CHECKOUT · STEP 2 OF 3
         </p>
-
-        {session ? (
-          <CheckoutPayment sessionId={session} />
-        ) : (
-          <div className="lx-account-card" role="status">
-            <p className="lx-account-note">No checkout session in progress.</p>
-            <a href="/checkout/order-summary" className="lx-btn lx-btn--solid">Start checkout</a>
-          </div>
-        )}
-        </div>
-        <CheckoutTrust step={2} />
+        <h1 className="mt-1 font-[family-name:var(--font-display)] text-4xl font-semibold text-[#141413]">
+          Secure Payment (Simulated Demo Provider)
+        </h1>
       </div>
-    </main>
+      <CheckoutSecurePaymentClient sessionId={session ?? null} />
+    </div>
   );
 }

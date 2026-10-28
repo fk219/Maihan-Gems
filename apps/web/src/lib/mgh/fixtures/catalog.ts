@@ -147,7 +147,7 @@ export const GEMSTONES: GemstoneItem[] = [
     currency: 'USD',
     availability: 'IN_VAULT',
     isHeroAnchor: true,
-    images: ['/images/gems/tanzanite-gem.jpg', '/images/gems/sapphire-gem.jpg'],
+    images: ['/mgh/images/gems/tanzanite-gem.jpg', '/mgh/images/gems/sapphire-gem.jpg'],
     webarAssetId: 'webar-tz-0131',
     lede: 'Anchor parcel MG-TZ-0131: a 1.31 ct round brilliant violetish blue tanzanite from Merelani Block D, graded VSI clarity with disclosed thermal enhancement.',
     description:
@@ -182,7 +182,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 12800,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/elysian-ring.jpg', '/images/elysian-ring.svg', '/gems/setting-solitaire.svg'],
+    images: ['/mgh/images/elysian-ring.jpg', '/mgh/images/elysian-ring.svg', '/mgh/gems/setting-solitaire.svg'],
     webarAssetId: 'webar-tz-0131',
     lede: 'Elysian Ring: a 2.15 ct radiant-cut natural diamond mounted in an architectural platinum 950 and 18K yellow gold double-band salon setting.',
     description:
@@ -217,7 +217,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 18500,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/verdant-drop.jpg', '/images/gems/emerald-gem.jpg'],
+    images: ['/mgh/images/verdant-drop.jpg', '/mgh/images/gems/emerald-gem.jpg'],
     webarAssetId: 'webar-tz-0131',
     lede: 'Verdant Drop: a 4.32 ct pear-cut natural Muzo emerald pendant embraced by a brilliant diamond halo on an 18K yellow gold chain.',
     description:
@@ -252,7 +252,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 6950,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/tanzanite-gem.jpg'],
+    images: ['/mgh/images/gems/tanzanite-gem.jpg'],
     webarAssetId: 'webar-tz-0131',
     lede: 'Naturally unheated 2.84 ct antique cushion tanzanite exhibiting distinct cyan-violet pleochroism under daylight.',
     description:
@@ -287,7 +287,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 9400,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/tanzanite-gem.jpg'],
+    images: ['/mgh/images/gems/tanzanite-gem.jpg'],
     webarAssetId: 'webar-tz-0131',
     lede: 'Internally flawless 4.12 ct octagonal step-cut tanzanite with architectural mitered corners.',
     description:
@@ -322,7 +322,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 3420,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/tanzanite-gem.jpg'],
+    images: ['/mgh/images/gems/tanzanite-gem.jpg'],
     webarAssetId: 'webar-tz-0131',
     lede: 'Luminous 1.95 ct oval brilliant tanzanite with high-crown dispersion and open pastel-violet table reflections.',
     description:
@@ -357,7 +357,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 14800,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/sapphire-gem.jpg', '/images/gems/tanzanite-gem.jpg'],
+    images: ['/mgh/images/gems/sapphire-gem.jpg', '/mgh/images/gems/tanzanite-gem.jpg'],
     webarAssetId: 'webar-sap-0204',
     lede: 'Unheated 2.04 ct Ratnapura cushion sapphire with velvety cornflower scattering caused by intact microscopic rutile needles.',
     description:
@@ -392,7 +392,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 16200,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/sapphire-gem.jpg'],
+    images: ['/mgh/images/gems/sapphire-gem.jpg'],
     webarAssetId: 'webar-sap-0204',
     lede: '3.18 ct oval royal blue sapphire from Ilakaka with deep, velvety saturation and full thermal disclosure.',
     description:
@@ -427,7 +427,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 12900,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/ruby-gem.jpg'],
+    images: ['/mgh/images/gems/ruby-gem.jpg'],
     webarAssetId: 'webar-sap-0204',
     lede: 'Unheated 1.56 ct Ceylon padparadscha sapphire balancing warm sunset orange and delicate lotus pink.',
     description:
@@ -462,7 +462,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 4350,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/sapphire-gem.jpg'],
+    images: ['/mgh/images/gems/sapphire-gem.jpg'],
     webarAssetId: 'webar-sap-0204',
     lede: '1.74 ct precision round brilliant Montana sapphire shifting between Slate Atlantic blue and sage green.',
     description:
@@ -497,7 +497,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 11400,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/sapphire-gem.jpg'],
+    images: ['/mgh/images/gems/sapphire-gem.jpg'],
     webarAssetId: 'webar-sap-0204',
     lede: '2.45 ct square Asscher-cut Ceylon sapphire with concentric windmill reflection halls.',
     description:
@@ -532,7 +532,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 13600,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/emerald-gem.jpg'],
+    images: ['/mgh/images/gems/emerald-gem.jpg'],
     webarAssetId: 'webar-em-0185',
     lede: '1.85 ct Colombian octagonal emerald with warm grassy-bluish green saturation and three-phase fluid inclusions.',
     description:
@@ -567,7 +567,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 22400,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/emerald-gem.jpg'],
+    images: ['/mgh/images/gems/emerald-gem.jpg'],
     webarAssetId: 'webar-em-0185',
     lede: 'Rare 2.62 ct Panjshir Valley cushion emerald certified completely free of oil, wax, or resin filling.',
     description:
@@ -602,7 +602,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 7800,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/emerald-gem.jpg'],
+    images: ['/mgh/images/gems/emerald-gem.jpg'],
     webarAssetId: 'webar-em-0185',
     lede: '1.40 ct pear brilliant Chivor emerald displaying cool bluish-green overtones and high crystal transparency.',
     description:
@@ -637,7 +637,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 28500,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/ruby-gem.jpg'],
+    images: ['/mgh/images/gems/ruby-gem.jpg'],
     webarAssetId: null, // Intentionally null so `/ar/missing` or testing missing AR works honestly
     lede: 'Unheated 1.52 ct marble-hosted Mogok ruby with vivid red UV fluorescence and velvety internal light scatter.',
     description:
@@ -672,7 +672,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 17900,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/ruby-gem.jpg'],
+    images: ['/mgh/images/gems/ruby-gem.jpg'],
     webarAssetId: 'webar-sap-0204',
     lede: '2.15 ct Mozambique cushion ruby with exceptional crystal clarity and saturated cardinal-red body colour.',
     description:
@@ -707,7 +707,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 8900,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/ruby-gem.jpg'],
+    images: ['/mgh/images/gems/ruby-gem.jpg'],
     webarAssetId: 'webar-sap-0204',
     lede: '2.38 ct Mahenge cushion spinel glowing with chromium-driven hot pink and warm coral-red flashes.',
     description:
@@ -742,7 +742,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 11200,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/tanzanite-gem.jpg'],
+    images: ['/mgh/images/gems/tanzanite-gem.jpg'],
     webarAssetId: 'webar-tz-0131',
     lede: '1.64 ct Vietnamese cobalt spinel verified by UV-Vis spectroscopy for trace Co2+ absorption bands.',
     description:
@@ -777,7 +777,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 4680,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/emerald-gem.jpg'],
+    images: ['/mgh/images/gems/emerald-gem.jpg'],
     webarAssetId: 'webar-em-0185',
     lede: '3.90 ct radiant-cut Afghan tourmaline with open c-axis alignment and vivid seafoam-teal brilliance.',
     description:
@@ -812,7 +812,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 15400,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/emerald-gem.jpg'],
+    images: ['/mgh/images/gems/emerald-gem.jpg'],
     webarAssetId: 'webar-em-0185',
     lede: '1.18 ct Brazilian marquise alexandrite exhibiting a 90% shift from peacock green in 5500K daylight to plum-red under 2700K tungsten.',
     description:
@@ -847,7 +847,7 @@ export const GEMSTONES: GemstoneItem[] = [
     price: 5900,
     currency: 'USD',
     availability: 'IN_VAULT',
-    images: ['/images/gems/emerald-gem.jpg'],
+    images: ['/mgh/images/gems/emerald-gem.jpg'],
     webarAssetId: 'webar-em-0185',
     lede: '2.26 ct oval tsavorite garnet with high refractive index (1.740) and zero treatment.',
     description:
@@ -887,7 +887,7 @@ export const MATCHED_PAIRS: MatchedPairItem[] = [
     price: 7600,
     availability: 'IN_VAULT',
     attachmentConstraint: 'EARRINGS_ONLY',
-    images: ['/images/gems/earrings-pair.jpg'],
+    images: ['/mgh/images/gems/earrings-pair.jpg'],
     webarAssetId: 'webar-sap-0204',
     lede: 'Calibrated 1.44 ct and 1.46 ct cushion-cut Mahenge spinels matched for hue, tone, and pavilion depth. Reserved strictly for earring settings.',
     description:
@@ -924,7 +924,7 @@ export const MATCHED_PAIRS: MatchedPairItem[] = [
     price: 4950,
     availability: 'IN_VAULT',
     attachmentConstraint: 'EARRINGS_ONLY',
-    images: ['/images/gems/earrings-pair.jpg', '/images/gems/tanzanite-gem.jpg'],
+    images: ['/mgh/images/gems/earrings-pair.jpg', '/mgh/images/gems/tanzanite-gem.jpg'],
     webarAssetId: 'webar-tz-0131',
     lede: 'Twin 6.8 mm round brilliant Merelani tanzanites cut from a single split crystal for identical trichroic orientation. Attaches to earring settings only.',
     description:
@@ -961,7 +961,7 @@ export const MATCHED_PAIRS: MatchedPairItem[] = [
     price: 19800,
     availability: 'IN_VAULT',
     attachmentConstraint: 'EARRINGS_ONLY',
-    images: ['/images/gems/earrings-pair.jpg', '/images/gems/sapphire-gem.jpg'],
+    images: ['/mgh/images/gems/earrings-pair.jpg', '/mgh/images/gems/sapphire-gem.jpg'],
     webarAssetId: 'webar-sap-0204',
     lede: 'Unheated 3.10 ct tw oval Ceylon sapphires for bespoke drop or stud earrings. Attaches exclusively to earring settings.',
     description:
@@ -998,7 +998,7 @@ export const MATCHED_PAIRS: MatchedPairItem[] = [
     price: 14200,
     availability: 'IN_VAULT',
     attachmentConstraint: 'EARRINGS_ONLY',
-    images: ['/images/gems/earrings-pair.jpg', '/images/gems/emerald-gem.jpg'],
+    images: ['/mgh/images/gems/earrings-pair.jpg', '/mgh/images/gems/emerald-gem.jpg'],
     webarAssetId: 'webar-em-0185',
     lede: 'Architectural step-cut Colombian emerald pair calibrated for articulated drop earrings.',
     description:
@@ -1042,7 +1042,7 @@ export const SETTINGS: SettingItem[] = [
     bandWidthMm: '2.1 mm knife-edge taper',
     galleryHeightMm: '5.8 mm',
     originAtelier: 'Geneva Rue du Rhône Bench #4',
-    images: ['/images/gems/setting-ring.jpg'],
+    images: ['/mgh/images/gems/setting-ring.jpg'],
     webarAssetId: 'webar-set-arch-01',
     lede: 'Hand-forged cathedral gallery engineered to seat deep-pavilion coloured gemstones flush against the finger.',
     description:
@@ -1062,7 +1062,7 @@ export const SETTINGS: SettingItem[] = [
     bandWidthMm: '4.4 mm tapered saddle',
     galleryHeightMm: '4.9 mm',
     originAtelier: 'Geneva Rue du Rhône Bench #2',
-    images: ['/images/gems/setting-ring.jpg'],
+    images: ['/mgh/images/gems/setting-ring.jpg'],
     webarAssetId: 'webar-set-arch-01',
     lede: 'Heavy-gauge architectural bezel that shields cleavage-sensitive stones such as tanzanite and emerald from lateral impact.',
     description:
@@ -1082,7 +1082,7 @@ export const SETTINGS: SettingItem[] = [
     bandWidthMm: '2.0 mm',
     galleryHeightMm: null, // Intentionally null to demonstrate honest NotEvidenced state in DYO review
     originAtelier: 'Paris Place Vendôme Partner Workshop',
-    images: ['/images/gems/setting-ring.jpg'],
+    images: ['/mgh/images/gems/setting-ring.jpg'],
     webarAssetId: 'webar-set-arch-01',
     lede: 'Flanked by a matched pair of F-VVS step-cut diamond baguettes (0.36 ct tw) that frame the centre coloured stone.',
     description:
@@ -1102,7 +1102,7 @@ export const SETTINGS: SettingItem[] = [
     bandWidthMm: null,
     galleryHeightMm: '22.0 mm total drop',
     originAtelier: 'Geneva Rue du Rhône Bench #4',
-    images: ['/images/gems/earrings-pair.jpg', '/images/gems/setting-ring.jpg'],
+    images: ['/mgh/images/gems/earrings-pair.jpg', '/mgh/images/gems/setting-ring.jpg'],
     webarAssetId: 'webar-set-arch-01',
     lede: 'Engineered exclusively for Maihan matched gemstone pairs with knife-edge articulation that catches ambient light with every movement.',
     description:
@@ -1122,7 +1122,7 @@ export const SETTINGS: SettingItem[] = [
     bandWidthMm: null,
     galleryHeightMm: '4.5 mm low-droop basket',
     originAtelier: 'Geneva Rue du Rhône Bench #1',
-    images: ['/images/gems/earrings-pair.jpg'],
+    images: ['/mgh/images/gems/earrings-pair.jpg'],
     webarAssetId: 'webar-set-arch-01',
     lede: 'Three-point and four-point recessed baskets that sit close to the earlobe without forward tilt. Accepts matched pairs only.',
     description:
@@ -1142,7 +1142,7 @@ export const SETTINGS: SettingItem[] = [
     bandWidthMm: '1.3 mm Spiga Chain',
     galleryHeightMm: '5.2 mm',
     originAtelier: 'Geneva Rue du Rhône Bench #4',
-    images: ['/images/gems/setting-ring.jpg'],
+    images: ['/mgh/images/gems/setting-ring.jpg'],
     webarAssetId: null,
     lede: 'North-South-East-West talon prongs suspended from a hidden architectural bail.',
     description:

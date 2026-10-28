@@ -1,13 +1,17 @@
 /**
  * @vitest-environment happy-dom
+ *
+ * M2a probe — the (storefront) homepage is the migrated MaihanGems reference
+ * homepage (golden-cloud layout) wired to the repo's real catalogue through
+ * lib/mgh/adapters/catalog. Assertions cover the reference structure markers
+ * that are copy-driven (stable) and treat the featured grid as data-driven:
+ * whatever the real catalogue evidences is what renders.
  */
 import { describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { AxeBuilder } from '../../lib/axe-builder.js';
-import { DEFAULT_FX } from '../../lib/currency.js';
-import { storefrontBySlug } from '../../lib/ngc/storefronts.js';
-import { StorefrontProvider } from './StorefrontProvider.js';
+import { StorefrontProvider as AppletStorefrontProvider } from '../mgh/providers/StorefrontProvider.js';
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: () => undefined, replace: () => undefined, prefetch: () => undefined }),
@@ -15,43 +19,46 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-vi.mock('next/headers', () => ({
-  headers: async () => new Headers(),
-  cookies: async () => ({ get: () => undefined }),
-}));
-
 const HomePage = (await import('../../app/(storefront)/page.js')).default;
 
-describe('homepage redesign', () => {
-  it('renders every requested section', async () => {
+describe('homepage (M2a migrated reference)', () => {
+  it('renders the golden-cloud reference sections over the real catalogue', async () => {
     document.documentElement.setAttribute('lang', 'en');
     if (document.title === '') document.title = 'Maihan Gems';
     const page = await HomePage();
     const html = renderToStaticMarkup(
-      createElement(StorefrontProvider, { rates: DEFAULT_FX, children: page }),
+      createElement(AppletStorefrontProvider, null, page),
     );
     const container = document.createElement('div');
     container.innerHTML = html;
     document.body.appendChild(container);
 
-    expect(container.querySelectorAll('main.mgh').length).toBe(1);
-    expect(container.querySelector('.mgh-hero__title')?.textContent).toContain('natural gemstones');
-    expect(container.querySelector('.mgh-gems h2')?.textContent).toBe('Gemstones');
-    expect(container.querySelectorAll('.mgh-gem').length).toBeGreaterThanOrEqual(10);
-    expect(container.querySelector('.mgh-jewellery h2')?.textContent).toContain('Jewellery');
-    expect(container.querySelectorAll('.mgh-jewellery .mgh-jew').length).toBe(4);
-    expect(container.querySelector('#mgh-set-h')?.textContent).toBe('Settings');
-    expect(container.querySelector('.mgh-pack h2')?.textContent).toContain('Packaging');
-    expect(container.querySelectorAll('.mgh-pack__item').length).toBe(5);
-    expect(container.querySelector('.mgh-dyo h2')?.textContent).toContain('Design Your Own');
-    expect(container.querySelectorAll('.mgh-steps li').length).toBe(3);
-    expect(container.querySelector('.mgh-history h2')?.textContent).toContain('History');
-    expect(container.querySelectorAll('.mgh-history__card').length).toBe(3);
-    expect(container.querySelector('.mgh-peace h2')?.textContent).toContain('Peace');
-    expect(container.querySelectorAll('.mgh-peace__card').length).toBe(4);
-    expect(container.querySelector('.mgh-about h2')?.textContent).toContain('About');
-    expect(container.querySelector('.mgh-charity h2')?.textContent).toContain('Charity');
-    expect(container.querySelectorAll('.mgh-quote').length).toBe(0);
+    // Reference structure markers (reference-applet homepage, 1:1)
+    expect(container.querySelector('.golden-cloud-gallery')).not.toBeNull();
+    expect(container.querySelector('[data-testid="hero-background-video"]')).not.toBeNull();
+    expect(container.querySelector('video[src="/mgh/videos/hero-gemstone.mp4"], video > source[src="/mgh/videos/hero-gemstone.mp4"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="hero-ai-search-container"]')).not.toBeNull();
+    expect(container.querySelector('h1')?.textContent).toContain('Gemstones');
+    expect(container.textContent).toContain('Eight Natural Gemstone Families');
+
+    // Gemstone marquee — fixture editorial content, 8 families, tripled track
+    const marquee = container.querySelector('[data-testid="gemstone-category-marquee"]');
+    expect(marquee).not.toBeNull();
+    expect(container.querySelectorAll('[data-testid="gemstone-marquee-item"]').length).toBeGreaterThanOrEqual(8);
+
+    // Featured grid is data-driven: the header is copy, the cards are real stock
+    expect(container.textContent).toContain('Featured Natural Gemstones');
+
+    // Shop-by-category: four verbatim editorial cards
+    expect(container.querySelectorAll('[data-testid="shop-by-category-card"]').length).toBe(4);
+    expect(container.querySelector('[data-testid="shop-by-category-card"]')?.textContent).toContain('Rings');
+
+    // DYOJ, AI gemologist, client voices, next step — verbatim editorial copy
+    expect(container.textContent).toContain('Create a custom piece in three simple steps.');
+    expect(container.textContent).toContain('A gemologist’s eye, on demand.');
+    expect(container.textContent).toContain('READY TO WEAR');
+    expect(container.querySelectorAll('blockquote').length).toBe(3);
+    expect(container.textContent).toContain('Talk to a gemologist.');
 
     const results = await new AxeBuilder().analyze();
     const blocking = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
@@ -62,22 +69,5 @@ describe('homepage redesign', () => {
     expect(blocking, blocking.map((v) => `${v.id}: ${v.nodes.length} nodes`).join('; ')).toEqual([]);
 
     container.remove();
-  });
-
-  it('photographs each sister house with its own stone', async () => {
-    const cases = [
-      ['sapphire', '/media/jew-sapphire-ring.jpg'],
-      ['ruby', '/media/jew-ruby-ring.jpg'],
-      ['emerald', '/media/jew-emerald-necklace.jpg'],
-    ] as const;
-    for (const [slug, main] of cases) {
-      const page = await HomePage({ brand: storefrontBySlug(slug) });
-      const html = renderToStaticMarkup(
-        createElement(StorefrontProvider, { rates: DEFAULT_FX, children: page }),
-      );
-      const container = document.createElement('div');
-      container.innerHTML = html;
-      expect(container.querySelector('.vault-vitrine__img')?.getAttribute('src'), slug).toBe(main);
-    }
   });
 });

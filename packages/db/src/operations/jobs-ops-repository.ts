@@ -3,7 +3,12 @@
  *
  * P3-2 AI-ops console reality: the jobs table (queue, state, attempts,
  * last_error) gets an operator surface — list jobs, requeue a dead-lettered
- * job (idempotent via the state guard; audited), and a tail of ai_logs.
+ * job (idempotent via the state guard; audited), and a tail of AI interactions.
+ * The interaction tail reads the LOCKED `ai_interactions` table (0013) — there
+ * is no `ai_logs` table in the schema. Column mapping: surface≈module,
+ * intent≈action, input_tokens/output_tokens≈tokens_in/out; "success" is an
+ * error-free interaction (error_code IS NULL) and "degraded" is one where a
+ * handoff was triggered or a guardrail acted beyond ALLOW.
  * Requeue is a guarded transition: only DEAD_LETTER rows move, so a
  * double-click cannot re-run a QUEUED or SUCCEEDED job.
  */
@@ -23,13 +28,14 @@ export interface JobOpsRow {
 
 export interface AiLogRow {
   readonly id: string;
-  readonly module: string;
-  readonly action: string;
+  readonly surface: string;
+  readonly intent: string | null;
   readonly latency_ms: number | null;
-  readonly tokens_in: number | null;
-  readonly tokens_out: number | null;
-  readonly success: boolean;
-  readonly degraded: boolean;
+  readonly input_tokens: number | null;
+  readonly output_tokens: number | null;
+  readonly error_code: string | null;
+  readonly guardrail_action: string | null;
+  readonly handoff_triggered: boolean;
   readonly created_at: string;
 }
 
@@ -98,8 +104,10 @@ export function createJobsOpsRepository(db: CatalogDatabase): JobsOpsRepository 
 
     async tailAiLogs({ limit }) {
       const res = await db.execute(sql`
-        SELECT id, module, action, latency_ms, tokens_in, tokens_out, success, degraded, created_at
-          FROM ai_logs
+        SELECT id::text AS id, surface, intent, latency_ms,
+               input_tokens, output_tokens, error_code,
+               guardrail_action, handoff_triggered, created_at
+          FROM ai_interactions
          ORDER BY created_at DESC
          LIMIT ${limit}
       `);

@@ -230,10 +230,10 @@ export default function AdminConsoleClient({
       reviewerNote: 'Added directly by Geneva Vault Archivist.',
       image:
         newInvCategory === 'Settings'
-          ? '/images/gems/setting-ring.jpg'
+          ? '/mgh/images/gems/setting-ring.jpg'
           : newInvCategory === 'Fine Jewellery'
-          ? '/images/elysian-ring.jpg'
-          : '/images/gems/sapphire-gem.jpg',
+          ? '/mgh/images/elysian-ring.jpg'
+          : '/mgh/images/gems/sapphire-gem.jpg',
     };
 
     const next = [created, ...inventory];

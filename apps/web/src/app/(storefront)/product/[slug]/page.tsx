@@ -1,28 +1,42 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
+/**
+ * apps/web/src/app/(storefront)/product/[slug]/page.tsx
+ *
+ * M3 — the reference applet PDP, verbatim, on the legacy alias slug. It used
+ * to render its own UI; it now renders the SAME applet `ProductDetailView`
+ * through the SAME adapter path as `/products/[productSlug]` (the applet's
+ * product page body, sourced by slug; metadata keeps the repo's canonical
+ * `${displayTitle} | Maihan Gems` format). notFound()/error/loading
+ * boundaries unchanged.
+ */
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 
-import { LuxuryProductCard } from '../../../../components/storefront/LuxuryProductCard.js';
-import { ProductActions } from '../../../../components/storefront/ProductActions.js';
-import { ProductStudio } from '../../../../components/storefront/ProductStudio.js';
-import { cardToAtelier } from '../../../../lib/atelier-item.js';
-import { findNgcProduct, ngcCards } from '../../../../lib/ngc/catalog.js';
-import { displayTitle } from '../../../../lib/ngc/title.js';
-import { getProductBySlug, listProducts } from '../../../../lib/storefront-data.js';
-import { productImage } from '../../../../lib/storefront-images.js';
+import { ProductDetailView } from '@/components/mgh/catalog/ProductDetailView';
+import { getPdpCatalogGemstone } from '@/lib/mgh/adapters/catalog';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({
-  params,
-}: {
+interface PageProps {
   params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const ngc = findNgcProduct(slug);
-  if (ngc) return { title: `${displayTitle(ngc)} | Maihan Gems` };
-  const product = await getProductBySlug(slug);
-  return { title: product ? `${product.title} | Maihan Gems` : 'Piece | Maihan Gems' };
+  const resolved = await getPdpCatalogGemstone(slug).catch(() => null);
+
+  if (!resolved) {
+    return {
+      title: 'Piece | Maihan Gems',
+      description: 'The requested gemstone slug does not exist in the Maihan Gems vault ledger.',
+    };
+  }
+  return {
+    title: `${resolved.displayTitle} | Maihan Gems`,
+    description: resolved.stone.lede,
+    alternates: {
+      canonical: `/product/${resolved.stone.slug}`,
+    },
+  };
 }
 
 export default async function ProductPage({
@@ -31,102 +45,9 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
-  if (!product) notFound();
-
-  const ngc = findNgcProduct(slug);
-  if (ngc) {
-    const related = ngcCards({ kind: ngc.kind, stoneSlug: ngc.stoneType?.toLowerCase().replace(/[^a-z0-9]+/g, '-'), limit: 5 }).filter(
-      (row) => row.sku !== ngc.id,
-    );
-    const mergedNgc = {
-      ...ngc,
-      title: product.title || ngc.title,
-      priceUsd: product.priceUsd || ngc.priceUsd,
-    };
-    return <ProductStudio product={mergedNgc} related={related} />;
+  const resolved = await getPdpCatalogGemstone(slug);
+  if (!resolved) {
+    notFound();
   }
-
-  const image = productImage({
-    kind: product.kind,
-    stoneType: product.stoneType,
-    jewelryType: product.jewelryType,
-    settingFor: product.settingFor,
-    style: product.style,
-    title: product.title,
-    colorHue: product.colorHue,
-    variety: product.variety,
-    quantityType: product.quantityType,
-    imageUrl: product.imageUrl,
-  });
-
-  const related = (
-    await listProducts({
-      kind: product.kind,
-      stoneType: product.stoneType ?? undefined,
-      limit: 4,
-    })
-  ).filter((p) => p.id !== product.id);
-
-  const dossier = [
-    ['Kind', product.kind],
-    ['Stone', product.stoneType?.replace(/_/g, ' ')],
-    ['Carat', product.caratTotal ? `${product.caratTotal} ct` : null],
-    ['Shape', product.shape?.replace(/_/g, ' ')],
-    ['Colour', product.colorHue],
-    ['Origin', product.originCountry],
-    ['Treatment', product.treatment?.replace(/_/g, ' ')],
-    ['SKU', product.sku],
-  ].filter(([, value]) => Boolean(value));
-
-  return (
-    <main className="lx-section">
-      <div className="lx-wrap">
-        <nav className="lx-crumb" aria-label="Breadcrumb">
-          <Link href="/">Home</Link>
-          <span aria-hidden="true">·</span>
-          <Link href="/browse">Vault</Link>
-          <span aria-hidden="true">·</span>
-          <span>{product.title}</span>
-        </nav>
-        <div className="lx-pdp">
-          <div className="lx-pdp__media">
-            <img src={image} alt={product.title} />
-          </div>
-          <div>
-            <span className="lx-kicker">{product.originCountry ?? product.kind}</span>
-            <h1 className="lx-h2">{product.title}</h1>
-            <p className="lx-lede">
-              {[
-                product.caratTotal ? `${product.caratTotal} ct` : null,
-                product.shape?.replace(/_/g, ' '),
-                product.treatment?.replace(/_/g, ' '),
-                product.settingFor,
-                product.jewelryType,
-              ]
-                .filter(Boolean)
-                .join(' · ')}
-            </p>
-            <p className="lx-lede">{product.description ?? 'A vault piece, listed with the attributes we hold on record.'}</p>
-            <ProductActions item={cardToAtelier(product)} />
-            <dl className="lx-dossier">
-              {dossier.map(([label, value]) => (
-                <div key={String(label)}>
-                  <dt>{label}</dt>
-                  <dd>{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </div>
-        {related.length > 0 ? (
-          <div className="lx-grid" style={{ marginTop: '3rem' }}>
-            {related.map((row) => (
-              <LuxuryProductCard key={row.id} product={row} />
-            ))}
-          </div>
-        ) : null}
-      </div>
-    </main>
-  );
+  return <ProductDetailView stone={resolved.stone} />;
 }

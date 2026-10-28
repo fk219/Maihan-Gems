@@ -1,91 +1,74 @@
-/**
- * apps/web/src/app/(storefront)/colour/[colourSlug]/page.tsx
- *
- * `/padparadscha-gemstones` — colour-family listing (Task 3, target of the
- * 60 observed /{colour}-gemstones 301s). Same data-driven shape as the
- * variety page: one dynamic route, taxonomy decides existence, the colour
- * filter rides the Phase 3 port.
- */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { CollectionExplorer } from '@/components/mgh/catalog/CollectionExplorer';
+import { getCatalogColourCollection } from '@/lib/mgh/adapters/catalog';
+import { SITE_URL } from '@/lib/mgh/site-url';
 
-import { catalogServer } from '../../../../lib/catalog-server.js';
-import { listingBasePath, listingQuery, productItems, type ListingParams } from '../../../../lib/catalog-view.js';
-import { ProductCard } from '../../../../components/catalog/ProductCard.js';
-import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
-import { EmptyState } from '../../../../components/design-system/EmptyState.js';
-import { Pagination } from '../../../../components/design-system/Pagination.js';
-
-// Route segment config. Catalog views render per request from the cached
-// CatalogQueryService (doc 12.3: Server-rendered, cacheable, no per-user
-// state); there is deliberately no build-time catalogue, so Next must not
-// prerender this route (it would otherwise invoke the page with empty params
-// during `next build`). Runtime caching stays in the service, not in Next.
 export const dynamic = 'force-dynamic';
 
-interface PageProps {
+export async function generateMetadata({
+  params,
+}: {
   params: Promise<{ colourSlug: string }>;
-  searchParams: Promise<ListingParams>;
+}): Promise<Metadata> {
+  const { colourSlug } = await params;
+  const colour = await getCatalogColourCollection(colourSlug);
+  if (!colour) {
+    return {
+      title: 'Colour Collection Not Found',
+      description: 'The requested spectral hue collection does not exist.',
+    };
+  }
+  return {
+    title: `${colour.meta.name} Gemstones Collection`,
+    description: colour.meta.lede,
+    alternates: {
+      canonical: `${SITE_URL}/colour/${colour.meta.slug}`,
+    },
+  };
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export default async function ColourCollectionPage({
+  params,
+}: {
+  params: Promise<{ colourSlug: string }>;
+}) {
   const { colourSlug } = await params;
-  return { title: `${colourSlug.replace(/-/g, ' ')} gemstones | Maihan Gems` };
-}
-
-export default async function ColourIndexPage({ params, searchParams }: PageProps) {
-  const { colourSlug } = await params;
-  const urlParams = await searchParams;
-  const query = listingQuery(urlParams);
-  const service = catalogServer();
-
-  const taxonomy = (await service.getTaxonomy()).value;
-  const colour = taxonomy.colours.find((c) => c.slug === colourSlug);
-  if (colour === undefined || colour.state !== 'ACTIVE') notFound();
-
-  const result = (await service.listProducts({ ...query, filters: { color: [colourSlug] } })).value;
-  const items = productItems(result);
+  const colour = await getCatalogColourCollection(colourSlug);
+  if (!colour) {
+    notFound();
+  }
 
   return (
-    <main className="page colour-page">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Colour', href: '/colour' },
-          { label: colour.name },
-        ]}
-      />
-      <span className="page-eyebrow">Chromatic Palette</span>
-      <h1>{colour.name} Gemstones</h1>
-      <p className="page-subtitle">
-        Curated natural gemstones exhibiting exceptional {colour.name.toLowerCase()} hue saturation, crystal transparency, and scintillation.
-      </p>
-      <p className="result-count">
-        {items.length === 0 ? 'No gemstones currently listed.' : `${items.length} gemstone${items.length === 1 ? '' : 's'} listed`}
-      </p>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+      <nav aria-label="Breadcrumb" className="text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#76726A]">
+        <ol className="flex items-center gap-2">
+          <li><Link href="/" className="hover:text-[#121211]">Home</Link></li>
+          <li aria-hidden="true">/</li>
+          <li><Link href="/varieties" className="hover:text-[#121211]">Varieties</Link></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" className="font-medium text-[#121211]">{colour.meta.name}</li>
+        </ol>
+      </nav>
 
-      {items.length === 0 ? (
-        <EmptyState
-          title={`No ${colour.name.toLowerCase()} gemstones are currently listed.`}
-          action={<Link href="/">Browse all gemstones</Link>}
+      <div className="border-b border-[#E4DFD5] pb-6 flex items-center gap-4">
+        <span
+          aria-hidden="true"
+          className="h-9 w-9 rounded-full shrink-0 border border-black/15"
+          style={{ backgroundColor: colour.meta.hex }}
         />
-      ) : (
-        <ul className="product-grid">
-          {items.map((product) => (
-            <li key={product.slug}>
-              <ProductCard product={product.summary} />
-            </li>
-          ))}
-        </ul>
-      )}
+        <div>
+          <p className="text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] text-[#9A7B2C]">
+            SPECTRAL HUE · {colour.stones.length} LOTS
+          </p>
+          <h1 className="font-[family-name:var(--font-display)] text-4xl font-semibold text-[#121211]">
+            {colour.meta.name}
+          </h1>
+        </div>
+      </div>
 
-      <Pagination
-        basePath={listingBasePath(`/colour/${colourSlug}`, urlParams)}
-        previousCursor={null}
-        nextCursor={result.meta.next_cursor}
-        hasNext={result.meta.has_more}
-      />
-    </main>
+      <CollectionExplorer initialItems={colour.stones} lockedColourSlug={colour.meta.slug} />
+    </div>
   );
 }

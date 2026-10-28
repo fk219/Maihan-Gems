@@ -44,14 +44,14 @@ export function HeroBackgroundVideo() {
         muted
         playsInline
         preload="auto"
-        poster="/images/gems/sapphire-gem.jpg"
+        poster="/mgh/images/gems/sapphire-gem.jpg"
         data-testid="hero-background-video"
         data-video-ready={isReady ? 'true' : 'false'}
         className={`absolute inset-0 h-full w-full object-cover transform-gpu will-change-[opacity,transform] transition-opacity duration-1000 ease-out ${
           isReady ? 'opacity-85 scale-100' : 'opacity-60 scale-105'
         }`}
       >
-        <source src="/videos/hero-gemstone.mp4" type="video/mp4" />
+        <source src="/mgh/videos/hero-gemstone.mp4" type="video/mp4" />
       </video>
 
       {/* Minimalist Dark Gradient Scrims for Clear Navbar & Text Readability */}

@@ -1,26 +1,20 @@
+/**
+ * apps/web/src/app/(storefront)/products/[productSlug]/page.tsx
+ *
+ * M3 — replaced by the reference applet PDP (ProductDetailView, verbatim)
+ * sourced through the M3 adapter (`getPdpCatalogGemstone`):
+ *   - resolution order preserved from the pre-M3 page (read layer w/ NGC
+ *     merge → catalogue port product → gem-ref),
+ *   - the repo's productJsonLd SEO spine is still emitted, but ONLY from the
+ *     catalogue-port DTO (provenance/evidence stay the row's own);
+ *   - the WebAR hue asset feeds the applet's 3D/AR paths via the adapter.
+ */
 import { notFound } from 'next/navigation';
 
-import { isProductNotFound } from '../../../../lib/catalog-errors.js';
-import { loadProductDetail, loadGemstoneDetail } from '../../../../lib/catalog-server.js';
 import { siteBaseUrl, productJsonLd } from '../../../../lib/jsonld.js';
 import { JsonLd } from '../../../../components/seo/JsonLd.js';
-import { ProductDetailContent } from '../../../../components/catalog/ProductDetailContent.js';
-import { adaptGemstoneToProductDetail } from '../../../../lib/gemstone-adapter.js';
-import { loadWebarAssetByAssetId } from '../../../../lib/webar-server.js';
-
-/** Colour text → GLB hue file (mirrors gemHexFor's matching order). */
-function colourHueForAsset(text: string): string | null {
-  if (text.includes('tanzanite') || text.includes('violet')) return 'violet';
-  if (text.includes('emerald') || text.includes('green')) return 'green';
-  if (text.includes('ruby') || text.includes('red')) return 'red';
-  if (text.includes('pink') || text.includes('padparadscha')) return 'pink';
-  if (text.includes('yellow') || text.includes('citrine') || text.includes('heliodor')) return 'yellow';
-  if (text.includes('orange') || text.includes('spessart')) return 'orange';
-  if (text.includes('purple') || text.includes('amethyst')) return 'purple';
-  if (text.includes('white') || text.includes('colorless') || text.includes('diamond')) return 'white';
-  if (text.includes('blue') || text.includes('sapphire') || text.includes('spinel')) return 'blue';
-  return null;
-}
+import { ProductDetailView } from '@/components/mgh/catalog/ProductDetailView';
+import { getPdpCatalogGemstone } from '@/lib/mgh/adapters/catalog';
 
 // Route segment config. Catalog views render per request from the cached
 // CatalogQueryService (doc 12.3: Server-rendered, cacheable, no per-user
@@ -33,54 +27,42 @@ interface PageProps {
   params: Promise<{ productSlug: string }>;
 }
 
-async function resolveProductOrGemstone(slug: string) {
-  const detail = await loadProductDetail(slug);
-  if (detail.ok) {
-    return { ok: true as const, value: detail.value };
-  }
-  // If product not found, check if slug corresponds to a gemstone reference (e.g. K1324, PR5681)
-  const gemRefUpper = slug.toUpperCase();
-  const gemResult = await loadGemstoneDetail(gemRefUpper);
-  if (gemResult.ok) {
-    return { ok: true as const, value: adaptGemstoneToProductDetail(gemResult.value, slug) };
-  }
-  return { ok: false as const, error: detail.error };
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<{ title: string }> {
   const { productSlug } = await params;
-  const resolved = await resolveProductOrGemstone(productSlug);
-  return resolved.ok ? { title: `${resolved.value.title} | Maihan Gems` } : { title: 'Product | Maihan Gems' };
+  // Same metadata shape the pre-M3 page kept: any failed resolution (not
+  // found OR transient catalogue error) collapses to the fallback title —
+  // the route body surfaces the real state.
+  const resolved = await getPdpCatalogGemstone(productSlug).catch(() => null);
+  return resolved ? { title: `${resolved.displayTitle} | Maihan Gems` } : { title: 'Product | Maihan Gems' };
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { productSlug } = await params;
-  const resolved = await resolveProductOrGemstone(productSlug);
-  if (!resolved.ok) {
-    if (isProductNotFound(resolved.error)) notFound();
-    throw resolved.error; // route error boundary renders the recovery view (Task 5)
+  const resolved = await getPdpCatalogGemstone(productSlug);
+  if (!resolved) {
+    notFound();
   }
-  // P2-9: resolve the gem's WebAR asset by colour hue (`brilliant-<hue>`),
-  // seeded READY by `seed:webar`; only READY assets render the 3D/AR action.
-  const colourText = `${resolved.value.color?.name ?? ''} ${resolved.value.variety?.name ?? ''}`.toLowerCase();
-  const hue = colourHueForAsset(colourText);
-  const webarAsset = hue ? await loadWebarAssetByAssetId(`brilliant-${hue}`).catch(() => null) : null;
-  // Task 8: JSON-LD from the SAME server data the page renders — the contract
-  // DTO plus the breadcrumb trail the page itself builds. SITE_URL provides the
-  // canonical base; without it the page must not emit wrong canonical URLs.
-  const base = siteBaseUrl();
-  const crumbs = [
-    { label: 'Home', href: '/' },
-    ...(resolved.value.variety !== null
-      ? [{ label: resolved.value.variety.name, href: `/${resolved.value.variety.slug}` }]
-      : []),
-    { label: resolved.value.title },
-  ];
+  // Task 8 (unchanged rule): JSON-LD from the SAME server data the page
+  // renders — the port DTO plus the breadcrumb trail this page builds
+  // (SITE_URL provides the canonical base; the adapter keeps the row's own
+  // provenance, so nothing is synthesised for the offer).
+  const jsonLdPayload = resolved.productDetail
+    ? (() => {
+        const base = siteBaseUrl();
+        const crumbs = [
+          { label: 'Home', href: '/' },
+          ...(resolved.productDetail.variety !== null
+            ? [{ label: resolved.productDetail.variety.name, href: `/${resolved.productDetail.variety.slug}` }]
+            : []),
+          { label: resolved.productDetail.title },
+        ];
+        return productJsonLd(base, resolved.productDetail, crumbs);
+      })()
+    : null;
   return (
     <>
-      <JsonLd payload={productJsonLd(base, resolved.value, crumbs)} />
-      <ProductDetailContent detail={resolved.value} webarAsset={webarAsset} />
+      {jsonLdPayload ? <JsonLd payload={jsonLdPayload} /> : null}
+      <ProductDetailView stone={resolved.stone} />
     </>
   );
 }
-

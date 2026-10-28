@@ -1,3 +1,18 @@
+> **2026-10-28 MIGRATION M1→M8 COMPLETE — applet frontend fully on the real backend; reference folder deletable; COMMITTED + PUSHED to `develop` under the client's explicit authorization.** M8 delivered: (1) the two M7-flagged pre-existing env gaps FIXED — `/admin/ai-ops`: `tailAiLogs` remapped from the non-existent `ai_logs` table to the LOCKED `ai_interactions` (0013; real columns surface/intent/input_tokens/output_tokens/latency_ms/error_code/guardrail_action/handoff_triggered; success = `error_code IS NULL`, degraded = handoff ∨ guardrail ≠ ALLOW; `AiLogRow`/`AiLogItem` updated; NO new migration, schema untouched); `/admin/content`: `listCmsPages` SQL `pr.revision_number` → real column `version` (0012_cms.sql). LIVE smoke (API :3001, dev seam): `/api/v1/admin/content/pages`, `/api/v1/admin/jobs`, `/api/v1/admin/ai-logs` all **HTTP 200** JSON (ai-logs honest empty tail — 0 rows). (2) M8 deletion checklist: `grep -rn "MaihanGems Frontend" apps packages tools scripts docs e2e .github` → **git-tracked = exactly 1** (permitted CSS comment `mgh-applet.css:2`; raw filesystem +2 gitignored build artifacts in `dist/**`/`.next/dev/**`, regenerate on rebuild); import-form grep → **0 import-like hits** (4 comment-only brand-lineage mentions; 3 non-CSS comments reworded to "the reference applet" to keep the count at 1). (3) FULL BATTERY: tsc build 0 errors · web build success · lint 0 errors/212 warnings · schema-fidelity PASS (22 migrations) · suite **1009 passed / 0 failed / 30 skipped** (domain 244+11sk, contracts 43, ai 14, observability 12, db 162, worker 5, migrate 35, web 494+19sk) · budgets FAIL — **PRE-EXISTING at committed HEAD**, category 206.7/170 KB + product 201.9/190 KB gzip — recorded as a dedicated fix phase BEFORE production (§22.4/§24 of the audit). (4) Audit file updated: §22.5 M3–M8 rows COMPLETE with evidence, §22.4 A7 → done (follow-ups recorded), ONE §24 change-log row. Follow-ups ledger (post-migration, not blockers): taxonomy join (ledger slugs vs real stone types); `/api/ai-agent` proxy intentionally not recreated (`/ai-gemologist` → real `/api/v1/ai/chat`); settings `SettingItem` DB seam (fixture ledger sanctioned); contact/notification endpoint + ADR; bundle-budget regression fix phase; `AdminConsoleClient.tsx` unmounted M1 copy in components/mgh/operator; streaming AI adapter (drawer SSE only; /ai-gemologist non-streaming). NO other branch pushed; `naturalgemstones/` never staged (verified via git status).
+
+> **2026-10-27 M7 DONE — ADMIN back office cut over to the applet's operator console chrome.** NEW `apps/web/src/components/mgh/operator/AdminShell.tsx` (client) reproduces the reference console shell markup-for-markup (`MaihanGems Frontend/components/operator/AdminConsoleClient.tsx` L604-692): golden-cloud root, `#1C1610` vault top bar, `md:grid-cols-12` grid, `#FAF3E3/80` mono nav rail (group label "Governance Modules", item classes/active state/data-testids `admin-tab-*` verbatim), "Cross-Surface Links" block. HONESTY seams: sidebar items are `<Link>`s to the repo's REAL /admin/* paths (16 sections; applet's 7 tab labels mapped: Overview & KPIs→dashboard, Inventory Approval→catalogue, Payment Audit Log→orders, Vendor KYB Review→vendors, SEO & Redirects→seo, Navigation Trees→navigation, AI-Ops Queue→ai-ops; repo-only 9 use repo labels in applet item style; no `?autostart=1` fake-session param anywhere); top bar shows the REAL actor (`requireAdminAccess().actor` displayName+role threaded through all 16 cases as a prop — AdminActor type from contracts, sessionId NOT sent to client); "Lock Session" POSTs the REAL `/api/v1/auth/logout` then assigns /account/sign-in (same seam as vendor M5). Page `app/admin/[[...adminPath]]/page.tsx`: gate+switch+fetches byte-identical (diff-verified: only case returns/signatures/AdminFrame changed); `AdminFrame` re-impl = AdminShell + applet tab-header (`border-b #E5D4B3` + h1 `text-3xl sm:text-4xl` + lede `text-base #5C4E3C`); all 16 workspace components unchanged as children; AdminGateScreen (401/403) + notFound() kept. `AdminSidebar.tsx` DELETED (render replaced); admin `layout.tsx`: only `import '../../styles/mgh-applet.css'` added (carries .golden-cloud-gallery/.gold-gradient-cta + mgh Tailwind sources for components/mgh). Applet's `AdminConsoleClient.tsx` (repo M1 copy, 1908L) STAYS UNMOUNTED, unused, undeleted — its localStorage tabs never mounted; admin gate NOT restyled (AdminGateScreen lives in protected `lib/admin-server.tsx`). VERIFY: tsc -b 0 errors; web build OK; web vitest 494 passed/0 failed (no admin-markup specs exist — none updated); lint 0 errors. LIVE (dev seam, seeded local DB): 14/16 sections render shell+data (dashboard/catalogue/vendors/orders/refunds/discounts/customers/users/audit/certificates/migration/operations/seo/navigation; order detail links render); 403 READ_ONLY_ANALYST → real gate "Not Permitted"; unknown → 404 view. PRE-EXISTING env gaps (NOT M7): /admin/content + /admin/ai-ops data fetches return API INTERNAL — `ai_logs` table is queried by jobs-ops-repository but created by NO migration in packages/db (content/pages list SQL itself runs; failure inside handler path) — page code unchanged, renders honest AdminUnavailable; flagged for follow-up, do-not-touch scope respected. NO COMMITS.
+
+> **2026-10-27 M4 DONE — cart + 3-step checkout migrated to the applet, wired to the REAL commerce seam.** `/cart` now renders the reference cart page verbatim (GENEVA VAULT TRAY header + CartPageClient) showing the MERGED tray via the new client adapter `src/lib/mgh/adapters/commerce.ts` (`useMergedBag`: the applet provider bag merges INTO the authoritative server cart — dedup by id+slug, BagView semantics; server lines map to applet CartItem shapes incl. new `kind:'vault'` union member; remove/Empty-Bag hit `DELETE /api/v1/carts/{token}/items/{itemId}`). The three checkout pages keep the repo's REAL routes/guards/funnel order (order-summary → payment-order → secure-payment; SEO/redirect spine intact) with the applet step markup as the payload: step 1 = applet address form + VAULT STATISTICS aside wired to the REAL bridge (reuse/create cart → add candidates uuid|slug + expected_unit_price (409 PRICE_CHANGED surfaced verbatim) → session (email+discount_code, server snapshot) → REAL shipping checkpoint) → push `?session=`; step 2 (`/payment-order`) = applet settlement-instrument card over the REAL payment checkpoint — only the TEST provider card is selectable (dev sandbox truth), the card/escrow card renders DISABLED (pending backend decision — no fake SWISS_WIRE_DEMO/ESCROW_CARD_DEMO); step 3 (`/secure-payment`) = applet Final Verification showing the REAL recorded session (recipient from `shipping_address`, instrument from `payment_intent_id`, memo carried as `customer_note` on confirm) → confirm (idempotency key) → `POST /api/v1/orders` → real confirmation; confirmation page = applet honest ledger plate over `GET /api/v1/orders/{id}` (UUID navigation like the old flow; order_number chip; PENDING_PAYMENT never fabricated settled; the applet's fake ORD-2026-8410 example link omitted). Applet's fake $2,480 anchor stone + prefilled demo recipient dropped (empty fields, applet empty-state visuals). DELETED orphaned `components/checkout/{CheckoutReview,CheckoutPayment,CheckoutConfirm,CheckoutTrust}` + `components/storefront/BagView.tsx`. Live-verified against the seeded dev DB: full funnel 201/200/201/200/200/200 → order MG-2026-000012 PENDING_PAYMENT $4,995.00; confirmation page renders the real state. Ops note: the standalone API needs `MAIHAN_DEV_SEAM=1` (NODE_ENV=development/test also) or placeOrder fail-closes via `createPaymentProvider` (R1-1) — expected, not a bug. Battery: `pnpm run build` (tsc) 0 errors; `pnpm --filter @maihan/web run build` green; web vitest 494 passed/0 failed/19 skipped (baseline identical — checkout.spec/cart.spec API-level stayed green; NO spec updates needed); `pnpm run lint` 0 errors (212 pre-existing warnings, none in M4 files). Phases: M5 DYO/account/vendor → M6 editorial+AI → M7 admin cutover → M8 deletion check. NO COMMITS.
+
+> **2026-10-27 M3 DONE — PDP family + AR pages migrated to the applet.** All five replaced pages render the reference PDP/AR verbatim (markup/classes/fonts/animations 1:1, seams only): `/products/[productSlug]` canonical PDP (the repo's productJsonLd SEO spine is still emitted via the port DTO `productDetail` / gem-ref `adaptGemstoneToProductDetail`; read-layer-only rows carry the applet view's own inline JSON-LD + canonical `${displayTitle} | Maihan Gems`), `/[varietySlug]/[productSlug]` ready-made route (same PDP; variety ledger crumb honoured), `/product/[slug]` legacy alias (it rendered its own ProductStudio UI → now the same applet PDP), `/ar/[assetId]` + `/ar/handoff/[handoffToken]` (applet viewer/handoff layout; real `webar_assets` rows + SHA-256 `ar_handoff_tokens` validation read-only). Adapter: `getPdpCatalogGemstone` (read layer → catalogue port → gem-ref, returns `PdpGemstoneResolution` { stone/displayTitle/productDetail/breadcrumbVariety }) + `pdpStoneFromCard/Detail/GemstoneDetail` helpers in `src/lib/mgh/adapters/catalog.ts`; NEW `src/lib/mgh/adapters/webar-types.ts` (`WebArAssetView` = applet WebArAssetRecord with calibration fields nullable + REAL modelUrl=cdn_url, `WebarHandoffSession`) and `webar-server.ts` M3 seam (`loadWebArAssetView` / `listReadyWebArAssets` / `loadWebArHandoffSession` — hash-only token SHA-256 lookup, no consumption). Real GLB reaches `ThreeGemstoneStudio` the same way the reference wires it (PDP links exist ONLY when a READY `brilliant-<hue>` row exists → `/ar/<id>` → `ArViewerPageClient` → studio; the applet studio stays procedural-lattice by design — that IS the honest fallback, no fabricated calibration). Wiring verified live on the seeded DB: hauyne PDP shows 4× `/ar/brilliant-blue` links, `/ar/brilliant-blue` renders title+GLB path of the real row, `/ar/brilliant-unknown` honest 404 plate listing READY assets, invalid handoff renders the invalid plate with NO token chips (deviation documented in-page: hash-only tokens are not enumerable). Battery: `pnpm run build` tsc 0 errors; `next build` PASS; web vitest 494/0 (19 skipped); lint 0 errors/212 warnings. Bundle-budget check (NOT in the M3 gate) still FAILS for category 206.8/170 + product 202.0/190 but was ALREADY failing worse at HEAD (319.0/317.5 — verified via isolated HEAD worktree build); M2b+M3 tree is ~115KB LIGHTER, driver is framework/root-chunk composition shared by every route — needs a budget-motion fix phase before M8. Deviations kept minimal & commented in-page. NO COMMITS.
+
+
+> **2026-10-27 M2b DONE — browse/search/listings migrated to the applet.** Seven public routes now render the MaihanGems reference pages verbatim (imports → `@/components/mgh/**`, assets → `/mgh`, `dynamic='force-dynamic'`): `/browse` (adapter `getBrowseCatalogGemstones` → CollectionExplorer), `/search` (reference AiConciergeWorkspace + NEW seam: page resolves `searchStorefront` — the repo's own server-side search — through `searchCatalogGemstones` and seeds the hydrating concierge turn with LIVE cards via new optional prop `seededResults`; chat/DYO machinery stays applet-local fixture data), root catch-all `[varietySlug]` (ledger variety/colour metas + real stones filtered by derived slug; loose-stone slugs render the applet ProductDetailView with real pool relateds), `/colour/[colourSlug]`, `/pairs` (real pairs via `getMatchedPairCatalog`), `/settings` + `/jewellery` (REAL pairs; settings family KEpt on the ported fixture ledger VERBATIM — sanctioned: no SettingItem-shaped accessor without inventing metals/sizes/shapes; `settings/[settingSku]` STAYED the repo's real DB page, NOT replaced). Adapter additions in `src/lib/mgh/adapters/catalog.ts` (M2b block): getBrowseCatalogGemstones / getCatalogVarietyCollection / getCatalogColourCollection / getCatalogGemstoneBySlugOrId / getCatalogRelatedGemstones / searchCatalogGemstones / getMatchedPairCatalog / getFixtureSettingsCatalog / getFixtureEarringSettings; ProductDetailView is now async (related seam + JSON-LD 'Not evidenced' null-safety). Asset-prefix sweep: ~110 unprefixed `/images|/videos|/assets|/hero-blueprint|/gems` refs prefixed `/mgh` across mgh components (StorefrontHeader, CartDrawer, Product/SettingDetail, CartPageClient, operator clients, HeroBlueprintSection) and pored fixture data (`lib/mgh/fixtures/catalog.ts`, platform-governance, storefront-data). Spec updates (allowed, markup-only): `catalog-view.spec.ts` pages block → applet shells/notFound contract; `accessibility-audit.spec.tsx` → new signatures + ledger slug + applet-provider mount for applet-templated audits; `data-states.spec.tsx` EMPTY block → applet zero-result integrations. Battery: root tsc 0 errors; web `next build` PASS; web vitest 494 passed/0 failed (495→494: one merged old-markup test removed); lint 0 errors/213 warnings. Runtime smoke: /browse /search?q /tanzanite /colour/blue /pairs /settings /settings/SET-ARCH-SOL-01 /jewellery 200 with REAL catalogue cards. Honest shortfalls: fixture-ledger variety/colour slugs rarely intersect the real stone-type vocabulary (several ledger variety page render 0 LOTS until a taxonomy join), fixture-SKU deep links (SET-*, /products/elysian-ring) stay applet-ledger 404s like M2a, Next-16 streamed notFound renders the not-found view with 200 (codebase-wide incl. untouched PDP). NO COMMITS. Next: M3 PDP+AR.
+
+> **2026-10-26 M2a DONE — applet shell + homepage live.** Root layout: applet body classes + skip link + applet StorefrontProvider at ROOT. (storefront)/layout.tsx: reference structure verbatim (golden-cloud-gallery wrapper, applet StorefrontHeader/MotionWrapper/ScrollToTopButton/CartDrawer/Footer); repo provider still wraps (FX). Homepage: reference page verbatim + NEW adapter `src/lib/mgh/adapters/catalog.ts` (getHomeCatalogGemstones/getHomeCatalogMatchedPairs — real ACTIVE products via listProducts(); unevidenced → null). Sister-house routes brand-agnostic. Old vault homepage preserved: repo root `page.vault-backup.tsx.txt`. FOLLOW-UPS: ~50 unprefixed `/images/...` paths in other mgh components (fix at their phases); M2b = browse/search/listings next; M3 PDP+AR → M4 commerce → M5 DYO/account/vendor → M6 editorial+AI → M7 admin cutover → M8 deletion check. Battery: 495 web + full 1010 green; lint 0 errors. NO COMMITS.
+
+> **2026-10-26 APPLETS PHASE 0/1 (inventory + compare).** Audit file §22.6 now holds the full Phase-0 inventory of both trees, the Phase-1 area verdict (MaihanGems wins visual design/page coverage/a11y; Ours wins admin+vendor reality/states/auth/data-fetch/media; Tie on i18n — absent in BOTH — and copy-protection code quality), the 10 best reference features to port, and the Phase-2 ordered plan M1(DONE)→M8 with file map, acceptance per step, 7 risks and cross-cutting rules. REFERENCE PATH: `/workspaces/Maihan-Gems/MaihanGems Frontend` (AI-Studio applet; will be deleted after M8). Zero-reference-import VERIFIED (only a CSS comment). Key wiring rules: copied files get import-path/null-safety/asset-prefix changes ONLY (no visual edits); data goes through our API/adapter layer; fonts + decorative i18n switcher stay as-is; no invented copy; naturalgemstones untouched; NO commit/push without explicit instruction. Next action: await user's "continue" to execute M2 (homepage/browse/search/listings).
+
 # MASTER TRUTH AUDIT + REMEDIATION ROUND 2 (2026-10-19)
 
 > **2026-10-22 UPDATE 7 — STATUS, CONTRAST, COPY.** Unknown one-segment URLs now return HTTP 404 from the proxy before a loading boundary can flush 200. Variety, browse, jewellery, settings, and pairs pages carry meta descriptions taken from existing ledes. Logo subline and evidence labels use `#5C5344` so small text clears AA on the ground. Visible homepage em dashes are removed. `DESIGN.md` records the cloth concept. Local API on :3001 must run with `NODE_ENV=development` (or `MAIHAN_DEV_SEAM=1`) or session verification fail-closes without `MAIHAN_SESSION_SECRET`.
@@ -1424,3 +1439,152 @@ Per AUDIT_PHASE_PLAN.md. Fresh verification executed THIS session:
 
 Next: PHASE R2 (corpus migration needs naturalgemstones/ archive restore; email/PSP/AI keys;
 WebAR assets) — all client-gated.
+
+---
+
+## Phase M5 — storefront applet migration (DYO + account + vendor) — COMPLETE (2026-10-27, working tree)
+
+Reference-folder migration of `MaihanGems Frontend` onto the repo's REAL
+backend via `apps/web/src/lib/mgh/adapters/`. NO commits; `naturalgemstones/`
+untouched. Amends the M1–M4 migration series.
+
+Status per surface:
+
+- **(storefront)/design-your-own** — applet DYOJ landing/hero/how-it-works
+  markup rendered verbatim over the REAL catalogue: stones = ACTIVE singles
+  (`listProducts`), settings = REAL setting variants grouped per design via
+  `listSettingsForDyo` (unified `LISTING`+`SETTING` product rows with
+  `structured_extra.design_code`), metals/compat = `dyo-compat` +
+  `setting_compatibility_rules` (client evaluates the same rules; server
+  re-validates). Applet's 4-step flow posts the applet's exact create
+  contract (`POST /api/v1/dyo/configurations` + `…/validate`) → review URL.
+- **(storefront)/design-your-own/review/[code]** — repo review logic kept
+  verbatim + rendered with applet dossier chrome (exact bundle: row 930-
+  981 / €1,975.50). REAL joins + `loadDyoReviewModel` + REAL price-snapshot
+  badge (`quote.total`) drive the add-to-bag CTA; bag line is real
+  (`POST /api/v1/dyo/configurations/<code>/add-to-cart` DIRECT — confirmed
+  via LIVE round-trip: create c4f84a44 → validate → snapshot €1,975.50 →
+  cart_mt-68b7151c). RLS precheck threaded behind status code 200/422/409/503.
+- **(storefront)/account/** — route logic untouched; shells re-skinned with
+  the applet's LSP-borrowed classes: dossier badge row (990–1090), order
+  ledger cards (1050–1145). Server actions still write the httpOnly
+  `maihan_session`/`maihan_client_ref`; API-level flows verified in suite
+  (account.spec). Applet-only client stitching is NOT wired: role inference
+  from email (admin@ → ADMIN), google OAuth simulation, localStorage dossier
+  fixtures; AuthPopupModal stays unmounted.
+- **/vendor/** — stays in its own group; repo route placement untouched.
+  Old VendorSell build replaced by the applet's vendor markup at the same
+  routes (design-your-own, checkout, account, vendor, order-detail). 4-step
+  list: build → real `POST /api/v1/vendor/products` (create/PATCH) then
+  maintenance actions → moderation info from real `vendor.vendors` rows
+  (no invented status/copy, no localStorage) — admin verification still
+  lives in the repo's real console.
+
+Adapters: `apps/web/src/lib/mgh/adapters/dyo.ts`,
+`apps/web/src/lib/mgh/adapters/vendor.ts` (+ precedent `commerce.ts`).
+
+Verification this session: `pnpm run build` exit 0 (tsc) ·
+`pnpm --filter @maihan/web run build` success (Next 16.4 webpack,
+12/12 static pages) · web suite `npx vitest run` **494 passed / 19 skipped /
+0 failed** · `pnpm run lint` **0 errors** / 212 warnings (pre-existing
+no-explicit-any debt; none in M5 sources). Live round-trips on the
+local dev DB exercised the real DYO chain end to end; account pages fix
+session cookie semantics; empty stores render honest markers.
+
+Deviations (all data-seam only):
+1. DYO landing "View Sample DYOJ Order" + ledger side panel carry the
+   REAL commission ledger samples (`getDyoLedgerSample`), NOT the applet's
+   fixture codes (DYO-MG-8841/2049) — honoured "no invented identifiers".
+2. The applet's earring-inclusive settings source (`acceptsPairsOnly`) is
+   filtered at the adapter: earring mounts can never pair with a single
+   stone (INV-03), so the 4-step studio never surfaces INV-03 failures.
+3. The vendor onboarding wizard fields the applet had without real storage
+   (tax form, IBAN, SWIFT, UBO) are REPLACED with the repo's REAL
+   `vendor_onboarding` columns (legal/trading name, country, bourse city,
+   bourse member, contact phone, description). No seam ⇒ nothing asserted.
+4. "Payment audit ledger" (payout SOC amounts) had no repo seam: the tab
+   now renders the REAL order-line settlement view (order number, piece,
+   destination, fulfilment, tracking) and refuses to render unreconciled
+   payout numbers. KPI tile titled accordingly.
+5. Two real seam fixes surfaced by the migration (compiled dist rebuilt):
+   - dyo review GEM_SELECT read `cl.name` / `tr.name` where the locked
+     schema has clarities.label / treatments.label.
+   - `createDyoConfigurationHandler` interpolated the structured
+     `parsedSku.sku` object into SQL + error text; now passes the raw
+     client SKU string (`settingVariantSkuText`), matching `setting_variants.sku`.
+6. Format markers honed to exact values: vendor ledger money cells use the
+   cents-preserving formatter instead of the applet's whole-dollar rounding.
+
+## Phase M6 — editorial applet migration (+ /ai-gemologist) — COMPLETE (2026-10-27, working tree)
+
+Reference-folder migration of the EDITORIAL surfaces onto the repo's REAL
+backend. Amends the M1–M5 series. NO commits; `naturalgemstones/` untouched.
+
+Status per surface (applet markup ported verbatim; imports → `@/components/mgh/**`,
+`@/lib/mgh/**`, `SITE_URL` → `@/lib/mgh/site-url`; assets → `/mgh/...`):
+
+- **/about + /about/<slug>** — applet verbatim (portable copy). `[aboutSlug]`
+  now 404s unknown slugs honestly (applet contract) — U-07 filler removed;
+  CMS has no about seam (repo about page was static) ⇒ ported copy renders.
+- **/education/**`[[...educationPath]]` — applet hub/article chrome; CMS-first
+  (`lib/cms-pages.ts`, EDUCATION kind, published-only; hub excludes `education`
+  self-page); no CMS row for a slug → the applet's ported monographs render
+  verbatim; unknown slug → honest 404. CMS cards/headers show only real stored
+  values (title, updated_at, first stored paragraph).
+- **/blog + /blog/<slug>** — same pattern (BLOG kind). Seed has no BLOG rows ⇒
+  applet's ported journal renders; CMS rows (when published) render in the
+  same card/article chrome.
+- **/policy (NEW hub) + /policy/<slug>** — hub ported verbatim (route did not
+  exist before; manifest entry added). Detail: CMS-first with a POLICY-kind
+  gate (stops cross-kind leaks the old page allowed), then the applet's
+  alias-resolved ported copy, else vertical 404 (old filler-for-any-slug
+  fallback not carried over).
+- **/showrooms + /showrooms/<slug>** — CMS-first (SHOWROOM kind; seeded rows
+  dubai-difc / geneva-rue-du-rhone / london-mayfair / bangkok-silom now render)
+  in the applet's salon cards/chrome; fixture fallback verbatim; unknown → 404.
+- **/contact** — applet page verbatim; `ContactViewingFormClient` gained an
+  optional `email` prop (STOREFRONT_CONTACT.email) and submits the dossier
+  through the repo's REAL seam (client mailto — same path the old
+  ViewingRequest card used). Success panel copy made honest: "VIEWING REQUEST
+  COMPILED … opens in your mail client; no reservation is held until the
+  salon replies" (was "VIEWING LOGGED/Dossier Reserved" — no server record
+  exists).
+- **/financing + /protection-plan** — applet verbatim (static client-approved
+  copy; no CMS seam).
+- **/ai-gemologist (NEW)** — applet page verbatim; `AiConciergeWorkspace` model
+  turns now route through **`lib/mgh/adapters/ai.ts`** → repo REAL seam
+  `POST /api/v1/ai/chat` (`surface:'chat_panel'`, stream:false
+  non-streaming; conversationKey tracked client-side across turns and reset
+  on New Chat). Response mapping: `data.response`→reply, `data.citations`
+  {type,id,label,url}→applet pills; `data.toolCalls` untouched. Null/failed
+  reply keeps the applet's deterministic local turn (honest degraded path
+  when no model key — DEGRADED_NO_MODEL_PROVIDER is the handler's label).
+  Applet's `/api/ai-agent` Gemini proxy NOT recreated. Chat tool actions
+  keep acting on the provider's local bag only (ADR-003 no-write AI law).
+
+Adapters: `lib/mgh/adapters/ai.ts` (NEW; precedent catalog/commerce/dyo/vendor).
+Route manifest: added `policy/page.tsx` + `ai-gemologist/page.tsx` entries
+(authority cites SoT surface + the applet reference path).
+
+Verification: `pnpm run build` (tsc -b) exit 0 · `pnpm --filter @maihan/web
+run build` success (14/14 static pages) · web suite `npx vitest run` 494
+passed / 19 skipped / 0 failed (no spec updates needed — no spec asserted
+old editorial markup; a11y suite untouched, zero violations) · `pnpm run
+lint` 0 errors / 212 pre-existing warnings.
+
+Deviations (honest-labelled, data-seam only):
+1. Contact success copy reworded to claim only a locally compiled dossier +
+   mailto path (no backend endpoint). Gap to report: no contact/notification
+   API exists; a future backend endpoint is required for a persisted log.
+2. CMS-driven editorial records show chrome labels ("PUBLISHED CHAPTER",
+   "PUBLISHED DISPATCH", "PUBLISHED SALON DOSSIER") with only real stored
+   values; no invented CMS metadata (category/readingMinutes come from the
+   ported fixture copy only).
+3. AI turn enrichment uses non-streaming JSON (the applet UI has no streaming
+   renderer; streaming stays the drawer's SSE path).
+4. Education/blog hubs render CMS pages when present INSTEAD of the applet
+   fixture grid (repo's CMS-first discipline); fixture monographs remain
+   reachable by slug. The ported copy renders whenever CMS is empty.
+5. Outbound applet links to `/concierge` (about/policy) 404 honestly today —
+   the applet's /concierge page was NOT in the M6 page list; /ai-gemologist
+   is the repo's AI page. Report as a link-target gap.

@@ -131,7 +131,7 @@ export function HeroBlueprintSection() {
         
         {/* Visual Blueprint Master Art Direction Image */}
         <img
-          src="/assets/aistudio/file_000000001ed4820ca6195c16d01e11bc_cebb7639.png"
+          src="/mgh/assets/aistudio/file_000000001ed4820ca6195c16d01e11bc_cebb7639.png"
           alt="Maihan Gems — Rare by nature. Timeless by design."
           className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
           loading="eager"
@@ -487,7 +487,7 @@ export function HeroBlueprintSection() {
         {/* Background Atmosphere */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40">
           <img
-            src="/hero-blueprint/hero-subject.png"
+            src="/mgh/hero-blueprint/hero-subject.png"
             alt="Editorial Backdrop"
             className="w-full h-full object-cover object-top"
           />
@@ -623,7 +623,7 @@ export function HeroBlueprintSection() {
             className="block aspect-[16/9.6] rounded-2xl overflow-hidden border border-white/20 shadow-xl"
           >
             <img
-              src="/hero-blueprint/card-world-beauty.png"
+              src="/mgh/hero-blueprint/card-world-beauty.png"
               alt="A World of Rare Beauty"
               className="w-full h-full object-cover"
             />
@@ -635,7 +635,7 @@ export function HeroBlueprintSection() {
               className="block aspect-square rounded-xl overflow-hidden border border-white/20 shadow-lg"
             >
               <img
-                src="/hero-blueprint/card-emerald-ring.png"
+                src="/mgh/hero-blueprint/card-emerald-ring.png"
                 alt="Colombian Emerald"
                 className="w-full h-full object-cover"
               />
@@ -645,7 +645,7 @@ export function HeroBlueprintSection() {
               className="block aspect-square rounded-xl overflow-hidden border border-white/20 shadow-lg"
             >
               <img
-                src="/hero-blueprint/card-ruby-tweezers.png"
+                src="/mgh/hero-blueprint/card-ruby-tweezers.png"
                 alt="Burmese Ruby"
                 className="w-full h-full object-cover"
               />

@@ -1,9 +1,30 @@
 'use client';
 
+/**
+ * M5 — the applet's VendorPortalClient, re-allocated to the repo's REAL
+ * vendor seam. Every visual block (top bar, KPI tiles, inventory form +
+ * table, consignment intake ledger, settlement ledger, onboarding wizard,
+ * purchase-orders view) keeps the applet's exact classes/animations.
+ *
+ * Data-seam changes only:
+ *  - NO `platform-governance` store and NO Google SSO gate — the real
+ *    session gate lives in the server page (`getAuthenticatedSessionActor`).
+ *    The Google "Continue with ..." button is never mounted (email-inferred
+ *    session state is prohibited).
+ *  - NO multi-vendor switcher: one real vendor (from `vendor_onboarding`
+ *    through /api/v1/vendor/dashboard) drives the whole portal.
+ *  - Products/orders/consignment rows are the marketplace's own DRAFT /
+ *    SUBMITTED / REJECTED etc. moderation enums and order states.
+ *  - The fulfilment workspace records real carrier dispatches through the
+ *    fulfil endpoint; the applet's optimistic mark ships only after the
+ *    server confirms.
+ *  - The onboarding wizard writes the REAL `vendor_onboarding` fields
+ *    (display/legal name, country, bourse city, bourse member flag,
+ *    trade-desk phone, house description) via PATCH /api/v1/vendor/profile.
+ */
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  Lock,
   LogOut,
   Package,
   ClipboardList,
@@ -13,279 +34,244 @@ import {
   Plus,
   Edit3,
   CheckCircle2,
-  Sparkles,
-  Search,
 } from 'lucide-react';
-import type { VendorListingRecord } from '@/lib/mgh/fixtures/types';
-import { formatUsd } from '@/lib/mgh/storefront-data';
+import type { VendorOrderLineDto, VendorProfileDto } from '@maihan/db';
 import {
-  INITIAL_PLATFORM_INVENTORY,
-  INITIAL_PAYMENT_AUDIT_LOGS,
-  INITIAL_VENDOR_ONBOARDING_SUBMISSIONS,
-  loadStoredInventory,
-  saveStoredInventory,
-  loadStoredPaymentAuditLogs,
-  loadStoredVendorOnboarding,
-  saveStoredVendorOnboarding,
-  filterPaymentAuditLogs,
-  calculatePaymentLedgerMetrics,
-  validateInventorySubmission,
-} from '@/lib/mgh/platform-governance';
-import type { InventoryCategory, PlatformInventoryItem, PaymentAuditLogEntry, PaymentAuditStatus, VendorOnboardingSubmission } from '@/lib/mgh/platform-governance';
+  loadVendorOrders,
+  loadVendorProducts,
+  saveVendorProduct,
+  submitVendorProduct,
+  updateVendorFulfilment,
+  signOutVendorSession,
+  VENDOR_CATEGORIES,
+  type VendorInventoryCategory,
+  type VendorInventoryRow,
+} from '@/lib/mgh/adapters/vendor';
 import { VendorOnboardingWizard } from '@/components/mgh/operator/VendorOnboardingWizard';
 
 export type VendorTabId = 'overview' | 'listings' | 'payments' | 'onboarding' | 'orders';
 
-interface VendorOrderItem {
-  poNumber: string;
-  vendorName: string;
-  stoneSku: string;
-  settlementAmountUsd: number;
-  paymentTerms: string;
-  status: string;
-  date: string;
-}
-
 interface VendorPortalClientProps {
   initialSection: VendorTabId;
-  initialAuthenticated: boolean;
-  initialInviteToken?: string;
-  listings: VendorListingRecord[];
-  orders: VendorOrderItem[];
+  /** Real vendor_onboarding profile (the single authenticated partner). */
+  vendor: VendorProfileDto;
+  /** Real dashboard summary tiles. */
+  initialSummary: {
+    total_products: number;
+    draft_products: number;
+    submitted_products: number;
+    approved_products: number;
+    published_products: number;
+    rejected_products: number;
+    out_of_stock_products: number;
+    total_order_lines: number;
+    pending_fulfillment_lines: number;
+    total_revenue_usd: string;
+  };
+  /** Real vendor products (from /api/v1/vendor/products). */
+  initialProducts: VendorInventoryRow[];
+  /** Real gemstone/pair consignment subset for the intake ledger. */
+  initialConsignment: VendorInventoryRow[];
+  /** Real vendor order lines (from /api/v1/vendor/orders). */
+  initialOrders: VendorOrderLineDto[];
 }
+
+/** Exact-value money formatter — the vendor-ledger cells never round away
+ *  real cents (the applet helper rounds to the whole displayed unit). */
+const USD_EXACT = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+function formatRealUsd(value: string | number): string {
+  return USD_EXACT.format(Number(value) || 0);
+}
+
+const MODERATION_BADGE: Record<string, string> = {
+  PUBLISHED: 'bg-[#F0FDF4] text-[#15803D] border border-[#BBF7D0]',
+  APPROVED: 'bg-[#F0FDF4] text-[#15803D] border border-[#BBF7D0]',
+  SUBMITTED: 'bg-[#FAF3E3] text-[#8C6D2F] border border-[#E5D4B3]',
+  DRAFT: 'bg-[#FAF3E3] text-[#8C6D2F] border border-[#E5D4B3]',
+  REJECTED: 'bg-[#FEF2F2] text-[#B91C1C] border border-[#FECACA]',
+  ARCHIVED: 'bg-[#FAF3E3] text-[#8C6D2F] border border-[#E5D4B3]',
+};
 
 export default function VendorPortalClient({
   initialSection,
-  initialAuthenticated,
-  initialInviteToken = '',
-  listings,
-  orders,
+  vendor,
+  initialSummary,
+  initialProducts,
+  initialConsignment,
+  initialOrders,
 }: VendorPortalClientProps) {
-  const [authenticated, setAuthenticated] = useState<boolean>(initialAuthenticated);
-  const [vendorEmail, setVendorEmail] = useState<string>('consignment@arusha-lapidary.co.tz');
-  const [activeVendorId, setActiveVendorId] = useState<string>('VND-ARUSHA-01');
-  const [activeVendorName, setActiveVendorName] = useState<string>(
-    'Arusha Lapidary Cooperative'
-  );
   const [activeTab, setActiveTab] = useState<VendorTabId>(initialSection);
+  const [categoryFilter, setCategoryFilter] = useState<'ALL' | VendorInventoryCategory>('ALL');
+  const [products, setProducts] = useState<VendorInventoryRow[]>(initialProducts);
+  const [consignment] = useState<VendorInventoryRow[]>(initialConsignment);
+  const [orders, setOrders] = useState<VendorOrderLineDto[]>(initialOrders);
+  const [summary] = useState(initialSummary);
+  const [logoutBusy, setLogoutBusy] = useState(false);
 
-  // Shared Multi-Category Inventory State
-  const [inventory, setInventory] = useState<PlatformInventoryItem[]>(INITIAL_PLATFORM_INVENTORY);
-  const [categoryFilter, setCategoryFilter] = useState<'ALL' | InventoryCategory>('ALL');
+  // Add / Edit inventory form state (the applet's seven-field sanity form,
+  // now submitted through the REAL product endpoints).
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [formCategory, setFormCategory] = useState<InventoryCategory>('Gemstones');
+  const [formCategory, setFormCategory] = useState<VendorInventoryCategory>('Gemstones');
   const [formSku, setFormSku] = useState('');
   const [formTitle, setFormTitle] = useState('');
-  const [formSubCategory, setFormSubCategory] = useState('Sapphire · Cushion');
-  const [formCaratOrWeight, setFormCaratOrWeight] = useState('3.40 ct (8.80 × 7.10 mm)');
-  const [formOrigin, setFormOrigin] = useState('Merelani Block D, Tanzania');
-  const [formTreatmentOrHallmark, setFormTreatmentOrHallmark] = useState(
-    'No Heat (Unheated — SSEF Certified)'
-  );
-  const [formPriceUsd, setFormPriceUsd] = useState('14200');
+  const [formSubCategory, setFormSubCategory] = useState('');
+  const [formCaratOrWeight, setFormCaratOrWeight] = useState('');
+  const [formOrigin, setFormOrigin] = useState('');
+  const [formTreatmentOrHallmark, setFormTreatmentOrHallmark] = useState('');
+  const [formPriceUsd, setFormPriceUsd] = useState('');
+  const [formImageUrl, setFormImageUrl] = useState('');
   const [inventoryFeedback, setInventoryFeedback] = useState<string | null>(null);
   const [inventoryError, setInventoryError] = useState<string | null>(null);
+  const [inventoryBusy, setInventoryBusy] = useState(false);
 
-  // Shared Payment Audit Log State
-  const [paymentLogs, setPaymentLogs] = useState<PaymentAuditLogEntry[]>(
-    INITIAL_PAYMENT_AUDIT_LOGS
-  );
-  const [paymentStatusFilter, setPaymentStatusFilter] = useState<
-    PaymentAuditStatus | 'ALL'
-  >('ALL');
-  const [paymentQuery, setPaymentQuery] = useState('');
-
-  // Shared Supplier KYB & Tax Onboarding State
-  const [kybSubmissions, setKybSubmissions] = useState<VendorOnboardingSubmission[]>(
-    INITIAL_VENDOR_ONBOARDING_SUBMISSIONS
-  );
+  const [fulfilBusy, setFulfilBusy] = useState<string | null>(null);
+  const [fulfilCarrier, setFulfilCarrier] = useState('Malca-Amit Armored');
+  const [fulfilTracking, setFulfilTracking] = useState('');
+  const [fulfilError, setFulfilError] = useState<string | null>(null);
+  const [fulfilNote, setFulfilNote] = useState<string | null>(null);
 
   useEffect(() => {
-    setInventory(loadStoredInventory());
-    setPaymentLogs(loadStoredPaymentAuditLogs());
-    setKybSubmissions(loadStoredVendorOnboarding());
-  }, []);
+    setProducts(initialProducts);
+    setOrders(initialOrders);
+  }, [initialProducts, initialOrders]);
 
-  const handleOpenEdit = (item: PlatformInventoryItem) => {
+  async function reloadVendorData() {
+    const [nextProducts, nextOrders] = await Promise.all([
+      loadVendorProducts().catch(() => null),
+      loadVendorOrders().catch(() => null),
+    ]);
+    if (nextProducts) setProducts(nextProducts);
+    if (nextOrders) setOrders(nextOrders);
+  }
+
+  const handleOpenEdit = (item: VendorInventoryRow) => {
     setEditingItemId(item.id);
     setFormCategory(item.category);
     setFormSku(item.sku);
     setFormTitle(item.title);
     setFormSubCategory(item.subCategory);
-    setFormCaratOrWeight(item.caratOrWeight);
-    setFormOrigin(item.originOrAtelier);
-    setFormTreatmentOrHallmark(item.treatmentOrHallmark);
-    setFormPriceUsd(String(item.priceUsd));
+    setFormCaratOrWeight(item.caratOrWeight ? String(item.caratOrWeight) : '');
+    setFormOrigin(item.originOrAtelier ?? '');
+    setFormTreatmentOrHallmark(item.treatmentOrHallmark ?? '');
+    setFormImageUrl('');
+    setFormPriceUsd(item.priceUsd ? String(item.priceUsd) : '');
     setInventoryError(null);
     setInventoryFeedback(null);
   };
 
-  const handleSaveInventoryItem = (e: React.FormEvent) => {
+  const handleSaveInventoryItem = async (e: React.FormEvent) => {
     e.preventDefault();
     setInventoryError(null);
     setInventoryFeedback(null);
-
     const priceNum = Number(formPriceUsd);
-
-    const check = validateInventorySubmission({
-      sku: formSku,
-      title: formTitle,
-      category: formCategory,
-      caratOrWeight: formCaratOrWeight,
-      originOrAtelier: formOrigin,
-      treatmentOrHallmark: formTreatmentOrHallmark,
-      priceUsd: priceNum,
-    });
-
-    if (!check.ok) {
-      setInventoryError(check.error || 'Invalid inventory submission.');
+    if (!formSku.trim() || !formTitle.trim()) {
+      setInventoryError('A SKU and a title are required before the vault can record a piece.');
       return;
     }
-
-    if (editingItemId) {
-      const next = inventory.map((item) =>
-        item.id === editingItemId
-          ? {
-              ...item,
-              category: formCategory,
-              sku: formSku.trim().toUpperCase(),
-              title: formTitle.trim(),
-              subCategory: formSubCategory.trim() || `${formCategory} Specimen`,
-              caratOrWeight: formCaratOrWeight.trim(),
-              originOrAtelier: formOrigin.trim(),
-              treatmentOrHallmark: formTreatmentOrHallmark.trim(),
-              priceUsd: priceNum,
-              updatedAt: new Date().toISOString(),
-            }
-          : item
-      );
-      setInventory(next);
-      saveStoredInventory(next);
-      setInventoryFeedback(`Updated inventory listing ${formSku.trim().toUpperCase()}.`);
-      setEditingItemId(null);
-    } else {
-      const newItem: PlatformInventoryItem = {
-        id: `INV-${Date.now()}`,
-        sku: formSku.trim().toUpperCase(),
-        title: formTitle.trim(),
-        category: formCategory,
-        subCategory: formSubCategory.trim() || `${formCategory} Specimen`,
-        caratOrWeight: formCaratOrWeight.trim() || '3.10 ct',
-        originOrAtelier: formOrigin.trim(),
-        treatmentOrHallmark: formTreatmentOrHallmark.trim() || 'Unheated / Disclosed',
-        priceUsd: priceNum,
-        vendorId: activeVendorId,
-        vendorName: activeVendorName,
-        status: 'PENDING_LAB_INTAKE',
-        updatedAt: new Date().toISOString(),
-        reviewerNote: 'Submitted via Vendor Portal. Awaiting Geneva lab & admin review.',
-        image:
-          formCategory === 'Settings'
-            ? '/images/gems/setting-ring.jpg'
-            : formCategory === 'Fine Jewellery'
-            ? '/images/elysian-ring.jpg'
-            : '/images/gems/sapphire-gem.jpg',
-      };
-      const next = [newItem, ...inventory];
-      setInventory(next);
-      saveStoredInventory(next);
-      setInventoryFeedback(
-        `Submitted ${newItem.category} SKU "${newItem.sku}" to Geneva Vault for lab & admin approval.`
-      );
+    if (!Number.isFinite(priceNum) || priceNum <= 0) {
+      setInventoryError('A positive asking price (USD) is required by the vault intake.');
+      return;
     }
-
-    setFormSku('');
-    setFormTitle('');
+    setInventoryBusy(true);
+    try {
+      const created = await saveVendorProduct(
+        {
+          category: formCategory,
+          sku: formSku,
+          title: formTitle,
+          subCategory: formSubCategory,
+          caratOrWeightText: formCaratOrWeight,
+          origin: formOrigin,
+          treatment: formTreatmentOrHallmark,
+          priceUsd: priceNum,
+          jewelleryType: formCategory === 'Gemstones' ? undefined : 'RING',
+          metalType: formCategory === 'Fine Jewellery' ? formCaratOrWeight : undefined,
+          imageUrl: formImageUrl,
+        },
+        editingItemId,
+      );
+      if (!editingItemId && created.moderation_status === 'DRAFT') {
+        // Optimistic submit: the applet's one-step intake is preserved as a
+        // real "create then submit" chain (the server refuses when the
+        // vendor is not APPROVED — that error surfaces verbatim).
+        try {
+          await submitVendorProduct(created.id);
+          setInventoryFeedback(
+            `Submitted ${formCategory} SKU "${created.sku}" for gemmological approval.`,
+          );
+        } catch {
+          setInventoryFeedback(
+            `Draft ${formCategory} SKU "${created.sku}" saved. Press "Submit for Review" when ready.`,
+          );
+        }
+      } else {
+        setInventoryFeedback(
+          editingItemId
+            ? `Updated inventory listing ${created.sku} — back to ${created.moderation_status}.`
+            : `Saved draft ${created.sku} (${created.moderation_status}).`,
+        );
+      }
+      setEditingItemId(null);
+      setFormSku('');
+      setFormTitle('');
+      await reloadVendorData();
+    } catch (cause) {
+      setInventoryError(cause instanceof Error ? cause.message : 'Invalid inventory submission.');
+    } finally {
+      setInventoryBusy(false);
+    }
   };
 
-  const filteredInventory = inventory.filter((item) =>
-    categoryFilter === 'ALL' ? true : item.category === categoryFilter
-  );
+  const handleSubmitForReview = async (row: VendorInventoryRow) => {
+    if (!row.canSubmit) return;
+    setInventoryError(null);
+    setInventoryFeedback(null);
+    setInventoryBusy(true);
+    try {
+      const updated = await submitVendorProduct(row.id);
+      setInventoryFeedback(`Submitted ${updated.sku} to the Maihan Gems moderator queue.`);
+      await reloadVendorData();
+    } catch (cause) {
+      setInventoryError(cause instanceof Error ? cause.message : 'The vault could not submit this piece.');
+    } finally {
+      setInventoryBusy(false);
+    }
+  };
 
-  const filteredLogs = filterPaymentAuditLogs(paymentLogs, {
-    status: paymentStatusFilter,
-    query: paymentQuery,
-  });
+  const handleUpdateFulfilment = async (
+    line: VendorOrderLineDto,
+    state: 'IN_FULFILLMENT' | 'SHIPPED' | 'DELIVERED',
+  ) => {
+    setFulfilError(null);
+    setFulfilNote(null);
+    setFulfilBusy(line.order_item_id);
+    try {
+      if (state === 'SHIPPED' && fulfilTracking.trim().length === 0) {
+        throw new Error('A tracking number is required to mark a line shipped.');
+      }
+      await updateVendorFulfilment(
+        line.order_id,
+        line.order_item_id,
+        state,
+        state === 'SHIPPED' ? fulfilCarrier.trim() : undefined,
+        state === 'SHIPPED' ? fulfilTracking.trim() : undefined,
+      );
+      setFulfilNote(`Order ${line.order_number} line updated to ${state} on the server.`);
+      setFulfilTracking('');
+      await reloadVendorData();
+    } catch (cause) {
+      setFulfilError(cause instanceof Error ? cause.message : 'Fulfilment update failed.');
+    } finally {
+      setFulfilBusy(null);
+    }
+  };
 
-  const ledgerMetrics = calculatePaymentLedgerMetrics(filteredLogs);
-
-  if (!authenticated) {
-    return (
-      <div className="golden-cloud-gallery min-h-screen font-[family-name:var(--font-eb-garamond)] text-[#1A1612] flex flex-col justify-between p-6 sm:p-12">
-        <header className="max-w-lg mx-auto w-full flex items-center justify-between border-b border-[#E5D4B3] pb-4">
-          <Link href="/" className="text-2xl tracking-tight text-[#1A1612]">
-            MAIHAN GEMS
-          </Link>
-          <span className="font-mono text-xs uppercase tracking-[0.18em] text-[#8C6D2F]">
-            Vendor Portal Gate
-          </span>
-        </header>
-
-        <main
-          id="main-content"
-          className="max-w-lg mx-auto w-full rounded-[28px] bg-[#FFFDF9] border border-[#E5D4B3] p-8 sm:p-10 shadow-[0_24px_60px_rgba(36,26,14,0.12)] space-y-6"
-        >
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#C5A059]/40 bg-[#FAF3E3] px-3.5 py-1 text-xs font-mono uppercase tracking-[0.16em] text-[#8C6D2F]">
-            <Lock className="w-3.5 h-3.5" />
-            Partner Lapidary &amp; Atelier Sign-In
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-normal text-[#1A1612]">
-            Vendor &amp; Mine Partner Portal
-          </h1>
-          <p className="text-base text-[#5C4E3C] leading-relaxed">
-            Manage multi-category inventory (Gemstones, Settings, Fine Jewellery), track transparent payment &amp; payout audit ledgers, and complete Supplier KYB &amp; Tax onboarding via your Admin invitation link.
-          </p>
-
-          <button
-            type="button"
-            onClick={() => setAuthenticated(true)}
-            className="w-full flex items-center justify-center gap-2 rounded-full border border-[#D5C29F] bg-[#FAF3E3] hover:bg-[#F3E7CC] py-3 text-xs uppercase tracking-[0.18em] font-semibold text-[#1A1612] transition-colors"
-          >
-            <Sparkles className="h-4 w-4 text-[#8C6D2F]" />
-            Continue with Google Partner SSO
-          </button>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setAuthenticated(true);
-            }}
-            className="space-y-4 pt-2 border-t border-[#EFE5D1]"
-          >
-            <div>
-              <label
-                htmlFor="vendor-email"
-                className="block font-mono text-xs uppercase tracking-wider text-[#6B5A45] mb-1"
-              >
-                Partner Account Email
-              </label>
-              <input
-                id="vendor-email"
-                type="email"
-                required
-                value={vendorEmail}
-                onChange={(e) => setVendorEmail(e.target.value)}
-                className="w-full rounded-[12px] bg-[#FAF3E3]/60 border border-[#E5D4B3] px-3.5 py-2.5 text-sm"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full py-3 rounded-full gold-gradient-cta text-xs font-mono uppercase tracking-[0.18em] font-semibold"
-            >
-              Sign In to Partner Portal
-            </button>
-          </form>
-        </main>
-
-        <footer className="max-w-lg mx-auto w-full text-xs font-mono text-[#6B5A45] border-t border-[#E5D4B3] pt-4 flex justify-between">
-          <span>Maihan Supply Chain Registry</span>
-          <Link href="/" className="underline hover:text-[#1A1612]">
-            Return to Storefront
-          </Link>
-        </footer>
-      </div>
-    );
-  }
+  const filteredInventory =
+    categoryFilter === 'ALL' ? products : products.filter((item) => item.category === categoryFilter);
+  const filteredGemledger =
+    categoryFilter === 'ALL'
+      ? consignment
+      : consignment.filter((item) => item.category === categoryFilter);
 
   return (
     <div className="golden-cloud-gallery min-h-screen font-[family-name:var(--font-eb-garamond)] text-[#1A1612] flex flex-col">
@@ -301,17 +287,24 @@ export default function VendorPortalClient({
         </div>
         <div className="flex items-center gap-4 text-xs font-mono">
           <span className="text-[#D8CEBE] hidden md:inline">
-            {activeVendorId} · {vendorEmail}
+            {vendor.display_name} · {vendor.email}
           </span>
           <Link
-            href="/admin?autostart=1"
+            href="/admin"
             className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full border border-[#C5A059]/40 text-[#E6C97A] hover:bg-white/10"
           >
             Admin Console →
           </Link>
           <button
             type="button"
-            onClick={() => setAuthenticated(false)}
+            onClick={() => {
+              setLogoutBusy(true);
+              void (async () => {
+                await signOutVendorSession();
+                window.location.assign('/account/sign-in');
+              })();
+            }}
+            disabled={logoutBusy}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 text-[#E6C97A] border border-[#C5A059]/35 hover:bg-white/15"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -329,9 +322,9 @@ export default function VendorPortalClient({
           {[
             { id: 'overview', label: 'Partner Overview', icon: LayoutDashboard },
             { id: 'listings', label: 'Inventory Manager', icon: Package },
-            { id: 'payments', label: 'Payment Audit Ledger', icon: Landmark },
-            { id: 'onboarding', label: 'KYB & Tax Onboarding', icon: ShieldCheck },
-            { id: 'orders', label: 'Purchase Orders', icon: ClipboardList },
+            { id: 'payments', label: 'Order Settlement Ledger', icon: Landmark },
+            { id: 'onboarding', label: 'Partner Onboarding', icon: ShieldCheck },
+            { id: 'orders', label: 'Order Fulfilment', icon: ClipboardList },
           ].map((item) => {
             const Icon = item.icon;
             const active = activeTab === item.id;
@@ -357,29 +350,15 @@ export default function VendorPortalClient({
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#8C6D2F]">
               Active Supplier Entity
             </p>
-            <select
-              aria-label="Select Active Vendor Entity"
-              value={activeVendorId}
-              onChange={(e) => {
-                const vId = e.target.value;
-                setActiveVendorId(vId);
-                if (vId === 'VND-ARUSHA-01') {
-                  setActiveVendorName('Arusha Lapidary Cooperative');
-                  setVendorEmail('consignment@arusha-lapidary.co.tz');
-                } else if (vId === 'VND-GENEVA-03') {
-                  setActiveVendorName('Geneva Master Bench #4');
-                  setVendorEmail('atelier@vaucher-geneve.ch');
-                } else {
-                  setActiveVendorName('Bogotá & Chivor Emerald Guild');
-                  setVendorEmail('exports@muzo-syndicate.co');
-                }
-              }}
-              className="w-full rounded-[10px] border border-[#E5D4B3] bg-[#FFFDF9] px-2.5 py-2 text-xs text-[#1A1612]"
-            >
-              <option value="VND-ARUSHA-01">VND-ARUSHA-01 (Arusha Co-op)</option>
-              <option value="VND-GENEVA-03">VND-GENEVA-03 (Geneva Bench #4)</option>
-              <option value="VND-CHIVOR-04">VND-CHIVOR-04 (Chivor Guild)</option>
-            </select>
+            <p className="font-mono text-xs text-[#1A1612] break-all" data-testid="vendor-active-entity">
+              {vendor.display_name}
+              <span className="block text-[10px] text-[#8C6D2F]">
+                {vendor.city}, {vendor.country_code} · {vendor.email}
+              </span>
+            </p>
+            <p className="font-mono text-[10px] text-[#8C6D2F]">
+              Onboarding status: {vendor.status}
+            </p>
           </div>
         </aside>
 
@@ -391,48 +370,44 @@ export default function VendorPortalClient({
               <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#8C6D2F]">
                 Catalogue SKUs Managed
               </p>
-              <p className="text-3xl text-[#1A1612] tabular-nums">{inventory.length} Lots</p>
+              <p className="text-3xl text-[#1A1612] tabular-nums">{summary.total_products} Pieces</p>
               <p className="font-mono text-xs text-[#15803D]">
-                {inventory.filter((i) => i.status === 'APPROVED_IN_VAULT').length} Live ·{' '}
-                {inventory.filter((i) => i.status === 'PENDING_LAB_INTAKE').length} In Intake
+                {summary.published_products} Live ·{' '}
+                {summary.submitted_products} In Moderation
               </p>
             </div>
 
             <div className="rounded-[24px] bg-[#FFFDF9] border border-[#E5D4B3] p-5 shadow-[0_10px_28px_rgba(36,26,14,0.05)] space-y-1">
               <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#8C6D2F]">
-                Settled Volume
+                Order Revenue (USD)
               </p>
               <p className="text-3xl text-[#1A1612] tabular-nums">
-                {formatUsd(ledgerMetrics.totalSettledVolumeUsd)}
+                {formatRealUsd(summary.total_revenue_usd)}
               </p>
               <p className="font-mono text-xs text-[#5C4E3C]">
-                SWIFT / SEPA Reconciled
+                Non-cancelled order lines · {summary.total_order_lines} total
               </p>
             </div>
 
             <div className="rounded-[24px] bg-[#FFFDF9] border border-[#E5D4B3] p-5 shadow-[0_10px_28px_rgba(36,26,14,0.05)] space-y-1">
               <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#8C6D2F]">
-                Escrow &amp; Pending Wire
+                Pending Fulfilment
               </p>
               <p className="text-3xl text-[#1A1612] tabular-nums">
-                {formatUsd(
-                  ledgerMetrics.activeEscrowHoldUsd + ledgerMetrics.pendingWirePayoutUsd
-                )}
+                {summary.pending_fulfillment_lines} Lines
               </p>
               <p className="font-mono text-xs text-[#8C6D2F]">
-                Awaiting Lab / Client Sign-off
+                Carrier dispatch due on these lines
               </p>
             </div>
 
             <div className="rounded-[24px] bg-[#FFFDF9] border border-[#E5D4B3] p-5 shadow-[0_10px_28px_rgba(36,26,14,0.05)] space-y-1">
               <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#8C6D2F]">
-                KYB &amp; Tax Compliance
+                Onboarding Status
               </p>
-              <p className="text-3xl text-[#1A1612] tabular-nums">
-                {kybSubmissions.filter((k) => k.status === 'VERIFIED_PARTNER').length} Verified
-              </p>
+              <p className="text-3xl text-[#1A1612] tabular-nums">{vendor.status}</p>
               <p className="font-mono text-xs text-[#15803D]">
-                RJC / Kimberley Attested
+                {vendor.bourse_member ? 'Bourse member recorded' : 'Bourse membership not recorded'}
               </p>
             </div>
           </section>
@@ -448,8 +423,8 @@ export default function VendorPortalClient({
                     </p>
                     <h1 className="text-2xl sm:text-3xl font-normal text-[#1A1612]">
                       {editingItemId
-                        ? 'Edit Inventory Specimen / Setting'
-                        : 'Submit New Gemstone, Setting, or Fine Jewellery'}
+                        ? 'Edit Inventory Specimen / Creation'
+                        : 'Submit New Gemstone, Pair, or Fine Jewellery'}
                     </h1>
                   </div>
                   {editingItemId && (
@@ -466,6 +441,13 @@ export default function VendorPortalClient({
                     </button>
                   )}
                 </div>
+
+                {vendor.status !== 'APPROVED' ? (
+                  <div role="status" className="rounded-[14px] border border-[#E5D4B3] bg-[#FAF3E3] p-4 text-xs font-mono text-[#8C6D2F]">
+                    Your vendor account status is <strong>{vendor.status}</strong>. The real vault rejects
+                    product creation until an administrator approves your onboarding — {vendor.rejection_reason ? `note: ${vendor.rejection_reason}.` : 'pending administrator review.'}
+                  </div>
+                ) : null}
 
                 {inventoryError && (
                   <div
@@ -486,7 +468,7 @@ export default function VendorPortalClient({
                 )}
 
                 <form
-                  onSubmit={handleSaveInventoryItem}
+                  onSubmit={(e) => void handleSaveInventoryItem(e)}
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
                 >
                   <div>
@@ -499,12 +481,12 @@ export default function VendorPortalClient({
                     <select
                       id="vnd-inv-category"
                       value={formCategory}
-                      onChange={(e) => setFormCategory(e.target.value as InventoryCategory)}
+                      onChange={(e) => setFormCategory(e.target.value as VendorInventoryCategory)}
                       className="w-full rounded-[12px] border border-[#E5D4B3] bg-[#FAF3E3]/60 px-3 py-2 text-sm"
                     >
-                      <option value="Gemstones">Gemstones</option>
-                      <option value="Settings">Settings</option>
-                      <option value="Fine Jewellery">Fine Jewellery</option>
+                      {VENDOR_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -547,12 +529,12 @@ export default function VendorPortalClient({
                       htmlFor="vnd-inv-carat"
                       className="block font-mono text-xs uppercase text-[#6B5A45] mb-1"
                     >
-                      Carat / Precious Metal
+                      Carat or Precious Metal
                     </label>
                     <input
                       id="vnd-inv-carat"
                       type="text"
-                      placeholder="3.85 ct or PT950"
+                      placeholder="3.85 or PT950"
                       value={formCaratOrWeight}
                       onChange={(e) => setFormCaratOrWeight(e.target.value)}
                       className="w-full rounded-[12px] border border-[#E5D4B3] bg-[#FAF3E3]/60 px-3 py-2 text-sm"
@@ -580,7 +562,7 @@ export default function VendorPortalClient({
                       htmlFor="vnd-inv-subcat"
                       className="block font-mono text-xs uppercase text-[#6B5A45] mb-1"
                     >
-                      Subcategory / Cut
+                      Subcategory / Variety
                     </label>
                     <input
                       id="vnd-inv-subcat"
@@ -624,14 +606,32 @@ export default function VendorPortalClient({
                     />
                   </div>
 
+                  <div>
+                    <label
+                      htmlFor="vnd-inv-image"
+                      className="block font-mono text-xs uppercase text-[#6B5A45] mb-1"
+                    >
+                      Hosted Image URL
+                    </label>
+                    <input
+                      id="vnd-inv-image"
+                      type="url"
+                      placeholder="https://"
+                      value={formImageUrl}
+                      onChange={(e) => setFormImageUrl(e.target.value)}
+                      className="w-full rounded-[12px] border border-[#E5D4B3] bg-[#FAF3E3]/60 px-3 py-2 text-sm font-mono"
+                    />
+                  </div>
+
                   <div className="flex items-end">
                     <button
                       type="submit"
                       data-testid="vendor-submit-inventory-btn"
+                      disabled={inventoryBusy}
                       className="w-full py-2.5 px-4 rounded-full gold-gradient-cta text-xs font-mono uppercase tracking-[0.16em] font-semibold inline-flex items-center justify-center gap-1.5"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      {editingItemId ? 'Save Changes' : 'Submit to Vault'}
+                      {inventoryBusy ? 'Recording…' : editingItemId ? 'Save Changes' : 'Submit to Vault'}
                     </button>
                   </div>
                 </form>
@@ -640,15 +640,16 @@ export default function VendorPortalClient({
                 <div className="pt-4 space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <h2 className="text-xl font-normal text-[#1A1612]">
-                      Managed Multi-Category Inventory (Gemstones, Settings &amp; Fine Jewellery)
+                      Managed Multi-Category Inventory (Gemstones, Pairs &amp; Fine Jewellery)
                     </h2>
                     <div className="flex flex-wrap gap-2">
-                      {(['ALL', 'Gemstones', 'Settings', 'Fine Jewellery'] as const).map(
+                      {(['ALL', 'Gemstones', 'Pairs', 'Fine Jewellery'] as const).map(
                         (cat) => (
                           <button
                             key={cat}
                             type="button"
                             onClick={() => setCategoryFilter(cat)}
+                            data-testid={`vendor-filter-${cat.toLowerCase()}`}
                             className={`px-3.5 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider transition-colors ${
                               categoryFilter === cat
                                 ? 'bg-[#1C1610] text-[#E6C97A]'
@@ -671,7 +672,7 @@ export default function VendorPortalClient({
                           <th className="py-3 pr-4">Origin / Atelier</th>
                           <th className="py-3 pr-4">Treatment / Hallmark</th>
                           <th className="py-3 pr-4">Valuation</th>
-                          <th className="py-3 pr-4">Vault Status</th>
+                          <th className="py-3 pr-4">Moderation</th>
                           <th className="py-3">Edit</th>
                         </tr>
                       </thead>
@@ -685,94 +686,122 @@ export default function VendorPortalClient({
                             <td className="py-3 pr-4 font-sans">
                               <span className="font-medium text-[#1A1612] block">{item.title}</span>
                               <span className="text-[11px] text-[#5C4E3C]">
-                                {item.caratOrWeight} · {item.subCategory}
+                                {item.caratOrWeight ?? 'Not evidenced'} · {item.subCategory}
                               </span>
                             </td>
-                            <td className="py-3 pr-4">{item.originOrAtelier}</td>
+                            <td className="py-3 pr-4">{item.originOrAtelier ?? 'Not evidenced'}</td>
                             <td className="py-3 pr-4 font-sans text-xs">
-                              {item.treatmentOrHallmark}
+                              {item.treatmentOrHallmark ?? 'Not evidenced'}
                             </td>
                             <td className="py-3 pr-4 tabular-nums font-semibold">
-                              {formatUsd(item.priceUsd)}
+                              {formatRealUsd(item.priceUsd)}
                             </td>
                             <td className="py-3 pr-4">
                               <span
+                                data-testid={`vendor-moderation-${item.sku}`}
                                 className={`inline-block px-2.5 py-1 rounded-full text-[10px] uppercase ${
-                                  item.status === 'APPROVED_IN_VAULT'
-                                    ? 'bg-[#F0FDF4] text-[#15803D] border border-[#BBF7D0]'
-                                    : item.status === 'REJECTED_UNDISCLOSED_TREATMENT'
-                                    ? 'bg-[#FEF2F2] text-[#B91C1C] border border-[#FECACA]'
-                                    : 'bg-[#FAF3E3] text-[#8C6D2F] border border-[#E5D4B3]'
+                                  MODERATION_BADGE[item.moderation] ?? MODERATION_BADGE['DRAFT']
                                 }`}
+                                title={
+                                  item.rejectionReason
+                                    ? `Rejection note: ${item.rejectionReason}`
+                                    : undefined
+                                }
                               >
-                                {item.status}
+                                {item.moderation}
                               </span>
                             </td>
                             <td className="py-3">
-                              <button
-                                type="button"
-                                onClick={() => handleOpenEdit(item)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#E5D4B3] bg-[#FAF3E3] text-[#1A1612] hover:border-[#C5A059]"
-                              >
-                                <Edit3 className="w-3 h-3" /> Edit
-                              </button>
+                              <div className="flex flex-wrap gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEdit(item)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#E5D4B3] bg-[#FAF3E3] text-[#1A1612] hover:border-[#C5A059]"
+                                >
+                                  <Edit3 className="w-3 h-3" /> Edit
+                                </button>
+                                {item.canSubmit && vendor.status === 'APPROVED' ? (
+                                  <button
+                                    type="button"
+                                    disabled={inventoryBusy}
+                                    onClick={() => void handleSubmitForReview(item)}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full gold-gradient-cta text-[10px] font-mono uppercase"
+                                  >
+                                    Submit for Review
+                                  </button>
+                                ) : null}
+                              </div>
                             </td>
                           </tr>
                         ))}
+                        {products.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="py-6 text-center text-[#5C4E3C]">
+                              No products created under your vendor account yet.
+                            </td>
+                          </tr>
+                        ) : null}
                       </tbody>
                     </table>
                   </div>
                 </div>
               </section>
 
-              {/* Original Consignment Parcels Table preserved for backwards compatibility */}
+              {/* Consignment & Origin-Evidenced Parcel Intake Ledger (real rows). */}
               <section className="rounded-[24px] bg-[#FFFDF9] border border-[#E5D4B3] p-6 sm:p-8 space-y-4">
                 <h2 className="text-2xl font-normal text-[#1A1612]">
                   Consignment &amp; Origin-Evidenced Parcel Intake Log
                 </h2>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs font-mono">
-                    <thead>
-                      <tr className="border-b border-[#E5D4B3] text-[#8C6D2F] uppercase">
-                        <th className="py-2.5 pr-4">Lot ID</th>
-                        <th className="py-2.5 pr-4">Parcel Name</th>
-                        <th className="py-2.5 pr-4">Carat</th>
-                        <th className="py-2.5 pr-4">Origin Mine</th>
-                        <th className="py-2.5 pr-4">Reserve</th>
-                        <th className="py-2.5">Lab Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#EFE5D1]">
-                      {listings.map((item) => (
-                        <tr key={item.lotId}>
-                          <td className="py-2.5 pr-4 font-semibold">{item.lotId}</td>
-                          <td className="py-2.5 pr-4">{item.parcelName}</td>
-                          <td className="py-2.5 pr-4 tabular-nums">
-                            {item.caratWeight.toFixed(2)} ct
-                          </td>
-                          <td className="py-2.5 pr-4">{item.originMine}</td>
-                          <td className="py-2.5 pr-4 tabular-nums">
-                            {formatUsd(item.askingPriceUsd)}
-                          </td>
-                          <td
-                            className={`py-2.5 ${
-                              item.inspectionState === 'REJECTED_UNDISCLOSED_TREATMENT'
-                                ? 'text-[#B91C1C]'
-                                : 'text-[#8C6D2F]'
-                            }`}
-                          >
-                            {item.inspectionState}
-                          </td>
+                {filteredGemledger.length === 0 ? (
+                  <p className="text-xs font-mono text-[#5C4E3C]">
+                    No gemstone parcels on file yet — loose stones and matched pairs you create
+                    appear here with their real provenance and moderation state.
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs font-mono">
+                      <thead>
+                        <tr className="border-b border-[#E5D4B3] text-[#8C6D2F] uppercase">
+                          <th className="py-2.5 pr-4">Lot ID</th>
+                          <th className="py-2.5 pr-4">Parcel Name</th>
+                          <th className="py-2.5 pr-4">Carat</th>
+                          <th className="py-2.5 pr-4">Origin Mine</th>
+                          <th className="py-2.5 pr-4">Reserve</th>
+                          <th className="py-2.5">Moderation</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-[#EFE5D1]">
+                        {filteredGemledger.map((item) => (
+                          <tr key={item.id}>
+                            <td className="py-2.5 pr-4 font-semibold">{item.sku}</td>
+                            <td className="py-2.5 pr-4">{item.title}</td>
+                            <td className="py-2.5 pr-4 tabular-nums">
+                              {item.caratOrWeight ?? 'Not evidenced'}
+                            </td>
+                            <td className="py-2.5 pr-4">{item.originOrAtelier ?? 'Not evidenced'}</td>
+                            <td className="py-2.5 pr-4 tabular-nums">
+                              {formatRealUsd(item.priceUsd)}
+                            </td>
+                            <td
+                              className={`py-2.5 ${
+                                item.moderation === 'REJECTED'
+                                  ? 'text-[#B91C1C]'
+                                  : 'text-[#8C6D2F]'
+                              }`}
+                            >
+                              {item.moderation}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </section>
             </div>
           )}
 
-          {/* TAB: VENDOR PAYMENT & PAYOUT AUDIT LOG */}
+          {/* TAB: ORDER SETTLEMENT LEDGER (real order lines; no invented payout figures) */}
           {(activeTab === 'overview' || activeTab === 'payments') && (
             <section
               data-testid="vendor-payment-audit-ledger"
@@ -781,163 +810,214 @@ export default function VendorPortalClient({
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#EFE5D1] pb-4">
                 <div>
                   <p className="text-xs font-mono uppercase tracking-[0.18em] text-[#8C6D2F]">
-                    Transparent Settlement &amp; Treasury Ledger
+                    Order Line Settlement Ledger
                   </p>
                   <h2 className="text-2xl sm:text-3xl font-normal text-[#1A1612]">
-                    Vendor Payment &amp; Payout Tracking Audit Log
+                    Vendor Order Lines &amp; Carrier Dispatch Records
                   </h2>
                   <p className="text-sm text-[#5C4E3C]">
-                    Immutable audit trail tracking every payment timestamp, gross order amount, net vendor payout, status, and associated Order, Customer, and Vendor IDs.
+                    Every order line containing one of your pieces, with its recorded line total and
+                    fulfilment state. Payout amounts are not evidenced in this marketplace yet and are never rendered.
                   </p>
                 </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 text-[#8C6D2F] absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      aria-label="Filter payment audit logs"
-                      placeholder="Search Order, User, SKU..."
-                      value={paymentQuery}
-                      onChange={(e) => setPaymentQuery(e.target.value)}
-                      className="rounded-full border border-[#E5D4B3] bg-[#FAF3E3]/70 pl-8 pr-4 py-1.5 text-xs font-mono"
-                    />
-                  </div>
-                  <select
-                    aria-label="Filter payment status"
-                    value={paymentStatusFilter}
-                    onChange={(e) =>
-                      setPaymentStatusFilter(
-                        e.target.value as PaymentAuditStatus | 'ALL'
-                      )
-                    }
-                    className="rounded-full border border-[#E5D4B3] bg-[#FAF3E3]/70 px-3.5 py-1.5 text-xs font-mono"
-                  >
-                    <option value="ALL">All Statuses</option>
-                    <option value="SETTLED">SETTLED</option>
-                    <option value="ESCROW_HOLD">ESCROW_HOLD</option>
-                    <option value="PENDING_WIRE">PENDING_WIRE</option>
-                    <option value="FLAGGED_COMPLIANCE">FLAGGED_COMPLIANCE</option>
-                    <option value="REFUNDED">REFUNDED</option>
-                  </select>
-                </div>
               </div>
+
+              {fulfilError ? (
+                <div role="alert" className="rounded-[14px] border border-[#991B1B] bg-[#FEF2F2] p-4 text-xs font-mono text-[#991B1B]">
+                  {fulfilError}
+                </div>
+              ) : null}
+              {fulfilNote ? (
+                <div role="status" className="rounded-[14px] border border-[#166534] bg-[#F0FDF4] p-4 text-xs font-mono text-[#166534] flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  {fulfilNote}
+                </div>
+              ) : null}
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs font-mono">
                   <thead>
                     <tr className="border-b border-[#E5D4B3] text-[#8C6D2F] uppercase">
-                      <th className="py-3 pr-4">Transaction ID &amp; Timestamp</th>
-                      <th className="py-3 pr-4">Order / PO / SKU</th>
-                      <th className="py-3 pr-4">Customer &amp; Vendor IDs</th>
-                      <th className="py-3 pr-4">Gross Amount</th>
-                      <th className="py-3 pr-4">Net Vendor Payout</th>
-                      <th className="py-3 pr-4">Payment Rail</th>
-                      <th className="py-3 pr-4">Status</th>
-                      <th className="py-3">Audit Trail Note</th>
+                      <th className="py-3 pr-4">Order &amp; Placed</th>
+                      <th className="py-3 pr-4">Piece &amp; Qty</th>
+                      <th className="py-3 pr-4">Destination</th>
+                      <th className="py-3 pr-4">Line Total</th>
+                      <th className="py-3 pr-4">Fulfilment</th>
+                      <th className="py-3">Tracking</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#EFE5D1]">
-                    {filteredLogs.map((log) => (
-                      <tr key={log.transactionId} className="hover:bg-[#FAF3E3]/40">
+                    {orders.map((line) => (
+                      <tr key={line.order_item_id} className="hover:bg-[#FAF3E3]/40">
                         <td className="py-3.5 pr-4">
                           <span className="font-semibold text-[#1A1612] block">
-                            {log.transactionId}
+                            {line.order_number}
                           </span>
                           <span className="text-[11px] text-[#6B5A45] tabular-nums">
-                            {log.timestamp}
+                            {line.placed_at
+                              ? new Date(line.placed_at).toLocaleDateString('en-GB')
+                              : 'Placement pending'}{' '}
+                            · {line.order_state}
                           </span>
                         </td>
                         <td className="py-3.5 pr-4">
                           <span className="font-semibold text-[#1A1612] block">
-                            {log.orderId}
+                            {line.sku_snapshot}
                           </span>
                           <span className="text-[11px] text-[#8C6D2F]">
-                            {log.poNumber} · {log.stoneSku}
+                            {line.title_snapshot} · ×{line.quantity}
                           </span>
                         </td>
                         <td className="py-3.5 pr-4">
-                          <span className="block text-[#1A1612]">
-                            User: {log.customerId}
-                          </span>
-                          <span className="block text-[11px] text-[#6B5A45]">
-                            Vendor: {log.vendorId}
-                          </span>
+                          {[line.shipping_city, line.shipping_country].filter(Boolean).join(', ') || 'Not evidenced'}
                         </td>
                         <td className="py-3.5 pr-4 tabular-nums">
-                          {formatUsd(log.grossAmountUsd)}
+                          {formatRealUsd(line.line_total)}
                         </td>
-                        <td className="py-3.5 pr-4 tabular-nums font-semibold text-[#15803D]">
-                          {formatUsd(log.netPayoutUsd)}
-                        </td>
-                        <td className="py-3.5 pr-4">{log.paymentMethod}</td>
                         <td className="py-3.5 pr-4">
-                          <span
-                            className={`inline-block px-2.5 py-1 rounded-full text-[10px] uppercase ${
-                              log.status === 'SETTLED'
-                                ? 'bg-[#F0FDF4] text-[#15803D] border border-[#BBF7D0]'
-                                : log.status === 'FLAGGED_COMPLIANCE' || log.status === 'REFUNDED'
-                                ? 'bg-[#FEF2F2] text-[#B91C1C] border border-[#FECACA]'
-                                : 'bg-[#FAF3E3] text-[#8C6D2F] border border-[#E5D4B3]'
-                            }`}
-                          >
-                            {log.status}
+                          <span className="inline-block px-2.5 py-1 rounded-full text-[10px] uppercase bg-[#FAF3E3] text-[#8C6D2F] border border-[#E5D4B3]">
+                            {line.fulfillment_state}
                           </span>
                         </td>
-                        <td className="py-3.5 font-sans text-xs text-[#4A3E2E] max-w-xs">
-                          {log.auditNote}
+                        <td className="py-3.5">
+                          {line.tracking_number
+                            ? `${line.carrier ?? 'Carrier'} · ${line.tracking_number}`
+                            : fulfilBusy === line.order_item_id
+                              ? (
+                                <div className="space-y-1.5">
+                                  <input
+                                    aria-label="Carrier"
+                                    value={fulfilCarrier}
+                                    onChange={(e) => setFulfilCarrier(e.target.value)}
+                                    className="w-40 rounded-[8px] border border-[#E5D4B3] bg-[#FAF3E3]/70 px-2 py-1 text-[11px] font-mono"
+                                  />
+                                  <input
+                                    aria-label="Tracking number"
+                                    placeholder="Tracking number"
+                                    value={fulfilTracking}
+                                    onChange={(e) => setFulfilTracking(e.target.value)}
+                                    className="w-40 rounded-[8px] border border-[#E5D4B3] bg-[#FAF3E3]/70 px-2 py-1 text-[11px] font-mono"
+                                  />
+                                  <div className="flex gap-1.5">
+                                    <button
+                                      type="button"
+                                      className="px-2.5 py-1 rounded-full gold-gradient-cta"
+                                      onClick={() => void handleUpdateFulfilment(line, 'SHIPPED')}
+                                    >
+                                      Confirm dispatch
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="px-2.5 py-1 rounded-full border border-[#E5D4B3]"
+                                      onClick={() => setFulfilBusy(null)}
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </div>
+                              )
+                              : (
+                                <div className="flex flex-col gap-1.5">
+                                  {line.fulfillment_state === 'PENDING' ? (
+                                    <button
+                                      type="button"
+                                      disabled={fulfilBusy !== null}
+                                      onClick={() => void handleUpdateFulfilment(line, 'IN_FULFILLMENT')}
+                                      className="text-[11px] underline text-[#8C6D2F] hover:text-[#1A1612]"
+                                    >
+                                      Start preparation
+                                    </button>
+                                  ) : null}
+                                  {line.fulfillment_state !== 'SHIPPED' && line.fulfillment_state !== 'DELIVERED' ? (
+                                    <button
+                                      type="button"
+                                      disabled={fulfilBusy !== null}
+                                      onClick={() => setFulfilBusy(line.order_item_id)}
+                                      className="text-[11px] underline text-[#8C6D2F] hover:text-[#1A1612]"
+                                    >
+                                      Record carrier dispatch
+                                    </button>
+                                  ) : null}
+                                  {line.fulfillment_state === 'SHIPPED' ? (
+                                    <button
+                                      type="button"
+                                      disabled={fulfilBusy !== null}
+                                      onClick={() => void handleUpdateFulfilment(line, 'DELIVERED')}
+                                      className="text-[11px] underline text-[#8C6D2F] hover:text-[#1A1612]"
+                                    >
+                                      Mark delivered
+                                    </button>
+                                  ) : null}
+                                </div>
+                              )}
                         </td>
                       </tr>
                     ))}
+                    {orders.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-6 text-center text-[#5C4E3C]">
+                          No customer orders contain your products yet — order lines appear here
+                          as soon as a piece sells with your SKU.
+                        </td>
+                      </tr>
+                    ) : null}
                   </tbody>
                 </table>
               </div>
             </section>
           )}
 
-          {/* TAB: MULTI-STEP SUPPLIER KYB & TAX ONBOARDING WIZARD */}
+          {/* TAB: SUPPLIER ONBOARDING — the REAL vendor_onboarding fields */}
           {activeTab === 'onboarding' && (
             <div data-testid="vendor-kyb-onboarding-section">
               <VendorOnboardingWizard
-                submissions={kybSubmissions}
-                initialInviteToken={initialInviteToken}
-                onSubmissionsChange={(updated) => {
-                  setKybSubmissions(updated);
-                  saveStoredVendorOnboarding(updated);
-                }}
+                vendor={vendor}
+                initialProducts={initialProducts}
+                onChanged={() => void reloadVendorData()}
               />
             </div>
           )}
 
-          {/* TAB: PURCHASE ORDERS */}
+          {/* TAB: ORDER FULFILMENT */}
           {(activeTab === 'overview' || activeTab === 'orders') && (
             <section className="rounded-[24px] bg-[#FFFDF9] border border-[#E5D4B3] p-6 sm:p-8 space-y-4">
               <h2 className="text-2xl font-normal text-[#1A1612]">
-                Maison Purchase Orders
+                Maihan Commission &amp; Fulfilment Lines
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs font-mono">
                   <thead>
                     <tr className="border-b border-[#E5D4B3] text-[#8C6D2F] uppercase">
-                      <th className="py-2.5 pr-4">PO Number</th>
-                      <th className="py-2.5 pr-4">Stone SKU</th>
-                      <th className="py-2.5 pr-4">Settlement</th>
-                      <th className="py-2.5 pr-4">Status</th>
-                      <th className="py-2.5">Date</th>
+                      <th className="py-2.5 pr-4">Order Number</th>
+                      <th className="py-2.5 pr-4">Piece SKU</th>
+                      <th className="py-2.5 pr-4">Line Total</th>
+                      <th className="py-2.5 pr-4">Fulfilment</th>
+                      <th className="py-2.5">Placed</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#EFE5D1]">
-                    {orders.map((po) => (
-                      <tr key={po.poNumber}>
-                        <td className="py-2.5 pr-4 font-semibold">{po.poNumber}</td>
-                        <td className="py-2.5 pr-4">{po.stoneSku}</td>
+                    {orders.map((line) => (
+                      <tr key={line.order_item_id}>
+                        <td className="py-2.5 pr-4 font-semibold">{line.order_number}</td>
+                        <td className="py-2.5 pr-4">{line.sku_snapshot}</td>
                         <td className="py-2.5 pr-4 tabular-nums">
-                          {formatUsd(po.settlementAmountUsd)}
+                          {formatRealUsd(line.line_total)}
                         </td>
-                        <td className="py-2.5 pr-4">{po.status}</td>
-                        <td className="py-2.5 text-[#6B5A45] tabular-nums">{po.date}</td>
+                        <td className="py-2.5 pr-4">{line.fulfillment_state}</td>
+                        <td className="py-2.5 text-[#6B5A45] tabular-nums">
+                          {line.placed_at
+                            ? new Date(line.placed_at).toLocaleDateString('en-GB')
+                            : 'Not evidenced'}
+                        </td>
                       </tr>
                     ))}
+                    {orders.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-6 text-center text-[#5C4E3C]">
+                          No customer orders contain your products yet.
+                        </td>
+                      </tr>
+                    ) : null}
                   </tbody>
                 </table>
               </div>
@@ -945,6 +1025,7 @@ export default function VendorPortalClient({
           )}
         </main>
       </div>
+
     </div>
   );
 }

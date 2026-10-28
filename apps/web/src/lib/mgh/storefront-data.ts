@@ -775,7 +775,7 @@ export function getAllJewelleryItems(): JewelleryCatalogItem[] {
       settingStyle: 'Cathedral Knife-Edge Solitaire',
       certification: 'GIA Certified · Geneva Hallmarked',
       price: 12800,
-      image: '/images/elysian-ring.jpg',
+      image: '/mgh/images/elysian-ring.jpg',
       href: '/products/elysian-ring',
     },
     {
@@ -791,7 +791,7 @@ export function getAllJewelleryItems(): JewelleryCatalogItem[] {
       settingStyle: 'Articulated Pear Drop Bail',
       certification: 'SSEF Certified · Minor Cedarwood Oil',
       price: 18500,
-      image: '/images/verdant-drop.jpg',
+      image: '/mgh/images/verdant-drop.jpg',
       href: '/products/verdant-drop',
     },
   ];

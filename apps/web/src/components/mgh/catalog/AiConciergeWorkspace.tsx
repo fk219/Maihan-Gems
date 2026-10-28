@@ -28,6 +28,8 @@ import {
   type ConciergeDyoProposal,
   type GemologistFocusMode,
 } from '@/lib/mgh/ai-concierge-agent';
+import { requestGemologistModelReply } from '@/lib/mgh/adapters/ai';
+import type { GemstoneItem } from '@/lib/mgh/fixtures';
 import {
   getAllGemstones,
   getAllSettings,
@@ -264,7 +266,13 @@ function InChatDyoBuilder({ initialProposal }: { initialProposal: ConciergeDyoPr
   );
 }
 
-export function AiConciergeWorkspace({ initialQuery = '' }: { initialQuery?: string }) {
+export function AiConciergeWorkspace({
+  initialQuery = '',
+  seededResults,
+}: {
+  initialQuery?: string;
+  seededResults?: GemstoneItem[];
+}) {
   const {
     addToCart,
     toggleFavorite,
@@ -286,10 +294,20 @@ export function AiConciergeWorkspace({ initialQuery = '' }: { initialQuery?: str
   const inputRef = useRef<HTMLInputElement | null>(null);
   const bottomEndRef = useRef<HTMLDivElement | null>(null);
 
+  // M2b data seam: live search seeds flow through a ref so the hydration
+  // effect keeps its original dependency shape (never re-seeds on re-render).
+  const seededResultsRef = useRef<GemstoneItem[] | undefined>(seededResults);
+  seededResultsRef.current = seededResults;
+
   const favoritesRef = useRef(favorites);
   favoritesRef.current = favorites;
   const compareRef = useRef(compareList);
   compareRef.current = compareList;
+
+  // M6 AI adapter: continuity of the repo-side AI conversation across turns.
+  // The repo handler creates/updates the conversations row server-side; here
+  // we only track the returned key (no database access client-side).
+  const gemologistConversation = useRef<{ key: string | null }>({ key: null });
 
   const executeClientActions = useCallback(
     (response: ConciergeAgentResponse): string[] => {
@@ -353,39 +371,36 @@ export function AiConciergeWorkspace({ initialQuery = '' }: { initialQuery?: str
 
       setIsGenerating(true);
       try {
-        const res = await fetch('/api/ai-agent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: trimmed,
-            focusMode: 'all',
-            maxBudget: null,
-            unheatedOnly: false,
-          }),
-        });
-        if (res.ok) {
-          const serverData: ConciergeAgentResponse = await res.json();
-          if (serverData && serverData.reply) {
-            setTurns((prev) =>
-              prev.map((t) =>
-                t.id === turnId
-                  ? {
-                      ...t,
-                      response: {
-                        ...t.response,
-                        reply: serverData.reply,
-                        gemologicalNotes:
-                          serverData.gemologicalNotes || t.response.gemologicalNotes,
-                        citations: serverData.citations || t.response.citations,
-                      },
-                    }
-                  : t
-              )
-            );
-          }
+        // M6: model enrichment routes through the repo's REAL AI concierge
+        // seam (POST /api/v1/ai/chat — the handler persists the conversation,
+        // messages and tool-call audit rows server-side). The applet's
+        // `/api/ai-agent` Gemini proxy is NOT recreated; a null reply (no
+        // key/error) keeps the deterministic local response verbatim.
+        const serverData = await requestGemologistModelReply(trimmed, gemologistConversation.current.key);
+        if (serverData && serverData.reply) {
+          gemologistConversation.current.key = serverData.conversationKey ?? gemologistConversation.current.key;
+          setTurns((prev) =>
+            prev.map((t) =>
+              t.id === turnId
+                ? {
+                    ...t,
+                    response: {
+                      ...t.response,
+                      reply: serverData.reply,
+                      gemologicalNotes:
+                        serverData.gemologicalNotes.length > 0
+                          ? serverData.gemologicalNotes
+                          : t.response.gemologicalNotes,
+                      citations:
+                        serverData.citations.length > 0
+                          ? serverData.citations
+                          : t.response.citations,
+                    },
+                  }
+                : t
+            )
+          );
         }
-      } catch {
-        // Keep deterministic local response
       } finally {
         setIsGenerating(false);
       }
@@ -397,6 +412,36 @@ export function AiConciergeWorkspace({ initialQuery = '' }: { initialQuery?: str
     const startQuery = initialQuery.trim() || '1.31 ct Tanzanite';
     if (initializedRef.current === startQuery) return;
     initializedRef.current = startQuery;
+    // M2b data seam: the /search page resolves the query against the repo's
+    // real search (searchStorefront) server-side and seeds those results
+    // here. When present, the hydrating turn renders the LIVE vault cards;
+    // without a seed the applet's deterministic local turn applies as-is.
+    if (seededResultsRef.current.length > 0) {
+      const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setTurns((prev) => [
+        ...prev,
+        {
+          id: `turn-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          timestamp: nowTime,
+          userPrompt: startQuery,
+          focusMode: 'all' as GemologistFocusMode,
+          response: {
+            reply: `Live vault results for “${startQuery}”, ranked by the Maihan search index. Evidenced values only — fields the catalogue does not carry stay blank.`,
+            gemologicalNotes: [],
+            citations: [],
+            intent: 'show_products',
+            products: seededResultsRef.current as GemstoneItem[],
+            comparedProducts: [],
+            dyoProposal: null,
+            matchedPairs: [],
+            clientActions: [],
+            suggestedFollowUps: [],
+          } as ConciergeAgentResponse,
+          executedReceipts: [],
+        } as ChatTurn,
+      ]);
+      return;
+    }
     void submitAgentPrompt(startQuery, false);
   }, [initialQuery, submitAgentPrompt]);
 
@@ -411,6 +456,7 @@ export function AiConciergeWorkspace({ initialQuery = '' }: { initialQuery?: str
   const handleNewConsultation = () => {
     setTurns([]);
     setInputPrompt('');
+    gemologistConversation.current.key = null;
     window.setTimeout(() => inputRef.current?.focus(), 50);
   };
 

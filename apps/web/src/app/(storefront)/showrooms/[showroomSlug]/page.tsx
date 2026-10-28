@@ -1,108 +1,156 @@
-/**
- * apps/web/src/app/(storefront)/showrooms/[showroomSlug]/page.tsx
- *
- * `/showrooms/<slug>` — individual salon detail & appointment information
- * (target of observed /showroom/preview 301, SoT 12.2 + 13.1).
- */
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { getShowroomBySlug } from '@/lib/mgh/storefront-data';
+import { getCmsPageBySlug } from '@/lib/cms-pages';
+import { CmsBlockList } from '@/components/cms/CmsBlockView';
+import { SITE_URL } from '@/lib/mgh/site-url';
 
-import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
-
-interface PageProps {
+// M6 editorial migration: one salon dossier. CMS-first (SHOWROOM kind,
+// published head revision only) rendered in the reference applet's detail
+// chrome; the applet's ported salon dossiers render verbatim when the CMS has
+// no published row for the slug (fixture slugs resolve here; unknown → 404).
+export async function generateMetadata({
+  params,
+}: {
   params: Promise<{ showroomSlug: string }>;
-}
-
-const SHOWROOM_DETAILS: Record<
-  string,
-  { city: string; quarter: string; address: string; hours: string; note: string }
-> = {
-  dubai: {
-    city: 'Dubai DIFC Salon',
-    quarter: 'Gate Village, Building 3, Level 4',
-    address: 'Dubai International Financial Centre, Dubai, United Arab Emirates',
-    hours: 'Sunday – Thursday · 10:00 – 19:00 GST (By Appointment)',
-    note: 'Primary Arabian Gulf vault holding certified loose sapphires, rubies, emeralds, and bespoke platinum mountings.',
-  },
-  bangkok: {
-    city: 'Bangkok Silom Bourse Office',
-    quarter: 'Jewelry Trade Center, Silom Road',
-    address: 'Bang Rak, Bangkok 10500, Thailand',
-    hours: 'Monday – Saturday · 09:30 – 18:00 ICT (By Appointment)',
-    note: 'Primary Asian cutting, laboratory submission, and trade partner curation hub.',
-  },
-  geneva: {
-    city: 'Geneva Rue du Rhône Salon',
-    quarter: 'Rue du Rhône 42',
-    address: '1204 Genève, Switzerland',
-    hours: 'Monday – Friday · 10:00 – 18:30 CET (By Appointment)',
-    note: 'Private European viewing salon with direct access to SSEF and Gübelin laboratory dossier services.',
-  },
-  london: {
-    city: 'London Mayfair Salon',
-    quarter: 'Old Bond Street 14',
-    address: 'Mayfair, London W1S 4PP, United Kingdom',
-    hours: 'Monday – Friday · 10:00 – 18:00 GMT (By Appointment)',
-    note: 'Bespoke mounting consultations and private loose-stone viewings in the heart of Mayfair.',
-  },
-};
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+}): Promise<Metadata> {
   const { showroomSlug } = await params;
-  const entry = SHOWROOM_DETAILS[showroomSlug.toLowerCase()];
+  const cmsPage = await getCmsPageBySlug(showroomSlug.toLowerCase());
+  if (cmsPage && cmsPage.pageKind === 'SHOWROOM') {
+    return {
+      title: `${cmsPage.title} | Maihan Gems Salons`,
+      description: 'Maihan Gems private viewing salon dossier.',
+      alternates: { canonical: `${SITE_URL}/showrooms/${cmsPage.slug}` },
+    };
+  }
+  const salon = getShowroomBySlug(showroomSlug);
+  if (!salon) {
+    return {
+      title: 'Salon Not Found',
+      description: 'The requested showroom location does not exist.',
+    };
+  }
   return {
-    title: entry ? `${entry.city} | Maihan Gems Showrooms` : `Salon Preview: ${showroomSlug} | Maihan Gems`,
+    title: `${salon.name} (${salon.city})`,
+    description: salon.lede,
+    alternates: { canonical: `${SITE_URL}/showrooms/${salon.slug}` },
   };
 }
 
-export default async function ShowroomDetailPage({ params }: PageProps) {
+/** Real booking href from a stored SHOWROOM_CTA/CTA block, else /contact. */
+function ctaHref(cmsPage: { blocks: { type: string; props: Record<string, unknown> }[] }): string {
+  for (const block of cmsPage.blocks) {
+    const href = block.props['href'];
+    if (typeof href === 'string' && href.startsWith('/')) return href;
+  }
+  return '/contact';
+}
+
+export default async function ShowroomDetailPage({
+  params,
+}: {
+  params: Promise<{ showroomSlug: string }>;
+}) {
   const { showroomSlug } = await params;
-  const entry = SHOWROOM_DETAILS[showroomSlug.toLowerCase()] ?? {
-    city: `Maihan Gems Salon · ${showroomSlug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}`,
-    quarter: 'Private Viewing Suite',
-    address: 'Dubai DIFC · Bangkok Silom · Geneva · London',
-    hours: 'By Private Appointment Only',
-    note: 'Reserve up to four loose gemstones or settings from the online vault for an in-person daylight viewing with a senior gemmologist.',
-  };
+  const cmsPage = await getCmsPageBySlug(showroomSlug.toLowerCase());
+
+  if (cmsPage && cmsPage.pageKind === 'SHOWROOM') {
+    return (
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+        <nav aria-label="Breadcrumb" className="text-xs text-[#52504C]">
+          <ol className="flex items-center gap-2">
+            <li><Link href="/" className="hover:text-[#141413]">Home</Link></li>
+            <li aria-hidden="true">/</li>
+            <li><Link href="/showrooms" className="hover:text-[#141413]">Showrooms</Link></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" className="font-medium text-[#141413]">{cmsPage.title}</li>
+          </ol>
+        </nav>
+
+        <div className="rounded border border-[#E2DFD7] bg-white p-8 space-y-6">
+          <div className="border-b border-[#E2DFD7] pb-6 space-y-2">
+            <p className="text-xs font-[family-name:var(--font-mono)] text-[#78756F]">
+              PUBLISHED SALON DOSSIER
+              {cmsPage.updatedAt ? ` · ${cmsPage.updatedAt.slice(0, 10)}` : ''}
+            </p>
+            <h1 className="font-[family-name:var(--font-display)] text-4xl font-semibold text-[#141413]">
+              {cmsPage.title}
+            </h1>
+          </div>
+
+          <CmsBlockList blocks={cmsPage.blocks} />
+
+          <div className="pt-4 border-t border-[#E2DFD7]">
+            <Link
+              href={ctaHref(cmsPage)}
+              className="inline-flex items-center px-5 py-2.5 text-xs font-semibold bg-[#1E3A5F] text-white rounded hover:bg-[#152944]"
+            >
+              Request a Salon Viewing →
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const salon = getShowroomBySlug(showroomSlug);
+  if (!salon) {
+    notFound();
+  }
 
   return (
-    <main className="page showrooms-page" id="main-content">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Showrooms', href: '/showrooms' },
-          { label: entry.city },
-        ]}
-      />
-      <span className="page-eyebrow">{entry.quarter}</span>
-      <h1>{entry.city}</h1>
-      <p className="page-subtitle">{entry.note}</p>
+    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+      <nav aria-label="Breadcrumb" className="text-xs text-[#52504C]">
+        <ol className="flex items-center gap-2">
+          <li><Link href="/" className="hover:text-[#141413]">Home</Link></li>
+          <li aria-hidden="true">/</li>
+          <li><Link href="/showrooms" className="hover:text-[#141413]">Showrooms</Link></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" className="font-medium text-[#141413]">{salon.city}</li>
+        </ol>
+      </nav>
 
-      <div className="lx-account-card" style={{ maxWidth: '44rem', marginTop: '2rem' }}>
-        <h2 className="lx-account-card__title">Salon Details</h2>
-        <dl className="lx-account-rows">
-          <div>
-            <dt>Location</dt>
-            <dd>{entry.address}</dd>
+      <div className="rounded border border-[#E2DFD7] bg-white p-8 space-y-6">
+        <div className="border-b border-[#E2DFD7] pb-6 space-y-2">
+          <p className="text-xs font-[family-name:var(--font-mono)] text-[#78756F]">
+            PRIVATE VIEWING SALON · {salon.city.toUpperCase()}
+          </p>
+          <h1 className="font-[family-name:var(--font-display)] text-4xl font-semibold text-[#141413]">
+            {salon.name}
+          </h1>
+          <p className="text-base text-[#52504C] leading-relaxed">{salon.lede}</p>
+        </div>
+
+        <p className="text-sm text-[#52504C] leading-relaxed">{salon.description}</p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs border-t border-[#E2DFD7] pt-6">
+          <div className="space-y-1.5">
+            <h2 className="font-semibold text-[#141413]">Location &amp; Hours</h2>
+            <p className="text-[#52504C]">{salon.address}</p>
+            <p className="text-[#52504C]">{salon.hours}</p>
+            <p className="font-[family-name:var(--font-mono)] text-[#141413]">{salon.phone}</p>
+            <p className="text-[#78756F] pt-1">{salon.securityProtocol}</p>
           </div>
-          <div>
-            <dt>Viewing Hours</dt>
-            <dd>{entry.hours}</dd>
+          <div className="space-y-1.5">
+            <h2 className="font-semibold text-[#141413]">On-Site Gemological Capabilities</h2>
+            <ul className="list-disc pl-4 space-y-1 text-[#52504C]">
+              {salon.vaultCapabilities.map((cap) => (
+                <li key={cap}>{cap}</li>
+              ))}
+            </ul>
           </div>
-          <div>
-            <dt>Security Protocol</dt>
-            <dd>Advance appointment &amp; photo ID required</dd>
-          </div>
-        </dl>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
-          <Link href="/contact" className="lx-btn lx-btn--solid">
-            Request Private Viewing
-          </Link>
-          <Link href="/showrooms" className="lx-btn lx-btn--ghost">
-            All International Salons
+        </div>
+
+        <div className="pt-4 border-t border-[#E2DFD7]">
+          <Link
+            href={`/contact?salon=${encodeURIComponent(salon.city)}`}
+            className="inline-flex items-center px-5 py-2.5 text-xs font-semibold bg-[#1E3A5F] text-white rounded hover:bg-[#152944]"
+          >
+            Request Viewing at {salon.city} Salon →
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

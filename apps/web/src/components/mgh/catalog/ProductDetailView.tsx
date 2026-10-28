@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import type { GemstoneItem } from '@/lib/mgh/fixtures';
-import { getRelatedGemstones } from '@/lib/mgh/storefront-data';
 import {
   ProductDetailGallery,
   ProductDetailActionsAndAccordion,
@@ -9,6 +8,7 @@ import {
 } from './ProductDetailClient';
 import { ProductCard } from './ProductCard';
 import { SITE_URL } from '@/lib/mgh/site-url';
+import { getCatalogRelatedGemstones } from '@/lib/mgh/adapters/catalog';
 
 export function ProductDetailSkeleton() {
   return (
@@ -42,7 +42,7 @@ export function ProductDetailSkeleton() {
   );
 }
 
-export function ProductDetailView({
+export async function ProductDetailView({
   stone,
   breadcrumbVariety,
   isLoading = false,
@@ -56,7 +56,9 @@ export function ProductDetailView({
   }
 
   const isJewellery = stone.varietySlug === 'rings' || stone.varietySlug === 'necklaces';
-  const related = getRelatedGemstones(stone.id, stone.varietySlug, 4);
+  // M2b data seam: related stones come from the live catalogue pool (same
+  // variety first), not the fixture ledger; an empty pool renders no row.
+  const related = await getCatalogRelatedGemstones(stone.id, stone.varietySlug, 4);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -71,10 +73,16 @@ export function ProductDetailView({
     },
     additionalProperty: [
       { '@type': 'PropertyValue', name: 'Carat', value: stone.carat },
-      { '@type': 'PropertyValue', name: 'Shape', value: stone.shape },
-      { '@type': 'PropertyValue', name: 'Clarity', value: stone.clarity },
-      { '@type': 'PropertyValue', name: 'Disclosed Treatment', value: stone.treatmentDisclosed },
-      { '@type': 'PropertyValue', name: 'Origin', value: stone.origin },
+      // INV-07 null-safety: a field the row does not evidence is rendered as
+      // the applet's honest "Not evidenced" marker, never a fabricated value.
+      { '@type': 'PropertyValue', name: 'Shape', value: stone.shape ?? 'Not evidenced' },
+      { '@type': 'PropertyValue', name: 'Clarity', value: stone.clarity ?? 'Not evidenced' },
+      {
+        '@type': 'PropertyValue',
+        name: 'Disclosed Treatment',
+        value: stone.treatmentDisclosed || 'Not evidenced',
+      },
+      { '@type': 'PropertyValue', name: 'Origin', value: stone.origin || 'Not evidenced' },
     ],
     offers: {
       '@type': 'Offer',
