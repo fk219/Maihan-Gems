@@ -1,15 +1,20 @@
-// F3-V vendor portal API — fresh clean schema (technical_design/43 §3).
-// DEV-ONLY service: binds to 127.0.0.1. Admin routes require the dev bearer
-// token (FRESH_ADMIN_TOKEN). Vendor routes are identified by vendor code only —
-// real vendor authentication (sessions/RBAC) lands with F3-AUTH.
+// F3-V vendor portal + F3-AUTH + storefront read APIs — fresh clean schema.
+// DEV service: binds to 127.0.0.1. Admin routes use the dev bearer token
+// (FRESH_ADMIN_TOKEN). Customers use real sessions (scrypt + token hashes).
+// Vendors use per-vendor API keys issued once at onboarding approval.
+// Storefront read APIs are public and never expose vendor-internal columns.
 
 import http from 'node:http';
 import { z } from 'zod';
 import { pool, withTx, PORT, HOST, ADMIN_TOKEN, type Db } from './db.js';
-import { createVendor, approveOnboarding, rejectOnboarding, suspendOnboarding, getVendor } from './onboarding.js';
+import { createVendor, approveOnboarding, rejectOnboarding, suspendOnboarding, getVendor, verifyVendor } from './onboarding.js';
 import { approveSubmission, rejectSubmission, listSubmissions } from './submissions.js';
-import { VocabError, StateError, ConflictError } from './validation.js';
-import { gemstoneSubmissionSchema, settingSubmissionSchema, productSubmissionSchema } from './validation.js';
+import { StateError, ConflictError, VocabError, gemstoneSubmissionSchema, settingSubmissionSchema, productSubmissionSchema } from './validation.js';
+import { registerCustomer, loginCustomer, logoutCustomer, me } from './auth-handlers.js';
+import {
+  listGemstones, gemstoneDetail, listProducts, productDetail, listSettings,
+  varietiesWithCounts, familiesWithCounts,
+} from './storefront.js';
 
 const submissionSchemas = { gemstone: gemstoneSubmissionSchema, setting: settingSubmissionSchema, product: productSubmissionSchema } as const;
 
@@ -18,6 +23,7 @@ type Handler = (ctx: Ctx, params: Record<string, string>) => Promise<{ status: n
 
 const ok = (json: unknown): { status: number; json: unknown } => ({ status: 200, json });
 const created = (json: unknown): { status: number; json: unknown } => ({ status: 201, json });
+const notFound = (what: string): { status: number; json: unknown } => ({ status: 404, json: { error: `${what} not found` } });
 
 function requireAdmin(ctx: Ctx): void {
   const auth = ctx.headers.authorization ?? '';
@@ -28,37 +34,56 @@ function requireAdmin(ctx: Ctx): void {
   }
 }
 
-async function requireOnboardedVendor(client: Db, code: string): Promise<void> {
-  const v = await getVendor(client, code);
-  if (v.onboarding_status !== 'APPROVED' || v.status !== 'ACTIVE') {
-    const e = new Error(`vendor '${code}' is not onboarded/active`) as Error & { status?: number };
-    e.status = 409;
-    throw e;
-  }
-}
-
 const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   { method: 'GET', pattern: /^\/healthz$/, handler: async () => ok({ ok: true, service: 'fresh-api' }) },
 
+  // auth (customer) ----------------------------------------------------------
+  { method: 'POST', pattern: /^\/api\/v1\/auth\/register$/, handler: async (ctx) =>
+    created(await registerCustomer(ctx.body, ctx.headers['user-agent'] ?? null)) },
+  { method: 'POST', pattern: /^\/api\/v1\/auth\/login$/, handler: async (ctx) =>
+    ok(await loginCustomer(ctx.body, ctx.headers['user-agent'] ?? null)) },
+  { method: 'POST', pattern: /^\/api\/v1\/auth\/logout$/, handler: async (ctx) =>
+    ok(await logoutCustomer(ctx.headers.authorization)) },
+  { method: 'GET', pattern: /^\/api\/v1\/auth\/me$/, handler: async (ctx) =>
+    ok(await me(ctx.headers.authorization)) },
+
+  // storefront reads (public) -------------------------------------------------
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/varieties$/, handler: async () => ok(await varietiesWithCounts(pool)) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/families$/, handler: async () => ok(await familiesWithCounts(pool)) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/gemstones$/, handler: async (ctx) => ok(await listGemstones(pool, ctx.query)) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/gemstones\/(?<ref>[GP]-[A-Z0-9-]+)$/, handler: async (_ctx, p) => {
+    const d = await gemstoneDetail(pool, p.ref!);
+    return d ? ok(d) : notFound(`gemstone ${p.ref}`);
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/products$/, handler: async (ctx) => ok(await listProducts(pool, ctx.query)) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/products\/(?<ref>J-[A-Z0-9-]+)$/, handler: async (_ctx, p) => {
+    const d = await productDetail(pool, p.ref!);
+    return d ? ok(d) : notFound(`product ${p.ref}`);
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/settings$/, handler: async (ctx) => ok(await listSettings(pool, ctx.query)) },
+
+  // vendors -------------------------------------------------------------------
   { method: 'POST', pattern: /^\/api\/v1\/vendors$/, handler: async (ctx) => {
     const r = await withTx((c) => createVendor(c, ctx.body));
     return created(r);
   } },
-
   { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})$/, handler: async (_ctx, p) => ok(await getVendor(pool, p.code!)) },
-
   { method: 'POST', pattern: /^\/api\/v1\/admin\/onboarding\/(?<code>V-[A-Za-z]{2}-\d{3})\/(?<action>approve|reject|suspend)$/, handler: async (ctx, p) => {
     requireAdmin(ctx);
     const note = (ctx.body as { note?: string } | null)?.note ?? null;
+    if (p.action === 'approve') {
+      const r = await withTx((c) => approveOnboarding(c, p.code!, 'admin'));
+      return ok({ ...r, note: 'store the API key now — it is shown once' });
+    }
     await withTx(async (c) => {
-      if (p.action === 'approve') await approveOnboarding(c, p.code!, 'admin');
-      else if (p.action === 'reject') await rejectOnboarding(c, p.code!, note ?? 'no reason given', 'admin');
+      if (p.action === 'reject') await rejectOnboarding(c, p.code!, note ?? 'no reason given', 'admin');
       else await suspendOnboarding(c, p.code!, note ?? 'suspended', 'admin');
     });
     return ok(await getVendor(pool, p.code!));
   } },
 
   { method: 'POST', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/submissions$/, handler: async (ctx, p) => {
+    await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
     const body = (ctx.body ?? {}) as { submission_kind?: string };
     const kind = body.submission_kind;
     const schema = submissionSchemas[kind as keyof typeof submissionSchemas];
@@ -68,8 +93,7 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
       throw e;
     }
     const payload = schema.parse(body);
-    const r = await withTx(async (c) => {
-      await requireOnboardedVendor(c, p.code!);
+    const r = await withTx(async (c: Db) => {
       const { rows } = await c.query(`SELECT id FROM fresh.vendors WHERE code = $1`, [p.code!.toUpperCase()]);
       const inserted = await c.query(
         `INSERT INTO fresh.vendor_submissions (vendor_id, submission_kind, payload, status)
@@ -80,36 +104,22 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     });
     return created(r);
   } },
-
-  { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/submissions$/, handler: async (ctx, p) =>
-    ok(await listSubmissions(pool, ctx.query.get('status'), p.code!)) },
+  { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/submissions$/, handler: async (ctx, p) => {
+    await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
+    return ok(await listSubmissions(pool, ctx.query.get('status'), p.code!));
+  } },
 
   { method: 'GET', pattern: /^\/api\/v1\/admin\/submissions$/, handler: async (ctx) => {
     requireAdmin(ctx);
     return ok(await listSubmissions(pool, ctx.query.get('status'), ctx.query.get('vendor')));
   } },
-
   { method: 'POST', pattern: /^\/api\/v1\/admin\/submissions\/(?<id>\d+)\/(?<action>approve|reject)$/, handler: async (ctx, p) => {
     requireAdmin(ctx);
     const id = Number(p.id);
-    if (p.action === 'approve') {
-      const r = await withTx((c) => approveSubmission(c, id, 'admin'));
-      return ok(r);
-    }
+    if (p.action === 'approve') return ok(await withTx((c) => approveSubmission(c, id, 'admin')));
     const note = (ctx.body as { note?: string } | null)?.note ?? 'no reason given';
     await withTx((c) => rejectSubmission(c, id, note, 'admin'));
     return ok({ id, status: 'REJECTED' });
-  } },
-
-  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/(?<kind>gemstones|settings|products)$/, handler: async (ctx, p) => {
-    const status = ctx.query.get('status') ?? 'ACTIVE';
-    const limit = Math.min(Number(ctx.query.get('limit') ?? 50), 200);
-    const offset = Number(ctx.query.get('offset') ?? 0);
-    const { rows } = await pool.query(
-      `SELECT ref, slug, name, price_amount, currency, status FROM fresh.${p.kind} WHERE status = $1 ORDER BY ref LIMIT $2 OFFSET $3`,
-      [status, limit, offset],
-    );
-    return ok({ kind: p.kind, status, count: rows.length, items: rows });
   } },
 ];
 
