@@ -16,6 +16,17 @@ import {
   varietiesWithCounts, familiesWithCounts, listMetals, listShapes, listColours,
   listOrigins, settingsByDesign, settingDetailByCode, listAssets,
 } from './storefront.js';
+import {
+  getOrCreateCart, viewCart, addProductToCart, updateCartItem, removeCartItem,
+  checkoutCart, payOrder, getOrder, listOrders, type CheckoutInput,
+} from './commerce.js';
+import crypto from 'node:crypto';
+
+const ADMIN_PASSWORD = process.env['FRESH_ADMIN_PASSWORD'] ?? 'maihan-admin-dev';
+
+function adminSessionToken(): string {
+  return crypto.createHmac('sha256', ADMIN_PASSWORD).update('maihan-admin-session-v1').digest('hex');
+}
 
 const submissionSchemas = { gemstone: gemstoneSubmissionSchema, setting: settingSubmissionSchema, product: productSubmissionSchema } as const;
 
@@ -28,7 +39,8 @@ const notFound = (what: string): { status: number; json: unknown } => ({ status:
 
 function requireAdmin(ctx: Ctx): void {
   const auth = ctx.headers.authorization ?? '';
-  if (auth !== `Bearer ${ADMIN_TOKEN}`) {
+  const token = auth.replace(/^Bearer\s+/i, '');
+  if (token !== ADMIN_TOKEN && token !== adminSessionToken()) {
     const e = new Error('admin bearer token required') as Error & { status?: number };
     e.status = 401;
     throw e;
@@ -37,6 +49,66 @@ function requireAdmin(ctx: Ctx): void {
 
 const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   { method: 'GET', pattern: /^\/healthz$/, handler: async () => ok({ ok: true, service: 'fresh-api' }) },
+
+  // admin session (dev password -> derived session token)
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/login$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { password?: string };
+    if (!body.password || body.password !== ADMIN_PASSWORD) {
+      const e = new Error('invalid admin password') as Error & { status?: number };
+      e.status = 401;
+      throw e;
+    }
+    return ok({ token: adminSessionToken() });
+  } },
+
+  // commerce — carts
+  { method: 'POST', pattern: /^\/api\/v1\/carts$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { token?: string };
+    return created(await withTx((c) => getOrCreateCart(c, body.token)));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/carts\/(?<token>[a-f0-9-]{36})$/, handler: async (_ctx, p) => {
+    const cart = await withTx((c) => viewCart(c, p.token!));
+    return ok(cart);
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/carts\/(?<token>[a-f0-9-]{36})\/items$/, handler: async (ctx, p) => {
+    const body = (ctx.body ?? {}) as { ref?: string; quantity?: number };
+    if (!body.ref) {
+      const e = new Error('ref is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => addProductToCart(c, p.token!, body.ref!, Number(body.quantity) || 1)));
+  } },
+  { method: 'PATCH', pattern: /^\/api\/v1\/carts\/(?<token>[a-f0-9-]{36})\/items\/(?<itemId>\d+)$/, handler: async (ctx, p) => {
+    const body = (ctx.body ?? {}) as { quantity?: number };
+    return ok(await withTx((c) => updateCartItem(c, p.token!, Number(p.itemId), Number(body.quantity ?? 1))));
+  } },
+  { method: 'DELETE', pattern: /^\/api\/v1\/carts\/(?<token>[a-f0-9-]{36})\/items\/(?<itemId>\d+)$/, handler: async (_ctx, p) =>
+    ok(await withTx((c) => removeCartItem(c, p.token!, Number(p.itemId)))) },
+
+  // commerce — checkout + orders
+  { method: 'POST', pattern: /^\/api\/v1\/carts\/(?<token>[a-f0-9-]{36})\/checkout$/, handler: async (ctx, p) => {
+    const body = (ctx.body ?? {}) as Partial<CheckoutInput>;
+    if (!body.email || !body.shipping_address) {
+      const e = new Error('email and shipping_address are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    const input: CheckoutInput = {
+      email: body.email,
+      shipping_address: body.shipping_address,
+      billing_address: body.billing_address ?? null,
+      customer_note: body.customer_note ?? null,
+      discount_code: body.discount_code ?? null,
+    };
+    return created(await withTx((c) => checkoutCart(c, p.token!, input)));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/orders\/(?<number>MG-\d{4}-\d{6})\/pay$/, handler: async (_ctx, p) =>
+    ok(await withTx((c) => payOrder(c, p.number!))) },
+  { method: 'GET', pattern: /^\/api\/v1\/orders\/(?<number>MG-\d{4}-\d{6})$/, handler: async (_ctx, p) => {
+    const order = await withTx((c) => getOrder(c, p.number!));
+    return order ? ok(order) : notFound(`order ${p.number}`);
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/orders$/, handler: async (ctx) => {
+    requireAdmin(ctx);
+    return ok(await withTx((c) => listOrders(c, Number(ctx.query.get('limit') ?? 50))));
+  } },
 
   // auth (customer) ----------------------------------------------------------
   { method: 'POST', pattern: /^\/api\/v1\/auth\/register$/, handler: async (ctx) =>

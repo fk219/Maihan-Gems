@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "F3-V vendor portal API on the fresh clean schema (technical_design/43 §3). Localhost dev service; real auth lands with F3-AUTH.",
+  "description": "F3-V vendor portal API on the fresh clean schema (technical_design/43 \u00a73). Localhost dev service; real auth lands with F3-AUTH.",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "start": "tsx src/server.ts",
@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "pg": "8.23.1",
-    "zod": "3.25.76"
+    "zod": "3.25.76",
+    "@maihan/domain": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "26.6.4",
