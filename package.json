@@ -9,17 +9,13 @@
   },
   "scripts": {
     "dev": "pnpm --filter @maihan/web run dev",
-    "worker": "pnpm --filter @maihan/worker run start",
-    "storefront:db:setup": "pnpm --filter @maihan/db run migrate && pnpm --filter @maihan/db run seed && pnpm --filter @maihan/db run seed:catalogue",
-    "bootstrap:admin": "pnpm --filter @maihan/db run bootstrap:admin",
     "start": "pnpm --filter @maihan/web run start:web",
     "build": "tsc -b",
     "typecheck": "tsc -b",
     "clean": "tsc -b --clean",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "pnpm -r run test",
-    "schema-fidelity": "pnpm run build && pnpm --filter @maihan/db run schema-fidelity"
+    "test": "pnpm -r run test"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",

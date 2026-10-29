@@ -144,6 +144,15 @@ A fresh clone, a Codespace, or the home machine after `git pull` will **not**
 have `naturalgemstones/`. That is correct and expected. It must be restored from
 durable storage out of band.
 
+> **2026-10-29 UPDATE (owner decision): the archive was DELETED from this
+> workspace.** The cleaned catalogue lives in the fresh database and is
+> independently backed up (`backups/maihan_dev_fresh_schema_2026-10-28.dump`,
+> SHA-256 `72deede4…`). The `naturalgemstones/` NEVER-de protections are
+> retired: re-cleaning from source is no longer possible until the archive is
+> re-restored out of band, and `tools/fresh-clean` prints a restore message to
+> that effect. All other §5 rules (no committing it, no fabricating its data)
+> remain in force for any future restored copy.
+
 ### When migration data is needed
 
 If a task requires source datasets (`urls.jsonl`, `specifications.jsonl`,

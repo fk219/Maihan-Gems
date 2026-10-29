@@ -3,22 +3,45 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
     "rootDir": "src",
     "outDir": "dist",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "jsx": "react-jsx",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"]
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/data/ngc-taxonomy.json"],
-  "exclude": ["dist", "node_modules", ".next"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/data/ngc-taxonomy.json"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    ".next"
+  ],
   "references": [
-    { "path": "../../packages/ai" },
-    { "path": "../../packages/config" },
-    { "path": "../../packages/contracts" },
-    { "path": "../../packages/db" },
-    { "path": "../../packages/domain" },
-    { "path": "../../packages/observability" }
+    {
+      "path": "../../packages/ai"
+    },
+    {
+      "path": "../../packages/config"
+    },
+    {
+      "path": "../../packages/contracts"
+    },
+    {
+      "path": "../../packages/domain"
+    },
+    {
+      "path": "../../packages/observability"
+    }
   ]
 }

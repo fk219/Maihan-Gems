@@ -25,10 +25,10 @@
 import { STOREFRONT_CONTACT } from '@maihan/config';
 import type { ProductDetailReadModel } from '@maihan/contracts';
 
-import { siteBaseUrl } from './sitemap.js';
+import { SITE_URL } from '@/lib/mgh/site-url';
 
 /** The canonical production base URL (shared policy with the sitemap). */
-export { siteBaseUrl };
+export const siteBaseUrl = (env?: string): string => (env ?? SITE_URL).replace(/\/$/, '');
 
 /**
  * Serialise a JSON-LD value for embedding in a <script type="application/ld+json">.
@@ -81,7 +81,8 @@ export const ORGANIZATION_EVIDENCE = {
 export function organizationJsonLdPayload(env: Record<string, string | undefined> = process.env): string | null {
   const raw = env['SITE_URL'];
   if (raw === undefined || raw.trim() === '') return null;
-  return serializeJsonLd({ '@context': 'https://schema.org', ...organizationNode(siteBaseUrl(env)) });
+  const base = typeof env === 'string' ? env : SITE_URL;
+  return serializeJsonLd({ '@context': 'https://schema.org', ...organizationNode(siteBaseUrl(base)) });
 }
 
 /** The Organization node — observed identity only. */

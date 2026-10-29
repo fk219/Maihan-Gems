@@ -14,7 +14,7 @@ import { registerCustomer, loginCustomer, logoutCustomer, me } from './auth-hand
 import {
   listGemstones, gemstoneDetail, listProducts, productDetail, listSettings,
   varietiesWithCounts, familiesWithCounts, listMetals, listShapes, listColours,
-  listOrigins, settingsByDesign, settingDetailByCode,
+  listOrigins, settingsByDesign, settingDetailByCode, listAssets,
 } from './storefront.js';
 
 const submissionSchemas = { gemstone: gemstoneSubmissionSchema, setting: settingSubmissionSchema, product: productSubmissionSchema } as const;
@@ -71,6 +71,7 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   { method: 'GET', pattern: /^\/api\/v1\/catalogue\/shapes$/, handler: async () => ok(await listShapes(pool)) },
   { method: 'GET', pattern: /^\/api\/v1\/catalogue\/colours$/, handler: async () => ok(await listColours(pool)) },
   { method: 'GET', pattern: /^\/api\/v1\/catalogue\/origins$/, handler: async () => ok(await listOrigins(pool)) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/assets$/, handler: async (ctx) => ok(await listAssets(pool, ctx.query)) },
 
   // vendors -------------------------------------------------------------------
   { method: 'POST', pattern: /^\/api\/v1\/vendors$/, handler: async (ctx) => {

@@ -16,7 +16,6 @@
     "@maihan/ai": "workspace:*",
     "@maihan/config": "workspace:*",
     "@maihan/contracts": "workspace:*",
-    "@maihan/db": "workspace:*",
     "@maihan/domain": "workspace:*",
     "@maihan/observability": "workspace:*",
     "@mediapipe/tasks-vision": "0.10.17",

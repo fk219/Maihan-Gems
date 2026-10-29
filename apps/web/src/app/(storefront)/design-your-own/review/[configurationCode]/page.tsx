@@ -27,6 +27,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { getDyoLedgerSample } from '@/lib/mgh/adapters/dyo.js';
 import { EvidenceValue } from '@/components/mgh/ui/EvidenceValue';
 import { DyoReviewAddToCartButton } from '@/components/mgh/dyo/DyoReviewClient';
@@ -101,6 +102,10 @@ export default async function DyoReviewPage({ params }: PageProps) {
     );
   }
 
+  if (!model) {
+    // Honest not-found: the configurations ledger lands with F3-commerce.
+    notFound();
+  }
   const { configuration, gemstone, settingVariant, quote } = model;
   const state = configuration.state;
   const compatibilityStatus = configuration.compatibility_status;

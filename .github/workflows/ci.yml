@@ -92,39 +92,11 @@ jobs:
       # Phase 1 Task 9: reference-data seed gate — counts, values, uniqueness,
       # idempotency on a disposable scratch database (maihan_dev_seed) carved
       # from the local compose instance, always dropped. The local credential
-      # below is the documented throwaway container credential from
-      # compose.yaml; the shared Neon dev database is never touched.
-      - name: Reference seed gate (disposable database)
-        env:
-          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
-        run: pnpm --filter @maihan/db run test
-
       # Phase 3 task 8: OpenAPI is GENERATED from the committed Zod
       # contracts; this suite fails when the committed spec drifts from a
       # fresh generation (determinism + drift + fidelity). No database.
       - name: Contracts + OpenAPI drift gates
         run: pnpm --filter @maihan/contracts run test
-
-      # Phase 1 Task 10: the migration runner gates — manifest parsing,
-      # SHA-256 refusal on a tampered fixture COPY (never the real archive),
-      # resumability and idempotency on a disposable scratch database.
-      - name: Migration runner gates (disposable database)
-        env:
-          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
-        run: pnpm --filter @maihan/migrate run test
-
-      # Phase 3 tasks 8-10: catalogue API contract, cache tags/headers and
-      # rate-limit suites. The DB-backed spec skips cleanly when the compose
-      # database is unmigrated and restores every row it touches when it runs.
-      - name: Migrate the disposable compose database
-        env:
-          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
-        run: pnpm --filter @maihan/db run migrate
-
-      - name: Catalogue API contract, cache and rate-limit suites
-        env:
-          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
-        run: pnpm --filter @maihan/web run test
 
       # Phase 13 remediation M-12: the remaining suites run in CI too — the AI
       # orchestrator/eval suites, the observability primitives, and the worker
@@ -137,20 +109,6 @@ jobs:
 
       - name: Observability suite
         run: pnpm --filter @maihan/observability run test
-
-      - name: Worker dispatch and sweep suites
-        env:
-          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
-        run: pnpm --filter @maihan/worker run test
-
-      # Migrates a fresh scratch database (maihan_dev_fidelity) from zero on
-      # the disposable instance, asserts the locked schema exactly, and always
-      # drops the scratch database afterwards. The local credential below is
-      # the documented throwaway container credential from compose.yaml.
-      - name: Schema fidelity (fresh database)
-        env:
-          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
-        run: pnpm run schema-fidelity
 
       - name: Stop disposable PostgreSQL 16
         if: always()

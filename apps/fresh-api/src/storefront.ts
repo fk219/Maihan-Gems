@@ -172,6 +172,24 @@ export async function listSettings(client: AnyClient, q: URLSearchParams) {
   return { kind: 'settings', count: rows.length, items: rows };
 }
 
+export async function listAssets(client: AnyClient, q: URLSearchParams) {
+  const params: unknown[] = [];
+  const where: string[] = [];
+  const kind = q.get('kind');
+  if (kind) { params.push(kind); where.push(`a.kind = $${params.length}`); }
+  const ownerKind = q.get('owner_kind');
+  if (ownerKind) { params.push(ownerKind); where.push(`a.owner_kind = $${params.length}`); }
+  const state = q.get('state');
+  if (state) { params.push(state); where.push(`a.role = $${params.length}`); }
+  const limit = Math.min(Number(q.get('limit') ?? 50), 200);
+  const { rows } = await client.query(
+    `SELECT a.id, a.owner_kind, a.owner_id, a.role, a.kind, a.vto_ready, a.url, a.position, a.alt
+     FROM fresh.assets a ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY a.position LIMIT ${limit}`,
+    params,
+  );
+  return { count: rows.length, items: rows };
+}
+
 export async function listMetals(client: AnyClient) {
   const { rows } = await client.query(`SELECT code, name, purity FROM fresh.metals ORDER BY sort`);
   return { count: rows.length, items: rows };

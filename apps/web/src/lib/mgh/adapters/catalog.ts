@@ -652,3 +652,8 @@ export function getFreshFxRates(): FxRates {
 export function isFreshCatalogueOffline(): boolean {
   return false;
 }
+
+/** The /varieties/[varietySlug] surface: same contract as the fixture fn. */
+export async function getVarietyBySlug(slug: string) {
+  return getCatalogVarietyCollection(slug);
+}
