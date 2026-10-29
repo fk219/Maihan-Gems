@@ -110,6 +110,11 @@ jobs:
       - name: Observability suite
         run: pnpm --filter @maihan/observability run test
 
+      - name: Fresh API typecheck + lint
+        run: |
+          pnpm --filter @maihan/fresh-api exec tsc --noEmit
+          pnpm exec eslint apps/fresh-api/src/
+
       - name: Stop disposable PostgreSQL 16
         if: always()
         run: docker compose down -v

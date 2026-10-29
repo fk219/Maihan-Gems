@@ -22,6 +22,7 @@ import {
 } from './commerce.js';
 import { createConfiguration, getConfiguration, addConfigurationToCart } from './configurations.js';
 import crypto from 'node:crypto';
+import { checkRateLimit } from './rate-limit.js';
 
 const ADMIN_PASSWORD = process.env['FRESH_ADMIN_PASSWORD'] ?? 'maihan-admin-dev';
 
@@ -229,6 +230,19 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
 ];
 
 const server = http.createServer(async (req, res) => {
+  // CORS: dev service — the web app (localhost:3000) proxies for production,
+  // but test runners (vitest browser context) and local tools hit us directly.
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+      'access-control-allow-headers': 'content-type, authorization, x-vendor-code, x-vendor-key',
+      'access-control-max-age': '86400',
+    });
+    res.end();
+    return;
+  }
+  const corsHeaders = { 'access-control-allow-origin': '*' };
   const url = new URL(req.url ?? '/', `http://${HOST}:${PORT}`);
   const chunks: Buffer[] = [];
   for await (const c of req) chunks.push(c as Buffer);
@@ -237,17 +251,28 @@ const server = http.createServer(async (req, res) => {
   if (raw) { try { body = JSON.parse(raw); } catch { res.writeHead(400).end('{"error":"invalid JSON body"}'); return; } }
 
   const ctx: Ctx = { method: req.method ?? 'GET', path: url.pathname, query: url.searchParams, body, headers: req.headers };
+  // Rate limiting (before auth — brute-force protection)
+  const ip = req.socket.remoteAddress ?? 'unknown';
+  const limiter = checkRateLimit(ip, url.pathname);
+  if (!limiter.allowed) {
+    res.writeHead(429, {
+      'content-type': 'application/json',
+      'retry-after': String(limiter.retryAfterSec),
+      'x-ratelimit-scope': limiter.scope,
+    }).end(JSON.stringify({ error: `rate limit exceeded (${limiter.scope}) — retry in ${limiter.retryAfterSec}s` }));
+    return;
+  }
   try {
     for (const r of routes) {
       if (r.method !== ctx.method) continue;
       const m = ctx.path.match(r.pattern);
       if (!m) continue;
       const out = await r.handler(ctx, m.groups ?? {});
-      res.writeHead(out.status, { 'content-type': 'application/json' });
+      res.writeHead(out.status, { 'content-type': 'application/json', ...corsHeaders });
       res.end(JSON.stringify(out.json, null, 2));
       return;
     }
-    res.writeHead(404, { 'content-type': 'application/json' }).end(JSON.stringify({ error: `no route: ${ctx.method} ${ctx.path}` }));
+    res.writeHead(404, { 'content-type': 'application/json', ...corsHeaders }).end(JSON.stringify({ error: `no route: ${ctx.method} ${ctx.path}` }));
   } catch (e) {
     const err = e as Error & { status?: number; code?: string };
     const status = err.status
@@ -258,7 +283,7 @@ const server = http.createServer(async (req, res) => {
         : 500);
     const detail = err instanceof z.ZodError ? err.issues : err.message;
     if (status === 500) console.error('fresh-api 500:', err);
-    res.writeHead(status, { 'content-type': 'application/json' }).end(JSON.stringify({ error: detail }));
+    res.writeHead(status, { 'content-type': 'application/json', ...corsHeaders }).end(JSON.stringify({ error: detail }));
   }
 });
 
