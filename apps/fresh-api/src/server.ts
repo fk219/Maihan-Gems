@@ -20,6 +20,7 @@ import {
   getOrCreateCart, viewCart, addProductToCart, updateCartItem, removeCartItem,
   checkoutCart, payOrder, getOrder, listOrders, type CheckoutInput,
 } from './commerce.js';
+import { createConfiguration, getConfiguration, addConfigurationToCart } from './configurations.js';
 import crypto from 'node:crypto';
 
 const ADMIN_PASSWORD = process.env['FRESH_ADMIN_PASSWORD'] ?? 'maihan-admin-dev';
@@ -71,9 +72,13 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     return ok(cart);
   } },
   { method: 'POST', pattern: /^\/api\/v1\/carts\/(?<token>[a-f0-9-]{36})\/items$/, handler: async (ctx, p) => {
-    const body = (ctx.body ?? {}) as { ref?: string; quantity?: number };
+    const body = (ctx.body ?? {}) as { ref?: string; quantity?: number; configuration_code?: string };
+    if (body.configuration_code) {
+      await withTx(async (c) => addConfigurationToCart(c, p.token!, body.configuration_code ?? ''));
+      return ok(await withTx((c) => viewCart(c, p.token!)));
+    }
     if (!body.ref) {
-      const e = new Error('ref is required') as Error & { status?: number }; e.status = 422; throw e;
+      const e = new Error('ref or configuration_code is required') as Error & { status?: number }; e.status = 422; throw e;
     }
     return ok(await withTx((c) => addProductToCart(c, p.token!, body.ref!, Number(body.quantity) || 1)));
   } },
@@ -85,6 +90,23 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     ok(await withTx((c) => removeCartItem(c, p.token!, Number(p.itemId)))) },
 
   // commerce — checkout + orders
+  // DYO configurations
+  { method: 'POST', pattern: /^\/api\/v1\/configurations$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { settingSku?: string; gemRef?: string; jewelleryType?: string; options?: { metal?: string; ringSize?: string } };
+    if (!body.settingSku || !body.gemRef) {
+      const e = new Error('settingSku and gemRef are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    const r = await withTx((c) => createConfiguration(c, {
+      settingSku: body.settingSku!, gemRef: body.gemRef!,
+      jewelleryType: body.jewelleryType, options: body.options,
+    }));
+    const dossier = await withTx((c) => getConfiguration(c, r.code));
+    return created({ code: r.code, quote: { total: r.total, currency: r.currency, gemstoneComponent: r.gemstoneComponent, settingComponent: r.settingComponent }, configuration: dossier });
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/configurations\/(?<code>DYO-\d{4})$/, handler: async (_ctx, p) => {
+    const dossier = await withTx((c) => getConfiguration(c, p.code!));
+    return dossier ? ok(dossier) : notFound(`configuration ${p.code}`);
+  } },
   { method: 'POST', pattern: /^\/api\/v1\/carts\/(?<token>[a-f0-9-]{36})\/checkout$/, handler: async (ctx, p) => {
     const body = (ctx.body ?? {}) as Partial<CheckoutInput>;
     if (!body.email || !body.shipping_address) {

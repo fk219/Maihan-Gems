@@ -143,9 +143,9 @@ export async function listSettings(client: AnyClient, q: URLSearchParams) {
   const where: string[] = [`s.status <> 'ARCHIVED'`];
   const params: unknown[] = [];
   const add = (raw: string | null, sql: string): void => { if (raw) { params.push(raw); where.push(sql.replace('$X', `$${params.length}`)); } };
-  add(q.get('jewellery_type'), `s.jewellery_type_id = (SELECT id FROM fresh.jewellery_types WHERE code = '$X')`);
-  add(q.get('metal'), `s.metal_id = (SELECT id FROM fresh.metals WHERE code = '$X')`);
-  add(q.get('design'), `s.design_code = '$X'`);
+  add(q.get('jewellery_type'), `s.jewellery_type_id = (SELECT id FROM fresh.jewellery_types WHERE code = $X)`);
+  add(q.get('metal'), `s.metal_id = (SELECT id FROM fresh.metals WHERE code = $X)`);
+  add(q.get('design'), `s.design_code = $X`);
   const status = q.get('status');
   if (status) { params.push(status); where.splice(0, 1, `s.status = $${params.length}`); }
   const text = q.get('q');

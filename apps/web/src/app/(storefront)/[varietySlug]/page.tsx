@@ -42,10 +42,9 @@ export async function generateMetadata({
       alternates: { canonical: `${SITE_URL}/product/${stone.slug}` },
     };
   }
-  return {
-    title: 'Record Not Found',
-    description: 'Unknown variety, colour, or specimen slug.',
-  };
+  // Soft-404 fix: throwing here (metadata phase) yields a true 404 status —
+  // the body-phase notFound() fired too late, after the shell had streamed.
+  notFound();
 }
 
 export default async function RootVarietyCatchAllPage({

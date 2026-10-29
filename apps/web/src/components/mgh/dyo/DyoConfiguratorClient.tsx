@@ -32,11 +32,6 @@ import { buildDeterministicDyoCode, formatUsd } from '@/lib/mgh/storefront-data'
  * the review page — and again at bag conversion — is the only authority.
  */
 
-interface ServerError {
-  code?: string;
-  message?: string;
-}
-
 /**
  * The real compatibility rule evaluation (same seam the replaced studio used
  * in lib/dyo-compat): rule rows carry shape (+ optional carat bands); a rule
@@ -154,11 +149,12 @@ export function DyoConfiguratorClient({
     setBeginning(true);
     setBeginError(null);
     try {
-      const createRes = await fetch('/api/v1/dyo/configurations', {
+      // F4: fresh configurations API (creates + quotes server-side).
+      const createRes = await fetch('/api/fresh/configurations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          settingVariantSku: activeMetal.variantSku ?? selectedSetting.sku,
+          settingSku: activeMetal.variantSku ?? selectedSetting.sku,
           gemRef: selectedStone.sku,
           jewelleryType: 'RING',
           options: {
@@ -170,20 +166,12 @@ export function DyoConfiguratorClient({
         }),
       });
       const createBody = (await createRes.json().catch(() => null)) as {
-        data?: { configuration?: { short_code?: string } };
-        error?: ServerError;
+        code?: string;
+        error?: string;
       } | null;
-      const shortCode = createBody?.data?.configuration?.short_code;
+      const shortCode = createBody?.code;
       if (!createRes.ok || !shortCode) {
-        throw new Error(createBody?.error?.message ?? 'The atelier could not register this composition.');
-      }
-      const validateRes = await fetch(
-        `/api/v1/dyo/configurations/${encodeURIComponent(shortCode)}/validate`,
-        { method: 'POST' },
-      );
-      if (!validateRes.ok) {
-        const validateBody = (await validateRes.json().catch(() => null)) as { error?: ServerError } | null;
-        throw new Error(validateBody?.error?.message ?? 'This composition failed compatibility validation.');
+        throw new Error(createBody?.error ?? 'The atelier could not register this composition.');
       }
       router.push(`/design-your-own/review/${encodeURIComponent(shortCode)}`);
     } catch (cause) {

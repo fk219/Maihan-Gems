@@ -60,6 +60,13 @@ So every storefront page today shows fake data or crashes. All pages are re-poin
 - **Admin console** (`/admin`): password login (dev password `FRESH_ADMIN_PASSWORD`), tabs Submissions (approve/reject → mints codes)/Catalogue/Orders. **Vendor portal** (`/vendor`): key login, My Submissions, New Submission form (gemstone/setting/product) carrying the vendor's own reference.
 - Honest notes: payments are the dev test instrument (real PSPs are owner-gated); shipping is 0 pending fulfilment rates; DYO quote→cart conversion deferred (configurations POST is the seam).
 
+**DYO conversion + soft-404 fix (2026-10-29):**
+- **DYO configurations API**: `POST /api/v1/configurations` (setting + gemstone by semantic ref; composition law F-INV-02/03 + carat-range validated; component prices summed → server quote `DYO-####` minted; dupe hash returns existing), `GET /api/v1/configurations/:code` (full dossier), cart accepts `configuration_code` (line at quoted price).
+- **Live-verified DYO→order flow**: vendor gemstone (priced) + vendor setting (priced) → config `DYO-0003` ($2,900+$1,200=$4,100) → cart → checkout (AE tax $205) → test-paid → **gem SOLD**, order item snapshot `DYO-0003`.
+- **Applet configurator rewired**: POSTs to `/api/fresh/configurations`; review dossier fetches the fresh configuration (`dyo-server` → fresh-api); **Acquire Commission button** converts to cart (session tray token) → walks to checkout.
+- **Soft-404 FIXED at the edge**: proxy middleware now checks single-segment paths against the cached variety registry (5-min TTL) + known app-route prefixes — unknown → true 404 before any shell streams. Verified: `/nonexistent-page-xyz` → **404**, `/sapphire` → 200.
+- Two checkout bugs found and fixed by the E2E: order-item `code_snapshot` double-prefix (`DYO-DYO-…`) and the configuration gemstone_id not carried into order_items (gem never sold).
+
 **Known follow-ups (recorded, not blockers):** (1) catch-all soft-404 — unknown `[varietySlug]` renders the branded not-found body with HTTP 200 because the root loading skeleton flushes before notFound(); needs a pre-stream guard. (2) DYO pool empty until vendor photos arrive (honest). (3) dead `lib/storefront-data.ts` + old commerce/admin routes remain non-functional legacy (retired at cut-over). (4) Sanity adapter + credentials (separate increment).
 
 ## 5. Verification standard (per batch)

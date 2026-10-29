@@ -28,6 +28,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import DyoAcquireButton from '@/components/mgh/dyo/DyoAcquireButton';
 import { getDyoLedgerSample } from '@/lib/mgh/adapters/dyo.js';
 import { EvidenceValue } from '@/components/mgh/ui/EvidenceValue';
 import { DyoReviewAddToCartButton } from '@/components/mgh/dyo/DyoReviewClient';
@@ -370,10 +371,13 @@ export default async function DyoReviewPage({ params }: PageProps) {
           </p>
         )}
         {quote ? (
-          <p className="text-[11px] font-[family-name:var(--font-mono)] text-[#76726A]">
-            Pricing rule {quote.pricingRuleVersion} · A fresh quote is issued server-side at bag
-            conversion.
-          </p>
+          <div className="pt-2 space-y-3">
+            <DyoAcquireButton configurationCode={model.configurationCode} />
+            <p className="text-[11px] font-[family-name:var(--font-mono)] text-[#76726A]">
+              Pricing rule {quote.pricingRuleVersion ?? 'fresh-v1'} · A fresh quote is issued server-side at bag
+              conversion.
+            </p>
+          </div>
         ) : null}
       </section>
     </div>

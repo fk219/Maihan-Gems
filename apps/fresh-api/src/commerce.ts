@@ -242,7 +242,7 @@ export async function checkoutCart(client: Db, token: string, input: CheckoutInp
     await client.query(
       `INSERT INTO fresh.order_items (order_id, product_id, configuration_id, description, code_snapshot,
          gemstone_id, setting_id, quantity, unit_price, line_total)
-       SELECT $1, ci.product_id, ci.configuration_id, $2, COALESCE(p.ref, CONCAT('DYO-', cfg.code)), p.gemstone_id,
+       SELECT $1, ci.product_id, ci.configuration_id, $2, COALESCE(p.ref, cfg.code), COALESCE(p.gemstone_id, cfg.gemstone_id),
          cfg.setting_id, ci.quantity, ci.unit_price, ci.unit_price * ci.quantity
        FROM fresh.cart_items ci
        LEFT JOIN fresh.products p ON p.id = ci.product_id
