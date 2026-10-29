@@ -46,6 +46,12 @@ So every storefront page today shows fake data or crashes. All pages are re-poin
 | 4 | Polish: no-photo cards → house gem tile (variety initial, never fixture photos); unpriced → "Price on request" (never $0); verified 0 fixture images on /browse | ✅ core DONE (remaining: per-route skeletons exist at root; LCP/a11y sweep scheduled) |
 | 5 | Verify: build green; routes 200 with real data (status sweep + content greps); known follow-up: catch-all soft-404 (streams 200 before notFound) recorded below | ✅ DONE |
 
+**Design-fidelity pass (2026-10-29, owner: "all links visually modified; match the exact reference design"):**
+- **Root cause of the blue underlined links:** the reference applet runs WITH Tailwind preflight (strips browser link styling); our migration layer deliberately skips it. Fix: scoped base rules in `mgh-applet.css` — `.golden-cloud-gallery a:not([class])` inherits colour + no underline; every `a[class]` drops the default underline. Utilities still win. Verified in the shipped CSS bundle.
+- **Pages re-copied verbatim from the reference** (import-path/asset-prefix/data-source swaps only): `/varieties` (full editorial hero + marquee + subcategory grid + colour swatches), `/varieties/[varietySlug]`, `/settings/[settingSku]` (the applet SettingDetailGallery/Client/BelowFold components — previously a hand-built text page), `/contact` (SALON CONCIERGE layout + form).
+- **Gates + editorial + not-found restyled to the exact applet not-found pattern** (obsidian bg, mono gold eyebrow, EB Garamond display, `gold-gradient-cta` + gold-border secondary): `/admin`, `/vendor`, `/account`, all ComingSoon editorial pages, root `not-found.tsx` = reference file verbatim.
+- Honesty kept: the reference's invented Diamond editorial card + Elysian-Ring fixture links are dropped from the varieties grid; unpriced cards show "Price on request"; showrooms show the single appointment card.
+
 **Known follow-ups (recorded, not blockers):** (1) catch-all soft-404 — unknown `[varietySlug]` renders the branded not-found body with HTTP 200 because the root loading skeleton flushes before notFound(); needs a pre-stream guard. (2) DYO pool empty until vendor photos arrive (honest). (3) dead `lib/storefront-data.ts` + old commerce/admin routes remain non-functional legacy (retired at cut-over). (4) Sanity adapter + credentials (separate increment).
 
 ## 5. Verification standard (per batch)

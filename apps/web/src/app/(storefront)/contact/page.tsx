@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
+
 import { ContactViewingFormClient } from '@/components/mgh/content/ContactViewingFormClient';
 import { SITE_URL } from '@/lib/mgh/site-url';
-import { STOREFRONT_CONTACT } from '@maihan/config';
 
 const LEDE =
   'Reserve a private viewing in Geneva, New York, or London.';
@@ -20,7 +20,9 @@ export default async function ContactPage({
   searchParams: Promise<{ salon?: string; sku?: string }>;
 }) {
   const sp = await searchParams;
-  
+  // Private viewings are arranged personally — showrooms list returns with
+  // the Sanity content increment (ADR-036). Honest single card meanwhile. 
+
   return (
     <div className="golden-cloud-gallery text-[#181613] font-[family-name:var(--font-eb-garamond)] min-h-[82vh]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 space-y-12">
@@ -46,25 +48,23 @@ export default async function ContactPage({
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-[22px] border border-[#E5D4B3] bg-white/95 p-6 shadow-[0_10px_28px_rgba(185,150,75,0.08)] space-y-1.5">
+              <div
+                className="rounded-[22px] border border-[#E5D4B3] bg-white/95 p-6 shadow-[0_10px_28px_rgba(185,150,75,0.08)] space-y-1.5"
+              >
                 <p className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.22em] text-[#8B6B23] font-semibold">
                   <MapPin className="h-3.5 w-3.5 text-[#D4AF37]" />
                   <span>By appointment</span>
                 </p>
-                <p className="text-xl text-[#181613] font-medium">Private viewings</p>
+                <p className="text-xl text-[#181613] font-medium">Private Viewing</p>
                 <p className="text-sm text-[#5C5346]">
-                  Viewing appointments are arranged personally with the house. Send a request through the form and our gemmologist will confirm a time.
+                  Viewings are arranged personally with the house. Our gemmologist confirms a time after your request.
                 </p>
               </div>
             </div>
           </div>
 
           <div className="lg:col-span-7">
-            <ContactViewingFormClient
-              initialSalon={sp.salon}
-              initialSku={sp.sku}
-              email={STOREFRONT_CONTACT.email}
-            />
+            <ContactViewingFormClient initialSalon={sp.salon} initialSku={sp.sku} />
           </div>
         </div>
       </div>

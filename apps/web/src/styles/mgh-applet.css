@@ -161,3 +161,25 @@
 :root {
   --font-eb-garamond: var(--font-display-applet);
 }
+
+
+/* ---------------------------------------------------------------------
+ * F4 link cascade — the reference applet runs WITH Tailwind preflight,
+ * which strips browser-default link colours/underlines. This migration
+ * layer intentionally skips preflight, so bare links fell back to the
+ * browser default (blue + underline). This scoped base rule reproduces
+ * the preflight anchor behaviour for every storefront page; explicit
+ * utilities (text-[#121211], hover:text-[#9A7B2C], gold-gradient-cta…)
+ * still win from the utilities layer.
+ * ------------------------------------------------------------------- */
+@layer base {
+  .golden-cloud-gallery a:not([class]) {
+    color: inherit;
+    text-decoration: none;
+  }
+  /* Links WITH utility classes keep their utilities but never render the
+     browser-default blue or the default underline — the applet look. */
+  .golden-cloud-gallery a[class] {
+    text-decoration: none;
+  }
+}

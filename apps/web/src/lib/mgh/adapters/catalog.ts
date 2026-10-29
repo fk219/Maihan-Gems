@@ -586,7 +586,9 @@ export interface FreshVarietyLink {
   code: string;
   slug: string;
   name: string;
+  species: string | null;
   family: string;
+  familyName: string;
   stones: number;
 }
 
@@ -595,20 +597,25 @@ export interface FreshVarietyLink {
  * (86 varieties with live stone counts) — replaces the fixture ledger.
  */
 export async function getFreshVarietyLinks(): Promise<FreshVarietyLink[]> {
-  const data = await freshGet<{ count: number; items: Array<{ code: string; slug: string; name: string; family: string; stones: number }> }>(
+  const data = await freshGet<{ count: number; items: Array<{ code: string; slug: string; name: string; species: string | null; family: string; family_name: string; stones: number }> }>(
     '/api/v1/catalogue/varieties',
   );
-  return (data?.items ?? []).map((v) => ({ code: v.code, slug: v.slug, name: v.name, family: v.family, stones: v.stones }));
+  return (data?.items ?? []).map((v) => ({
+    code: v.code, slug: v.slug, name: v.name,
+    species: v.species ?? v.family_name,
+    family: v.family, familyName: v.family_name, stones: v.stones,
+  }));
 }
 
 export interface FreshColourLink {
   slug: string;
   name: string;
+  hex: string | null;
   stones: number;
 }
 
 export async function getFreshColourLinks(): Promise<FreshColourLink[]> {
-  const data = await freshGet<{ count: number; items: Array<{ slug: string; name: string }> }>(
+  const data = await freshGet<{ count: number; items: Array<{ slug: string; name: string; hex_preview: string | null }> }>(
     '/api/v1/catalogue/colours',
   );
   const gems = await fetchGemstones({ limit: '200' });
@@ -617,7 +624,9 @@ export async function getFreshColourLinks(): Promise<FreshColourLink[]> {
     const slug = row.colour_slug ?? slugify(row.colour ?? '');
     if (slug) counts.set(slug, (counts.get(slug) ?? 0) + 1);
   }
-  return (data?.items ?? []).map((c) => ({ slug: c.slug, name: c.name, stones: counts.get(c.slug) ?? 0 }));
+  return (data?.items ?? []).map((c) => ({
+    slug: c.slug, name: c.name, hex: c.hex_preview, stones: counts.get(c.slug) ?? 0,
+  }));
 }
 
 /* ------------------------------------------------------- shop-page pool */

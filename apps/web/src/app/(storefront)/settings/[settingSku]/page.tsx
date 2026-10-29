@@ -1,98 +1,102 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getFreshSettingBySkuOrSlug as getSettingBySkuOrSlug } from '@/lib/mgh/adapters/catalog';
+import {
+  SettingDetailGallery,
+  SettingDetailClient,
+  SettingDetailBelowFoldSections,
+} from '@/components/mgh/catalog/SettingDetailClient';
+import { SITE_URL } from '@/lib/mgh/site-url';
 
-import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
-import { Badge } from '../../../../components/design-system/Badge.js';
-import { getFreshSettingBySkuOrSlug } from '@/lib/mgh/adapters/catalog';
-
-interface PageProps {
+export async function generateMetadata({
+  params,
+}: {
   params: Promise<{ settingSku: string }>;
+}): Promise<Metadata> {
+  const { settingSku } = await params;
+  const setting = await getSettingBySkuOrSlug(settingSku);
+  if (!setting) {
+    return {
+      title: 'Setting Not Found',
+      description: 'The requested setting SKU does not exist in the Maihan Gems ledger.',
+    };
+  }
+  return {
+    title: `${setting.name} (${setting.sku})`,
+    description: setting.lede,
+    alternates: {
+      canonical: `${SITE_URL}/settings/${setting.sku}`,
+    },
+  };
 }
 
-export const dynamic = 'force-dynamic';
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export default async function SettingDetailPage({
+  params,
+}: {
+  params: Promise<{ settingSku: string }>;
+}) {
   const { settingSku } = await params;
-  return { title: `Setting ${decodeURIComponent(settingSku)} | Maihan Gems` };
-}
-
-export default async function SettingDetailPage({ params }: PageProps) {
-  const { settingSku } = await params;
-  const setting = await getFreshSettingBySkuOrSlug(decodeURIComponent(settingSku));
-  if (!setting) notFound();
-
-  const price = setting.metals.length
-    ? setting.metals.reduce((min, m) => Math.min(min, setting.basePrice + m.priceDelta), setting.basePrice + (setting.metals[0]?.priceDelta ?? 0))
-    : setting.basePrice;
+  const setting = await getSettingBySkuOrSlug(settingSku);
+  if (!setting) {
+    notFound();
+  }
 
   return (
-    <main className="page setting-detail-page">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Settings', href: '/settings' },
-          { label: setting.name },
-        ]}
-      />
-      <span className="page-eyebrow">Geneva Atelier Setting</span>
-      <h1>{setting.name}</h1>
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', margin: '0.75rem 0 1.5rem' }}>
-        <Badge tone="neutral">{setting.category.toUpperCase()}</Badge>
-        {setting.style ? <Badge tone="neutral">{setting.style}</Badge> : null}
-        <Badge tone="neutral">{setting.sku}</Badge>
+    <div className="golden-cloud-gallery min-h-screen font-[family-name:var(--font-eb-garamond)] text-[#1A1612]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-8 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#76726A]"
+        >
+          <ol className="flex items-center gap-2">
+            <li>
+              <Link href="/" className="hover:text-[#1A1612]">
+                Home
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <Link href="/settings" className="hover:text-[#1A1612]">
+                Settings
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" className="font-medium text-[#1A1612]">
+              {setting.name}
+            </li>
+          </ol>
+        </nav>
+
+        {/* Above-the-Fold 2-Column Showcase */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+          {/* Left: Vertical Thumbnail Rail + Main Stage Image */}
+          <div className="lg:col-span-7">
+            <SettingDetailGallery setting={setting} />
+          </div>
+
+          {/* Right: Kicker, Title, Description, Price, Metal/Size Selectors & Actions */}
+          <div className="lg:col-span-5 space-y-5">
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2.5 text-xs uppercase tracking-[0.28em] text-[#9A7432] font-semibold">
+                <span className="h-px w-6 bg-[#C5A059]" />
+                <span>SETTING</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-normal text-[#1A1612] leading-[1.12]">
+                {setting.name}
+              </h1>
+              <p className="text-base text-[#5C4E3C] leading-relaxed">
+                {setting.lede}
+              </p>
+            </div>
+
+            <SettingDetailClient setting={setting} />
+          </div>
+        </div>
+
+        {/* Below-the-Fold Interactive Tabs, Specifications, Craftsmanship Banner & Gemstone Pairings */}
+        <SettingDetailBelowFoldSections setting={setting} />
       </div>
-      <p className="page-subtitle">
-        {setting.description || 'Precious-metal mounting crafted for a centre gemstone.'}
-      </p>
-
-      <section style={{ margin: '1.5rem 0', display: 'grid', gap: '0.75rem' }}>
-        <div className="setting-fact">
-          <span className="eyebrow">From</span>
-          <strong style={{ fontSize: '1.35rem' }}>
-            {price > 0 ? `$${price.toLocaleString('en-US', { minimumFractionDigits: 2 })}` : 'Price on request'}
-          </strong>
-          
-        </div>
-        <div className="setting-fact">
-          <span className="eyebrow">Metals available</span>
-          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {setting.metals.map((m) => (
-              <li key={m.code} style={{ border: '1px solid #E5D4B3', borderRadius: 999, padding: '0.25rem 0.75rem', fontSize: '0.85rem' }}>
-                {m.label}
-                {m.priceDelta !== 0 ? <span style={{ color: '#76726A' }}> ({m.priceDelta > 0 ? '+' : ''}${m.priceDelta.toLocaleString('en-US')})</span> : null}
-              </li>
-            ))}
-          </ul>
-        </div>
-        {setting.accepts?.filter((a) => a.minCarat != null || a.maxCarat != null).length ? (
-          <div className="setting-fact">
-            <span className="eyebrow">Centre stone range</span>
-            <span>
-              {setting.accepts
-                .filter((a) => a.minCarat != null || a.maxCarat != null)
-                .map((a) => `${a.minCarat ?? 0}-${a.maxCarat ?? 'infinity'} ct`)
-                .join(', ')}
-            </span>
-          </div>
-        ) : null}
-        {setting.compatibleShapes.length ? (
-          <div className="setting-fact">
-            <span className="eyebrow">Compatible shapes</span>
-            <span>{setting.compatibleShapes.map((s) => s.replace(/-/g, ' ')).join(', ')}</span>
-          </div>
-        ) : null}
-        <div className="setting-fact">
-          <span className="eyebrow">Mounting sizes</span>
-          <span>{setting.sizes.join(', ')}</span>
-        </div>
-      </section>
-
-      <p style={{ marginTop: '2rem' }}>
-        <Link href="/design-your-own" className="variety-card__sublink">
-          Design your own with this setting →
-        </Link>
-      </p>
-    </main>
+    </div>
   );
 }

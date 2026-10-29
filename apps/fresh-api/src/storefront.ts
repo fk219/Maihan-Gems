@@ -244,12 +244,12 @@ export async function settingDetailByCode(client: AnyClient, key: string) {
 
 export async function varietiesWithCounts(client: AnyClient) {
   const { rows } = await client.query(
-    `SELECT v.code, v.slug, v.name, f.code AS family, f.name AS family_name,
+    `SELECT v.code, v.slug, v.name, v.species, f.code AS family, f.name AS family_name,
             count(g.id)::int AS stones
      FROM fresh.gemstone_varieties v
      JOIN fresh.gemstone_families f ON f.id = v.family_id
      LEFT JOIN fresh.gemstones g ON g.variety_id = v.id AND g.status <> 'ARCHIVED'
-     GROUP BY v.id, v.code, v.slug, v.name, f.code, f.name
+     GROUP BY v.id, v.code, v.slug, v.name, v.species, f.code, f.name
      ORDER BY stones DESC, v.name`,
   );
   return { count: rows.length, items: rows };
