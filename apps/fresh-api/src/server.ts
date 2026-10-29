@@ -13,7 +13,8 @@ import { StateError, ConflictError, VocabError, gemstoneSubmissionSchema, settin
 import { registerCustomer, loginCustomer, logoutCustomer, me } from './auth-handlers.js';
 import {
   listGemstones, gemstoneDetail, listProducts, productDetail, listSettings,
-  varietiesWithCounts, familiesWithCounts,
+  varietiesWithCounts, familiesWithCounts, listMetals, listShapes, listColours,
+  listOrigins, settingsByDesign, settingDetailByCode,
 } from './storefront.js';
 
 const submissionSchemas = { gemstone: gemstoneSubmissionSchema, setting: settingSubmissionSchema, product: productSubmissionSchema } as const;
@@ -61,6 +62,15 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     return d ? ok(d) : notFound(`product ${p.ref}`);
   } },
   { method: 'GET', pattern: /^\/api\/v1\/catalogue\/settings$/, handler: async (ctx) => ok(await listSettings(pool, ctx.query)) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/settings\/design\/(?<design>[A-Za-z0-9-]+)$/, handler: async (_ctx, p) => ok(await settingsByDesign(pool, p.design!)) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/settings\/(?<key>S-[A-Za-z0-9-]+)$/, handler: async (_ctx, p) => {
+    const d = await settingDetailByCode(pool, p.key!);
+    return d ? ok(d) : notFound(`setting ${p.key}`);
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/metals$/, handler: async () => ok(await listMetals(pool)) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/shapes$/, handler: async () => ok(await listShapes(pool)) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/colours$/, handler: async () => ok(await listColours(pool)) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/origins$/, handler: async () => ok(await listOrigins(pool)) },
 
   // vendors -------------------------------------------------------------------
   { method: 'POST', pattern: /^\/api\/v1\/vendors$/, handler: async (ctx) => {

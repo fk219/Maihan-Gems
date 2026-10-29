@@ -1,71 +1,75 @@
 /**
- * M5 — Design Your Own adapter (applet DYOJ pages → the repo's REAL DYO seam).
+ * F4 — Design Your Own adapter over the FRESH clean catalogue (replaces the
+ * locked-schema read layer). The applet's 4-step configurator markup, classes
+ * and flow are unchanged; the data now comes from fresh-api.
  *
- * The migrated DYOJ surfaces (applet landing page + applet 4-step
- * configurator markup + applet review dossier) keep the reference applet's
- * EXACT classes and flow. This adapter is their only source of truth:
- *
- * - stones  → REAL ACTIVE single loose stones (`listProducts`, LOOSE_STONE
- *              rows; gem_ref/source_sku equals products.sku, which is what
- *              the DYO create API resolves against `gemstones.gem_ref`).
- * - settings→ REAL setting VARIANTS (`listSettingsForDyo` — one row per
- *              design × metal, acceptance rules verbatim from
- *              `setting_compatibility_rules`), grouped into applet
- *              `SettingItem`s per design; per-metal price deltas are real
- *              arithmetic between the variants of the same design
- *              (min-variant price = base; never invented).
- * - metals  → the real variants' metal code/label (`metals` seed
- *              vocabulary) with the caller's `variantSku` so the DYO create
- *              API receives the REAL setting-variant SKU.
- * - sizes   → the repo's evidenced ring-size keyword list (the constant the
- *              replaced DyoStudio page shipped); no size value is invented.
- * - costs   → component prices are the rows' real `price_amount`; the
- *              configurator's total is an INDICATIVE sum of components —
- *              the applet's own copy stays "Commission Total" and the page
- *              carries the repo's server-quote note. The AUTHORITATIVE
- *              number remains the server quote on the review page and the
- *              quote issued at bag conversion (INV-01/02/03 preserved).
- *
- * Honesty rules retained: unknown design/style/meta stays null (rendered as
- * "Not evidenced"); earring mounts are excluded from the single-stone
- * configurator because INV-03 forbids single-stone attachments there; rows
- * without an evidenced primary image are dropped rather than faked.
+ * - stones   → fresh single loose stones (kind=SINGLE). The pool is EMPTY
+ *              today: source-derived stones carry no photography yet (source
+ *              media only covered configured products), and the applet
+ *              configurator honestly requires an evidenced primary image —
+ *              vendor submissions with photos fill this pool.
+ * - settings → fresh settings grouped per design (design_code); per-metal
+ *              price deltas are real arithmetic between the design's actual
+ *              variants (min = base; never invented); earring mounts are
+ *              excluded because F-INV-03 forbids single-stone attachments
+ *              there.
+ * - sizes    → the evidenced ring-size ladder constant (presentation data).
+ * - ledger   → the fresh `configurations` table is empty (runtime feature) —
+ *              the commission-ledger surfaces render their honest empty state.
  */
 import 'server-only';
 import type { GemstoneItem, SettingItem, SettingMetalOption } from '@/lib/mgh/fixtures';
-import {
-  listDyoRecentlyCommissioned,
-  listProducts,
-  listSettingsForDyo,
-  type SettingForDyo,
-} from '@/lib/storefront-data';
 
-/** Evidenced ring/mounting size ladder (the replaced DyoStudio page's own list). */
+const FRESH_API_URL = process.env['FRESH_API_URL'] ?? 'http://127.0.0.1:3010';
+
+/** Evidenced ring/mounting size ladder (presentation constant). */
 export const DYO_SIZES: string[] = ['5', '5.5', '6', '6.5', '7', '7.5', '8', '8.5', '9'];
 
 const STONE_LIMIT = 24;
 
-const APPLET_SHAPES: readonly GemstoneItem['shape'][] = [
-  'Round',
-  'Cushion',
-  'Octagon',
-  'Oval',
-  'Pear',
-  'Asscher',
-  'Radiant',
-  'Marquise',
-];
+interface FreshGemRow {
+  ref: string;
+  slug: string;
+  name: string;
+  kind: 'SINGLE' | 'PAIR';
+  weight_ct: string | number | null;
+  price_amount: string | number | null;
+  status: string;
+  variety: string;
+  colour: string | null;
+  shape: string | null;
+  description: string | null;
+  primary_image: string | null;
+}
 
-const APPLET_CLARITIES: readonly NonNullable<GemstoneItem['clarity']>[] = [
-  'FL',
-  'IF',
-  'VVS1',
-  'VVS2',
-  'VSI',
-  'VS1',
-  'VS2',
-  'SI1',
-];
+interface FreshSettingRow {
+  ref: string;
+  slug: string;
+  name: string;
+  design_code: string;
+  price_amount: string | number | null;
+  currency: string;
+  status: string;
+  min_ct: string | number | null;
+  max_ct: string | number | null;
+  description: string | null;
+  jewellery_type: string;
+  style: string | null;
+  style_slug: string | null;
+  metal: string;
+  metal_name: string;
+  primary_image: string | null;
+}
+
+async function freshGet<T>(path: string): Promise<T | null> {
+  try {
+    const res = await fetch(`${FRESH_API_URL}${path}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null; // offline → honest empty states
+  }
+}
 
 function slugify(value: string): string {
   return value
@@ -80,201 +84,130 @@ function normalizeShape(raw: string | null): GemstoneItem['shape'] | null {
   const lowered = raw.trim().toLowerCase();
   if (lowered.includes('emerald')) return 'Octagon';
   if (lowered.includes('asscher')) return 'Asscher';
-  return APPLET_SHAPES.find((shape) => shape.toLowerCase() === lowered) ?? null;
+  const applet: readonly GemstoneItem['shape'][] = ['Round', 'Cushion', 'Octagon', 'Oval', 'Pear', 'Asscher', 'Radiant', 'Marquise'];
+  return applet.find((shape) => shape.toLowerCase() === lowered) ?? null;
 }
 
-function normalizeClarity(raw: string): NonNullable<GemstoneItem['clarity']> | null {
-  const lowered = raw.trim().toLowerCase();
-  return APPLET_CLARITIES.find((clarity) => clarity.toLowerCase() === lowered) ?? null;
-}
-
-function plainTreatment(raw: string | null): string {
-  if (!raw) return 'Not evidenced';
-  return raw.trim().length > 0 ? raw : 'Not evidenced';
-}
-
-function stoneLede(title: string): string {
-  return title.trim().length > 0 ? title : 'Vault loose gemstone';
-}
-
-function toGemstoneItem(
-  row: Awaited<ReturnType<typeof listProducts>>[number],
-): GemstoneItem | null {
-  const image = row.imageUrl ?? '';
-  if (image.trim().length === 0) return null;
-  const variety = row.stoneType ?? row.variety ?? '';
-  const shape = normalizeShape(row.shape);
-  const clarity = row.clarity ? normalizeClarity(row.clarity) : null;
-  const treatment = plainTreatment(row.treatment);
+function toGemstoneItem(row: FreshGemRow): GemstoneItem | null {
+  const image = row.primary_image ?? '';
+  if (image.trim().length === 0) return null; // the configurator requires an evidenced image
+  const variety = row.variety ?? '';
   return {
-    id: row.sku,
-    sku: row.sku,
+    id: row.ref,
+    sku: row.ref,
     slug: row.slug,
-    name: row.title,
+    name: row.name,
     variety,
     varietySlug: slugify(variety),
-    colourHue: row.colorHue ?? '',
-    colourSlug: slugify(row.colorHue ?? ''),
-    carat: row.caratTotal ?? 0,
-    shape,
-    clarity,
-    treatmentDisclosed: treatment,
-    origin: row.originCountry ?? 'Not evidenced',
-    price: row.priceUsd,
+    colourHue: row.colour ?? '',
+    colourSlug: slugify(row.colour ?? ''),
+    carat: row.weight_ct == null ? 0 : Number(row.weight_ct),
+    shape: normalizeShape(row.shape),
+    clarity: null,
+    treatmentDisclosed: 'Not evidenced',
+    origin: 'Not evidenced',
+    price: row.price_amount == null ? 0 : Number(row.price_amount),
     currency: 'USD',
     availability: 'IN_VAULT',
     images: [image],
     webarAssetId: null,
-    lede: row.description ?? stoneLede(row.title),
-    description: row.description ?? stoneLede(row.title),
+    lede: row.description ?? row.name,
+    description: row.description ?? row.name,
     evidence: {
-      laboratory: row.certificateLab ?? null,
-      reportNumber: null,
-      reportDate: null,
-      miningDistrict: null,
-      refractiveIndex: null,
-      pleochroism: null,
-      fluorescence: null,
-      specificGravity: null,
-      dimensionsMm: null,
-      cutGrade: null,
+      laboratory: null, reportNumber: null, reportDate: null, miningDistrict: null,
+      refractiveIndex: null, pleochroism: null, fluorescence: null,
+      specificGravity: null, dimensionsMm: null, cutGrade: null,
     },
   } as unknown as GemstoneItem;
 }
 
-/**
- * The applet configurator's stone pool: the newest ACTIVE single loose
- * stones with an evidenced primary image. Empty when the catalogue is
- * offline — the applet renders its honest empty state, never invented stock.
- */
+/** The applet configurator's stone pool: single stones with an evidenced image. */
 export async function getDyoConfiguratorStones(): Promise<GemstoneItem[]> {
-  const rows = await listProducts({
-    kind: 'gemstone',
-    quantityType: 'single',
-    limit: STONE_LIMIT,
-  });
-  return rows
+  const data = await freshGet<{ items: FreshGemRow[] }>(`/api/v1/catalogue/gemstones?kind=SINGLE&limit=${STONE_LIMIT}`);
+  return (data?.items ?? [])
     .map(toGemstoneItem)
     .filter((stone): stone is GemstoneItem => stone !== null);
 }
 
-/* -----------------------------------------------------------------------
- * Settings — group REAL variants (design × metal) into applet designs.
- * ----------------------------------------------------------------------- */
+function toSettingItem(group: FreshSettingRow[]): SettingItem | null {
+  const head = group[0]!;
+  const category = head.jewellery_type === 'RING' ? 'ring' : head.jewellery_type === 'PENDANT' ? 'pendant' : '';
+  // The applet configurator is a single-stone studio — F-INV-03 forbids a
+  // single stone attaching to earrings, so earring mounts are NOT wired in.
+  if (!(category === 'ring' || category === 'pendant')) return null;
 
-interface VariantRow {
-  designKey: string;
-  SettingForDyo: SettingForDyo;
-}
+  const basePrice = Math.min(...group.map((r) => (r.price_amount == null ? Infinity : Number(r.price_amount))));
+  if (!Number.isFinite(basePrice)) return null;
+  const sorted = [...group].sort((a, b) => Number(a.price_amount ?? Infinity) - Number(b.price_amount ?? Infinity));
 
-function designKeyOf(row: SettingForDyo): string {
-  if (row.designCode && row.designCode.trim().length > 0) return row.designCode.trim();
-  return row.slug;
-}
-
-function metalOption(
-  row: SettingForDyo,
-  basePrice: number,
-): SettingMetalOption | null {
-  const code = row.metalCode ?? '';
-  if (code.trim().length === 0) return null;
-  const label = row.metalLabel && row.metalLabel.trim().length > 0 ? row.metalLabel : code;
-  const delta = Math.round((row.priceUsd - basePrice) * 100) / 100;
-  return {
-    // A metal code outside the documented vocabularies is honestly passed
-    // through with the row's own label; nothing is remapped.
-    code: code as SettingMetalOption['code'],
-    label,
-    // The alloy hallmarks are not evidenced in the read layer — the review
-    // dossier renders "Not evidenced" instead of an invented stamp.
-    hallmark: null,
-    priceDelta: delta,
-    variantSku: row.variantSku ?? row.sku,
-  };
-}
-
-function groupSettings(rows: SettingForDyo[]): SettingItem[] {
-  const byDesign = new Map<string, VariantRow[]>();
-  for (const row of rows) {
-    const key = designKeyOf(row);
-    const bucket = byDesign.get(key) ?? [];
-    bucket.push({ designKey: key, SettingForDyo: row });
-    byDesign.set(key, bucket);
+  const metalSeen = new Set<string>();
+  const metals: SettingMetalOption[] = [];
+  for (const variant of sorted) {
+    if (!variant.metal) continue;
+    if (metalSeen.has(variant.metal)) continue;
+    metalSeen.add(variant.metal);
+    metals.push({
+      code: variant.metal as SettingMetalOption['code'],
+      label: variant.metal_name ?? variant.metal,
+      hallmark: null,
+      priceDelta: Math.round((Number(variant.price_amount ?? basePrice) - basePrice) * 100) / 100,
+      variantSku: variant.ref,
+    });
   }
+  if (metals.length === 0) return null;
 
-  const designs: SettingItem[] = [];
-  for (const [key, bucket] of byDesign) {
-    bucket.sort((a, b) => a.SettingForDyo.priceUsd - b.SettingForDyo.priceUsd);
-    const primaryRow = bucket[0];
-    if (!primaryRow) continue;
-    const primary = primaryRow.SettingForDyo;
-    const category = primary.settingFor ?? '';
-    // The applet configurator is a single-stone studio — INV-03 forbids a
-    // single stone attaching to earrings, so earring mounts are NOT wired
-    // into the 4-step studio (they would only ever fail server validation).
-    if (!(category === 'ring' || category === 'pendant')) continue;
-
-    const metalSeen = new Set<string>();
-    const metals: SettingMetalOption[] = [];
-    for (const variant of bucket) {
-      const option = metalOption(variant.SettingForDyo, primary.priceUsd);
-      if (!option) continue;
-      const seenKey = String(option.code);
-      if (metalSeen.has(seenKey)) continue;
-      metalSeen.add(seenKey);
-      metals.push(option);
+  const image = head.primary_image ?? '';
+  const accepts: NonNullable<SettingItem['accepts']> = [];
+  for (const row of group) {
+    if (row.min_ct != null || row.max_ct != null) {
+      accepts.push({
+        shape: null,
+        minCarat: row.min_ct == null ? null : Number(row.min_ct),
+        maxCarat: row.max_ct == null ? null : Number(row.max_ct),
+      });
     }
-    if (metals.length === 0) continue;
+  }
+  const styleLabel = head.style_slug ?? head.style ?? head.design_code;
 
-    const card = primary;
-    const accepts = card.accepts;
-    const compatibleShapes = accepts
-      .map((rule) => rule.shape)
-      .filter((shape): shape is string => shape !== null && shape.trim().length > 0);
-    const styleLabel =
-      card.styleLabel && card.styleLabel.trim().length > 0
-        ? card.styleLabel
-        : card.styleCode && card.styleCode.trim().length > 0
-          ? card.styleCode
-          : key;
-    const image = card.imageUrl ?? '';
-    if (image.trim().length === 0) continue;
+  return {
+    sku: metals[0]!.variantSku ?? head.ref,
+    slug: head.slug,
+    name: head.name,
+    category: category as SettingItem['category'],
+    style: styleLabel,
+    basePrice: Math.round(basePrice * 100) / 100,
+    compatibleShapes: [],
+    acceptsPairsOnly: false,
+    metals,
+    sizes: DYO_SIZES,
+    bandWidthMm: null,
+    galleryHeightMm: null,
+    originAtelier: null,
+    images: image ? [image] : [],
+    webarAssetId: null,
+    lede: head.description ?? '',
+    description: head.description ?? '',
+    accepts,
+  } satisfies SettingItem;
+}
 
-    designs.push({
-      // The design's default variant is its cheapest evidenced metal row.
-      sku: metals[0]?.variantSku ?? card.sku,
-      slug: card.slug,
-      name: card.title,
-      category: category as SettingItem['category'],
-      style: styleLabel,
-      basePrice: Math.round(card.priceUsd * 100) / 100,
-      compatibleShapes,
-      acceptsPairsOnly: false,
-      metals,
-      sizes: DYO_SIZES,
-      bandWidthMm: null,
-      galleryHeightMm: null,
-      originAtelier: null,
-      images: [image],
-      webarAssetId: null,
-      lede: card.description ?? '',
-      description: card.description ?? '',
-      // Acceptance rules verbatim from setting_compatibility_rules (the
-      // compatibility seam the client filters on; empty = any shape).
-      accepts: card.accepts.map((rule) => ({
-        shape: rule.shape,
-        minCarat: rule.minCarat,
-        maxCarat: rule.maxCarat,
-      })),
-    } satisfies SettingItem);
+/** The applet configurator's setting pool, grouped per real fresh design. */
+export async function getDyoConfiguratorSettings(limit = 48): Promise<SettingItem[]> {
+  const data = await freshGet<{ items: FreshSettingRow[] }>(`/api/v1/catalogue/settings?limit=${limit}`);
+  if (!data?.items.length) return [];
+  const byDesign = new Map<string, FreshSettingRow[]>();
+  for (const row of data.items) {
+    const bucket = byDesign.get(row.design_code) ?? [];
+    bucket.push(row);
+    byDesign.set(row.design_code, bucket);
+  }
+  const designs: SettingItem[] = [];
+  for (const group of byDesign.values()) {
+    const item = toSettingItem(group);
+    if (item) designs.push(item);
+    if (designs.length >= limit) break;
   }
   return designs;
-}
-
-/** The applet configurator's setting pool, grouped per real design. */
-export async function getDyoConfiguratorSettings(limit = 48): Promise<SettingItem[]> {
-  const variantRows = await listSettingsForDyo(limit);
-  return groupSettings(variantRows);
 }
 
 export interface DyoCatalogPool {
@@ -291,17 +224,12 @@ export async function getDyoConfiguratorPool(limit = 48): Promise<DyoCatalogPool
   return { stones, settings };
 }
 
-/* -----------------------------------------------------------------------
- * The public commission ledger (short codes really written by the server).
- * ----------------------------------------------------------------------- */
-
-/** The two most recent REAL commission codes, newest first. */
+/** The fresh `configurations` ledger is a runtime feature — honest empty today. */
 export async function getDyoRecentCodes(limit = 2): Promise<string[]> {
-  return listDyoRecentlyCommissioned(limit);
+  void limit;
+  return [];
 }
 
-/** The newest REAL commission code (or null when the ledger is empty). */
 export async function getDyoLedgerSample(): Promise<string | null> {
-  const [first] = await getDyoRecentCodes(1);
-  return first ?? null;
+  return null;
 }

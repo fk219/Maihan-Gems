@@ -51,8 +51,8 @@ technical design documents.
   INITIAL_IMPLEMENTATION_PLAN.md     # 13 phases, dependency graph, first 20 tasks
   SKILL_MATRIX_AND_TOOLING.md        # required skills/tools; approval status
   DISTINGUISHING_SAUCE_MASTER_ARCHITECTURE.md   # vision + charter authority
-  technical_design/                  # 40 design documents (01–40) + 41 fresh clean DB design + 42 semantic code architecture + 43 platform schema increments
-  docs/fresh-schema/                 # fresh clean schema DDL (0001–0009: reference, catalogue, vendors, semantic codes, media/3D/VTO, commerce, vendor portal, trust, CMS/ops)
+  technical_design/                  # 40 design documents (01–40) + 41 fresh clean DB design + 42 semantic code architecture + 43 platform schema increments + 44 storefront UI plan
+  docs/fresh-schema/                 # fresh clean schema DDL (0001–0010: reference, catalogue, vendors, semantic codes, media/3D/VTO, commerce, vendor portal, trust, CMS/ops, auth keys)
   tools/fresh-clean/                 # Phase F2 cleaning script (loads the fresh schema; gate: `check`)
   MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md  # single audit tracker (§22 phases, §24 change log)
   .opencode/memory/                  # persistent project context (this layer)

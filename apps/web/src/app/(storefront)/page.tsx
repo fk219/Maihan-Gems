@@ -14,10 +14,10 @@ import {
   Truck,
   UserCheck,
 } from 'lucide-react';
-import { getAllVarieties } from '@/lib/mgh/storefront-data';
 import {
   getHomeCatalogGemstones,
   getHomeCatalogMatchedPairs,
+  getFreshVarietyLinks,
 } from '@/lib/mgh/adapters/catalog';
 import { ProductCard } from '@/components/mgh/catalog/ProductCard';
 import { HeroAiSearch } from '@/components/mgh/catalog/HeroAiSearch';
@@ -132,13 +132,13 @@ export default async function HomePage() {
   const featuredStones = featuredVarieties
     .map((vSlug) => allStones.find((s) => s.varietySlug === vSlug))
     .filter((s): s is NonNullable<typeof s> => Boolean(s));
-  const varieties = getAllVarieties();
+  const varieties = await getFreshVarietyLinks();
   const pairs = (await getHomeCatalogMatchedPairs()).slice(0, 1);
 
   const marqueeVarieties = varieties.map((v) => ({
     slug: v.slug,
     name: v.name,
-    count: v.count,
+    count: v.stones,
     colorNote: VARIETY_PLAIN_NOTES[v.slug]?.colorNote || 'Natural loose gemstones',
   }));
 

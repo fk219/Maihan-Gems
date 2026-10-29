@@ -1,0 +1,57 @@
+# 44 STOREFRONT UI — EXACT COPY + POLISH PLAN
+
+**Status:** Approved (owner, 2026-10-28). "Make sure the exact UI of all pages is copied exactly from MaihanGems Frontend, complete all pages, polish the UI."
+**Companion to:** `technical_design/42` (codes), `technical_design/43` (platform schema), `apps/fresh-api` (data source).
+
+---
+
+## 1. Key finding (why the data rewiring is the core task)
+
+The M1–M8 applet migration copied the UI verbatim (42 components, 42 pages — verified). But the data seam is dead:
+
+- `apps/web/src/lib/mgh/storefront-data.ts` is **`@ts-nocheck` + 100% fixtures** (invented stones/settings/orders).
+- The M2–M6 adapters (`lib/mgh/adapters/catalog.ts` etc.) call **packages/db repositories on the locked schema — which was dropped** at cut-over.
+
+So every storefront page today shows fake data or crashes. All pages are re-pointed at **`fresh-api`** (`FRESH_API_URL`, default `http://127.0.0.1:3010`).
+
+## 2. The 5 reference-folder pointers — implementation
+
+| # | Pointer | Status | Task |
+|---|---|---|---|
+| 1 | 4 extra pages: `/gemstones`, `/card-preview`, `/concierge`, `/demo` | not copied | Copy verbatim into `(storefront)` group, import paths adjusted |
+| 2 | Cmd+K palette (`shell/CommandPalette.tsx` + ⌘K/ctrl-K hotkey) | component copied; fixture-fed | UI unchanged; `searchCatalogue` → fresh-api search (gemstones + settings + products) |
+| 3 | DYO configurator matrix (4 steps) + settings metal-dot grid / size selector / size guide | components copied; fixture-fed | metal grid → fresh `metals` (14 codes); DYO steps → real settings + stones reads; **quote/submit disabled honestly** until F3-commerce |
+| 4 | AR handoff UX (`ArViewerPageClient`, `ThreeGemstoneStudio`, QR handoff) | ported in M3; reads dropped `webar_assets` | model lookup → fresh `assets` (`kind='MODEL_3D'`, `vto_ready`); honest empty states until real models exist (0 today) |
+| 5 | i18n switcher (EN/FR/AR in StorefrontHeader) | ported, active | verify + screenshot-proof in polish pass |
+
+## 3. Owner decisions (2026-10-28)
+
+| Decision | Value |
+|---|---|
+| Ring sizes | **Standard US ring sizes (4–9.5) as a presentation constant** — industry standard, not inventory data (fresh DB carries no sizes by design) |
+| CMS | **Sanity will be integrated** for editorial content (about/education/blog/policy/showrooms) — ADR-036 records the decision. Until wired: honest "coming soon" placeholders; the data seam stays behind one interface (`cms-source.ts`) so the Sanity adapter plugs in without page rewrites |
+| Account/favorites/cart/checkout pages | Shown with **sign-in prompts / store-closed honest states** in this phase; real flows land with F3-commerce |
+
+## 4. Steps and tracking
+
+| Step | Scope | Status |
+|---|---|---|
+| 1 | Fidelity audit: 42/42 components present; 15 exact, 12 minor drift (documented infra seams: /mgh prefixes, null-safety, async data), 5 major rewrites (fake→real flows from M4–M6, intentionally NOT reverted) | ✅ DONE 2026-10-28 |
+| 2 | 4 missing pages copied (`/gemstones` alias, `/card-preview`, `/concierge`, `/demo`); old dead root `/demo` removed (route collision) | ✅ DONE |
+| 3a | Read layer: `lib/mgh/adapters/catalog.ts` fully rewritten onto fresh-api (same exports; pages untouched); `adapters/dyo.ts` rewritten; layout FX/offline seam replaced (fresh constants); fresh-api upgraded (primary_image/pieces joins, `q` text search, slug-or-ref detail, metals/shapes/colours/origins/settings-by-design/setting-detail endpoints) | ✅ DONE |
+| 3b | Batch 1: home + browse/shop + gemstones hub + variety/colour landings live on fresh data (60 real stones verified on /browse) | ✅ DONE |
+| 3c | Batch 2: PDPs live — gemstone detail (by slug/ref), product detail (composition trace), settings detail (design variants + carat range + shapes) | ✅ DONE |
+| 3d | Batch 3: search (fresh `q`), settings matrices (metals = real variants; sizes = approved constant), DYO pool (honest-empty until vendor photos; quote step deferred to commerce); CommandPalette re-uses the same searchCatalogue seam | ✅ DONE |
+| 3e | Batch 4: CMS pages → honest "ComingSoon" placeholders (Sanity per ADR-036); contact showrooms → appointment line; AR/3D → fresh assets seam (0 models → honest states); **legacy URL-parity proxy retired** (ADR-035): host security + sister-house stamping kept | ✅ DONE |
+| 4 | Polish: no-photo cards → house gem tile (variety initial, never fixture photos); unpriced → "Price on request" (never $0); verified 0 fixture images on /browse | ✅ core DONE (remaining: per-route skeletons exist at root; LCP/a11y sweep scheduled) |
+| 5 | Verify: build green; routes 200 with real data (status sweep + content greps); known follow-up: catch-all soft-404 (streams 200 before notFound) recorded below | ✅ DONE |
+
+**Known follow-ups (recorded, not blockers):** (1) catch-all soft-404 — unknown `[varietySlug]` renders the branded not-found body with HTTP 200 because the root loading skeleton flushes before notFound(); needs a pre-stream guard. (2) DYO pool empty until vendor photos arrive (honest). (3) dead `lib/storefront-data.ts` + old commerce/admin routes remain non-functional legacy (retired at cut-over). (4) Sanity adapter + credentials (separate increment).
+
+## 5. Verification standard (per batch)
+
+`tsc` + `eslint` clean → `next build` success → live curl of every touched route returns 200 with fresh data → audit tracker updated.
+
+## 6. Explicit non-goals for this phase
+
+Cart/checkout/account **write flows** (F3-commerce), real CMS content (Sanity integration — separate increment), AI concierge provider wiring, 3D model content (assets exist as a schema, models come later).

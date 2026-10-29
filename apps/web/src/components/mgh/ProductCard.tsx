@@ -77,13 +77,15 @@ export function ProductCard({
       ? stone.price
       : 12800;
 
-  const displayPrice = formatPrice(baseUsdPrice);
+  const isPriced = baseUsdPrice > 0;
+  const displayPrice = isPriced ? formatPrice(baseUsdPrice) : 'Price on request';
   const formattedAedAmount = new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0,
   }).format(Math.round(baseUsdPrice * 3.6725));
 
-  const rawImage = image || (stone?.images && stone.images[0]) || '/mgh/images/elysian-ring.jpg';
-  const displayImage = imgError ? '/mgh/images/gems/tanzanite-gem.jpg' : rawImage;
+  const hasRealImage = Boolean(image || (stone?.images && stone.images[0]));
+  const rawImage = image || (stone?.images && stone.images[0]) || '';
+  const displayImage = hasRealImage ? (imgError ? '/mgh/images/gems/tanzanite-gem.jpg' : rawImage) : '';
 
   const targetHref =
     href ||
@@ -136,14 +138,27 @@ export function ProductCard({
       data-stone-id={stoneId}
       className={`group relative overflow-hidden rounded-[24px] border border-[#E5D4B3] bg-[#FAF8F4] transition-all duration-500 hover:-translate-y-1 hover:border-[#C5A059] shadow-[0_14px_38px_rgba(185,150,75,0.12)] hover:shadow-[0_24px_56px_rgba(185,150,75,0.24)] flex flex-col justify-between p-6 sm:p-7 aspect-[10/14] sm:aspect-[3/4] min-h-[450px] ${className}`}
     >
-      {/* 1. Full-Bleed Background Image Covering the Entire Card */}
-      <img
-        src={displayImage}
-        alt={displayName}
-        onError={() => setImgError(true)}
-        referrerPolicy="no-referrer"
-        className="absolute inset-0 z-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-      />
+      {/* 1. Full-Bleed Background Cover: real photo when evidenced, house
+          gem tile (gradient + variety initial) otherwise — never a fixture
+          photo on a card for a stone we have not photographed. */}
+      {hasRealImage ? (
+        <img
+          src={displayImage}
+          alt={displayName}
+          onError={() => setImgError(true)}
+          referrerPolicy="no-referrer"
+          className="absolute inset-0 z-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+        />
+      ) : (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-0 flex items-center justify-center bg-[radial-gradient(circle_at_30%_25%,#2A2418_0%,#0F0D0A_70%)]"
+        >
+          <span className="font-[family-name:var(--font-eb-garamond)] text-6xl text-[#C5A059]/40 select-none">
+            {(stone?.variety || displayName || 'G').charAt(0)}
+          </span>
+        </div>
+      )}
 
       {/* 2. Luminous Light-Colored Pearl & Golden Cloud Overlays */}
       {/* Top warm ivory veil for category readability */}

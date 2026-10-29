@@ -1,65 +1,43 @@
-/**
- * apps/web/src/app/(storefront)/shop/page.tsx
- *
- * `/shop` — the simple catalogue grid over the storefront schema. Filters,
- * imagery, prices and empty state all come from the storefront data seam.
- */
 import type { Metadata } from 'next';
 import Link from 'next/link';
-
-import { CollectionPage } from '../../../components/storefront/CollectionPage.js';
-import { listProducts } from '../../../lib/storefront-data.js';
-
-export const dynamic = 'force-dynamic';
+import { getAllGemstones, getAllMatchedPairs, getAllSettings } from '@/lib/mgh/adapters/catalog';
+import { ShopKindTabs } from '@/components/mgh/catalog/ShopKindTabs';
+import { SITE_URL } from "@/lib/mgh/site-url";
 
 export const metadata: Metadata = {
-  title: 'Shop the Vault | Maihan Gems',
-  description: 'Natural gemstones, matched pairs, settings and finished jewellery from the private vault.',
+  title: 'Shop Gemstones, Pairs & Settings',
+  description:
+    'Explore loose single-origin gemstones, matched earring pairs, and Geneva precious-metal settings.',
+  alternates: {
+    canonical: `${SITE_URL}/shop`,
+  },
 };
 
-const KINDS = ['gemstone', 'jewelry', 'setting'] as const;
-type Kind = (typeof KINDS)[number];
-
-const KIND_LABELS: Record<Kind, string> = {
-  gemstone: 'Loose gemstones',
-  jewelry: 'Finished jewellery',
-  setting: 'Atelier settings',
-};
-
-export default async function ShopPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ kind?: string }>;
-}) {
-  const query = await searchParams;
-  const kind = KINDS.includes(query.kind as Kind) ? (query.kind as Kind) : undefined;
-
-  const products = await listProducts({ kind, limit: 48 });
+export default async function ShopPage() {
+  const stones = await getAllGemstones();
+  const pairs = await getAllMatchedPairs();
+  const settings = await getAllSettings();
 
   return (
-    <CollectionPage
-      kicker="The vault"
-      title={kind ? KIND_LABELS[kind] : 'Shop the vault'}
-      lede="Natural gemstones, matched pairs, settings and finished jewellery. Prices follow your selected currency."
-      products={products}
-      chips={
-        <>
-          <Link href="/shop" className={kind ? undefined : 'is-on'} aria-current={kind ? undefined : 'page'}>
-            All pieces
-          </Link>
-          {KINDS.map((row) => (
-            <Link
-              key={row}
-              href={`/shop?kind=${row}`}
-              className={kind === row ? 'is-on' : undefined}
-              aria-current={kind === row ? 'page' : undefined}
-            >
-              {KIND_LABELS[row]}
-            </Link>
-          ))}
-        </>
-      }
-      cta={{ href: '/design-your-own', label: 'Design your own piece' }}
-    />
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+      <nav aria-label="Breadcrumb" className="text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#76726A]">
+        <ol className="flex items-center gap-2">
+          <li><Link href="/" className="hover:text-[#121211]">Home</Link></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" className="font-medium text-[#121211]">Shop</li>
+        </ol>
+      </nav>
+
+      <div className="border-b border-[#E4DFD5] pb-6">
+        <p className="text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] text-[#9A7B2C]">
+          MAISON COLLECTION
+        </p>
+        <h1 className="mt-1 font-[family-name:var(--font-display)] text-4xl font-semibold text-[#121211]">
+          Shop by Kind
+        </h1>
+      </div>
+
+      <ShopKindTabs stones={stones} pairs={pairs} settings={settings} />
+    </div>
   );
 }

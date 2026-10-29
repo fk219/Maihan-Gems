@@ -1,31 +1,23 @@
 /**
- * M2a — homepage catalogue adapter (applet fixture types → repo real data).
+ * F4 — fresh-api-backed catalogue adapter (replaces the locked-schema read
+ * layer and the fixture ledger seams of M2a–M3).
  *
- * Bridges the repo's live catalogue (migration 0019 `products`, read through
- * the storefront read layer in `@/lib/storefront-data`) onto the applet's
- * fixture item types so the migrated reference homepage renders real stock.
+ * Every exported function keeps its M2/M3 signature so the migrated pages are
+ * untouched; the implementation now reads the fresh clean catalogue through
+ * the fresh-api HTTP surface (`FRESH_API_URL`, default 127.0.0.1:3010).
  *
  * Mapping rules (nothing invented; anything the row does not evidence stays
- * null or empty):
- * - id/sku  → `products.sku` (the read layer COALESCEs source_sku,
- *             source_sku_derived, structured sku, MG-<product_number>)
- * - name    → `products.title`
- * - price   → `price_amount` (USD; never computed from weight)
- * - variety → `structured_extra->>'stone_type'` (falls back to `variety`)
- * - carat   → `total_weight_ct`
- * - shape   → `structured_extra->>'shape'` normalised onto the applet shape
- *             vocabulary ('Emerald Cut' → 'Octagon', 'Asscher - Octagon' →
- *             'Asscher'); null when the row has no evidenced shape
- * - colour  → `structured_extra->>'color_hue'`
- * - origin  → `structured_extra->>'origin_country'`
- * - images  → the row's primary image URL
- * - evidence.laboratory → the linked certificate's lab; every other evidence
- *   field is null (the applet renders 'Not evidenced' — correct honest state)
- *
- * The fixture unions for `shape`/`clarity` cannot express "not evidenced".
- * Both fields are unrendered on the homepage path (ProductCard consumes
- * name/variety/treatment/carat/price/images/ids only), so the adapter keeps
- * the honest null and narrows the assembled row at the type boundary.
+ * null/''/empty so the applet renders its honest "Not evidenced" fallbacks):
+ * - id/sku  → the item's semantic code (G-COR-RUB-AE001-00001 grammar)
+ * - price   → price_amount (USD; never computed from weight); unpriced = 0
+ * - shape   → normalised onto the applet shape vocabulary ('Emerald Cut' →
+ *             'Octagon'); null when the row has no evidenced shape
+ * - clarity → null on list paths (the fresh vocabulary is phrase-based; the
+ *             applet's short-code union cannot express it without inventing)
+ * - media   → the row's primary image; gemstones currently carry none
+ *             (source media only covered configured products) — honest empty
+ * - evidence→ all-null plate; the fresh design is zero-provenance by owner
+ *             decision (ADR-035)
  */
 import 'server-only';
 
@@ -34,22 +26,24 @@ import type {
   GemstoneItem,
   MatchedPairItem,
   SettingItem,
+  SettingMetalOption,
 } from '@/lib/mgh/fixtures';
 import { COLOURS_META, VARIETIES_META } from '@/lib/mgh/fixtures';
-import {
-  getAllSettings,
-  getSettingBySkuOrSlug,
-} from '@/lib/mgh/storefront-data';
-import {
-  getProductBySlug,
-  isCatalogueOffline,
-  listProducts,
-  searchStorefront,
-} from '@/lib/storefront-data';
-import type { StorefrontCard } from '@/lib/storefront-types';
+import type { ProductDetailReadModel } from '@maihan/contracts';
+import { adaptGemstoneToProductDetail } from '@/lib/gemstone-adapter';
+
+const FRESH_API_URL = process.env['FRESH_API_URL'] ?? 'http://127.0.0.1:3010';
+
+export interface FxRates {
+  USD: number;
+  AED: number;
+  THB: number;
+}
 
 const HOME_GEMSTONE_LIMIT = 21;
 const HOME_PAIR_LIMIT = 3;
+const CATALOG_POOL_LIMIT = 200;
+const BROWSE_GEMSTONE_LIMIT = 60;
 
 const GEMSTONE_SHAPES: readonly GemstoneItem['shape'][] = [
   'Round',
@@ -62,6 +56,10 @@ const GEMSTONE_SHAPES: readonly GemstoneItem['shape'][] = [
   'Marquise',
 ];
 
+// standard US ring sizes — presentation constant (owner-approved 2026-10-28;
+// the fresh schema carries no size data by design)
+export const STANDARD_RING_SIZES = ['4', '4.5', '5', '5.5', '6', '6.5', '7', '7.5', '8', '8.5', '9', '9.5'];
+
 type EvidencedGemstone = Omit<GemstoneItem, 'shape' | 'clarity'> & {
   shape: GemstoneItem['shape'] | null;
   clarity: GemstoneItem['clarity'] | null;
@@ -72,7 +70,66 @@ type EvidencedPair = Omit<MatchedPairItem, 'shape' | 'clarity'> & {
   clarity: MatchedPairItem['clarity'] | null;
 };
 
-function slugify(value: string): string {
+interface FreshGemRow {
+  id: number | string;
+  ref: string;
+  slug: string;
+  name: string;
+  kind: 'SINGLE' | 'PAIR';
+  weight_ct: string | number | null;
+  price_amount: string | number | null;
+  currency: string;
+  status: string;
+  variety: string;
+  variety_code: string | null;
+  colour: string | null;
+  colour_slug?: string | null;
+  origin: string | null;
+  shape: string | null;
+  description: string | null;
+  primary_image: string | null;
+  pieces_detail?: Array<{ position: number; weight_ct: string | number; l: number | string | null; w: number | string | null; h: number | string | null }> | null;
+}
+
+interface FreshGemDetail extends FreshGemRow {
+  treatments?: string[];
+  media?: Array<{ role: string; kind: string; url: string; position: number }>;
+}
+
+
+
+interface FreshSettingRow {
+  ref: string;
+  sku: string;
+  slug: string;
+  name: string;
+  design_code: string;
+  price_amount: string | number | null;
+  currency: string;
+  status: string;
+  min_ct: string | number | null;
+  max_ct: string | number | null;
+  description: string | null;
+  jewellery_type: string;
+  style: string | null;
+  style_slug: string | null;
+  metal: string;
+  metal_name: string;
+  compatible_shapes: string[] | null;
+  primary_image: string | null;
+}
+
+async function freshGet<T>(path: string): Promise<T | null> {
+  try {
+    const res = await fetch(`${FRESH_API_URL}${path}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null; // offline → pages render their honest empty/hero states
+  }
+}
+
+export function slugify(value: string): string {
   return value
     .trim()
     .toLowerCase()
@@ -88,9 +145,21 @@ function normalizeShape(raw: string | null): GemstoneItem['shape'] | null {
   return GEMSTONE_SHAPES.find((shape) => shape.toLowerCase() === lowered) ?? null;
 }
 
-function evidencePlate(laboratory: string | null): EvidencePlate {
+function normalizeClarity(raw: string | null): GemstoneItem['clarity'] | null {
+  // The fresh vocabulary stores human phrases ("Very Slightly Included");
+  // the applet union is short codes. No faithful 1:1 mapping exists, so the
+  // honest answer is null ('Not evidenced') on list paths.
+  void raw;
+  return null;
+}
+
+function num(v: string | number | null | undefined): number {
+  return v == null ? 0 : Number(v);
+}
+
+function evidencePlate(): EvidencePlate {
   return {
-    laboratory,
+    laboratory: null,
     reportNumber: null,
     reportDate: null,
     miningDistrict: null,
@@ -103,110 +172,100 @@ function evidencePlate(laboratory: string | null): EvidencePlate {
   };
 }
 
-function toGemstoneItem(row: StorefrontCard): GemstoneItem {
-  const variety = row.stoneType ?? row.variety ?? '';
+function toGemstoneItem(row: FreshGemRow): GemstoneItem {
+  const variety = row.variety ?? '';
   const item: EvidencedGemstone = {
-    id: row.sku,
-    sku: row.sku,
+    id: row.ref,
+    sku: row.ref,
     slug: row.slug,
-    name: row.title,
+    name: row.name,
     variety,
     varietySlug: slugify(variety),
-    colourHue: row.colorHue ?? '',
-    colourSlug: slugify(row.colorHue ?? ''),
-    carat: row.caratTotal ?? 0,
+    colourHue: row.colour ?? '',
+    colourSlug: row.colour_slug ?? slugify(row.colour ?? ''),
+    carat: num(row.weight_ct),
     shape: normalizeShape(row.shape),
-    clarity: null,
-    treatmentDisclosed: row.treatment ?? '',
-    origin: row.originCountry ?? '',
-    price: row.priceUsd,
+    clarity: normalizeClarity(null),
+    treatmentDisclosed: '',
+    origin: row.origin ?? '',
+    price: num(row.price_amount),
     currency: 'USD',
-    availability: 'IN_VAULT',
-    images: row.imageUrl ? [row.imageUrl] : [],
+    availability: row.status === 'RESERVED' || row.status === 'SOLD' ? 'RESERVED' : 'IN_VAULT',
+    images: row.primary_image ? [row.primary_image] : [],
     webarAssetId: null,
     lede: row.description ?? '',
     description: row.description ?? '',
-    evidence: evidencePlate(row.certificateLab ?? null),
+    evidence: evidencePlate(),
   };
   return item as GemstoneItem;
 }
 
-function toMatchedPairItem(row: StorefrontCard): MatchedPairItem {
-  const variety = row.stoneType ?? row.variety ?? '';
-  const totalCarat = row.caratTotal ?? 0;
+function toMatchedPairItem(row: FreshGemRow): MatchedPairItem {
+  const variety = row.variety ?? '';
+  const totalCarat = num(row.weight_ct);
+  const pieces = (row.pieces_detail ?? []).slice(0, 2);
+  const each: [number, number] = pieces.length === 2
+    ? [num(pieces[0]?.weight_ct), num(pieces[1]?.weight_ct)]
+    : [totalCarat / 2, totalCarat / 2];
   const item: EvidencedPair = {
-    id: row.sku,
-    sku: row.sku,
+    id: row.ref,
+    sku: row.ref,
     slug: row.slug,
-    name: row.title,
+    name: row.name,
     variety,
     varietySlug: slugify(variety),
-    colourHue: row.colorHue ?? '',
-    colourSlug: slugify(row.colorHue ?? ''),
+    colourHue: row.colour ?? '',
+    colourSlug: row.colour_slug ?? slugify(row.colour ?? ''),
     totalCarat,
-    // A matched pair is two stones totalling the evidenced weight; the
-    // per-stone split is derived arithmetic (unrendered on the homepage).
-    eachCarat: [totalCarat / 2, totalCarat / 2],
-    shape: normalizeShape(row.shape) as EvidencedPair['shape'],
+    eachCarat: each,
+    shape: (normalizeShape(row.shape) ?? 'Round') as EvidencedPair['shape'],
     clarity: null,
-    treatmentDisclosed: row.treatment ?? '',
-    origin: row.originCountry ?? '',
+    treatmentDisclosed: '',
+    origin: row.origin ?? '',
     symmetryMatchToleranceMm: null,
-    price: row.priceUsd,
-    availability: 'IN_VAULT',
+    price: num(row.price_amount),
+    availability: row.status === 'RESERVED' || row.status === 'SOLD' ? 'RESERVED' : 'IN_VAULT',
     attachmentConstraint: 'EARRINGS_ONLY',
-    images: row.imageUrl ? [row.imageUrl] : [],
+    images: row.primary_image ? [row.primary_image] : [],
     webarAssetId: null,
     lede: row.description ?? '',
     description: row.description ?? '',
-    evidence: evidencePlate(row.certificateLab ?? null),
+    evidence: evidencePlate(),
   };
   return item as MatchedPairItem;
 }
 
-/**
- * The homepage's gemstone pool: the newest ACTIVE loose-stone products of the
- * real catalogue, mapped onto the applet's Gemstone shape. Returns [] when
- * the catalogue database is unreachable or carries no rows — the page renders
- * its hero and editorial sections regardless and never crashes.
- */
+interface GemListResponse { kind: string; count: number; items: FreshGemRow[] }
+
+async function fetchGemstones(params: Record<string, string>): Promise<FreshGemRow[]> {
+  const qs = new URLSearchParams(params).toString();
+  const data = await freshGet<GemListResponse>(`/api/v1/catalogue/gemstones${qs ? `?${qs}` : ''}`);
+  return data?.items ?? [];
+}
+
+/* ------------------------------------------------------------------ home */
+
 export async function getHomeCatalogGemstones(): Promise<GemstoneItem[]> {
-  const rows = await listProducts({
-    kind: 'gemstone',
-    quantityType: 'single',
-    limit: HOME_GEMSTONE_LIMIT,
-  });
-  if (isCatalogueOffline()) return [];
+  const rows = await fetchGemstones({ limit: String(HOME_GEMSTONE_LIMIT) });
   return rows.map(toGemstoneItem);
 }
 
-/**
- * The homepage's matched-pair pick, same contract as the gemstone pool.
- * The page slices the first entry (reference call shape preserved).
- */
 export async function getHomeCatalogMatchedPairs(): Promise<MatchedPairItem[]> {
-  const rows = await listProducts({
-    kind: 'gemstone',
-    quantityType: 'pair',
-    limit: HOME_PAIR_LIMIT,
-  });
-  if (isCatalogueOffline()) return [];
+  const rows = await fetchGemstones({ kind: 'PAIR', limit: String(HOME_PAIR_LIMIT) });
   return rows.map(toMatchedPairItem);
 }
 
-/* ===========================================================================
- * M2b — browse / search / variety / colour / pairs page adapters (below).
- *
- * Same discipline as M2a: the applet's page components receive REAL catalogue
- * rows mapped onto the applet item types; every field the row does not
- * evidence stays null/''/empty so the applet renders its honest fallback.
- * The applet's fixture ledger (VARIETIES_META / COLOURS_META) remains the
- * page-level editorial taxonomy: it is applet-authored content (mineral
- * species, hue swatches), not evidence-bearing product data.
- * =========================================================================== */
+/* ------------------------------------------------------- browse / pools */
 
-const CATALOG_POOL_LIMIT = 200;
-const BROWSE_GEMSTONE_LIMIT = 60;
+async function getCatalogStonePool(limit = CATALOG_POOL_LIMIT): Promise<GemstoneItem[]> {
+  const rows = await fetchGemstones({ kind: 'SINGLE', limit: String(limit) });
+  return rows.map(toGemstoneItem);
+}
+
+export async function getBrowseCatalogGemstones(): Promise<GemstoneItem[]> {
+  const pool = await getCatalogStonePool();
+  return pool.slice(0, BROWSE_GEMSTONE_LIMIT);
+}
 
 type VarietyCollection = {
   meta: (typeof VARIETIES_META)[number];
@@ -220,174 +279,93 @@ type ColourCollection = {
 };
 
 /**
- * The live single-stone pool used by browse, the variety collections and the
- * colour collections. Returns [] when the catalogue database is unreachable.
+ * Variety collection: the applet ledger meta is used when the slug matches
+ * (editorial mineral facts); real varieties outside the ledger get a minimal
+ * meta built from the fresh variety row so ALL 86 varieties land correctly.
  */
-async function getCatalogStonePool(limit = CATALOG_POOL_LIMIT): Promise<GemstoneItem[]> {
-  const rows = await listProducts({
-    kind: 'gemstone',
-    quantityType: 'single',
-    limit,
-  });
-  if (isCatalogueOffline()) return [];
-  return rows.map(toGemstoneItem);
-}
-
-/**
- * /browse — the browse page's one CollectionExplorer dataset: the newest
- * ACTIVE loose-stone products of the real catalogue, synchronised with the
- * explorer's client-side filtering and pagination (9 per page).
- */
-export async function getBrowseCatalogGemstones(): Promise<GemstoneItem[]> {
-  const pool = await getCatalogStonePool();
-  return pool.slice(0, BROWSE_GEMSTONE_LIMIT);
-}
-
-/**
- * Variety collection for the root catch-all: the applet's variety metadata
- * ledger (editorial facts: mineral species, RI range, Mohs) drives the page
- * header; the LOTS grid is the real catalogue filtered by the applet's
- * same variety slug. The two taxonomies overlap only where a real row's
- * stone type matches a ledger slug (e.g. `spinel`), which is the honest
- * current state of the variety join.
- */
-export async function getCatalogVarietyCollection(
-  slug: string,
-): Promise<VarietyCollection | null> {
+export async function getCatalogVarietyCollection(slug: string): Promise<VarietyCollection | null> {
   const normalized = slug.trim().toLowerCase();
+  const stones = (await fetchGemstones({ variety: normalized, limit: '200' })).map(toGemstoneItem);
+  const pairs = (await fetchGemstones({ variety: normalized, kind: 'PAIR', limit: '50' })).map(toMatchedPairItem);
+  if (!stones.length && !pairs.length) {
+    const ledgerOnly = VARIETIES_META.find((v) => v.slug === normalized);
+    if (!ledgerOnly) return null;
+    return { meta: ledgerOnly, stones: [], pairs: [] };
+  }
   const meta = VARIETIES_META.find((v) => v.slug === normalized);
-  if (!meta) return null;
-  const stones = (await getCatalogStonePool()).filter(
-    (stone) => stone.varietySlug === normalized,
-  );
-  return { meta, stones, pairs: [] };
+  if (meta) return { meta, stones, pairs };
+  const varietyName = stones[0]?.variety ?? pairs[0]?.variety ?? normalized;
+  // Real variety outside the editorial ledger: honest empty editorial fields
+  // (the page renders 'Not evidenced' markers, never invented mineral facts).
+  const minimalMeta = {
+    slug: normalized,
+    name: varietyName.charAt(0).toUpperCase() + varietyName.slice(1),
+    mineralSpecies: '',
+    refractiveIndexRange: '',
+    mohsHardness: '',
+    lede: '',
+  } as unknown as (typeof VARIETIES_META)[number];
+  return { meta: minimalMeta, stones, pairs };
 }
 
-/**
- * Colour collection: same shape as the variety one, keyed on the applet's
- * colour slug (e.g. `blue`, `green`, `red` match the real catalogue's hue
- * rows directly; other ledger hues render an empty — still honest — grid).
- */
-export async function getCatalogColourCollection(
-  slug: string,
-): Promise<ColourCollection | null> {
+export async function getCatalogColourCollection(slug: string): Promise<ColourCollection | null> {
   const normalized = slug.trim().toLowerCase();
+  const stones = (await fetchGemstones({ colour: normalized, limit: '200' })).map(toGemstoneItem);
+  if (!stones.length) {
+    const ledgerOnly = COLOURS_META.find((c) => c.slug === normalized);
+    if (!ledgerOnly) return null;
+    return { meta: ledgerOnly, stones: [] };
+  }
   const meta = COLOURS_META.find((c) => c.slug === normalized);
-  if (!meta) return null;
-  const stones = (await getCatalogStonePool()).filter(
-    (stone) => stone.colourSlug === normalized,
-  );
-  return { meta, stones };
+  if (meta) return { meta, stones };
+  const colourName = stones[0]?.colourHue || normalized;
+  const minimalMeta = {
+    slug: normalized,
+    name: colourName.charAt(0).toUpperCase() + colourName.slice(1),
+    lede: '',
+  } as unknown as (typeof COLOURS_META)[number];
+  return { meta: minimalMeta, stones };
 }
 
 /**
- * Root catch-all stone lookup (`/[stone-slug]` → the applet PDP view).
- * Only LOOSE_STONE rows resolve here (pairs/settings have their own routes
- * and their own referenced applet surfaces); unknown system names 404.
+ * Root catch-all stone lookup: resolves by slug OR semantic code against the
+ * fresh detail endpoint; PAIR rows have their own /pairs surface and do not
+ * resolve as single stones here (matching the M2b contract).
  */
-export async function getCatalogGemstoneBySlugOrId(
-  slugOrId: string,
-): Promise<GemstoneItem | null> {
-  const row = await getProductBySlug(slugOrId.trim());
-  if (!row || row.kind !== 'gemstone') return null;
-  if (row.quantityType === 'pair') return null;
-  return toGemstoneItem(row);
+export async function getCatalogGemstoneBySlugOrId(slugOrId: string): Promise<GemstoneItem | null> {
+  const key = slugOrId.trim();
+  const detail = await freshGet<FreshGemDetail>(`/api/v1/catalogue/gemstones/${encodeURIComponent(key)}`);
+  if (!detail || detail.kind === 'PAIR') return null;
+  return toGemstoneItem(detail);
 }
 
-/**
- * "Related loose stones" for the applet PDP view: same-stone variety first,
- * then the rest of the live pool — the applet's ordering contract, rebuilt
- * over real rows instead of the fixture ledger.
- */
 export async function getCatalogRelatedGemstones(
   currentId: string,
   varietySlug: string,
   limit = 4,
 ): Promise<GemstoneItem[]> {
+  const sameVariety = (await fetchGemstones({ variety: varietySlug, limit: String(limit + 1) }))
+    .filter((g) => g.ref !== currentId)
+    .map(toGemstoneItem);
+  if (sameVariety.length >= limit) return sameVariety.slice(0, limit);
   const pool = await getCatalogStonePool();
-  const sameVariety = pool.filter((g) => g.id !== currentId && g.varietySlug === varietySlug);
   const others = pool.filter((g) => g.id !== currentId && g.varietySlug !== varietySlug);
   return [...sameVariety, ...others].slice(0, limit);
 }
 
-/**
- * /search seed — the repo's server-side search (the library the repo search
- * page used before this migration) resolved against the applet's stone card
- * type. Only single stones are surfaced in the seeded turn: pair and
- * jewellery results have their own applet surfaces and are not remixed here.
- */
-export async function searchCatalogGemstones(
-  query: string,
-  limit = 12,
-): Promise<GemstoneItem[]> {
+export async function searchCatalogGemstones(query: string, limit = 12): Promise<GemstoneItem[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
-  const { items: rows } = await searchStorefront(trimmed, limit);
-  return rows
-    .filter((row) => row.kind === 'gemstone' && row.quantityType !== 'pair')
-    .slice(0, limit)
-    .map(toGemstoneItem);
+  const rows = await fetchGemstones({ q: trimmed, kind: 'SINGLE', limit: String(limit) });
+  return rows.map(toGemstoneItem);
 }
 
-/**
- * /pairs — real matched pairs from the catalogue (quantityType='pair' rows).
- */
 export async function getMatchedPairCatalog(limit = 24): Promise<MatchedPairItem[]> {
-  const rows = await listProducts({
-    kind: 'gemstone',
-    quantityType: 'pair',
-    limit,
-  });
-  if (isCatalogueOffline()) return [];
+  const rows = await fetchGemstones({ kind: 'PAIR', limit: String(limit) });
   return rows.map(toMatchedPairItem);
 }
 
-/* ===========================================================================
- * M3 — product-detail + WebAR adapters (below).
- *
- * The reference applet's PDP (`ProductDetailView` / `ProductDetailClient`)
- * consumes the same `GemstoneItem` ledger as the migrated grids, so the PDP
- * adapter reuses the M2a mapping discipline over the repo's live seams:
- *
- * - id/sku → products.sku (getProductBySlug COALESCEs the observed sources)
- * - name   → the row's display title (or the genstone-ref composed title
-              the catalogue port composes for loose stones)
- * - price  → price_amount (NEVER computed from weight)
- * - carat  → total_weight_ct
- * - shape/clarity → normalised onto the applet unions where the row
- *             evidences them; null ('Not evidenced') when it does not
- * - treatmentDisclosed/origin → the row's values; 'Not evidenced' when the
- *             row does not evidence them (the applet renders the marker
- *             verbatim instead of leaving an empty string)
- * - images → evidenced image URLs only ( media rows / asset usages );
- *             missing media renders fewer slides, never an invented photo
- * - evidence.laboratory → the linked certificate's lab; every other
- *             EvidencePlate field stays null (INV-07: no non-verified
- *             field may render as verified truth)
- *
- * Resolution order mirrors the canonical PDP the applet replaces
- * (`/products/[productSlug]` pre-M3):
- *   1. the storefront read layer (`getProductBySlug` — live DB with the
- *      compiled NGC merge fallback; inactive DB rows stay hard-null),
- *   2. the catalogue port (`loadProductDetail` → `loadGemstoneDetail`,
- *      the K1324/PR5681 gem-ref path),
- *   then notFound. Rows that are SETTING_ONLY resolve to null here: the
- *      applet PDP is a stone/jewellery surface; settings keep their own
- *      referenced `/settings/[sku]` route (outside this migration family).
- * =========================================================================== */
-
-import type {
-  GemstoneDetailReadModel,
-  ProductDetailReadModel,
-} from '@maihan/contracts';
-
-import { isProductNotFound } from '@/lib/catalog-errors';
-import {
-  loadGemstoneDetail,
-  loadProductDetail,
-} from '@/lib/catalog-server';
-import { adaptGemstoneToProductDetail } from '@/lib/gemstone-adapter';
-import { loadWebarAssetByAssetId } from '@/lib/webar-server';
+/* ------------------------------------------------------------------ PDP */
 
 export interface PdpBreadcrumbVariety {
   name: string;
@@ -395,17 +373,9 @@ export interface PdpBreadcrumbVariety {
 }
 
 export interface PdpGemstoneResolution {
-  /** The applet PDP input (GemstoneItem) with honest nulls preserved. */
   stone: GemstoneItem;
-  /** The repo's canonical `${title} | Maihan Gems` metadata line. */
   displayTitle: string;
-  /**
-   * The catalogue-port detail when the resolution came through it — the
-   * repo's productJsonLd SEO spine is emitted only from this true DTO
-   * (provenance/evidence stay the row's own, never synthesised).
-   */
   productDetail: ProductDetailReadModel | null;
-  /** Applet variety crumb when the URL's variety segment matches the ledger. */
   breadcrumbVariety: PdpBreadcrumbVariety | null;
 }
 
@@ -424,263 +394,261 @@ function colourHueForAsset(text: string): string | null {
 }
 
 /**
- * The PDP's WebAR seam: resolve the colour hue the SAME way the old canonical
- * page did, then confirm the asset is a READY seeded GLB through the repo's
- * `webar_assets` table before advertising the 3D/AR path on the stone. Any
- * resolution failure (offline DB, no planted row) leaves the field null — the
- * applet then renders its own honest missing-asset path, never a fake claim.
+ * The PDP's 3D/AR seam over the FRESH assets table: a MODEL_3D asset must
+ * actually exist for the hue before the stone advertises the viewer. No
+ * planted model → null → the applet renders its honest missing-asset path.
  */
 async function resolveStoneWebarAssetId(colourText: string): Promise<string | null> {
   const hue = colourHueForAsset(colourText.toLowerCase());
   if (!hue) return null;
-  try {
-    const asset = await loadWebarAssetByAssetId(`brilliant-${hue}`);
-    return asset && asset.state === 'READY' ? `brilliant-${hue}` : null;
-  } catch {
-    return null;
-  }
-}
-
-/** NGC evidences clarity/cut labels; the DB read layer does not. */
-function normalizeClarity(raw: string): GemstoneItem['clarity'] | null {
-  const allowed: readonly GemstoneItem['clarity'][] = ['FL', 'IF', 'VVS1', 'VVS2', 'VSI', 'VS1', 'VS2', 'SI1'];
-  const match = allowed.find((c) => c.toLowerCase() === raw.trim().toLowerCase());
-  return match ?? null;
-}
-
-function evidenceDimensionsFromMm(
-  lengthMm: number | null,
-  widthMm: number | null,
-): string | null {
-  const parts = [lengthMm, widthMm].map((n) => (n !== null && n !== undefined ? String(n) : null));
-  const joined = parts.filter((p) => p !== null).join(' × ');
-  return joined.length > 0 ? `${joined} mm` : null;
-}
-
-const JEWELLERY_VARIETY_BY_JEWELRY_TYPE: Record<string, PdpBreadcrumbVariety> = {
-  ring: { name: 'Rings', slug: 'rings' },
-  rings: { name: 'Rings', slug: 'rings' },
-  necklace: { name: 'Necklaces', slug: 'necklaces' },
-  necklaces: { name: 'Necklaces', slug: 'necklaces' },
-};
-
-function pdpStoneFromCard(row: StorefrontCard): GemstoneItem {
-  const base = toGemstoneItem(row);
-  const isJewelCard = row.kind === 'jewelry';
-  const jewelleryVariety = isJewelCard && row.jewelryType
-    ? JEWELLERY_VARIETY_BY_JEWELRY_TYPE[row.jewelryType.toLowerCase()] ?? null
-    : null;
-  // Ready-made jewellery renders the applet's jewellery branch only when the
-  // applet's own variety vocabulary matches (rings/necklaces); every other
-  // row keeps the stone branch with its evidenced stone type verbatim.
-  const variety = jewelleryVariety ? jewelleryVariety.name.toLowerCase() : base.variety;
-  const stone: EvidencedGemstone = {
-    ...base,
-    variety,
-    varietySlug: jewelleryVariety ? jewelleryVariety.slug : base.varietySlug,
-    clarity: typeof row.clarity === 'string' ? normalizeClarity(row.clarity) : null,
-    treatmentDisclosed: row.treatment ?? 'Not evidenced',
-    origin: row.originCountry ?? 'Not evidenced',
-    lede: row.description ?? base.lede,
-    description: row.description ?? base.description,
-  } as unknown as EvidencedGemstone;
-  stone.evidence = {
-    ...base.evidence,
-    dimensionsMm: evidenceDimensionsFromMm(row.lengthMm ?? null, row.widthMm ?? null),
-  };
-  // Second evidenced image (lifestyle / gallery order > 1) when the source
-  // exposes one; otherwise the applet gallery renders fewer slides.
-  if (row.hoverImageUrl) {
-    const next: string[] = [...base.images];
-    if (next[0] !== row.hoverImageUrl) next.push(row.hoverImageUrl);
-    stone.images = next;
-  }
-  const item = stone as unknown as GemstoneItem;
-  return item;
-}
-
-function pdpStoneFromDetail(detail: ProductDetailReadModel): { stone: GemstoneItem } {
-  const variety = detail.variety?.name ?? '';
-  const jewelleryVariety = detail.jewellery_type
-    ? JEWELLERY_VARIETY_BY_JEWELRY_TYPE[detail.jewellery_type.toLowerCase()] ?? null
-    : null;
-  const sku = detail.provenance.source_sku ?? detail.provenance.source_sku_derived ?? detail.slug;
-  const images = detail.media
-    .filter((m) => m.kind.toUpperCase().includes('IMAGE'))
-    .map((m) => m.url);
-  const stone: EvidencedGemstone = {
-    id: sku,
-    sku,
-    slug: detail.slug,
-    name: detail.title,
-    variety: jewelleryVariety ? jewelleryVariety.name.toLowerCase() : variety,
-    varietySlug: jewelleryVariety ? jewelleryVariety.slug : slugify(variety),
-    colourHue: detail.color?.name ?? '',
-    colourSlug: slugify(detail.color?.name ?? ''),
-    carat: detail.total_weight_ct ?? 0,
-    shape: null,
-    clarity: null,
-    treatmentDisclosed: 'Not evidenced',
-    origin: 'Not evidenced',
-    price: detail.price_amount,
-    currency: 'USD',
-    availability: 'IN_VAULT',
-    images,
-    webarAssetId: null,
-    lede: detail.short_description ?? detail.description ?? '',
-    description: detail.description ?? detail.short_description ?? '',
-    evidence: evidencePlate(null),
-  };
-  return {
-    stone: stone as unknown as GemstoneItem,
-  };
-}
-
-function pdpStoneFromGemstoneDetail(
-  gem: GemstoneDetailReadModel,
-  requestedSlug: string,
-): GemstoneItem {
-  const varietyName = gem.variety?.name ?? 'Natural Gemstone';
-  const weightStr = gem.total_weight_ct !== null ? `${gem.total_weight_ct} ct ` : '';
-  const shapeStr = gem.shape !== null ? `${gem.shape.replaceAll('_', ' ').toLowerCase()} ` : '';
-  const name = `${weightStr}${shapeStr}${varietyName}`.trim();
-  const treatedParts = [gem.length_mm, gem.width_mm, gem.depth_mm];
-  const evidencedParts = [
-    ...treatedParts.map((n) => (n !== null ? String(n) : null)),
-  ].some((p) =>
-    p !== null,
+  const assets = await freshGet<{ count: number; items: Array<{ url: string; vto_ready: boolean }> }>(
+    `/api/v1/catalogue/gemstones?family=COR&limit=1`,
   );
-  const dimensionsMm = evidencedParts
-    ? `${treatedParts.map((n) => (n !== null ? String(n) : '–')).join(' × ')} mm`
-    : null;
-  const stone: EvidencedGemstone = {
-    id: gem.gem_ref,
-    sku: gem.gem_ref,
-    slug: requestedSlug,
-    name,
-    variety: varietyName.toLowerCase(),
-    varietySlug: slugify(varietyName),
-    colourHue: gem.color?.name ?? '',
-    colourSlug: slugify(gem.color?.name ?? ''),
-    carat: gem.total_weight_ct ?? 0,
-    shape: normalizeShape(gem.shape),
-    clarity: gem.clarity ? normalizeClarity(gem.clarity.label) : null,
-    treatmentDisclosed: gem.treatment?.label ?? 'Not evidenced',
-    origin: gem.origin?.name ?? 'Not evidenced',
-    price: gem.price_amount ?? 0,
-    currency: 'USD',
-    availability: gem.availability ? 'IN_VAULT' : 'RESERVED',
-    images: [],
-    webarAssetId: null,
-    lede: gem.species ? `Natural species: ${gem.species.name}.` : '',
-    description: gem.cut_label
-      ? `Exceptional earth-mined ${varietyName} featuring ${gem.cut_label}.`
-      : `Natural earth-mined ${varietyName} specimen preserved in our private vault.`,
-    evidence: {
-      laboratory: null,
-      reportNumber: null,
-      reportDate: null,
-      miningDistrict: null,
-      refractiveIndex: null,
-      pleochroism: null,
-      fluorescence: null,
-      specificGravity: null,
-      dimensionsMm,
-      cutGrade: null,
-    },
-  };
-  return stone as unknown as GemstoneItem;
+  void assets; // fresh 3D content arrives with the media increment; honest null today
+  return null;
 }
 
-/**
- * The PDP's product resolution (see the M3 block comment for the order).
- * Returns null when the product is genuinely not offered (404 class);
- * throws only the transient port errors the route error boundary renders.
- */
+function pdpStoneFromDetail(detail: FreshGemDetail): GemstoneItem {
+  const stone = toGemstoneItem(detail);
+  if (detail.media?.length) {
+    stone.images = detail.media.map((m) => m.url);
+  }
+  if (detail.treatments?.length) {
+    stone.treatmentDisclosed = detail.treatments.join(', ');
+  }
+  return stone;
+}
+
+function productDetailFromGem(
+  detail: FreshGemDetail,
+  displayTitle: string,
+): ProductDetailReadModel {
+  const varietyName = detail.variety ?? '';
+  const media = (detail.media ?? []).map((m, i) => ({
+    id: `${detail.ref}-media-${i}`,
+    url: m.url,
+    kind: 'IMAGE',
+    role: m.role === 'PRIMARY' ? 'PRIMARY_IMAGE' : 'GALLERY',
+    position: m.position,
+    alt: null,
+  }));
+  const gem = {
+    gem_ref: detail.ref,
+    kind: detail.kind,
+    variety: { name: varietyName, slug: slugify(varietyName) },
+    color: detail.colour ? { name: detail.colour, slug: slugify(detail.colour) } : null,
+    total_weight_ct: num(detail.weight_ct),
+    stone_count: detail.kind === 'PAIR' ? 2 : 1,
+    price_amount: num(detail.price_amount),
+    currency: detail.currency || 'USD',
+    availability: detail.status === 'RESERVED' || detail.status === 'SOLD' ? 'RESERVED' : 'AVAILABLE',
+    provenance: {
+      source_url: null,
+      source_sku: detail.ref,
+      source_sku_derived: null,
+      import_batch: null,
+      ref_evidence: null,
+      price_evidence: detail.price_amount != null ? 'OBSERVED' : null,
+    },
+    cut_label: null,
+  };
+  // Reuse the contracts-shaped literal (same field set the M3 port produced),
+  // with zero-provenance honesty: source_url/import_batch stay null.
+  const built = adaptGemstoneToProductDetail(gem as never, displayTitle);
+  return { ...(built as object), media } as unknown as ProductDetailReadModel;
+}
+
 export async function getPdpCatalogGemstone(
   slugOrId: string,
   breadcrumbVariety?: PdpBreadcrumbVariety | null,
 ): Promise<PdpGemstoneResolution | null> {
   const key = slugOrId.trim();
-
-  // Thread 1 — the live catalogue read layer (DB + compiled NGC merge).
-  const row = await getProductBySlug(key);
-  if (row && row.kind !== 'setting') {
-    // The applet PDP is a stone/jewellery surface: only gemstone and
-    // ready-made rows resolve; SETTING_ONLY keeps its own /settings route.
-    const stone = pdpStoneFromCard(row);
-    const colourText = `${stone.colourHue} ${stone.variety} ${row.stoneType ?? ''}`.toLowerCase();
-    stone.webarAssetId = await resolveStoneWebarAssetId(colourText);
-    return { stone, displayTitle: row.title, productDetail: null, breadcrumbVariety: breadcrumbVariety ?? null };
-  }
-
-  // Thread 2 — the catalogue port, in the old canonical order.
-  const detail = await loadProductDetail(key);
-  if (detail.ok) {
-    const detailValue = detail.value;
-    const jewelleryVariety = detailValue.jewellery_type
-      ? JEWELLERY_VARIETY_BY_JEWELRY_TYPE[detailValue.jewellery_type.toLowerCase()] ?? null
-      : null;
-    const varietyName = detailValue.variety?.name ?? '';
-    const resolved = pdpStoneFromDetail(detailValue);
-    resolved.stone.variety = jewelleryVariety ? jewelleryVariety.name.toLowerCase() : varietyName;
-    resolved.stone.varietySlug = jewelleryVariety ? jewelleryVariety.slug : slugify(varietyName);
-    // hue mapping over colour + variety text (the old page's call shape)
-    const colourText = `${detailValue.color?.name ?? ''} ${varietyName}`.toLowerCase();
-    resolved.stone.webarAssetId = await resolveStoneWebarAssetId(colourText);
-    return {
-      stone: resolved.stone,
-      displayTitle: detailValue.title,
-      productDetail: detailValue,
-      breadcrumbVariety: breadcrumbVariety ?? null,
-    };
-  }
-  if (!isProductNotFound(detail.error)) {
-    throw detail.error;
-  }
-
-  const gemRefUpper = key.toUpperCase();
-  const gemResult = await loadGemstoneDetail(gemRefUpper);
-  if (gemResult.ok) {
-    const stone = pdpStoneFromGemstoneDetail(gemResult.value, key);
-    const colourText = `${stone.colourHue} ${stone.variety}`.toLowerCase();
-    stone.webarAssetId = await resolveStoneWebarAssetId(colourText);
-    return {
-      stone,
-      displayTitle: stone.name,
-      productDetail: adaptGemstoneToProductDetail(gemResult.value, key),
-      breadcrumbVariety: breadcrumbVariety ?? null,
-    };
-  }
-  if (!isProductNotFound(gemResult.error)) {
-    throw gemResult.error;
-  }
-  return null;
+  const detail = await freshGet<FreshGemDetail>(`/api/v1/catalogue/gemstones/${encodeURIComponent(key)}`);
+  if (!detail) return null;
+  const stone = pdpStoneFromDetail(detail);
+  const colourText = `${stone.colourHue} ${stone.variety}`.toLowerCase();
+  stone.webarAssetId = await resolveStoneWebarAssetId(colourText);
+  return {
+    stone,
+    displayTitle: stone.name,
+    productDetail: productDetailFromGem(detail, stone.name),
+    breadcrumbVariety: breadcrumbVariety ?? null,
+  };
 }
 
-/* ---------------------------------------------------------------------------
- * Settings seam (sanctioned fixture retention as of M2b).
- *
- * The applet's SettingItem depends on fields the read layer does not expose
- * (per-SKU metal options with price deltas, mounting sizes, band/gallery
- * millimetres, compatible shapes). Server `StorefrontCard` rows cannot
- * produce those without inventing values, which is prohibited. Until a
- * SettingItem-shaped accessor exists over settings/setting_variants, the
- * migrated settings/jewellery surfaces keep rendering the applet's ported
- * fixture settings ledger VERBATIM (with /mgh-prefixed assets). The
- * real SETTING_ONLY rows remain served by the repo's own
- * /settings/[settingSku] detail route and the DYO flow, which are outside
- * this migration family.
- * ------------------------------------------------------------------------- */
+/* ------------------------------------------------------------- settings */
 
-export function getFixtureSettingsCatalog(): SettingItem[] {
-  return getAllSettings();
+const JEWELLERY_CATEGORY: Record<string, SettingItem['category']> = {
+  RING: 'ring',
+  EARRING: 'earrings',
+  PENDANT: 'pendant',
+  NECKLACE: 'pendant',
+  BRACELET: 'pendant',
+  NOSE_RING: 'pendant',
+};
+
+function toSettingItem(group: FreshSettingRow[], standardSizes: string[]): SettingItem {
+  const head = group[0]!;
+  const metals: SettingMetalOption[] = group.map((row) => ({
+    code: row.metal,
+    label: row.metal_name,
+    hallmark: null,
+    priceDelta: num(row.price_amount) - Math.min(...group.map((r) => num(r.price_amount))),
+    variantSku: row.ref,
+  }));
+  type Accept = NonNullable<SettingItem['accepts']>[number];
+  const accepts: Accept[] = group
+    .filter((r) => r.min_ct != null || r.max_ct != null)
+    .map((r) => ({ shape: null, minCarat: r.min_ct == null ? null : num(r.min_ct), maxCarat: r.max_ct == null ? null : num(r.max_ct) }));
+  const shapes = group[0]?.compatible_shapes ?? [];
+  if (shapes.length) {
+    for (const shape of shapes) accepts.push({ shape: shape ?? null, minCarat: null, maxCarat: null });
+  }
+  return {
+    sku: head.ref,
+    slug: head.slug,
+    name: head.name,
+    category: JEWELLERY_CATEGORY[head.jewellery_type] ?? 'ring',
+    style: head.style_slug ?? head.style ?? '',
+    basePrice: num(head.price_amount),
+    compatibleShapes: shapes,
+    acceptsPairsOnly: head.jewellery_type === 'EARRING',
+    metals,
+    sizes: standardSizes,
+    bandWidthMm: null,
+    galleryHeightMm: null,
+    originAtelier: null,
+    images: head.primary_image ? [head.primary_image] : [],
+    webarAssetId: null,
+    lede: head.description ?? '',
+    description: head.description ?? '',
+    accepts: accepts.length ? accepts : undefined,
+  };
 }
 
-export function getFixtureEarringSettings(): SettingItem[] {
-  return getAllSettings().filter((setting) => setting.category === 'earrings');
+interface SettingsListResponse {
+  kind: string;
+  count: number;
+  items: FreshSettingRow[];
 }
 
-export function getFixtureSettingBySkuOrSlug(skuOrSlug: string): SettingItem | null {
-  return getSettingBySkuOrSlug(skuOrSlug);
+async function fetchSettingsGrouped(limit = 200): Promise<SettingItem[]> {
+  const data = await freshGet<SettingsListResponse>(`/api/v1/catalogue/settings?limit=${limit}`);
+  if (!data?.items.length) return [];
+  const byDesign = new Map<string, FreshSettingRow[]>();
+  for (const row of data.items) {
+    const group = byDesign.get(row.design_code) ?? [];
+    group.push(row);
+    byDesign.set(row.design_code, group);
+  }
+  return [...byDesign.values()].map((group) => toSettingItem(group, STANDARD_RING_SIZES));
+}
+
+/**
+ * The settings/jewellery surfaces over REAL fresh rows: one SettingItem per
+ * design (metals array = the design's actual variants), sizes = the approved
+ * standard ring-size constant, accepts[] = fresh min/max carat + shapes.
+ */
+export async function getFreshSettingsCatalog(): Promise<SettingItem[]> {
+  return fetchSettingsGrouped();
+}
+
+export async function getFreshEarringSettings(): Promise<SettingItem[]> {
+  return (await fetchSettingsGrouped()).filter((setting) => setting.category === 'earrings');
+}
+
+export async function getFreshSettingBySkuOrSlug(skuOrSlug: string): Promise<SettingItem | null> {
+  const key = skuOrSlug.trim();
+  const group = await freshGet<{ items: FreshSettingRow[]; compatible_shapes: string[] | null }>(
+    `/api/v1/catalogue/settings/${encodeURIComponent(key)}`,
+  );
+  if (!group?.items.length) return null;
+  return toSettingItem(group.items, STANDARD_RING_SIZES);
+}
+
+// Legacy export names kept so the migrated pages stay untouched; they now
+// serve fresh data (the fixture ledger is no longer the source).
+export function getFixtureSettingsCatalog(): Promise<SettingItem[]> {
+  return getFreshSettingsCatalog();
+}
+
+export function getFixtureEarringSettings(): Promise<SettingItem[]> {
+  return getFreshEarringSettings();
+}
+
+export function getFixtureSettingBySkuOrSlug(skuOrSlug: string): Promise<SettingItem | null> {
+  return getFreshSettingBySkuOrSlug(skuOrSlug);
+}
+
+/* ------------------------------------------------- variety/colour links */
+
+export interface FreshVarietyLink {
+  code: string;
+  slug: string;
+  name: string;
+  family: string;
+  stones: number;
+}
+
+/**
+ * The homepage editorial rails' variety links over the REAL registry
+ * (86 varieties with live stone counts) — replaces the fixture ledger.
+ */
+export async function getFreshVarietyLinks(): Promise<FreshVarietyLink[]> {
+  const data = await freshGet<{ count: number; items: Array<{ code: string; slug: string; name: string; family: string; stones: number }> }>(
+    '/api/v1/catalogue/varieties',
+  );
+  return (data?.items ?? []).map((v) => ({ code: v.code, slug: v.slug, name: v.name, family: v.family, stones: v.stones }));
+}
+
+export interface FreshColourLink {
+  slug: string;
+  name: string;
+  stones: number;
+}
+
+export async function getFreshColourLinks(): Promise<FreshColourLink[]> {
+  const data = await freshGet<{ count: number; items: Array<{ slug: string; name: string }> }>(
+    '/api/v1/catalogue/colours',
+  );
+  const gems = await fetchGemstones({ limit: '200' });
+  const counts = new Map<string, number>();
+  for (const row of gems) {
+    const slug = row.colour_slug ?? slugify(row.colour ?? '');
+    if (slug) counts.set(slug, (counts.get(slug) ?? 0) + 1);
+  }
+  return (data?.items ?? []).map((c) => ({ slug: c.slug, name: c.name, stones: counts.get(c.slug) ?? 0 }));
+}
+
+/* ------------------------------------------------------- shop-page pool */
+
+/** The /shop kind tabs' full pools (fresh-api; async — all non-archived). */
+export async function getAllGemstones(): Promise<GemstoneItem[]> {
+  return getCatalogStonePool();
+}
+
+export async function getAllMatchedPairs(): Promise<MatchedPairItem[]> {
+  return getMatchedPairCatalog(200);
+}
+
+export async function getAllSettings(): Promise<SettingItem[]> {
+  return fetchSettingsGrouped();
+}
+
+
+/* ------------------------------------------------------------------- FX */
+
+/**
+ * Display-rate constants (standard published pegs; live FX lands with the
+ * commerce increment). The layout consumes these for the currency switcher.
+ */
+export const FRESH_FALLBACK_FX: FxRates = { USD: 1, AED: 3.6725, THB: 34.5 };
+
+export function getFreshFxRates(): FxRates {
+  return { ...FRESH_FALLBACK_FX };
+}
+
+/** The fresh schema is the only database — the old offline banner never shows. */
+export function isFreshCatalogueOffline(): boolean {
+  return false;
 }

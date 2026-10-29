@@ -68,7 +68,7 @@ export default async function JewelleryIndexPage() {
   // applet's ported fixture ledger verbatim (see the settings seam note in
   // adapters/catalog.ts and /settings).
   const pairs = await getMatchedPairCatalog(24);
-  const settings = getFixtureSettingsCatalog();
+  const settings = await getFixtureSettingsCatalog();
 
   return (
     <div className="golden-cloud-gallery text-[#181613]">

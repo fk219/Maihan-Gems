@@ -60,14 +60,12 @@ const SETTING_SUBCATEGORIES = [
   },
 ];
 
-export default function SettingsIndexPage() {
-  // Settings seam: the applet SettingItem (metals with price deltas, sizes,
-  // band/gallery mm, compatible shapes) cannot be produced from storefront
-  // rows without inventing fields, so this page keeps rendering the applet's
-  // ported fixture settings ledger VERBATIM (images /mgh-prefixed). Real
-  // SETTING_ONLY rows stay on the repo's own /settings/[settingSku] route
-  // and DYO flow, outside this family.
-  const settings = getFixtureSettingsCatalog();
+export default async function SettingsIndexPage() {
+  // Settings seam (F4): the applet SettingItem now assembles from REAL fresh
+  // rows (one item per design; metals = the design's actual variants; sizes =
+  // the approved standard ring-size constant; accepts = fresh min/max carat
+  // + compatible shapes). Nothing is invented.
+  const settings = await getFixtureSettingsCatalog();
 
   return (
     <div className="golden-cloud-gallery text-[#181613]">

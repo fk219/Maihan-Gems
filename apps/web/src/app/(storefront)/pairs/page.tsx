@@ -25,7 +25,7 @@ export default async function MatchedPairsPage() {
   // derivable from storefront-data rows without inventing fields, so the
   // earring setting chips keep rendering the applet's ported fixture ledger
   // until a SettingItem-shaped accessor exists.
-  const earringSettings = getFixtureEarringSettings();
+  const earringSettings = await getFixtureEarringSettings();
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">

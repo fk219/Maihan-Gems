@@ -16,8 +16,7 @@ import { Toaster } from '../../components/ui/sonner.js';
 import { AiConciergeLauncher } from '../../components/ai/AiConciergeLauncher.js';
 import { StorefrontProvider } from '../../components/storefront/StorefrontProvider.js';
 import { parseCurrency } from '../../lib/currency.js';
-import { loadNgcCatalog } from '../../lib/ngc/catalog.js';
-import { getFxRates, isCatalogueOffline } from '../../lib/storefront-data.js';
+import { getFreshFxRates, isFreshCatalogueOffline } from '@/lib/mgh/adapters/catalog';
 
 /* M2 — the migrated shell is the MaihanGems (applet) chrome, reproduced
    1:1: golden-cloud gallery wrapper, StorefrontHeader, MotionWrapper, the
@@ -32,9 +31,10 @@ import { ScrollToTopButton } from '../../components/mgh/shell/ScrollToTopButton.
 import CartDrawer from '../../components/mgh/shell/CartDrawer.js';
 
 export default async function StorefrontLayout({ children }: { children: ReactNode }) {
-  const [rates, cookieStore] = await Promise.all([getFxRates(), cookies()]);
+  const rates = getFreshFxRates();
+  const cookieStore = await cookies();
   const initialCurrency = parseCurrency(cookieStore.get('maihan_currency')?.value) ?? 'USD';
-  const offline = isCatalogueOffline() && loadNgcCatalog().length === 0;
+  const offline = isFreshCatalogueOffline();
   return (
     <StorefrontProvider rates={rates} initialCurrency={initialCurrency}>
       <div className="relative min-h-screen flex flex-col golden-cloud-gallery">
