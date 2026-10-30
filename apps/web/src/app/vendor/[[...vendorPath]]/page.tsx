@@ -7,10 +7,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const VendorShellMount = dynamicImport(() => import('@/components/mgh/operator/VendorShellMount'), {
+const VendorPortalApp = dynamicImport(() => import('@/components/mgh/operator/VendorPortalApp'), {
   loading: () => <div className="min-h-screen bg-[#0A0A0B]" />,
 });
 
 export default function VendorGatePage() {
-  return <VendorShellMount />;
+  return <VendorPortalApp />;
 }

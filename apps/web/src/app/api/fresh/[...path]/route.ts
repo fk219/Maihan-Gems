@@ -27,8 +27,10 @@ async function forward(req: NextRequest, path: string[]): Promise<NextResponse> 
 
   const vendorCode = req.cookies.get('maihan_vendor_code')?.value;
   const vendorKey = req.cookies.get('maihan_vendor_key')?.value;
+  const vendorSession = req.cookies.get('maihan_vendor_session')?.value;
   if (vendorCode) headers['x-vendor-code'] = vendorCode;
   if (vendorKey) headers['x-vendor-key'] = vendorKey;
+  if (vendorSession && !adminToken) headers['authorization'] = `Bearer ${vendorSession}`;
 
   const contentType = req.headers.get('content-type');
   if (contentType) headers['content-type'] = contentType;

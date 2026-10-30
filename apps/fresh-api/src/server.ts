@@ -23,6 +23,10 @@ import {
 import { createConfiguration, getConfiguration, addConfigurationToCart } from './configurations.js';
 import crypto from 'node:crypto';
 import { checkRateLimit } from './rate-limit.js';
+import {
+  vendorLogin, resolveVendorSession, revokeVendorSession,
+  adminLogin, resolveAdminSession, revokeAdminSession,
+} from './vendor-auth.js';
 
 const ADMIN_PASSWORD = process.env['FRESH_ADMIN_PASSWORD'] ?? 'maihan-admin-dev';
 
@@ -49,8 +53,56 @@ function requireAdmin(ctx: Ctx): void {
   }
 }
 
+// NOTE: requireAdmin stays sync for env-token compatibility; the admin/login
+// endpoint verifies against the DB and returns the derived session token.
+// Both paths work — the DB path is the production pattern.
+
 const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   { method: 'GET', pattern: /^\/healthz$/, handler: async () => ok({ ok: true, service: 'fresh-api' }) },
+
+  // vendor auth (email + password → session)
+  { method: 'POST', pattern: /^\/api\/v1\/vendor\/auth\/login$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { email?: string; password?: string };
+    if (!body.email || !body.password) {
+      const e = new Error('email and password are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    const r = await withTx((c) => vendorLogin(c, body.email!, body.password!, ctx.headers['user-agent'] ?? null));
+    return ok({ token: r.token, vendor: r.vendor });
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/vendor\/auth\/logout$/, handler: async (ctx) => {
+    const session = await resolveVendorSession(pool, ctx.headers.authorization);
+    if (session) await withTx(async (c: Db) => { await revokeVendorSession(c, session.sessionId); });
+    return ok({ logged_out: true });
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/vendor\/auth\/me$/, handler: async (ctx) => {
+    const session = await resolveVendorSession(pool, ctx.headers.authorization);
+    if (!session) {
+      const e = new Error('authentication required') as Error & { status?: number }; e.status = 401; throw e;
+    }
+    return ok(await getVendor(pool, session.vendorCode));
+  } },
+
+  // admin auth (email + password → session)
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/auth\/login$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { email?: string; password?: string };
+    if (!body.email || !body.password) {
+      const e = new Error('email and password are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    const r = await withTx((c) => adminLogin(c, body.email!, body.password!, ctx.headers['user-agent'] ?? null));
+    return ok({ token: r.token, admin: r.admin });
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/auth\/logout$/, handler: async (ctx) => {
+    const session = await resolveAdminSession(pool, ctx.headers.authorization);
+    if (session) await withTx((c) => revokeAdminSession(c, session.sessionId));
+    return ok({ logged_out: true });
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/auth\/me$/, handler: async (ctx) => {
+    const session = await resolveAdminSession(pool, ctx.headers.authorization);
+    if (!session) {
+      const e = new Error('authentication required') as Error & { status?: number }; e.status = 401; throw e;
+    }
+    return ok({ email: session.email, role: session.role });
+  } },
 
   // admin session (dev password -> derived session token)
   { method: 'POST', pattern: /^\/api\/v1\/admin\/login$/, handler: async (ctx) => {
@@ -189,7 +241,11 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   } },
 
   { method: 'POST', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/submissions$/, handler: async (ctx, p) => {
-    await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
+    // Vendor auth: session token OR API key (both valid for submissions)
+    const session = await resolveVendorSession(pool, ctx.headers.authorization);
+    if (!session) {
+      await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
+    }
     const body = (ctx.body ?? {}) as { submission_kind?: string };
     const kind = body.submission_kind;
     const schema = submissionSchemas[kind as keyof typeof submissionSchemas];
@@ -211,7 +267,10 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     return created(r);
   } },
   { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/submissions$/, handler: async (ctx, p) => {
-    await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
+    const session = await resolveVendorSession(pool, ctx.headers.authorization);
+    if (!session) {
+      await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
+    }
     return ok(await listSubmissions(pool, ctx.query.get('status'), p.code!));
   } },
 
