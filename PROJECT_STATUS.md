@@ -3,7 +3,7 @@
 **This is the ONE file to read for the complete, current state of the project.**
 History and per-item evidence live in `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` (§22–§24); the roadmap in `INITIAL_IMPLEMENTATION_PLAN.md` (Appendix A); decisions in `docs/adr/`.
 
-**Last updated:** 2026-10-29 · branch `develop` · head `abe7cf6`
+**Last updated:** 2026-10-29 · branch `develop` · head `c9dec46`
 
 ---
 
@@ -91,6 +91,7 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 | Item | What | Blocker |
 |---|---|---|
 | **Vendor photo upload** | DYO pool + product cards need real photos — vendors must submit images | Next increment: image upload endpoint + vendor portal UI |
+| **Vendor portal production** | Complete: light theme sidebar, inventory management, admin feedback, variety dropdowns — committed `c9dec46` | DONE |
 | **Sanity CMS** (ADR-036) | about/education/blog/policy/showrooms → real content | Needs Sanity project credentials (owner) |
 | **DYO configurator pool** | Empty until vendor stones have photos | Same as photo upload |
 | **Soft-404 remaining** | Non-variety single-segment unknowns still 200 (e.g. deep 404s in nested routes) | Edge guard covers top-level only; deep unknowns are a lower-priority SEO polish |

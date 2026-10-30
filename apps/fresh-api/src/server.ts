@@ -21,6 +21,7 @@ import {
   checkoutCart, payOrder, getOrder, listOrders, type CheckoutInput,
 } from './commerce.js';
 import { createConfiguration, getConfiguration, addConfigurationToCart } from './configurations.js';
+import { vendorInventory, updateItemStatus } from './inventory.js';
 import crypto from 'node:crypto';
 import { checkRateLimit } from './rate-limit.js';
 import {
@@ -265,6 +266,27 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
       return { submission_id: Number(inserted.rows[0]!.id) };
     });
     return created(r);
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory$/, handler: async (ctx, p) => {
+    const session = await resolveVendorSession(pool, ctx.headers.authorization);
+    if (!session) {
+      await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
+    }
+    const vid = Number((await pool.query(`SELECT id FROM fresh.vendors WHERE code = $1`, [p.code!.toUpperCase()])).rows[0]?.id);
+    return ok(await vendorInventory(pool, vid));
+  } },
+  { method: 'PATCH', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)$/, handler: async (ctx, p) => {
+    const session = await resolveVendorSession(pool, ctx.headers.authorization);
+    if (!session) {
+      await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
+    }
+    const body = (ctx.body ?? {}) as { status?: string };
+    if (!body.status) {
+      const e = new Error('status is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    const vid = Number((await pool.query(`SELECT id FROM fresh.vendors WHERE code = $1`, [p.code!.toUpperCase()])).rows[0]?.id);
+    await withTx((c) => updateItemStatus(c, vid, p.ref!, body.status!));
+    return ok({ ref: p.ref, status: body.status });
   } },
   { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/submissions$/, handler: async (ctx, p) => {
     const session = await resolveVendorSession(pool, ctx.headers.authorization);

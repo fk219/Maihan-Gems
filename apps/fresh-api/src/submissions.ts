@@ -174,7 +174,8 @@ export async function listSubmissions(client: AnyClient, status: string | null, 
     where.push(`v.code = $${params.length}`);
   }
   const { rows } = await client.query(
-    `SELECT s.id, s.submission_kind, s.status, s.payload, s.resulting_ref, s.created_at, v.code AS vendor_code
+    `SELECT s.id, s.submission_kind, s.status, s.payload, s.resulting_ref, s.created_at,
+            s.reviewer_note, s.reviewed_at, v.code AS vendor_code
      FROM fresh.vendor_submissions s JOIN fresh.vendors v ON v.id = s.vendor_id
      ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
      ORDER BY s.id DESC LIMIT 100`,
