@@ -22,6 +22,10 @@ import {
 } from './commerce.js';
 import { createConfiguration, getConfiguration, addConfigurationToCart } from './configurations.js';
 import { vendorInventory, updateItemStatus } from './inventory.js';
+import {
+  adminStats, adminInventory, adminUpdateItemStatus, adminOrderDetail,
+  adminVendorsList, listLeads, createLead, updateLeadStatus,
+} from './admin.js';
 import crypto from 'node:crypto';
 import { checkRateLimit } from './rate-limit.js';
 import {
@@ -184,6 +188,54 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   { method: 'GET', pattern: /^\/api\/v1\/admin\/orders$/, handler: async (ctx) => {
     requireAdmin(ctx);
     return ok(await withTx((c) => listOrders(c, Number(ctx.query.get('limit') ?? 50))));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/orders\/(?<number>MG-\d{4}-\d{6})$/, handler: async (ctx, p) => {
+    requireAdmin(ctx);
+    const d = await withTx((c) => adminOrderDetail(c, p.number!));
+    return d ? ok(d) : notFound(`order ${p.number}`);
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/stats$/, handler: async (ctx) => {
+    requireAdmin(ctx);
+    return ok(await withTx((c) => adminStats(c)));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/inventory$/, handler: async (ctx) => {
+    requireAdmin(ctx);
+    return ok(await withTx((c) => adminInventory(c, {
+      q: ctx.query.get('q') ?? undefined, status: ctx.query.get('status') ?? undefined,
+      kind: ctx.query.get('kind') ?? undefined,
+      limit: Number(ctx.query.get('limit') ?? 50), offset: Number(ctx.query.get('offset') ?? 0),
+    })));
+  } },
+  { method: 'PATCH', pattern: /^\/api\/v1\/admin\/inventory\/(?<ref>[A-Za-z0-9-]+)$/, handler: async (ctx, p) => {
+    requireAdmin(ctx);
+    const body = (ctx.body ?? {}) as { status?: string };
+    if (!body.status) {
+      const e = new Error('status is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    await withTx((c) => adminUpdateItemStatus(c, p.ref!, body.status!));
+    return ok({ ref: p.ref, status: body.status });
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/vendors$/, handler: async (ctx) => {
+    requireAdmin(ctx);
+    return ok(await withTx((c) => adminVendorsList(c)));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/leads$/, handler: async (ctx) => {
+    requireAdmin(ctx);
+    return ok(await withTx((c) => listLeads(c, ctx.query.get('status') ?? undefined)));
+  } },
+  { method: 'PATCH', pattern: /^\/api\/v1\/admin\/leads\/(?<id>\d+)$/, handler: async (ctx, p) => {
+    requireAdmin(ctx);
+    const body = (ctx.body ?? {}) as { status?: string };
+    await withTx((c) => updateLeadStatus(c, Number(p.id), body.status ?? 'CONTACTED'));
+    return ok({ id: Number(p.id), status: body.status });
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/leads$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { email?: string; name?: string; source?: string };
+    if (!body.email) {
+      const e = new Error('email is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    await withTx((c) => createLead(c, body.email!, body.name ?? null, body.source ?? 'newsletter'));
+    return created({ ok: true, message: 'subscribed' });
   } },
 
   // auth (customer) ----------------------------------------------------------

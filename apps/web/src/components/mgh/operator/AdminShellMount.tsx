@@ -2,11 +2,11 @@
 
 import dynamic from 'next/dynamic';
 
-const AdminConsoleFresh = dynamic(() => import('./AdminConsoleFresh'), {
+const AdminConsoleApp = dynamic(() => import('./AdminConsoleApp'), {
   ssr: false,
-  loading: () => <div className="min-h-screen bg-[#0A0A0B]" />,
+  loading: () => <div className="min-h-screen bg-[#FAF8F4]" />,
 });
 
 export default function AdminShellMount() {
-  return <AdminConsoleFresh />;
+  return <AdminConsoleApp />;
 }
