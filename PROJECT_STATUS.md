@@ -3,7 +3,7 @@
 **This is the ONE file to read for the complete, current state of the project.**
 History and per-item evidence live in `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` (§22–§24); the roadmap in `INITIAL_IMPLEMENTATION_PLAN.md` (Appendix A); decisions in `docs/adr/`.
 
-**Last updated:** 2026-10-31 · branch `develop` · head `8eb094c`
+**Last updated:** 2026-10-31 · branch `develop` · head `develop` — see `git log -1`
 
 ---
 
