@@ -73,6 +73,14 @@ export default function AdminConsoleApp() {
   const [selectedVendor, setSelectedVendor] = useState<VendorRow | null>(null);
   const [leads, setLeads] = useState<LeadRow[]>([]);
   const [busy, setBusy] = useState(false);
+  const [vendorAction, setVendorAction] = useState<string | null>(null);
+  const [actionError, setActionError] = useState('');
+  const [issuedKey, setIssuedKey] = useState<{ code: string; key: string } | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [createBusy, setCreateBusy] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    name: '', legal_name: '', contact_name: '', email: '', country: '', phone: '', website: '',
+  });
 
   const loadAll = useCallback(async () => {
     setBusy(true);
@@ -143,6 +151,54 @@ export default function AdminConsoleApp() {
     const res = await fetch(`/api/fresh/admin/orders/${num}`, { cache: 'no-store' });
     if (res.ok) setOrderDetail((await res.json()) as OrderDetail);
     setBusy(false);
+  };
+
+  const vendorOnboarding = async (v: VendorRow, action: 'approve' | 'reject' | 'suspend') => {
+    setVendorAction(action); setActionError('');
+    try {
+      const res = await fetch(`/api/fresh/admin/onboarding/${encodeURIComponent(v.code)}/${action}`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(action === 'approve' ? {} : { note: action === 'suspend' ? 'Suspended by admin' : 'Rejected by admin' }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string; apiKey?: string };
+      if (!res.ok) throw new Error(data.error ?? 'Action failed');
+      const refreshed = await fetch('/api/fresh/admin/vendors', { cache: 'no-store' });
+      if (refreshed.ok) {
+        const list = (await refreshed.json()) as VendorRow[];
+        setVendors(list);
+        setSelectedVendor(list.find((x) => x.code === v.code) ?? null);
+      }
+      if (action === 'approve' && data.apiKey) setIssuedKey({ code: v.code, key: data.apiKey });
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : 'Action failed');
+    } finally {
+      setVendorAction(null);
+    }
+  };
+
+  const createVendor = async (e: React.FormEvent) => {
+    e.preventDefault(); setCreateBusy(true); setActionError('');
+    try {
+      const res = await fetch('/api/fresh/vendors', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          name: createForm.name, legal_name: createForm.legal_name,
+          contact_name: createForm.contact_name, email: createForm.email,
+          country: createForm.country,
+          phone: createForm.phone || undefined,
+          website: createForm.website || undefined,
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string; vendorCode?: string };
+      if (!res.ok) throw new Error(data.error ?? 'Could not create partner');
+      setShowCreate(false);
+      setCreateForm({ name: '', legal_name: '', contact_name: '', email: '', country: '', phone: '', website: '' });
+      await loadAll();
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : 'Could not create partner');
+    } finally {
+      setCreateBusy(false);
+    }
   };
 
   const markLead = async (id: number, status: string) => {
@@ -406,10 +462,59 @@ export default function AdminConsoleApp() {
                 <h1 className="portal-page-title">{selectedVendor ? selectedVendor.name : 'Vendors'}</h1>
                 <p className="portal-page-sub">{selectedVendor ? 'Partner dossier and inventory position.' : 'Every partner supplying the maison.'}</p>
               </div>
+              {!selectedVendor ? (
+                <button onClick={() => { setShowCreate((v) => !v); setActionError(''); }} className="portal-btn portal-btn--gold portal-btn--sm">
+                  {showCreate ? 'Close' : 'New partner'}
+                </button>
+              ) : null}
             </div>
+            {showCreate && !selectedVendor ? (
+              <form onSubmit={createVendor} className="portal-card portal-card--pad space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="cv-name" className="portal-label">Trading name</label>
+                    <input id="cv-name" required minLength={2} value={createForm.name} onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))} className="portal-input" placeholder="Atelier Lumière" />
+                  </div>
+                  <div>
+                    <label htmlFor="cv-legal" className="portal-label">Legal name</label>
+                    <input id="cv-legal" required minLength={2} value={createForm.legal_name} onChange={(e) => setCreateForm((f) => ({ ...f, legal_name: e.target.value }))} className="portal-input" placeholder="Atelier Lumière SARL" />
+                  </div>
+                  <div>
+                    <label htmlFor="cv-contact" className="portal-label">Contact name</label>
+                    <input id="cv-contact" required minLength={2} value={createForm.contact_name} onChange={(e) => setCreateForm((f) => ({ ...f, contact_name: e.target.value }))} className="portal-input" placeholder="Full name" />
+                  </div>
+                  <div>
+                    <label htmlFor="cv-email" className="portal-label">Email</label>
+                    <input id="cv-email" type="email" required value={createForm.email} onChange={(e) => setCreateForm((f) => ({ ...f, email: e.target.value }))} className="portal-input" placeholder="partner@company.com" />
+                  </div>
+                  <div>
+                    <label htmlFor="cv-country" className="portal-label">Country (ISO-2)</label>
+                    <input id="cv-country" required maxLength={2} minLength={2} value={createForm.country} onChange={(e) => setCreateForm((f) => ({ ...f, country: e.target.value.toUpperCase() }))} className="portal-input" placeholder="AE" />
+                  </div>
+                  <div>
+                    <label htmlFor="cv-phone" className="portal-label">Phone <span className="text-[10px] text-[#A39E93]">optional</span></label>
+                    <input id="cv-phone" value={createForm.phone} onChange={(e) => setCreateForm((f) => ({ ...f, phone: e.target.value }))} className="portal-input" placeholder="+971 …" />
+                  </div>
+                </div>
+                {actionError ? <p className="text-xs text-[#9B3A2A]">{actionError}</p> : null}
+                <div className="flex justify-end">
+                  <button type="submit" disabled={createBusy} className="portal-btn portal-btn--gold portal-btn--sm">
+                    {createBusy ? 'Creating…' : 'Create partner'}
+                  </button>
+                </div>
+              </form>
+            ) : null}
             {selectedVendor ? (
               <div className="space-y-5">
                 <button onClick={() => setSelectedVendor(null)} className="portal-btn portal-btn--ghost portal-btn--sm"><ArrowLeft className="h-3.5 w-3.5" /> All vendors</button>
+                {issuedKey && issuedKey.code === selectedVendor.code ? (
+                  <div className="portal-card portal-card--pad" style={{ borderColor: '#D4AF37', background: '#FCF8EC' }}>
+                    <p className="portal-kicker">One-time credential</p>
+                    <p className="mt-2 text-sm text-[#3D362C]">API key for <span className="font-mono text-[12px] text-[#9A7B2C]">{issuedKey.code}</span> — shown once. Send it to the partner for first-time password setup.</p>
+                    <code className="mt-3 block break-all rounded-md border border-[#EAE1D1] bg-white px-3 py-2 font-mono text-[11px] text-[#16120D]">{issuedKey.key}</code>
+                    <button onClick={() => void navigator.clipboard?.writeText(issuedKey.key)} className="portal-btn portal-btn--ghost portal-btn--sm mt-3">Copy key</button>
+                  </div>
+                ) : null}
                 <div className="portal-card portal-card--pad">
                   <div className="flex items-start justify-between gap-6">
                     <div>
@@ -418,8 +523,26 @@ export default function AdminConsoleApp() {
                       <p className="text-[13px] text-[#5C4E3C] mt-1">{selectedVendor.contact_name} · {selectedVendor.email}</p>
                       <div className="mt-2 flex items-center gap-2">
                         <span className={badgeClass(selectedVendor.status)}>{selectedVendor.status}</span>
+                        <span className="portal-badge portal-badge--draft">{selectedVendor.onboarding_status}</span>
                         <span className="portal-badge portal-badge--draft">{selectedVendor.country}</span>
                       </div>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {selectedVendor.onboarding_status !== 'APPROVED' || selectedVendor.status !== 'ACTIVE' ? (
+                          <>
+                            <button onClick={() => void vendorOnboarding(selectedVendor, 'approve')} disabled={vendorAction !== null} className="portal-btn portal-btn--gold portal-btn--sm">
+                              {vendorAction === 'approve' ? 'Approving…' : 'Approve partner'}
+                            </button>
+                            <button onClick={() => void vendorOnboarding(selectedVendor, 'reject')} disabled={vendorAction !== null} className="portal-btn portal-btn--ghost portal-btn--sm">
+                              {vendorAction === 'reject' ? 'Rejecting…' : 'Reject'}
+                            </button>
+                          </>
+                        ) : (
+                          <button onClick={() => void vendorOnboarding(selectedVendor, 'suspend')} disabled={vendorAction !== null} className="portal-btn portal-btn--danger portal-btn--sm">
+                            {vendorAction === 'suspend' ? 'Suspending…' : 'Suspend partner'}
+                          </button>
+                        )}
+                      </div>
+                      {actionError ? <p className="mt-3 text-xs text-[#9B3A2A]">{actionError}</p> : null}
                     </div>
                     <div className="text-right">
                       <p className="text-[26px] tabular-nums text-[#16120D]">${selectedVendor.inventory_value.toLocaleString()}</p>

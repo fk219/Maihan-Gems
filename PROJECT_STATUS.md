@@ -3,7 +3,7 @@
 **This is the ONE file to read for the complete, current state of the project.**
 History and per-item evidence live in `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` (§22–§24); the roadmap in `INITIAL_IMPLEMENTATION_PLAN.md` (Appendix A); decisions in `docs/adr/`.
 
-**Last updated:** 2026-10-30 · branch `develop` · head `199c95e`
+**Last updated:** 2026-10-31 · branch `develop` · head `8eb094c`
 
 ---
 
@@ -35,14 +35,15 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 **Access URLs** (local dev, `MAIHAN_DEV_SEAM=1`):
 - Storefront: `http://localhost:3000`
 - Catalogue: `http://localhost:3000/gemstones` · `/browse` · `/shop` · `/varieties`
-- Vendor portal: `http://localhost:3000/vendor` (login: vendor code + API key)
+- Vendor portal: `http://localhost:3000/vendor` (email + password · first-time setup with the one-time API key)
 - Admin console: `http://localhost:3000/admin` (login: admin password)
 - API direct: `http://localhost:3010/api/v1/healthz`
 
 ## 3. What's COMPLETE
 
-### 3.1 Database (fresh schema, `docs/fresh-schema/0001–0010`)
-- 44 tables, 47 FKs, 5 enums — the whole business model
+### 3.1 Database (fresh schema, `docs/fresh-schema/0001–0013`)
+- 48 tables + `schema_migrations`, 47+ FKs, enums — the whole business model
+- **Reproducible bootstrap**: `pnpm --filter @maihan/fresh-api run migrate` applies every DDL file in order, tracked in `fresh.schema_migrations`; `0013_reference_seed.sql` carries the owner-approved reference vocabulary (11 families, 86 varieties, 55 colours, 43 origins, shapes, metals, jewellery types). Verified on a scratch database (49 tables, counts exact).
 - Semantic code architecture (doc 42) with `code_counters` (never-repeat guarantee)
 - Composition law F-INV-01/02/03 (DB CHECKs + trigger — 0 violations live)
 - Media rules (≤10 images / ≤5 videos / ≤2 3D per item — DB trigger enforced)
@@ -64,17 +65,21 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 | **Catalogue reads** | gemstones (filters: variety/family/colour/origin/shape/kind/price/q), settings (filters + design-group), products (filters), varieties (with counts), families, metals, shapes, colours, origins, assets | public |
 | **Detail** | gemstone by slug-or-ref (media, per-pair stones, treatments) · product detail (composition trace) · setting by ref (design variants) · configuration by code | public |
 | **Customer auth** | register / login / logout / me | scrypt + session tokens (SHA-256 at rest, 30-day) |
-| **Vendor portal** | register (mints `V-{CC}-{NNN}`), onboarding approve/reject/suspend, submissions (gemstone/setting/product forms), my submissions | admin password · vendor API key (httpOnly cookies via proxy) |
-| **Admin** | submissions moderation (approve mints semantic codes + audit rows), orders list | admin password (HMAC session, httpOnly cookie via proxy) |
+| **Vendor portal** | email+password login, **first-time password setup (one-time API key → session)**, submissions (gemstone/setting/product forms), my submissions, inventory status, image upload | admin password · vendor session or API key |
+| **Admin** | submissions moderation (approve mints semantic codes + audit rows), vendors (create/approve/reject/suspend), orders, stats, inventory, leads | admin password (HMAC session, httpOnly cookie via proxy) |
 | **DYO configurations** | POST (create+quote: F-INV + carat-range validated, dupe-hash deduped), GET dossier, cart accepts `configuration_code` | public |
 | **Commerce** | carts (guest tokens, lines with price snapshots), checkout (domain tax engine, discounts, **inventory reservations**), orders (number, items, events), test payment instrument | public (checkout) / admin (orders) |
+| **Leads** | `POST /leads` (newsletter / viewing_request / contact; deduped per email+source, optional note) | public (rate-limited) |
 
 ### 3.4 Storefront (all pages on fresh data, exact applet design)
 - Home (hero video + rails) · browse/shop (CollectionExplorer, 60 real stones) · variety + colour landings
 - Gemstones hub · PDPs (gemstone by slug/ref, product composition, settings with metal/size selectors)
 - DYO configurator (4 steps → Acquire Commission → checkout) · review dossier (fresh configuration)
-- Search (fresh-api `q` param) · Cmd+K palette · compare · favourites (localStorage)
+- Search (fresh-api `q` param) · **Cmd+K palette live** (gemstones/pairs/settings) · **compare live** (gemstones + settings tables) · **favourites live** (saved refs fetched from the catalogue)
 - Editorial pages (ComingSoon → Sanity per ADR-036) · contact (SALON CONCIERGE)
+- **Forms are real**: journal newsletter + footer + viewing request POST to the leads API (deduped, validated, admin-visible)
+- **Order confirmation** (`/checkout/confirmation/<order>`) reads the live fresh-api ledger
+- **Sitemap** (`/sitemap.xml`) — static routes + varieties + stones + settings + products (~31.5k URLs)
 - Admin console + vendor portal (login + working consoles) — **premium light theme with sidebar (portal-premium.css)**
 - **Link cascade fixed** (mgh-applet preflight + gold focus-visible ring)
 - Soft-404 at the edge (proxy middleware + variety registry)
@@ -90,12 +95,12 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 ### 4.1 In progress (owner-visible gaps)
 | Item | What | Blocker |
 |---|---|---|
-| **Vendor photo upload** | DYO pool + product cards need real photos — vendors must submit images | Next increment: image upload endpoint + vendor portal UI |
+| **Vendor photo upload** | Endpoint + vendor portal widget shipped; DYO pool now depends on vendors actually uploading | Content, not code |
 | **Vendor portal production** | Complete: light theme sidebar, inventory management, admin feedback, variety dropdowns — committed `c9dec46` | DONE |
 | **Admin console production** | Complete: light sidebar with 5 tabs (Overview/Inventory/Orders/Vendors/Leads) + full stats — committed `68d41dd` | DONE |
 | **Leads/newsletter** | Leads table + public signup + admin management — committed `68d41dd` | DONE |
 | **Sanity CMS** (ADR-036) | about/education/blog/policy/showrooms → real content | Needs Sanity project credentials (owner) |
-| **DYO configurator pool** | Empty until vendor stones have photos | Same as photo upload |
+| **DYO configurator pool** | Empty until vendor stones have photos | Vendor content |
 | **Soft-404 remaining** | Non-variety single-segment unknowns still 200 (e.g. deep 404s in nested routes) | Edge guard covers top-level only; deep unknowns are a lower-priority SEO polish |
 
 ### 4.2 Commerce completion (code-ready, needs owner decisions)
@@ -115,7 +120,7 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 | **Secrets** | FRESH_ADMIN_PASSWORD, vendor keys, Sanity token, Stripe keys → platform secret manager |
 | **CI re-point** | Current CI runs domain/contracts/ai/observability/web build — needs fresh-era test additions (fresh-api tests) |
 | **Domain + analytics** | maihangems.com DNS + analytics |
-| **Rate limiting** | None on fresh-api (localhost dev); production needs per-scope limits |
+| **Rate limiting** | In-memory per-IP on fresh-api; production needs distributed limits |
 
 ### 4.4 Nice-to-have (post-launch polish)
 | Item | What |

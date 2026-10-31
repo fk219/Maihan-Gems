@@ -1,98 +1,89 @@
 /**
- * apps/web/src/app/(storefront)/checkout/confirmation/[orderId]/page.tsx
- *
- * `/checkout/confirmation/<orderId>` — the REAL order confirmation, rendered
- * strictly from the authoritative order read model (`GET /api/v1/orders/{id}`
- * served by the API process). The RENDERED payload is the reference applet's
- * confirmation page (its markup is honest by construction: the payment state
- * shows what the backend recorded — a freshly placed order is
- * PENDING_PAYMENT until the provider webhook reconciles it, never fabricated
- * as settled, and no surrogate order id is ever invented here).
+ * `/checkout/confirmation/<orderNumber>` — the authoritative order confirmation,
+ * rendered strictly from the fresh-api order read model
+ * (`GET /api/v1/orders/{order_number}`). Nothing is fabricated here: a freshly
+ * placed order stays PENDING_PAYMENT until the payment step settles it.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Clock, CheckCircle2, ShieldAlert } from 'lucide-react';
 
-import { apiFetch } from '../../../../../lib/api-origin.js';
+import { SITE_URL } from '@/lib/mgh/site-url';
+
+const FRESH_API_URL = process.env['FRESH_API_URL'] ?? 'http://127.0.0.1:3010';
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
 }
 
-interface OrderReadModel {
-  id: string;
+interface FreshOrder {
   order_number: string;
   email: string;
-  state: string;
+  status: string;
   currency: string;
   subtotal: string;
-  discount_total: string;
-  shipping_total: string;
-  tax_total: string;
+  discount: string;
+  shipping: string;
+  tax: string;
   grand_total: string;
   shipping_address: Record<string, string | null> | null;
-  items: {
-    id: string;
-    sku_snapshot: string;
-    title_snapshot: string;
+  customer_note: string | null;
+  placed_at: string;
+  paid_at: string | null;
+  items: Array<{
+    description: string;
+    code_snapshot: string;
     quantity: number;
     unit_price: string;
     line_total: string;
-  }[];
+  }>;
+  events: Array<{ event: string; created_at: string }>;
 }
 
-async function readOrder(orderId: string): Promise<OrderReadModel | null> {
-  const response = await apiFetch(`/api/v1/orders/${encodeURIComponent(orderId)}`);
-  if (response.status === 404) return null;
-  if (!response.ok) {
+async function readOrder(orderNumber: string): Promise<FreshOrder | null> {
+  try {
+    const res = await fetch(`${FRESH_API_URL}/api/v1/orders/${encodeURIComponent(orderNumber)}`, {
+      cache: 'no-store',
+    });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error('order read failed');
+    return (await res.json()) as FreshOrder;
+  } catch {
     throw new Error('The order could not be loaded.');
   }
-  const body = (await response.json()) as { data?: OrderReadModel };
-  return body.data ?? null;
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { orderId } = await params;
   try {
     const order = await readOrder(decodeURIComponent(orderId));
     if (!order) {
-      return {
-        title: 'Order Not Found',
-        description: 'The requested order ID does not exist in our vault ledger.',
-        robots: { index: false, follow: false },
-      };
+      return { title: 'Order Not Found', robots: { index: false, follow: false } };
     }
     return {
-      title: `Order ${order.order_number} (${order.state})`,
-      description: `Server-authoritative order status for ${order.order_number}: ${order.state}.`,
+      title: `Order ${order.order_number} (${order.status})`,
+      description: `Server-authoritative order status for ${order.order_number}: ${order.status}.`,
       robots: { index: false, follow: false },
+      alternates: { canonical: `${SITE_URL}/checkout/confirmation/${order.order_number}` },
     };
   } catch {
-    return {
-      title: 'Order confirmation | Maihan Gems',
-      robots: { index: false, follow: false },
-    };
+    return { title: 'Order confirmation | Maihan Gems', robots: { index: false, follow: false } };
   }
 }
 
 export default async function OrderConfirmationPage({ params }: PageProps) {
   const { orderId } = await params;
   const order = await readOrder(decodeURIComponent(orderId));
+  if (!order) notFound();
 
-  // Server-authoritative: 404 for unknown order IDs — never render a fabricated success
-  if (!order) {
-    notFound();
-  }
-
-  const isPending = order.state === 'PENDING_PAYMENT';
-
-  // USD-envelope formatter for the order's own currency; the order snapshot
-  // is the authority, nothing is derived here.
+  const isPending = order.status === 'PENDING_PAYMENT';
   const money = (amount: string): string =>
-    Number(amount).toLocaleString('en-US', { style: 'currency', currency: order.currency, maximumFractionDigits: 2 });
+    Number(amount).toLocaleString('en-US', {
+      style: 'currency',
+      currency: order.currency,
+      maximumFractionDigits: 2,
+    });
 
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
@@ -100,13 +91,15 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
         <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#E4DFD5] pb-6">
           <div>
             <p className="text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.18em] text-[#9A7B2C]">
-              AUTHORITATIVE ORDER LEDGER · {order.order_number}
+              ORDER LEDGER · {order.order_number}
             </p>
             <h1 className="mt-1 font-[family-name:var(--font-display)] text-3xl sm:text-4xl font-semibold text-[#121211]">
-              {isPending
-                ? 'Order Recorded — Pending Payment Reconciliation'
-                : 'Order Reconciled & Confirmed'}
+              {isPending ? 'Order Recorded — Pending Payment' : 'Order Confirmed'}
             </h1>
+            <p className="mt-1 text-xs font-[family-name:var(--font-eb-garamond)] text-[#4E4C47]">
+              Placed {new Date(order.placed_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              {order.email ? ` · correspondence to ${order.email}` : ''}
+            </p>
           </div>
 
           <div
@@ -118,41 +111,41 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
             }`}
           >
             {isPending ? <Clock className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-            {order.state}
+            {order.status}
           </div>
         </div>
 
-        {/* Honest Status Banner */}
         <div className="rounded-sm border border-[#D4AF37]/30 bg-[#0A0A0B] text-white p-4 text-xs leading-relaxed">
           <div className="flex items-start gap-2.5">
             <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5 text-[#D4AF37]" />
             <div>
               <p className="font-semibold text-[#E6C97A]">
                 {isPending
-                  ? 'Honest Reconciliation Notice: Payment is PENDING_PAYMENT'
-                  : `Treasury Settlement Status: Payment is ${order.state}`}
+                  ? 'Payment is pending — this is the live ledger state.'
+                  : `Payment is ${order.status}.`}
               </p>
               <p className="text-[#C8C3B8] mt-1">
-                Settlement is confirmed by the payment provider&apos;s webhook — until reconciliation this order
-                stays {order.state.replace(/_/g, ' ').toLowerCase()} ; correspondence goes to {order.email}.
+                {isPending
+                  ? 'The order is recorded and your items are reserved. Settlement is confirmed by the payment provider; this page always shows what the ledger records.'
+                  : 'This order has been settled in the ledger. Keep this reference for correspondence with the atelier.'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Order Line Items */}
         <div className="space-y-3">
           <h2 className="text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#9A7B2C]">
             Reserved Vault Specimens
           </h2>
           <ul className="divide-y divide-[#E4DFD5] border-t border-b border-[#E4DFD5] text-xs">
-            {order.items.map((item) => (
-              <li key={item.id} className="py-3.5 flex justify-between items-center gap-4">
+            {order.items.map((item, i) => (
+              <li key={`${item.code_snapshot}-${i}`} className="py-3.5 flex justify-between items-center gap-4">
                 <div>
                   <span className="font-[family-name:var(--font-mono)] text-[#9A7B2C] mr-2">
-                    {item.sku_snapshot}
+                    {item.code_snapshot}
                   </span>
-                  <span className="font-semibold text-[#121211]">{item.title_snapshot}</span>
+                  <span className="font-semibold text-[#121211]">{item.description}</span>
+                  <span className="text-[#76726A] ml-2">× {item.quantity}</span>
                 </div>
                 <span className="font-[family-name:var(--font-mono)] tabular-nums font-semibold text-[#121211]">
                   {money(item.line_total)}
@@ -162,7 +155,6 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
           </ul>
         </div>
 
-        {/* Delivery & Totals */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs pt-2">
           <div>
             <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-wider text-[#9A7B2C] mb-1">
@@ -170,64 +162,80 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
             </p>
             {order.shipping_address ? (
               <>
-                <p className="font-semibold text-[#121211]">{order.shipping_address['full_name']}</p>
+                <p className="font-semibold text-[#121211]">
+                  {order.shipping_address['recipient'] ?? '—'}
+                </p>
                 <p className="text-[#4E4C47]">{order.shipping_address['line1']}</p>
+                {order.shipping_address['line2'] ? (
+                  <p className="text-[#4E4C47]">{order.shipping_address['line2']}</p>
+                ) : null}
                 <p className="text-[#4E4C47]">
                   {order.shipping_address['postal_code']} {order.shipping_address['city']},{' '}
-                  {order.shipping_address['country_code']}
+                  {order.shipping_address['country']}
                 </p>
               </>
             ) : (
               <p className="text-[#4E4C47]">Not recorded.</p>
             )}
+            {order.customer_note ? (
+              <p className="mt-3 text-[#4E4C47] italic">“{order.customer_note}”</p>
+            ) : null}
           </div>
 
           <div className="space-y-1.5">
             <div className="flex justify-between">
-              <span className="text-[#4E4C47]">Order State</span>
-              <span className="font-[family-name:var(--font-mono)] text-[#121211]">
-                {order.state}
-              </span>
+              <span className="text-[#4E4C47]">Subtotal</span>
+              <span className="font-[family-name:var(--font-mono)] tabular-nums text-[#121211]">{money(order.subtotal)}</span>
             </div>
+            {Number(order.discount) > 0 ? (
+              <div className="flex justify-between">
+                <span className="text-[#4E4C47]">Discount</span>
+                <span className="font-[family-name:var(--font-mono)] tabular-nums text-[#166534]">−{money(order.discount)}</span>
+              </div>
+            ) : null}
             <div className="flex justify-between">
-              <span className="text-[#4E4C47]">Insured Courier</span>
-              <span className="font-[family-name:var(--font-mono)] text-[#166534]">
-                {money(order.shipping_total)}
-              </span>
+              <span className="text-[#4E4C47]">Insured courier</span>
+              <span className="font-[family-name:var(--font-mono)] tabular-nums text-[#166534]">{money(order.shipping)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#4E4C47]">Tax</span>
-              <span className="font-[family-name:var(--font-mono)] tabular-nums text-[#121211]">
-                {money(order.tax_total)}
-              </span>
+              <span className="font-[family-name:var(--font-mono)] tabular-nums text-[#121211]">{money(order.tax)}</span>
             </div>
             <div className="flex justify-between border-t border-[#E4DFD5] pt-2 text-sm font-semibold text-[#121211]">
               <span>Order Total</span>
-              <span className="font-[family-name:var(--font-mono)] tabular-nums">
-                {money(order.grand_total)}
-              </span>
+              <span className="font-[family-name:var(--font-mono)] tabular-nums">{money(order.grand_total)}</span>
             </div>
           </div>
         </div>
 
+        {order.events.length > 0 ? (
+          <div className="pt-2">
+            <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-wider text-[#9A7B2C] mb-2">
+              LEDGER EVENTS
+            </p>
+            <ul className="space-y-1 text-[11px] font-[family-name:var(--font-mono)] text-[#4E4C47]">
+              {order.events.map((e, i) => (
+                <li key={`${e.event}-${i}`}>
+                  {e.event} · {new Date(e.created_at).toLocaleString('en-GB')}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
         <div className="pt-4 border-t border-[#E4DFD5] flex flex-wrap items-center gap-3">
           <Link
-            href="/account/orders"
+            href="/browse"
             className="px-4 py-2.5 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider font-semibold gold-gradient-cta rounded-sm"
           >
-            Client Orders
+            Continue Exploring
           </Link>
           <Link
-            href="/browse"
+            href="/contact"
             className="px-4 py-2.5 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider font-medium border border-[#E4DFD5] bg-[#F7F5F0] text-[#121211] rounded-sm hover:bg-[#EFECE6]"
           >
-            Explore Vault
+            Contact the Atelier
           </Link>
-          {/*
-            The applet page had a third link pointing at a hard-coded
-            reconciled fixture order (ORD-2026-8410). That order does not
-            exist here, so the link is omitted rather than fabricated.
-          */}
         </div>
       </div>
     </div>

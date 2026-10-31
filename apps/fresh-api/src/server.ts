@@ -30,7 +30,7 @@ import {
 import crypto from 'node:crypto';
 import { checkRateLimit } from './rate-limit.js';
 import {
-  vendorLogin, resolveVendorSession, revokeVendorSession,
+  vendorLogin, resolveVendorSession, revokeVendorSession, setupVendorPassword,
   adminLogin, resolveAdminSession, revokeAdminSession,
 } from './vendor-auth.js';
 
@@ -73,6 +73,14 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
       const e = new Error('email and password are required') as Error & { status?: number }; e.status = 422; throw e;
     }
     const r = await withTx((c) => vendorLogin(c, body.email!, body.password!, ctx.headers['user-agent'] ?? null));
+    return ok({ token: r.token, vendor: r.vendor });
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/vendor\/auth\/setup$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { vendor_code?: string; api_key?: string; password?: string };
+    if (!body.vendor_code || !body.api_key || !body.password) {
+      const e = new Error('vendor_code, api_key and password are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    const r = await withTx((c) => setupVendorPassword(c, body.vendor_code!, body.api_key!, body.password!, ctx.headers['user-agent'] ?? null));
     return ok({ token: r.token, vendor: r.vendor });
   } },
   { method: 'POST', pattern: /^\/api\/v1\/vendor\/auth\/logout$/, handler: async (ctx) => {
@@ -231,12 +239,17 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     return ok({ id: Number(p.id), status: body.status });
   } },
   { method: 'POST', pattern: /^\/api\/v1\/leads$/, handler: async (ctx) => {
-    const body = (ctx.body ?? {}) as { email?: string; name?: string; source?: string };
-    if (!body.email) {
-      const e = new Error('email is required') as Error & { status?: number }; e.status = 422; throw e;
+    const body = (ctx.body ?? {}) as { email?: string; name?: string; source?: string; note?: string };
+    if (!body.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
+      const e = new Error('a valid email is required') as Error & { status?: number }; e.status = 422; throw e;
     }
-    await withTx((c) => createLead(c, body.email!, body.name ?? null, body.source ?? 'newsletter'));
-    return created({ ok: true, message: 'subscribed' });
+    const source = body.source ?? 'newsletter';
+    if (!['newsletter', 'viewing_request', 'contact'].includes(source)) {
+      const e = new Error(`unsupported lead source '${source}'`) as Error & { status?: number }; e.status = 422; throw e;
+    }
+    const note = body.note ? String(body.note).slice(0, 2000) : null;
+    const id = await withTx((c) => createLead(c, body.email!, body.name ?? null, source, note));
+    return created({ ok: true, id, message: 'subscribed' });
   } },
 
   // auth (customer) ----------------------------------------------------------

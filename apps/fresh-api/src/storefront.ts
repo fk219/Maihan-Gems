@@ -37,6 +37,14 @@ export async function listGemstones(client: AnyClient, q: URLSearchParams) {
     params.push(`%${text}%`);
     where.push(`(g.name ILIKE $${params.length} OR g.slug ILIKE $${params.length} OR g.ref ILIKE $${params.length} OR v.name ILIKE $${params.length})`);
   }
+  const refs = q.get('refs');
+  if (refs) {
+    const list = refs.split(',').map((r) => r.trim()).filter(Boolean).slice(0, 100);
+    if (list.length) {
+      params.push(list);
+      where.push(`g.ref = ANY($${params.length}::text[])`);
+    }
+  }
 
   const limit = Math.min(Number(q.get('limit') ?? 50), 200);
   const offset = Number(q.get('offset') ?? 0);
@@ -152,6 +160,14 @@ export async function listSettings(client: AnyClient, q: URLSearchParams) {
   if (text) {
     params.push(`%${text}%`);
     where.push(`(s.name ILIKE $${params.length} OR s.slug ILIKE $${params.length} OR s.ref ILIKE $${params.length} OR s.design_code ILIKE $${params.length})`);
+  }
+  const refs = q.get('refs');
+  if (refs) {
+    const list = refs.split(',').map((r) => r.trim()).filter(Boolean).slice(0, 100);
+    if (list.length) {
+      params.push(list);
+      where.push(`s.ref = ANY($${params.length}::text[])`);
+    }
   }
   const limit = Math.min(Number(q.get('limit') ?? 50), 200);
   const offset = Number(q.get('offset') ?? 0);

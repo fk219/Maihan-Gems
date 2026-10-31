@@ -8,7 +8,7 @@ export function JournalNewsletterSection() {
   const [status, setStatus] = useState<'idle' | 'error' | 'subscribed'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmed = email.trim();
 
@@ -18,8 +18,19 @@ export function JournalNewsletterSection() {
       return;
     }
 
-    setStatus('subscribed');
-    setErrorMessage('');
+    try {
+      const res = await fetch('/api/fresh/leads', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: trimmed, source: 'newsletter' }),
+      });
+      if (!res.ok) throw new Error('subscribe failed');
+      setStatus('subscribed');
+      setErrorMessage('');
+    } catch {
+      setStatus('error');
+      setErrorMessage('We could not reach the atelier just now. Please try again.');
+    }
   };
 
   return (

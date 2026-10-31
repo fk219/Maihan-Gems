@@ -45,6 +45,10 @@ export default function VendorPortalApp() {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [authMode, setAuthMode] = useState<'login' | 'setup'>('login');
+  const [setupCode, setSetupCode] = useState('');
+  const [setupKey, setSetupKey] = useState('');
+  const [setupPassword, setSetupPassword] = useState('');
   const [error, setError] = useState('');
   const [vendorName, setVendorName] = useState('');
   const [vendorCode, setVendorCode] = useState('');
@@ -101,6 +105,17 @@ export default function VendorPortalApp() {
     });
     if (res.ok) { setPassword(''); await loadAll(); }
     else { const d = (await res.json().catch(() => ({}))) as { error?: string }; setError(d.error ?? 'Invalid email or password'); }
+    setBusy(false);
+  };
+
+  const setupAccount = async (e: React.FormEvent) => {
+    e.preventDefault(); setError(''); setBusy(true);
+    const res = await fetch('/api/fresh-vendor-password/setup', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ vendor_code: setupCode.trim(), api_key: setupKey.trim(), password: setupPassword }),
+    });
+    if (res.ok) { setSetupKey(''); setSetupPassword(''); setAuthMode('login'); await loadAll(); }
+    else { const d = (await res.json().catch(() => ({}))) as { error?: string }; setError(d.error ?? 'Could not set up access'); }
     setBusy(false);
   };
 
@@ -193,20 +208,46 @@ export default function VendorPortalApp() {
             <h1 className="portal-page-title">Partner Atelier</h1>
             <div className="w-10 h-px bg-gradient-to-r from-[#F3DFA2] via-[#D4AF37] to-[#9A7B2C] mx-auto" />
           </div>
-          <form onSubmit={login} className="portal-card portal-card--pad space-y-5">
-            <div>
-              <label htmlFor="v-email" className="portal-label">Email</label>
-              <input id="v-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@company.com" className="portal-input" autoComplete="email" />
-            </div>
-            <div>
-              <label htmlFor="v-password" className="portal-label">Password</label>
-              <input id="v-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="portal-input" autoComplete="current-password" />
-            </div>
+          <form onSubmit={authMode === 'login' ? login : setupAccount} className="portal-card portal-card--pad space-y-5">
+            {authMode === 'login' ? (
+              <>
+                <div>
+                  <label htmlFor="v-email" className="portal-label">Email</label>
+                  <input id="v-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@company.com" className="portal-input" autoComplete="email" />
+                </div>
+                <div>
+                  <label htmlFor="v-password" className="portal-label">Password</label>
+                  <input id="v-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="portal-input" autoComplete="current-password" />
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <label htmlFor="v-setup-code" className="portal-label">Vendor code</label>
+                  <input id="v-setup-code" value={setupCode} onChange={(e) => setSetupCode(e.target.value.toUpperCase())} required placeholder="V-AE-004" className="portal-input" autoComplete="off" />
+                </div>
+                <div>
+                  <label htmlFor="v-setup-key" className="portal-label">One-time API key</label>
+                  <input id="v-setup-key" type="password" value={setupKey} onChange={(e) => setSetupKey(e.target.value)} required placeholder="Issued at onboarding approval" className="portal-input" autoComplete="off" />
+                </div>
+                <div>
+                  <label htmlFor="v-setup-password" className="portal-label">New password</label>
+                  <input id="v-setup-password" type="password" value={setupPassword} onChange={(e) => setSetupPassword(e.target.value)} required minLength={8} placeholder="At least 8 characters" className="portal-input" autoComplete="new-password" />
+                </div>
+              </>
+            )}
             {error ? <p className="text-xs text-[#9B3A2A]">{error}</p> : null}
             <button type="submit" disabled={busy} className="portal-btn portal-btn--gold w-full">
-              {busy ? 'Signing in…' : 'Enter the atelier'}
+              {busy ? (authMode === 'login' ? 'Signing in…' : 'Setting up…') : authMode === 'login' ? 'Enter the atelier' : 'Set password & enter'}
             </button>
           </form>
+          <button
+            type="button"
+            onClick={() => { setAuthMode((m) => (m === 'login' ? 'setup' : 'login')); setError(''); }}
+            className="block w-full text-center text-[11px] uppercase tracking-[0.16em] text-[#9A7B2C] hover:text-[#6B5420] transition-colors"
+          >
+            {authMode === 'login' ? 'First time here? Set up access' : 'Back to sign in'}
+          </button>
           <p className="text-center text-[11px] text-[#A39E93]">Access is activated after onboarding approval.</p>
         </div>
       </div>

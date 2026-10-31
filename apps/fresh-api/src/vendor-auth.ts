@@ -50,23 +50,38 @@ export async function vendorLogin(client: AnyClient, email: string, password: st
      WHERE lower(vo.email) = lower($1) AND v.status = 'ACTIVE' AND vo.status = 'APPROVED'`,
     [email],
   );
-  if (!rows[0] || !verifyPassword(password, String(rows[0].password_hash))) {
+  if (!rows[0]) {
+    const e = new StateError('invalid email or password');
+    (e as Error & { status?: number }).status = 401;
+    throw e;
+  }
+  if (!rows[0].password_hash) {
+    const e = new StateError('password not set for this account — use the first-time setup link');
+    (e as Error & { status?: number }).status = 409;
+    throw e;
+  }
+  if (!verifyPassword(password, String(rows[0].password_hash))) {
     const e = new StateError('invalid email or password');
     (e as Error & { status?: number }).status = 401;
     throw e;
   }
   const vendorId = Number(rows[0].id);
+  const t = await issueVendorSession(client, vendorId, _userAgent);
+  return {
+    token: t,
+    vendor: { code: String(rows[0].code), name: String(rows[0].name) },
+  };
+}
+
+async function issueVendorSession(client: AnyClient, vendorId: number, userAgent: string | null): Promise<string> {
   const t = newToken();
   await client.query(
     `INSERT INTO fresh.vendor_sessions (vendor_id, token_hash, user_agent, expires_at)
      VALUES ($1,$2,$3, now() + interval '${VENDOR_SESSION_DAYS} days')`,
-    [vendorId, t.hash, _userAgent],
+    [vendorId, t.hash, userAgent],
   );
   await client.query(`UPDATE fresh.vendors SET last_login_at = now() WHERE id = $1`, [vendorId]);
-  return {
-    token: t.raw,
-    vendor: { code: String(rows[0].code), name: String(rows[0].name) },
-  };
+  return t.raw;
 }
 
 export async function resolveVendorSession(client: AnyClient, bearer: string | undefined): Promise<VendorSession | null> {
@@ -91,6 +106,40 @@ export async function setVendorPassword(client: AnyClient, vendorId: number, pas
     `UPDATE fresh.vendor_onboarding SET password_hash = $2, password_set_at = now() WHERE vendor_id = $1`,
     [vendorId, hashPassword(password)],
   );
+}
+
+/**
+ * First-time password setup: the vendor proves possession of the one-time API
+ * key issued at onboarding approval, then sets a password and receives a
+ * session. No email link required, no plaintext secret stored.
+ */
+export async function setupVendorPassword(
+  client: AnyClient,
+  code: string,
+  apiKey: string,
+  password: string,
+  userAgent: string | null,
+): Promise<{ token: string; vendor: { code: string; name: string } }> {
+  if (password.length < 8) {
+    const e = new StateError('password must be at least 8 characters');
+    (e as Error & { status?: number }).status = 422;
+    throw e;
+  }
+  const { rows } = await client.query(
+    `SELECT v.id, v.code, v.name FROM fresh.vendors v
+     JOIN fresh.vendor_onboarding o ON o.vendor_id = v.id
+     WHERE v.code = $1 AND v.status = 'ACTIVE' AND o.status = 'APPROVED' AND o.api_key_hash = $2`,
+    [code.toUpperCase(), sha256(apiKey)],
+  );
+  if (!rows[0]) {
+    const e = new StateError('invalid vendor code or API key');
+    (e as Error & { status?: number }).status = 401;
+    throw e;
+  }
+  const vendorId = Number(rows[0].id);
+  await setVendorPassword(client, vendorId, password);
+  const token = await issueVendorSession(client, vendorId, userAgent);
+  return { token, vendor: { code: String(rows[0].code), name: String(rows[0].name) } };
 }
 
 /** Vendors can submit via session OR API key. */
@@ -137,7 +186,17 @@ export async function adminLogin(client: AnyClient, email: string, password: str
      WHERE lower(email) = lower($1) AND password_hash != 'PENDING_SETUP'`,
     [email],
   );
-  if (!rows[0] || !verifyPassword(password, String(rows[0].password_hash))) {
+  if (!rows[0]) {
+    const e = new StateError('invalid email or password');
+    (e as Error & { status?: number }).status = 401;
+    throw e;
+  }
+  if (!rows[0].password_hash) {
+    const e = new StateError('password not set for this account — use the first-time setup link');
+    (e as Error & { status?: number }).status = 409;
+    throw e;
+  }
+  if (!verifyPassword(password, String(rows[0].password_hash))) {
     const e = new StateError('invalid email or password');
     (e as Error & { status?: number }).status = 401;
     throw e;

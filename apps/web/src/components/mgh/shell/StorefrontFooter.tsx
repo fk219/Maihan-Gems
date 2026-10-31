@@ -9,16 +9,26 @@ export function StorefrontFooter() {
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = email.trim();
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
       setError('Please enter a valid email address.');
       return;
     }
-    setError(null);
-    setSubmittedEmail(trimmed);
-    setEmail('');
+    try {
+      const res = await fetch('/api/fresh/leads', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: trimmed, source: 'newsletter' }),
+      });
+      if (!res.ok) throw new Error('subscribe failed');
+      setError(null);
+      setSubmittedEmail(trimmed);
+      setEmail('');
+    } catch {
+      setError('We could not reach the atelier just now. Please try again.');
+    }
   };
 
   return (

@@ -227,12 +227,20 @@ export async function listLeads(client: AnyClient, status?: string) {
   return rows;
 }
 
-export async function createLead(client: AnyClient, email: string, name: string | null, source: string): Promise<void> {
-  await client.query(
-    `INSERT INTO fresh.leads (email, name, source) VALUES ($1,$2,$3)
-     ON CONFLICT (lower(email), source) DO NOTHING`,
-    [email, name, source],
+export async function createLead(
+  client: AnyClient,
+  email: string,
+  name: string | null,
+  source: string,
+  note: string | null = null,
+): Promise<number | null> {
+  const { rows } = await client.query(
+    `INSERT INTO fresh.leads (email, name, source, note) VALUES ($1,$2,$3,$4)
+     ON CONFLICT (lower(email), source) DO UPDATE SET note = COALESCE(EXCLUDED.note, fresh.leads.note)
+     RETURNING id`,
+    [email, name, source, note],
   );
+  return rows[0] ? Number(rows[0].id) : null;
 }
 
 export async function updateLeadStatus(client: AnyClient, leadId: number, status: string): Promise<void> {

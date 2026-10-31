@@ -820,6 +820,7 @@ export function getCompareCategoryForId(id: string): CompareCategory {
   const normalized = id.trim().toUpperCase();
   if (
     normalized.startsWith('SET-') ||
+    normalized.startsWith('S-') ||
     SETTINGS.some((s) => s.sku.toUpperCase() === normalized || s.slug.toUpperCase() === normalized)
   ) {
     return 'settings';
@@ -827,6 +828,7 @@ export function getCompareCategoryForId(id: string): CompareCategory {
   if (
     normalized.startsWith('PAIR-') ||
     normalized.startsWith('JWL-') ||
+    normalized.startsWith('J-') ||
     normalized === 'ITEM-ELYSIAN-RING' ||
     normalized === 'ITEM-VERDANT-DROP' ||
     MATCHED_PAIRS.some((p) => p.id.toUpperCase() === normalized || p.sku.toUpperCase() === normalized)

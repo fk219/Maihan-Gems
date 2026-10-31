@@ -6,7 +6,6 @@ import { Calendar, CheckCircle2 } from 'lucide-react';
 export function ContactViewingFormClient({
   initialSalon,
   initialSku,
-  email,
 }: {
   initialSalon?: string;
   initialSku?: string;
@@ -30,33 +29,44 @@ export function ContactViewingFormClient({
     preferredDate: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !clientEmail.trim() || !clientEmail.includes('@')) {
       setError('Please enter your full name and a valid client email address.');
       return;
     }
     setError(null);
-    const record = {
-      referenceId: `VW-${salon.slice(0, 3).toUpperCase()}-2026-409`,
-      name: name.trim(),
-      salon,
-      requestedSkus: requestedSkus.trim() || 'MG-TZ-0131',
-      preferredDate,
-    };
-    // Repo's real contact path (no backend endpoint exists — repo seam is the
-    // same one the previous ViewingRequest card used: a client mailto).
-    if (email) {
-      const subject = encodeURIComponent(`Private viewing ${record.referenceId}`);
-      const body = encodeURIComponent(
-        `Name: ${record.name}\nEmail: ${email.trim()}\nSalon: ${record.salon}\n` +
-          `Specimen SKUs: ${record.requestedSkus}\nPreferred date: ${record.preferredDate}\n` +
-          `Optical setup: ${lightingPreference}\n\nNotes: ${salonNotes.trim() || '—'}`,
-      );
-      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    setBusy(true);
+    const note = [
+      `Salon: ${salon}`,
+      `Specimens: ${requestedSkus.trim() || '—'}`,
+      `Preferred date: ${preferredDate}`,
+      `Optical setup: ${lightingPreference}`,
+      salonNotes.trim() ? `Notes: ${salonNotes.trim()}` : null,
+    ].filter(Boolean).join('\n');
+    try {
+      const res = await fetch('/api/fresh/leads', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: clientEmail.trim(), name: name.trim(), source: 'viewing_request', note }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { id?: number; error?: string };
+      if (!res.ok) throw new Error(data.error ?? 'Request failed');
+      const id = typeof data.id === 'number' ? data.id : null;
+      setSubmittedRecord({
+        referenceId: id ? `VW-${salon.slice(0, 3).toUpperCase()}-${new Date().getFullYear()}-${String(id).padStart(4, '0')}` : 'VW-RECEIVED',
+        name: name.trim(),
+        salon,
+        requestedSkus: requestedSkus.trim() || '—',
+        preferredDate,
+      });
+    } catch {
+      setError('We could not reach the atelier just now. Please try again.');
+    } finally {
+      setBusy(false);
     }
-    setSubmittedRecord(record);
   };
 
   if (submittedRecord) {
@@ -80,9 +90,7 @@ export function ContactViewingFormClient({
           · {submittedRecord.preferredDate}.
         </p>
         <p className="text-xs text-[#C8C3B8] leading-relaxed">
-          {email
-            ? 'This dossier opens in your mail client addressed to the atelier — the salon confirms appointments by email. No reservation is held until the salon replies.'
-            : 'Keep this dossier — the atelier has not yet published a live booking path, so no reservation is held until you are contacted.'}
+          Your request is with the atelier. A client advisor confirms appointments by email; no reservation is held until the salon replies.
         </p>
         <button
           type="button"
@@ -225,9 +233,10 @@ export function ContactViewingFormClient({
 
       <button
         type="submit"
-        className="px-8 py-3.5 rounded-full text-xs uppercase tracking-[0.2em] font-bold gold-gradient-cta transition-all cursor-pointer"
+        disabled={busy}
+        className="px-8 py-3.5 rounded-full text-xs uppercase tracking-[0.2em] font-bold gold-gradient-cta transition-all cursor-pointer disabled:opacity-60"
       >
-        Request Appointment
+        {busy ? 'Sending…' : 'Request Appointment'}
       </button>
     </form>
   );
