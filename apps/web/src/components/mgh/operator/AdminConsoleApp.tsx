@@ -2,19 +2,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import {
-  LayoutDashboard, PackageSearch, ShoppingCart, Users, Mail, Building2,
-  LogOut, Eye, EyeOff, Trash2, DollarSign, Package, Search,
+  LayoutDashboard, PackageSearch, ShoppingCart, Mail, Building2,
+  LogOut, Eye, EyeOff, Trash2, Search, ArrowLeft, ArrowUpRight,
 } from 'lucide-react';
 
 /**
- * F4 — admin console, production-ready light theme with sidebar.
+ * F4 — admin console, Maison-grade light theme.
  * Full platform management: stats, inventory, orders, vendors, leads.
  */
-
-const input = 'w-full rounded-lg border border-[#E5D4B3] bg-white px-3 py-2.5 text-sm text-[#1A1612] placeholder-[#9A9385] focus:border-[#D4AF37] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/30 transition-colors';
-const label = 'block text-[11px] font-medium text-[#5C4E3C] mb-1.5 tracking-wide';
-const card = 'bg-white rounded-xl border border-[#E8DFCE] shadow-[0_2px_8px_rgba(185,150,75,0.06)]';
-const btnPrimary = 'rounded-lg bg-gradient-to-r from-[#F3DFA2] via-[#D4AF37] to-[#9A7B2C] text-white font-medium py-2.5 px-5 text-sm hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer';
 
 type Tab = 'overview' | 'inventory' | 'orders' | 'vendors' | 'leads';
 
@@ -54,6 +49,14 @@ interface VendorRow {
 interface LeadRow {
   id: number; email: string; name: string | null; source: string; status: string; created_at: string;
 }
+
+const badgeClass = (s: string) => {
+  if (s === 'ACTIVE' || s === 'PAID' || s === 'APPROVED' || s === 'CONVERTED') return 'portal-badge portal-badge--active';
+  if (s === 'SUBMITTED' || s === 'RESERVED' || s === 'PENDING_PAYMENT' || s === 'NEW' || s === 'QUOTE') return 'portal-badge portal-badge--pending';
+  if (s === 'SOLD' || s === 'DELIVERED' || s === 'CONTACTED') return 'portal-badge portal-badge--sold';
+  if (s === 'REJECTED' || s === 'CANCELLED' || s === 'LOST') return 'portal-badge portal-badge--rejected';
+  return 'portal-badge portal-badge--draft';
+};
 
 export default function AdminConsoleApp() {
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -107,7 +110,7 @@ export default function AdminConsoleApp() {
       body: JSON.stringify({ password }),
     });
     if (res.ok) { setPassword(''); setAuthed(true); await loadAll(); }
-    else setLoginError('invalid password');
+    else setLoginError('Invalid password');
     setBusy(false);
   };
 
@@ -142,31 +145,36 @@ export default function AdminConsoleApp() {
     setBusy(false);
   };
 
-  const statusColor = (s: string) => {
-    if (s === 'ACTIVE') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    if (s === 'PAID') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    if (s === 'SUBMITTED' || s === 'RESERVED' || s === 'PENDING_PAYMENT') return 'bg-amber-50 text-amber-700 border-amber-200';
-    if (s === 'SOLD' || s === 'DELIVERED') return 'bg-blue-50 text-blue-700 border-blue-200';
-    if (s === 'REJECTED' || s === 'CANCELLED') return 'bg-red-50 text-red-700 border-red-200';
-    return 'bg-gray-50 text-gray-600 border-gray-200';
+  const markLead = async (id: number, status: string) => {
+    await fetch(`/api/fresh/admin/leads/${id}`, {
+      method: 'PATCH', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    await loadAll();
   };
 
-  if (authed === null) return <div className="min-h-screen bg-[#FAF8F4]" />;
+  if (authed === null) return <div className="portal-shell" />;
 
   if (!authed) {
     return (
-      <div className="min-h-screen bg-[#FAF8F4] flex items-center justify-center px-4">
-        <div className="w-full max-w-sm space-y-6">
-          <div className="text-center space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.26em] text-[#9A7B2C]">Maihan Gems</p>
-            <h1 className="font-serif text-2xl text-[#1A1612]">Admin Console</h1>
+      <div className="portal-shell items-center justify-center px-4">
+        <div className="w-full max-w-sm space-y-7">
+          <div className="text-center space-y-3">
+            <p className="portal-kicker">Maihan Gems</p>
+            <h1 className="portal-page-title">Maison Operations</h1>
+            <div className="w-10 h-px bg-gradient-to-r from-[#F3DFA2] via-[#D4AF37] to-[#9A7B2C] mx-auto" />
           </div>
-          <div className={card + ' p-6 space-y-4'}>
-            <div><label className={label}>Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className={input} /></div>
-            {loginError ? <p className="text-xs text-[#991B1B]">{loginError}</p> : null}
-            <button onClick={login} disabled={busy} className={btnPrimary + ' w-full'}>{busy ? 'Signing in…' : 'Sign in'}</button>
-          </div>
+          <form onSubmit={login} className="portal-card portal-card--pad space-y-5">
+            <div>
+              <label className="portal-label" htmlFor="admin-password">Password</label>
+              <input id="admin-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="portal-input" autoComplete="current-password" />
+            </div>
+            {loginError ? <p className="text-xs text-[#9B3A2A]">{loginError}</p> : null}
+            <button type="submit" disabled={busy} className="portal-btn portal-btn--gold w-full">
+              {busy ? 'Opening the vault…' : 'Enter the console'}
+            </button>
+          </form>
+          <p className="text-center text-[11px] text-[#A39E93]">Authorized personnel only.</p>
         </div>
       </div>
     );
@@ -181,45 +189,49 @@ export default function AdminConsoleApp() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF8F4] flex">
-      <aside className="w-60 shrink-0 border-r border-[#E8DFCE] bg-white flex flex-col h-screen sticky top-0">
-        <div className="p-5 border-b border-[#E8DFCE]">
-          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#9A7B2C]">Maihan Gems</p>
-          <p className="font-serif text-lg text-[#1A1612] mt-0.5">Admin Console</p>
+    <div className="portal-shell">
+      <aside className="portal-sidebar">
+        <div className="portal-brand">
+          <p className="portal-brand__eyebrow">Maihan Gems</p>
+          <p className="portal-brand__name">Operations</p>
+          <div className="portal-brand__rule" />
+          <p className="portal-brand__meta">Administrator</p>
         </div>
-        <nav className="flex-1 py-3">
+        <nav className="portal-nav">
           {navItems.map((item) => (
-            <button key={item.id} onClick={() => { setTab(item.id); setOrderDetail(null); }}
-              className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm transition-colors cursor-pointer ${
-                tab === item.id ? 'bg-[#FAF8F4] text-[#9A7B2C] font-medium border-r-2 border-[#D4AF37]' : 'text-[#5C4E3C] hover:bg-[#FAF8F4] hover:text-[#1A1612]'
-              }`}>
-              <item.icon className="h-4 w-4 shrink-0" /> {item.label}
+            <button key={item.id} onClick={() => { setTab(item.id); setOrderDetail(null); setSelectedVendor(null); }}
+              className={`portal-nav__item ${tab === item.id ? 'is-active' : ''}`}>
+              <item.icon /> {item.label}
             </button>
           ))}
         </nav>
-        <div className="p-4 border-t border-[#E8DFCE]">
-          <button onClick={logout} className="flex items-center gap-3 px-2 py-2 text-sm text-[#9A9385] hover:text-[#1A1612] transition-colors cursor-pointer w-full">
-            <LogOut className="h-4 w-4" /> Sign out
-          </button>
+        <div className="portal-sidebar__footer">
+          <button onClick={logout} className="portal-signout"><LogOut className="h-4 w-4" /> Sign out</button>
         </div>
       </aside>
 
-      <main className="flex-1 px-8 py-8 max-w-6xl overflow-y-auto">
+      <main className="portal-main">
         {/* ======== OVERVIEW ======== */}
         {tab === 'overview' && stats ? (
-          <div className="space-y-6">
-            <h1 className="font-serif text-2xl text-[#1A1612]">Platform Overview</h1>
+          <div className="space-y-8">
+            <div className="portal-page-head">
+              <div>
+                <p className="portal-kicker">Maison Ledger</p>
+                <h1 className="portal-page-title">Platform Overview</h1>
+                <p className="portal-page-sub">Revenue, inventory and partners at a glance.</p>
+              </div>
+            </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { icon: DollarSign, label: 'Revenue (PAID)', value: `$${stats.revenue_total.toLocaleString()}`, sub: stats.revenue_currency },
-                { icon: ShoppingCart, label: 'Orders', value: stats.orders_total, sub: `${stats.orders_pending} pending` },
-                { icon: Package, label: 'Live Inventory', value: `$${stats.inventory_value.toLocaleString()}`, sub: `${stats.gemstones_active} active stones` },
-                { icon: Users, label: 'Customers', value: stats.customers_total, sub: `${stats.leads_total} leads` },
+                { label: 'Revenue (paid)', value: `$${stats.revenue_total.toLocaleString()}`, meta: `${stats.orders_paid} settled orders` },
+                { label: 'Orders', value: stats.orders_total, meta: `${stats.orders_pending} pending payment` },
+                { label: 'Inventory value', value: `$${stats.inventory_value.toLocaleString()}`, meta: `${stats.gemstones_active} active stones` },
+                { label: 'Clients', value: stats.customers_total, meta: `${stats.leads_total} leads · ${stats.leads_new} new` },
               ].map((s) => (
-                <div key={s.label} className={card + ' p-5'}>
-                  <div className="flex items-center gap-2 text-[#9A7B2C]"><s.icon className="h-4 w-4" /><span className="text-[10px] uppercase tracking-wider font-medium">{s.label}</span></div>
-                  <p className="font-serif text-3xl text-[#1A1612] mt-2">{s.value}</p>
-                  <p className="text-[10px] text-[#9A9385] mt-1">{s.sub}</p>
+                <div key={s.label} className="portal-card portal-stat">
+                  <p className="portal-stat__label">{s.label}</p>
+                  <p className="portal-stat__value">{s.value}</p>
+                  <p className="portal-stat__meta">{s.meta}</p>
                 </div>
               ))}
             </div>
@@ -232,12 +244,12 @@ export default function AdminConsoleApp() {
                 { label: 'Submissions', total: stats.submissions_total, active: stats.submissions_pending, sold: 0 },
                 { label: 'DYO Configs', total: stats.configurations_total, active: 0, sold: 0 },
               ].map((s) => (
-                <div key={s.label} className={card + ' p-4'}>
-                  <p className="text-sm font-medium text-[#1A1612]">{s.label}</p>
-                  <div className="flex gap-4 mt-2 text-xs">
-                    <span className="text-[#5C4E3C]">Total: <strong>{s.total}</strong></span>
-                    <span className="text-[#166534]">Active: <strong>{s.active}</strong></span>
-                    {s.sold > 0 ? <span className="text-[#1E40AF]">Sold: <strong>{s.sold}</strong></span> : null}
+                <div key={s.label} className="portal-card portal-card--pad">
+                  <p className="text-[13px] font-medium text-[#1A1612]">{s.label}</p>
+                  <div className="flex gap-4 mt-2 font-mono text-[10px] tracking-wide text-[#8A857B]">
+                    <span>Total <strong className="text-[#3D352A]">{s.total}</strong></span>
+                    <span>Active <strong className="text-[#2E6B3E]">{s.active}</strong></span>
+                    {s.sold > 0 ? <span>Sold <strong className="text-[#33587F]">{s.sold}</strong></span> : null}
                   </div>
                 </div>
               ))}
@@ -247,41 +259,49 @@ export default function AdminConsoleApp() {
 
         {/* ======== INVENTORY ======== */}
         {tab === 'inventory' ? (
-          <div className="space-y-5">
-            <h1 className="font-serif text-2xl text-[#1A1612]">Platform Inventory</h1>
-            <div className="flex gap-3">
+          <div className="space-y-6">
+            <div className="portal-page-head">
+              <div>
+                <p className="portal-kicker">Catalogue</p>
+                <h1 className="portal-page-title">Platform Inventory</h1>
+                <p className="portal-page-sub">Every stone and piece across the house and its partners.</p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#9A9385]" />
+                <Search className="absolute left-3.5 top-3 h-4 w-4 text-[#B3AC9F]" />
                 <input value={invSearch} onChange={(e) => setInvSearch(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && searchInventory()}
-                  placeholder="Search by name or reference…" className={input + ' pl-9'} />
+                  placeholder="Search by name or reference…" className="portal-input pl-10" />
               </div>
-              <select value={invStatus} onChange={(e) => setInvStatus(e.target.value)} className={input + ' w-40 cursor-pointer'}>
-                <option value="">All Statuses</option><option>ACTIVE</option><option>DRAFT</option><option>SOLD</option><option>RESERVED</option><option>ARCHIVED</option>
+              <select value={invStatus} onChange={(e) => setInvStatus(e.target.value)} className="portal-select sm:w-44">
+                <option value="">All statuses</option><option>ACTIVE</option><option>DRAFT</option><option>SOLD</option><option>RESERVED</option><option>ARCHIVED</option>
               </select>
-              <button onClick={searchInventory} className={btnPrimary}>Search</button>
+              <button onClick={searchInventory} className="portal-btn portal-btn--gold">Search</button>
             </div>
-            <div className={card + ' overflow-x-auto'}>
-              <table className="w-full text-sm">
-                <thead><tr className="text-left text-[10px] font-medium uppercase tracking-wider text-[#9A9385] border-b border-[#E8DFCE]">
-                  <th className="py-3 pr-3">Item</th><th className="py-3 pr-3">Ref</th><th className="py-3 pr-3">Vendor</th>
-                  <th className="py-3 pr-3">Status</th><th className="py-3 pr-3 text-right">Price</th><th className="py-3 text-right">Actions</th>
+            <div className="portal-card overflow-x-auto">
+              <table className="portal-table">
+                <thead><tr>
+                  <th>Item</th><th>Reference</th><th>Vendor</th><th>Status</th><th className="text-right">Price</th><th className="text-right">Actions</th>
                 </tr></thead>
                 <tbody>
                   {inventory.map((item) => (
-                    <tr key={item.ref + item.table_name} className="border-b border-[#F0EDE6] hover:bg-[#FAF8F4]">
-                      <td className="py-2.5 pr-3 font-medium text-[#1A1612]">{item.name}<span className="block text-[10px] text-[#9A9385]">{item.variety} · {item.kind}</span></td>
-                      <td className="py-2.5 pr-3 font-mono text-xs text-[#9A7B2C]">{item.ref}</td>
-                      <td className="py-2.5 pr-3 text-xs text-[#9A9385]">{item.vendor_name ?? 'House'}</td>
-                      <td className="py-2.5 pr-3"><span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${statusColor(item.status)}`}>{item.status}</span></td>
-                      <td className="py-2.5 pr-3 text-right tabular-nums">{item.price_amount ? `$${item.price_amount.toLocaleString()}` : '—'}</td>
-                      <td className="py-2.5 text-right">
-                        <div className="flex gap-1 justify-end">
+                    <tr key={item.ref + item.table_name}>
+                      <td>
+                        <span className="font-medium text-[#1A1612]">{item.name}</span>
+                        <span className="block text-[10px] text-[#A39E93]">{item.variety} · {item.kind}</span>
+                      </td>
+                      <td className="mono">{item.ref}</td>
+                      <td className="text-[12px] text-[#8A857B]">{item.vendor_name ?? 'House'}</td>
+                      <td><span className={badgeClass(item.status)}>{item.status}</span></td>
+                      <td className="num">{item.price_amount ? `$${item.price_amount.toLocaleString()}` : '—'}</td>
+                      <td className="text-right">
+                        <div className="flex gap-1.5 justify-end">
                           {item.status === 'ACTIVE' ? <>
-                            <button onClick={() => updateStatus(item.ref, 'DRAFT')} title="Hide" className="p-1.5 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 cursor-pointer"><EyeOff className="h-3.5 w-3.5" /></button>
-                            <button onClick={() => updateStatus(item.ref, 'ARCHIVED')} title="Delete" className="p-1.5 rounded-md border border-red-200 text-red-500 hover:bg-red-50 cursor-pointer"><Trash2 className="h-3.5 w-3.5" /></button>
+                            <button onClick={() => updateStatus(item.ref, 'DRAFT')} title="Hide from storefront" className="portal-btn portal-btn--ghost portal-btn--sm"><EyeOff className="h-3.5 w-3.5" /></button>
+                            <button onClick={() => updateStatus(item.ref, 'ARCHIVED')} title="Archive" className="portal-btn portal-btn--danger portal-btn--sm"><Trash2 className="h-3.5 w-3.5" /></button>
                           </> : item.status === 'DRAFT' ? <>
-                            <button onClick={() => updateStatus(item.ref, 'ACTIVE')} title="Publish" className="p-1.5 rounded-md border border-emerald-200 text-emerald-600 hover:bg-emerald-50 cursor-pointer"><Eye className="h-3.5 w-3.5" /></button>
+                            <button onClick={() => updateStatus(item.ref, 'ACTIVE')} title="Publish" className="portal-btn portal-btn--ghost portal-btn--sm"><Eye className="h-3.5 w-3.5" /></button>
                           </> : null}
                         </div>
                       </td>
@@ -289,61 +309,89 @@ export default function AdminConsoleApp() {
                   ))}
                 </tbody>
               </table>
+              {inventory.length === 0 ? (
+                <div className="portal-empty">
+                  <div className="portal-empty__mark"><PackageSearch className="h-5 w-5" /></div>
+                  <p className="portal-empty__title">No items match</p>
+                  <p className="portal-empty__sub">Try a different search or status filter.</p>
+                </div>
+              ) : null}
             </div>
           </div>
         ) : null}
 
         {/* ======== ORDERS ======== */}
         {tab === 'orders' ? (
-          <div className="space-y-5">
-            <h1 className="font-serif text-2xl text-[#1A1612]">Orders</h1>
+          <div className="space-y-6">
+            <div className="portal-page-head">
+              <div>
+                <p className="portal-kicker">Ledger</p>
+                <h1 className="portal-page-title">{orderDetail ? orderDetail.order_number : 'Orders'}</h1>
+                <p className="portal-page-sub">{orderDetail ? 'Order dossier and customer record.' : 'Every order placed on the platform.'}</p>
+              </div>
+            </div>
             {orderDetail ? (
-              <div className="space-y-4">
-                <button onClick={() => setOrderDetail(null)} className="text-sm text-[#9A7B2C] hover:text-[#1A1612] cursor-pointer">← Back to orders</button>
-                <div className={card + ' p-6 space-y-4'}>
-                  <div className="flex items-start justify-between">
+              <div className="space-y-5">
+                <button onClick={() => setOrderDetail(null)} className="portal-btn portal-btn--ghost portal-btn--sm"><ArrowLeft className="h-3.5 w-3.5" /> All orders</button>
+                <div className="portal-card portal-card--pad space-y-5">
+                  <div className="flex items-start justify-between gap-6">
                     <div>
-                      <p className="font-mono text-xs text-[#9A7B2C]">{orderDetail.order_number}</p>
-                      <h2 className="font-serif text-xl text-[#1A1612]">{orderDetail.customer_email}</h2>
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${statusColor(orderDetail.status)}`}>{orderDetail.status}</span>
+                      <p className="font-mono text-[11px] text-[#9A7B2C] tracking-wide">{orderDetail.order_number}</p>
+                      <h2 className="text-xl mt-1">{orderDetail.customer_email}</h2>
+                      <div className="mt-2"><span className={badgeClass(orderDetail.status)}>{orderDetail.status}</span></div>
                     </div>
-                    <p className="font-serif text-2xl text-[#1A1612]">{orderDetail.currency} {orderDetail.grand_total}</p>
+                    <p className="text-[26px] tabular-nums text-[#16120D]">{orderDetail.currency} {orderDetail.grand_total}</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div><p className="font-medium text-[#1A1612]">Items</p>
-                      {orderDetail.items.map((i, j) => (
-                        <p key={j} className="text-xs text-[#5C4E3C]">{i.quantity}× {i.description} <span className="font-mono">{i.code_snapshot}</span> — {i.line_total}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
+                    <div>
+                      <p className="portal-label">Items</p>
+                      <div className="space-y-2">
+                        {orderDetail.items.map((i, j) => (
+                          <div key={j} className="flex justify-between gap-3 text-[13px]">
+                            <span className="text-[#5C4E3C]">{i.quantity}× {i.description}</span>
+                            <span className="mono">{i.line_total}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="portal-label">Shipping</p>
+                      <p className="text-[12.5px] text-[#5C4E3C] leading-relaxed">{JSON.stringify(orderDetail.shipping_address)}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="portal-label">Timeline</p>
+                    <div className="space-y-1.5">
+                      {orderDetail.events.map((ev, j) => (
+                        <p key={j} className="font-mono text-[10.5px] text-[#8A857B]">{ev.event} · {ev.created_at}</p>
                       ))}
                     </div>
-                    <div><p className="font-medium text-[#1A1612]">Shipping</p>
-                      <p className="text-xs text-[#5C4E3C]">{JSON.stringify(orderDetail.shipping_address).slice(0, 200)}</p></div>
-                  </div>
-                  <div><p className="font-medium text-[#1A1612]">Timeline</p>
-                    {orderDetail.events.map((ev, j) => (
-                      <p key={j} className="text-xs text-[#9A9385]">{ev.event} · {ev.created_at}</p>
-                    ))}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className={card + ' overflow-x-auto'}>
-                <table className="w-full text-sm">
-                  <thead><tr className="text-left text-[10px] font-medium uppercase tracking-wider text-[#9A9385] border-b border-[#E8DFCE]">
-                    <th className="py-3 pr-3">Order</th><th className="py-3 pr-3">Email</th><th className="py-3 pr-3">Status</th>
-                    <th className="py-3 text-right">Total</th>
-                  </tr></thead>
+              <div className="portal-card overflow-x-auto">
+                <table className="portal-table">
+                  <thead><tr><th>Order</th><th>Email</th><th>Status</th><th className="text-right">Total</th><th className="text-right">Placed</th></tr></thead>
                   <tbody>
                     {orders.map((o) => (
-                      <tr key={o.order_number} onClick={() => openOrder(o.order_number)}
-                        className="border-b border-[#F0EDE6] hover:bg-[#FAF8F4] cursor-pointer transition-colors">
-                        <td className="py-2.5 pr-3 font-mono text-xs text-[#9A7B2C]">{o.order_number}</td>
-                        <td className="py-2.5 pr-3 text-[#5C4E3C]">{o.email}</td>
-                        <td className="py-2.5 pr-3"><span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${statusColor(o.status)}`}>{o.status}</span></td>
-                        <td className="py-2.5 text-right tabular-nums">{o.currency} {o.grand_total}</td>
+                      <tr key={o.order_number} onClick={() => openOrder(o.order_number)} className="cursor-pointer">
+                        <td className="mono">{o.order_number}</td>
+                        <td className="text-[#5C4E3C]">{o.email}</td>
+                        <td><span className={badgeClass(o.status)}>{o.status}</span></td>
+                        <td className="num">{o.currency} {o.grand_total}</td>
+                        <td className="num text-[#A39E93]">{new Date(o.placed_at).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                {orders.length === 0 ? (
+                  <div className="portal-empty">
+                    <div className="portal-empty__mark"><ShoppingCart className="h-5 w-5" /></div>
+                    <p className="portal-empty__title">No orders yet</p>
+                    <p className="portal-empty__sub">Orders placed on the storefront appear here.</p>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
@@ -351,51 +399,67 @@ export default function AdminConsoleApp() {
 
         {/* ======== VENDORS ======== */}
         {tab === 'vendors' ? (
-          <div className="space-y-5">
-            <h1 className="font-serif text-2xl text-[#1A1612]">Vendors</h1>
+          <div className="space-y-6">
+            <div className="portal-page-head">
+              <div>
+                <p className="portal-kicker">Partners</p>
+                <h1 className="portal-page-title">{selectedVendor ? selectedVendor.name : 'Vendors'}</h1>
+                <p className="portal-page-sub">{selectedVendor ? 'Partner dossier and inventory position.' : 'Every partner supplying the maison.'}</p>
+              </div>
+            </div>
             {selectedVendor ? (
-              <div className="space-y-4">
-                <button onClick={() => setSelectedVendor(null)} className="text-sm text-[#9A7B2C] hover:text-[#1A1612] cursor-pointer">← Back to vendors</button>
-                <div className={card + ' p-6 space-y-4'}>
-                  <div className="flex items-start justify-between">
+              <div className="space-y-5">
+                <button onClick={() => setSelectedVendor(null)} className="portal-btn portal-btn--ghost portal-btn--sm"><ArrowLeft className="h-3.5 w-3.5" /> All vendors</button>
+                <div className="portal-card portal-card--pad">
+                  <div className="flex items-start justify-between gap-6">
                     <div>
-                      <p className="font-mono text-xs text-[#9A7B2C]">{selectedVendor.code}</p>
-                      <h2 className="font-serif text-xl text-[#1A1612]">{selectedVendor.name}</h2>
-                      <p className="text-sm text-[#5C4E3C]">{selectedVendor.contact_name} · {selectedVendor.email}</p>
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${statusColor(selectedVendor.status)}`}>{selectedVendor.status}</span>
+                      <p className="font-mono text-[11px] text-[#9A7B2C]">{selectedVendor.code}</p>
+                      <h2 className="text-xl mt-1">{selectedVendor.name}</h2>
+                      <p className="text-[13px] text-[#5C4E3C] mt-1">{selectedVendor.contact_name} · {selectedVendor.email}</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className={badgeClass(selectedVendor.status)}>{selectedVendor.status}</span>
+                        <span className="portal-badge portal-badge--draft">{selectedVendor.country}</span>
+                      </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-serif text-2xl text-[#1A1612]">${selectedVendor.inventory_value.toLocaleString()}</p>
-                      <p className="text-[10px] text-[#9A9385]">{selectedVendor.live_gems} live items</p>
+                      <p className="text-[26px] tabular-nums text-[#16120D]">${selectedVendor.inventory_value.toLocaleString()}</p>
+                      <p className="portal-stat__meta">{selectedVendor.live_gems} live items</p>
                     </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                  <div className={card + ' p-4 text-center'}><p className="text-[10px] uppercase text-[#9A9385]">Live Gems</p><p className="font-serif text-2xl">{selectedVendor.live_gems}</p></div>
-                  <div className={card + ' p-4 text-center'}><p className="text-[10px] uppercase text-[#9A9385]">Submissions</p><p className="font-serif text-2xl">{selectedVendor.total_submissions}</p></div>
-                  <div className={card + ' p-4 text-center'}><p className="text-[10px] uppercase text-[#9A9385]">Inventory Value</p><p className="font-serif text-2xl">${selectedVendor.inventory_value.toLocaleString()}</p></div>
+                  <div className="portal-card portal-stat"><p className="portal-stat__label">Live gems</p><p className="portal-stat__value">{selectedVendor.live_gems}</p></div>
+                  <div className="portal-card portal-stat"><p className="portal-stat__label">Submissions</p><p className="portal-stat__value">{selectedVendor.total_submissions}</p></div>
+                  <div className="portal-card portal-stat"><p className="portal-stat__label">Inventory value</p><p className="portal-stat__value">${selectedVendor.inventory_value.toLocaleString()}</p></div>
                 </div>
               </div>
             ) : (
-              <div className={card + ' overflow-x-auto'}>
-                <table className="w-full text-sm">
-                  <thead><tr className="text-left text-[10px] font-medium uppercase tracking-wider text-[#9A9385] border-b border-[#E8DFCE]">
-                    <th className="py-3 pr-3">Code</th><th className="py-3 pr-3">Name</th><th className="py-3 pr-3">Country</th>
-                    <th className="py-3 pr-3">Status</th><th className="py-3 pr-3 text-right">Live</th><th className="py-3 text-right">Value</th>
-                  </tr></thead>
+              <div className="portal-card overflow-x-auto">
+                <table className="portal-table">
+                  <thead><tr><th>Code</th><th>Partner</th><th>Country</th><th>Status</th><th className="text-right">Live</th><th className="text-right">Value</th></tr></thead>
                   <tbody>
                     {vendors.map((v) => (
-                      <tr key={v.code} onClick={() => setSelectedVendor(v)} className="border-b border-[#F0EDE6] hover:bg-[#FAF8F4] cursor-pointer transition-colors">
-                        <td className="py-2.5 pr-3 font-mono text-xs text-[#9A7B2C]">{v.code}</td>
-                        <td className="py-2.5 pr-3 font-medium text-[#1A1612]">{v.name}<span className="block text-[10px] text-[#9A9385]">{v.contact_name} · {v.email}</span></td>
-                        <td className="py-2.5 pr-3 text-xs">{v.country}</td>
-                        <td className="py-2.5 pr-3"><span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${statusColor(v.status)}`}>{v.status}</span></td>
-                        <td className="py-2.5 pr-3 text-right">{v.live_gems}</td>
-                        <td className="py-2.5 text-right tabular-nums">${v.inventory_value.toLocaleString()}</td>
+                      <tr key={v.code} onClick={() => setSelectedVendor(v)} className="cursor-pointer">
+                        <td className="mono">{v.code}</td>
+                        <td>
+                          <span className="font-medium text-[#1A1612]">{v.name}</span>
+                          <span className="block text-[10px] text-[#A39E93]">{v.contact_name} · {v.email}</span>
+                        </td>
+                        <td className="text-[12px]">{v.country}</td>
+                        <td><span className={badgeClass(v.status)}>{v.status}</span></td>
+                        <td className="num">{v.live_gems}</td>
+                        <td className="num">${v.inventory_value.toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                {vendors.length === 0 ? (
+                  <div className="portal-empty">
+                    <div className="portal-empty__mark"><Building2 className="h-5 w-5" /></div>
+                    <p className="portal-empty__title">No vendors yet</p>
+                    <p className="portal-empty__sub">Partner onboarding appears here.</p>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
@@ -403,21 +467,33 @@ export default function AdminConsoleApp() {
 
         {/* ======== LEADS ======== */}
         {tab === 'leads' ? (
-          <div className="space-y-5">
-            <h1 className="font-serif text-2xl text-[#1A1612]">Leads</h1>
+          <div className="space-y-6">
+            <div className="portal-page-head">
+              <div>
+                <p className="portal-kicker">Relationships</p>
+                <h1 className="portal-page-title">Leads</h1>
+                <p className="portal-page-sub">Newsletter signups and viewing requests from the storefront.</p>
+              </div>
+            </div>
             {leads.length === 0 ? (
-              <p className="text-sm text-[#9A9385]">No leads yet. Newsletter signups from the storefront appear here.</p>
+              <div className="portal-card portal-empty">
+                <div className="portal-empty__mark"><Mail className="h-5 w-5" /></div>
+                <p className="portal-empty__title">No leads yet</p>
+                <p className="portal-empty__sub">Newsletter and viewing requests will appear here.</p>
+              </div>
             ) : (
               <div className="space-y-3">
                 {leads.map((l) => (
-                  <div key={l.id} className={card + ' p-4 flex items-start justify-between gap-4'}>
+                  <div key={l.id} className="portal-card portal-card--pad flex items-start justify-between gap-4">
                     <div>
                       <p className="font-medium text-[#1A1612]">{l.email}</p>
-                      <p className="text-xs text-[#9A9385]">{l.name ?? '—'} · {l.source} · {new Date(l.created_at).toLocaleDateString()}</p>
+                      <p className="font-mono text-[10.5px] text-[#A39E93] mt-0.5">{l.name ?? '—'} · {l.source} · {new Date(l.created_at).toLocaleDateString()}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${l.status === 'NEW' ? 'border-amber-200 text-amber-700 bg-amber-50' : l.status === 'CONTACTED' ? 'border-blue-200 text-blue-700 bg-blue-50' : l.status === 'CONVERTED' ? 'border-emerald-200 text-emerald-700 bg-emerald-50' : 'border-gray-200 text-gray-600 bg-gray-50'}`}>{l.status}</span>
-                      {l.status === 'NEW' ? <button onClick={() => { fetch(`/api/fresh/admin/leads/${l.id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status: 'CONTACTED' }) }).then(() => loadAll()); }} className="text-xs text-[#9A7B2C] hover:text-[#1A1612] cursor-pointer">Mark contacted →</button> : null}
+                    <div className="flex items-center gap-3">
+                      <span className={badgeClass(l.status)}>{l.status}</span>
+                      {l.status === 'NEW' ? (
+                        <button onClick={() => markLead(l.id, 'CONTACTED')} className="portal-btn portal-btn--ghost portal-btn--sm">Mark contacted <ArrowUpRight className="h-3 w-3" /></button>
+                      ) : null}
                     </div>
                   </div>
                 ))}

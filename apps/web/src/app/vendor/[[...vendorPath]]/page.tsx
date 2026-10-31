@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import '../../../styles/mgh-applet.css';
+import '../../../styles/portal-premium.css';
 
 export const metadata: Metadata = {
   title: 'Vendor Portal | Maihan Gems',

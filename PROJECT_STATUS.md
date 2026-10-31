@@ -3,7 +3,7 @@
 **This is the ONE file to read for the complete, current state of the project.**
 History and per-item evidence live in `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` (§22–§24); the roadmap in `INITIAL_IMPLEMENTATION_PLAN.md` (Appendix A); decisions in `docs/adr/`.
 
-**Last updated:** 2026-10-29 · branch `develop` · head `68d41dd`
+**Last updated:** 2026-10-30 · branch `develop` · head `199c95e`
 
 ---
 
@@ -75,7 +75,7 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 - DYO configurator (4 steps → Acquire Commission → checkout) · review dossier (fresh configuration)
 - Search (fresh-api `q` param) · Cmd+K palette · compare · favourites (localStorage)
 - Editorial pages (ComingSoon → Sanity per ADR-036) · contact (SALON CONCIERGE)
-- Admin console + vendor portal (login + working consoles)
+- Admin console + vendor portal (login + working consoles) — **premium light theme with sidebar (portal-premium.css)**
 - **Link cascade fixed** (mgh-applet preflight + gold focus-visible ring)
 - Soft-404 at the edge (proxy middleware + variety registry)
 
