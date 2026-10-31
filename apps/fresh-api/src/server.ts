@@ -22,6 +22,7 @@ import {
 } from './commerce.js';
 import { createConfiguration, getConfiguration, addConfigurationToCart } from './configurations.js';
 import { vendorInventory, updateItemStatus } from './inventory.js';
+import { uploadImage, deleteImage } from './images.js';
 import {
   adminStats, adminInventory, adminUpdateItemStatus, adminOrderDetail,
   adminVendorsList, listLeads, createLead, updateLeadStatus,
@@ -326,6 +327,21 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     }
     const vid = Number((await pool.query(`SELECT id FROM fresh.vendors WHERE code = $1`, [p.code!.toUpperCase()])).rows[0]?.id);
     return ok(await vendorInventory(pool, vid));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)\/images$/, handler: async (ctx, p) => {
+    const session = await resolveVendorSession(pool, ctx.headers.authorization);
+    if (!session) {
+      await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
+    }
+    const body = (ctx.body ?? {}) as { image?: string; alt?: string };
+    if (!body.image) {
+      const e = new Error('image (base64 data URL or HTTPS URL) is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return created(await uploadImage(pool, p.code!, p.ref!, body.image, body.alt));
+  } },
+  { method: 'DELETE', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)\/images\/(?<assetId>\d+)$/, handler: async (_ctx, p) => {
+    await withTx(async (c: Db) => deleteImage(c, p.code!, p.ref!, Number(p.assetId)));
+    return ok({ deleted: true });
   } },
   { method: 'PATCH', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)$/, handler: async (ctx, p) => {
     const session = await resolveVendorSession(pool, ctx.headers.authorization);
