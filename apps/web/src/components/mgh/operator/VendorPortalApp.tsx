@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { MediaImage } from '@/components/mgh/ui/MediaImage';
 import type { LucideIcon } from 'lucide-react';
 import {
   AlertCircle, ArrowUpRight, Bell, CheckCircle2, ChevronDown, ChevronRight, ClipboardCheck,
-  Clock, DollarSign, Eye, EyeOff, Gem, ImagePlus, LayoutDashboard,
+  Clock, CreditCard, DollarSign, Eye, EyeOff, Gem, ImagePlus, LayoutDashboard,
   LogOut, Menu, MoreVertical, PanelLeftClose, Moon, Package, PackageSearch, Plus, PlusCircle, Search,
   Settings, Sun, Trash2, TrendingDown, TrendingUp, XCircle,
 } from 'lucide-react';
@@ -17,7 +18,7 @@ const badgeClass = (status: string) => {
   return 'portal-badge portal-badge--draft';
 };
 
-type Tab = 'overview' | 'submissions' | 'inventory' | 'new' | 'settings';
+type Tab = 'overview' | 'analytics' | 'submissions' | 'inventory' | 'new' | 'settings';
 type SubTab = 'all' | 'APPROVED' | 'SUBMITTED' | 'HOLD' | 'REJECTED';
 type Kind = 'gemstone' | 'setting' | 'product';
 
@@ -29,11 +30,17 @@ interface InventoryItem {
   ref: string; slug: string; name: string; kind: string; weight_ct: number | null;
   price_amount: number | null; currency: string; status: string; origin_type: string;
   variety: string; colour: string | null; shape: string | null; origin: string | null;
-  primary_image: string | null; owner_kind: string; created_at: string;
+  primary_image: string | null; owner_kind: string; created_at: string; quantity: number | null;
 }
 interface InventoryStats {
   total_items: number; live_items: number; sold_items: number; hidden_items: number;
   total_value: number; currency: string;
+}
+interface VendorAnalytics {
+  totals: { revenue: number; units: number; orders: number };
+  series: Array<{ day: string; revenue: number; units: number; orders: number }>;
+  top_items: Array<{ name: string; ref: string; revenue: number; units: number }>;
+  payments: Array<{ provider: string; count: number; amount: number }>;
 }
 interface VarietyRow { code: string; slug: string; name: string }
 interface CertificateRow {
@@ -62,6 +69,7 @@ const NAV_GROUPS: Array<{ head: string; items: Array<{ id: Tab; label: string; i
     head: 'Shop',
     items: [
       { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+      { id: 'analytics', label: 'Sales', icon: TrendingUp },
       { id: 'submissions', label: 'My Submissions', icon: PackageSearch },
       { id: 'inventory', label: 'Live Inventory', icon: Package },
       { id: 'new', label: 'Add Product', icon: PlusCircle },
@@ -216,7 +224,9 @@ export default function VendorPortalApp() {
   const [subTab, setSubTab] = useState<SubTab>('all');
   const [submissions, setSubmissions] = useState<SubmissionRow[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [selectedInventory, setSelectedInventory] = useState<string[]>([]);
   const [stats, setStats] = useState<InventoryStats | null>(null);
+  const [analytics, setAnalytics] = useState<VendorAnalytics | null>(null);
   const [varieties, setVarieties] = useState<VarietyRow[]>([]);
   const [busy, setBusy] = useState(false);
   const [kind, setKind] = useState<Kind>('gemstone');
@@ -224,7 +234,7 @@ export default function VendorPortalApp() {
   const [form, setForm] = useState<Record<string, string>>({
     vendor_ref: '', variety: 'ruby', weight_ct: '', colour: '', origin: '', shape: '',
     clarity: '', jewellery_type: 'RING', metal: 'W14', style: '',
-    price_amount: '', currency: 'USD', description: '', image: '',
+    price_amount: '', currency: 'USD', quantity: '1', description: '', image: '',
   });
   const [certItem, setCertItem] = useState<string | null>(null);
   const [certs, setCerts] = useState<Record<string, CertificateRow[]>>({});
@@ -234,6 +244,7 @@ export default function VendorPortalApp() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteQuery, setPaletteQuery] = useState('');
@@ -255,10 +266,11 @@ export default function VendorPortalApp() {
       const me = (await meRes.json()) as { code: string; name: string };
       setVendorName(me.name);
       setVendorCode(me.code);
-      const [subsRes, invRes, varRes] = await Promise.all([
+      const [subsRes, invRes, varRes, analyticsRes] = await Promise.all([
         authFetch(`/vendors/${me.code}/submissions`),
         authFetch(`/vendors/${me.code}/inventory`),
         fetch('/api/fresh/catalogue/varieties', { cache: 'no-store' }),
+        authFetch(`/vendors/${me.code}/analytics`),
       ]);
       if (subsRes.ok) setSubmissions(((await subsRes.json()) as SubmissionRow[]) ?? []);
       if (invRes.ok) {
@@ -266,6 +278,7 @@ export default function VendorPortalApp() {
         setInventory(inv.items); setStats(inv.stats);
       }
       if (varRes.ok) setVarieties(((await varRes.json()) as { items: VarietyRow[] }).items ?? []);
+      if (analyticsRes.ok) setAnalytics((await analyticsRes.json()) as VendorAnalytics);
       setAuthed(true);
     } catch { setAuthed(false); }
   }, [authFetch]);
@@ -297,6 +310,8 @@ export default function VendorPortalApp() {
       if (event.key === 'Escape') {
         setPaletteOpen(false);
         setMenuOpen(false);
+        setNotificationsOpen(false);
+        setUserMenuOpen(false);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -452,6 +467,7 @@ export default function VendorPortalApp() {
         price_amount: form['price_amount'] ? Number(form['price_amount']) : undefined,
         currency: form['currency'], description: form['description'] || undefined,
       });
+      if (kind === 'product') payload['quantity'] = Math.max(0, Math.min(1000, Number(form['quantity'] || 1)));
     }
     const response = await authFetch(`/vendors/${vendorCode}/submissions`, {
       method: 'POST', headers: { 'content-type': 'application/json' },
@@ -468,6 +484,17 @@ export default function VendorPortalApp() {
     setBusy(false);
   };
 
+  const downloadCsv = (filename: string, rows: Array<Array<string | number | null>>) => {
+    const escape = (value: string | number | null) => `"${String(value ?? '').replaceAll('"', '""')}"`;
+    const csv = rows.map((row) => row.map(escape).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   const updateStatus = async (ref: string, status: string) => {
     setBusy(true);
     await authFetch(`/vendors/${vendorCode}/inventory/${encodeURIComponent(ref)}`, {
@@ -475,6 +502,36 @@ export default function VendorPortalApp() {
       body: JSON.stringify({ status }),
     });
     await loadAll(); setBusy(false);
+  };
+
+  const toggleVendorSelection = (ref: string) => {
+    setSelectedInventory((current) => current.includes(ref) ? current.filter((item) => item !== ref) : [...current, ref]);
+  };
+
+  const bulkUpdateVendorInventory = async (status: string) => {
+    if (selectedInventory.length === 0) return;
+    setBusy(true);
+    await Promise.all(selectedInventory.map((ref) => authFetch(`/vendors/${vendorCode}/inventory/${encodeURIComponent(ref)}`, {
+      method: 'PATCH', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ status }),
+    })));
+    setSelectedInventory([]);
+    await loadAll();
+    setBusy(false);
+  };
+
+  const updateQuantity = async (ref: string, quantity: number) => {
+    setBusy(true); setError(''); setNotice('');
+    const response = await authFetch(`/vendors/${vendorCode}/inventory/${encodeURIComponent(ref)}`, {
+      method: 'PATCH', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ quantity }),
+    });
+    if (response.ok) { setNotice('Stock updated.'); await loadAll(); }
+    else {
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      setError(data.error ?? 'Could not update stock');
+    }
+    setBusy(false);
   };
 
   const uploadImage = async (ref: string, file: File) => {
@@ -811,10 +868,37 @@ export default function VendorPortalApp() {
               <i className="portal-live-dot" />
               <span>{formatClock(now)}</span>
             </span>
-            <button type="button" className="portal-icon-btn" aria-label="Notifications" onClick={() => setTab('submissions')}>
-              <Bell />
-              {pendingReview > 0 ? <span className="portal-badge-dot">{pendingReview}</span> : null}
-            </button>
+            <div className="portal-notifications">
+              <button type="button" className="portal-icon-btn" aria-label="Notifications" aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((value) => !value)}>
+                <Bell />
+                {pendingReview > 0 ? <span className="portal-badge-dot">{pendingReview}</span> : null}
+              </button>
+              {notificationsOpen ? (
+                <>
+                  <button type="button" className="portal-notifications__scrim" aria-label="Close notifications" onClick={() => setNotificationsOpen(false)} />
+                  <div className="portal-notifications__panel">
+                  <p className="portal-label" style={{ padding: '2px 8px 8px' }}>Needs attention</p>
+                  <button type="button" className="portal-notification__item" onClick={() => { setTab('submissions'); setNotificationsOpen(false); }}>
+                    <ClipboardCheck />
+                    <span className="portal-notification__text">
+                      <span className="portal-notification__title">Awaiting the house</span>
+                      <span className="portal-notification__sub">Submissions in review</span>
+                    </span>
+                    <span className="portal-notification__count">{pendingReview}</span>
+                  </button>
+                  <button type="button" className="portal-notification__item" onClick={() => { setTab('inventory'); setNotificationsOpen(false); }}>
+                    <Package />
+                    <span className="portal-notification__text">
+                      <span className="portal-notification__title">Live inventory</span>
+                      <span className="portal-notification__sub">Pieces visible to clients</span>
+                    </span>
+                    <span className="portal-notification__count">{liveItems}</span>
+                  </button>
+                    {pendingReview === 0 ? <p className="portal-notifications__empty">Nothing requires attention.</p> : null}
+                  </div>
+                </>
+              ) : null}
+            </div>
             <button
               type="button"
               className="portal-icon-btn"
@@ -1271,6 +1355,100 @@ export default function VendorPortalApp() {
           </div>
         ) : null}
 
+        {tab === 'analytics' ? (
+          <div className="portal-section">
+            <div className="portal-page-head">
+              <div>
+                <p className="portal-kicker">Settled ledger</p>
+                <h1 className="portal-page-title">Sales</h1>
+                <p className="portal-page-sub">Your realised sales through the house, attributed to your pieces.</p>
+              </div>
+            </div>
+
+            <div className="portal-grid--stats">
+              <div className="portal-card portal-stat"><p className="portal-stat__label">Settled revenue</p><p className="portal-stat__value">{money(analytics?.totals.revenue ?? 0, stats?.currency ?? 'USD')}</p><p className="portal-stat__meta">paid & fulfilled orders</p></div>
+              <div className="portal-card portal-stat"><p className="portal-stat__label">Orders</p><p className="portal-stat__value">{analytics?.totals.orders ?? 0}</p><p className="portal-stat__meta">lifetime settled</p></div>
+              <div className="portal-card portal-stat"><p className="portal-stat__label">Units</p><p className="portal-stat__value">{analytics?.totals.units ?? 0}</p><p className="portal-stat__meta">pieces sold</p></div>
+              <div className="portal-card portal-stat"><p className="portal-stat__label">Average order</p><p className="portal-stat__value">{money((analytics?.totals.orders ?? 0) > 0 ? (analytics?.totals.revenue ?? 0) / (analytics?.totals.orders ?? 1) : 0, stats?.currency ?? 'USD')}</p><p className="portal-stat__meta">per settled order</p></div>
+            </div>
+
+            <section className="portal-card portal-card--pad">
+              <header className="portal-card__head">
+                <div>
+                  <h2 className="portal-card__title">Revenue by day</h2>
+                  <p className="portal-card__sub">Last 30 days · settled order lines</p>
+                </div>
+              </header>
+              {analytics && analytics.series.length > 0 ? (
+                <div className="portal-chart">
+                  <svg viewBox="0 0 600 170" preserveAspectRatio="none" role="img" aria-label="Settled vendor revenue by day for the last 30 days">
+                    {(() => {
+                      const max = Math.max(...analytics.series.map((point) => point.revenue), 1);
+                      return (
+                        <>
+                          {[0, 1, 2, 3].map((line) => {
+                            const y = 20 + line * (125 / 3);
+                            return <line key={line} x1="42" x2="590" y1={y} y2={y} stroke="var(--p-line)" strokeDasharray={line === 3 ? undefined : '2 3'} />;
+                          })}
+                          {analytics.series.map((point, index) => {
+                            const step = (590 - 42) / analytics.series.length;
+                            const height = (point.revenue / max) * 125;
+                            return (
+                              <g key={point.day}>
+                                <rect x={42 + index * step + step * 0.2} y={145 - height} width={Math.max(3, step * 0.55)} height={height} rx={3} fill="var(--p-chart-current)" />
+                                {index % 5 === 0 || index === analytics.series.length - 1 ? <text x={42 + index * step + step / 2} y="162" fontSize="10" fill="var(--p-muted)" textAnchor="middle">{point.day.slice(5)}</text> : null}
+                              </g>
+                            );
+                          })}
+                        </>
+                      );
+                    })()}
+                  </svg>
+                </div>
+              ) : (
+                <div className="portal-empty">
+                  <div className="portal-empty__mark"><TrendingUp /></div>
+                  <p className="portal-empty__title">No settled sales yet</p>
+                  <p className="portal-empty__sub">Revenue appears after the house settles an order containing your pieces.</p>
+                </div>
+              )}
+            </section>
+
+            <div className="client-split">
+              <section className="portal-card portal-card--pad">
+                <header className="portal-card__head"><div><h2 className="portal-card__title">Top pieces</h2><p className="portal-card__sub">By settled revenue</p></div></header>
+                {analytics && analytics.top_items.length > 0 ? (
+                  <div className="portal-best">
+                    {analytics.top_items.map((item, index) => (
+                      <div key={`${item.ref}-${index}`} className="portal-best__item">
+                        <span className="portal-best__rank">{index + 1}</span>
+                        <span className="portal-best__details">
+                          <span className="portal-best__header"><span className="portal-best__name">{item.name} <small>{item.ref}</small></span><span className="portal-best__value">{money(item.revenue, stats?.currency ?? 'USD')}</span></span>
+                          <span className="portal-best__track"><span className="portal-best__bar" style={{ width: `${Math.max(4, (item.revenue / Math.max(...analytics.top_items.map((entry) => entry.revenue), 1)) * 100)}%` }} /></span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : <p className="portal-card__sub">No settled pieces yet.</p>}
+              </section>
+
+              <section className="portal-card portal-card--pad">
+                <header className="portal-card__head"><div><h2 className="portal-card__title">Settlement mix</h2><p className="portal-card__sub">How clients paid</p></div></header>
+                {analytics && analytics.payments.length > 0 ? (
+                  <div className="portal-mix__list">
+                    {analytics.payments.map((payment) => (
+                      <div key={payment.provider} className="portal-mix__item">
+                        <div className="portal-mix__left"><span className="portal-mix__icon"><CreditCard /></span><span className="portal-mix__label"><b>{payment.provider === 'test' ? 'Test card' : payment.provider}</b><small>{payment.count} payment(s)</small></span></div>
+                        <span className="portal-mix__value">{money(payment.amount, stats?.currency ?? 'USD')}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : <p className="portal-card__sub">No settled payments yet.</p>}
+              </section>
+            </div>
+          </div>
+        ) : null}
+
         {tab === 'submissions' ? (
           <div className="portal-section">
             <div className="portal-page-head">
@@ -1279,9 +1457,15 @@ export default function VendorPortalApp() {
                 <h1 className="portal-page-title">My Submissions</h1>
                 <p className="portal-page-sub">Every item you submit, with the house&apos;s feedback.</p>
               </div>
-              <button type="button" className="portal-btn portal-btn--gold" onClick={() => setTab('new')}>
-                <PlusCircle /> Add product
-              </button>
+              <div className="portal-card__actions">
+                <button type="button" className="portal-btn portal-btn--ghost" onClick={() => downloadCsv('maihan-partner-submissions.csv', [
+                  ['ID', 'Kind', 'Status', 'Resulting ref', 'Created', 'Reviewer note'],
+                  ...submissions.map((submission) => [submission.id, submission.submission_kind, submission.status, submission.resulting_ref, submission.created_at, submission.reviewer_note]),
+                ])}>Export CSV</button>
+                <button type="button" className="portal-btn portal-btn--gold" onClick={() => setTab('new')}>
+                  <PlusCircle /> Add product
+                </button>
+              </div>
             </div>
 
             <div className="portal-seg">
@@ -1332,6 +1516,10 @@ export default function VendorPortalApp() {
                 <h1 className="portal-page-title">Live Inventory</h1>
                 <p className="portal-page-sub">Control what clients see — mark sold, hide or remove.</p>
               </div>
+              <button type="button" className="portal-btn portal-btn--ghost" onClick={() => downloadCsv('maihan-partner-inventory.csv', [
+                ['Reference', 'Name', 'Kind', 'Status', 'Variety', 'Price', 'Currency', 'Quantity', 'Created'],
+                ...inventory.map((item) => [item.ref, item.name, item.kind, item.status, item.variety, item.price_amount, item.currency, item.quantity, item.created_at]),
+              ])}>Export CSV</button>
             </div>
 
             <div className="portal-inline">
@@ -1347,6 +1535,16 @@ export default function VendorPortalApp() {
               <span className="portal-badge portal-badge--active">{filteredInventory.length} pieces</span>
             </div>
 
+            {selectedInventory.length > 0 ? (
+              <div className="portal-inline">
+                <span className="portal-badge portal-badge--pending">{selectedInventory.length} selected</span>
+                <button type="button" onClick={() => void bulkUpdateVendorInventory('ACTIVE')} disabled={busy} className="portal-btn portal-btn--gold portal-btn--sm">Publish</button>
+                <button type="button" onClick={() => void bulkUpdateVendorInventory('DRAFT')} disabled={busy} className="portal-btn portal-btn--ghost portal-btn--sm">Hide</button>
+                <button type="button" onClick={() => void bulkUpdateVendorInventory('SOLD')} disabled={busy} className="portal-btn portal-btn--ghost portal-btn--sm">Mark sold</button>
+                <button type="button" onClick={() => setSelectedInventory([])} className="portal-btn portal-btn--ghost portal-btn--sm">Clear</button>
+              </div>
+            ) : null}
+
             {error ? <p className="portal-notice">{error}</p> : null}
 
             {filteredInventory.length === 0 ? (
@@ -1360,9 +1558,9 @@ export default function VendorPortalApp() {
                 {filteredInventory.map((item) => (
                   <div key={item.ref} className="portal-card overflow-hidden">
                     <div className="flex gap-4 p-4">
-                      <div className="w-[76px] h-[76px] rounded-xl shrink-0 overflow-hidden flex items-center justify-center" style={{ background: 'var(--p-well-solid)' }}>
+                      <div className="relative w-[76px] h-[76px] rounded-xl shrink-0 overflow-hidden flex items-center justify-center" style={{ background: 'var(--p-well-solid)' }}>
                         {item.primary_image ? (
-                          <img src={item.primary_image} alt={item.name} className="w-full h-full object-cover" />
+                          <MediaImage src={item.primary_image} alt={item.name} className="w-full h-full object-cover" sizes="76px" />
                         ) : (
                           <span style={{ fontSize: 24, color: 'var(--p-accent-deep)' }}>{item.variety.charAt(0)}</span>
                         )}
@@ -1370,11 +1568,20 @@ export default function VendorPortalApp() {
                       <div className="space-y-1 min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
                           <h3 style={{ margin: 0, fontSize: 'var(--p-fs-lg)', fontWeight: 700 }} className="truncate">{item.name}</h3>
-                          <span className={badgeClass(item.status)}>{statusLabel(item.status)}</span>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              className="portal-checkbox"
+                              aria-label={`Select ${item.name}`}
+                              checked={selectedInventory.includes(item.ref)}
+                              onChange={() => toggleVendorSelection(item.ref)}
+                            />
+                            <span className={badgeClass(item.status)}>{statusLabel(item.status)}</span>
+                          </div>
                         </div>
                         <p className="portal-card__sub">{item.variety}{item.shape ? ` · ${item.shape}` : ''}{item.weight_ct ? ` · ${item.weight_ct}ct` : ''}</p>
                         <p style={{ margin: 0, fontSize: 'var(--p-fs-md)', fontWeight: 600, color: 'var(--p-accent-deep)' }}>{fmt(item.price_amount, item.currency)}</p>
-                        <p className="portal-card__sub" style={{ fontSize: 10 }}>{item.ref} · {item.origin_type}{item.origin ? ` · ${item.origin}` : ''}</p>
+                        <p className="portal-card__sub" style={{ fontSize: 10 }}>{item.ref} · {item.origin_type}{item.origin ? ` · ${item.origin}` : ''}{item.owner_kind === 'product' ? ` · stock ${item.quantity ?? 0}` : ''}</p>
                       </div>
                     </div>
 
@@ -1392,6 +1599,21 @@ export default function VendorPortalApp() {
                         </>
                       ) : item.status === 'SOLD' ? (
                         <button type="button" onClick={() => void updateStatus(item.ref, 'ACTIVE')} disabled={busy} className="portal-btn portal-btn--ghost portal-btn--sm"><ArrowUpRight /> Restock</button>
+                      ) : null}
+                      {item.owner_kind === 'product' ? (
+                        <span className="portal-inline" style={{ gap: 6 }}>
+                          <span className="portal-label" style={{ margin: 0 }}>Stock</span>
+                          <input
+                            type="number" min={0} max={1000} step={1}
+                            defaultValue={String(item.quantity ?? 0)}
+                            aria-label={`Stock for ${item.name}`}
+                            onBlur={(event) => {
+                              const value = Number(event.target.value);
+                              if (Number.isInteger(value) && value >= 0 && value <= 1000 && value !== item.quantity) void updateQuantity(item.ref, value);
+                            }}
+                            className="portal-input portal-input--sm" style={{ width: 72 }}
+                          />
+                        </span>
                       ) : null}
                       <label className="portal-btn portal-btn--ghost portal-btn--sm cursor-pointer">
                         <ImagePlus /> {uploadingRef === item.ref ? 'Uploading…' : 'Add photo'}
@@ -1516,6 +1738,12 @@ export default function VendorPortalApp() {
                     <label htmlFor="v-price2" className="portal-label">Price USD (blank = on request)</label>
                     <input id="v-price2" type="number" step="0.01" value={form['price_amount']} onChange={set('price_amount')} className="portal-input" />
                   </div>
+                  {kind === 'product' ? (
+                    <div>
+                      <label htmlFor="v-quantity" className="portal-label">Stock quantity</label>
+                      <input id="v-quantity" type="number" min={0} max={1000} step={1} value={form['quantity']} onChange={set('quantity')} className="portal-input" />
+                    </div>
+                  ) : null}
                 </div>
               )}
 
@@ -1566,6 +1794,12 @@ export default function VendorPortalApp() {
                   <button type="button" onClick={() => void navigator.clipboard?.writeText(issuedApiKey)} className="portal-btn portal-btn--ghost portal-btn--sm">Copy key</button>
                 </div>
               ) : null}
+            </div>
+
+            <div className="portal-card portal-card--pad space-y-2">
+              <p className="portal-label">Settlement & payouts</p>
+              <p className="portal-card__sub">Payouts are arranged by the house. Online settlement is not configured in this environment.</p>
+              <span className="portal-badge portal-badge--pending">Not configured</span>
             </div>
 
             <div className="portal-card portal-card--pad space-y-2">

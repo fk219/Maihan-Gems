@@ -9,8 +9,9 @@
  * `scrypt$N$r$p$salt$hash`
  */
 import crypto from 'node:crypto';
-import type { AnyClient } from './db.js';
+import { audit, type AnyClient } from './db.js';
 import { StateError } from './validation.js';
+import { generateTotpSecret, otpauthUrl, verifyTotp } from './totp.js';
 
 const sha256 = (v: string): string => crypto.createHash('sha256').update(v).digest('hex');
 
@@ -190,9 +191,27 @@ const ADMIN_SESSION_HOURS = 12;
 
 export interface AdminSession { adminId: number; email: string; role: string; sessionId: number }
 
-export async function adminLogin(client: AnyClient, email: string, password: string, _userAgent: string | null): Promise<{ token: string; admin: { email: string; role: string } }> {
+export interface AdminLoginResult {
+  token?: string;
+  admin?: { email: string; role: string };
+  requires_2fa?: boolean;
+  challenge_token?: string;
+}
+
+async function issueAdminSession(client: AnyClient, adminId: number): Promise<string> {
+  const t = newToken();
+  await client.query(
+    `INSERT INTO fresh.admin_sessions (admin_id, token_hash, expires_at)
+     VALUES ($1,$2, now() + interval '${ADMIN_SESSION_HOURS} hours')`,
+    [adminId, t.hash],
+  );
+  await client.query(`UPDATE fresh.admin_users SET last_login_at = now() WHERE id = $1`, [adminId]);
+  return t.raw;
+}
+
+export async function adminLogin(client: AnyClient, email: string, password: string, _userAgent: string | null): Promise<AdminLoginResult> {
   const { rows } = await client.query(
-    `SELECT id, email, password_hash, role FROM fresh.admin_users
+    `SELECT id, email, password_hash, role, totp_enabled FROM fresh.admin_users
      WHERE lower(email) = lower($1) AND password_hash != 'PENDING_SETUP'`,
     [email],
   );
@@ -212,14 +231,80 @@ export async function adminLogin(client: AnyClient, email: string, password: str
     throw e;
   }
   const adminId = Number(rows[0].id);
-  const t = newToken();
-  await client.query(
-    `INSERT INTO fresh.admin_sessions (admin_id, token_hash, expires_at)
-     VALUES ($1,$2, now() + interval '${ADMIN_SESSION_HOURS} hours')`,
-    [adminId, t.hash],
+  if (rows[0].totp_enabled) {
+    const challenge = newToken();
+    await client.query(
+      `INSERT INTO fresh.admin_2fa_challenges (admin_id, token_hash, expires_at)
+       VALUES ($1,$2, now() + interval '5 minutes')`,
+      [adminId, challenge.hash],
+    );
+    return { requires_2fa: true, challenge_token: challenge.raw };
+  }
+  const token = await issueAdminSession(client, adminId);
+  return { token, admin: { email: String(rows[0].email), role: String(rows[0].role) } };
+}
+
+export async function adminVerifyTotp(
+  client: AnyClient,
+  challengeToken: string,
+  code: string,
+): Promise<{ token: string; admin: { email: string; role: string } }> {
+  const { rows } = await client.query(
+    `SELECT ch.id, ch.admin_id, a.email, a.role, a.totp_secret, a.totp_enabled
+     FROM fresh.admin_2fa_challenges ch
+     JOIN fresh.admin_users a ON a.id = ch.admin_id
+     WHERE ch.token_hash = $1 AND ch.used_at IS NULL AND ch.expires_at > now()`,
+    [sha256(challengeToken)],
   );
-  await client.query(`UPDATE fresh.admin_users SET last_login_at = now() WHERE id = $1`, [adminId]);
-  return { token: t.raw, admin: { email: String(rows[0].email), role: String(rows[0].role) } };
+  const row = rows[0];
+  if (!row || !row.totp_enabled || !row.totp_secret || !verifyTotp(String(row.totp_secret), code)) {
+    const e = new StateError('invalid or expired two-factor code');
+    (e as Error & { status?: number }).status = 401;
+    throw e;
+  }
+  await client.query(`UPDATE fresh.admin_2fa_challenges SET used_at = now() WHERE id = $1`, [row.id]);
+  const token = await issueAdminSession(client, Number(row.admin_id));
+  await audit(client, 'ADMIN_2FA_LOGIN', 'admin_user', Number(row.admin_id), {}, 'admin');
+  return { token, admin: { email: String(row.email), role: String(row.role) } };
+}
+
+export async function adminTotpStatus(client: AnyClient, adminId: number): Promise<{ enabled: boolean }> {
+  const { rows } = await client.query(`SELECT totp_enabled FROM fresh.admin_users WHERE id = $1`, [adminId]);
+  return { enabled: Boolean(rows[0]?.totp_enabled) };
+}
+
+export async function adminTotpSetup(
+  client: AnyClient,
+  adminId: number,
+  email: string,
+): Promise<{ secret: string; otpauth_url: string }> {
+  const current = await client.query(`SELECT totp_enabled FROM fresh.admin_users WHERE id = $1`, [adminId]);
+  if (current.rows[0]?.totp_enabled) {
+    const e = new StateError('two-factor is already enabled — disable it first');
+    (e as Error & { status?: number }).status = 409;
+    throw e;
+  }
+  const secret = generateTotpSecret();
+  await client.query(`UPDATE fresh.admin_users SET totp_secret = $2, totp_enabled = false WHERE id = $1`, [adminId, secret]);
+  return { secret, otpauth_url: otpauthUrl(email, secret) };
+}
+
+export async function adminTotpEnable(client: AnyClient, adminId: number, code: string): Promise<{ enabled: true }> {
+  const { rows } = await client.query(`SELECT totp_secret, totp_enabled FROM fresh.admin_users WHERE id = $1`, [adminId]);
+  if (!rows[0]?.totp_secret) throw new StateError('start two-factor setup first');
+  if (!verifyTotp(String(rows[0].totp_secret), code)) throw new StateError('invalid two-factor code');
+  await client.query(`UPDATE fresh.admin_users SET totp_enabled = true WHERE id = $1`, [adminId]);
+  await audit(client, 'ADMIN_2FA_ENABLED', 'admin_user', adminId, {}, 'admin');
+  return { enabled: true };
+}
+
+export async function adminTotpDisable(client: AnyClient, adminId: number, code: string): Promise<{ enabled: false }> {
+  const { rows } = await client.query(`SELECT totp_secret, totp_enabled FROM fresh.admin_users WHERE id = $1`, [adminId]);
+  if (!rows[0]?.totp_enabled || !rows[0]?.totp_secret) throw new StateError('two-factor is not enabled');
+  if (!verifyTotp(String(rows[0].totp_secret), code)) throw new StateError('invalid two-factor code');
+  await client.query(`UPDATE fresh.admin_users SET totp_enabled = false, totp_secret = NULL WHERE id = $1`, [adminId]);
+  await audit(client, 'ADMIN_2FA_DISABLED', 'admin_user', adminId, {}, 'admin');
+  return { enabled: false };
 }
 
 export async function resolveAdminSession(client: AnyClient, bearer: string | undefined): Promise<AdminSession | null> {

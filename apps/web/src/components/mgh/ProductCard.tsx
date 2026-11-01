@@ -7,6 +7,7 @@ import type { GemstoneItem } from '@/lib/mgh/fixtures';
 import { useStorefront } from '@/components/mgh/providers/StorefrontProvider';
 import { DirhamLogo } from '@/components/mgh/ui/DirhamLogo';
 import { normalizeCompareId } from '@/lib/mgh/storefront-data';
+import { MediaImage } from '@/components/mgh/ui/MediaImage';
 
 export interface ProductCardProps {
   category?: string;
@@ -142,11 +143,10 @@ export function ProductCard({
           gem tile (gradient + variety initial) otherwise — never a fixture
           photo on a card for a stone we have not photographed. */}
       {hasRealImage ? (
-        <img
+        <MediaImage
           src={displayImage}
           alt={displayName}
           onError={() => setImgError(true)}
-          referrerPolicy="no-referrer"
           className="absolute inset-0 z-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
       ) : (

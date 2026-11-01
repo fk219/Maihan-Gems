@@ -210,5 +210,5 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|media/).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|media/|mgh/|assets/|models/).*)'],
 };

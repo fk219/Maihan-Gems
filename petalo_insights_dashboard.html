@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Overview · Petalo</title>
+  
+  <!-- Urbanist Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --font: "Urbanist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --fs-2xs: 11px;
+      --fs-xs: 12px;
+      --fs-sm: 12.5px;
+      --fs-md: 13.5px;
+      --fs-base: 14px;
+      --fs-lg: 15px;
+      --fs-xl: 17px;
+      --fs-2xl: 20px;
+      --fs-3xl: 22px;
+      --fs-4xl: 26px;
+      --fs-display: 34px;
+
+      --bg: #f4f2ee;
+      --card: #fbfaf8;
+      --card-2: #f2eee9;
+      --well: rgba(40, 32, 26, 0.04);
+      --well-solid: #ebe8e3;
+      --line: rgba(40, 32, 26, 0.08);
+      --line-2: rgba(40, 32, 26, 0.14);
+      --shadow: 0 1px 3px rgba(40, 32, 26, 0.04), 0 8px 24px -12px rgba(40, 32, 26, 0.12);
+
+      --text: #1d1a18;
+      --muted: #6b635c;
+      --faint: #9c948c;
+
+      /* Signature Petalo Coral */
+      --accent: #ff6f4e;
+      --accent-grad: linear-gradient(135deg, #ff7e5f 0%, #ff6240 100%);
+      --accent-soft: #ffe7e0;
+      --accent-muted: rgba(255, 111, 78, 0.12);
+
+      /* Accent Tile Pastels */
+      --tile-peach: #fae4dc;
+      --on-tile-peach: #5a2113;
+      --tile-butter: #f8edd1;
+      --on-tile-butter: #523b08;
+      --tile-sky: #e1edf8;
+      --on-tile-sky: #13395b;
+      --tile-mint: #ddf2e4;
+      --on-tile-mint: #0f4625;
+
+      --good: #1b6b44;
+      --good-fill: #39b56f;
+      --good-bg: #e5f6ec;
+      --warn: #8a5700;
+      --warn-fill: #e89e24;
+      --bad: #c2291d;
+      --bad-soft: #fde8e6;
+
+      --side: #1c1d1d;
+      --side-card: #252726;
+      --side-text: #f0f2f0;
+      --side-muted: #8d9591;
+      --side-line: rgba(255, 255, 255, 0.06);
+
+      --r-card: 22px;
+      --r-ctl: 12px;
+      --side-w: 248px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font);
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    .ico {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    /* Outer Container */
+    .app {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+      padding: 12px;
+      gap: 16px;
+    }
+
+    /* Floating Island Sidebar */
+    .side {
+      width: var(--side-w);
+      background: var(--side);
+      color: var(--side-text);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      border-radius: 24px;
+      padding: 16px 12px;
+      height: calc(100vh - 24px);
+      position: sticky;
+      top: 12px;
+      overflow-y: auto;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+    }
+
+    .side__brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 6px 18px;
+    }
+
+    .side__logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .side__mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .side__brandText b {
+      display: block;
+      font-size: var(--fs-xl);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .side__brandText small {
+      font-size: var(--fs-2xs);
+      color: var(--side-muted);
+    }
+
+    .side__collapse {
+      background: transparent;
+      border: 1px solid var(--side-line);
+      color: var(--side-muted);
+      cursor: pointer;
+      display: flex;
+      padding: 6px;
+      border-radius: 8px;
+    }
+
+    .nav {
+      flex: 1;
+      padding-top: 8px;
+    }
+
+    .nav__head {
+      font-size: var(--fs-2xs);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #606864;
+      padding: 8px 10px 6px;
+      font-weight: 700;
+    }
+
+    .nav ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .nav__link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      color: var(--side-muted);
+      text-decoration: none;
+      font-size: var(--fs-md);
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
+    .nav__link:hover {
+      color: var(--side-text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav__link.is-active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(255, 111, 78, 0.35);
+    }
+
+    .nav__link.is-active .nav__chev {
+      color: #fff;
+    }
+
+    .nav__label {
+      flex: 1;
+    }
+
+    .nav__count {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .nav__count--accent {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .nav__count--warn {
+      background: #f0bd45;
+      color: #3b2800;
+    }
+
+    .nav__chev {
+      width: 14px;
+      height: 14px;
+      opacity: 0.6;
+    }
+
+    .side__foot {
+      padding-top: 12px;
+      border-top: 1px solid var(--side-line);
+      margin-top: auto;
+    }
+
+    .side__me {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--side-text);
+      cursor: pointer;
+      text-align: left;
+      padding: 6px 4px;
+    }
+
+    .av {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #fed7aa;
+      color: #7c2d12;
+      font-weight: 700;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .side__foot-text b {
+      display: block;
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .side__foot-text small {
+      font-size: var(--fs-2xs);
+      color: var(--side-muted);
+    }
+
+    .side__dots {
+      margin-left: auto;
+      color: var(--side-muted);
+    }
+
+    /* Main Section */
+    .main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Top Bar */
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 4px 0;
+    }
+
+    .top__where {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--fs-md);
+      color: var(--muted);
+    }
+
+    .top__where b {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .top__search {
+      flex: 1;
+      max-width: 440px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r-ctl);
+      padding: 8px 12px;
+      color: var(--faint);
+      font-size: var(--fs-sm);
+      cursor: pointer;
+    }
+
+    .top__search span {
+      flex: 1;
+      text-align: left;
+    }
+
+    .top__search kbd {
+      background: var(--well-solid);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--muted);
+    }
+
+    .top__tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r-ctl);
+      padding: 7px 12px;
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .chip--clock {
+      color: var(--muted);
+      cursor: default;
+    }
+
+    .chip--clock .live {
+      width: 7px;
+      height: 7px;
+      background: var(--good-fill);
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(77, 191, 136, 0.25);
+    }
+
+    .ibtn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--r-ctl);
+      background: var(--card);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text);
+      position: relative;
+    }
+
+    .badge-dot {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 1px 4px;
+      line-height: 1;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: inherit;
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      border-radius: var(--r-ctl);
+      padding: 8px 14px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn--accent {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 3px 12px rgba(255, 111, 78, 0.3);
+    }
+
+    .btn--ghost {
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    /* Greeting Header */
+    .greeting-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 6px 0;
+    }
+
+    .greeting-title {
+      font-size: var(--fs-display);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .greeting-sub {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .greeting-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r-card);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      position: relative;
+    }
+
+    .card__head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .card__title {
+      font-size: var(--fs-base);
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .card__sub {
+      font-size: var(--fs-xs);
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Grid Layout */
+    .overview-top-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+      gap: 16px;
+    }
+
+    /* Takings Card */
+    .takings-big {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .takings-val {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .takings-trend {
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      color: var(--good);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .takings-kpis {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .takings-kpi dt {
+      font-size: var(--fs-2xs);
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .takings-kpi dd {
+      font-size: var(--fs-lg);
+      font-weight: 700;
+    }
+
+    .chart-legend {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: var(--fs-2xs);
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    .chart-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .legend-dot--today {
+      background: var(--accent);
+    }
+
+    .legend-dot--last {
+      background: #ddd8d0;
+    }
+
+    /* Bar Chart Component */
+    .bar-chart {
+      width: 100%;
+      height: 180px;
+    }
+
+    /* Metric Tiles Grid */
+    .tiles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .tile {
+      border-radius: var(--r-card);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 130px;
+      position: relative;
+      text-decoration: none;
+      transition: transform 0.15s ease;
+    }
+
+    .tile:hover {
+      transform: translateY(-2px);
+    }
+
+    .tile__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tile__ico {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .tile__link {
+      font-size: 13px;
+      opacity: 0.7;
+    }
+
+    .tile__title {
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    .tile__val {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-top: 6px;
+    }
+
+    .tile__sub {
+      font-size: var(--fs-2xs);
+      opacity: 0.85;
+      margin-top: 3px;
+    }
+
+    .tile--peach {
+      background: var(--tile-peach);
+      color: var(--on-tile-peach);
+    }
+
+    .tile--butter {
+      background: var(--tile-butter);
+      color: var(--on-tile-butter);
+    }
+
+    .tile--sky {
+      background: var(--tile-sky);
+      color: var(--on-tile-sky);
+    }
+
+    .tile--mint {
+      background: var(--tile-mint);
+      color: var(--on-tile-mint);
+    }
+
+    /* Middle Row Grid */
+    .overview-mid-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr) minmax(280px, 0.9fr);
+      gap: 16px;
+    }
+
+    /* Timeline list */
+    .pickups-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+    }
+
+    .pickups-list::before {
+      content: '';
+      position: absolute;
+      left: 68px;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background: var(--line);
+    }
+
+    .pickup-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      font-size: var(--fs-sm);
+    }
+
+    .pickup-time {
+      width: 48px;
+      font-size: var(--fs-xs);
+      color: var(--muted);
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .pickup-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 2px solid var(--line-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .pickup-dot--good {
+      border-color: var(--good);
+      background: var(--good);
+      color: #fff;
+    }
+
+    .pickup-dot--late {
+      border-color: var(--accent);
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .pickup-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .pickup-name {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .pickup-sub {
+      font-size: var(--fs-2xs);
+      color: var(--muted);
+    }
+
+    .pickup-status {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pickup-status--good {
+      background: var(--good-bg);
+      color: var(--good);
+    }
+
+    .pickup-status--late {
+      background: var(--bad-soft);
+      color: var(--bad);
+    }
+
+    /* Best Sellers */
+    .best-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .best-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: var(--fs-sm);
+    }
+
+    .best-rank {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: var(--well-solid);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .best-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .best-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .best-name {
+      font-weight: 600;
+    }
+
+    .best-name small {
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+
+    .best-val {
+      font-weight: 700;
+    }
+
+    .best-track {
+      height: 4px;
+      background: var(--well-solid);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .best-bar {
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    /* Payments Card */
+    .pay-stack {
+      display: flex;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      gap: 2px;
+      margin-bottom: 14px;
+    }
+
+    .pay-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pay-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .pay-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pay-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--well-solid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+    }
+
+    .pay-title b {
+      display: block;
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .pay-title small {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .pay-spark {
+      width: 60px;
+      height: 20px;
+    }
+
+    .pay-val {
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      text-align: right;
+      min-width: 50px;
+    }
+
+    /* Bottom Row Grid */
+    .overview-bottom-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr);
+      gap: 16px;
+    }
+
+    /* Till Feed */
+    .feed-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .feed-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: var(--fs-sm);
+    }
+
+    .feed-item:last-child {
+      border-bottom: none;
+    }
+
+    .feed-av {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--well-solid);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .feed-info {
+      flex: 1;
+    }
+
+    .feed-name {
+      font-weight: 600;
+    }
+
+    .feed-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .feed-method {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .feed-amount {
+      font-weight: 700;
+      font-size: var(--fs-sm);
+    }
+
+    /* Use First Flowers */
+    .stems-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .stem-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: var(--fs-sm);
+      padding: 4px 0;
+    }
+
+    .stem-days {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1.5px solid var(--line-2);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .stem-info {
+      flex: 1;
+    }
+
+    .stem-name {
+      font-weight: 600;
+    }
+
+    .stem-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .stem-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stem-pill--today {
+      background: var(--bad-soft);
+      color: var(--bad);
+    }
+
+    .stem-pill--soon {
+      background: var(--tile-butter);
+      color: var(--on-tile-butter);
+    }
+
+    .stem-pill--fresh {
+      background: var(--tile-mint);
+      color: var(--on-tile-mint);
+    }
+
+    /* Cash Drawers */
+    .tills-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .till-box {
+      background: var(--card-2);
+      border-radius: var(--r-ctl);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .till-box-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .till-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--good-fill);
+    }
+
+    .till-name {
+      font-size: var(--fs-sm);
+      font-weight: 700;
+    }
+
+    .till-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .till-amt {
+      font-size: var(--fs-md);
+      font-weight: 800;
+    }
+
+    /* Bottom Banner Notice */
+    .footer-bar {
+      font-size: var(--fs-xs);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 0 20px;
+    }
+
+    .footer-bar b {
+      color: var(--text);
+    }
+
+    /* Floating preview badge */
+    .preview-pill {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      background: #e8593a;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 2px solid #fff;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      text-decoration: none;
+      z-index: 100;
+    }
+
+    @media (max-width: 1200px) {
+      .overview-top-grid,
+      .overview-mid-grid,
+      .overview-bottom-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        flex-direction: column;
+      }
+      .side {
+        width: 100%;
+        height: auto;
+        position: relative;
+        top: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="side" aria-label="Main navigation">
+      <div class="side__brand">
+        <a href="#/overview" class="side__logo">
+          <span class="side__mark">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M12 20.5v-7M12 13.5c-4.4 0-7-2.6-7-7 4.4 0 7 2.6 7 7ZM12 13.5c4.4 0 7-2.6 7-7-4.4 0-7 2.6-7 7ZM12 10.5c-1.6-1.4-2.2-3.4-1.4-6 2 .7 2.9 2.5 1.4 6Zm0 0c1.6-1.4 2.2-3.4 1.4-6-2 .7-2.9 2.5-1.4 6Z"></path></svg>
+          </span>
+          <span class="side__brandText">
+            <b>Petalo</b>
+            <small>Marigold &amp; Moss</small>
+          </span>
+        </a>
+        <button type="button" class="side__collapse" aria-label="Collapse sidebar">
+          <svg class="ico" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"></rect><path d="M9.5 4.5v15M15.5 9.5l-2.5 2.5 2.5 2.5"></path></svg>
+        </button>
+      </div>
+
+      <nav class="nav">
+        <p class="nav__head">Shop</p>
+        <ul>
+          <li><a class="nav__link is-active" href="#/overview"><svg class="ico" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-4v-6h-5v6h-4A1.5 1.5 0 0 1 4 19z"></path></svg><span class="nav__label">Overview</span></a></li>
+          <li><a class="nav__link" href="#/register"><svg class="ico" viewBox="0 0 24 24"><rect x="3.5" y="11" width="17" height="9.5" rx="2"></rect><path d="M7 11V5.5A1.5 1.5 0 0 1 8.5 4h7A1.5 1.5 0 0 1 17 5.5V11M9.5 7.5h5M7.5 15.5h.01M11 15.5h.01M14.5 15.5h2"></path></svg><span class="nav__label">Register</span></a></li>
+          <li><a class="nav__link" href="#/orders"><svg class="ico" viewBox="0 0 24 24"><path d="M7 4.5h10a1.5 1.5 0 0 1 1.5 1.5v14l-3-2-3 2-3-2-3 2V6A1.5 1.5 0 0 1 7 4.5zM9 9h6M9 12.5h4"></path></svg><span class="nav__label">Orders</span><span class="nav__count nav__count--accent">14</span></a></li>
+          <li><a class="nav__link" href="#/sales"><svg class="ico" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4ZM9 8h6M9 11.5h6M9 15h3.5"></path></svg><span class="nav__label">Sales</span><svg class="ico nav__chev" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"></path></svg></a></li>
+          <li><a class="nav__link" href="#/customers"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"></circle><path d="M4.5 20c.8-3.8 3.8-6 7.5-6s6.7 2.2 7.5 6"></path></svg><span class="nav__label">Customers</span></a></li>
+          <li><a class="nav__link" href="#/insights"><svg class="ico" viewBox="0 0 24 24"><path d="M4.5 19.5h15M7.5 16v-4.5M12 16V7.5M16.5 16v-6.5"></path></svg><span class="nav__label">Insights</span><svg class="ico nav__chev" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"></path></svg></a></li>
+          <li><a class="nav__link" href="#/payments"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"></rect><path d="M3 10h18M7 15h3"></path></svg><span class="nav__label">Payments</span><svg class="ico nav__chev" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"></path></svg></a></li>
+          <li><a class="nav__link" href="#/stock"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3.5 20 8v8l-8 4.5L4 16V8zM4 8l8 4.5L20 8M12 12.5v8"></path></svg><span class="nav__label">Stock</span><span class="nav__count nav__count--warn">19</span><svg class="ico nav__chev" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"></path></svg></a></li>
+          <li><a class="nav__link" href="#/team"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.5"></circle><path d="M3 19.5c.6-3.2 3-5 6-5s5.4 1.8 6 5M15.5 5.2a3.5 3.5 0 0 1 0 6.6M17.5 14.8c1.8.6 3 2.2 3.5 4.7"></path></svg><span class="nav__label">Team</span><svg class="ico nav__chev" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"></path></svg></a></li>
+          <li><a class="nav__link" href="#/archive"><svg class="ico" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="4.5" rx="1.5"></rect><path d="M5 9v9.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V9M10 13h4"></path></svg><span class="nav__label">Archive</span><svg class="ico nav__chev" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"></path></svg></a></li>
+        </ul>
+
+        <p class="nav__head" style="margin-top: 14px;">Support</p>
+        <ul>
+          <li><a class="nav__link" href="#/settings"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M12 2.8l2 2.1 2.9-.4.7 2.8 2.6 1.4-1 2.8 1 2.8-2.6 1.4-.7 2.8-2.9-.4-2 2.1-2-2.1-2.9.4-.7-2.8-2.6-1.4 1-2.8-1-2.8 2.6-1.4.7-2.8 2.9.4Z"></path></svg><span class="nav__label">Settings</span></a></li>
+          <li><a class="nav__link" href="#/security"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6zM9 12l2.2 2.2L15.5 10"></path></svg><span class="nav__label">Security</span></a></li>
+          <li><a class="nav__link" href="#/help"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><path d="M9.6 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 16.8h.01"></path></svg><span class="nav__label">Help</span></a></li>
+        </ul>
+      </nav>
+
+      <div class="side__foot">
+        <button type="button" class="side__me">
+          <span class="av">IO</span>
+          <span class="side__foot-text">
+            <b>Ines Okafor</b>
+            <small>Shop manager</small>
+          </span>
+          <svg class="ico side__dots" viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle><circle cx="12" cy="18.5" r="1.3"></circle></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Top Navigation -->
+      <header class="top">
+        <div class="top__where">
+          <span>Shop</span>
+          <svg class="ico" viewBox="0 0 24 24" style="width:12px; height:12px;"><path d="m9.5 6 6 6-6 6"></path></svg>
+          <b>Overview</b>
+        </div>
+
+        <button type="button" class="top__search">
+          <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+          <span>Search orders, stems, people…</span>
+          <kbd>⌘K</kbd>
+        </button>
+
+        <div class="top__tools">
+          <button type="button" class="chip">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M4 9.5 5.5 4.5h13L20 9.5M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0M5.5 11.5v8.5h13v-8.5M10 20v-4.5h4V20"></path></svg>
+            <span>Both shops</span>
+            <svg class="ico" viewBox="0 0 24 24" style="width:12px; height:12px;"><path d="m6 9.5 6 6 6-6"></path></svg>
+          </button>
+
+          <span class="chip chip--clock">
+            <i class="live"></i>
+            <span>Fri 23 Oct · 06:20</span>
+          </span>
+
+          <button type="button" class="ibtn" aria-label="Notifications">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0"></path></svg>
+            <span class="badge-dot">3</span>
+          </button>
+
+          <button type="button" class="ibtn" aria-label="Dark mode">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10Z"></path></svg>
+          </button>
+
+          <button type="button" class="btn btn--accent">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
+            <span>New</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Greeting -->
+      <div class="greeting-row">
+        <div>
+          <h1 class="greeting-title">Good morning, Ines</h1>
+          <p class="greeting-sub">Saturday, October 24 · both shops closed · <b>8 orders still due today</b></p>
+        </div>
+        <div class="greeting-actions">
+          <button type="button" class="btn btn--ghost">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
+            <span>New order</span>
+          </button>
+          <button type="button" class="btn btn--accent">
+            <svg class="ico" viewBox="0 0 24 24"><rect x="3.5" y="11" width="17" height="9.5" rx="2"></rect><path d="M7 11V5.5A1.5 1.5 0 0 1 8.5 4h7A1.5 1.5 0 0 1 17 5.5V11"></path></svg>
+            <span>Open register</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Top Row Grid: Takings + 4 Accent Tiles -->
+      <div class="overview-top-grid">
+        <!-- Takings Card -->
+        <section class="card">
+          <header class="card__head">
+            <div>
+              <h2 class="card__title">Takings</h2>
+              <p class="card__sub">Both shops · by hour, against last Friday</p>
+            </div>
+            <div style="background:var(--well-solid); border-radius:10px; padding:2px; display:inline-flex;">
+              <button class="btn btn--ghost" style="padding:4px 10px; font-size:12px; background:var(--card); border:none; box-shadow:0 1px 3px rgba(0,0,0,0.06);">Today</button>
+              <button class="btn btn--ghost" style="padding:4px 10px; font-size:12px; background:transparent; border:none; color:var(--muted);">Week</button>
+              <button class="btn btn--ghost" style="padding:4px 10px; font-size:12px; background:transparent; border:none; color:var(--muted);">Month</button>
+            </div>
+          </header>
+
+          <div class="takings-big">
+            <span class="takings-val">$3,483.22</span>
+            <span class="takings-trend">
+              <svg class="ico" viewBox="0 0 24 24" style="width:14px; height:14px;"><path d="M3.5 17 9 11.5l3.5 3.5 8-8M15 7h5.5v5.5"></path></svg>
+              +0.0% vs last Friday at this time
+            </span>
+          </div>
+
+          <div style="display:flex; align-items:center;">
+            <dl class="takings-kpis">
+              <div class="takings-kpi"><dt>Sales</dt><dd>57</dd></div>
+              <div class="takings-kpi"><dt>Average basket</dt><dd>$61.11</dd></div>
+              <div class="takings-kpi"><dt>Refunds</dt><dd>$0.00</dd></div>
+            </dl>
+            <div class="chart-legend">
+              <span class="chart-legend-item"><i class="legend-dot legend-dot--today"></i> Today</span>
+              <span class="chart-legend-item"><i class="legend-dot legend-dot--last"></i> Last Friday</span>
+            </div>
+          </div>
+
+          <!-- SVG Dual-Bar Chart -->
+          <div class="bar-chart">
+            <svg width="100%" height="100%" viewBox="0 0 600 170" preserveAspectRatio="none">
+              <!-- Grid lines -->
+              <line x1="36" x2="590" y1="20" y2="20" stroke="var(--line)" stroke-dasharray="2 3"></line>
+              <text x="10" y="24" font-size="10" fill="var(--faint)">$1k</text>
+              
+              <line x1="36" x2="590" y1="65" y2="65" stroke="var(--line)" stroke-dasharray="2 3"></line>
+              <text x="10" y="69" font-size="10" fill="var(--faint)">$750</text>
+              
+              <line x1="36" x2="590" y1="110" y2="110" stroke="var(--line)" stroke-dasharray="2 3"></line>
+              <text x="10" y="114" font-size="10" fill="var(--faint)">$500</text>
+              
+              <line x1="36" x2="590" y1="145" y2="145" stroke="var(--line)"></line>
+              <text x="10" y="148" font-size="10" fill="var(--faint)">$0</text>
+
+              <!-- Bars (Last week light pill, Today coral pill) -->
+              <!-- 08 -->
+              <rect x="52" y="100" width="22" height="45" rx="5" fill="#f0ece6" stroke="#e0dbd3" stroke-dasharray="2 2"></rect>
+              <rect x="54" y="125" width="18" height="20" rx="4" fill="#fbdcd4"></rect>
+              <text x="63" y="162" font-size="11" fill="var(--muted)" text-anchor="middle">08</text>
+
+              <!-- 09 -->
+              <rect x="104" y="80" width="22" height="65" rx="5" fill="#f0ece6" stroke="#e0dbd3" stroke-dasharray="2 2"></rect>
+              <rect x="106" y="95" width="18" height="50" rx="4" fill="#fbdcd4"></rect>
+              <text x="115" y="162" font-size="11" fill="var(--muted)" text-anchor="middle">09</text>
+
+              <!-- 10 -->
+              <rect x="156" y="60" width="22" height="85" rx="5" fill="#f0ece6" stroke="#e0dbd3" stroke-dasharray="2 2"></rect>
+              <rect x="158" y="70" width="18" height="75" rx="4" fill="#fbdcd4"></rect>
+              <text x="167" y="162" font-size="11" fill="var(--muted)" text-anchor="middle">10</text>
+
+              <!-- 11 -->
+              <rect x="208" y="40" width="22" height="105" rx="5" fill="#f0ece6" stroke="#e0dbd3" stroke-dasharray="2 2"></rect>
+              <rect x="210" y="55" width="18" height="90" rx="4" fill="#fbdcd4"></rect>
+              <text x="219" y="162" font-size="11" fill="var(--muted)" text-anchor="middle">11</text>
+
+              <!-- 12 -->
+              <rect x="260" y="65" width="22" height="80" rx="5" fill="#f0ece6" stroke="#e0dbd3" stroke-dasharray="2 2"></rect>
+              <rect x="262" y="85" width="18" height="60" rx="4" fill="#fbdcd4"></rect>
+              <text x="271" y="162" font-size="11" fill="var(--muted)" text-anchor="middle">12</text>
+
+              <!-- 13 -->
+              <rect x="312" y="75" width="22" height="70" rx="5" fill="#f0ece6" stroke="#e0dbd3" stroke-dasharray="2 2"></rect>
+              <rect x="314" y="90" width="18" height="55" rx="4" fill="#fbdcd4"></rect>
+              <text x="323" y="162" font-size="11" fill="var(--muted)" text-anchor="middle">13</text>
+
+              <!-- 14 -->
+              <rect x="364" y="80" width="22" height="65" rx="5" fill="#f0ece6" stroke="#e0dbd3" stroke-dasharray="2 2"></rect>
+              <rect x="366" y="92" width="18" height="53" rx="4" fill="#fbdcd4"></rect>
+              <text x="375" y="162" font-size="11" fill="var(--muted)" text-anchor="middle">14</text>
+
+              <!-- 15 -->
+              <rect x="416" y="90" width="22" height="55" rx="5" fill="#f0ece6" stroke="#e0dbd3" stroke-dasharray="2 2"></rect>
+              <rect x="418" y="115" width="18" height="30" rx="4" fill="#fbdcd4"></rect>
+              <text x="427" y="162" font-size="11" fill="var(--muted)" text-anchor="middle">15</text>
+
+              <!-- 16 -->
+              <rect x="468" y="105" width="22" height="40" rx="5" fill="#f0ece6" stroke="#e0dbd3" stroke-dasharray="2 2"></rect>
+              <text x="479" y="162" font-size="11" fill="var(--muted)" text-anchor="middle">16</text>
+
+              <!-- 17 -->
+              <rect x="520" y="95" width="22" height="50" rx="5" fill="#f0ece6" stroke="#e0dbd3" stroke-dasharray="2 2"></rect>
+              <text x="531" y="162" font-size="11" fill="var(--muted)" text-anchor="middle">17</text>
+
+              <!-- 18 -->
+              <rect x="568" y="80" width="22" height="65" rx="5" fill="#f0ece6" stroke="#e0dbd3" stroke-dasharray="2 2"></rect>
+              <text x="579" y="162" font-size="11" fill="var(--muted)" text-anchor="middle">18</text>
+            </svg>
+          </div>
+        </section>
+
+        <!-- 4 Pastel Action Tiles -->
+        <div class="tiles-grid">
+          <a href="#/orders" class="tile tile--peach">
+            <div class="tile__head">
+              <span class="tile__ico"><svg class="ico" viewBox="0 0 24 24"><path d="M7 4.5h10a1.5 1.5 0 0 1 1.5 1.5v14l-3-2-3 2-3-2-3 2V6A1.5 1.5 0 0 1 7 4.5zM9 9h6M9 12.5h4"></path></svg></span>
+              <span class="tile__link">↗</span>
+            </div>
+            <div>
+              <p class="tile__title">Orders due today</p>
+              <p class="tile__val">8</p>
+              <p class="tile__sub">Next: Dahlia tie for Mum · 15:00</p>
+            </div>
+          </a>
+
+          <a href="#/stock" class="tile tile--butter">
+            <div class="tile__head">
+              <span class="tile__ico"><svg class="ico" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span>
+              <span class="tile__link">↗</span>
+            </div>
+            <div>
+              <p class="tile__title">Stems to use first</p>
+              <p class="tile__val">3</p>
+              <p class="tile__sub">Dahlia, Ranunculus within 3 days</p>
+            </div>
+          </a>
+
+          <a href="#/team" class="tile tile--sky">
+            <div class="tile__head">
+              <span class="tile__ico"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"></circle><path d="M4.5 20c.8-3.8 3.8-6 7.5-6s6.7 2.2 7.5 6"></path></svg></span>
+              <span class="tile__link">↗</span>
+            </div>
+            <div>
+              <p class="tile__title">On the floor</p>
+              <p class="tile__val">0</p>
+              <p class="tile__sub">Both shops closed right now</p>
+            </div>
+          </a>
+
+          <a href="#/payments" class="tile tile--mint">
+            <div class="tile__head">
+              <span class="tile__ico"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"></rect><path d="M3 10h18M7 15h3"></path></svg></span>
+              <span class="tile__link">↗</span>
+            </div>
+            <div>
+              <p class="tile__title">Next payout</p>
+              <p class="tile__val">$2,703</p>
+              <p class="tile__sub">Lands Tomorrow · cards &amp; phone pay</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Middle Grid: Pickups + Best Sellers + Payments -->
+      <div class="overview-mid-grid">
+        <!-- Pick-ups & Deliveries -->
+        <section class="card">
+          <header class="card__head">
+            <div>
+              <h2 class="card__title">Pick-ups &amp; deliveries</h2>
+              <p class="card__sub">3 of 11 handed over today</p>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn--ghost" style="padding:4px 8px; font-size:11px;">+ Order</button>
+              <button class="btn btn--ghost" style="padding:4px 8px; font-size:11px;">Board ↗</button>
+            </div>
+          </header>
+
+          <div class="pickups-list">
+            <div class="pickup-item">
+              <span class="pickup-time">09:30</span>
+              <span class="pickup-dot pickup-dot--good">✓</span>
+              <div class="pickup-info">
+                <p class="pickup-name">Café counter bunch</p>
+                <p class="pickup-sub">Sofia Marchetti · Collect · Market Hall</p>
+              </div>
+              <span class="pickup-status pickup-status--good">• Handed over</span>
+            </div>
+
+            <div class="pickup-item">
+              <span class="pickup-time">11:00</span>
+              <span class="pickup-dot pickup-dot--good">✓</span>
+              <div class="pickup-info">
+                <p class="pickup-name">Halden lobby refresh</p>
+                <p class="pickup-sub">Halden Hotel · Delivery · Canal St</p>
+              </div>
+              <span class="pickup-status pickup-status--good">• Handed over</span>
+            </div>
+
+            <div class="pickup-item">
+              <span class="pickup-time">12:30</span>
+              <span class="pickup-dot pickup-dot--good">✓</span>
+              <div class="pickup-info">
+                <p class="pickup-name">Birthday hand-tie</p>
+                <p class="pickup-sub">Ewa Kowalska · Collect · Canal St</p>
+              </div>
+              <span class="pickup-status pickup-status--good">• Handed over</span>
+            </div>
+
+            <div class="pickup-item">
+              <span class="pickup-time">15:00</span>
+              <span class="pickup-dot pickup-dot--late">🛍️</span>
+              <div class="pickup-info">
+                <p class="pickup-name">Dahlia tie for Mum</p>
+                <p class="pickup-sub">Amara Nwosu · Collect · Canal St</p>
+              </div>
+              <span class="pickup-status pickup-status--late">• Late →</span>
+            </div>
+
+            <div class="pickup-item">
+              <span class="pickup-time">15:15</span>
+              <span class="pickup-dot pickup-dot--late">🛍️</span>
+              <div class="pickup-info">
+                <p class="pickup-name">Workshop pick-up</p>
+                <p class="pickup-sub">Priya Raman · Collect · Market Hall</p>
+              </div>
+              <span class="pickup-status pickup-status--late">• Late →</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Best Sellers -->
+        <section class="card">
+          <header class="card__head">
+            <div>
+              <h2 class="card__title">Best sellers</h2>
+              <p class="card__sub">Last 7 days</p>
+            </div>
+            <div style="background:var(--well-solid); border-radius:8px; padding:2px; display:inline-flex;">
+              <button class="btn btn--ghost" style="padding:3px 8px; font-size:11px; background:var(--card); border:none;">Takings</button>
+              <button class="btn btn--ghost" style="padding:3px 8px; font-size:11px; background:transparent; border:none; color:var(--muted);">Units</button>
+            </div>
+          </header>
+
+          <div class="best-list">
+            <div class="best-item">
+              <span class="best-rank">1</span>
+              <div class="best-details">
+                <div class="best-header">
+                  <span class="best-name">Hand-tie, large <small>Bouquets</small></span>
+                  <span class="best-val">$1,890</span>
+                </div>
+                <div class="best-track"><div class="best-bar" style="width: 100%; background: var(--accent);"></div></div>
+              </div>
+            </div>
+
+            <div class="best-item">
+              <span class="best-rank">2</span>
+              <div class="best-details">
+                <div class="best-header">
+                  <span class="best-name">Dahlia &amp; rosehip tie <small>Bouquets</small></span>
+                  <span class="best-val">$1,740</span>
+                </div>
+                <div class="best-track"><div class="best-bar" style="width: 88%; background: var(--accent);"></div></div>
+              </div>
+            </div>
+
+            <div class="best-item">
+              <span class="best-rank">3</span>
+              <div class="best-details">
+                <div class="best-header">
+                  <span class="best-name">Hand-tie, medium <small>Bouquets</small></span>
+                  <span class="best-val">$1,365</span>
+                </div>
+                <div class="best-track"><div class="best-bar" style="width: 72%; background: var(--accent);"></div></div>
+              </div>
+            </div>
+
+            <div class="best-item">
+              <span class="best-rank">4</span>
+              <div class="best-details">
+                <div class="best-header">
+                  <span class="best-name">Olive tree, 1m <small>Plants</small></span>
+                  <span class="best-val">$1,200</span>
+                </div>
+                <div class="best-track"><div class="best-bar" style="width: 64%; background: var(--good-fill);"></div></div>
+              </div>
+            </div>
+
+            <div class="best-item">
+              <span class="best-rank">5</span>
+              <div class="best-details">
+                <div class="best-header">
+                  <span class="best-name">Dried meadow wreath <small>Bouquets</small></span>
+                  <span class="best-val">$1,080</span>
+                </div>
+                <div class="best-track"><div class="best-bar" style="width: 58%; background: var(--accent);"></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- How they paid -->
+        <section class="card">
+          <header class="card__head">
+            <div>
+              <h2 class="card__title">How they paid</h2>
+              <p class="card__sub">Today</p>
+            </div>
+          </header>
+
+          <div class="pay-stack">
+            <span style="flex-grow: 0.47; background: #ff7e5f;"></span>
+            <span style="flex-grow: 0.26; background: #64a8e6;"></span>
+            <span style="flex-grow: 0.27; background: #f0bd45;"></span>
+          </div>
+
+          <div class="pay-list">
+            <div class="pay-item">
+              <div class="pay-left">
+                <span class="pay-icon"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"></rect><path d="M3 10h18"></path></svg></span>
+                <div class="pay-title"><b>Card</b><small>47%</small></div>
+              </div>
+              <svg class="pay-spark" viewBox="0 0 60 20"><path d="M2 15 Q 15 5, 30 14 T 58 8" fill="none" stroke="#ff7e5f" stroke-width="2"></path></svg>
+              <span class="pay-val">$1,629</span>
+            </div>
+
+            <div class="pay-item">
+              <div class="pay-left">
+                <span class="pay-icon"><svg class="ico" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"></rect><path d="M11 18h2"></path></svg></span>
+                <div class="pay-title"><b>Phone pay</b><small>26%</small></div>
+              </div>
+              <svg class="pay-spark" viewBox="0 0 60 20"><path d="M2 12 Q 18 16, 32 8 T 58 11" fill="none" stroke="#64a8e6" stroke-width="2"></path></svg>
+              <span class="pay-val">$899</span>
+            </div>
+
+            <div class="pay-item">
+              <div class="pay-left">
+                <span class="pay-icon"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"></circle><path d="M12 9v6"></path></svg></span>
+                <div class="pay-title"><b>Cash</b><small>27%</small></div>
+              </div>
+              <svg class="pay-spark" viewBox="0 0 60 20"><path d="M2 16 Q 20 4, 38 12 T 58 6" fill="none" stroke="#f0bd45" stroke-width="2"></path></svg>
+              <span class="pay-val">$955</span>
+            </div>
+
+            <div class="pay-item">
+              <div class="pay-left">
+                <span class="pay-icon"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="2"></rect><path d="M12 6v12M4 12h16"></path></svg></span>
+                <div class="pay-title"><b>Gift card</b><small>0%</small></div>
+              </div>
+              <svg class="pay-spark" viewBox="0 0 60 20"><path d="M2 10 Q 15 18, 30 6 T 58 14" fill="none" stroke="#5fc795" stroke-width="2"></path></svg>
+              <span class="pay-val">$0</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Bottom Grid: Till feed + Use first -->
+      <div class="overview-bottom-grid">
+        <!-- Till Feed -->
+        <section class="card">
+          <header class="card__head">
+            <div>
+              <h2 class="card__title" style="display:flex; align-items:center; gap:6px;">
+                <span style="width:7px; height:7px; border-radius:50%; background:var(--good-fill);"></span>
+                Till feed
+              </h2>
+              <p class="card__sub">The last sales, as they ring up</p>
+            </div>
+            <a href="#/sales" class="btn btn--ghost" style="padding:4px 8px; font-size:11px;">All sales ↗</a>
+          </header>
+
+          <div class="feed-list">
+            <div class="feed-item">
+              <span class="feed-av">NH</span>
+              <div class="feed-info">
+                <p class="feed-name">Snake plant</p>
+                <p class="feed-sub">15:34 · Noor · Market Hall</p>
+              </div>
+              <span class="feed-method">📱</span>
+              <span class="feed-amount">$31.32</span>
+            </div>
+
+            <div class="feed-item">
+              <span class="feed-av">JW</span>
+              <div class="feed-info">
+                <p class="feed-name">Market bunch</p>
+                <p class="feed-sub">15:28 · Jonah · Canal St</p>
+              </div>
+              <span class="feed-method">💳</span>
+              <span class="feed-amount">$30.24</span>
+            </div>
+
+            <div class="feed-item">
+              <span class="feed-av">NH</span>
+              <div class="feed-info">
+                <p class="feed-name">Ceramic bud vase</p>
+                <p class="feed-sub">15:28 · Noor · Market Hall</p>
+              </div>
+              <span class="feed-method">💳</span>
+              <span class="feed-amount">$23.76</span>
+            </div>
+
+            <div class="feed-item">
+              <span class="feed-av">NH</span>
+              <div class="feed-info">
+                <p class="feed-name">Pilea peperomioides</p>
+                <p class="feed-sub">15:26 · Noor · Market Hall</p>
+              </div>
+              <span class="feed-method">📱</span>
+              <span class="feed-amount">$17.28</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Use First (Vase life left) -->
+        <section class="card">
+          <header class="card__head">
+            <div>
+              <h2 class="card__title">Use first</h2>
+              <p class="card__sub">Stems by vase life left</p>
+            </div>
+            <a href="#/stock" class="btn btn--ghost" style="padding:4px 8px; font-size:11px;">Stems ↗</a>
+          </header>
+
+          <div class="stems-list">
+            <div class="stem-item">
+              <span class="stem-days">2d</span>
+              <div class="stem-info">
+                <p class="stem-name">Ranunculus</p>
+                <p class="stem-sub">22 stems · below par</p>
+              </div>
+              <span class="stem-pill stem-pill--today">• Today</span>
+            </div>
+
+            <div class="stem-item">
+              <span class="stem-days">3d</span>
+              <div class="stem-info">
+                <p class="stem-name">Dahlia 'Café au Lait'</p>
+                <p class="stem-sub">80 stems</p>
+              </div>
+              <span class="stem-pill stem-pill--soon">• Soon</span>
+            </div>
+
+            <div class="stem-item">
+              <span class="stem-days">3d</span>
+              <div class="stem-info">
+                <p class="stem-name">Scabiosa</p>
+                <p class="stem-sub">8 stems · below par</p>
+              </div>
+              <span class="stem-pill stem-pill--soon">• Soon</span>
+            </div>
+
+            <div class="stem-item">
+              <span class="stem-days">4d</span>
+              <div class="stem-info">
+                <p class="stem-name">Amaranthus</p>
+                <p class="stem-sub">22 stems · below par</p>
+              </div>
+              <span class="stem-pill stem-pill--fresh">• Fresh</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Tills / Cash Drawers -->
+      <section class="card">
+        <header class="card__head" style="margin-bottom:8px;">
+          <div>
+            <h2 class="card__title">Tills</h2>
+            <p class="card__sub">Cash that should be in each drawer</p>
+          </div>
+          <a href="#/payments" class="btn btn--ghost" style="padding:4px 8px; font-size:11px;">Manage ↗</a>
+        </header>
+
+        <div class="tills-row">
+          <div class="till-box">
+            <div class="till-box-left">
+              <span class="till-status-dot"></span>
+              <div>
+                <p class="till-name">Canal · Till 1</p>
+                <p class="till-sub">Jonah · since 08:54 · 18 sales</p>
+              </div>
+            </div>
+            <span class="till-amt">$639.57</span>
+          </div>
+
+          <div class="till-box">
+            <div class="till-box-left">
+              <span class="till-status-dot"></span>
+              <div>
+                <p class="till-name">Canal · Till 2</p>
+                <p class="till-sub">Aisha · since 12:03 · 9 sales</p>
+              </div>
+            </div>
+            <span class="till-amt">$137.26</span>
+          </div>
+
+          <div class="till-box">
+            <div class="till-box-left">
+              <span class="till-status-dot"></span>
+              <div>
+                <p class="till-name">Market · Till 1</p>
+                <p class="till-sub">Noor · since 07:57 · 30 sales</p>
+              </div>
+            </div>
+            <span class="till-amt">$578.33</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom Status Bar -->
+      <footer class="footer-bar">
+        <span>❖</span>
+        <span>This week so far: <b>$20,198</b> across 381 sales · best day Sat, Oct 17 · last close Oct 22 by Rafael · data as of 1 min ago</span>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Buy template pill from original demo -->
+  <a href="https://codeandchill.store/checkout?item=petalo" class="preview-pill" target="_blank" rel="noopener">Buy this template →</a>
+</body>
+</html>

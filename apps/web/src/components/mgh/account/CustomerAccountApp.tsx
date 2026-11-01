@@ -8,6 +8,7 @@ import {
   ShieldCheck, UserRound,
 } from 'lucide-react';
 import { useStorefront } from '@/components/mgh/providers/StorefrontProvider';
+import { ClientThemeToggle } from '@/components/mgh/providers/ClientSurface';
 
 interface Customer {
   id: number;
@@ -77,6 +78,7 @@ export function CustomerAccountApp({ subPath }: { subPath: string[] }) {
     label: 'Home', recipient: '', line1: '', line2: '', city: '', region: '', postal_code: '', country: 'AE', phone: '', is_default: false,
   });
   const [devVerifyToken, setDevVerifyToken] = useState<string | null>(null);
+  const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -252,21 +254,46 @@ export function CustomerAccountApp({ subPath }: { subPath: string[] }) {
     setBusy(false);
   };
 
-  const addAddress = async (event: React.FormEvent) => {
+  const saveAddress = async (event: React.FormEvent) => {
     event.preventDefault(); setBusy(true); setError(''); setNotice('');
-    const response = await fetch('/api/fresh/auth/addresses', {
-      method: 'POST', headers: { 'content-type': 'application/json' },
+    const response = await fetch(editingAddressId ? `/api/fresh/auth/addresses/${editingAddressId}` : '/api/fresh/auth/addresses', {
+      method: editingAddressId ? 'PATCH' : 'POST',
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify(addressForm),
     });
     if (response.ok) {
       setAddressForm({ label: 'Home', recipient: '', line1: '', line2: '', city: '', region: '', postal_code: '', country: 'AE', phone: '', is_default: false });
+      setEditingAddressId(null);
       await loadData();
-      setNotice('Address saved.');
+      setNotice(editingAddressId ? 'Address updated.' : 'Address saved.');
     } else {
       const data = (await response.json().catch(() => ({}))) as { error?: string };
       setError(data.error ?? 'Could not save the address');
     }
     setBusy(false);
+  };
+
+  const startEditAddress = (address: AddressRow) => {
+    setEditingAddressId(address.id);
+    setAddressForm({
+      label: address.label,
+      recipient: address.recipient,
+      line1: address.line1,
+      line2: address.line2 ?? '',
+      city: address.city,
+      region: address.region ?? '',
+      postal_code: address.postal_code,
+      country: address.country,
+      phone: address.phone ?? '',
+      is_default: address.is_default,
+    });
+    setError('');
+    setNotice('');
+  };
+
+  const cancelEditAddress = () => {
+    setEditingAddressId(null);
+    setAddressForm({ label: 'Home', recipient: '', line1: '', line2: '', city: '', region: '', postal_code: '', country: 'AE', phone: '', is_default: false });
   };
 
   const removeAddress = async (id: number) => {
@@ -417,6 +444,7 @@ export function CustomerAccountApp({ subPath }: { subPath: string[] }) {
           </p>
         </div>
         <div className="portal-greeting__actions">
+          <ClientThemeToggle />
           <button type="button" onClick={() => void logout()} className="portal-btn portal-btn--ghost">
             <LogOut /> Sign out
           </button>
@@ -519,10 +547,19 @@ export function CustomerAccountApp({ subPath }: { subPath: string[] }) {
               </header>
               <form onSubmit={saveProfile} className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <input value={profile.first_name} onChange={(event) => setProfile((value) => ({ ...value, first_name: event.target.value }))} placeholder="First name" className="portal-input" />
-                  <input value={profile.last_name} onChange={(event) => setProfile((value) => ({ ...value, last_name: event.target.value }))} placeholder="Last name" className="portal-input" />
+                  <div>
+                    <label className="portal-label" htmlFor="account-first-name">First name</label>
+                    <input id="account-first-name" value={profile.first_name} onChange={(event) => setProfile((value) => ({ ...value, first_name: event.target.value }))} placeholder="First name" className="portal-input" />
+                  </div>
+                  <div>
+                    <label className="portal-label" htmlFor="account-last-name">Last name</label>
+                    <input id="account-last-name" value={profile.last_name} onChange={(event) => setProfile((value) => ({ ...value, last_name: event.target.value }))} placeholder="Last name" className="portal-input" />
+                  </div>
                 </div>
-                <input value={profile.phone} onChange={(event) => setProfile((value) => ({ ...value, phone: event.target.value }))} placeholder="Phone (optional)" className="portal-input" />
+                <div>
+                  <label className="portal-label" htmlFor="account-phone">Phone</label>
+                  <input id="account-phone" value={profile.phone} onChange={(event) => setProfile((value) => ({ ...value, phone: event.target.value }))} placeholder="Optional" className="portal-input" />
+                </div>
                 <button type="submit" disabled={busy} className="portal-btn portal-btn--gold portal-btn--sm">Save profile</button>
               </form>
               <div className="client-divider" />
@@ -640,6 +677,7 @@ export function CustomerAccountApp({ subPath }: { subPath: string[] }) {
                     </span>
                     <span className="client-list__side">
                       {!address.is_default ? <button type="button" onClick={() => void makeDefaultAddress(address.id)} className="portal-btn portal-btn--ghost portal-btn--sm">Make default</button> : null}
+                      <button type="button" onClick={() => startEditAddress(address)} className="portal-btn portal-btn--ghost portal-btn--sm" style={{ marginTop: 6 }}>Edit</button>
                       <button type="button" onClick={() => void removeAddress(address.id)} className="portal-btn portal-btn--danger portal-btn--sm" style={{ marginTop: 6 }}>Remove</button>
                     </span>
                   </div>
@@ -648,28 +686,56 @@ export function CustomerAccountApp({ subPath }: { subPath: string[] }) {
             )}
           </section>
 
-          <form onSubmit={addAddress} className="portal-card portal-card--pad space-y-3">
+          <form onSubmit={saveAddress} className="portal-card portal-card--pad space-y-3">
             <header className="portal-card__head" style={{ marginBottom: 2 }}>
               <div>
-                <h2 className="portal-card__title">Add an address</h2>
-                <p className="portal-card__sub">Stored for future checkouts</p>
+                <h2 className="portal-card__title">{editingAddressId ? 'Edit address' : 'Add an address'}</h2>
+                <p className="portal-card__sub">{editingAddressId ? 'Update this delivery destination' : 'Stored for future checkouts'}</p>
               </div>
+              {editingAddressId ? <button type="button" onClick={cancelEditAddress} className="portal-btn portal-btn--ghost portal-btn--sm">Cancel</button> : null}
             </header>
             <div className="grid grid-cols-2 gap-3">
-              <input value={addressForm.label} onChange={(event) => setAddressForm((value) => ({ ...value, label: event.target.value }))} placeholder="Label (Home)" className="portal-input" />
-              <input value={addressForm.recipient} required onChange={(event) => setAddressForm((value) => ({ ...value, recipient: event.target.value }))} placeholder="Recipient" className="portal-input" />
-              <input value={addressForm.line1} required onChange={(event) => setAddressForm((value) => ({ ...value, line1: event.target.value }))} placeholder="Address line 1" className="portal-input col-span-2" />
-              <input value={addressForm.line2} onChange={(event) => setAddressForm((value) => ({ ...value, line2: event.target.value }))} placeholder="Address line 2 (optional)" className="portal-input col-span-2" />
-              <input value={addressForm.city} required onChange={(event) => setAddressForm((value) => ({ ...value, city: event.target.value }))} placeholder="City" className="portal-input" />
-              <input value={addressForm.region} onChange={(event) => setAddressForm((value) => ({ ...value, region: event.target.value }))} placeholder="Region (optional)" className="portal-input" />
-              <input value={addressForm.postal_code} required onChange={(event) => setAddressForm((value) => ({ ...value, postal_code: event.target.value }))} placeholder="Postal code" className="portal-input" />
-              <input value={addressForm.country} required maxLength={2} onChange={(event) => setAddressForm((value) => ({ ...value, country: event.target.value.toUpperCase() }))} placeholder="Country (AE)" className="portal-input" />
-              <input value={addressForm.phone} onChange={(event) => setAddressForm((value) => ({ ...value, phone: event.target.value }))} placeholder="Phone (optional)" className="portal-input col-span-2" />
+              <div>
+                <label className="portal-label" htmlFor="address-label">Label</label>
+                <input id="address-label" value={addressForm.label} onChange={(event) => setAddressForm((value) => ({ ...value, label: event.target.value }))} placeholder="Home" className="portal-input" />
+              </div>
+              <div>
+                <label className="portal-label" htmlFor="address-recipient">Recipient</label>
+                <input id="address-recipient" value={addressForm.recipient} required onChange={(event) => setAddressForm((value) => ({ ...value, recipient: event.target.value }))} placeholder="Full name" className="portal-input" />
+              </div>
+              <div className="col-span-2">
+                <label className="portal-label" htmlFor="address-line1">Address line 1</label>
+                <input id="address-line1" value={addressForm.line1} required onChange={(event) => setAddressForm((value) => ({ ...value, line1: event.target.value }))} className="portal-input" />
+              </div>
+              <div className="col-span-2">
+                <label className="portal-label" htmlFor="address-line2">Address line 2</label>
+                <input id="address-line2" value={addressForm.line2} onChange={(event) => setAddressForm((value) => ({ ...value, line2: event.target.value }))} placeholder="Optional" className="portal-input" />
+              </div>
+              <div>
+                <label className="portal-label" htmlFor="address-city">City</label>
+                <input id="address-city" value={addressForm.city} required onChange={(event) => setAddressForm((value) => ({ ...value, city: event.target.value }))} className="portal-input" />
+              </div>
+              <div>
+                <label className="portal-label" htmlFor="address-region">Region</label>
+                <input id="address-region" value={addressForm.region} onChange={(event) => setAddressForm((value) => ({ ...value, region: event.target.value }))} placeholder="Optional" className="portal-input" />
+              </div>
+              <div>
+                <label className="portal-label" htmlFor="address-postal">Postal code</label>
+                <input id="address-postal" value={addressForm.postal_code} required onChange={(event) => setAddressForm((value) => ({ ...value, postal_code: event.target.value }))} className="portal-input" />
+              </div>
+              <div>
+                <label className="portal-label" htmlFor="address-country">Country</label>
+                <input id="address-country" value={addressForm.country} required maxLength={2} onChange={(event) => setAddressForm((value) => ({ ...value, country: event.target.value.toUpperCase() }))} placeholder="AE" className="portal-input" />
+              </div>
+              <div className="col-span-2">
+                <label className="portal-label" htmlFor="address-phone">Phone</label>
+                <input id="address-phone" value={addressForm.phone} onChange={(event) => setAddressForm((value) => ({ ...value, phone: event.target.value }))} placeholder="Optional" className="portal-input" />
+              </div>
             </div>
             <label className="flex items-center gap-2" style={{ color: 'var(--p-muted)', fontSize: 'var(--p-fs-xs)' }}>
               <input type="checkbox" checked={addressForm.is_default} onChange={(event) => setAddressForm((value) => ({ ...value, is_default: event.target.checked }))} /> Make this my default address
             </label>
-            <button type="submit" disabled={busy} className="portal-btn portal-btn--gold">Save address</button>
+            <button type="submit" disabled={busy} className="portal-btn portal-btn--gold">{editingAddressId ? 'Update address' : 'Save address'}</button>
           </form>
         </div>
       ) : null}
@@ -684,10 +750,19 @@ export function CustomerAccountApp({ subPath }: { subPath: string[] }) {
               </div>
             </header>
             <div className="grid grid-cols-2 gap-3">
-              <input value={profile.first_name} onChange={(event) => setProfile((value) => ({ ...value, first_name: event.target.value }))} placeholder="First name" className="portal-input" />
-              <input value={profile.last_name} onChange={(event) => setProfile((value) => ({ ...value, last_name: event.target.value }))} placeholder="Last name" className="portal-input" />
+              <div>
+                <label className="portal-label" htmlFor="settings-first-name">First name</label>
+                <input id="settings-first-name" value={profile.first_name} onChange={(event) => setProfile((value) => ({ ...value, first_name: event.target.value }))} placeholder="First name" className="portal-input" />
+              </div>
+              <div>
+                <label className="portal-label" htmlFor="settings-last-name">Last name</label>
+                <input id="settings-last-name" value={profile.last_name} onChange={(event) => setProfile((value) => ({ ...value, last_name: event.target.value }))} placeholder="Last name" className="portal-input" />
+              </div>
             </div>
-            <input value={profile.phone} onChange={(event) => setProfile((value) => ({ ...value, phone: event.target.value }))} placeholder="Phone (optional)" className="portal-input" />
+            <div>
+              <label className="portal-label" htmlFor="settings-phone">Phone</label>
+              <input id="settings-phone" value={profile.phone} onChange={(event) => setProfile((value) => ({ ...value, phone: event.target.value }))} placeholder="Optional" className="portal-input" />
+            </div>
             <button type="submit" disabled={busy} className="portal-btn portal-btn--gold">Save profile</button>
           </form>
 

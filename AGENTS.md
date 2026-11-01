@@ -95,6 +95,7 @@ Useful single-document shortcuts:
 | What is the truth about the source data? | `technical_design/39_GLOSSARY_AND_EVIDENCE_LEDGER.md` |
 | How does data get into the database now? | `technical_design/41` §6 (cleaning rules + acceptance gate). The old corpus-import pipeline (`technical_design/33`) is historical. |
 | What is decided vs open? | `technical_design/40` + `SKILL_MATRIX_AND_TOOLING.md` §6 |
+| What functionality exists / what is decided? | `docs/FUNCTIONALITY_MATRIX.md` |
 
 ---
 

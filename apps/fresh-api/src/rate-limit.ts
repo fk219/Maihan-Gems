@@ -26,6 +26,8 @@ const RULES: Rule[] = [
   { pattern: /^\/api\/v1\/auth\/(register|login)$/, methods: ['POST'], max: 5, windowMs: 60_000, scope: 'auth' },
   { pattern: /^\/api\/v1\/admin\/login$/, methods: ['POST'], max: 5, windowMs: 60_000, scope: 'admin_login' },
   { pattern: /^\/api\/v1\/admin\/auth\/login$/, methods: ['POST'], max: 5, windowMs: 60_000, scope: 'admin_login' },
+  { pattern: /^\/api\/v1\/admin\/auth\/2fa\/verify$/, methods: ['POST'], max: 5, windowMs: 60_000, scope: 'admin_2fa' },
+  { pattern: /^\/api\/v1\/admin\/auth\/2fa\/(setup|enable|disable)$/, methods: ['POST'], max: 10, windowMs: 60_000, scope: 'admin_2fa_setup' },
   { pattern: /^\/api\/v1\/vendor\/auth\/login$/, methods: ['POST'], max: 10, windowMs: 60_000, scope: 'vendor_login' },
   { pattern: /^\/api\/v1\/vendor\/auth\/setup$/, methods: ['POST'], max: 5, windowMs: 60_000, scope: 'vendor_setup' },
   // password reset + change: tight, both request and consume

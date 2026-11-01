@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Gem, Search, Sparkles } from 'lucide-react';
+import { MediaImage } from '@/components/mgh/ui/MediaImage';
 
 interface LiveGem {
   ref: string;
@@ -139,9 +140,9 @@ export function LiveConcierge({ initialQuery = '' }: { initialQuery?: string }) 
                   href={stone.kind === 'PAIR' ? '/pairs' : `/product/${stone.slug || stone.ref}`}
                   className="group rounded-sm border border-[#E4DFD5] bg-white overflow-hidden hover:border-[#D4AF37]/60 transition-colors"
                 >
-                  <div className="flex h-36 items-center justify-center bg-[#FBF7EC]">
+                  <div className="relative flex h-36 items-center justify-center bg-[#FBF7EC]">
                     {stone.primary_image ? (
-                      <img src={stone.primary_image} alt={stone.name} className="h-full w-full object-cover" />
+                      <MediaImage src={stone.primary_image} alt={stone.name} className="h-full w-full object-cover" sizes="(max-width: 640px) 100vw, 25vw" />
                     ) : (
                       <span className="text-3xl text-[#D4AF37]/50 font-serif">{stone.variety.charAt(0)}</span>
                     )}

@@ -21,7 +21,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       error?: string;
       token?: string;
       admin?: { email: string; role: string };
+      requires_2fa?: boolean;
+      challenge_token?: string;
     };
+    if (upstream.ok && data.requires_2fa && data.challenge_token) {
+      return NextResponse.json({ ok: false, requires_2fa: true, challenge_token: data.challenge_token });
+    }
     if (!upstream.ok || !data.token) {
       return NextResponse.json({ error: data.error ?? 'Invalid email or password' }, { status: upstream.status || 401 });
     }

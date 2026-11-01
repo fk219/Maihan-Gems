@@ -4,6 +4,32 @@
 
 ---
 
+> **2026-11-01 — CURRENT STATE: FRESH PLATFORM COMPLETE; ONLY OWNER-GATED, DECISION AND CONTENT WORK REMAINS.**
+>
+> The `fresh` schema (20 migrations, 54 tables) is the only database. All
+> code-side functionality is implemented and verified: storefront on live data,
+> customer accounts, commerce + operations, vendor portal (invite-only), admin
+> console, media pipeline, deterministic/model-assisted concierge, security
+> hardening, maintenance, backups + restore drill, admin TOTP 2FA.
+>
+> **Resume at `docs/FUNCTIONALITY_MATRIX.md` §0 (Resume here)** — it has the
+> services, commands, dev credentials, completed work log and the exact
+> pending list. `docs/FUNCTIONALITY_MATRIX.md` is the canonical inventory;
+> `PROJECT_STATUS.md` is the status summary; the audit (§22–§24) holds history.
+>
+> **Only remaining work:** owner-gated integrations (PSP, Sanity, shipping,
+> FX, Resend key, LLM key, OTLP endpoint, object storage, production deploy),
+> product decisions (vendor settlements, per-customer discount limits, size
+> variants, AI conversation persistence, tax rules, branded dialogs), deploy
+> ops (apply DB roles, schedule backups, restore drill) and content (vendor
+> photos, 3D/AR models, verified certificates, editorial copy).
+>
+> Dev credentials: admin `admin@maihangems.com` / `maihan-admin-dev`; vendor
+> `ahmed@skylinegems.ae` / `Skyline2026!`. Local DB container `maihan-dev-db`
+> on `127.0.0.1:5433`; API `:3010`; storefront `:3000`.
+
+---
+
 > **2026-10-28 — CURRENT STATE: FRESH DATABASE IS THE ONLY DATABASE.** ADR-035
 > pivot executed end-to-end: F1 design → F2 cleaning (22,737 gems / 10,349
 > settings / 1,429 products / 10,240 assets) → F2.9 semantic codes → F2.10

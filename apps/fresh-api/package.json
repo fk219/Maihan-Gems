@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "migrate": "tsx src/migrate.ts",
     "test": "node ../../apps/web/node_modules/vitest/vitest.mjs run",
-    "mail:drain": "tsx src/drain-outbox.ts"
+    "mail:drain": "tsx src/drain-outbox.ts",
+    "maintenance": "tsx src/maintenance-cli.ts"
   },
   "dependencies": {
     "pg": "8.23.1",

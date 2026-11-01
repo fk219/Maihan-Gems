@@ -42,6 +42,15 @@ approved. `DEFERRED` = deliberately postponed.
 
 | **Vendor onboarding is invite-only (2026-11-01, owner):** the house creates partners in the admin console, approves onboarding, and issues the one-time API key; there is **no public vendor self-registration**. `POST /vendors` is admin-only. | **ACCEPTED** | owner direction 2026-11-01 · `PROJECT_STATUS.md` §3.6 |
 
+| **Media pipeline (2026-11-01):** uploads are sniffed, MIME-checked and stripped of EXIF/XMP/IPTC metadata in-house; GIF/AVIF uploads are refused. Derivatives use Next's image optimiser for `/media` only. No image-processing dependency added. | **ACCEPTED** | ADR-037 · `docs/FUNCTIONALITY_MATRIX.md` §8 |
+| **Ready-made stock (2026-11-01):** `products.quantity` is authoritative for READY_MADE; configured pieces are one-of-one and their availability follows the stone (sold/reserved blocks cart + listing). Product status itself stays DRAFT/ACTIVE/ARCHIVED. | **ACCEPTED** | `0019` · matrix §4 |
+| **Order access tokens (2026-11-01):** public order reads require the checkout token or the owning customer session; emails carry the private link. | **ACCEPTED** | `0015` · matrix §9 |
+| **Maintenance sweep (2026-11-01):** unpaid orders expire after 24 h, abandoned reservations release, expired auth/token/outbox/cart rows are pruned (timer + admin endpoint + CLI). | **ACCEPTED** | `maintenance.ts` · matrix §10 |
+| **Migration checksums (2026-11-01):** applied migration files are SHA-256 tracked; drift fails the runner unless `--allow-drift` is intentional. | **ACCEPTED** | `migrate.ts` · matrix §10 |
+| **Backups (2026-11-01):** `pnpm run db:backup` writes a custom-format dump + SHA-256 under `backups/`; `backup-cron.sh` installs the daily job and `db:restore-drill` proves restorability. | **ACCEPTED** | `scripts/backup-db.mjs` · `scripts/restore-drill.mjs` |
+| **Admin 2FA (2026-11-01):** TOTP is available and opt-in per admin user; enabling requires a verified code, and login becomes a two-step challenge. The env fallback remains dev-only. | **ACCEPTED** | `0020` · `totp.ts` · matrix §6 |
+| **Production roles (2026-11-01):** `roles.sql` separates `maihan_app` (DML, no audit UPDATE/DELETE) from `maihan_migrator` (DDL); applied at deploy. | **ACCEPTED** | `docs/DB_ROLES.sql` |
+
 ## 3. AI and channels
 
 | Decision | Status | Source |

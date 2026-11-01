@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { ComparePageClient } from '@/components/mgh/catalog/ComparePageClient';
 import { SITE_URL } from '@/lib/mgh/site-url';
+import '../../../styles/portal-premium.css';
+import { ClientSurface } from '@/components/mgh/providers/ClientSurface';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,28 +15,20 @@ export const metadata: Metadata = {
 
 export default function ComparePage() {
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-      <nav aria-label="Breadcrumb" className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-wider text-[#76726A]">
-        <ol className="flex items-center gap-2">
-          <li><Link href="/" className="hover:text-[#121211]">Home</Link></li>
-          <li aria-hidden="true">/</li>
-          <li aria-current="page" className="font-medium text-[#121211]">Compare</li>
-        </ol>
-      </nav>
-
-      <div className="border-b border-[#E4DFD5] pb-6">
-        <p className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] text-[#9A7B2C]">
-          GEMMOLOGICAL ANALYSIS
-        </p>
-        <h1 className="mt-1 font-[family-name:var(--font-eb-garamond)] text-4xl font-normal text-[#121211]">
-          Compare
-        </h1>
-        <p className="mt-2 text-sm font-[family-name:var(--font-eb-garamond)] text-[#4E4C47]">
-          Carat, origin, cut and price, read as a dossier.
-        </p>
+    <ClientSurface>
+      <div className="client-frame">
+        <div className="portal-top__where">
+          <span>Client atelier</span>
+          <span aria-hidden="true">/</span>
+          <b>Compare</b>
+        </div>
+        <div className="checkout-head" style={{ marginTop: 8 }}>
+          <p className="portal-kicker">Gemological analysis</p>
+          <h1 className="portal-page-title">Compare</h1>
+          <p className="portal-page-sub">Carat, origin, cut and price, read as a dossier.</p>
+        </div>
+        <ComparePageClient />
       </div>
-
-      <ComparePageClient />
-    </div>
+    </ClientSurface>
   );
 }

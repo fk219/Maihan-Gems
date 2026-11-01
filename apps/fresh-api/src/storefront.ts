@@ -117,7 +117,10 @@ export async function gemstoneDetail(client: AnyClient, ref: string) {
 }
 
 export async function listProducts(client: AnyClient, q: URLSearchParams) {
-  const where: string[] = [`p.status <> 'ARCHIVED'`];
+  const where: string[] = [
+    `p.status <> 'ARCHIVED'`,
+    `(p.kind <> 'CONFIGURED' OR g.status IS NULL OR g.status NOT IN ('SOLD','ARCHIVED'))`,
+  ];
   const params: unknown[] = [];
   const add = (raw: string | null, sql: string): void => { if (raw) { params.push(raw); where.push(sql.replace('$X', `$${params.length}`)); } };
   add(q.get('jewellery_type'), `p.jewellery_type_id = (SELECT id FROM fresh.jewellery_types WHERE code = '$X')`);

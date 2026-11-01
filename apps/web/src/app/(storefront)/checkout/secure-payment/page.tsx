@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
+import { ClientThemeToggle } from '@/components/mgh/providers/ClientSurface';
 
 export const metadata: Metadata = {
   title: 'Checkout | Maihan Gems',
@@ -13,10 +14,13 @@ const CheckoutFlow = dynamicImport(() => import('@/components/mgh/checkout/Check
 export default function Page() {
   return (
     <div>
-      <div className="checkout-head">
-        <p className="portal-kicker">Checkout</p>
-        <h1 className="portal-page-title">Vault Selection Checkout</h1>
-        <p className="portal-page-sub">Three quiet steps: your selection, the address, then settlement.</p>
+      <div className="checkout-head" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <div>
+          <p className="portal-kicker">Checkout</p>
+          <h1 className="portal-page-title">Vault Selection Checkout</h1>
+          <p className="portal-page-sub">Three quiet steps: your selection, the address, then settlement.</p>
+        </div>
+        <ClientThemeToggle />
       </div>
       <CheckoutFlow />
     </div>

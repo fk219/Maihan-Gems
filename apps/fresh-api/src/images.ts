@@ -5,7 +5,7 @@
  */
 import type { AnyClient } from './db.js';
 import { StateError } from './validation.js';
-import { storeImage, removeStoredImage } from './media.js';
+import { storeImage, removeStoredImage, sanitizeImage } from './media.js';
 
 function err(message: string, status: number): Error {
   const e = new StateError(message);
@@ -49,11 +49,17 @@ export async function uploadImage(
 
   // validate image data
   let url: string;
-  const dataUrl = /^data:(image\/(?:jpeg|png|webp|gif|avif));base64,([A-Za-z0-9+/=\s]+)$/.exec(imageData);
+  const dataUrl = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=\s]+)$/.exec(imageData);
   if (dataUrl) {
     const buffer = Buffer.from(dataUrl[2]!, 'base64');
     if (buffer.length > 2 * 1024 * 1024) throw err('image too large (max 2 MB)', 422);
-    const stored = await storeImage(buffer, dataUrl[1]!);
+    let sanitized: { buffer: Buffer; mime: string };
+    try {
+      sanitized = sanitizeImage(buffer, dataUrl[1]!);
+    } catch (cause) {
+      throw err(cause instanceof Error ? cause.message : 'invalid image', 422);
+    }
+    const stored = await storeImage(sanitized.buffer, sanitized.mime);
     url = stored.url;
   } else if (imageData.startsWith('https://')) {
     // external URL: store as-is

@@ -112,10 +112,10 @@ async function insertProduct(client: AnyClient, vendor: VendorRow, p: ProductSub
   const slug = await mintSlug(client, 'products', [varietySlug, p.style, p.shape ? norm(p.shape) : null, p.jewellery_type.toLowerCase(), p.metal.toLowerCase(), ref.toLowerCase()]);
 
   await client.query(
-    `INSERT INTO fresh.products (ref, slug, name, jewellery_type_id, kind, price_amount, currency, status, vendor_id, vendor_ref)
-     VALUES ($1,$2,$3,$4,'READY_MADE',$5,$6,$7,$8,$9)`,
+    `INSERT INTO fresh.products (ref, slug, name, jewellery_type_id, kind, price_amount, currency, status, vendor_id, vendor_ref, quantity)
+     VALUES ($1,$2,$3,$4,'READY_MADE',$5,$6,$7,$8,$9,$10)`,
     [ref, slug, name, jtId, p.price_amount ?? null, p.currency,
-      p.price_amount != null ? 'ACTIVE' : 'DRAFT', vendor.id, p.vendor_ref],
+      p.price_amount != null ? 'ACTIVE' : 'DRAFT', vendor.id, p.vendor_ref, p.quantity],
   );
   return ref;
 }
@@ -165,7 +165,7 @@ export async function rejectSubmission(client: AnyClient, submissionId: number, 
   await audit(client, 'REJECT_SUBMISSION', 'vendor_submission', submissionId, { note });
 }
 
-export async function listSubmissions(client: AnyClient, status: string | null, vendorCode: string | null) {
+export async function listSubmissions(client: AnyClient, status: string | null, vendorCode: string | null, limit = 100, offset = 0) {
   const params: unknown[] = [];
   const where: string[] = [];
   if (status) { params.push(status); where.push(`s.status = $${params.length}`); }
@@ -178,8 +178,8 @@ export async function listSubmissions(client: AnyClient, status: string | null, 
             s.reviewer_note, s.reviewed_at, v.code AS vendor_code, v.name AS vendor_name
      FROM fresh.vendor_submissions s JOIN fresh.vendors v ON v.id = s.vendor_id
      ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
-     ORDER BY s.id DESC LIMIT 100`,
-    params,
+     ORDER BY s.id DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    [...params, Math.min(limit, 200), Math.max(offset, 0)],
   );
   return rows;
 }

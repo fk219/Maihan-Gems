@@ -9,7 +9,8 @@ import { hashKey, hashPassword, verifyPassword } from '../auth.js';
 import { setupVendorPassword, resolveVendorSession } from '../vendor-auth.js';
 import { requestPasswordReset, resetPassword } from '../password-resets.js';
 import { createDiscount, updateDiscount, recordRefund, updateOrderStatus } from '../admin.js';
-import { cancelOrder, getOrderAuthorized, payOrder } from '../commerce.js';
+import { cancelOrder, getOrderAuthorized, payOrder, getOrCreateCart, addProductToCart, checkoutCart } from '../commerce.js';
+import { expireReservations, cleanupExpired } from '../maintenance.js';
 import { verifyCertificate } from '../certificates.js';
 import { issueVerification, verifyEmail } from '../email-verification.js';
 import { listAddresses, createAddress, setDefaultAddress, deleteAddress } from '../addresses.js';
@@ -18,6 +19,8 @@ import { checkRateLimitShared } from '../rate-limit.js';
 import { catalogueExists, sitemapPage } from '../storefront.js';
 import { createLead, unsubscribeLead } from '../admin.js';
 import { conciergeQuery } from '../concierge.js';
+import { adminTotpSetup, adminTotpEnable, adminLogin, adminVerifyTotp, resolveAdminSession } from '../vendor-auth.js';
+import { totpAt } from '../totp.js';
 
 const URL = process.env['DATABASE_URL'];
 const describeDb = describe.skipIf(!URL);
@@ -358,5 +361,147 @@ describeDb('fresh schema integration', () => {
     else expect(result.items.length).toBeGreaterThan(0);
     const empty = await conciergeQuery(client, '');
     expect(empty.refusal).toBeTruthy();
+  });
+
+  it('decrements ready-made stock at checkout and restocks on cancellation', async () => {
+    await inRollback(async (c) => {
+      const jt = await c.query(`SELECT id FROM fresh.jewellery_types LIMIT 1`);
+      const suffix = String(Math.floor(100000 + Math.random() * 899999));
+      const prod = await c.query(
+        `INSERT INTO fresh.products (ref, slug, name, jewellery_type_id, kind, price_amount, currency, status, quantity)
+         VALUES ($1,$2,'Stock Test Piece',$3,'READY_MADE',120,'USD','ACTIVE',2) RETURNING id`,
+        [`J-R-STK-HQ-${suffix}`, `stock-test-${suffix}`, jt.rows[0]!.id],
+      );
+      const productRef = `J-R-STK-HQ-${suffix}`;
+      const cart = await getOrCreateCart(c as never, undefined);
+      await addProductToCart(c as never, cart.token, productRef, 2);
+      const order = await checkoutCart(c as never, cart.token, {
+        email: 'stock-int@test.example',
+        shipping_address: { recipient: 'Stock Tester', line1: '1 Road', city: 'Dubai', postal_code: '00000', country: 'AE' },
+      });
+      const after = await c.query(`SELECT quantity FROM fresh.products WHERE id = $1`, [prod.rows[0]!.id]);
+      expect(after.rows[0]!.quantity).toBe(0);
+
+      const second = await getOrCreateCart(c as never, undefined);
+      await expect(addProductToCart(c as never, second.token, productRef, 1)).rejects.toThrow();
+
+      await cancelOrder(c as never, order.order_number, 'stock test', 'admin');
+      const restored = await c.query(`SELECT quantity FROM fresh.products WHERE id = $1`, [prod.rows[0]!.id]);
+      expect(restored.rows[0]!.quantity).toBe(2);
+    });
+  });
+
+  it('expires abandoned reservations and releases the stone', async () => {
+    await inRollback(async (c) => {
+      const v = await c.query(`SELECT id FROM fresh.gemstone_varieties LIMIT 1`);
+      const suffix = String(Math.floor(100000 + Math.random() * 899999));
+      const gem = await c.query(
+        `INSERT INTO fresh.gemstones (ref, slug, name, variety_id, kind, pieces, currency, quantity, status, origin_type)
+         VALUES ($1,$2,'Reserve Sweep Stone',$3,'SINGLE',1,'USD',0,'RESERVED','NATURAL') RETURNING id`,
+        [`G-RSV-TST-HQ-${suffix}`, `reserve-sweep-${suffix}`, v.rows[0]!.id],
+      );
+      const cart = await getOrCreateCart(c as never, undefined);
+      await c.query(
+        `INSERT INTO fresh.inventory_reservations (owner_kind, owner_id, cart_id, state, expires_at, previous_status)
+         VALUES ('gemstone',$1,(SELECT id FROM fresh.carts WHERE token=$2),'ACTIVE', now() - interval '1 hour','ACTIVE')`,
+        [gem.rows[0]!.id, cart.token],
+      );
+      const result = await expireReservations(c as never);
+      expect(result.reservations_expired).toBeGreaterThanOrEqual(1);
+      const gemStatus = await c.query(`SELECT status FROM fresh.gemstones WHERE id = $1`, [gem.rows[0]!.id]);
+      expect(gemStatus.rows[0]!.status).toBe('ACTIVE');
+      const res = await c.query(`SELECT state FROM fresh.inventory_reservations WHERE owner_id = $1`, [gem.rows[0]!.id]);
+      expect(res.rows[0]!.state).toBe('EXPIRED');
+    });
+  });
+
+  it('prunes expired sessions, tokens, outbox, carts and limiter rows', async () => {
+    await inRollback(async (c) => {
+      const customer = await c.query(
+        `INSERT INTO fresh.customers (email, password_hash) VALUES ('cleanup-int@test.example', $1) RETURNING id`,
+        [hashPassword('CleanupPass2026!')],
+      );
+      const cid = customer.rows[0]!.id;
+      await c.query(`INSERT INTO fresh.auth_sessions (customer_id, token_hash, expires_at) VALUES ($1,'cleanup-session', now() - interval '8 days')`, [cid]);
+      await c.query(`INSERT INTO fresh.password_resets (actor_kind, actor_id, token_hash, expires_at) VALUES ('CUSTOMER',$1,'cleanup-reset', now() - interval '8 days')`, [cid]);
+      await c.query(`INSERT INTO fresh.email_verifications (customer_id, token_hash, expires_at) VALUES ($1,'cleanup-verify', now() - interval '8 days')`, [cid]);
+      await c.query(`INSERT INTO fresh.email_outbox (to_email, subject, body, state, created_at) VALUES ('cleanup-int@test.example','old','body','SENT', now() - interval '40 days')`);
+      await c.query(`INSERT INTO fresh.carts (token, status, created_at) VALUES (gen_random_uuid(), 'ACTIVE', now() - interval '8 days')`);
+      await c.query(`INSERT INTO fresh.rate_limits (key, count, reset_at) VALUES ('cleanup:key', 1, now() - interval '2 hours')`);
+
+      const report = await cleanupExpired(c as never);
+      expect(report.sessions_deleted).toBeGreaterThanOrEqual(1);
+      expect(report.tokens_deleted).toBeGreaterThanOrEqual(2);
+      expect(report.outbox_deleted).toBeGreaterThanOrEqual(1);
+      expect(report.carts_deleted).toBeGreaterThanOrEqual(1);
+      expect(report.rate_limits_deleted).toBeGreaterThanOrEqual(1);
+      const sessions = await c.query(`SELECT count(*)::int AS n FROM fresh.auth_sessions WHERE token_hash = 'cleanup-session'`);
+      expect(sessions.rows[0]!.n).toBe(0);
+    });
+  });
+
+  it('sells and restores a configured product with its stone', async () => {
+    await inRollback(async (c) => {
+      const v = await c.query(`SELECT id FROM fresh.gemstone_varieties LIMIT 1`);
+      const jt = await c.query(`SELECT id FROM fresh.jewellery_types LIMIT 1`);
+      const setting = await c.query(`SELECT id FROM fresh.settings LIMIT 1`);
+      const suffix = String(Math.floor(100000 + Math.random() * 899999));
+      const gem = await c.query(
+        `INSERT INTO fresh.gemstones (ref, slug, name, variety_id, kind, pieces, currency, quantity, status, origin_type)
+         VALUES ($1,$2,'Configured Sync Stone',$3,'SINGLE',1,'USD',1,'ACTIVE','NATURAL') RETURNING id`,
+        [`G-CFG-TST-HQ-${suffix}`, `configured-sync-${suffix}`, v.rows[0]!.id],
+      );
+      const prod = await c.query(
+        `INSERT INTO fresh.products (ref, slug, name, jewellery_type_id, kind, setting_id, gemstone_id, price_amount, currency, status)
+         VALUES ($1,$2,'Configured Sync Piece',$3,'CONFIGURED',$4,$5,250,'USD','ACTIVE') RETURNING id`,
+        [`J-R-CFG-HQ-${suffix}`, `configured-sync-piece-${suffix}`, jt.rows[0]!.id, setting.rows[0]!.id, gem.rows[0]!.id],
+      );
+      const cart = await getOrCreateCart(c as never, undefined);
+      await addProductToCart(c as never, cart.token, `J-R-CFG-HQ-${suffix}`, 1);
+      const order = await checkoutCart(c as never, cart.token, {
+        email: 'configured-int@test.example',
+        shipping_address: { recipient: 'Configured Tester', line1: '1 Road', city: 'Dubai', postal_code: '00000', country: 'AE' },
+      });
+      await payOrder(c as never, order.order_number);
+      // Products keep DRAFT/ACTIVE/ARCHIVED; availability follows the stone.
+      const product = await c.query(`SELECT status FROM fresh.products WHERE id = $1`, [prod.rows[0]!.id]);
+      expect(product.rows[0]!.status).toBe('ACTIVE');
+      const gemSold = await c.query(`SELECT status FROM fresh.gemstones WHERE id = $1`, [gem.rows[0]!.id]);
+      expect(gemSold.rows[0]!.status).toBe('SOLD');
+
+      await cancelOrder(c as never, order.order_number, 'configured sync test', 'admin');
+      const productAfter = await c.query(`SELECT status FROM fresh.products WHERE id = $1`, [prod.rows[0]!.id]);
+      expect(productAfter.rows[0]!.status).toBe('ACTIVE');
+      const gemRestored = await c.query(`SELECT status FROM fresh.gemstones WHERE id = $1`, [gem.rows[0]!.id]);
+      expect(gemRestored.rows[0]!.status).toBe('ACTIVE');
+    });
+  });
+
+  it('enables TOTP and requires the second step at login', async () => {
+    await inRollback(async (c) => {
+      const admin = await c.query(`SELECT id, email FROM fresh.admin_users ORDER BY id LIMIT 1`);
+      const adminId = Number(admin.rows[0]!.id);
+      const email = String(admin.rows[0]!.email);
+
+      const setup = await adminTotpSetup(c as never, adminId, email);
+      const counter = Math.floor(Date.now() / 30_000);
+      const code = totpAt(setup.secret, counter);
+      await adminTotpEnable(c as never, adminId, code);
+
+      const login = await adminLogin(c as never, email, 'maihan-admin-dev', null);
+      expect(login.requires_2fa).toBe(true);
+      expect(login.challenge_token).toBeTruthy();
+      expect(login.token).toBeUndefined();
+
+      const verified = await adminVerifyTotp(
+        c as never,
+        login.challenge_token!,
+        totpAt(setup.secret, Math.floor(Date.now() / 30_000)),
+      );
+      expect(verified.token).toBeTruthy();
+      const session = await resolveAdminSession(c as never, `Bearer ${verified.token}`);
+      expect(session?.adminId).toBe(adminId);
+      await expect(adminVerifyTotp(c as never, login.challenge_token!, code)).rejects.toThrow();
+    });
   });
 });

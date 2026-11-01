@@ -131,7 +131,7 @@ export async function adminInventory(client: AnyClient, q: { q?: string; status?
              g.weight_ct::text AS weight_ct, v.name AS variety,
              o.name AS origin, g.origin_type::text AS origin_type,
              vend.code AS vendor_code, vend.name AS vendor_name,
-             'gemstones' AS table_name, g.created_at::text AS created_at,
+             'gemstones' AS table_name, g.created_at::text AS created_at, NULL::integer AS quantity,
              (SELECT url FROM fresh.assets a WHERE a.owner_kind='gemstone' AND a.owner_id=g.id ORDER BY position LIMIT 1) AS primary_image
       FROM fresh.gemstones g
       LEFT JOIN fresh.gemstone_varieties v ON v.id = g.variety_id
@@ -143,7 +143,7 @@ export async function adminInventory(client: AnyClient, q: { q?: string; status?
              NULL AS weight_ct, jt.name AS variety,
              NULL AS origin, 'NATURAL' AS origin_type,
              vend.code AS vendor_code, vend.name AS vendor_name,
-             'products' AS table_name, p.created_at::text AS created_at,
+             'products' AS table_name, p.created_at::text AS created_at, p.quantity,
              (SELECT url FROM fresh.assets a WHERE a.owner_kind='product' AND a.owner_id=p.id ORDER BY position LIMIT 1) AS primary_image
       FROM fresh.products p
       JOIN fresh.jewellery_types jt ON jt.id = p.jewellery_type_id
@@ -158,7 +158,18 @@ export async function adminInventory(client: AnyClient, q: { q?: string; status?
     ...r,
     price_amount: r.price_amount == null ? null : num(r.price_amount),
     weight_ct: r.weight_ct == null ? null : num(r.weight_ct),
+    quantity: r.quantity == null ? null : Number(r.quantity),
   })) as AdminInventoryItem[];
+}
+
+export async function adminUpdateItemQuantity(client: AnyClient, ref: string, quantity: number): Promise<void> {
+  if (!Number.isInteger(quantity) || quantity < 0 || quantity > 1000) {
+    throw new StateError('quantity must be an integer between 0 and 1000');
+  }
+  const prod = await client.query(`SELECT id, kind::text AS kind FROM fresh.products WHERE ref = $1`, [ref]);
+  if (!prod.rows[0]) throw new StateError(`product '${ref}' not found`);
+  if (prod.rows[0].kind === 'CONFIGURED') throw new StateError('configured pieces are one-of-one; stock is not editable');
+  await client.query(`UPDATE fresh.products SET quantity = $2 WHERE id = $1`, [prod.rows[0].id, quantity]);
 }
 
 export async function adminUpdateItemStatus(client: AnyClient, ref: string, newStatus: string): Promise<void> {
@@ -216,12 +227,19 @@ export async function adminVendorsList(client: AnyClient) {
             vo.legal_name, vo.contact_name, vo.email, vo.status AS onboarding_status,
             (SELECT count(*)::int FROM fresh.gemstones g WHERE g.vendor_id = v.id AND g.status = 'ACTIVE') AS live_gems,
             (SELECT COALESCE(sum(price_amount),0)::text FROM fresh.gemstones g WHERE g.vendor_id = v.id AND g.status = 'ACTIVE') AS inventory_value,
+            (SELECT COALESCE(sum(oi.line_total),0)::text
+             FROM fresh.order_items oi
+             JOIN fresh.orders o ON o.id = oi.order_id
+             LEFT JOIN fresh.gemstones g ON g.id = oi.gemstone_id
+             LEFT JOIN fresh.products p ON p.id = oi.product_id
+             WHERE COALESCE(g.vendor_id, p.vendor_id) = v.id
+               AND o.status IN ('PAID','IN_FULFILLMENT','FULFILLED','DELIVERED')) AS revenue,
             (SELECT count(*)::int FROM fresh.vendor_submissions vs WHERE vs.vendor_id = v.id) AS total_submissions
      FROM fresh.vendors v
      LEFT JOIN fresh.vendor_onboarding vo ON vo.vendor_id = v.id
      ORDER BY v.code`,
   );
-  return rows.map((r) => ({ ...r, inventory_value: num(r.inventory_value) }));
+  return rows.map((r) => ({ ...r, inventory_value: num(r.inventory_value), revenue: num(r.revenue) }));
 }
 
 /* ------------------------------------------------------------------ leads */

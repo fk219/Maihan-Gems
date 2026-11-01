@@ -30,6 +30,7 @@ export interface InventoryItem {
   primary_image: string | null;
   created_at: string;
   owner_kind: 'gemstone' | 'product';
+  quantity: number | null;
 }
 
 export interface InventoryStats {
@@ -46,7 +47,7 @@ export async function vendorInventory(client: AnyClient, vendorId: number): Prom
     `SELECT g.ref, g.slug, g.name, g.kind::text, g.weight_ct::text AS weight_ct,
             g.price_amount::text AS price_amount, g.currency, g.status, g.origin_type::text AS origin_type,
             v.name AS variety, c.name AS colour, sh.name AS shape, o.name AS origin, g.created_at::text AS created_at,
-            'gemstone' AS owner_kind,
+            'gemstone' AS owner_kind, NULL::integer AS quantity,
             (SELECT url FROM fresh.assets a WHERE a.owner_kind='gemstone' AND a.owner_id=g.id ORDER BY position LIMIT 1) AS primary_image
      FROM fresh.gemstones g
      JOIN fresh.gemstone_varieties v ON v.id = g.variety_id
@@ -58,7 +59,7 @@ export async function vendorInventory(client: AnyClient, vendorId: number): Prom
      SELECT p.ref, p.slug, p.name, p.kind::text AS kind, NULL AS weight_ct,
             p.price_amount::text AS price_amount, p.currency, p.status, 'NATURAL' AS origin_type,
             jt.name AS variety, NULL AS colour, NULL AS shape, NULL AS origin, p.created_at::text AS created_at,
-            'product' AS owner_kind,
+            'product' AS owner_kind, p.quantity,
             (SELECT url FROM fresh.assets a WHERE a.owner_kind='product' AND a.owner_id=p.id ORDER BY position LIMIT 1) AS primary_image
      FROM fresh.products p
      JOIN fresh.jewellery_types jt ON jt.id = p.jewellery_type_id
@@ -84,6 +85,7 @@ export async function vendorInventory(client: AnyClient, vendorId: number): Prom
     primary_image: r.primary_image == null ? null : String(r.primary_image),
     created_at: String(r.created_at ?? ''),
     owner_kind: r.owner_kind,
+    quantity: r.quantity == null ? null : Number(r.quantity),
   }));
 
   const live = items.filter((i) => i.status === 'ACTIVE');
@@ -126,4 +128,19 @@ export async function updateItemStatus(client: AnyClient, vendorId: number, ref:
     return;
   }
   throw err(`item '${ref}' not found in your inventory`, 404);
+}
+
+
+/** Ready-made stock is vendor-editable; configured pieces are one-of-one. */
+export async function updateItemQuantity(client: AnyClient, vendorId: number, ref: string, quantity: number): Promise<void> {
+  if (!Number.isInteger(quantity) || quantity < 0 || quantity > 1000) {
+    throw err('quantity must be an integer between 0 and 1000', 422);
+  }
+  const prod = await client.query(
+    `SELECT id, kind::text AS kind, status FROM fresh.products WHERE ref = $1 AND vendor_id = $2`,
+    [ref, vendorId],
+  );
+  if (!prod.rows[0]) throw err(`product '${ref}' not found in your inventory`, 404);
+  if (prod.rows[0].kind === 'CONFIGURED') throw err('configured pieces carry a single stone; stock is not editable', 422);
+  await client.query(`UPDATE fresh.products SET quantity = $2 WHERE id = $1`, [prod.rows[0].id, quantity]);
 }

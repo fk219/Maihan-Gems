@@ -1,3 +1,46 @@
+> **2026-11-01 RESUME POINTER.** All code-side work is complete. Continue from `docs/FUNCTIONALITY_MATRIX.md` §0 (“Resume here”): commands, credentials, completed work log, and the only pending items (owner-gated integrations, product decisions, deploy ops, content). Working tree may contain uncommitted changes — check `git status` first.
+
+# UI PROGRAM STATUS — 2026-11-01 (continue here)
+
+## Completed
+- Admin + vendor consoles: Petalo dashboard composition, gold-gradient accent, Urbanist, island sidebar, topbar, period Takings, tiles, timelines, best partners/pieces, payment mix, feeds, aged stock, floors/vault, footer.
+- Operator depth: notifications dropdowns, CSV exports, bulk publish/hide/archive/mark-sold, admin Help, vendor settlement state, vendor Sales analytics, admin per-vendor revenue.
+- Client account: portal theme, tiles/nav, stats, profile, orders, saved, address add/edit/remove/default, password/settings, auth cards, labels.
+- Checkout: three-step portal flow, sticky summary, real tax/shipping quote, test payment, confirmation, dark theme, saved-address selector.
+- Cart, favourites, compare: portal cards/tables, sticky summary, empty/loading states.
+- Editorial pages: cream/gold honest “in preparation” layout; `/about` header fixed.
+- Emails: Maison HTML template with text fallback.
+- Client dark theme + persisted toggle across account/checkout/cart/favourites/compare/editorial.
+- Global: proxy serves `/mgh` `/assets` `/models`; mobile header overflow fixed; storefront loading state; concierge hidden on client surfaces.
+- Verification: production build, web+fresh-api typecheck, lint 0 errors, Playwright desktop+mobile walks, live quote API (17,599 + 879.95 VAT = 18,478.95).
+
+## Pending — buildable
+- Replace remaining `window.confirm` actions with branded confirm dialogs; standardise toasts.
+- Full accessibility + Lighthouse sweep.
+- Nested unknown-slug 404 polish.
+- Storefront browse/PDP/search visual audit.
+- Vendor photo pool (content, not code).
+
+## Blocked — owner inputs
+- Real PSP selection/settlement + payout history (owner keys; ADR-031).
+- Sanity CMS content for About/Journal/Education/Policies/Showrooms (ADR-036).
+- Resend delivery key (templates ready; outbox stays QUEUED).
+- AR/VTO calibration assets + device verification.
+- Live FX provider and shipping-rate table.
+- Neon/Vercel production deploy, secrets, domain/analytics.
+
+> **2026-11-01 FINAL HARDENING.** Admin TOTP 2FA (0020) + login UI, structural image validation, restore drill verified, backup cron + least-privilege role template. Fresh-api 51 tests. Remaining: owner-gated integrations, product decisions, content.
+
+> **2026-11-01 COMMERCE DEPTH PASS.** Added real cart tax/shipping quotes (`GET /carts/:token/quote`, domain tax engine; tax label now the human label e.g. "UAE VAT 5%") and wired the checkout summary to show discount/tax/insured courier/due before placement. Added vendor sales analytics (`GET /vendors/:code/analytics`) with a new Sales tab (settled revenue/orders/units, 30-day revenue chart, top pieces, settlement mix) and admin per-vendor revenue (vendors table/detail + Best partners Revenue toggle + CSV). Admin and vendor notifications, CSV exports and bulk actions remain live. Verified: fresh-api + web typecheck, lint 0 errors, production build, quote API (subtotal 17,599 → VAT 879.95 → due 18,478.95), vendor Sales tab, admin notifications/bulk/CSV/Help, account dark/edit address, dark checkout.
+
+> **2026-11-01 OPERATOR UX DEPTH PASS.** Client surfaces gained a persisted light/dark theme (`ClientSurface` + `ClientThemeToggle`) across account/checkout/cart/favourites/compare/editorial, including dark account and dark checkout. Address book gained edit/update (PATCH already existed server-side). Admin and vendor topbars gained real notification dropdowns with scrim/Escape close; both consoles gained CSV export (inventory/orders/vendors/submissions/partner inventory/submissions) and bulk publish/hide/archive/mark-sold actions. Admin gained a Help tab with honest console guidance; vendor Settings gained an honest Settlement & payouts state. Notifications CSS, checkbox styling and dark tile-icon treatment added. Verified: production build + typecheck + lint green; Playwright walk of account dark/edit address, admin notifications/CSV/bulk/help, vendor notifications/CSV/bulk/settings, and dark checkout with no runtime errors.
+
+> **2026-11-01 CLIENT SURFACES + EDITORIAL + EMAIL PASS.** Cart, favourites and compare pages rebuilt on `.portal-theme` (luxury cards, sticky dispatch summary, portal tables, honest empty/loading states). Editorial `ComingSoon` pages (About, Journal, Education, Policies, Showrooms) restyled as a warm cream editorial plate with gold accents and honest "in preparation" copy; `/about` removed from the transparent-header hero list so its header stays dark. Transactional email dispatch now sends a table-based Maison HTML template (night/gold header, cream body, linked URLs, text fallback). Storefront gained a luxury route loading state; mobile header compare control hides ≤520px to remove horizontal overflow; proxy matcher now serves `/mgh/`, `/assets/` and `/models/` static assets (they were being 404'd). Account address/profile forms gained labels. Verified: production build + typecheck + lint green; Playwright walk of cart, favourites, compare, About/Journal/Policy and email preview with no runtime errors.
+
+> **2026-11-01 COMPLETION PASS.** Product/stone status sync, media sanitising + Next derivatives (ADR-037), migration checksums, admin pagination, db:backup script, and the canonical `docs/FUNCTIONALITY_MATRIX.md`. Fresh-api 47 tests; all suites green.
+
+> **2026-11-01 STOCK + MAINTENANCE.** `0019` ready-made stock + reservation order linkage; stock-aware carts/checkout/cancel; maintenance sweep (unpaid orders, reservations, pruning) with admin endpoint, timer and CLI. Fresh-api 41 tests, all suites green.
+
 > **2026-11-01 FINAL SURFACE CLEANUP.** `/search` live ledger, `/ai-gemologist` → `/concierge` redirect, dead fixture shells removed, homepage probe scoped (~14 s), CI runs storefront unit tests with fresh-api. All suites green. Code-side work complete; remaining items are owner-gated or content.
 
 > **2026-11-01 AI SEAM + OTLP.** Read-only `search_catalogue`/`get_stone` tool registry + OpenAI-compatible enrichment (key-gated), deterministic fallback. OTLP/HTTP span exporter (endpoint-gated). Fresh-api 38 tests, web 213, lint green. Rebuild note: stop `next start` first.

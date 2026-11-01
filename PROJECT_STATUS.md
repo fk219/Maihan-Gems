@@ -1,9 +1,11 @@
 # MAIHAN GEMS — PROJECT STATUS (Single Source of Truth)
 
 **This is the ONE file to read for the complete, current state of the project.**
-History and per-item evidence live in `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` (§22–§24); the roadmap in `INITIAL_IMPLEMENTATION_PLAN.md` (Appendix A); decisions in `docs/adr/`.
+History and per-item evidence live in `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` (§22–§24); the roadmap in `INITIAL_IMPLEMENTATION_PLAN.md` (Appendix A); decisions in `docs/adr/`. **The canonical feature/decision inventory is `docs/FUNCTIONALITY_MATRIX.md`.**
 
 **Last updated:** 2026-11-01 · branch `develop` · head `develop` — see `git log -1`
+
+> **Resuming later? Start at `docs/FUNCTIONALITY_MATRIX.md` §0 (“Resume here”)** — services, commands, credentials, completed work log and the exact pending list.
 
 ---
 
@@ -100,7 +102,10 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 - **Shared rate limits**: windows are atomic Postgres upserts (`0018`), safe across instances; in-memory fallback if the database is unavailable.
 - **Catalogue load-more**: browse/varieties append pages of 60 live stones on demand.
 - **Vendor route auth fix**: every vendor inventory/media/submission route now enforces the session's own vendor code (cross-vendor mismatch → 403); image deletion requires authentication.
-- **Order cancellation**: pre-fulfilment cancel restores each stone to its *pre-reservation* status (`0016`), releases reservations, and records a pending refund for the captured amount. Marking DELIVERED stamps the fulfilment record.
+- **Order cancellation**: pre-fulfilment cancel restores each stone to its *pre-reservation* status (`0016`), releases reservations, restores ready-made stock, and records a pending refund for the captured amount. Marking DELIVERED stamps the fulfilment record.
+- **Ready-made stock**: `products.quantity` (`0019`), stock-aware cart caps, checkout decrement with an atomic guard, vendor submission quantity, admin/vendor inline stock edits, and cancellation restock. Configured-product availability follows its stone (sold/reserved stones block add-to-cart and hide the product from listings).
+- **Reservation concurrency**: checkout locks stones, rejects already-reserved/sold items, and ties reservations to the order (`order_id`) so cancellation/expiry never releases a stone a newer reservation holds.
+- **Maintenance sweep**: in-process timer (5 min), admin `POST /admin/maintenance/sweep` and `pnpm --filter @maihan/fresh-api run maintenance` — cancels unpaid orders past 24 h, expires abandoned reservations (restoring stones), and prunes expired sessions/reset/verification tokens, sent/failed outbox rows, abandoned carts and stale rate-limit windows.
 - **Certificate verification**: admin Certificates tab lists submissions and moves them VERIFIED / FLAGGED / UNVERIFIED; only VERIFIED reports render publicly.
 - **Email verification**: registration queues a hashed single-use verification link (24 h); the account app shows a verify/resend banner and completes `?verify=<token>`. Dev returns the token locally.
 - **Address book**: customer address CRUD (list/add/default/delete), used by the checkout "saved address" selector.
@@ -110,6 +115,7 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 - **Unsubscribe**: `/unsubscribe` + `POST /leads/unsubscribe` marks newsletter leads LOST without touching service/viewing leads.
 - **CSRF origin guard**: cross-site writes to `/api/*` are rejected at the edge (Origin / Sec-Fetch-Site), verified 403 vs 200.
 - **Engineering cleanup**: removed the unused fixture-era operator/account shells and the dead `api-origin` seam; CI now boots fresh-api and runs the full storefront unit suite (including the homepage probe, scoped to layout-independent axe rules for speed).
+- **Ops**: `db:backup` (pg_dump + SHA-256), `scripts/backup-cron.sh`, `db:restore-drill` (verified against a real dump), and a least-privilege DB role template.
 - **Metrics**: Prometheus text endpoint at `:3010/metrics` — request counters (bounded path buckets), uptime and RSS, no PII.
 - **Trace context + OTLP**: W3C `traceparent` parsed/issued/echoed and logged; the web proxy propagates it. With `OTEL_EXPORTER_OTLP_ENDPOINT` set, request spans batch-export to OTLP/HTTP (10 s flush, global headers).
 - **Search**: `/search` is a live server-rendered ledger over the catalogue (no fixture chat); `/ai-gemologist` permanently redirects to `/concierge` preserving `q`.
@@ -121,18 +127,32 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 - `naturalgemstones/` archive: **deleted** (3 GB freed; fresh dump is the catalogue's insurance)
 - CI re-pointed (removed db/worker/migrate steps; kept domain/contracts/ai/observability/web)
 
+### 3.7 UI program — luxury portal system (2026-11-01)
+- **Admin + vendor consoles** rebuilt to the Petalo dashboard composition with a champagne-gold gradient accent: Urbanist, floating night island sidebar (collapse, grouped nav, counts, user menu), topbar (breadcrumb, ⌘K search, live clock, notifications, theme, New), greeting, period-filtered Takings chart, four pastel action tiles, order/submission timeline, Best partners/pieces toggles, payment mix with sparklines, latest-order/activity feed, aged stock, floors/vault status boxes and footer.
+- **Client account** rebuilt on `.portal-theme`: greeting, verification banner, four action tiles, section nav, real stats, profile, orders, saved pieces, address book (add/edit/remove/default), password/settings, and matching auth cards. Persisted light/dark theme with toggle.
+- **Checkout** rebuilt as a three-step portal flow: selection, address, sticky summary, real tax/shipping quote before placement, test-payment card and confirmation; standalone order-confirmation page restyled. Dark theme supported. Saved-address selector retained.
+- **Cart, favourites, compare** rebuilt on the portal design system: luxury cards, sticky dispatch summary, portal tables, honest empty/loading states.
+- **Editorial pages** (About, Journal, Education, Policies, Showrooms) restyled as a cream-and-gold editorial plate with honest “in preparation” copy; `/about` header overlap fixed.
+- **Transactional email** dispatch now sends a table-based Maison HTML template (night/gold header, cream body, linked URLs) with the plain-text fallback.
+- **Operator depth**: admin/vendor notification dropdowns (scrim + Escape close), CSV exports, bulk publish/hide/archive/mark-sold, admin Help tab, vendor Settlement & payouts state, vendor Sales analytics tab (settled revenue/orders/units, 30-day chart, top pieces, settlement mix), admin per-vendor revenue and Best partners Revenue toggle.
+- **Global fixes**: `/mgh`, `/assets` and `/models` static assets now served (were 404'd by the proxy); mobile header overflow removed; luxury storefront loading state; account/checkout concierge hidden; account form labels; client theme persistence.
+
 ## 4. What's REMAINING
 
-### 4.1 In progress (owner-visible gaps)
-| Item | What | Blocker |
+### 4.1 UI program — remaining
+Completed UI work is recorded in §3.7. The remaining UI items are either owner-gated or small buildable polish.
+
+| Item | What remains | Blocker |
 |---|---|---|
-| **Vendor photo upload** | Endpoint + vendor portal widget shipped; DYO pool now depends on vendors actually uploading | Content, not code |
-| **Vendor portal production** | Complete: light theme sidebar, inventory management, admin feedback, variety dropdowns — committed `c9dec46` | DONE |
-| **Admin console production** | Complete: light sidebar with 5 tabs (Overview/Inventory/Orders/Vendors/Leads) + full stats — committed `68d41dd` | DONE |
-| **Leads/newsletter** | Leads table + public signup + admin management — committed `68d41dd` | DONE |
-| **Sanity CMS** (ADR-036) | about/education/blog/policy/showrooms → real content | Needs Sanity project credentials (owner) |
-| **DYO configurator pool** | Empty until vendor stones have photos | Vendor content |
-| **Soft-404 remaining** | Non-variety single-segment unknowns still 200 (e.g. deep 404s in nested routes) | Edge guard covers top-level only; deep unknowns are a lower-priority SEO polish |
+| **Real payment provider** | Payment-method selection, real settlement and payout history UI | Owner must choose PSP + provide keys (ADR-031) |
+| **Sanity CMS content** | About / Journal / Education / Policies / Showrooms currently honest styled placeholders | Sanity project credentials + content (ADR-036) |
+| **Email delivery** | HTML templates are ready; outbox rows stay QUEUED until a provider drains them | Resend API key |
+| **AR/VTO** | 3D studio + AR handoff exist; calibration and device verification are incomplete | Calibration assets + device QA |
+| **Payout history** | Vendor Settings shows an honest “not configured” state | PSP + commission decision (ADR-031) |
+| **Custom confirm dialogs / toasts** | A few admin/vendor actions still use `window.confirm` | Buildable polish |
+| **Full accessibility + Lighthouse sweep** | Labels/focus states added; full audit not run | Buildable |
+| **Deep-404 polish** | Top-level edge guard live; nested unknown slugs are lower-priority SEO polish | Buildable |
+| **DYO photo pool** | Vendor stones need uploaded photos before the DYO pool fills | Vendor content |
 
 ### 4.2 Commerce completion (code-ready, needs owner decisions)
 | Item | What | Owner decision needed |

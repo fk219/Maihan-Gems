@@ -103,8 +103,11 @@ export async function viewCart(client: Db, token: string): Promise<CartView> {
 /** Add a catalogue product (READY_MADE or CONFIGURED) to the cart. */
 export async function addProductToCart(client: Db, token: string, productRef: string, quantity: number): Promise<CartView> {
   const { rows } = await client.query(
-    `SELECT id, ref, name, kind, price_amount, currency, status FROM fresh.products
-     WHERE (ref = $1 OR slug = $1) AND status = 'ACTIVE' LIMIT 1`,
+    `SELECT p.id, p.ref, p.name, p.kind, p.price_amount, p.currency, p.status, p.quantity,
+            g.status AS gem_status
+     FROM fresh.products p
+     LEFT JOIN fresh.gemstones g ON g.id = p.gemstone_id
+     WHERE (p.ref = $1 OR p.slug = $1) AND p.status = 'ACTIVE' LIMIT 1`,
     [productRef],
   );
   const p = rows[0];
@@ -112,8 +115,11 @@ export async function addProductToCart(client: Db, token: string, productRef: st
   if (p.price_amount == null) throw err(`product '${productRef}' is unpriced (Price on request)`, 409);
   const qty = Math.max(1, Math.min(Number(quantity) || 1, 10));
   // One-of-one compositions: a configured product carries a unique gemstone —
-  // quantity is capped at 1 honestly.
-  const maxQty = p.kind === 'CONFIGURED' ? 1 : 10;
+  // quantity is capped at 1 honestly. Ready-made pieces are capped by stock.
+  if (p.kind === 'READY_MADE' && Number(p.quantity) <= 0) {
+    throw err(`'${p.name}' is out of stock`, 409);
+  }
+  const maxQty = p.kind === 'CONFIGURED' ? 1 : Math.max(1, Math.min(10, Number(p.quantity)));
   const finalQty = Math.min(qty, maxQty);
 
   const cart = await getOrCreateCart(client, token);
@@ -138,12 +144,25 @@ export async function addProductToCart(client: Db, token: string, productRef: st
 
 export async function updateCartItem(client: Db, token: string, itemId: number, quantity: number): Promise<CartView> {
   if (quantity <= 0) return removeCartItem(client, token, itemId);
+  const item = await client.query(
+    `SELECT ci.product_id, p.kind::text AS kind, p.quantity
+     FROM fresh.cart_items ci
+     JOIN fresh.carts c ON c.id = ci.cart_id
+     LEFT JOIN fresh.products p ON p.id = ci.product_id
+     WHERE ci.id = $1 AND c.token = $2 AND c.status = 'ACTIVE'`,
+    [itemId, token],
+  );
+  if (!item.rows[0]) throw err(`cart item ${itemId} not found`, 404);
+  const row = item.rows[0];
+  let max = 10;
+  if (row.product_id != null) {
+    const stock = row.kind === 'CONFIGURED' ? 1 : Number(row.quantity);
+    if (stock <= 0) throw err('item is out of stock', 409);
+    max = Math.max(1, Math.min(10, stock));
+  }
   const { rows } = await client.query(
-    `UPDATE fresh.cart_items ci SET quantity = $2
-     FROM fresh.carts c
-     WHERE ci.id = $1 AND ci.cart_id = c.id AND c.token = $3 AND c.status = 'ACTIVE'
-     RETURNING ci.id`,
-    [itemId, Math.min(quantity, 10), token],
+    `UPDATE fresh.cart_items SET quantity = $2 WHERE id = $1 RETURNING id`,
+    [itemId, Math.min(quantity, max)],
   );
   if (!rows[0]) throw err(`cart item ${itemId} not found`, 404);
   return loadCartView(client, token);
@@ -181,6 +200,47 @@ export interface CheckoutResult {
   access_token: string;
   totals: { subtotal: number; discount: number; tax: number; tax_label: string; shipping: number; grand_total: number; currency: string };
   payment_pending: true;
+}
+
+export async function quoteCart(
+  client: Db,
+  token: string,
+  input: { country?: string | null; discount_code?: string | null },
+) {
+  const cart = await loadCartView(client, token);
+  if (!cart.items.length) throw err('cart is empty', 422);
+  const subtotal = cart.subtotal;
+  let discount = 0;
+  if (input.discount_code) {
+    const d = await client.query(
+      `SELECT kind, value, min_subtotal, starts_at, ends_at, usage_limit, used_count
+       FROM fresh.discounts WHERE code = $1 AND active = true`,
+      [input.discount_code.toUpperCase()],
+    );
+    const row = d.rows[0];
+    if (!row) throw err(`discount '${input.discount_code}' not found or inactive`, 422);
+    const now = Date.now();
+    if (row.starts_at && new Date(row.starts_at).getTime() > now) throw err('discount not started', 422);
+    if (row.ends_at && new Date(row.ends_at).getTime() < now) throw err('discount expired', 422);
+    if (row.usage_limit != null && Number(row.used_count) >= Number(row.usage_limit)) throw err('discount exhausted', 422);
+    if (row.min_subtotal != null && subtotal < num(row.min_subtotal)) throw err(`discount requires minimum $${num(row.min_subtotal)}`, 422);
+    discount = row.kind === 'PERCENT' ? Math.round(subtotal * num(row.value)) / 100 : num(row.value);
+    discount = Math.min(discount, subtotal);
+  }
+  const assessment = assessTax(input.country ?? null, BigInt(Math.round((subtotal - discount) * 100)));
+  const tax = num(assessment.taxTotal);
+  const taxLabel = 'label' in assessment ? assessment.label : 'UNCONFIGURED';
+  const shipping = 0;
+  const grand = Math.max(0, Math.round((subtotal - discount + tax + shipping) * 100) / 100);
+  return {
+    subtotal,
+    discount,
+    tax,
+    tax_label: taxLabel,
+    shipping,
+    grand_total: grand,
+    currency: cart.currency,
+  };
 }
 
 export async function checkoutCart(client: Db, token: string, input: CheckoutInput): Promise<CheckoutResult> {
@@ -228,6 +288,7 @@ export async function checkoutCart(client: Db, token: string, input: CheckoutInp
   const taxableCents = BigInt(Math.round((subtotal - discount) * 100));
   const assessment = assessTax(country, taxableCents);
   const tax = num(assessment.taxTotal);
+  const taxLabel = 'label' in assessment ? assessment.label : 'UNCONFIGURED';
   const shipping = 0; // pending-fulfilment: shipping is settled before dispatch (recorded follow-up)
   const grand = Math.max(0, Math.round((subtotal - discount + tax + shipping) * 100) / 100);
 
@@ -257,24 +318,36 @@ export async function checkoutCart(client: Db, token: string, input: CheckoutInp
     );
   }
 
-  // Reservations + inventory movement
+  // Reservations + inventory movement (locked; no double-sell, stock guarded)
   for (const item of cart.items) {
     if (item.gemstone_ref) {
-      await client.query(
-        `INSERT INTO fresh.inventory_reservations (owner_kind, owner_id, cart_id, state, expires_at, previous_status)
-         SELECT 'gemstone', g.id, (SELECT id FROM fresh.carts WHERE token = $2), 'ACTIVE', now() + interval '24 hours', g.status::text
-         FROM fresh.gemstones g WHERE g.ref = $1`,
-        [item.gemstone_ref, token],
+      const locked = await client.query(
+        `SELECT id, status FROM fresh.gemstones WHERE ref = $1 FOR UPDATE`,
+        [item.gemstone_ref],
       );
-      await client.query(`UPDATE fresh.gemstones SET status = 'RESERVED' WHERE ref = $1`, [item.gemstone_ref]);
-    } else if (item.product_id != null) {
+      const gem = locked.rows[0];
+      if (!gem) throw err(`stone '${item.gemstone_ref}' not found`, 404);
+      if (['RESERVED', 'SOLD', 'ARCHIVED'].includes(String(gem.status))) {
+        throw new ConflictError(`stone '${item.gemstone_ref}' is no longer available`);
+      }
+      await client.query(`UPDATE fresh.gemstones SET status = 'RESERVED' WHERE id = $1`, [gem.id]);
       await client.query(
-        `INSERT INTO fresh.inventory_reservations (owner_kind, owner_id, cart_id, state, expires_at)
-         VALUES ('product', $1, (SELECT id FROM fresh.carts WHERE token = $2), 'ACTIVE', now() + interval '24 hours')`,
-        [item.product_id, token],
+        `INSERT INTO fresh.inventory_reservations (owner_kind, owner_id, cart_id, state, expires_at, previous_status, order_id)
+         VALUES ('gemstone', $1, (SELECT id FROM fresh.carts WHERE token = $2), 'ACTIVE', now() + interval '24 hours', $3, $4)`,
+        [gem.id, token, gem.status, orderId],
+      );
+    } else if (item.product_id != null) {
+      const dec = await client.query(
+        `UPDATE fresh.products SET quantity = quantity - $2 WHERE id = $1 AND quantity >= $2 RETURNING id`,
+        [item.product_id, item.quantity],
+      );
+      if (!dec.rows[0]) throw new ConflictError(`'${item.product_name}' is out of stock`);
+      await client.query(
+        `INSERT INTO fresh.inventory_reservations (owner_kind, owner_id, cart_id, state, expires_at, order_id)
+         VALUES ('product', $1, (SELECT id FROM fresh.carts WHERE token = $2), 'ACTIVE', now() + interval '24 hours', $3)`,
+        [item.product_id, token, orderId],
       );
     }
-    if (appliedDiscountId != null) break; // usage counted once per order below
   }
   if (appliedDiscountId != null) {
     await client.query(`UPDATE fresh.discounts SET used_count = used_count + 1 WHERE id = $1`, [appliedDiscountId]);
@@ -294,7 +367,7 @@ export async function checkoutCart(client: Db, token: string, input: CheckoutInp
     order_number: number,
     order_id: orderId,
     access_token: access.raw,
-    totals: { subtotal, discount, tax, tax_label: assessment.evidence, shipping, grand_total: grand, currency: cart.currency },
+    totals: { subtotal, discount, tax, tax_label: taxLabel, shipping, grand_total: grand, currency: cart.currency },
     payment_pending: true,
   };
 }
@@ -394,12 +467,12 @@ export async function getOrderAuthorized(
   return null;
 }
 
-export async function listOrders(client: Db, limit = 50) {
+export async function listOrders(client: Db, limit = 50, offset = 0) {
   const { rows } = await client.query(
     `SELECT o.order_number, o.email, o.status, o.grand_total::text AS grand_total, o.currency, o.placed_at, o.paid_at,
             (SELECT p.provider FROM fresh.payments p WHERE p.order_id = o.id ORDER BY p.created_at DESC LIMIT 1) AS payment_provider
-     FROM fresh.orders o ORDER BY o.placed_at DESC LIMIT $1`,
-    [Math.min(limit, 200)],
+     FROM fresh.orders o ORDER BY o.placed_at DESC LIMIT $1 OFFSET $2`,
+    [Math.min(limit, 200), Math.max(offset, 0)],
   );
   return rows;
 }
@@ -452,7 +525,15 @@ export async function cancelOrder(
     }
   }
 
-  const items = await client.query(`SELECT gemstone_id FROM fresh.order_items WHERE order_id = $1`, [order.id]);
+  await client.query(
+    `UPDATE fresh.inventory_reservations SET state = 'RELEASED'
+     WHERE order_id = $1 AND state IN ('ACTIVE','CONSUMED')`,
+    [order.id],
+  );
+  const items = await client.query(
+    `SELECT gemstone_id, product_id, quantity FROM fresh.order_items WHERE order_id = $1`,
+    [order.id],
+  );
   for (const item of items.rows) {
     if (item.gemstone_id != null) {
       await client.query(
@@ -464,22 +545,21 @@ export async function cancelOrder(
                'ACTIVE'
              )::fresh.catalog_status,
              quantity = 1
-         WHERE g.id = $1 AND g.status IN ('RESERVED','SOLD')`,
+         WHERE g.id = $1 AND g.status IN ('RESERVED','SOLD')
+           AND NOT EXISTS (
+             SELECT 1 FROM fresh.inventory_reservations r2
+             WHERE r2.owner_kind = 'gemstone' AND r2.owner_id = g.id AND r2.state = 'ACTIVE'
+           )`,
         [item.gemstone_id],
       );
+
+    }
+    if (item.product_id != null) {
       await client.query(
-        `UPDATE fresh.inventory_reservations SET state = 'RELEASED'
-         WHERE owner_kind = 'gemstone' AND owner_id = $1 AND state IN ('ACTIVE','CONSUMED')`,
-        [item.gemstone_id],
+        `UPDATE fresh.products SET quantity = quantity + $2 WHERE id = $1`,
+        [item.product_id, item.quantity],
       );
     }
-  }
-  const productRes = await client.query(`SELECT product_id FROM fresh.order_items WHERE order_id = $1 AND product_id IS NOT NULL`, [order.id]);
-  for (const item of productRes.rows) {
-    await client.query(
-      `UPDATE fresh.inventory_reservations SET state = 'RELEASED' WHERE owner_kind = 'product' AND owner_id = $1 AND state IN ('ACTIVE','CONSUMED')`,
-      [item.product_id],
-    );
   }
 
   await client.query(

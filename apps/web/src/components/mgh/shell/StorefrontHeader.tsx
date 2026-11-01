@@ -45,8 +45,7 @@ export function StorefrontHeader() {
     pathname === '/varieties' ||
     pathname === '/jewellery' ||
     pathname === '/settings' ||
-    pathname === '/design-your-own' ||
-    pathname === '/about';
+    pathname === '/design-your-own';
 
   const { cart, favorites, compareList, currency, setCurrency, setCartOpen, setSearchOpen } =
     useStorefront();

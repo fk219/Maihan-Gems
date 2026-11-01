@@ -7,10 +7,11 @@
  * the applet provider bag + the authoritative server cart).
  */
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 import { siteBaseUrl } from '../../../lib/jsonld.js';
 import { CartPageClient } from '@/components/mgh/catalog/CartPageClient';
+import '../../../styles/portal-premium.css';
+import { ClientSurface } from '@/components/mgh/providers/ClientSurface';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,25 +40,20 @@ function canonicalBase(): string | null {
 
 export default function CartPage() {
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-      <nav aria-label="Breadcrumb" className="text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#76726A]">
-        <ol className="flex items-center gap-2">
-          <li><Link href="/" className="hover:text-[#121211]">Home</Link></li>
-          <li aria-hidden="true">/</li>
-          <li aria-current="page" className="font-medium text-[#121211]">Vault Cart</li>
-        </ol>
-      </nav>
-
-      <div className="border-b border-[#E4DFD5] pb-6">
-        <p className="text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] text-[#9A7B2C]">
-          GENEVA VAULT TRAY
-        </p>
-        <h1 className="mt-1 font-[family-name:var(--font-display)] text-4xl font-semibold text-[#121211]">
-          Vault Selection
-        </h1>
+    <ClientSurface>
+      <div className="client-frame">
+        <div className="portal-top__where">
+          <span>Client atelier</span>
+          <span aria-hidden="true">/</span>
+          <b>Vault tray</b>
+        </div>
+        <div className="checkout-head" style={{ marginTop: 8 }}>
+          <p className="portal-kicker">The private tray</p>
+          <h1 className="portal-page-title">Vault Selection</h1>
+          <p className="portal-page-sub">Review the specimens and settings held for your commission.</p>
+        </div>
+        <CartPageClient />
       </div>
-
-      <CartPageClient />
-    </div>
+    </ClientSurface>
   );
 }

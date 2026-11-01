@@ -1897,6 +1897,13 @@
   cursor: pointer;
 }
 
+.portal-checkbox {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--p-accent);
+  cursor: pointer;
+}
+
 .portal-label {
   display: block;
   margin-bottom: 6px;
@@ -2070,6 +2077,91 @@
 
 .portal-notice--good {
   color: var(--p-good);
+}
+
+/* --------------------------------------------------------- notifications */
+.portal-notifications {
+  position: relative;
+}
+
+.portal-notifications__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  border: none;
+  background: transparent;
+}
+
+.portal-notifications__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 90;
+  width: 310px;
+  padding: 10px;
+  border: 1px solid var(--p-line);
+  border-radius: 16px;
+  background: var(--p-card);
+  box-shadow: var(--p-shadow-lg);
+}
+
+.portal-notification__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--p-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.portal-notification__item:hover {
+  background: var(--p-well);
+}
+
+.portal-notification__item svg {
+  width: 16px;
+  height: 16px;
+  color: var(--p-muted);
+}
+
+.portal-notification__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.portal-notification__title {
+  display: block;
+  font-size: var(--p-fs-sm);
+  font-weight: 600;
+  color: var(--p-text);
+}
+
+.portal-notification__sub {
+  display: block;
+  font-size: 10px;
+  color: var(--p-muted);
+}
+
+.portal-notification__count {
+  padding: 2px 7px;
+  border-radius: var(--p-r-pill);
+  background: var(--p-accent-soft);
+  color: var(--p-accent-deep);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.portal-notifications__empty {
+  margin: 0;
+  padding: 16px 8px 8px;
+  color: var(--p-muted);
+  font-size: var(--p-fs-sm);
+  text-align: center;
 }
 
 /* -------------------------------------------------------------- palette */
@@ -2972,4 +3064,8 @@ body.portal-surface .ai-concierge-trigger {
   body.portal-surface a[aria-label^="Compare items"] {
     display: none;
   }
+}
+
+.portal-theme[data-portal-theme="dark"] .portal-tile__icon {
+  background: rgba(255, 255, 255, 0.08);
 }

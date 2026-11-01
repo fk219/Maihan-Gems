@@ -7,10 +7,10 @@ import {
   Building2, Check, ChevronDown, ChevronRight, CircleDollarSign, ClipboardCheck,
   Clock, CreditCard, Eye, EyeOff, Gem, LayoutDashboard, LogOut, Mail,
   Menu, MoreVertical, PanelLeftClose, Moon, PackageSearch, Plus, RotateCcw, Search,
-  ShoppingCart, Settings, Sun, Trash2, TrendingDown, TrendingUp, Truck, X, ShieldCheck,
+  ShoppingCart, Settings, ShieldCheck, Sun, Trash2, TrendingDown, TrendingUp, Truck, X, HelpCircle,
 } from 'lucide-react';
 
-type Tab = 'overview' | 'inventory' | 'orders' | 'submissions' | 'vendors' | 'discounts' | 'certificates' | 'leads' | 'audit' | 'settings';
+type Tab = 'overview' | 'inventory' | 'orders' | 'submissions' | 'vendors' | 'discounts' | 'certificates' | 'leads' | 'audit' | 'settings' | 'help';
 
 interface Stats {
   gemstones_total: number; gemstones_active: number; gemstones_sold: number;
@@ -27,7 +27,7 @@ interface InvItem {
   ref: string; name: string; kind: string; status: string; price_amount: number | null;
   currency: string; weight_ct: number | null; variety: string; origin: string | null;
   origin_type: string; vendor_code: string | null; vendor_name: string | null;
-  table_name: string; primary_image: string | null; created_at: string;
+  table_name: string; primary_image: string | null; created_at: string; quantity: number | null;
 }
 interface OrderRow {
   order_number: string; email: string; status: string; grand_total: string; currency: string; placed_at: string;
@@ -73,7 +73,7 @@ interface AuditRow {
 interface VendorRow {
   code: string; name: string; country: string | null; status: string;
   email: string | null; contact_name: string | null; onboarding_status: string;
-  live_gems: number; inventory_value: number; total_submissions: number;
+  live_gems: number; inventory_value: number; revenue: number; total_submissions: number;
 }
 interface LeadRow {
   id: number; email: string; name: string | null; source: string; status: string; created_at: string;
@@ -114,6 +114,7 @@ const NAV_GROUPS: Array<{ head: string; items: Array<{ id: Tab; label: string; i
     head: 'Support',
     items: [
       { id: 'settings', label: 'Settings', icon: Settings },
+      { id: 'help', label: 'Help', icon: HelpCircle },
       { id: 'audit', label: 'Audit log', icon: Activity },
     ],
   },
@@ -263,9 +264,16 @@ export default function AdminConsoleApp() {
   const [adminEmail, setAdminEmail] = useState('admin@maihangems.com');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [challengeToken, setChallengeToken] = useState<string | null>(null);
+  const [otp, setOtp] = useState('');
+  const [twoFactor, setTwoFactor] = useState<{ enabled: boolean } | null>(null);
+  const [totpSetup, setTotpSetup] = useState<{ secret: string; otpauth_url: string } | null>(null);
+  const [totpCode, setTotpCode] = useState('');
+  const [totpError, setTotpError] = useState('');
   const [tab, setTab] = useState<Tab>('overview');
   const [stats, setStats] = useState<Stats | null>(null);
   const [inventory, setInventory] = useState<InvItem[]>([]);
+  const [selectedInventory, setSelectedInventory] = useState<string[]>([]);
   const [invSearch, setInvSearch] = useState('');
   const [invStatus, setInvStatus] = useState('');
   const [orders, setOrders] = useState<OrderRow[]>([]);
@@ -298,12 +306,13 @@ export default function AdminConsoleApp() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteQuery, setPaletteQuery] = useState('');
   const [now, setNow] = useState(() => new Date());
   const [range, setRange] = useState<ChartRange>('week');
-  const [partnerMetric, setPartnerMetric] = useState<'value' | 'units'>('value');
+  const [partnerMetric, setPartnerMetric] = useState<'value' | 'units' | 'revenue'>('value');
 
   const loadAll = useCallback(async () => {
     setBusy(true);
@@ -334,6 +343,8 @@ export default function AdminConsoleApp() {
       if (auditRes.ok) setAudit((await auditRes.json()) as AuditRow[]);
       if (certRes.ok) setCerts((await certRes.json()) as CertRow[]);
       if (outboxRes.ok) setOutbox((await outboxRes.json()) as OutboxData);
+      const twoFactorRes = await fetch('/api/fresh/admin/auth/2fa/status', { cache: 'no-store' });
+      if (twoFactorRes.ok) setTwoFactor((await twoFactorRes.json()) as { enabled: boolean });
       setAuthed(true);
     } catch { setAuthed(false); }
     setBusy(false);
@@ -372,6 +383,8 @@ export default function AdminConsoleApp() {
       if (event.key === 'Escape') {
         setPaletteOpen(false);
         setMenuOpen(false);
+        setNotificationsOpen(false);
+        setUserMenuOpen(false);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -384,12 +397,67 @@ export default function AdminConsoleApp() {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ email: adminEmail.trim(), password }),
     });
-    if (response.ok) { setPassword(''); setAuthed(true); await loadAll(); }
-    else {
-      const data = (await response.json().catch(() => ({}))) as { error?: string };
+    const data = (await response.json().catch(() => ({}))) as {
+      error?: string; requires_2fa?: boolean; challenge_token?: string;
+    };
+    if (response.ok && data.requires_2fa && data.challenge_token) {
+      setChallengeToken(data.challenge_token);
+      setPassword('');
+    } else if (response.ok) {
+      setPassword(''); setAuthed(true); await loadAll();
+    } else {
       setLoginError(data.error ?? 'Invalid email or password');
     }
     setBusy(false);
+  };
+
+  const verifyOtp = async (event: React.FormEvent) => {
+    event.preventDefault(); setLoginError(''); setBusy(true);
+    const response = await fetch('/api/fresh-admin/2fa/verify', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ challenge_token: challengeToken, code: otp }),
+    });
+    if (response.ok) {
+      setChallengeToken(null); setOtp(''); setAuthed(true); await loadAll();
+    } else {
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      setLoginError(data.error ?? 'Invalid two-factor code');
+    }
+    setBusy(false);
+  };
+
+  const setupTotp = async () => {
+    setTotpError('');
+    const response = await fetch('/api/fresh/admin/auth/2fa/setup', { method: 'POST' });
+    if (response.ok) setTotpSetup((await response.json()) as { secret: string; otpauth_url: string });
+    else {
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      setTotpError(data.error ?? 'Could not start 2FA setup');
+    }
+  };
+
+  const enableTotp = async () => {
+    setTotpError('');
+    const response = await fetch('/api/fresh/admin/auth/2fa/enable', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code: totpCode }),
+    });
+    if (response.ok) { setTwoFactor({ enabled: true }); setTotpSetup(null); setTotpCode(''); }
+    else {
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      setTotpError(data.error ?? 'Could not enable 2FA');
+    }
+  };
+
+  const disableTotp = async () => {
+    setTotpError('');
+    const response = await fetch('/api/fresh/admin/auth/2fa/disable', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code: totpCode }),
+    });
+    if (response.ok) { setTwoFactor({ enabled: false }); setTotpCode(''); }
+    else {
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      setTotpError(data.error ?? 'Could not disable 2FA');
+    }
   };
 
   const logout = async () => {
@@ -408,9 +476,49 @@ export default function AdminConsoleApp() {
     if (response.ok) {
       const data = (await response.json()) as InvItem[] | { items?: InvItem[] };
       setInventory(Array.isArray(data) ? data : data.items ?? []);
+      setSelectedInventory([]);
     }
     setBusy(false);
   }, [invSearch, invStatus]);
+
+  const loadMoreOrders = async () => {
+    const response = await fetch(`/api/fresh/admin/orders?limit=100&offset=${orders.length}`, { cache: 'no-store' });
+    if (!response.ok) return;
+    const more = (await response.json()) as OrderRow[];
+    setOrders((current) => [...current, ...more.filter((row) => !current.some((o) => o.order_number === row.order_number))]);
+  };
+
+  const loadMoreSubmissions = async () => {
+    const response = await fetch(`/api/fresh/admin/submissions?limit=100&offset=${submissions.length}`, { cache: 'no-store' });
+    if (!response.ok) return;
+    const more = (await response.json()) as SubmissionRow[];
+    setSubmissions((current) => [...current, ...more.filter((row) => !current.some((x) => x.id === row.id))]);
+  };
+
+  const loadMoreInventory = async () => {
+    const params = new URLSearchParams({ limit: '100', offset: String(inventory.length) });
+    if (invSearch) params.set('q', invSearch);
+    if (invStatus) params.set('status', invStatus);
+    const response = await fetch(`/api/fresh/admin/inventory?${params.toString()}`, { cache: 'no-store' });
+    if (!response.ok) return;
+    const more = ((await response.json()) as { items?: InvItem[] }).items ?? [];
+    setInventory((current) => [...current, ...more.filter((row) => !current.some((x) => x.ref === row.ref && x.table_name === row.table_name))]);
+  };
+
+  const updateStock = async (ref: string, quantity: number) => {
+    setBusy(true); setActionError('');
+    const response = await fetch(`/api/fresh/admin/inventory/${encodeURIComponent(ref)}`, {
+      method: 'PATCH', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ quantity }),
+    });
+    if (!response.ok) {
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      setActionError(data.error ?? 'Could not update stock');
+    } else {
+      await loadAll();
+    }
+    setBusy(false);
+  };
 
   const updateStatus = async (ref: string, status: string) => {
     setBusy(true);
@@ -419,6 +527,22 @@ export default function AdminConsoleApp() {
       body: JSON.stringify({ status }),
     });
     await loadAll(); setBusy(false);
+  };
+
+  const toggleInventorySelection = (ref: string) => {
+    setSelectedInventory((current) => current.includes(ref) ? current.filter((item) => item !== ref) : [...current, ref]);
+  };
+
+  const bulkUpdateInventory = async (status: string) => {
+    if (selectedInventory.length === 0) return;
+    setBusy(true);
+    await Promise.all(selectedInventory.map((ref) => fetch(`/api/fresh/admin/inventory/${encodeURIComponent(ref)}`, {
+      method: 'PATCH', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ status }),
+    })));
+    setSelectedInventory([]);
+    await loadAll();
+    setBusy(false);
   };
 
   const openOrder = useCallback(async (number: string) => {
@@ -683,14 +807,14 @@ export default function AdminConsoleApp() {
   );
   const topVendors = useMemo(
     () => [...vendors]
-      .sort((a, b) => (partnerMetric === 'value' ? b.inventory_value - a.inventory_value : b.live_gems - a.live_gems))
+      .sort((a, b) => (partnerMetric === 'value' ? b.inventory_value - a.inventory_value : partnerMetric === 'revenue' ? b.revenue - a.revenue : b.live_gems - a.live_gems))
       .slice(0, 5),
     [vendors, partnerMetric],
   );
   const topVendorMetric = topVendors[0]
-    ? (partnerMetric === 'value' ? topVendors[0].inventory_value : topVendors[0].live_gems)
+    ? (partnerMetric === 'value' ? topVendors[0].inventory_value : partnerMetric === 'revenue' ? topVendors[0].revenue : topVendors[0].live_gems)
     : 0;
-  const vendorMetric = (vendor: VendorRow) => (partnerMetric === 'value' ? vendor.inventory_value : vendor.live_gems);
+  const vendorMetric = (vendor: VendorRow) => (partnerMetric === 'value' ? vendor.inventory_value : partnerMetric === 'revenue' ? vendor.revenue : vendor.live_gems);
   const paymentBreakdown = useMemo(() => {
     const map = new Map<string, { count: number; amount: number }>();
     for (const order of currentPeriodOrders) {
@@ -797,7 +921,17 @@ export default function AdminConsoleApp() {
             <p className="portal-auth__sub">The complete ledger of the house.</p>
             <span className="portal-auth__rule" />
           </div>
-          <form onSubmit={login} className="portal-card portal-auth__card space-y-5">
+          <form onSubmit={challengeToken ? verifyOtp : login} className="portal-card portal-auth__card space-y-5">
+            {challengeToken ? (
+              <>
+                <p className="portal-card__sub">Enter the 6-digit code from your authenticator app.</p>
+                <div>
+                  <label className="portal-label" htmlFor="admin-otp">Authentication code</label>
+                  <input id="admin-otp" value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" maxLength={6} className="portal-input portal-input--mono" autoFocus />
+                </div>
+              </>
+            ) : (
+              <>
             <div>
               <label className="portal-label" htmlFor="admin-email">Email</label>
               <input id="admin-email" type="email" value={adminEmail} onChange={(event) => setAdminEmail(event.target.value)} required className="portal-input" autoComplete="email" />
@@ -806,10 +940,17 @@ export default function AdminConsoleApp() {
               <label className="portal-label" htmlFor="admin-password">Password</label>
               <input id="admin-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required className="portal-input" autoComplete="current-password" />
             </div>
+              </>
+            )}
             {loginError ? <p className="portal-notice">{loginError}</p> : null}
-            <button type="submit" disabled={busy} className="portal-btn portal-btn--gold w-full">
-              {busy ? 'Opening the vault…' : 'Enter the console'}
+            <button type="submit" disabled={busy || (challengeToken !== null && otp.length !== 6)} className="portal-btn portal-btn--gold w-full">
+              {busy ? 'Opening the vault…' : challengeToken ? 'Verify code' : 'Enter the console'}
             </button>
+            {challengeToken ? (
+              <button type="button" onClick={() => { setChallengeToken(null); setOtp(''); setLoginError(''); }} className="portal-card__sub" style={{ background: 'none', border: 0, cursor: 'pointer' }}>
+                Back to password
+              </button>
+            ) : null}
           </form>
           <p className="portal-auth__foot">Authorized personnel only.</p>
         </div>
@@ -834,6 +975,17 @@ export default function AdminConsoleApp() {
     setSelectedVendor(null);
     setShowCreate(true);
     setActionError('');
+  };
+
+  const downloadCsv = (filename: string, rows: Array<Array<string | number | null>>) => {
+    const escape = (value: string | number | null) => `"${String(value ?? '').replaceAll('"', '""')}"`;
+    const csv = rows.map((row) => row.map(escape).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -943,15 +1095,51 @@ export default function AdminConsoleApp() {
               <i className="portal-live-dot" />
               <span>{formatClock(now)}</span>
             </span>
-            <button
-              type="button"
-              className="portal-icon-btn"
-              aria-label="Notifications"
-              onClick={() => setTab('submissions')}
-            >
-              <Bell />
-              {notificationCount > 0 ? <span className="portal-badge-dot">{notificationCount}</span> : null}
-            </button>
+            <div className="portal-notifications">
+              <button
+                type="button"
+                className="portal-icon-btn"
+                aria-label="Notifications"
+                aria-expanded={notificationsOpen}
+                onClick={() => setNotificationsOpen((value) => !value)}
+              >
+                <Bell />
+                {notificationCount > 0 ? <span className="portal-badge-dot">{notificationCount}</span> : null}
+              </button>
+              {notificationsOpen ? (
+                <>
+                  <button type="button" className="portal-notifications__scrim" aria-label="Close notifications" onClick={() => setNotificationsOpen(false)} />
+                  <div className="portal-notifications__panel">
+                  <p className="portal-label" style={{ padding: '2px 8px 8px' }}>Needs attention</p>
+                  <button type="button" className="portal-notification__item" onClick={() => { setTab('submissions'); setNotificationsOpen(false); }}>
+                    <ClipboardCheck />
+                    <span className="portal-notification__text">
+                      <span className="portal-notification__title">Partner submissions</span>
+                      <span className="portal-notification__sub">Awaiting moderation</span>
+                    </span>
+                    <span className="portal-notification__count">{pendingReview}</span>
+                  </button>
+                  <button type="button" className="portal-notification__item" onClick={() => { setTab('orders'); setNotificationsOpen(false); }}>
+                    <ShoppingCart />
+                    <span className="portal-notification__text">
+                      <span className="portal-notification__title">Orders awaiting payment</span>
+                      <span className="portal-notification__sub">Pending settlement</span>
+                    </span>
+                    <span className="portal-notification__count">{pendingOrders.length}</span>
+                  </button>
+                  <button type="button" className="portal-notification__item" onClick={() => { setTab('leads'); setNotificationsOpen(false); }}>
+                    <Mail />
+                    <span className="portal-notification__text">
+                      <span className="portal-notification__title">New leads</span>
+                      <span className="portal-notification__sub">Viewing and newsletter enquiries</span>
+                    </span>
+                    <span className="portal-notification__count">{newLeads}</span>
+                  </button>
+                    {notificationCount === 0 ? <p className="portal-notifications__empty">Nothing requires attention.</p> : null}
+                  </div>
+                </>
+              ) : null}
+            </div>
             <button
               type="button"
               className="portal-icon-btn"
@@ -1197,10 +1385,11 @@ export default function AdminConsoleApp() {
                 <header className="portal-card__head">
                   <div>
                     <h2 className="portal-card__title">Best partners</h2>
-                    <p className="portal-card__sub">{partnerMetric === 'value' ? 'Live inventory value' : 'Live pieces'}</p>
+                    <p className="portal-card__sub">{partnerMetric === 'value' ? 'Live inventory value' : partnerMetric === 'revenue' ? 'Settled revenue' : 'Live pieces'}</p>
                   </div>
                   <div className="portal-seg" role="group" aria-label="Partner ranking">
                     <button type="button" className={`portal-seg__item ${partnerMetric === 'value' ? 'is-active' : ''}`} onClick={() => setPartnerMetric('value')}>Value</button>
+                    <button type="button" className={`portal-seg__item ${partnerMetric === 'revenue' ? 'is-active' : ''}`} onClick={() => setPartnerMetric('revenue')}>Revenue</button>
                     <button type="button" className={`portal-seg__item ${partnerMetric === 'units' ? 'is-active' : ''}`} onClick={() => setPartnerMetric('units')}>Units</button>
                   </div>
                 </header>
@@ -1225,7 +1414,7 @@ export default function AdminConsoleApp() {
                         <span className="portal-best__details">
                           <span className="portal-best__header">
                             <span className="portal-best__name">{vendor.name} <small>{vendor.country ?? '—'}</small></span>
-                            <span className="portal-best__value">{partnerMetric === 'value' ? money(vendor.inventory_value, stats?.revenue_currency ?? 'USD') : `${vendor.live_gems} live`}</span>
+                            <span className="portal-best__value">{partnerMetric === 'value' ? money(vendor.inventory_value, stats?.revenue_currency ?? 'USD') : partnerMetric === 'revenue' ? money(vendor.revenue, stats?.revenue_currency ?? 'USD') : `${vendor.live_gems} live`}</span>
                           </span>
                           <span className="portal-best__track">
                             <span className={`portal-best__bar ${index === 4 ? 'is-muted' : ''}`} style={{ width: `${topVendorMetric > 0 ? Math.max(4, (vendorMetric(vendor) / topVendorMetric) * 100) : 0}%` }} />
@@ -1435,9 +1624,15 @@ export default function AdminConsoleApp() {
                 <h1 className="portal-page-title">Platform Inventory</h1>
                 <p className="portal-page-sub">Every stone and piece across the house and its partners.</p>
               </div>
-              <button type="button" className="portal-btn portal-btn--gold" onClick={() => { setInvSearch(''); setInvStatus(''); void searchInventory('', ''); }}>
-                Refresh list
-              </button>
+              <div className="portal-card__actions">
+                <button type="button" className="portal-btn portal-btn--ghost" onClick={() => downloadCsv('maihan-inventory.csv', [
+                  ['Reference', 'Name', 'Kind', 'Status', 'Vendor', 'Variety', 'Price', 'Currency', 'Created'],
+                  ...inventory.map((item) => [item.ref, item.name, item.kind, item.status, item.vendor_name ?? 'House', item.variety, item.price_amount, item.currency, item.created_at]),
+                ])}>Export CSV</button>
+                <button type="button" className="portal-btn portal-btn--gold" onClick={() => { setInvSearch(''); setInvStatus(''); void searchInventory('', ''); }}>
+                  Refresh list
+                </button>
+              </div>
             </div>
 
             <div className="portal-inline">
@@ -1459,13 +1654,42 @@ export default function AdminConsoleApp() {
             </div>
 
             <div className="portal-card portal-table-wrap">
+              {selectedInventory.length > 0 ? (
+                <div className="portal-inline" style={{ padding: '12px 14px', borderBottom: '1px solid var(--p-line)' }}>
+                  <span className="portal-badge portal-badge--pending">{selectedInventory.length} selected</span>
+                  <button type="button" onClick={() => void bulkUpdateInventory('ACTIVE')} disabled={busy} className="portal-btn portal-btn--gold portal-btn--sm">Publish</button>
+                  <button type="button" onClick={() => void bulkUpdateInventory('DRAFT')} disabled={busy} className="portal-btn portal-btn--ghost portal-btn--sm">Hide</button>
+                  <button type="button" onClick={() => void bulkUpdateInventory('ARCHIVED')} disabled={busy} className="portal-btn portal-btn--danger portal-btn--sm">Archive</button>
+                  <button type="button" onClick={() => setSelectedInventory([])} className="portal-btn portal-btn--ghost portal-btn--sm">Clear</button>
+                </div>
+              ) : null}
               <table className="portal-table">
                 <thead>
-                  <tr><th>Item</th><th>Reference</th><th>Vendor</th><th>Status</th><th className="num">Price</th><th className="num">Actions</th></tr>
+                  <tr>
+                    <th>
+                      <input
+                        type="checkbox"
+                        className="portal-checkbox"
+                        aria-label="Select all inventory on this page"
+                        checked={inventory.length > 0 && selectedInventory.length === inventory.length}
+                        onChange={(event) => setSelectedInventory(event.target.checked ? inventory.map((item) => item.ref) : [])}
+                      />
+                    </th>
+                    <th>Item</th><th>Reference</th><th>Vendor</th><th>Status</th><th className="num">Stock</th><th className="num">Price</th><th className="num">Actions</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {inventory.map((item) => (
                     <tr key={item.ref + item.table_name}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="portal-checkbox"
+                          aria-label={`Select ${item.name}`}
+                          checked={selectedInventory.includes(item.ref)}
+                          onChange={() => toggleInventorySelection(item.ref)}
+                        />
+                      </td>
                       <td>
                         <span className="strong">{item.name}</span>
                         <span className="dim">{item.variety} · {item.kind}</span>
@@ -1473,6 +1697,20 @@ export default function AdminConsoleApp() {
                       <td className="mono">{item.ref}</td>
                       <td>{item.vendor_name ?? 'House'}</td>
                       <td><span className={badgeClass(item.status)}>{statusLabel(item.status)}</span></td>
+                      <td className="num">
+                        {item.table_name === 'products' ? (
+                          <input
+                            type="number" min={0} max={1000} step={1}
+                            defaultValue={String(item.quantity ?? 0)}
+                            aria-label={`Stock for ${item.name}`}
+                            onBlur={(event) => {
+                              const value = Number(event.target.value);
+                              if (Number.isInteger(value) && value >= 0 && value <= 1000 && value !== item.quantity) void updateStock(item.ref, value);
+                            }}
+                            className="portal-input portal-input--sm" style={{ width: 72, textAlign: 'right' }}
+                          />
+                        ) : '—'}
+                      </td>
                       <td className="num">{item.price_amount ? money(item.price_amount, item.currency) : '—'}</td>
                       <td className="num">
                         <div className="flex gap-1.5 justify-end">
@@ -1490,6 +1728,11 @@ export default function AdminConsoleApp() {
                   ))}
                 </tbody>
               </table>
+              {inventory.length > 0 && inventory.length % 100 === 0 ? (
+                <div className="flex justify-center p-3">
+                  <button type="button" onClick={() => void loadMoreInventory()} className="portal-btn portal-btn--ghost portal-btn--sm">Load more inventory</button>
+                </div>
+              ) : null}
               {inventory.length === 0 ? (
                 <div className="portal-empty">
                   <div className="portal-empty__mark"><PackageSearch /></div>
@@ -1513,7 +1756,12 @@ export default function AdminConsoleApp() {
                 <button type="button" onClick={() => setOrderDetail(null)} className="portal-btn portal-btn--ghost">
                   <ArrowLeft /> All orders
                 </button>
-              ) : null}
+              ) : (
+                <button type="button" className="portal-btn portal-btn--ghost" onClick={() => downloadCsv('maihan-orders.csv', [
+                  ['Order', 'Email', 'Status', 'Total', 'Currency', 'Placed', 'Payment provider'],
+                  ...orders.map((order) => [order.order_number, order.email, order.status, order.grand_total, order.currency, order.placed_at, order.payment_provider]),
+                ])}>Export CSV</button>
+              )}
             </div>
 
             {orderDetail ? (
@@ -1639,6 +1887,11 @@ export default function AdminConsoleApp() {
                     ))}
                   </tbody>
                 </table>
+                {orders.length > 0 && orders.length % 100 === 0 ? (
+                  <div className="flex justify-center p-3">
+                    <button type="button" onClick={() => void loadMoreOrders()} className="portal-btn portal-btn--ghost portal-btn--sm">Load more orders</button>
+                  </div>
+                ) : null}
                 {orders.length === 0 ? (
                   <div className="portal-empty">
                     <div className="portal-empty__mark"><ShoppingCart /></div>
@@ -1660,10 +1913,16 @@ export default function AdminConsoleApp() {
                 <p className="portal-page-sub">{selectedVendor ? 'Partner dossier and inventory position.' : 'Every partner supplying the maison.'}</p>
               </div>
               {!selectedVendor ? (
-                <button type="button" onClick={() => { setShowCreate((value) => !value); setActionError(''); }} className="portal-btn portal-btn--gold">
-                  {showCreate ? <X /> : <Plus />}
-                  {showCreate ? 'Close' : 'New partner'}
-                </button>
+                <div className="portal-card__actions">
+                  <button type="button" className="portal-btn portal-btn--ghost" onClick={() => downloadCsv('maihan-vendors.csv', [
+                    ['Code', 'Name', 'Country', 'Status', 'Email', 'Contact', 'Onboarding', 'Live gems', 'Inventory value', 'Revenue', 'Submissions'],
+                    ...vendors.map((vendor) => [vendor.code, vendor.name, vendor.country, vendor.status, vendor.email, vendor.contact_name, vendor.onboarding_status, vendor.live_gems, vendor.inventory_value, vendor.revenue, vendor.total_submissions]),
+                  ])}>Export CSV</button>
+                  <button type="button" onClick={() => { setShowCreate((value) => !value); setActionError(''); }} className="portal-btn portal-btn--gold">
+                    {showCreate ? <X /> : <Plus />}
+                    {showCreate ? 'Close' : 'New partner'}
+                  </button>
+                </div>
               ) : (
                 <button type="button" onClick={() => setSelectedVendor(null)} className="portal-btn portal-btn--ghost">
                   <ArrowLeft /> All vendors
@@ -1759,13 +2018,14 @@ export default function AdminConsoleApp() {
                   <div className="portal-card portal-stat"><p className="portal-stat__label">Live gems</p><p className="portal-stat__value">{selectedVendor.live_gems}</p></div>
                   <div className="portal-card portal-stat"><p className="portal-stat__label">Submissions</p><p className="portal-stat__value">{selectedVendor.total_submissions}</p></div>
                   <div className="portal-card portal-stat"><p className="portal-stat__label">Inventory value</p><p className="portal-stat__value">{money(selectedVendor.inventory_value, stats?.revenue_currency ?? 'USD')}</p></div>
+                  <div className="portal-card portal-stat"><p className="portal-stat__label">Revenue</p><p className="portal-stat__value">{money(selectedVendor.revenue, stats?.revenue_currency ?? 'USD')}</p></div>
                   <div className="portal-card portal-stat"><p className="portal-stat__label">Country</p><p className="portal-stat__value" style={{ fontSize: 'var(--p-fs-2xl)' }}>{selectedVendor.country ?? '—'}</p></div>
                 </div>
               </div>
             ) : (
               <div className="portal-card portal-table-wrap">
                 <table className="portal-table">
-                  <thead><tr><th>Code</th><th>Partner</th><th>Country</th><th>Status</th><th className="num">Live</th><th className="num">Value</th></tr></thead>
+                  <thead><tr><th>Code</th><th>Partner</th><th>Country</th><th>Status</th><th className="num">Live</th><th className="num">Value</th><th className="num">Revenue</th></tr></thead>
                   <tbody>
                     {vendors.map((vendor) => (
                       <tr key={vendor.code} className="is-clickable" onClick={() => setSelectedVendor(vendor)}>
@@ -1778,6 +2038,7 @@ export default function AdminConsoleApp() {
                         <td><span className={badgeClass(vendor.status)}>{statusLabel(vendor.status)}</span></td>
                         <td className="num">{vendor.live_gems}</td>
                         <td className="num strong">{money(vendor.inventory_value, stats?.revenue_currency ?? 'USD')}</td>
+                        <td className="num strong">{money(vendor.revenue, stats?.revenue_currency ?? 'USD')}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1802,7 +2063,13 @@ export default function AdminConsoleApp() {
                 <h1 className="portal-page-title">Partner Submissions</h1>
                 <p className="portal-page-sub">Approve to mint a semantic code, hold for review, or reject with a note.</p>
               </div>
-              <span className="portal-badge portal-badge--pending">{pendingReview} awaiting review</span>
+              <div className="portal-card__actions">
+                <button type="button" className="portal-btn portal-btn--ghost" onClick={() => downloadCsv('maihan-submissions.csv', [
+                  ['ID', 'Vendor code', 'Vendor', 'Kind', 'Status', 'Resulting ref', 'Created', 'Reviewer note'],
+                  ...submissions.map((submission) => [submission.id, submission.vendor_code, submission.vendor_name, submission.kind, submission.status, submission.resulting_ref, submission.created_at, submission.reviewer_note]),
+                ])}>Export CSV</button>
+                <span className="portal-badge portal-badge--pending">{pendingReview} awaiting review</span>
+              </div>
             </div>
 
             <div className="portal-seg">
@@ -1856,6 +2123,11 @@ export default function AdminConsoleApp() {
                   ))}
                 </tbody>
               </table>
+              {submissions.length > 0 && submissions.length % 100 === 0 ? (
+                <div className="flex justify-center p-3">
+                  <button type="button" onClick={() => void loadMoreSubmissions()} className="portal-btn portal-btn--ghost portal-btn--sm">Load more submissions</button>
+                </div>
+              ) : null}
               {submissions.length === 0 ? (
                 <div className="portal-empty">
                   <div className="portal-empty__mark"><ClipboardCheck /></div>
@@ -2079,6 +2351,55 @@ export default function AdminConsoleApp() {
           </div>
         ) : null}
 
+        {tab === 'help' ? (
+          <div className="portal-section" style={{ maxWidth: 760 }}>
+            <div className="portal-page-head">
+              <div>
+                <p className="portal-kicker">Support</p>
+                <h1 className="portal-page-title">Help</h1>
+                <p className="portal-page-sub">The shortest routes through the console.</p>
+              </div>
+            </div>
+
+            <div className="portal-card portal-card--pad">
+              <p className="portal-label">House operations</p>
+              <p className="client-note">For a client, partner or order that needs a human decision, contact the atelier directly. The console never invents a resolution.</p>
+              <div className="client-list" style={{ marginTop: 14 }}>
+                <a href="/contact" className="client-list__item" style={{ textDecoration: 'none' }}>
+                  <span className="client-list__main">
+                    <span className="client-list__title">Contact the atelier</span>
+                    <span className="client-list__sub">Private client services and viewing requests</span>
+                  </span>
+                  <ArrowUpRight style={{ width: 16, height: 16, color: 'var(--p-accent-deep)' }} />
+                </a>
+                <button type="button" className="client-list__item" onClick={() => setTab('audit')} style={{ textAlign: 'left' }}>
+                  <span className="client-list__main">
+                    <span className="client-list__title">Review the audit log</span>
+                    <span className="client-list__sub">Every privileged action, append-only</span>
+                  </span>
+                  <Activity style={{ width: 16, height: 16, color: 'var(--p-accent-deep)' }} />
+                </button>
+                <button type="button" className="client-list__item" onClick={() => setTab('settings')} style={{ textAlign: 'left' }}>
+                  <span className="client-list__main">
+                    <span className="client-list__title">Open settings</span>
+                    <span className="client-list__sub">Appearance, account and two-factor authentication</span>
+                  </span>
+                  <Settings style={{ width: 16, height: 16, color: 'var(--p-accent-deep)' }} />
+                </button>
+              </div>
+            </div>
+
+            <div className="portal-card portal-card--pad">
+              <p className="portal-label">Console guide</p>
+              <div className="client-list">
+                <div className="client-list__item"><span className="client-list__main"><span className="client-list__title">Catalogue & inventory</span><span className="client-list__sub">Publish, hide, archive, adjust stock and export CSV.</span></span></div>
+                <div className="client-list__item"><span className="client-list__main"><span className="client-list__title">Orders & fulfilment</span><span className="client-list__sub">Advance the ledger, record shipments and refunds.</span></span></div>
+                <div className="client-list__item"><span className="client-list__main"><span className="client-list__title">Partners & submissions</span><span className="client-list__sub">Approve partners, moderate submissions and verify certificates.</span></span></div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         {tab === 'audit' ? (
           <div className="portal-section">
             <div className="portal-page-head">
@@ -2088,6 +2409,33 @@ export default function AdminConsoleApp() {
                 <p className="portal-page-sub">Every privileged action, append-only.</p>
               </div>
               <span className="portal-badge portal-badge--draft">{audit.length} recent</span>
+            </div>
+
+            <div className="portal-card portal-card--pad space-y-3">
+              <p className="portal-label">Two-factor authentication</p>
+              <p className="portal-card__sub">
+                {twoFactor?.enabled
+                  ? 'Enabled — sign-in requires a 6-digit authenticator code.'
+                  : 'Not enabled — protect the console with an authenticator app.'}
+              </p>
+              {twoFactor?.enabled ? (
+                <div className="portal-inline">
+                  <input value={totpCode} onChange={(event) => setTotpCode(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="6-digit code" inputMode="numeric" maxLength={6} className="portal-input portal-input--sm" style={{ width: 130 }} />
+                  <button type="button" onClick={() => void disableTotp()} className="portal-btn portal-btn--danger portal-btn--sm">Disable 2FA</button>
+                </div>
+              ) : totpSetup ? (
+                <div className="space-y-2">
+                  <p className="portal-mono" style={{ wordBreak: 'break-all' }}>Secret: {totpSetup.secret}</p>
+                  <a href={totpSetup.otpauth_url} className="portal-card__sub">Open in authenticator</a>
+                  <div className="portal-inline">
+                    <input value={totpCode} onChange={(event) => setTotpCode(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="6-digit code" inputMode="numeric" maxLength={6} className="portal-input portal-input--sm" style={{ width: 130 }} />
+                    <button type="button" onClick={() => void enableTotp()} disabled={totpCode.length !== 6} className="portal-btn portal-btn--gold portal-btn--sm">Enable 2FA</button>
+                  </div>
+                </div>
+              ) : (
+                <button type="button" onClick={() => void setupTotp()} className="portal-btn portal-btn--ghost portal-btn--sm">Set up 2FA</button>
+              )}
+              {totpError ? <p className="portal-notice">{totpError}</p> : null}
             </div>
 
             <div className="portal-card portal-card--pad space-y-3">

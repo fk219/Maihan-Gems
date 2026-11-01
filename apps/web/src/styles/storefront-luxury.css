@@ -1,0 +1,6 @@
+
+@media (max-width: 520px) {
+  a[aria-label^="Compare items"] {
+    display: none;
+  }
+}

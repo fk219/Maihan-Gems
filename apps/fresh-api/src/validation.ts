@@ -59,6 +59,7 @@ export const productSubmissionSchema = z.object({
   metal: z.string().min(1),
   price_amount: z.number().nonnegative().optional(),
   currency: z.string().length(3).default('USD'),
+  quantity: z.number().int().min(0).max(1000).default(1),
   description: z.string().max(2000).optional(),
 });
 

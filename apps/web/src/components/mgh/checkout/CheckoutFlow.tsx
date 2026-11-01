@@ -15,6 +15,9 @@ interface CartData {
 interface OrderResult {
   order_number: string; access_token: string; totals: { subtotal: number; discount: number; tax: number; tax_label: string; shipping: number; grand_total: number; currency: string };
 }
+interface CartQuote {
+  subtotal: number; discount: number; tax: number; tax_label: string; shipping: number; grand_total: number; currency: string;
+}
 
 const STEPS = [
   { num: 1, label: 'Summary & Address' },
@@ -33,6 +36,7 @@ export default function CheckoutFlow() {
   const [paid, setPaid] = useState(false);
   const [paying, setPaying] = useState(false);
   const [orderDetail, setOrderDetail] = useState<Record<string, unknown> | null>(null);
+  const [quote, setQuote] = useState<CartQuote | null>(null);
 
   const [address, setAddress] = useState({
     recipient: '', line1: '', line2: '', city: '', region: '', postal_code: '', country: 'AE', phone: '',
@@ -74,6 +78,19 @@ export default function CheckoutFlow() {
   }, [bag]);
 
   useEffect(() => { void syncCart(); }, [syncCart]);
+
+  useEffect(() => {
+    if (!cart?.token) return;
+    const timer = window.setTimeout(() => {
+      const params = new URLSearchParams({ country: address.country });
+      if (discountCode) params.set('discount', discountCode);
+      fetch(`/api/fresh/carts/${cart.token}/quote?${params.toString()}`, { cache: 'no-store' })
+        .then((response) => response.ok ? response.json() : null)
+        .then((data) => { if (data) setQuote(data as CartQuote); })
+        .catch(() => undefined);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [cart?.token, address.country, discountCode]);
 
   const placeOrder = async (event: React.FormEvent) => {
     event.preventDefault(); setError(''); setSyncing(true);
@@ -269,9 +286,11 @@ export default function CheckoutFlow() {
             </header>
 
             <div className="checkout-totals">
-              <div className="checkout-total-row"><span>Subtotal</span><span>{fmt(cart?.subtotal ?? bag.reduce((total, item) => total + item.price, 0), 'USD')}</span></div>
-              <div className="checkout-total-row"><span>Tax & shipping</span><span>Calculated next step</span></div>
-              <div className="checkout-total-row checkout-total-row--grand"><span>Due</span><span>{fmt(cart?.subtotal ?? bag.reduce((total, item) => total + item.price, 0), 'USD')}</span></div>
+              <div className="checkout-total-row"><span>Subtotal</span><span>{fmt(quote?.subtotal ?? cart?.subtotal ?? bag.reduce((total, item) => total + item.price, 0), quote?.currency ?? 'USD')}</span></div>
+              {quote && quote.discount > 0 ? <div className="checkout-total-row"><span>Discount</span><span>−{fmt(quote.discount, quote.currency)}</span></div> : null}
+              <div className="checkout-total-row"><span>Tax {quote ? `(${quote.tax_label})` : ''}</span><span>{quote ? fmt(quote.tax, quote.currency) : 'Calculated at placement'}</span></div>
+              <div className="checkout-total-row"><span>Insured courier</span><span>{quote ? (quote.shipping === 0 ? 'Included' : fmt(quote.shipping, quote.currency)) : 'Calculated at placement'}</span></div>
+              <div className="checkout-total-row checkout-total-row--grand"><span>Due</span><span>{fmt(quote?.grand_total ?? cart?.subtotal ?? bag.reduce((total, item) => total + item.price, 0), quote?.currency ?? 'USD')}</span></div>
             </div>
 
             <button type="submit" disabled={syncing || !cart?.items.length} className="portal-btn portal-btn--gold w-full" style={{ marginTop: 14 }}>

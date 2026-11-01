@@ -12,6 +12,7 @@
  * Usage: DATABASE_URL=... pnpm --filter @maihan/fresh-api run migrate
  */
 import { readdirSync, readFileSync } from 'node:fs';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import pg from 'pg';
 
@@ -23,8 +24,10 @@ if (!URL) {
   process.exit(1);
 }
 
+// Only numbered migration files: non-migration SQL (role templates etc.)
+// lives outside docs/fresh-schema and must never be applied by this runner.
 const files = readdirSync(DIR)
-  .filter((f) => f.endsWith('.sql'))
+  .filter((f) => /^\d{4}_.*\.sql$/.test(f))
   .sort((a, b) => a.localeCompare(b));
 
 if (!files.length) {
@@ -32,6 +35,11 @@ if (!files.length) {
   process.exit(1);
 }
 
+export function fileChecksum(sql: string): string {
+  return crypto.createHash('sha256').update(sql).digest('hex');
+}
+
+const ALLOW_DRIFT = process.argv.includes('--allow-drift');
 const client = new pg.Client({ connectionString: URL });
 
 try {
@@ -43,9 +51,33 @@ try {
        applied_at timestamptz NOT NULL DEFAULT now()
      )`,
   );
+  await client.query(`ALTER TABLE fresh.schema_migrations ADD COLUMN IF NOT EXISTS checksum text`);
 
-  const { rows } = await client.query<{ version: string }>('SELECT version FROM fresh.schema_migrations');
-  const applied = new Set(rows.map((r) => r.version));
+  const { rows } = await client.query<{ version: string; checksum: string | null }>(
+    'SELECT version, checksum FROM fresh.schema_migrations',
+  );
+  const applied = new Map(rows.map((r) => [r.version, r.checksum]));
+
+  // Backfill checksums recorded before integrity tracking existed.
+  let drift = 0;
+  for (const file of files) {
+    if (!applied.has(file)) continue;
+    const sql = readFileSync(path.join(DIR, file), 'utf8');
+    const hash = fileChecksum(sql);
+    const stored = applied.get(file);
+    if (stored == null) {
+      await client.query('UPDATE fresh.schema_migrations SET checksum = $2 WHERE version = $1', [file, hash]);
+      applied.set(file, hash);
+    } else if (stored !== hash) {
+      drift += 1;
+      console.error(`checksum drift: ${file} (recorded ${stored.slice(0, 12)}…, on disk ${hash.slice(0, 12)}…)`);
+    }
+  }
+  if (drift > 0 && !ALLOW_DRIFT) {
+    console.error(`FAILED: ${drift} applied migration file(s) changed. Restore the files or re-run with --allow-drift intentionally.`);
+    await client.end();
+    process.exit(1);
+  }
 
   if (applied.size === 0) {
     const { rows: base } = await client.query<{ t: string | null }>(
@@ -53,7 +85,11 @@ try {
     );
     if (base[0]?.t) {
       for (const f of files) {
-        await client.query('INSERT INTO fresh.schema_migrations (version) VALUES ($1) ON CONFLICT DO NOTHING', [f]);
+        const hash = fileChecksum(readFileSync(path.join(DIR, f), 'utf8'));
+        await client.query(
+          'INSERT INTO fresh.schema_migrations (version, checksum) VALUES ($1, $2) ON CONFLICT (version) DO UPDATE SET checksum = COALESCE(fresh.schema_migrations.checksum, EXCLUDED.checksum)',
+          [f, hash],
+        );
       }
       console.log(`baseline: schema already present — recorded ${files.length} file(s) as applied`);
       process.exit(0);
@@ -64,12 +100,13 @@ try {
   for (const file of files) {
     if (applied.has(file)) continue;
     const sql = readFileSync(path.join(DIR, file), 'utf8');
+    const checksum = fileChecksum(sql);
     const selfManaged = /^\s*BEGIN\s*;/im.test(sql);
     process.stdout.write(`apply ${file} … `);
     try {
       if (!selfManaged) await client.query('BEGIN');
       await client.query(sql);
-      await client.query('INSERT INTO fresh.schema_migrations (version) VALUES ($1)', [file]);
+      await client.query('INSERT INTO fresh.schema_migrations (version, checksum) VALUES ($1, $2)', [file, checksum]);
       if (!selfManaged) await client.query('COMMIT');
       console.log('ok');
       ran += 1;

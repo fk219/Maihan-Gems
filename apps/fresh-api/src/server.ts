@@ -24,15 +24,17 @@ import {
   listOrigins, settingsByDesign, settingDetailByCode, listAssets, catalogueExists, sitemapPage,
 } from './storefront.js';
 import { conciergeQuery } from './concierge.js';
+import { sweepMaintenance } from './maintenance.js';
 import {
   getOrCreateCart, viewCart, addProductToCart, updateCartItem, removeCartItem,
-  checkoutCart, payOrder, getOrderAuthorized, cancelOrder, listOrders, type CheckoutInput,
+  checkoutCart, quoteCart, payOrder, getOrderAuthorized, cancelOrder, listOrders, type CheckoutInput,
 } from './commerce.js';
 import { createConfiguration, getConfiguration, addConfigurationToCart } from './configurations.js';
-import { vendorInventory, updateItemStatus } from './inventory.js';
+import { vendorInventory, updateItemStatus, updateItemQuantity } from './inventory.js';
+import { vendorAnalytics } from './vendor-analytics.js';
 import { uploadImage, deleteImage } from './images.js';
 import {
-  adminStats, adminInventory, adminUpdateItemStatus, adminOrderDetail,
+  adminStats, adminInventory, adminUpdateItemStatus, adminUpdateItemQuantity, adminOrderDetail,
   adminVendorsList, listLeads, createLead, updateLeadStatus, unsubscribeLead,
   updateOrderStatus, addFulfillment, recordRefund,
   listDiscounts, createDiscount, updateDiscount, listAudit,
@@ -47,6 +49,7 @@ import { checkRateLimitShared } from './rate-limit.js';
 import {
   vendorLogin, resolveVendorSession, revokeVendorSession, setupVendorPassword,
   adminLogin, resolveAdminSession, revokeAdminSession,
+  adminVerifyTotp, adminTotpStatus, adminTotpSetup, adminTotpEnable, adminTotpDisable,
 } from './vendor-auth.js';
 
 if (!process.env['DATABASE_URL']) {
@@ -192,7 +195,7 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
       const e = new Error('email and password are required') as Error & { status?: number }; e.status = 422; throw e;
     }
     const r = await withTx((c) => adminLogin(c, body.email!, body.password!, ctx.headers['user-agent'] ?? null));
-    return ok({ token: r.token, admin: r.admin });
+    return ok(r);
   } },
   { method: 'POST', pattern: /^\/api\/v1\/admin\/auth\/logout$/, handler: async (ctx) => {
     const session = await resolveAdminSession(pool, ctx.headers.authorization);
@@ -232,6 +235,11 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     const cart = await withTx((c) => viewCart(c, p.token!));
     return ok(cart);
   } },
+  { method: 'GET', pattern: /^\/api\/v1\/carts\/(?<token>[a-f0-9-]{36})\/quote$/, handler: async (ctx, p) =>
+    ok(await withTx((c) => quoteCart(c, p.token!, {
+      country: ctx.query.get('country'),
+      discount_code: ctx.query.get('discount'),
+    }))) },
   { method: 'POST', pattern: /^\/api\/v1\/carts\/(?<token>[a-f0-9-]{36})\/items$/, handler: async (ctx, p) => {
     const body = (ctx.body ?? {}) as { ref?: string; quantity?: number; configuration_code?: string };
     if (body.configuration_code) {
@@ -297,7 +305,7 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   } },
   { method: 'GET', pattern: /^\/api\/v1\/admin\/orders$/, handler: async (ctx) => {
     await requireAdmin(ctx);
-    return ok(await withTx((c) => listOrders(c, Number(ctx.query.get('limit') ?? 50))));
+    return ok(await withTx((c) => listOrders(c, Number(ctx.query.get('limit') ?? 50), Number(ctx.query.get('offset') ?? 0))));
   } },
   { method: 'GET', pattern: /^\/api\/v1\/admin\/orders\/(?<number>MG-\d{4}-\d{6})$/, handler: async (ctx, p) => {
     await requireAdmin(ctx);
@@ -318,9 +326,13 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   } },
   { method: 'PATCH', pattern: /^\/api\/v1\/admin\/inventory\/(?<ref>[A-Za-z0-9-]+)$/, handler: async (ctx, p) => {
     await requireAdmin(ctx);
-    const body = (ctx.body ?? {}) as { status?: string };
+    const body = (ctx.body ?? {}) as { status?: string; quantity?: number };
+    if (body.quantity !== undefined) {
+      await withTx((c) => adminUpdateItemQuantity(c, p.ref!, Number(body.quantity)));
+      return ok({ ref: p.ref, quantity: Number(body.quantity) });
+    }
     if (!body.status) {
-      const e = new Error('status is required') as Error & { status?: number }; e.status = 422; throw e;
+      const e = new Error('status or quantity is required') as Error & { status?: number }; e.status = 422; throw e;
     }
     await withTx((c) => adminUpdateItemStatus(c, p.ref!, body.status!));
     return ok({ ref: p.ref, status: body.status });
@@ -469,6 +481,11 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     const vid = Number((await pool.query(`SELECT id FROM fresh.vendors WHERE code = $1`, [p.code!.toUpperCase()])).rows[0]?.id);
     return ok(await vendorInventory(pool, vid));
   } },
+  { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/analytics$/, handler: async (ctx, p) => {
+    await requireVendorForCode(ctx, p.code!);
+    const vid = Number((await pool.query(`SELECT id FROM fresh.vendors WHERE code = $1`, [p.code!.toUpperCase()])).rows[0]?.id);
+    return ok(await vendorAnalytics(pool, vid));
+  } },
   { method: 'POST', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)\/images$/, handler: async (ctx, p) => {
     await requireVendorForCode(ctx, p.code!);
     const body = (ctx.body ?? {}) as { image?: string; alt?: string };
@@ -484,11 +501,15 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   } },
   { method: 'PATCH', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)$/, handler: async (ctx, p) => {
     await requireVendorForCode(ctx, p.code!);
-    const body = (ctx.body ?? {}) as { status?: string };
-    if (!body.status) {
-      const e = new Error('status is required') as Error & { status?: number }; e.status = 422; throw e;
-    }
+    const body = (ctx.body ?? {}) as { status?: string; quantity?: number };
     const vid = Number((await pool.query(`SELECT id FROM fresh.vendors WHERE code = $1`, [p.code!.toUpperCase()])).rows[0]?.id);
+    if (body.quantity !== undefined) {
+      await withTx((c) => updateItemQuantity(c, vid, p.ref!, Number(body.quantity)));
+      return ok({ ref: p.ref, quantity: Number(body.quantity) });
+    }
+    if (!body.status) {
+      const e = new Error('status or quantity is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
     await withTx((c) => updateItemStatus(c, vid, p.ref!, body.status!));
     return ok({ ref: p.ref, status: body.status });
   } },
@@ -499,7 +520,7 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
 
   { method: 'GET', pattern: /^\/api\/v1\/admin\/submissions$/, handler: async (ctx) => {
     await requireAdmin(ctx);
-    return ok(await listSubmissions(pool, ctx.query.get('status'), ctx.query.get('vendor')));
+    return ok(await listSubmissions(pool, ctx.query.get('status'), ctx.query.get('vendor'), Number(ctx.query.get('limit') ?? 100), Number(ctx.query.get('offset') ?? 0)));
   } },
   { method: 'POST', pattern: /^\/api\/v1\/admin\/submissions\/(?<id>\d+)\/(?<action>approve|reject)$/, handler: async (ctx, p) => {
     await requireAdmin(ctx);
@@ -650,6 +671,31 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     }
     return ok(await withTx((c) => requestPasswordReset(c, 'ADMIN', body.email!)));
   } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/auth\/2fa\/verify$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { challenge_token?: string; code?: string };
+    if (!body.challenge_token || !body.code) {
+      const e = new Error('challenge_token and code are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => adminVerifyTotp(c, body.challenge_token!, body.code!)));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/auth\/2fa\/status$/, handler: async (ctx) => {
+    const s = await requireAdminSession(ctx);
+    return ok(await adminTotpStatus(pool, s.adminId));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/auth\/2fa\/setup$/, handler: async (ctx) => {
+    const s = await requireAdminSession(ctx);
+    return ok(await withTx((c) => adminTotpSetup(c, s.adminId, s.email)));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/auth\/2fa\/enable$/, handler: async (ctx) => {
+    const s = await requireAdminSession(ctx);
+    const code = (ctx.body as { code?: string } | null)?.code ?? '';
+    return ok(await withTx((c) => adminTotpEnable(c, s.adminId, code)));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/auth\/2fa\/disable$/, handler: async (ctx) => {
+    const s = await requireAdminSession(ctx);
+    const code = (ctx.body as { code?: string } | null)?.code ?? '';
+    return ok(await withTx((c) => adminTotpDisable(c, s.adminId, code)));
+  } },
   { method: 'POST', pattern: /^\/api\/v1\/admin\/auth\/reset$/, handler: async (ctx) => {
     const body = (ctx.body ?? {}) as { token?: string; password?: string };
     if (!body.token || !body.password) {
@@ -706,6 +752,10 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   { method: 'PATCH', pattern: /^\/api\/v1\/admin\/discounts\/(?<id>\d+)$/, handler: async (ctx, p) => {
     await requireAdmin(ctx);
     return ok(await withTx((c) => updateDiscount(c, Number(p.id), (ctx.body ?? {}) as Record<string, never>, 'admin')));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/maintenance\/sweep$/, handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return ok(await sweepMaintenance());
   } },
   { method: 'GET', pattern: /^\/api\/v1\/admin\/outbox$/, handler: async (ctx) => {
     await requireAdmin(ctx);
@@ -780,7 +830,8 @@ const server = http.createServer(async (req, res) => {
 
   // Locally stored media (served raw, immutable; proxied by the web app).
   if (req.method === 'GET' && url.pathname.startsWith('/media/')) {
-    const media = await readMedia(decodeURIComponent(url.pathname.slice('/media/'.length)));
+    const file = decodeURIComponent(url.pathname.slice('/media/'.length));
+    const media = await readMedia(file);
     if (!media) {
       res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8', ...corsHeaders }).end('Not found');
       return;
@@ -859,6 +910,16 @@ server.listen(PORT, HOST, () => console.log(`fresh-api listening on http://${HOS
 
 if (exporterConfigured()) {
   const timer = setInterval(() => { void flushSpans(); }, 10_000);
+  timer.unref();
+}
+
+const MAINTENANCE_MS = Number(process.env['MAINTENANCE_INTERVAL_MS'] ?? 300_000);
+if (MAINTENANCE_MS > 0) {
+  const timer = setInterval(() => {
+    void sweepMaintenance()
+      .then((report) => log('info', 'maintenance sweep', report as unknown as Record<string, unknown>))
+      .catch((cause) => log('warn', 'maintenance sweep failed', { message: cause instanceof Error ? cause.message : 'unknown' }));
+  }, MAINTENANCE_MS);
   timer.unref();
 }
 
