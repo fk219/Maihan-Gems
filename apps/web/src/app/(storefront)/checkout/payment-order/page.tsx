@@ -7,16 +7,17 @@ export const metadata: Metadata = {
 };
 
 const CheckoutFlow = dynamicImport(() => import('@/components/mgh/checkout/CheckoutFlow'), {
-  loading: () => <div className="min-h-screen bg-[#FAF8F4]" />,
+  loading: () => <div className="min-h-screen bg-[#F4F2EE]" />,
 });
 
 export default function Page() {
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-      <p className="text-xs font-[family-name:var(--font-mono)] text-[#78756F]">CHECKOUT</p>
-      <h1 className="mt-1 font-[family-name:var(--font-display)] text-3xl font-semibold text-[#141413] mb-8">
-        Vault Selection Checkout
-      </h1>
+    <div>
+      <div className="checkout-head">
+        <p className="portal-kicker">Checkout</p>
+        <h1 className="portal-page-title">Vault Selection Checkout</h1>
+        <p className="portal-page-sub">Three quiet steps: your selection, the address, then settlement.</p>
+      </div>
       <CheckoutFlow />
     </div>
   );

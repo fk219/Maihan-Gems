@@ -330,7 +330,7 @@ export default async function VarietiesIndexPage() {
           </div>
         </div>
 
-        <CollectionExplorer initialItems={allStones} />
+        <CollectionExplorer initialItems={allStones} loadMore />
       </section>
     </div>
   );

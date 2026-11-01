@@ -44,6 +44,7 @@ interface StorefrontContextValue {
   removeFromCart: (id: string) => void;
   clearCart: () => void;
   toggleFavorite: (id: string) => void;
+  replaceFavorites: (ids: string[]) => void;
   toggleCompare: (id: string) => void;
   clearCompare: () => void;
   setCartOpen: (open: boolean) => void;
@@ -169,6 +170,16 @@ export function StorefrontProvider({ children }: { children: React.ReactNode }) 
     });
   }, []);
 
+  const replaceFavorites = useCallback((ids: string[]) => {
+    const next = [...new Set(ids.filter(Boolean))];
+    setFavorites(next);
+    try {
+      localStorage.setItem(STORAGE_KEYS.FAV, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const toggleCompare = useCallback((rawId: string) => {
     const id = normalizeCompareId(rawId);
     setCompareList((prev) => {
@@ -235,6 +246,7 @@ export function StorefrontProvider({ children }: { children: React.ReactNode }) 
         removeFromCart,
         clearCart,
         toggleFavorite,
+        replaceFavorites,
         toggleCompare,
         clearCompare,
         setCartOpen: (open) => {

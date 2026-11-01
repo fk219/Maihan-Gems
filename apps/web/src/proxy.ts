@@ -27,11 +27,33 @@ const KNOWN_FIRST_SEGMENTS = new Set([
   'checkout', 'about', 'education', 'blog', 'policy', 'showrooms', 'contact',
   'demo', 'concierge', 'card-preview', 'admin', 'vendor', 'account',
   'product', 'products', 'ar', 'api', '_next', 'favicon.ico', 'media',
-  'financing', 'protection-plan', 'ai-gemologist', 'robots.txt', 'sitemap.xml',
+  'financing', 'protection-plan', 'ai-gemologist', 'unsubscribe', 'sitemap', 'robots.txt', 'sitemap.xml',
 ]);
 
 function isSisterPrefix(first: string): boolean {
   return SISTERS.has(first) || /-(?:gemstones|gemstone-pairs|gemstone-rings|earrings|pendants|bracelets|necklaces|rings|settings)$/.test(first);
+}
+
+/** Existence cache (10-min TTL) for deep dynamic routes. */
+const existsCache = new Map<string, { ok: boolean; at: number }>();
+async function apiExists(kind: string, key: string): Promise<boolean> {
+  const cacheKey = `${kind}:${key}`;
+  const hit = existsCache.get(cacheKey);
+  if (hit && Date.now() - hit.at < 10 * 60 * 1000) return hit.ok;
+  try {
+    const res = await fetch(
+      `${process.env['FRESH_API_URL'] ?? 'http://127.0.0.1:3010'}/api/v1/catalogue/exists?kind=${kind}&key=${encodeURIComponent(key)}`,
+      { cache: 'no-store' },
+    );
+    if (!res.ok) return true; // fail open: the app router still decides
+    const data = (await res.json()) as { exists?: boolean };
+    const ok = Boolean(data.exists);
+    if (existsCache.size > 5000) existsCache.clear();
+    existsCache.set(cacheKey, { ok, at: Date.now() });
+    return ok;
+  } catch {
+    return true;
+  }
 }
 
 /** Variety-slug cache (5-min TTL) — middleware runs before the app router. */
@@ -97,13 +119,64 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const segments = pathname.split('/').filter(Boolean);
   const first = segments[0] ?? '';
 
-  // Soft-404 guard: single-segment paths that are NOT a known app route are
-  // either a real variety slug (86 in the registry — checked against the
-  // cached registry, 5-min TTL) or a typo. Unknown → true 404 from the edge,
-  // before any layout shell can stream a 200.
-  if (segments.length === 1 && first && !KNOWN_FIRST_SEGMENTS.has(first) && !isSisterPrefix(first)) {
+  // CSRF guard for same-origin API mutations: reject cross-site writes.
+  if (first === 'api') {
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
+      const origin = request.headers.get('origin');
+      const site = request.headers.get('sec-fetch-site');
+      const host = request.headers.get('host');
+      if (origin) {
+        try {
+          if (new URL(origin).host !== host) {
+            return new NextResponse('Cross-origin request blocked.', { status: 403 });
+          }
+        } catch {
+          return new NextResponse('Invalid origin.', { status: 403 });
+        }
+      } else if (site && site !== 'same-origin') {
+        return new NextResponse('Cross-origin request blocked.', { status: 403 });
+      }
+    }
+    return NextResponse.next();
+  }
+
+  // Order confirmation is credential-gated: without the checkout token or a
+  // customer session the edge returns a true 404 (no order enumeration).
+  if (
+    segments[0] === 'checkout' &&
+    segments[1] === 'confirmation' &&
+    segments.length >= 3 &&
+    !request.nextUrl.searchParams.get('token') &&
+    !request.cookies.get('maihan_customer_session')
+  ) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  // Soft-404 guard: a first segment that is not a known app route or sister
+  // house must be a real variety slug; anything else is a true 404 from the
+  // edge, before a layout shell can stream a 200. Deep dynamic routes are
+  // validated against the catalogue with a 10-minute existence cache.
+  if (first && !KNOWN_FIRST_SEGMENTS.has(first) && !isSisterPrefix(first)) {
     const known = await getKnownVarietySlugs();
     if (!known.has(first)) {
+      return new NextResponse(null, { status: 404 });
+    }
+    if (segments.length === 2 && !(await apiExists('gemstone', segments[1]!))) {
+      return new NextResponse(null, { status: 404 });
+    }
+  } else if (segments.length === 2) {
+    const [section, key] = segments;
+    const kind =
+      section === 'product' ? 'gemstone'
+      : section === 'products' ? 'product'
+      : section === 'settings' ? 'setting'
+      : section === 'varieties' ? 'variety'
+      : null;
+    if (kind && key && !(await apiExists(kind, key))) {
+      return new NextResponse(null, { status: 404 });
+    }
+  } else if (segments[0] === 'design-your-own' && segments[1] === 'review' && segments.length === 3) {
+    if (!(await apiExists('configuration', segments[2]!))) {
       return new NextResponse(null, { status: 404 });
     }
   }
@@ -137,5 +210,5 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|media/|api/).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|media/).*)'],
 };

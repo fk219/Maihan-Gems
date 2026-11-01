@@ -42,7 +42,7 @@ export default async function BrowsePage() {
         </p>
       </div>
 
-      <CollectionExplorer initialItems={stones} />
+      <CollectionExplorer initialItems={stones} loadMore />
     </div>
   );
 }

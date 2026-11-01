@@ -40,6 +40,8 @@ approved. `DEFERRED` = deliberately postponed.
 
 ---
 
+| **Vendor onboarding is invite-only (2026-11-01, owner):** the house creates partners in the admin console, approves onboarding, and issues the one-time API key; there is **no public vendor self-registration**. `POST /vendors` is admin-only. | **ACCEPTED** | owner direction 2026-11-01 · `PROJECT_STATUS.md` §3.6 |
+
 ## 3. AI and channels
 
 | Decision | Status | Source |

@@ -3,7 +3,8 @@
  * Overview stats, platform-wide inventory management, order details,
  * vendor management, and leads.
  */
-import type { AnyClient } from './db.js';
+import { audit, type AnyClient } from './db.js';
+import { queueEmail, shippedEmail } from './mail.js';
 import { StateError } from './validation.js';
 
 const num = (v: string | number | null | undefined): number => (v == null ? 0 : Number(v));
@@ -192,9 +193,19 @@ export async function adminOrderDetail(client: AnyClient, orderNumber: string) {
   const items = await client.query(`SELECT description, code_snapshot, quantity, unit_price::text AS unit_price, line_total::text AS line_total FROM fresh.order_items WHERE order_id = $1`, [rows[0].id]);
   const payments = await client.query(`SELECT provider, provider_ref, state, amount::text AS amount, currency, created_at::text AS created_at FROM fresh.payments WHERE order_id = $1`, [rows[0].id]);
   const events = await client.query(`SELECT event, payload, created_at::text AS created_at FROM fresh.order_events WHERE order_id = $1 ORDER BY created_at`, [rows[0].id]);
+  const fulfilments = await client.query(
+    `SELECT id, carrier, tracking_number, state, shipped_at::text AS shipped_at, delivered_at::text AS delivered_at
+     FROM fresh.order_fulfillments WHERE order_id = $1 ORDER BY created_at`,
+    [rows[0].id],
+  );
+  const refunds = await client.query(
+    `SELECT id, amount::text AS amount, reason, state, created_at::text AS created_at, processed_at::text AS processed_at
+     FROM fresh.refunds WHERE order_id = $1 ORDER BY created_at`,
+    [rows[0].id],
+  );
   const { password_hash, ...rest } = rows[0];
   void password_hash;
-  return { ...rest, items: items.rows, payments: payments.rows, events: events.rows };
+  return { ...rest, items: items.rows, payments: payments.rows, events: events.rows, fulfilments: fulfilments.rows, refunds: refunds.rows };
 }
 
 /* ---------------------------------------------------------------- vendors */
@@ -243,6 +254,261 @@ export async function createLead(
   return rows[0] ? Number(rows[0].id) : null;
 }
 
+export async function unsubscribeLead(client: AnyClient, email: string): Promise<void> {
+  await client.query(
+    `UPDATE fresh.leads SET status = 'LOST' WHERE lower(email) = lower($1) AND source = 'newsletter' AND status <> 'LOST'`,
+    [email],
+  );
+}
+
 export async function updateLeadStatus(client: AnyClient, leadId: number, status: string): Promise<void> {
   await client.query(`UPDATE fresh.leads SET status = $2 WHERE id = $1`, [leadId, status]);
+}
+
+/* ------------------------------------------------------- order lifecycle */
+
+const ORDER_TRANSITIONS: Record<string, string[]> = {
+  PAID: ['IN_FULFILLMENT'],
+  IN_FULFILLMENT: ['FULFILLED'],
+  FULFILLED: ['DELIVERED'],
+};
+
+export async function updateOrderStatus(
+  client: AnyClient,
+  orderNumber: string,
+  next: string,
+  actor: string,
+): Promise<{ order_number: string; status: string }> {
+  const { rows } = await client.query(
+    `SELECT id, status FROM fresh.orders WHERE order_number = $1 FOR UPDATE`,
+    [orderNumber],
+  );
+  const order = rows[0];
+  if (!order) {
+    const e = new StateError(`order '${orderNumber}' not found`);
+    (e as Error & { status?: number }).status = 404;
+    throw e;
+  }
+  const from = String(order.status);
+  const allowed = ORDER_TRANSITIONS[from] ?? [];
+  if (!allowed.includes(next)) {
+    throw new StateError(`cannot move order from ${from} to ${next}`);
+  }
+  await client.query(`UPDATE fresh.orders SET status = $2, updated_at = now() WHERE id = $1`, [order.id, next]);
+  if (next === 'DELIVERED') {
+    await client.query(
+      `UPDATE fresh.order_fulfillments SET state = 'DELIVERED', delivered_at = COALESCE(delivered_at, now()) WHERE order_id = $1`,
+      [order.id],
+    );
+  }
+  await client.query(
+    `INSERT INTO fresh.order_events (order_id, event, payload) VALUES ($1,$2,$3::jsonb)`,
+    [order.id, `STATUS_${next}`, JSON.stringify({ from, to: next, by: actor })],
+  );
+  await audit(client, `ORDER_${next}`, 'order', Number(order.id), { orderNumber, from, to: next }, actor);
+  return { order_number: orderNumber, status: next };
+}
+
+export async function addFulfillment(
+  client: AnyClient,
+  orderNumber: string,
+  carrier: string,
+  trackingNumber: string,
+  actor: string,
+): Promise<{ order_number: string; status: string; carrier: string; tracking_number: string }> {
+  const { rows } = await client.query(
+    `SELECT id, status FROM fresh.orders WHERE order_number = $1 FOR UPDATE`,
+    [orderNumber],
+  );
+  const order = rows[0];
+  if (!order) {
+    const e = new StateError(`order '${orderNumber}' not found`);
+    (e as Error & { status?: number }).status = 404;
+    throw e;
+  }
+  if (!['PAID', 'IN_FULFILLMENT'].includes(String(order.status))) {
+    throw new StateError(`order ${orderNumber} is ${order.status}; only paid orders can be fulfilled`);
+  }
+  await client.query(
+    `INSERT INTO fresh.order_fulfillments (order_id, carrier, tracking_number, state, shipped_at)
+     VALUES ($1,$2,$3,'SHIPPED', now())`,
+    [order.id, carrier, trackingNumber],
+  );
+  await client.query(`UPDATE fresh.orders SET status = 'IN_FULFILLMENT', updated_at = now() WHERE id = $1`, [order.id]);
+  await client.query(
+    `INSERT INTO fresh.order_events (order_id, event, payload) VALUES ($1,'SHIPPED',$2::jsonb)`,
+    [order.id, JSON.stringify({ carrier, tracking_number: trackingNumber, by: actor })],
+  );
+  await audit(client, 'ORDER_SHIPPED', 'order', Number(order.id), { orderNumber, carrier, trackingNumber }, actor);
+  const who = await client.query(`SELECT email FROM fresh.orders WHERE id = $1`, [order.id]);
+  if (who.rows[0]?.email) {
+    const mail = shippedEmail(orderNumber, carrier, trackingNumber);
+    await queueEmail(client, { to: who.rows[0].email, subject: mail.subject, body: mail.body });
+  }
+  return { order_number: orderNumber, status: 'IN_FULFILLMENT', carrier, tracking_number: trackingNumber };
+}
+
+export async function recordRefund(
+  client: AnyClient,
+  orderNumber: string,
+  amount: number,
+  reason: string,
+  actor: string,
+): Promise<{ id: number; order_number: string; amount: number; state: string }> {
+  if (!Number.isFinite(amount) || amount <= 0) throw new StateError('refund amount must be positive');
+  const { rows } = await client.query(
+    `SELECT id, status, grand_total::text AS grand FROM fresh.orders WHERE order_number = $1 FOR UPDATE`,
+    [orderNumber],
+  );
+  const order = rows[0];
+  if (!order) {
+    const e = new StateError(`order '${orderNumber}' not found`);
+    (e as Error & { status?: number }).status = 404;
+    throw e;
+  }
+  if (!['PAID', 'IN_FULFILLMENT', 'FULFILLED', 'DELIVERED'].includes(String(order.status))) {
+    throw new StateError(`order ${orderNumber} is ${order.status}; nothing to refund`);
+  }
+  const pay = await client.query(
+    `SELECT p.id, p.amount::text AS amount FROM fresh.payments p
+     WHERE p.order_id = $1 AND p.state IN ('CAPTURED','SETTLED') ORDER BY p.created_at DESC LIMIT 1`,
+    [order.id],
+  );
+  if (!pay.rows[0]) throw new StateError(`order ${orderNumber} has no captured payment`);
+  const existing = await client.query(
+    `SELECT COALESCE(sum(amount),0)::text AS refunded FROM fresh.refunds WHERE order_id = $1 AND state <> 'FAILED'`,
+    [order.id],
+  );
+  const paid = Number(pay.rows[0].amount);
+  const refunded = Number(existing.rows[0].refunded);
+  const remaining = Math.round((paid - refunded) * 100) / 100;
+  if (amount > remaining) throw new StateError(`refund exceeds remaining refundable amount ${remaining}`);
+
+  // No PSP is configured: the refund is recorded in state PENDING. It is not
+  // claimed to be settled; a provider adapter transitions it when wired.
+  const { rows: refundRows } = await client.query(
+    `INSERT INTO fresh.refunds (payment_id, order_id, amount, reason, state)
+     VALUES ($1,$2,$3,$4,'PENDING') RETURNING id`,
+    [pay.rows[0].id, order.id, amount, reason],
+  );
+  await client.query(
+    `INSERT INTO fresh.order_events (order_id, event, payload) VALUES ($1,'REFUND_RECORDED',$2::jsonb)`,
+    [order.id, JSON.stringify({ amount, reason, by: actor })],
+  );
+  await audit(client, 'REFUND_RECORDED', 'order', Number(order.id), { orderNumber, amount, reason }, actor);
+  return { id: Number(refundRows[0].id), order_number: orderNumber, amount, state: 'PENDING' };
+}
+
+/* -------------------------------------------------------------- discounts */
+
+interface DiscountInput {
+  code: string;
+  kind: 'PERCENT' | 'FIXED';
+  value: number;
+  min_subtotal?: number | null;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  usage_limit?: number | null;
+  active?: boolean;
+}
+
+export async function listDiscounts(client: AnyClient) {
+  const { rows } = await client.query(
+    `SELECT id, code, kind, value::text AS value, min_subtotal::text AS min_subtotal,
+            starts_at::text AS starts_at, ends_at::text AS ends_at,
+            usage_limit, used_count, active, created_at::text AS created_at
+     FROM fresh.discounts ORDER BY created_at DESC`,
+  );
+  return rows;
+}
+
+function validateDiscount(input: DiscountInput): void {
+  if (!/^[A-Z0-9][A-Z0-9_-]{1,39}$/.test(input.code)) {
+    throw new StateError('code must be 2–40 uppercase letters, digits, - or _');
+  }
+  if (input.kind === 'PERCENT' && (input.value <= 0 || input.value > 100)) {
+    throw new StateError('percentage value must be between 0 and 100');
+  }
+  if (input.kind === 'FIXED' && input.value <= 0) {
+    throw new StateError('fixed discount must be positive');
+  }
+  if (input.starts_at && input.ends_at && new Date(input.starts_at) >= new Date(input.ends_at)) {
+    throw new StateError('starts_at must be before ends_at');
+  }
+}
+
+export async function createDiscount(client: AnyClient, body: DiscountInput, actor: string) {
+  const input = { ...body, code: body.code.trim().toUpperCase() };
+  validateDiscount(input);
+  const dup = await client.query(`SELECT 1 FROM fresh.discounts WHERE code = $1`, [input.code]);
+  if (dup.rowCount) throw new StateError(`discount '${input.code}' already exists`);
+  const { rows } = await client.query(
+    `INSERT INTO fresh.discounts (code, kind, value, min_subtotal, starts_at, ends_at, usage_limit, active)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+     RETURNING id, code, kind, value::text AS value, active`,
+    [input.code, input.kind, input.value, input.min_subtotal ?? null, input.starts_at ?? null, input.ends_at ?? null, input.usage_limit ?? null, input.active ?? true],
+  );
+  await audit(client, 'DISCOUNT_CREATED', 'discount', Number(rows[0].id), rows[0], actor);
+  return rows[0];
+}
+
+export async function updateDiscount(
+  client: AnyClient,
+  id: number,
+  body: Partial<DiscountInput>,
+  actor: string,
+) {
+  const existing = await client.query(
+    `SELECT id, code, kind, value::text AS value, min_subtotal::text AS min_subtotal,
+            starts_at::text AS starts_at, ends_at::text AS ends_at, usage_limit, active
+     FROM fresh.discounts WHERE id = $1`,
+    [id],
+  );
+  const row = existing.rows[0];
+  if (!row) {
+    const e = new StateError(`discount ${id} not found`);
+    (e as Error & { status?: number }).status = 404;
+    throw e;
+  }
+  const kind = (body.kind ?? row.kind) as 'PERCENT' | 'FIXED';
+  const value = body.value != null ? Number(body.value) : Number(row.value);
+  const code = (body.code ?? row.code).trim().toUpperCase();
+  const merged = {
+    code,
+    kind,
+    value,
+    starts_at: body.starts_at !== undefined ? body.starts_at : row.starts_at,
+    ends_at: body.ends_at !== undefined ? body.ends_at : row.ends_at,
+    min_subtotal: body.min_subtotal !== undefined ? body.min_subtotal : (row.min_subtotal == null ? null : Number(row.min_subtotal)),
+    usage_limit: body.usage_limit !== undefined ? body.usage_limit : row.usage_limit,
+    active: body.active !== undefined ? body.active : Boolean(row.active),
+  };
+  validateDiscount(merged as DiscountInput);
+  if (code !== row.code) {
+    const dup = await client.query(`SELECT 1 FROM fresh.discounts WHERE code = $1 AND id <> $2`, [code, id]);
+    if (dup.rowCount) throw new StateError(`discount '${code}' already exists`);
+  }
+  const { rows } = await client.query(
+    `UPDATE fresh.discounts
+     SET code = $2, kind = $3, value = $4, starts_at = $5, ends_at = $6,
+         min_subtotal = $7, usage_limit = $8, active = $9
+     WHERE id = $1
+     RETURNING id, code, kind, value::text AS value, min_subtotal::text AS min_subtotal,
+               starts_at::text AS starts_at, ends_at::text AS ends_at, active, usage_limit, used_count`,
+    [id, merged.code, merged.kind, merged.value, merged.starts_at ?? null, merged.ends_at ?? null,
+      merged.min_subtotal ?? null, merged.usage_limit ?? null, merged.active],
+  );
+  await audit(client, 'DISCOUNT_UPDATED', 'discount', id, body, actor);
+  return rows[0];
+}
+
+/* ----------------------------------------------------------------- audit */
+
+export async function listAudit(client: AnyClient, limit = 100) {
+  const { rows } = await client.query(
+    `SELECT id, actor_kind, action, entity_kind, entity_id, after, created_at::text AS created_at
+     FROM fresh.audit_log ORDER BY created_at DESC LIMIT $1`,
+    [Math.min(limit, 500)],
+  );
+  return rows;
 }

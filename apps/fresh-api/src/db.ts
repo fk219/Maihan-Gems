@@ -5,15 +5,6 @@ export const PORT = Number(process.env.FRESH_API_PORT ?? 3010);
 export const HOST = process.env.FRESH_API_HOST ?? '127.0.0.1';   // localhost-only dev service
 export const ADMIN_TOKEN = process.env.FRESH_ADMIN_TOKEN ?? '';
 
-if (!DATABASE_URL) {
-  console.error('FATAL: DATABASE_URL is required');
-  process.exit(2);
-}
-if (!ADMIN_TOKEN) {
-  console.error('FATAL: FRESH_ADMIN_TOKEN is required (dev bearer token for admin routes)');
-  process.exit(2);
-}
-
 export const pool = new pg.Pool({ connectionString: DATABASE_URL, max: 5 });
 
 export type Db = pg.PoolClient;

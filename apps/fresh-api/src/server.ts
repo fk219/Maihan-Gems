@@ -7,32 +7,56 @@
 import http from 'node:http';
 import { z } from 'zod';
 import { pool, withTx, PORT, HOST, ADMIN_TOKEN, type Db } from './db.js';
-import { createVendor, approveOnboarding, rejectOnboarding, suspendOnboarding, getVendor, verifyVendor } from './onboarding.js';
-import { approveSubmission, rejectSubmission, listSubmissions } from './submissions.js';
+import { createVendor, approveOnboarding, rejectOnboarding, suspendOnboarding, getVendor, verifyVendor, rotateVendorApiKey } from './onboarding.js';
+import { approveSubmission, rejectSubmission, holdSubmission, releaseSubmission, listSubmissions } from './submissions.js';
 import { StateError, ConflictError, VocabError, gemstoneSubmissionSchema, settingSubmissionSchema, productSubmissionSchema } from './validation.js';
 import { registerCustomer, loginCustomer, logoutCustomer, me } from './auth-handlers.js';
+import { resolveSession } from './auth.js';
+import { requestPasswordReset, resetPassword, changePassword } from './password-resets.js';
+import { issueVerification, verifyEmail } from './email-verification.js';
+import { listAddresses, createAddress, updateAddress, deleteAddress, setDefaultAddress } from './addresses.js';
+import { dispatchOutbox, outboxSummary, listOutbox } from './mail.js';
+import { listCustomerOrders, updateCustomerProfile, listCustomerFavourites, replaceCustomerFavourites } from './account.js';
+import { addCertificate, listVendorCertificates, removeCertificate, listCertificates, verifyCertificate } from './certificates.js';
 import {
   listGemstones, gemstoneDetail, listProducts, productDetail, listSettings,
   varietiesWithCounts, familiesWithCounts, listMetals, listShapes, listColours,
-  listOrigins, settingsByDesign, settingDetailByCode, listAssets,
+  listOrigins, settingsByDesign, settingDetailByCode, listAssets, catalogueExists, sitemapPage,
 } from './storefront.js';
+import { conciergeQuery } from './concierge.js';
 import {
   getOrCreateCart, viewCart, addProductToCart, updateCartItem, removeCartItem,
-  checkoutCart, payOrder, getOrder, listOrders, type CheckoutInput,
+  checkoutCart, payOrder, getOrderAuthorized, cancelOrder, listOrders, type CheckoutInput,
 } from './commerce.js';
 import { createConfiguration, getConfiguration, addConfigurationToCart } from './configurations.js';
 import { vendorInventory, updateItemStatus } from './inventory.js';
 import { uploadImage, deleteImage } from './images.js';
 import {
   adminStats, adminInventory, adminUpdateItemStatus, adminOrderDetail,
-  adminVendorsList, listLeads, createLead, updateLeadStatus,
+  adminVendorsList, listLeads, createLead, updateLeadStatus, unsubscribeLead,
+  updateOrderStatus, addFulfillment, recordRefund,
+  listDiscounts, createDiscount, updateDiscount, listAudit,
 } from './admin.js';
+import { log, requestId } from './logging.js';
+import { readMedia } from './media.js';
+import { recordRequest, renderMetrics } from './metrics.js';
+import { parseTraceparent, traceparentOf } from './tracing.js';
+import { exporterConfigured, flushSpans, recordSpan, requestSpan } from './otel.js';
 import crypto from 'node:crypto';
-import { checkRateLimit } from './rate-limit.js';
+import { checkRateLimitShared } from './rate-limit.js';
 import {
   vendorLogin, resolveVendorSession, revokeVendorSession, setupVendorPassword,
   adminLogin, resolveAdminSession, revokeAdminSession,
 } from './vendor-auth.js';
+
+if (!process.env['DATABASE_URL']) {
+  console.error('FATAL: DATABASE_URL is required');
+  process.exit(2);
+}
+if (!ADMIN_TOKEN) {
+  console.error('FATAL: FRESH_ADMIN_TOKEN is required (dev bearer token for admin routes)');
+  process.exit(2);
+}
 
 const ADMIN_PASSWORD = process.env['FRESH_ADMIN_PASSWORD'] ?? 'maihan-admin-dev';
 
@@ -49,19 +73,84 @@ const ok = (json: unknown): { status: number; json: unknown } => ({ status: 200,
 const created = (json: unknown): { status: number; json: unknown } => ({ status: 201, json });
 const notFound = (what: string): { status: number; json: unknown } => ({ status: 404, json: { error: `${what} not found` } });
 
-function requireAdmin(ctx: Ctx): void {
+const DEV_ADMIN_FALLBACK =
+  process.env['MAIHAN_ENV'] !== 'production' || process.env['ALLOW_DEV_ADMIN_TOKEN'] === '1';
+
+async function requireAdmin(ctx: Ctx): Promise<void> {
   const auth = ctx.headers.authorization ?? '';
   const token = auth.replace(/^Bearer\s+/i, '');
-  if (token !== ADMIN_TOKEN && token !== adminSessionToken()) {
-    const e = new Error('admin bearer token required') as Error & { status?: number };
-    e.status = 401;
-    throw e;
-  }
+  const envAllowed =
+    DEV_ADMIN_FALLBACK && (token === ADMIN_TOKEN || token === adminSessionToken());
+  if (envAllowed) return;
+  const session = await resolveAdminSession(pool, auth);
+  if (session) return;
+  const e = new Error('admin bearer token required') as Error & { status?: number };
+  e.status = 401;
+  throw e;
 }
 
 // NOTE: requireAdmin stays sync for env-token compatibility; the admin/login
 // endpoint verifies against the DB and returns the derived session token.
 // Both paths work — the DB path is the production pattern.
+
+async function requireCustomer(ctx: Ctx) {
+  const session = await resolveSession(pool, ctx.headers.authorization);
+  if (!session) {
+    const e = new Error('authentication required') as Error & { status?: number };
+    e.status = 401;
+    throw e;
+  }
+  return session;
+}
+
+async function requireVendor(ctx: Ctx) {
+  const session = await resolveVendorSession(pool, ctx.headers.authorization);
+  if (!session) {
+    const e = new Error('vendor authentication required') as Error & { status?: number };
+    e.status = 401;
+    throw e;
+  }
+  return session;
+}
+
+async function assertVendorOrAdmin(ctx: Ctx, code: string): Promise<void> {
+  const session = await resolveVendorSession(pool, ctx.headers.authorization);
+  if (session && session.vendorCode === code.toUpperCase()) return;
+  try {
+    await requireAdmin(ctx);
+    return;
+  } catch {
+    // fall through to the explicit authentication error
+  }
+  const e = new Error('vendor or admin authentication required') as Error & { status?: number };
+  e.status = 401;
+  throw e;
+}
+
+async function requireVendorForCode(ctx: Ctx, code: string): Promise<{ code: string }> {
+  const session = await resolveVendorSession(pool, ctx.headers.authorization);
+  if (session) {
+    if (session.vendorCode !== code.toUpperCase()) {
+      const e = new Error('vendor code mismatch') as Error & { status?: number };
+      e.status = 403;
+      throw e;
+    }
+    return { code: session.vendorCode };
+  }
+  const key = typeof ctx.headers['x-vendor-key'] === 'string' ? ctx.headers['x-vendor-key'] : undefined;
+  await verifyVendor(pool, code, key);
+  return { code: code.toUpperCase() };
+}
+
+async function requireAdminSession(ctx: Ctx) {
+  const session = await resolveAdminSession(pool, ctx.headers.authorization);
+  if (!session) {
+    const e = new Error('admin session required') as Error & { status?: number };
+    e.status = 401;
+    throw e;
+  }
+  return session;
+}
 
 const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   { method: 'GET', pattern: /^\/healthz$/, handler: async () => ok({ ok: true, service: 'fresh-api' }) },
@@ -120,6 +209,11 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
 
   // admin session (dev password -> derived session token)
   { method: 'POST', pattern: /^\/api\/v1\/admin\/login$/, handler: async (ctx) => {
+    if (!DEV_ADMIN_FALLBACK) {
+      const e = new Error('password login is disabled in this environment — use /admin/auth/login') as Error & { status?: number };
+      e.status = 403;
+      throw e;
+    }
     const body = (ctx.body ?? {}) as { password?: string };
     if (!body.password || body.password !== ADMIN_PASSWORD) {
       const e = new Error('invalid admin password') as Error & { status?: number };
@@ -190,25 +284,32 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
   } },
   { method: 'POST', pattern: /^\/api\/v1\/orders\/(?<number>MG-\d{4}-\d{6})\/pay$/, handler: async (_ctx, p) =>
     ok(await withTx((c) => payOrder(c, p.number!))) },
-  { method: 'GET', pattern: /^\/api\/v1\/orders\/(?<number>MG-\d{4}-\d{6})$/, handler: async (_ctx, p) => {
-    const order = await withTx((c) => getOrder(c, p.number!));
+  { method: 'GET', pattern: /^\/api\/v1\/orders\/(?<number>MG-\d{4}-\d{6})$/, handler: async (ctx, p) => {
+    const token = ctx.query.get('token')
+      ?? (typeof ctx.headers['x-order-token'] === 'string' ? ctx.headers['x-order-token'] : null);
+    const session = await resolveSession(pool, ctx.headers.authorization);
+    const order = await withTx((c) => getOrderAuthorized(c, p.number!, {
+      token,
+      customer: session ? { id: session.customerId, email: session.email } : null,
+    }));
+    // 404 for both unknown orders and missing credentials: no enumeration.
     return order ? ok(order) : notFound(`order ${p.number}`);
   } },
   { method: 'GET', pattern: /^\/api\/v1\/admin\/orders$/, handler: async (ctx) => {
-    requireAdmin(ctx);
+    await requireAdmin(ctx);
     return ok(await withTx((c) => listOrders(c, Number(ctx.query.get('limit') ?? 50))));
   } },
   { method: 'GET', pattern: /^\/api\/v1\/admin\/orders\/(?<number>MG-\d{4}-\d{6})$/, handler: async (ctx, p) => {
-    requireAdmin(ctx);
+    await requireAdmin(ctx);
     const d = await withTx((c) => adminOrderDetail(c, p.number!));
     return d ? ok(d) : notFound(`order ${p.number}`);
   } },
   { method: 'GET', pattern: /^\/api\/v1\/admin\/stats$/, handler: async (ctx) => {
-    requireAdmin(ctx);
+    await requireAdmin(ctx);
     return ok(await withTx((c) => adminStats(c)));
   } },
   { method: 'GET', pattern: /^\/api\/v1\/admin\/inventory$/, handler: async (ctx) => {
-    requireAdmin(ctx);
+    await requireAdmin(ctx);
     return ok(await withTx((c) => adminInventory(c, {
       q: ctx.query.get('q') ?? undefined, status: ctx.query.get('status') ?? undefined,
       kind: ctx.query.get('kind') ?? undefined,
@@ -216,7 +317,7 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     })));
   } },
   { method: 'PATCH', pattern: /^\/api\/v1\/admin\/inventory\/(?<ref>[A-Za-z0-9-]+)$/, handler: async (ctx, p) => {
-    requireAdmin(ctx);
+    await requireAdmin(ctx);
     const body = (ctx.body ?? {}) as { status?: string };
     if (!body.status) {
       const e = new Error('status is required') as Error & { status?: number }; e.status = 422; throw e;
@@ -225,18 +326,30 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     return ok({ ref: p.ref, status: body.status });
   } },
   { method: 'GET', pattern: /^\/api\/v1\/admin\/vendors$/, handler: async (ctx) => {
-    requireAdmin(ctx);
+    await requireAdmin(ctx);
     return ok(await withTx((c) => adminVendorsList(c)));
   } },
   { method: 'GET', pattern: /^\/api\/v1\/admin\/leads$/, handler: async (ctx) => {
-    requireAdmin(ctx);
+    await requireAdmin(ctx);
     return ok(await withTx((c) => listLeads(c, ctx.query.get('status') ?? undefined)));
   } },
   { method: 'PATCH', pattern: /^\/api\/v1\/admin\/leads\/(?<id>\d+)$/, handler: async (ctx, p) => {
-    requireAdmin(ctx);
+    await requireAdmin(ctx);
     const body = (ctx.body ?? {}) as { status?: string };
     await withTx((c) => updateLeadStatus(c, Number(p.id), body.status ?? 'CONTACTED'));
     return ok({ id: Number(p.id), status: body.status });
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/concierge$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { query?: string };
+    return ok(await conciergeQuery(pool, body.query ?? ''));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/leads\/unsubscribe$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { email?: string };
+    if (!body.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
+      const e = new Error('a valid email is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    await withTx((c) => unsubscribeLead(c, body.email!));
+    return ok({ ok: true, message: 'unsubscribed' });
   } },
   { method: 'POST', pattern: /^\/api\/v1\/leads$/, handler: async (ctx) => {
     const body = (ctx.body ?? {}) as { email?: string; name?: string; source?: string; note?: string };
@@ -264,6 +377,15 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
 
   // storefront reads (public) -------------------------------------------------
   { method: 'GET', pattern: /^\/api\/v1\/catalogue\/varieties$/, handler: async () => ok(await varietiesWithCounts(pool)) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/sitemap$/, handler: async (ctx) =>
+    ok(await sitemapPage(
+      pool,
+      ctx.query.get('kind') ?? '',
+      Number(ctx.query.get('offset') ?? 0),
+      Number(ctx.query.get('limit') ?? 5000),
+    )) },
+  { method: 'GET', pattern: /^\/api\/v1\/catalogue\/exists$/, handler: async (ctx) =>
+    ok(await catalogueExists(pool, ctx.query.get('kind') ?? '', ctx.query.get('key') ?? '')) },
   { method: 'GET', pattern: /^\/api\/v1\/catalogue\/families$/, handler: async () => ok(await familiesWithCounts(pool)) },
   { method: 'GET', pattern: /^\/api\/v1\/catalogue\/gemstones$/, handler: async (ctx) => ok(await listGemstones(pool, ctx.query)) },
   { method: 'GET', pattern: /^\/api\/v1\/catalogue\/gemstones\/(?<ref>[GP]-[A-Z0-9-]+)$/, handler: async (_ctx, p) => {
@@ -289,12 +411,16 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
 
   // vendors -------------------------------------------------------------------
   { method: 'POST', pattern: /^\/api\/v1\/vendors$/, handler: async (ctx) => {
+    await requireAdmin(ctx);
     const r = await withTx((c) => createVendor(c, ctx.body));
     return created(r);
   } },
-  { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})$/, handler: async (_ctx, p) => ok(await getVendor(pool, p.code!)) },
+  { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})$/, handler: async (ctx, p) => {
+    await assertVendorOrAdmin(ctx, p.code!);
+    return ok(await getVendor(pool, p.code!));
+  } },
   { method: 'POST', pattern: /^\/api\/v1\/admin\/onboarding\/(?<code>V-[A-Za-z]{2}-\d{3})\/(?<action>approve|reject|suspend)$/, handler: async (ctx, p) => {
-    requireAdmin(ctx);
+    await requireAdmin(ctx);
     const note = (ctx.body as { note?: string } | null)?.note ?? null;
     if (p.action === 'approve') {
       const r = await withTx((c) => approveOnboarding(c, p.code!, 'admin'));
@@ -307,12 +433,17 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     return ok(await getVendor(pool, p.code!));
   } },
 
+  { method: 'POST', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/api-key$/, handler: async (ctx, p) => {
+    const v = await requireVendor(ctx);
+    if (v.vendorCode !== p.code!.toUpperCase()) {
+      const e = new Error('vendor code mismatch') as Error & { status?: number }; e.status = 403; throw e;
+    }
+    const r = await withTx((c) => rotateVendorApiKey(c, v.vendorCode, v.vendorCode));
+    return ok({ ...r, note: 'store the API key now — it is shown once' });
+  } },
   { method: 'POST', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/submissions$/, handler: async (ctx, p) => {
     // Vendor auth: session token OR API key (both valid for submissions)
-    const session = await resolveVendorSession(pool, ctx.headers.authorization);
-    if (!session) {
-      await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
-    }
+    await requireVendorForCode(ctx, p.code!);
     const body = (ctx.body ?? {}) as { submission_kind?: string };
     const kind = body.submission_kind;
     const schema = submissionSchemas[kind as keyof typeof submissionSchemas];
@@ -334,33 +465,25 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     return created(r);
   } },
   { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory$/, handler: async (ctx, p) => {
-    const session = await resolveVendorSession(pool, ctx.headers.authorization);
-    if (!session) {
-      await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
-    }
+    await requireVendorForCode(ctx, p.code!);
     const vid = Number((await pool.query(`SELECT id FROM fresh.vendors WHERE code = $1`, [p.code!.toUpperCase()])).rows[0]?.id);
     return ok(await vendorInventory(pool, vid));
   } },
   { method: 'POST', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)\/images$/, handler: async (ctx, p) => {
-    const session = await resolveVendorSession(pool, ctx.headers.authorization);
-    if (!session) {
-      await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
-    }
+    await requireVendorForCode(ctx, p.code!);
     const body = (ctx.body ?? {}) as { image?: string; alt?: string };
     if (!body.image) {
       const e = new Error('image (base64 data URL or HTTPS URL) is required') as Error & { status?: number }; e.status = 422; throw e;
     }
     return created(await uploadImage(pool, p.code!, p.ref!, body.image, body.alt));
   } },
-  { method: 'DELETE', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)\/images\/(?<assetId>\d+)$/, handler: async (_ctx, p) => {
+  { method: 'DELETE', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)\/images\/(?<assetId>\d+)$/, handler: async (ctx, p) => {
+    await requireVendorForCode(ctx, p.code!);
     await withTx(async (c: Db) => deleteImage(c, p.code!, p.ref!, Number(p.assetId)));
     return ok({ deleted: true });
   } },
   { method: 'PATCH', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)$/, handler: async (ctx, p) => {
-    const session = await resolveVendorSession(pool, ctx.headers.authorization);
-    if (!session) {
-      await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
-    }
+    await requireVendorForCode(ctx, p.code!);
     const body = (ctx.body ?? {}) as { status?: string };
     if (!body.status) {
       const e = new Error('status is required') as Error & { status?: number }; e.status = 422; throw e;
@@ -370,57 +493,340 @@ const routes: Array<{ method: string; pattern: RegExp; handler: Handler }> = [
     return ok({ ref: p.ref, status: body.status });
   } },
   { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/submissions$/, handler: async (ctx, p) => {
-    const session = await resolveVendorSession(pool, ctx.headers.authorization);
-    if (!session) {
-      await verifyVendor(pool, p.code!, ctx.headers['x-vendor-key'] as string | undefined);
-    }
+    await requireVendorForCode(ctx, p.code!);
     return ok(await listSubmissions(pool, ctx.query.get('status'), p.code!));
   } },
 
   { method: 'GET', pattern: /^\/api\/v1\/admin\/submissions$/, handler: async (ctx) => {
-    requireAdmin(ctx);
+    await requireAdmin(ctx);
     return ok(await listSubmissions(pool, ctx.query.get('status'), ctx.query.get('vendor')));
   } },
   { method: 'POST', pattern: /^\/api\/v1\/admin\/submissions\/(?<id>\d+)\/(?<action>approve|reject)$/, handler: async (ctx, p) => {
-    requireAdmin(ctx);
+    await requireAdmin(ctx);
     const id = Number(p.id);
     if (p.action === 'approve') return ok(await withTx((c) => approveSubmission(c, id, 'admin')));
     const note = (ctx.body as { note?: string } | null)?.note ?? 'no reason given';
     await withTx((c) => rejectSubmission(c, id, note, 'admin'));
     return ok({ id, status: 'REJECTED' });
   } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/submissions\/(?<id>\d+)\/(?<action>hold|release)$/, handler: async (ctx, p) => {
+    await requireAdmin(ctx);
+    const id = Number(p.id);
+    if (p.action === 'hold') {
+      const note = (ctx.body as { note?: string } | null)?.note ?? 'on hold';
+      await withTx((c) => holdSubmission(c, id, note, 'admin'));
+      return ok({ id, status: 'HOLD' });
+    }
+    await withTx((c) => releaseSubmission(c, id, 'admin'));
+    return ok({ id, status: 'SUBMITTED' });
+  } },
+
+  // customer account -----------------------------------------------------------
+  { method: 'GET', pattern: /^\/api\/v1\/auth\/orders$/, handler: async (ctx) => {
+    const s = await requireCustomer(ctx);
+    return ok(await listCustomerOrders(pool, s.customerId, s.email));
+  } },
+  { method: 'PATCH', pattern: /^\/api\/v1\/auth\/me$/, handler: async (ctx) => {
+    const s = await requireCustomer(ctx);
+    const body = (ctx.body ?? {}) as { first_name?: string; last_name?: string; phone?: string };
+    return ok(await withTx((c) => updateCustomerProfile(c, s.customerId, body)));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/auth\/favourites$/, handler: async (ctx) => {
+    const s = await requireCustomer(ctx);
+    return ok(await listCustomerFavourites(pool, s.customerId));
+  } },
+  { method: 'PUT', pattern: /^\/api\/v1\/auth\/favourites$/, handler: async (ctx) => {
+    const s = await requireCustomer(ctx);
+    const body = (ctx.body ?? {}) as { refs?: string[] };
+    if (!Array.isArray(body.refs)) {
+      const e = new Error('refs must be an array') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => replaceCustomerFavourites(c, s.customerId, body.refs!)));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/auth\/change-password$/, handler: async (ctx) => {
+    const s = await requireCustomer(ctx);
+    const body = (ctx.body ?? {}) as { current_password?: string; new_password?: string };
+    if (!body.current_password || !body.new_password) {
+      const e = new Error('current_password and new_password are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => changePassword(c, 'CUSTOMER', s.customerId, body.current_password!, body.new_password!)));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/auth\/verify-email$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { token?: string };
+    if (!body.token) {
+      const e = new Error('token is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => verifyEmail(c, body.token!)));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/auth\/resend-verification$/, handler: async (ctx) => {
+    const s = await requireCustomer(ctx);
+    return ok(await withTx((c) => issueVerification(c, s.customerId, s.email)));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/auth\/addresses$/, handler: async (ctx) => {
+    const s = await requireCustomer(ctx);
+    return ok(await listAddresses(pool, s.customerId));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/auth\/addresses$/, handler: async (ctx) => {
+    const s = await requireCustomer(ctx);
+    return created(await withTx((c) => createAddress(c, s.customerId, (ctx.body ?? {}) as never)));
+  } },
+  { method: 'PATCH', pattern: /^\/api\/v1\/auth\/addresses\/(?<id>\d+)$/, handler: async (ctx, p) => {
+    const s = await requireCustomer(ctx);
+    return ok(await withTx((c) => updateAddress(c, s.customerId, Number(p.id), (ctx.body ?? {}) as never)));
+  } },
+  { method: 'DELETE', pattern: /^\/api\/v1\/auth\/addresses\/(?<id>\d+)$/, handler: async (ctx, p) => {
+    const s = await requireCustomer(ctx);
+    return ok(await withTx((c) => deleteAddress(c, s.customerId, Number(p.id))));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/auth\/addresses\/(?<id>\d+)\/default$/, handler: async (ctx, p) => {
+    const s = await requireCustomer(ctx);
+    return ok(await withTx((c) => setDefaultAddress(c, s.customerId, Number(p.id))));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/auth\/request-reset$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { email?: string };
+    if (!body.email) {
+      const e = new Error('email is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => requestPasswordReset(c, 'CUSTOMER', body.email!)));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/auth\/reset$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { token?: string; password?: string };
+    if (!body.token || !body.password) {
+      const e = new Error('token and password are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => resetPassword(c, 'CUSTOMER', body.token!, body.password!)));
+  } },
+
+  // vendor credentials + certificates -----------------------------------------
+  { method: 'POST', pattern: /^\/api\/v1\/vendor\/auth\/request-reset$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { email?: string };
+    if (!body.email) {
+      const e = new Error('email is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => requestPasswordReset(c, 'VENDOR', body.email!)));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/vendor\/auth\/reset$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { token?: string; password?: string };
+    if (!body.token || !body.password) {
+      const e = new Error('token and password are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => resetPassword(c, 'VENDOR', body.token!, body.password!)));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/vendor\/auth\/change-password$/, handler: async (ctx) => {
+    const v = await requireVendor(ctx);
+    const body = (ctx.body ?? {}) as { current_password?: string; new_password?: string };
+    if (!body.current_password || !body.new_password) {
+      const e = new Error('current_password and new_password are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => changePassword(c, 'VENDOR', v.vendorId, body.current_password!, body.new_password!)));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)\/certificates$/, handler: async (ctx, p) => {
+    const v = await requireVendor(ctx);
+    if (v.vendorCode !== p.code!.toUpperCase()) {
+      const e = new Error('vendor code mismatch') as Error & { status?: number }; e.status = 403; throw e;
+    }
+    return ok(await listVendorCertificates(pool, v.vendorCode, p.ref!));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)\/certificates$/, handler: async (ctx, p) => {
+    const v = await requireVendor(ctx);
+    if (v.vendorCode !== p.code!.toUpperCase()) {
+      const e = new Error('vendor code mismatch') as Error & { status?: number }; e.status = 403; throw e;
+    }
+    return created(await withTx((c) => addCertificate(c, v.vendorCode, p.ref!, (ctx.body ?? {}) as { agency: string; cert_no: string; url?: string; issued_at?: string }, v.vendorCode)));
+  } },
+  { method: 'DELETE', pattern: /^\/api\/v1\/vendors\/(?<code>V-[A-Za-z]{2}-\d{3})\/inventory\/(?<ref>[A-Za-z0-9-]+)\/certificates\/(?<id>\d+)$/, handler: async (ctx, p) => {
+    const v = await requireVendor(ctx);
+    if (v.vendorCode !== p.code!.toUpperCase()) {
+      const e = new Error('vendor code mismatch') as Error & { status?: number }; e.status = 403; throw e;
+    }
+    return ok(await withTx((c) => removeCertificate(c, v.vendorCode, p.ref!, Number(p.id), v.vendorCode)));
+  } },
+
+  // admin credentials + operations ---------------------------------------------
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/auth\/request-reset$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { email?: string };
+    if (!body.email) {
+      const e = new Error('email is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => requestPasswordReset(c, 'ADMIN', body.email!)));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/auth\/reset$/, handler: async (ctx) => {
+    const body = (ctx.body ?? {}) as { token?: string; password?: string };
+    if (!body.token || !body.password) {
+      const e = new Error('token and password are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => resetPassword(c, 'ADMIN', body.token!, body.password!)));
+  } },
+  { method: 'PATCH', pattern: /^\/api\/v1\/admin\/orders\/(?<number>MG-\d{4}-\d{6})$/, handler: async (ctx, p) => {
+    await requireAdmin(ctx);
+    const body = (ctx.body ?? {}) as { status?: string };
+    if (!body.status) {
+      const e = new Error('status is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => updateOrderStatus(c, p.number!, body.status!, 'admin')));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/orders\/(?<number>MG-\d{4}-\d{6})\/fulfillment$/, handler: async (ctx, p) => {
+    await requireAdmin(ctx);
+    const body = (ctx.body ?? {}) as { carrier?: string; tracking_number?: string };
+    if (!body.carrier || !body.tracking_number) {
+      const e = new Error('carrier and tracking_number are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => addFulfillment(c, p.number!, body.carrier!, body.tracking_number!, 'admin')));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/orders\/(?<number>MG-\d{4}-\d{6})\/refund$/, handler: async (ctx, p) => {
+    await requireAdmin(ctx);
+    const body = (ctx.body ?? {}) as { amount?: number; reason?: string };
+    if (typeof body.amount !== 'number') {
+      const e = new Error('amount is required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => recordRefund(c, p.number!, body.amount!, body.reason ?? 'no reason given', 'admin')));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/orders\/(?<number>MG-\d{4}-\d{6})\/cancel$/, handler: async (ctx, p) => {
+    await requireAdmin(ctx);
+    const reason = (ctx.body as { reason?: string } | null)?.reason ?? 'no reason given';
+    return ok(await withTx((c) => cancelOrder(c, p.number!, reason, 'admin')));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/certificates$/, handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return ok(await listCertificates(pool, ctx.query.get('status')));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/certificates\/(?<id>\d+)\/verify$/, handler: async (ctx, p) => {
+    await requireAdmin(ctx);
+    const verified = (ctx.body as { verified?: 'UNVERIFIED' | 'VERIFIED' | 'FLAGGED' } | null)?.verified ?? 'VERIFIED';
+    return ok(await withTx((c) => verifyCertificate(c, Number(p.id), verified, 'admin')));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/discounts$/, handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return ok(await listDiscounts(pool));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/discounts$/, handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return created(await withTx((c) => createDiscount(c, (ctx.body ?? {}) as { code: string; kind: 'PERCENT' | 'FIXED'; value: number }, 'admin')));
+  } },
+  { method: 'PATCH', pattern: /^\/api\/v1\/admin\/discounts\/(?<id>\d+)$/, handler: async (ctx, p) => {
+    await requireAdmin(ctx);
+    return ok(await withTx((c) => updateDiscount(c, Number(p.id), (ctx.body ?? {}) as Record<string, never>, 'admin')));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/outbox$/, handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return ok({ summary: await outboxSummary(pool), items: await listOutbox(pool, Number(ctx.query.get('limit') ?? 50)) });
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/outbox\/dispatch$/, handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return ok(await withTx((c) => dispatchOutbox(c, Number(ctx.query.get('limit') ?? 50))));
+  } },
+  { method: 'GET', pattern: /^\/api\/v1\/admin\/audit$/, handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return ok(await listAudit(pool, Number(ctx.query.get('limit') ?? 100)));
+  } },
+  { method: 'POST', pattern: /^\/api\/v1\/admin\/auth\/change-password$/, handler: async (ctx) => {
+    const s = await requireAdminSession(ctx);
+    const body = (ctx.body ?? {}) as { current_password?: string; new_password?: string };
+    if (!body.current_password || !body.new_password) {
+      const e = new Error('current_password and new_password are required') as Error & { status?: number }; e.status = 422; throw e;
+    }
+    return ok(await withTx((c) => changePassword(c, 'ADMIN', s.adminId, body.current_password!, body.new_password!)));
+  } },
 ];
 
+const ALLOWED_ORIGINS = (process.env['ALLOWED_ORIGINS'] ?? 'http://localhost:3000,http://127.0.0.1:3000')
+  .split(',').map((o) => o.trim()).filter(Boolean);
+
+function corsFor(origin: string | undefined): Record<string, string> {
+  const allowed = origin && (ALLOWED_ORIGINS.includes('*') || ALLOWED_ORIGINS.includes(origin));
+  if (!allowed) return {};
+  return {
+    'access-control-allow-origin': origin!,
+    vary: 'Origin',
+    'access-control-allow-methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+    'access-control-allow-headers': 'content-type, authorization, x-vendor-code, x-vendor-key',
+    'access-control-max-age': '86400',
+  };
+}
+
 const server = http.createServer(async (req, res) => {
-  // CORS: dev service — the web app (localhost:3000) proxies for production,
-  // but test runners (vitest browser context) and local tools hit us directly.
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204, {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET, POST, PATCH, DELETE, OPTIONS',
-      'access-control-allow-headers': 'content-type, authorization, x-vendor-code, x-vendor-key',
-      'access-control-max-age': '86400',
+  const startedAt = Date.now();
+  const rid = requestId(req.headers['x-request-id']);
+  const trace = parseTraceparent(req.headers['traceparent']);
+  res.setHeader('x-request-id', rid);
+  res.setHeader('traceparent', traceparentOf(trace));
+  res.on('finish', () => {
+    const pathOnly = (req.url ?? '/').split('?')[0]!;
+    recordRequest(req.method ?? 'GET', pathOnly, res.statusCode);
+    recordSpan(requestSpan(trace, req.method ?? 'GET', pathOnly, res.statusCode, startedAt));
+    log('info', 'request', {
+      request_id: rid,
+      method: req.method,
+      path: (req.url ?? '/').split('?')[0],
+      status: res.statusCode,
+      ms: Date.now() - startedAt,
+      trace_id: trace.traceId,
+      span_id: trace.spanId,
+      ...(trace.parentSpanId ? { parent_span_id: trace.parentSpanId } : {}),
     });
-    res.end();
+  });
+
+  const corsHeaders = corsFor(req.headers.origin);
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, corsHeaders).end();
     return;
   }
-  const corsHeaders = { 'access-control-allow-origin': '*' };
   const url = new URL(req.url ?? '/', `http://${HOST}:${PORT}`);
+
+  if (req.method === 'GET' && url.pathname === '/metrics') {
+    res.writeHead(200, { 'content-type': 'text/plain; version=0.0.4; charset=utf-8', ...corsHeaders }).end(renderMetrics());
+    return;
+  }
+
+  // Locally stored media (served raw, immutable; proxied by the web app).
+  if (req.method === 'GET' && url.pathname.startsWith('/media/')) {
+    const media = await readMedia(decodeURIComponent(url.pathname.slice('/media/'.length)));
+    if (!media) {
+      res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8', ...corsHeaders }).end('Not found');
+      return;
+    }
+    res.writeHead(200, {
+      'content-type': media.mime,
+      'cache-control': 'public, max-age=31536000, immutable',
+      ...corsHeaders,
+    }).end(media.data);
+    return;
+  }
+
+  const MAX_BODY_BYTES = Number(process.env['MAX_BODY_BYTES'] ?? 8 * 1024 * 1024);
+  const declared = Number(req.headers['content-length'] ?? 0);
+  if (declared > MAX_BODY_BYTES) {
+    res.writeHead(413, { 'content-type': 'application/json', ...corsHeaders }).end(JSON.stringify({ error: 'request body too large' }));
+    return;
+  }
   const chunks: Buffer[] = [];
-  for await (const c of req) chunks.push(c as Buffer);
+  let received = 0;
+  for await (const c of req) {
+    received += c.length;
+    if (received > MAX_BODY_BYTES) {
+      res.writeHead(413, { 'content-type': 'application/json', ...corsHeaders }).end(JSON.stringify({ error: 'request body too large' }));
+      req.destroy();
+      return;
+    }
+    chunks.push(c as Buffer);
+  }
   const raw = Buffer.concat(chunks).toString('utf8');
   let body: unknown = null;
-  if (raw) { try { body = JSON.parse(raw); } catch { res.writeHead(400).end('{"error":"invalid JSON body"}'); return; } }
+  if (raw) {
+    try { body = JSON.parse(raw); }
+    catch { res.writeHead(400, { 'content-type': 'application/json', ...corsHeaders }).end('{"error":"invalid JSON body"}'); return; }
+  }
 
   const ctx: Ctx = { method: req.method ?? 'GET', path: url.pathname, query: url.searchParams, body, headers: req.headers };
   // Rate limiting (before auth — brute-force protection)
   const ip = req.socket.remoteAddress ?? 'unknown';
-  const limiter = checkRateLimit(ip, url.pathname);
+  const limiter = await checkRateLimitShared(pool, ip, url.pathname, ctx.method);
   if (!limiter.allowed) {
     res.writeHead(429, {
       'content-type': 'application/json',
       'retry-after': String(limiter.retryAfterSec),
       'x-ratelimit-scope': limiter.scope,
+      ...corsHeaders,
     }).end(JSON.stringify({ error: `rate limit exceeded (${limiter.scope}) — retry in ${limiter.retryAfterSec}s` }));
     return;
   }
@@ -444,13 +850,18 @@ const server = http.createServer(async (req, res) => {
         : err.code === '23505' ? 409
         : 500);
     const detail = err instanceof z.ZodError ? err.issues : err.message;
-    if (status === 500) console.error('fresh-api 500:', err);
+    if (status === 500) log('error', 'unhandled request error', { request_id: rid, trace_id: trace.traceId, message: err.message });
     res.writeHead(status, { 'content-type': 'application/json', ...corsHeaders }).end(JSON.stringify({ error: detail }));
   }
 });
 
 server.listen(PORT, HOST, () => console.log(`fresh-api listening on http://${HOST}:${PORT} (dev; localhost only)`));
 
+if (exporterConfigured()) {
+  const timer = setInterval(() => { void flushSpans(); }, 10_000);
+  timer.unref();
+}
+
 for (const sig of ['SIGINT', 'SIGTERM'] as const) {
-  process.on(sig, () => { server.close(() => pool.end().then(() => process.exit(0))); });
+  process.on(sig, () => { server.close(() => { void flushSpans().finally(() => pool.end().then(() => process.exit(0))); }); });
 }

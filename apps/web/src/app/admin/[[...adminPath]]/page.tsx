@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 // Client-side only (session cookie probe); loaded through a client wrapper.
 const AdminShellMount = dynamicImport(() => import('@/components/mgh/operator/AdminShellMount'), {
-  loading: () => <div className="min-h-screen bg-[#0A0A0B]" />,
+  loading: () => <div className="min-h-screen bg-[#F4F2EE]" />,
 });
 
 export default function AdminGatePage() {

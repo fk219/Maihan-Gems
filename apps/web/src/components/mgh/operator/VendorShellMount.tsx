@@ -2,11 +2,11 @@
 
 import dynamic from 'next/dynamic';
 
-const VendorConsoleFresh = dynamic(() => import('./VendorConsoleFresh'), {
+const VendorPortalApp = dynamic(() => import('./VendorPortalApp'), {
   ssr: false,
-  loading: () => <div className="min-h-screen bg-[#0A0A0B]" />,
+  loading: () => <div className="min-h-screen bg-[#F4F2EE]" />,
 });
 
 export default function VendorShellMount() {
-  return <VendorConsoleFresh />;
+  return <VendorPortalApp />;
 }

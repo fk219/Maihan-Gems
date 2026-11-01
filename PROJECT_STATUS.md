@@ -3,7 +3,7 @@
 **This is the ONE file to read for the complete, current state of the project.**
 History and per-item evidence live in `MAIHAN_GEMS_DEEP_TECHNICAL_AUDIT.md` (§22–§24); the roadmap in `INITIAL_IMPLEMENTATION_PLAN.md` (Appendix A); decisions in `docs/adr/`.
 
-**Last updated:** 2026-10-31 · branch `develop` · head `develop` — see `git log -1`
+**Last updated:** 2026-11-01 · branch `develop` · head `develop` — see `git log -1`
 
 ---
 
@@ -84,6 +84,37 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 - **Link cascade fixed** (mgh-applet preflight + gold focus-visible ring)
 - Soft-404 at the edge (proxy middleware + variety registry)
 
+### 3.6 Accounts, operations & trust (2026-11-01)
+- **Customer accounts**: register / login / logout, profile, order history (guest orders matched by verified email), saved pieces synced to the account, change password, reset-token flow. `/account` is a live applet page (was a closed placeholder).
+- **Credential lifecycle**: single-use reset tokens for customer, vendor and admin (SHA-256 at rest, 60 min, dev token returned only outside production); change-password for customer/vendor; DB admin sessions now accepted by every admin route.
+- **Order lifecycle**: PAID → IN_FULFILLMENT → FULFILLED → DELIVERED transitions, shipment records (carrier + tracking), refunds recorded as PENDING against the captured payment (no PSP claimed), all with order events + audit rows and an admin dossier UI.
+- **Discounts**: admin create/pause + checkout validation against window, usage limit and minimum subtotal.
+- **Submissions moderation**: Approve / Hold / Release / Reject (HOLD added in `0014`), with a dedicated admin tab; vendor portal shows the Hold tab and house feedback.
+- **Certificates**: vendor upload/list/remove (`UNVERIFIED`); public catalogue exposes only `VERIFIED` reports.
+- **Email seam**: transactional messages (order placed, password reset) are queued in `fresh.email_outbox` and logged in dev — no delivery is claimed; a provider adapter drains the box.
+- **Operations**: structured JSON request logs with `x-request-id`, CORS allow-list (`ALLOWED_ORIGINS`), dev-only env admin token gate, trigram-ranked search (typo tolerant), audit-log feed in the admin overview.
+- **Vendor onboarding is invite-only** (owner decision 2026-11-01): partners are created and approved by the house; there is no public self-registration. **Security**: vendor creation is admin-only; vendor detail requires the vendor session or admin; admin console uses DB email+password sessions; method-aware rate limits cover vendor login/setup, resets, API-key rotation, leads and media writes; 8 MB request-body cap; vendor API-key rotation with one-time display.
+- **Order privacy**: public order reads require the one-time checkout access token or the owning customer session (no enumeration); confirmation page is edge-guarded (anonymous → true 404). Emails carry the private confirmation link.
+- **Media storage**: uploads are written to disk (`MEDIA_DIR`, default `var/media`) and served at `/media/<file>` through the web proxy — no base64 in Postgres; deletion removes the file. External HTTPS URLs stay as-is.
+- **Deep 404s**: the edge validates dynamic slugs against `/catalogue/exists` (10-min cache) for products, settings, varieties, DYO dossiers and variety-scoped routes — unknown slugs return true 404s.
+- **Shared rate limits**: windows are atomic Postgres upserts (`0018`), safe across instances; in-memory fallback if the database is unavailable.
+- **Catalogue load-more**: browse/varieties append pages of 60 live stones on demand.
+- **Vendor route auth fix**: every vendor inventory/media/submission route now enforces the session's own vendor code (cross-vendor mismatch → 403); image deletion requires authentication.
+- **Order cancellation**: pre-fulfilment cancel restores each stone to its *pre-reservation* status (`0016`), releases reservations, and records a pending refund for the captured amount. Marking DELIVERED stamps the fulfilment record.
+- **Certificate verification**: admin Certificates tab lists submissions and moves them VERIFIED / FLAGGED / UNVERIFIED; only VERIFIED reports render publicly.
+- **Email verification**: registration queues a hashed single-use verification link (24 h); the account app shows a verify/resend banner and completes `?verify=<token>`. Dev returns the token locally.
+- **Address book**: customer address CRUD (list/add/default/delete), used by the checkout "saved address" selector.
+- **Email lifecycle + drain**: paid / shipped / cancelled / verification emails queue in `email_outbox`; `POST /admin/outbox/dispatch` and `pnpm --filter @maihan/fresh-api run mail:drain` deliver via Resend when configured, with attempts/backoff state. Without a provider rows stay QUEUED — no delivery claimed.
+- **Sitemap index + chunks**: `/sitemap.xml` lists 5,000-URL chunks (`/sitemap/<n>.xml`), generated live from the catalogue (31,551 URLs across 9 chunks).
+- **Discount editing**: full admin edit of value, minimum, window and status (validated; duplicate-code protection).
+- **Unsubscribe**: `/unsubscribe` + `POST /leads/unsubscribe` marks newsletter leads LOST without touching service/viewing leads.
+- **CSRF origin guard**: cross-site writes to `/api/*` are rejected at the edge (Origin / Sec-Fetch-Site), verified 403 vs 200.
+- **Engineering cleanup**: removed the unused fixture-era operator/account shells and the dead `api-origin` seam; CI now boots fresh-api and runs the full storefront unit suite (including the homepage probe, scoped to layout-independent axe rules for speed).
+- **Metrics**: Prometheus text endpoint at `:3010/metrics` — request counters (bounded path buckets), uptime and RSS, no PII.
+- **Trace context + OTLP**: W3C `traceparent` parsed/issued/echoed and logged; the web proxy propagates it. With `OTEL_EXPORTER_OTLP_ENDPOINT` set, request spans batch-export to OTLP/HTTP (10 s flush, global headers).
+- **Search**: `/search` is a live server-rendered ledger over the catalogue (no fixture chat); `/ai-gemologist` permanently redirects to `/concierge` preserving `q`.
+- **Live concierge**: `/concierge` and the hero AI search read the real catalogue — deterministic parsing of variety/colour/origin/shape/budget/carat/pair intent with an honest refusal. When an OpenAI-compatible key is configured, a **read-only** tool registry (`search_catalogue`, `get_stone`; no writes, ADR-003) enriches the reply; without a key it stays deterministic and says so.
+
 ### 3.5 Old database — fully retired
 - `packages/db`, `apps/worker`, `tools/migrate`, `apps/api`, old web API surface, all old lib seams: **deleted**
 - Old locked schema: dropped from `maihan_dev` (backed up first)
@@ -109,7 +140,6 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 | **Real payment provider** | Stripe adapter (old pattern exists); currently dev test instrument only | Choose PSP + provide API keys |
 | **Shipping rates** | Currently 0 (pending-fulfilment); needs rate table | Choose carriers + rate logic |
 | **Live FX rates** | Display constants now (USD/AED/THB); needs an FX API source | Choose FX provider + API key |
-| **DYO checkout 3-step rewiring** | Currently single-page checkout; the applet's 3-step flow needs the cart→order seam | Design preference |
 | **Order fulfilment** | Fulfilments table exists; no ship/track flow yet | Business process decision |
 
 ### 4.3 Production deploy (all local dev currently)
@@ -118,14 +148,14 @@ A complete fine-gemstone e-commerce platform built on a **fresh, clean database 
 | **Neon production database** | Local `maihan_dev` → Neon project + secrets |
 | **Vercel deployment** | apps/web + apps/fresh-api → Vercel (or alternative) |
 | **Secrets** | FRESH_ADMIN_PASSWORD, vendor keys, Sanity token, Stripe keys → platform secret manager |
-| **CI re-point** | Current CI runs domain/contracts/ai/observability/web build — needs fresh-era test additions (fresh-api tests) |
+| **CI re-point** | DONE — CI now bootstraps `docs/fresh-schema/0001–0014` on the disposable DB and runs fresh-api unit + DB integration tests |
 | **Domain + analytics** | maihangems.com DNS + analytics |
 | **Rate limiting** | In-memory per-IP on fresh-api; production needs distributed limits |
 
 ### 4.4 Nice-to-have (post-launch polish)
 | Item | What |
 |---|---|
-| Search quality | trigram/full-text index for fuzzy gemstone search |
+| Search quality | DONE — trigram-ranked gemstone/setting search (typo tolerant) |
 | WebAR/3D content | `MODEL_3D` assets table ready; GLB models needed |
 | Certificate intelligence | 0008 schema ready (diamond 4C grading); UI + OCR flow needed |
 | i18n | Decorative EN/FR/AR switcher ported; full i18n needs a translation strategy |

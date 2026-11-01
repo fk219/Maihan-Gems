@@ -7,7 +7,7 @@ import { LayoutGrid, List, Eye, X, SlidersHorizontal, Heart, Scale } from 'lucid
 import { GemstoneItem } from '@/lib/mgh/fixtures';
 import { VARIETIES_META, COLOURS_META } from '@/lib/mgh/fixtures/catalog';
 import { ProductCard } from './ProductCard';
-import { useStorefront } from '@/components/mgh/providers/StorefrontProvider';
+
 
 export function CollectionExplorerSkeleton({
   count = 9,
@@ -82,23 +82,25 @@ export function CollectionExplorer({
   lockedVarietySlug,
   lockedColourSlug,
   isLoading = false,
+  loadMore = false,
 }: {
   initialItems: GemstoneItem[];
   lockedVarietySlug?: string;
   lockedColourSlug?: string;
   isLoading?: boolean;
+  loadMore?: boolean;
 }) {
   const { addToCart, toggleFavorite, toggleCompare, favorites, compareList, formatPrice } = useStorefront();
 
   // Compute absolute min and max prices from data
   const { minAvailablePrice, maxAvailablePrice } = useMemo(() => {
-    if (initialItems.length === 0) return { minAvailablePrice: 1000, maxAvailablePrice: 20000 };
-    const prices = initialItems.map((g) => g.price);
+    if (pool.length === 0) return { minAvailablePrice: 1000, maxAvailablePrice: 20000 };
+    const prices = pool.map((g) => g.price);
     return {
       minAvailablePrice: Math.min(...prices),
       maxAvailablePrice: Math.max(...prices),
     };
-  }, [initialItems]);
+  }, [pool]);
 
   const [variety, setVariety] = useState(lockedVarietySlug || 'all');
   const [colour, setColour] = useState(lockedColourSlug || 'all');
@@ -109,10 +111,19 @@ export function CollectionExplorer({
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [page, setPage] = useState(1);
   const [quickViewStone, setQuickViewStone] = useState<GemstoneItem | null>(null);
+  const [pool, setPool] = useState<GemstoneItem[]>(initialItems);
+  const [loadMoreBusy, setLoadMoreBusy] = useState(false);
+  const [exhausted, setExhausted] = useState(initialItems.length < 60);
   const [isPending, startTransition] = useTransition();
   const [isFilteringShimmer, setIsFilteringShimmer] = useState(false);
 
-  // Sync max budget if initial items change
+  // Reset the pool when the server-provided page changes (variety/colour nav)
+  useEffect(() => {
+    setPool(initialItems);
+    setExhausted(initialItems.length < 60);
+  }, [initialItems]);
+
+  // Sync max budget if the pool changes
   useEffect(() => {
     setMaxBudget(maxAvailablePrice);
   }, [maxAvailablePrice]);
@@ -120,7 +131,7 @@ export function CollectionExplorer({
   const pageSize = 9;
 
   const filtered = useMemo(() => {
-    let list = [...initialItems];
+    let list = [...pool];
 
     // Variety filter
     if (variety !== 'all') {
@@ -166,11 +177,25 @@ export function CollectionExplorer({
     if (sort === 'carat-desc') list.sort((a, b) => b.carat - a.carat);
 
     return list;
-  }, [initialItems, variety, colour, shape, treatment, maxBudget, maxAvailablePrice, sort]);
+  }, [pool, variety, colour, shape, treatment, maxBudget, maxAvailablePrice, sort]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const loadMoreStones = async () => {
+    setLoadMoreBusy(true);
+    try {
+      const { fetchStonePage, PAGE_SIZE } = await import('@/lib/mgh/gem-client');
+      const next = await fetchStonePage(pool.length, PAGE_SIZE);
+      const seen = new Set(pool.map((stone) => stone.id));
+      const merged = [...pool, ...next.filter((stone) => !seen.has(stone.id))];
+      setPool(merged);
+      if (next.length < PAGE_SIZE) setExhausted(true);
+    } finally {
+      setLoadMoreBusy(false);
+    }
+  };
 
   const triggerFilterChange = (callback: () => void) => {
     setIsFilteringShimmer(true);
@@ -592,6 +617,19 @@ export function CollectionExplorer({
           ))}
         </nav>
       )}
+
+      {loadMore && !exhausted && !isBusy ? (
+        <div className="flex justify-center pt-2">
+          <button
+            type="button"
+            onClick={() => void loadMoreStones()}
+            disabled={loadMoreBusy}
+            className="px-6 py-3 text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.16em] font-semibold border border-[#D4AF37]/60 text-[#9A7B2C] rounded-sm hover:bg-[#FCF8EC] transition-colors disabled:opacity-60"
+          >
+            {loadMoreBusy ? 'Loading…' : 'Load more from the vault'}
+          </button>
+        </div>
+      ) : null}
 
       {/* Quick View Modal */}
       {quickViewStone && (

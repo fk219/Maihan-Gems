@@ -167,6 +167,7 @@ export function StorefrontFooter() {
           <div className="flex flex-wrap items-center gap-6">
             <Link href="/policy/privacy-policy" className="hover:text-[#C8C3B8] transition-colors">Privacy Policy</Link>
             <Link href="/policy/terms-of-service" className="hover:text-[#C8C3B8] transition-colors">Terms of Service</Link>
+            <Link href="/unsubscribe" className="hover:text-[#C8C3B8] transition-colors">Unsubscribe</Link>
             <Link href="/policy/treatment-disclosure" className="hover:text-[#C8C3B8] transition-colors">Treatment Disclosure</Link>
             <Link href="/vendor" className="text-[#9A7B2C] hover:text-[#D4AF37] transition-colors">Vendor Portal</Link>
             <Link href="/admin" className="text-[#9A7B2C] hover:text-[#D4AF37] transition-colors">Admin Console</Link>

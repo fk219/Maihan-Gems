@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const VendorPortalApp = dynamicImport(() => import('@/components/mgh/operator/VendorPortalApp'), {
-  loading: () => <div className="min-h-screen bg-[#0A0A0B]" />,
+  loading: () => <div className="min-h-screen bg-[#F4F2EE]" />,
 });
 
 export default function VendorGatePage() {

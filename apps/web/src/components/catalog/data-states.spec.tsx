@@ -95,16 +95,14 @@ describe('EMPTY — listings integrate the shared EmptyState with a next action'
     expect(html).toContain('href="/"');
   });
 
-  // M2b: the four applet-migrated listings no longer consume the shared
-  // EmptyState — the reference template ships its own zero-result semantics
-  // instead: CollectionExplorer's "no vault specimens match" card with a
-  // reset action (variety/colour), the fixture settings ledger (settings),
-  // and the concierge workspace's own empty/error replies (search).
+  // M2b/F4: the applet-migrated listings ship their own zero-result
+  // semantics — CollectionExplorer's reset card (variety/colour), the
+  // fixture settings ledger, and the live search page's no-match state.
   it.each([
     ['[varietySlug]', 'CollectionExplorer'],
     ['colour/[colourSlug]', 'CollectionExplorer'],
     ['settings', 'SETTING_SUBCATEGORIES'],
-    ['search', 'AiConciergeWorkspace'],
+    ['search', 'searchCatalogGemstones'],
   ])('%s/page.tsx ships its zero-result integration (applet template)', (route, marker) => {
     expect(read(`${SF}/${route}/page.tsx`)).toContain(marker);
   });

@@ -60,3 +60,6 @@ node_modules/
 
 # database backups (owner-authorized cut-over artifacts; never committed)
 backups/
+
+# Local media storage (fresh-api MEDIA_DIR default)
+var/

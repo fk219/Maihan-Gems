@@ -174,12 +174,34 @@ export async function listSubmissions(client: AnyClient, status: string | null, 
     where.push(`v.code = $${params.length}`);
   }
   const { rows } = await client.query(
-    `SELECT s.id, s.submission_kind, s.status, s.payload, s.resulting_ref, s.created_at,
-            s.reviewer_note, s.reviewed_at, v.code AS vendor_code
+    `SELECT s.id, s.submission_kind AS kind, s.status, s.payload, s.resulting_ref, s.created_at,
+            s.reviewer_note, s.reviewed_at, v.code AS vendor_code, v.name AS vendor_name
      FROM fresh.vendor_submissions s JOIN fresh.vendors v ON v.id = s.vendor_id
      ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
      ORDER BY s.id DESC LIMIT 100`,
     params,
   );
   return rows;
+}
+
+/** Put a submitted piece on hold (owner review paused) — reversible. */
+export async function holdSubmission(client: AnyClient, submissionId: number, note: string, adminActor: string): Promise<void> {
+  const { rowCount } = await client.query(
+    `UPDATE fresh.vendor_submissions SET status = 'HOLD', reviewer_note = $2, reviewed_by = $3, reviewed_at = now()
+     WHERE id = $1 AND status = 'SUBMITTED'`,
+    [submissionId, note, adminActor],
+  );
+  if (!rowCount) throw new StateError(`submission ${submissionId} not found or not SUBMITTED`);
+  await audit(client, 'HOLD_SUBMISSION', 'vendor_submission', submissionId, { note });
+}
+
+/** Release a held piece back to the moderation queue. */
+export async function releaseSubmission(client: AnyClient, submissionId: number, adminActor: string): Promise<void> {
+  const { rowCount } = await client.query(
+    `UPDATE fresh.vendor_submissions SET status = 'SUBMITTED', reviewed_by = $2, reviewed_at = now()
+     WHERE id = $1 AND status = 'HOLD'`,
+    [submissionId, adminActor],
+  );
+  if (!rowCount) throw new StateError(`submission ${submissionId} not found or not HOLD`);
+  await audit(client, 'RELEASE_SUBMISSION', 'vendor_submission', submissionId, {});
 }

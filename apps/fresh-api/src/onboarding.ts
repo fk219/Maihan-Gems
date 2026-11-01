@@ -90,3 +90,17 @@ export async function getVendor(client: AnyClient, code: string) {
   return { ...rows[0], submissions: conflict.rows[0]!.submissions };
 }
 
+
+/** Rotate the vendor's API key (shown once). Requires the vendor session. */
+export async function rotateVendorApiKey(client: AnyClient, code: string, actor: string): Promise<{ apiKey: string }> {
+  const vq = await client.query(`SELECT id FROM fresh.vendors WHERE code = $1 AND status = 'ACTIVE'`, [code.toUpperCase()]);
+  if (!vq.rows[0]) throw new StateError(`unknown vendor '${code}'`);
+  const key = newToken();
+  const { rowCount } = await client.query(
+    `UPDATE fresh.vendor_onboarding SET api_key_hash = $2 WHERE vendor_id = $1 AND status = 'APPROVED'`,
+    [vq.rows[0].id, key.hash],
+  );
+  if (!rowCount) throw new StateError(`vendor '${code}' has no approved onboarding record`);
+  await audit(client, 'VENDOR_API_KEY_ROTATED', 'vendor', Number(vq.rows[0].id), { code: code.toUpperCase(), vendor: actor }, 'vendor');
+  return { apiKey: key.raw };
+}

@@ -27,6 +27,22 @@ export class AxeBuilder {
   async analyze(): Promise<AxeResults> {
     const results = (await axe.run(document, {
       resultTypes: ['violations', 'passes', 'incomplete'],
+      // happy-dom has no layout or computed styles. The unit probe therefore
+      // audits the layout-independent structural rules (names, roles, labels,
+      // language, lists); contrast and spacing belong to a real-browser audit.
+      runOnly: {
+        type: 'rule',
+        values: [
+          'aria-allowed-attr', 'aria-hidden-body', 'aria-required-attr',
+          'aria-required-children', 'aria-required-parent', 'aria-roles',
+          'aria-valid-attr', 'aria-valid-attr-value', 'button-name',
+          'document-title', 'duplicate-id-aria', 'form-field-multiple-labels',
+          'html-has-lang', 'html-lang-valid', 'image-alt', 'input-button-name',
+          'label', 'link-name', 'list', 'listitem', 'meta-viewport',
+          'select-name', 'summary-name', 'td-headers-attr',
+          'th-has-data-cells', 'valid-lang',
+        ],
+      },
     })) as unknown as AxeResults;
     return results;
   }

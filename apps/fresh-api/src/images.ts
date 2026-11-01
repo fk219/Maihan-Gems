@@ -5,6 +5,7 @@
  */
 import type { AnyClient } from './db.js';
 import { StateError } from './validation.js';
+import { storeImage, removeStoredImage } from './media.js';
 
 function err(message: string, status: number): Error {
   const e = new StateError(message);
@@ -48,10 +49,12 @@ export async function uploadImage(
 
   // validate image data
   let url: string;
-  if (imageData.startsWith('data:image/')) {
-    // base64 data URL: validate size (≤ 2 MB base64 ≈ 1.5 MB binary)
-    if (imageData.length > 2_800_000) throw err('image too large (max 2 MB)', 422);
-    url = imageData;
+  const dataUrl = /^data:(image\/(?:jpeg|png|webp|gif|avif));base64,([A-Za-z0-9+/=\s]+)$/.exec(imageData);
+  if (dataUrl) {
+    const buffer = Buffer.from(dataUrl[2]!, 'base64');
+    if (buffer.length > 2 * 1024 * 1024) throw err('image too large (max 2 MB)', 422);
+    const stored = await storeImage(buffer, dataUrl[1]!);
+    url = stored.url;
   } else if (imageData.startsWith('https://')) {
     // external URL: store as-is
     url = imageData;
@@ -80,14 +83,16 @@ export async function uploadImage(
 }
 
 export async function deleteImage(client: AnyClient, vendorCode: string, itemRef: string, assetId: number): Promise<void> {
-  const { rowCount } = await client.query(
+  const { rows } = await client.query(
     `DELETE FROM fresh.assets a
      WHERE a.id = $1 AND a.owner_id = (
        SELECT CASE WHEN a2.owner_kind = 'gemstone' THEN (SELECT id FROM fresh.gemstones WHERE ref = $2 AND vendor_id = (SELECT id FROM fresh.vendors WHERE code = $3))
                    ELSE (SELECT id FROM fresh.products WHERE ref = $2 AND vendor_id = (SELECT id FROM fresh.vendors WHERE code = $3)) END
        FROM fresh.assets a2 WHERE a2.id = $1
-     )`,
+     )
+     RETURNING a.url`,
     [assetId, itemRef, vendorCode.toUpperCase()],
   );
-  if (!rowCount) throw err(`asset ${assetId} not found or not owned by you`, 404);
+  if (!rows[0]) throw err(`asset ${assetId} not found or not owned by you`, 404);
+  await removeStoredImage(String(rows[0].url));
 }

@@ -115,6 +115,41 @@ jobs:
           pnpm --filter @maihan/fresh-api exec tsc --noEmit
           pnpm exec eslint apps/fresh-api/src/
 
+      # Reproducible bootstrap: apply docs/fresh-schema/0001–0014 in order to
+      # the disposable database, then run the fresh-api suite against it.
+      - name: Fresh schema bootstrap (ordered migrations)
+        env:
+          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
+        run: pnpm --filter @maihan/fresh-api run migrate
+
+      # The Next.js app is exercised against the migrated fresh-api: the
+      # storefront probe imports server components and reads the catalogue.
+      - name: Start fresh-api for storefront tests
+        env:
+          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
+          FRESH_ADMIN_TOKEN: ci-dev-token
+          FRESH_ADMIN_PASSWORD: ci-dev-password
+          FRESH_API_PORT: 3010
+        run: |
+          nohup pnpm --filter @maihan/fresh-api run start > /tmp/fresh-api.log 2>&1 &
+          for i in $(seq 1 40); do
+            if curl -sf http://127.0.0.1:3010/healthz >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/fresh-api.log
+          exit 1
+
+      - name: Storefront unit tests
+        env:
+          FRESH_API_URL: http://127.0.0.1:3010
+        run: pnpm --filter @maihan/web run test
+
+      - name: Fresh API unit + database integration tests
+        env:
+          DATABASE_URL: postgresql://postgres:maihan_local_dev_only@127.0.0.1:5433/maihan_dev
+          FRESH_ADMIN_TOKEN: ci-dev-token
+        run: pnpm --filter @maihan/fresh-api run test
+
       - name: Stop disposable PostgreSQL 16
         if: always()
         run: docker compose down -v

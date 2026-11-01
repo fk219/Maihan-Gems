@@ -9,6 +9,7 @@
  * The client never talks to fresh-api directly.
  */
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'node:crypto';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,18 +20,35 @@ async function forward(req: NextRequest, path: string[]): Promise<NextResponse> 
   const search = req.nextUrl.search;
   const url = `${FRESH_API_URL}/api/v1/${path.join('/')}${search}`;
 
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = {
+    traceparent: `00-${crypto.randomBytes(16).toString('hex')}-${crypto.randomBytes(8).toString('hex')}-01`,
+  };
   const adminCookie = req.cookies.get('maihan_admin_session')?.value;
   const adminLegacy = req.cookies.get('maihan_admin')?.value;
   const adminToken = adminCookie ?? adminLegacy;
-  if (adminToken) headers['authorization'] = `Bearer ${adminToken}`;
 
   const vendorCode = req.cookies.get('maihan_vendor_code')?.value;
   const vendorKey = req.cookies.get('maihan_vendor_key')?.value;
   const vendorSession = req.cookies.get('maihan_vendor_session')?.value;
+  const customerSession = req.cookies.get('maihan_customer_session')?.value;
   if (vendorCode) headers['x-vendor-code'] = vendorCode;
   if (vendorKey) headers['x-vendor-key'] = vendorKey;
-  if (vendorSession && !adminToken) headers['authorization'] = `Bearer ${vendorSession}`;
+
+  // Each surface prefers its own credential, so one browser can hold an
+  // admin, vendor and customer session at the same time.
+  const isCustomerPath = path[0] === 'auth';
+  const isVendorPath = path[0] === 'vendor' || path[0] === 'vendors';
+  if (isCustomerPath && customerSession) {
+    headers['authorization'] = `Bearer ${customerSession}`;
+  } else if (isVendorPath && vendorSession) {
+    headers['authorization'] = `Bearer ${vendorSession}`;
+  } else if (adminToken) {
+    headers['authorization'] = `Bearer ${adminToken}`;
+  } else if (vendorSession) {
+    headers['authorization'] = `Bearer ${vendorSession}`;
+  } else if (customerSession) {
+    headers['authorization'] = `Bearer ${customerSession}`;
+  }
 
   const contentType = req.headers.get('content-type');
   if (contentType) headers['content-type'] = contentType;
@@ -62,6 +80,10 @@ export async function POST(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
   return forward(req, path);
 }
 export async function PATCH(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
+  const { path } = await ctx.params;
+  return forward(req, path);
+}
+export async function PUT(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
   const { path } = await ctx.params;
   return forward(req, path);
 }

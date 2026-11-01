@@ -32,10 +32,20 @@ export async function listGemstones(client: AnyClient, q: URLSearchParams) {
   if (status) { params.push(status); where.splice(0, 1, `g.status = $${params.length}`); }
   const min = q.get('price_min'); if (min) { params.push(min); where.push(`g.price_amount >= $${params.length}::numeric`); }
   const max = q.get('price_max'); if (max) { params.push(max); where.push(`g.price_amount <= $${params.length}::numeric`); }
+  const wmin = q.get('weight_min'); if (wmin) { params.push(wmin); where.push(`g.weight_ct >= $${params.length}::numeric`); }
+  const wmax = q.get('weight_max'); if (wmax) { params.push(wmax); where.push(`g.weight_ct <= $${params.length}::numeric`); }
+  let orderBy = 'g.ref';
   const text = q.get('q');
   if (text) {
     params.push(`%${text}%`);
-    where.push(`(g.name ILIKE $${params.length} OR g.slug ILIKE $${params.length} OR g.ref ILIKE $${params.length} OR v.name ILIKE $${params.length})`);
+    const like = params.length;
+    params.push(text);
+    const raw = params.length;
+    where.push(
+      `(g.name ILIKE $${like} OR g.slug ILIKE $${like} OR g.ref ILIKE $${like} OR v.name ILIKE $${like}
+        OR fresh.similarity(lower(g.name), lower($${raw})) > 0.2 OR fresh.similarity(lower(v.name), lower($${raw})) > 0.2)`,
+    );
+    orderBy = `greatest(fresh.similarity(lower(g.name), lower($${raw})), fresh.similarity(lower(v.name), lower($${raw}))) DESC, g.ref`;
   }
   const refs = q.get('refs');
   if (refs) {
@@ -56,7 +66,7 @@ export async function listGemstones(client: AnyClient, q: URLSearchParams) {
       (SELECT url FROM fresh.assets a WHERE a.owner_kind='gemstone' AND a.owner_id=g.id ORDER BY position LIMIT 1) AS primary_image,
       (SELECT json_agg(json_build_object('position', st.position, 'weight_ct', st.weight_ct, 'l', st.length_mm, 'w', st.width_mm, 'h', st.depth_mm) ORDER BY st.position)
          FROM fresh.gemstone_stones st WHERE st.gemstone_id = g.id) AS pieces_detail
-     ${join} WHERE ${where.join(' AND ')} ORDER BY g.ref LIMIT $${params.length - 1} OFFSET $${params.length}`,
+     ${join} WHERE ${where.join(' AND ')} ORDER BY ${orderBy} LIMIT $${params.length - 1} OFFSET $${params.length}`,
     params,
   );
   return { kind: 'gemstones', count: rows.length, items: rows };
@@ -73,8 +83,8 @@ export async function gemstoneDetail(client: AnyClient, ref: string) {
      LEFT JOIN fresh.gemstone_origins o ON o.id = g.origin_id
      LEFT JOIN fresh.shapes s ON s.id = g.shape_id
      LEFT JOIN fresh.clarities cl ON cl.id = g.clarity_id
-     WHERE (g.ref = $1 OR g.slug = $1) AND g.status <> 'ARCHIVED'`,
-    [ref.toLowerCase()],
+     WHERE (g.ref = upper($1) OR g.slug = lower($1)) AND g.status <> 'ARCHIVED'`,
+    [ref],
   );
   if (!rows[0]) return null;
   const gem = rows[0];
@@ -90,7 +100,20 @@ export async function gemstoneDetail(client: AnyClient, ref: string) {
     `SELECT role, kind, url, position FROM fresh.assets WHERE owner_kind = 'gemstone' AND owner_id = $1 ORDER BY position`,
     [gem.id],
   );
-  return { ...gem, stones: stones.rows, treatments: treatments.rows.map((r) => r.name), media: media.rows };
+  const certificates = await client.query(
+    `SELECT agency, cert_no, url, issued_at::text AS issued_at
+     FROM fresh.certificates
+     WHERE owner_kind = 'gemstone' AND owner_id = $1 AND verified = 'VERIFIED'
+     ORDER BY issued_at DESC NULLS LAST`,
+    [gem.id],
+  );
+  return {
+    ...gem,
+    stones: stones.rows,
+    treatments: treatments.rows.map((r) => r.name),
+    media: media.rows,
+    certificates: certificates.rows,
+  };
 }
 
 export async function listProducts(client: AnyClient, q: URLSearchParams) {
@@ -156,10 +179,18 @@ export async function listSettings(client: AnyClient, q: URLSearchParams) {
   add(q.get('design'), `s.design_code = $X`);
   const status = q.get('status');
   if (status) { params.push(status); where.splice(0, 1, `s.status = $${params.length}`); }
+  let orderBy = 's.ref';
   const text = q.get('q');
   if (text) {
     params.push(`%${text}%`);
-    where.push(`(s.name ILIKE $${params.length} OR s.slug ILIKE $${params.length} OR s.ref ILIKE $${params.length} OR s.design_code ILIKE $${params.length})`);
+    const like = params.length;
+    params.push(text);
+    const raw = params.length;
+    where.push(
+      `(s.name ILIKE $${like} OR s.slug ILIKE $${like} OR s.ref ILIKE $${like} OR s.design_code ILIKE $${like}
+        OR fresh.similarity(lower(s.name), lower($${raw})) > 0.2)`,
+    );
+    orderBy = `greatest(fresh.similarity(lower(s.name), lower($${raw})), fresh.similarity(lower(s.slug), lower($${raw}))) DESC, s.ref`;
   }
   const refs = q.get('refs');
   if (refs) {
@@ -182,7 +213,7 @@ export async function listSettings(client: AnyClient, q: URLSearchParams) {
      JOIN fresh.jewellery_types jt ON jt.id = s.jewellery_type_id
      JOIN fresh.metals m ON m.id = s.metal_id
      LEFT JOIN fresh.setting_styles st ON st.id = s.style_id
-     WHERE ${where.join(' AND ')} ORDER BY s.ref LIMIT $${params.length - 1} OFFSET $${params.length}`,
+     WHERE ${where.join(' AND ')} ORDER BY ${orderBy} LIMIT $${params.length - 1} OFFSET $${params.length}`,
     params,
   );
   return { kind: 'settings', count: rows.length, items: rows };
@@ -281,4 +312,47 @@ export async function familiesWithCounts(client: AnyClient) {
      GROUP BY f.id, f.code, f.name, f.description ORDER BY f.sort`,
   );
   return { count: rows.length, items: rows };
+}
+
+
+const EXISTS_QUERIES: Record<string, string> = {
+  gemstone: `SELECT 1 FROM fresh.gemstones WHERE (slug = $1 OR ref = upper($1)) AND status <> 'ARCHIVED' LIMIT 1`,
+  setting: `SELECT 1 FROM fresh.settings WHERE (slug = $1 OR ref = $1) AND status <> 'ARCHIVED' LIMIT 1`,
+  product: `SELECT 1 FROM fresh.products WHERE (slug = $1 OR ref = $1) AND status <> 'ARCHIVED' LIMIT 1`,
+  variety: `SELECT 1 FROM fresh.gemstone_varieties WHERE slug = $1 OR code = upper($1) LIMIT 1`,
+  configuration: `SELECT 1 FROM fresh.configurations WHERE code = $1 LIMIT 1`,
+};
+
+/** Cheap existence check used by the edge to return true 404s for unknown slugs. */
+export async function catalogueExists(client: AnyClient, kind: string, key: string) {
+  const k = key.trim();
+  const sql = EXISTS_QUERIES[kind];
+  if (!sql || !k || k.length > 200) return { exists: false };
+  try {
+    const { rows } = await client.query(sql, [k]);
+    return { exists: Boolean(rows[0]) };
+  } catch {
+    return { exists: true };
+  }
+}
+
+
+const SITEMAP_KINDS: Record<string, { table: string; column: string; where: string }> = {
+  gemstone: { table: 'fresh.gemstones', column: 'slug', where: `status <> 'ARCHIVED' AND kind = 'SINGLE'` },
+  setting: { table: 'fresh.settings', column: 'ref', where: `status <> 'ARCHIVED'` },
+  product: { table: 'fresh.products', column: 'slug', where: `status <> 'ARCHIVED'` },
+  variety: { table: 'fresh.gemstone_varieties', column: 'slug', where: 'true' },
+};
+
+/** Sitemap pages: slugs/refs only, up to 5,000 rows per chunk. */
+export async function sitemapPage(client: AnyClient, kind: string, offset: number, limit: number) {
+  const spec = SITEMAP_KINDS[kind];
+  if (!spec) return { total: 0, items: [] };
+  const count = await client.query(`SELECT count(*)::int AS n FROM ${spec.table} WHERE ${spec.where}`);
+  const rows = await client.query(
+    `SELECT ${spec.column} AS key FROM ${spec.table} WHERE ${spec.where}
+     ORDER BY ${spec.column} LIMIT $1 OFFSET $2`,
+    [Math.min(Math.max(limit, 1), 5000), Math.max(offset, 0)],
+  );
+  return { total: Number(count.rows[0]?.n ?? 0), items: rows.rows };
 }

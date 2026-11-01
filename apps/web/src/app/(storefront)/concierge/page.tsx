@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { AiConciergeWorkspace } from '@/components/mgh/catalog/AiConciergeWorkspace';
+import { LiveConcierge } from '@/components/mgh/catalog/LiveConcierge';
 import { SITE_URL } from '@/lib/mgh/site-url';
 
 export async function generateMetadata({
@@ -29,5 +29,9 @@ export default async function ConciergePage({
   const { q } = await searchParams;
   const query = q?.trim() || '';
 
-  return <AiConciergeWorkspace initialQuery={query} />;
+  return (
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12">
+      <LiveConcierge initialQuery={query} />
+    </div>
+  );
 }

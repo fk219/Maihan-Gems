@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { pool, withTx, type AnyClient } from './db.js';
 import { hashPassword, verifyPassword, createCustomerSession, resolveSession, revokeSession, type SessionUser } from './auth.js';
 import { StateError } from './validation.js';
+import { issueVerification } from './email-verification.js';
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -28,7 +29,8 @@ export async function registerCustomer(body: unknown, userAgent: string | null) 
     );
     const customerId = Number(rows[0]!.id);
     const token = await createCustomerSession(c, customerId, userAgent);
-    return { customer_id: customerId, email: p.email, token };
+    const verification = await issueVerification(c, customerId, p.email);
+    return { customer_id: customerId, email: p.email, token, verification_token: verification.dev_token };
   });
 }
 

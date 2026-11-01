@@ -9,7 +9,7 @@ ALTER TABLE fresh.customers      ADD COLUMN IF NOT EXISTS last_login_at timestam
 COMMIT;
 
 -- Search quality: trigram index for fuzzy gemstone matching (owner: "search quality" follow-up)
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_trgm SCHEMA fresh;
 
-CREATE INDEX IF NOT EXISTS gemstones_name_trgm_idx ON fresh.gemstones USING gin (name gin_trgm_ops);
-CREATE INDEX IF NOT EXISTS gemstones_slug_trgm_idx ON fresh.gemstones USING gin (slug gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS gemstones_name_trgm_idx ON fresh.gemstones USING gin (name fresh.gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS gemstones_slug_trgm_idx ON fresh.gemstones USING gin (slug fresh.gin_trgm_ops);

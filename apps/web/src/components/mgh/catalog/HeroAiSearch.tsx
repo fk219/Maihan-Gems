@@ -3,15 +3,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Gem, MapPin, Search, Sparkles, X } from 'lucide-react';
-import {
-  getRealtimeGemologicalSuggestions,
-  type GemologicalSuggestionItem,
-} from '@/lib/mgh/storefront-data';
+
 
 const HERO_QUICK_PROMPTS = [
-  'Blue Sapphires under $6,000',
-  'Compare Tanzanite & Sapphire',
-  'Design a Platinum Ring',
+  'Oval tanzanite',
+  'Ruby from Mozambique',
+  'Matched pairs',
 ];
 
 export function HeroAiSearch() {
@@ -24,18 +21,55 @@ export function HeroAiSearch() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
 
-  const suggestions = useMemo(
-    () => getRealtimeGemologicalSuggestions(query),
-    [query]
-  );
+  interface SuggestionItem { id: string; label: string; metric: string; queryValue: string }
+  const [suggestions, setSuggestions] = useState<{
+    varieties: SuggestionItem[];
+    origins: SuggestionItem[];
+    totalMatches: number;
+  }>({ varieties: [], origins: [], totalMatches: 0 });
 
-  const flatSuggestionItems: GemologicalSuggestionItem[] = useMemo(
-    () => [
-      ...suggestions.varieties,
-      ...suggestions.origins,
-      ...suggestions.specimens.slice(0, 2),
-    ],
-    [suggestions]
+  useEffect(() => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      void (async () => {
+        try {
+          const q = query.trim();
+          const res = await fetch(
+            `/api/fresh/catalogue/gemstones?limit=40${q ? `&q=${encodeURIComponent(q)}` : ''}`,
+            { signal: controller.signal, cache: 'no-store' },
+          );
+          if (!res.ok) { setSuggestions({ varieties: [], origins: [], totalMatches: 0 }); return; }
+          const data = (await res.json()) as { items?: Array<{ variety?: string; origin?: string }> };
+          const items = data.items ?? [];
+          const varietyCounts = new Map<string, number>();
+          const originCounts = new Map<string, number>();
+          for (const stone of items) {
+            if (stone.variety) varietyCounts.set(stone.variety, (varietyCounts.get(stone.variety) ?? 0) + 1);
+            if (stone.origin) originCounts.set(stone.origin, (originCounts.get(stone.origin) ?? 0) + 1);
+          }
+          const toItems = (counts: Map<string, number>, prefix: string): SuggestionItem[] =>
+            [...counts.entries()].slice(0, 4).map(([label, count], index) => ({
+              id: `${prefix}-${index}`,
+              label,
+              metric: `${count} stone${count === 1 ? '' : 's'}`,
+              queryValue: label,
+            }));
+          setSuggestions({
+            varieties: toItems(varietyCounts, 'v'),
+            origins: toItems(originCounts, 'o'),
+            totalMatches: items.length,
+          });
+        } catch {
+          // aborted or offline: leave the current suggestions
+        }
+      })();
+    }, 180);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [query]);
+
+  const flatSuggestionItems: SuggestionItem[] = useMemo(
+    () => [...suggestions.varieties, ...suggestions.origins],
+    [suggestions],
   );
 
   const isDropdownVisible = showSuggestions && (query.trim().length > 0 || isFocused);
@@ -195,7 +229,7 @@ export function HeroAiSearch() {
             <span className="font-[family-name:var(--font-eb-garamond)] text-xs uppercase tracking-wider text-[#D4AF37]">
               {query.trim()
                 ? `AI Gemologist Matches for “${query.trim()}”`
-                : 'Popular Gemstones & Origins'}
+                : 'Catalogue Suggestions'}
             </span>
             <span className="font-[family-name:var(--font-eb-garamond)] text-xs text-neutral-400 tabular-nums">
               {suggestions.totalMatches} results

@@ -13,7 +13,7 @@ import { JsonLd } from '../components/seo/JsonLd.js';
 import './globals.css';
 import '../styles/maison.css';
 import { MAIHAN_THEME_CSS } from '../lib/theme-styles.js';
-import { Geist, EB_Garamond, Plus_Jakarta_Sans } from "next/font/google";
+import { Geist, EB_Garamond, Plus_Jakarta_Sans, Urbanist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { StorefrontProvider as AppletStorefrontProvider } from '../components/mgh/providers/StorefrontProvider.js';
 
@@ -37,9 +37,16 @@ const jakartaSansApplet = Plus_Jakarta_Sans({
   display: 'swap',
 });
 
+const urbanistPortal = Urbanist({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-urbanist',
+  display: 'swap',
+});
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable, ebGaramondApplet.variable, jakartaSansApplet.variable)}>
+    <html lang="en" className={cn("font-sans", geist.variable, ebGaramondApplet.variable, jakartaSansApplet.variable, urbanistPortal.variable)}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

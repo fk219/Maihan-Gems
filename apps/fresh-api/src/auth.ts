@@ -13,10 +13,20 @@ export function verifyPassword(password: string, stored: string): boolean {
   const parts = stored.split('$');
   if (parts.length !== 6 || parts[0] !== 'scrypt') return false;
   const N = Number(parts[1]), r = Number(parts[2]), p = Number(parts[3]);
-  const salt = Buffer.from(parts[4]!, 'hex');
-  const expected = Buffer.from(parts[5]!, 'hex');
-  const actual = crypto.scryptSync(password, salt, expected.length, { N, r, p });
-  return crypto.timingSafeEqual(actual, expected);
+  const saltHex = parts[4]!;
+  const hashHex = parts[5]!;
+  if (!Number.isInteger(N) || !Number.isInteger(r) || !Number.isInteger(p)) return false;
+  if (N < 2 || N > 1 << 20 || r < 1 || r > 32 || p < 1 || p > 16) return false;
+  if (!/^[0-9a-f]+$/i.test(saltHex) || saltHex.length % 2 !== 0) return false;
+  if (!/^[0-9a-f]+$/i.test(hashHex) || hashHex.length < 32 || hashHex.length % 2 !== 0) return false;
+  const salt = Buffer.from(saltHex, 'hex');
+  const expected = Buffer.from(hashHex, 'hex');
+  try {
+    const actual = crypto.scryptSync(password, salt, expected.length, { N, r, p });
+    return crypto.timingSafeEqual(actual, expected);
+  } catch {
+    return false;
+  }
 }
 
 const sha256 = (v: string): string => crypto.createHash('sha256').update(v).digest('hex');

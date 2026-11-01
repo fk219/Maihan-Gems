@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 
 const AdminConsoleApp = dynamic(() => import('./AdminConsoleApp'), {
   ssr: false,
-  loading: () => <div className="min-h-screen bg-[#FAF8F4]" />,
+  loading: () => <div className="min-h-screen bg-[#F4F2EE]" />,
 });
 
 export default function AdminShellMount() {

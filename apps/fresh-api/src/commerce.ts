@@ -15,6 +15,9 @@ import crypto from 'node:crypto';
 import type { Db } from './db.js';
 import { ConflictError, StateError } from './validation.js';
 import { assessTax } from '@maihan/domain';
+import { queueEmail, orderEmail, paymentEmail, cancelledEmail } from './mail.js';
+import { audit } from './db.js';
+import { newToken, hashKey } from './auth.js';
 
 const num = (v: string | number | null | undefined): number => (v == null ? 0 : Number(v));
 
@@ -175,6 +178,7 @@ function orderNumber(): string {
 export interface CheckoutResult {
   order_number: string;
   order_id: number;
+  access_token: string;
   totals: { subtotal: number; discount: number; tax: number; tax_label: string; shipping: number; grand_total: number; currency: string };
   payment_pending: true;
 }
@@ -228,13 +232,14 @@ export async function checkoutCart(client: Db, token: string, input: CheckoutInp
   const grand = Math.max(0, Math.round((subtotal - discount + tax + shipping) * 100) / 100);
 
   const number = orderNumber();
+  const access = newToken();
   const { rows: orderRows } = await client.query(
     `INSERT INTO fresh.orders (order_number, email, status, currency, subtotal, tax_amount, shipping_amount,
-       discount_amount, grand_total, shipping_address, billing_address, customer_note)
-     VALUES ($1,$2,'PENDING_PAYMENT',$3,$4,$5,$6,$7,$8,$9::jsonb,$10::jsonb,$11) RETURNING id`,
+       discount_amount, grand_total, shipping_address, billing_address, customer_note, access_token_hash)
+     VALUES ($1,$2,'PENDING_PAYMENT',$3,$4,$5,$6,$7,$8,$9::jsonb,$10::jsonb,$11,$12) RETURNING id`,
     [number, input.email, cart.currency, subtotal, tax, shipping, discount, grand,
       JSON.stringify(input.shipping_address), input.billing_address ? JSON.stringify(input.billing_address) : null,
-      input.customer_note ?? null],
+      input.customer_note ?? null, access.hash],
   );
   const orderId = Number(orderRows[0].id);
 
@@ -256,8 +261,9 @@ export async function checkoutCart(client: Db, token: string, input: CheckoutInp
   for (const item of cart.items) {
     if (item.gemstone_ref) {
       await client.query(
-        `INSERT INTO fresh.inventory_reservations (owner_kind, owner_id, cart_id, state, expires_at)
-         VALUES ('gemstone', (SELECT id FROM fresh.gemstones WHERE ref = $1), (SELECT id FROM fresh.carts WHERE token = $2), 'ACTIVE', now() + interval '24 hours')`,
+        `INSERT INTO fresh.inventory_reservations (owner_kind, owner_id, cart_id, state, expires_at, previous_status)
+         SELECT 'gemstone', g.id, (SELECT id FROM fresh.carts WHERE token = $2), 'ACTIVE', now() + interval '24 hours', g.status::text
+         FROM fresh.gemstones g WHERE g.ref = $1`,
         [item.gemstone_ref, token],
       );
       await client.query(`UPDATE fresh.gemstones SET status = 'RESERVED' WHERE ref = $1`, [item.gemstone_ref]);
@@ -281,9 +287,13 @@ export async function checkoutCart(client: Db, token: string, input: CheckoutInp
   );
   await client.query(`UPDATE fresh.carts SET status = 'CONVERTED' WHERE token = $1`, [token]);
 
+  const mail = orderEmail(number, String(grand), cart.currency, access.raw);
+  await queueEmail(client, { to: input.email, subject: mail.subject, body: mail.body });
+
   return {
     order_number: number,
     order_id: orderId,
+    access_token: access.raw,
     totals: { subtotal, discount, tax, tax_label: assessment.evidence, shipping, grand_total: grand, currency: cart.currency },
     payment_pending: true,
   };
@@ -332,12 +342,16 @@ export async function payOrder(client: Db, orderNumberStr: string): Promise<{ or
   }
   await client.query(`UPDATE fresh.payments SET captured_at = COALESCE(captured_at, now()) WHERE id = $1`, [paymentId]);
 
+  const who = await client.query(`SELECT email, currency FROM fresh.orders WHERE id = $1`, [o.id]);
+  const mail = paymentEmail(orderNumberStr, String(o.grand), String(who.rows[0]?.currency ?? 'USD'));
+  await queueEmail(client, { to: who.rows[0]?.email ?? '', subject: mail.subject, body: mail.body });
+
   return { order_number: orderNumberStr, status: 'PAID', payment: { state: 'CAPTURED', provider: 'test' } };
 }
 
 export async function getOrder(client: Db, orderNumberStr: string) {
   const { rows } = await client.query(
-    `SELECT order_number, email, status, currency, subtotal::text AS subtotal, tax_amount::text AS tax,
+    `SELECT order_number, customer_id, email, status, currency, subtotal::text AS subtotal, tax_amount::text AS tax,
             shipping_amount::text AS shipping, discount_amount::text AS discount, grand_total::text AS grand_total,
             shipping_address, customer_note, placed_at, paid_at
      FROM fresh.orders WHERE order_number = $1`,
@@ -356,11 +370,131 @@ export async function getOrder(client: Db, orderNumberStr: string) {
   return { ...rows[0], items: itemRows.rows, events: events.rows };
 }
 
+/** Public/customer read: requires the checkout access token or the owning session. */
+export async function getOrderAuthorized(
+  client: Db,
+  orderNumberStr: string,
+  opts: { token?: string | null; customer?: { id: number; email: string } | null },
+): Promise<ReturnType<typeof getOrder> extends Promise<infer T> ? T : never | null> {
+  const order = await getOrder(client, orderNumberStr);
+  if (!order) return null;
+  if (opts.token) {
+    const { rows } = await client.query(
+      `SELECT access_token_hash FROM fresh.orders WHERE order_number = $1`,
+      [orderNumberStr],
+    );
+    const stored = rows[0]?.access_token_hash as string | null;
+    if (stored && stored === hashKey(opts.token)) return order;
+  }
+  if (opts.customer) {
+    const sameId = order.customer_id != null && Number(order.customer_id) === opts.customer.id;
+    const sameEmail = String(order.email).toLowerCase() === opts.customer.email.toLowerCase();
+    if (sameId || sameEmail) return order;
+  }
+  return null;
+}
+
 export async function listOrders(client: Db, limit = 50) {
   const { rows } = await client.query(
-    `SELECT order_number, email, status, grand_total::text AS grand_total, currency, placed_at, paid_at
-     FROM fresh.orders ORDER BY placed_at DESC LIMIT $1`,
+    `SELECT o.order_number, o.email, o.status, o.grand_total::text AS grand_total, o.currency, o.placed_at, o.paid_at,
+            (SELECT p.provider FROM fresh.payments p WHERE p.order_id = o.id ORDER BY p.created_at DESC LIMIT 1) AS payment_provider
+     FROM fresh.orders o ORDER BY o.placed_at DESC LIMIT $1`,
     [Math.min(limit, 200)],
   );
   return rows;
+}
+
+
+/**
+ * Cancel an order before fulfilment: releases stone reservations, restores
+ * sold stones to the vault, and (when paid) records a PENDING refund for the
+ * remaining captured amount. No provider settlement is claimed.
+ */
+export async function cancelOrder(
+  client: Db,
+  orderNumberStr: string,
+  reason: string,
+  actor: string,
+): Promise<{ order_number: string; status: string; refunded: number | null }> {
+  const locked = await client.query(
+    `SELECT id, status, currency FROM fresh.orders WHERE order_number = $1 FOR UPDATE`,
+    [orderNumberStr],
+  );
+  const order = locked.rows[0];
+  if (!order) throw err(`order '${orderNumberStr}' not found`, 404);
+  if (!['PENDING_PAYMENT', 'PAID'].includes(String(order.status))) {
+    throw err(`order ${orderNumberStr} is ${order.status}; only unpaid or paid-but-unshipped orders can be cancelled`, 409);
+  }
+
+  let refunded: number | null = null;
+  if (String(order.status) === 'PAID') {
+    const pay = await client.query(
+      `SELECT id, amount::text AS amount FROM fresh.payments WHERE order_id = $1 AND state IN ('CAPTURED','SETTLED') ORDER BY created_at DESC LIMIT 1`,
+      [order.id],
+    );
+    if (pay.rows[0]) {
+      const existing = await client.query(
+        `SELECT COALESCE(sum(amount),0)::text AS refunded FROM fresh.refunds WHERE order_id = $1 AND state <> 'FAILED'`,
+        [order.id],
+      );
+      const amount = Math.round((Number(pay.rows[0].amount) - Number(existing.rows[0].refunded)) * 100) / 100;
+      if (amount > 0) {
+        await client.query(
+          `INSERT INTO fresh.refunds (payment_id, order_id, amount, reason, state) VALUES ($1,$2,$3,$4,'PENDING')`,
+          [pay.rows[0].id, order.id, amount, `order cancelled: ${reason}`],
+        );
+        await client.query(
+          `INSERT INTO fresh.order_events (order_id, event, payload) VALUES ($1,'REFUND_RECORDED',$2::jsonb)`,
+          [order.id, JSON.stringify({ amount, reason: 'order cancelled', by: actor })],
+        );
+        refunded = amount;
+      }
+    }
+  }
+
+  const items = await client.query(`SELECT gemstone_id FROM fresh.order_items WHERE order_id = $1`, [order.id]);
+  for (const item of items.rows) {
+    if (item.gemstone_id != null) {
+      await client.query(
+        `UPDATE fresh.gemstones g
+         SET status = COALESCE(
+               (SELECT r.previous_status FROM fresh.inventory_reservations r
+                WHERE r.owner_kind = 'gemstone' AND r.owner_id = g.id AND r.previous_status IS NOT NULL
+                ORDER BY r.created_at DESC LIMIT 1),
+               'ACTIVE'
+             )::fresh.catalog_status,
+             quantity = 1
+         WHERE g.id = $1 AND g.status IN ('RESERVED','SOLD')`,
+        [item.gemstone_id],
+      );
+      await client.query(
+        `UPDATE fresh.inventory_reservations SET state = 'RELEASED'
+         WHERE owner_kind = 'gemstone' AND owner_id = $1 AND state IN ('ACTIVE','CONSUMED')`,
+        [item.gemstone_id],
+      );
+    }
+  }
+  const productRes = await client.query(`SELECT product_id FROM fresh.order_items WHERE order_id = $1 AND product_id IS NOT NULL`, [order.id]);
+  for (const item of productRes.rows) {
+    await client.query(
+      `UPDATE fresh.inventory_reservations SET state = 'RELEASED' WHERE owner_kind = 'product' AND owner_id = $1 AND state IN ('ACTIVE','CONSUMED')`,
+      [item.product_id],
+    );
+  }
+
+  await client.query(
+    `UPDATE fresh.orders SET status = 'CANCELLED', cancelled_at = now(), updated_at = now() WHERE id = $1`,
+    [order.id],
+  );
+  await client.query(
+    `INSERT INTO fresh.order_events (order_id, event, payload) VALUES ($1,'CANCELLED',$2::jsonb)`,
+    [order.id, JSON.stringify({ reason, by: actor, refunded })],
+  );
+  await audit(client, 'ORDER_CANCELLED', 'order', Number(order.id), { orderNumber: orderNumberStr, reason, refunded }, actor);
+  const who = await client.query(`SELECT email FROM fresh.orders WHERE id = $1`, [order.id]);
+  if (who.rows[0]?.email) {
+    const mail = cancelledEmail(orderNumberStr, refunded, String(order.currency));
+    await queueEmail(client, { to: who.rows[0].email, subject: mail.subject, body: mail.body });
+  }
+  return { order_number: orderNumberStr, status: 'CANCELLED', refunded };
 }

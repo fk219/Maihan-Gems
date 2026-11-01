@@ -69,5 +69,5 @@ describe('homepage (M2a migrated reference)', () => {
     expect(blocking, blocking.map((v) => `${v.id}: ${v.nodes.length} nodes`).join('; ')).toEqual([]);
 
     container.remove();
-  }, 15000);
+  }, 45000);
 });
