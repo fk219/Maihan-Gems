@@ -22,6 +22,7 @@
 import 'server-only';
 import { loadRuntimeConfig } from '@maihan/config';
 import { createCatalogDatabase, createCatalogQueryPort, createPool } from '@maihan/db';
+import type { CatalogDatabase } from '@maihan/db';
 import {
   MemoryGenerationStore,
   NullCacheStore,
@@ -39,6 +40,7 @@ import type { CacheStore, GenerationStore } from '../modules/catalog/index.js';
 
 interface Wiring {
   api: CatalogApi;
+  db: CatalogDatabase;
   close(): Promise<void>;
 }
 
@@ -85,6 +87,7 @@ async function wire(): Promise<Wiring> {
 
   return {
     api,
+    db: catalogDatabase,
     async close(): Promise<void> {
       if (redis !== null) await redis.close();
       await pool.end();
@@ -93,6 +96,15 @@ async function wire(): Promise<Wiring> {
 }
 
 export async function getCatalogApi(): Promise<CatalogApi> {
+  return (await getWiring()).api;
+}
+
+/** Server-component access to the same pool the API uses. */
+export async function getServerDb(): Promise<CatalogDatabase> {
+  return (await getWiring()).db;
+}
+
+async function getWiring(): Promise<Wiring> {
   const holder = globalThis as GlobalWithWiring;
   let wiring = holder[GLOBAL_KEY];
   if (wiring === undefined) {
@@ -100,7 +112,7 @@ export async function getCatalogApi(): Promise<CatalogApi> {
     holder[GLOBAL_KEY] = wiring;
   }
   try {
-    return (await wiring).api;
+    return await wiring;
   } catch (error) {
     // Do not cache a failed wiring: a corrected environment must recover on
     // the next request without a restart.

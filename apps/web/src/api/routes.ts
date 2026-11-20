@@ -223,6 +223,27 @@ export const HEALTH_ROUTES: readonly RouteDefinition[] = [
   { id: 'metricsHandler', method: 'GET', path: '/metrics' },
 ];
 
+export const AUTH_ROUTES: readonly RouteDefinition[] = [
+  { id: 'authLoginHandler', method: 'POST', path: '/api/v1/auth/login' },
+  { id: 'authLogoutHandler', method: 'POST', path: '/api/v1/auth/logout' },
+  { id: 'authMeHandler', method: 'GET', path: '/api/v1/auth/me' },
+];
+
+export const ADMIN_ROUTES: readonly RouteDefinition[] = [
+  { id: 'adminCreatePageHandler', method: 'POST', path: '/api/v1/admin/cms/pages' },
+  { id: 'adminListPagesHandler', method: 'GET', path: '/api/v1/admin/cms/pages' },
+  { id: 'adminGetPageHandler', method: 'GET', path: '/api/v1/admin/cms/pages/{pageId}' },
+  { id: 'adminUpdateBlocksHandler', method: 'POST', path: '/api/v1/admin/cms/pages/{pageId}/blocks' },
+  { id: 'adminSubmitForReviewHandler', method: 'POST', path: '/api/v1/admin/cms/pages/{pageId}/submit' },
+  {
+    id: 'adminDecideRevisionHandler',
+    method: 'POST',
+    path: '/api/v1/admin/cms/revisions/{revisionId}/decide',
+  },
+  { id: 'adminPublishPageHandler', method: 'POST', path: '/api/v1/admin/cms/pages/{pageId}/publish' },
+  { id: 'adminArchivePageHandler', method: 'POST', path: '/api/v1/admin/cms/pages/{pageId}/archive' },
+];
+
 export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...CATALOG_ROUTES,
   ...SEARCH_ROUTES,
@@ -238,6 +259,8 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...WHATSAPP_ROUTES,
   ...WEBAR_ROUTES,
   ...HEALTH_ROUTES,
+  ...AUTH_ROUTES,
+  ...ADMIN_ROUTES,
 ];
 
 export type RouteLookup =

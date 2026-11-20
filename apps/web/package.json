@@ -8,6 +8,7 @@
     "build": "tsc -b && next build --webpack",
     "typecheck": "tsc -b",
     "test": "vitest run",
+    "create-admin": "node ./dist/cli/create-admin.js",
     "start": "next start",
     "start:api-legacy": "node ./dist/api/server.js",
     "check:budgets": "node scripts/check-bundle-budgets.mjs"

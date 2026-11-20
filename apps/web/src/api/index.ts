@@ -76,6 +76,21 @@ import {
   metricsHandler,
 } from './health-handlers.js';
 import {
+  authLoginHandler,
+  authLogoutHandler,
+  authMeHandler,
+} from './auth-handlers.js';
+import {
+  adminCreatePageHandler,
+  adminListPagesHandler,
+  adminGetPageHandler,
+  adminUpdateBlocksHandler,
+  adminSubmitForReviewHandler,
+  adminDecideRevisionHandler,
+  adminPublishPageHandler,
+  adminArchivePageHandler,
+} from './admin/cms-handlers.js';
+import {
   errorResponse,
   newRequestId,
   newTraceId,
@@ -191,6 +206,23 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       metricsHandler,
     };
 
+    const AUTH_HANDLERS: Record<string, any> = {
+      authLoginHandler,
+      authLogoutHandler,
+      authMeHandler,
+    };
+
+    const ADMIN_HANDLERS: Record<string, any> = {
+      adminCreatePageHandler,
+      adminListPagesHandler,
+      adminGetPageHandler,
+      adminUpdateBlocksHandler,
+      adminSubmitForReviewHandler,
+      adminDecideRevisionHandler,
+      adminPublishPageHandler,
+      adminArchivePageHandler,
+    };
+
     const handler =
       HANDLERS[lookup.route.id] ??
       SEARCH_HANDLERS[lookup.route.id] ??
@@ -205,7 +237,9 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       AI_HANDLERS[lookup.route.id] ??
       WHATSAPP_HANDLERS[lookup.route.id] ??
       WEBAR_HANDLERS[lookup.route.id] ??
-      HEALTH_HANDLERS[lookup.route.id];
+      HEALTH_HANDLERS[lookup.route.id] ??
+      AUTH_HANDLERS[lookup.route.id] ??
+      ADMIN_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);
     }

@@ -231,4 +231,19 @@ export {
   type AuditWriter,
 } from './cms/cms-repository.js';
 export type { CmsRepository } from './cms/cms-repository.js';
+export {
+  findUserByEmail,
+  findUserById,
+  createUser,
+  createSession,
+  findLiveSessionByTokenHash,
+  touchSession,
+  revokeSession,
+  revokeAllSessions,
+  type UserRow,
+  type SessionUserRow,
+  type CreateUserParams,
+  type CreateSessionParams,
+  type AdminRoleName,
+} from './identity/identity-repository.js';
 

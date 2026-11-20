@@ -29,6 +29,12 @@ export interface RuntimeConfig {
   readonly apiPort: number;
   /** Environment name; namespaces cache keys so environments never share. */
   readonly environment: string;
+  /**
+   * One-shot bootstrap credentials for `pnpm run create-admin`. Read from the
+   * environment, never from a file in the repository, and never logged.
+   */
+  readonly adminSeedEmail: string | null;
+  readonly adminSeedPassword: string | null;
 }
 
 export class ConfigError extends Error {
@@ -80,5 +86,7 @@ export function loadRuntimeConfig(env: NodeJS.ProcessEnv = process.env): Runtime
     redisUrl: optionalUrl(env['REDIS_URL'], 'REDIS_URL', REDIS_SCHEMES),
     apiPort: parsePort(env['API_PORT']),
     environment: env['ENVIRONMENT'] ?? env['NODE_ENV'] ?? 'local',
+    adminSeedEmail: env['ADMIN_SEED_EMAIL'] ?? null,
+    adminSeedPassword: env['ADMIN_SEED_PASSWORD'] ?? null,
   };
 }

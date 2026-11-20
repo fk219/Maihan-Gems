@@ -337,6 +337,14 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     storefront: false,
     group: 'admin',
   },
+  {
+    fsPath: 'src/app/admin/login/page.tsx',
+    sotPath: 'app/admin/login/page.tsx   # /admin/login',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.2 (/admin/**) + plan 37 P2 + ADR-027: the administrative sign-in surface. A static segment outranks the optional catch-all so the console guard cannot redirect-loop.',
+    storefront: false,
+    group: 'admin',
+  },
 
   // ── api (what the SoT chart calls "api/ — route handlers, section 11") ───
   {
