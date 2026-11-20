@@ -1529,8 +1529,11 @@ degradation drills, backups and restore drill, capacity statement, runbooks.
 | Phase | State |
 |---|---|
 | P0 | **Partially blocked** — P0.3 done; P0.1 needs the client's Neon credential; P0.2 open |
-| P1 | Open |
-| P2-P9 | Not started |
+| P1 | **P1.1-P1.4 done** — `/api/**` is mounted in the App Router, one pooled wiring, `pg`/`ioredis` external, `start` = `next start`, node adapter demoted to `start:api-legacy` |
+| P2 | **P2.1-P2.3 done** — users/sessions/password-reset schema, scrypt, cookie sessions, session-first admin gate, `create-admin` bootstrap, `/admin/login`, guarded `/admin` console. P2.4 (customer registration, verification, reset) and login brute-force throttling remain |
+| P3 | Open — publish path and media pipeline are the next blocking work |
+| P4 | **Partial** — CMS endpoints registered and operable from the console; the other eleven Phase-12 modules remain |
+| P5-P9 | Not started |
 
 ---
 
