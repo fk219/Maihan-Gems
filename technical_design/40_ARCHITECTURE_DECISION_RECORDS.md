@@ -321,6 +321,30 @@ never part of this decision and remains open.
 
 ---
 
+**ADR-026 - The catalogue is a multivendor marketplace; every commercial entity is vendor-owned**
+
+- **Context:** The original charter described a single-seller fine-jewellery business. The client's production target (2026-11-20) is a multivendor marketplace: independent vendors list gemstones and settings, the platform governs them, and money is split between vendor and platform. Every existing commercial table (`products`, `gemstones`, `settings`, `setting_variants`, `price_entries`, `orders`, `refunds`) is single-owner today.
+- **Alternatives:** (a) keep single-seller and model vendors as an external integration later; (b) add a `vendor_id` ownership column to commercial tables with a default platform vendor and expand contracts incrementally; (c) a separate per-vendor schema or database.
+- **Decision:** Option (b). A `vendors` table is authoritative. Commercial entities gain a nullable `vendor_id` that resolves to a seeded `PLATFORM` vendor for all migrated source data. Enforcement is expand-then-contract (ADR-020 discipline): add nullable, backfill, then tighten to `NOT NULL` only where the domain guarantees an owner. Orders gain `order_vendor_allocations`; money gains a double-entry `vendor_ledger`. Every vendor-scoped read and write carries the vendor boundary in the application service, with RLS as defence-in-depth.
+- **Reason:** Nullable-then-tighten is the only migration shape that does not break the 9,900 migrated DRAFT products or the 44,218 redirect spine, and it lets the storefront, admin and vendor portal ship on one schema. A separate schema per vendor multiplies migrations, breaks cross-vendor search, and makes a single order spanning two vendors unrepresentable. A late external integration cannot satisfy the client's requirement that vendors list stock directly.
+- **Consequences:** (1) Every catalogue query must decide vendor visibility explicitly; an unscoped query is a defect, enforced by a lint rule and a test that fails when a commercial repository is called without a vendor scope. (2) Order placement becomes a split operation with per-vendor fulfilment state. (3) Payment capture and refunds must allocate to vendors through the ledger; a refund without an allocation is rejected. (4) The AI tool registry gains a vendor scope parameter; no tool may return another vendor's private stock. (5) Search ranking must not privilege the platform vendor. (6) RLS policies extend to vendor-scoped rows.
+- **Evidence:** Client direction 2026-11-20; `PROJECT_SOURCE_OF_TRUTH.md` section 7 (current single-business model); `INITIAL_IMPLEMENTATION_PLAN.md` section 37. This ADR amends, and does not silently rewrite, the sections it touches.
+- **Status:** Accepted by explicit client authorisation (2026-11-20).
+
+---
+
+**ADR-027 - Admin and vendor identity is session-based; the trusted-header seam is development-only**
+
+- **Context:** Phase 12 Stage A shipped `resolveAdminActor()` reading `x-admin-sub` and `x-admin-role` from request headers, gated by an `allowRoleHeader` flag. That is acceptable for tests and local development and unacceptable in production, where a client could assert its own role. Phase 12's remaining tasks and the vendor portal both need real identity.
+- **Alternatives:** (a) a managed identity provider (Auth0, Clerk, Cognito); (b) first-party sessions backed by a `sessions` table with HttpOnly cookies; (c) signed stateless JWTs held in cookies.
+- **Decision:** Option (b) for both admin and vendor identities, with a first-party adapter behind the existing `AdminActor` contract. Passwords are hashed with scrypt (Node built-in, no new dependency). Sessions are opaque 256-bit tokens stored as SHA-256 hashes, HttpOnly, Secure, SameSite=Lax, with absolute and idle expiry. The header seam remains available only when `ALLOW_ROLE_HEADER=1` and `NODE_ENV !== 'production'`, and a production build must fail a test if that flag is enabled.
+- **Reason:** The `AdminActor` contract already exists and is well tested; replacing only the resolution source keeps every authorisation decision and its tests intact. Native scrypt avoids a new dependency, and hashed opaque tokens mean a database leak does not yield usable sessions. A managed provider remains available later without changing the contract.
+- **Consequences:** Two new tables and a login surface. Session revocation is a row update. CSRF protection is required on cookie-authenticated mutations because the cookie is sent automatically. The development seam must be proven unreachable in production by an automated test, not by documentation.
+- **Evidence:** `apps/web/src/api/admin/authz.ts`; `packages/contracts/src/dto/admin/actor.ts`; `docs/PHASE12_TRACEABILITY.md` Stage A non-goals.
+- **Status:** Accepted by explicit client authorisation (2026-11-20).
+
+---
+
 ## ADR governance
 
 | Rule | Detail |

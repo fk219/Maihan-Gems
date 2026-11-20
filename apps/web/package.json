@@ -8,8 +8,8 @@
     "build": "tsc -b && next build --webpack",
     "typecheck": "tsc -b",
     "test": "vitest run",
-    "start": "node ./dist/api/server.js",
-    "start:web": "next start",
+    "start": "next start",
+    "start:api-legacy": "node ./dist/api/server.js",
     "check:budgets": "node scripts/check-bundle-budgets.mjs"
   },
   "dependencies": {

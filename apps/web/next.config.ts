@@ -34,6 +34,12 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  /**
+   * P1.1: the API mount uses the Node runtime (pg + ioredis). These packages
+   * ship native/optional artifacts and must stay external to the server
+   * bundle rather than be traced and inlined by the bundler.
+   */
+  serverExternalPackages: ['pg', 'ioredis'],
   webpack(config, { dev }) {
     // `.js` -> `.ts`/`.tsx` (and `.mjs`/`.cjs` equivalents) so source written
     // for Node ESM output also resolves inside the Next bundler.

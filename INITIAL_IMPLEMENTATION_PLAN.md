@@ -1399,6 +1399,141 @@ Ordered. Each names its phase, its dependency, and the gate or test that proves 
 
 ---
 
+## 37. PRODUCTION PROGRAM — MULTIVENDOR, ADMIN, STORE, AR/3D, AI
+
+**Status:** OPEN. Authorised by the client on 2026-11-20.
+**Supersedes nothing.** Extends sections 19-20; does not reopen sections 8-18.
+
+### 37.1 What changed
+
+The first build targeted a **single-seller** storefront. The client's production
+target is a **multivendor** jewellery and gemstone marketplace with:
+
+1. a **vendor portal** (seller onboarding, catalogue, inventory, orders, payouts),
+2. an **admin console** governing vendors, catalogue, trust, content and money,
+3. a **store** that actually sells (media, publish, auth, payments, email),
+4. **AR virtual try-on** and a **3D viewer/configurator**,
+5. **deep AI search** and an AI concierge grounded in real embeddings.
+
+Multivendor is a **domain change**, not a UI change. Per AGENTS.md section 6.8 it
+requires an ADR and a Source-of-Truth amendment before implementation. Both are
+recorded as **ADR-026** (Accepted 2026-11-20 by explicit client authorisation).
+
+### 37.2 The definition of "done" for this program
+
+The program is complete only when **all** of the following are true, measured,
+not asserted:
+
+| # | Outcome | Proof |
+|---|---|---|
+| D1 | A stranger can find a gemstone, see real photography, add it to a cart, pay with a real card, and receive a confirmation email | End-to-end Playwright run against staging |
+| D2 | A vendor can register, be approved, list stock, receive an order and be paid | Vendor E2E run + payout ledger reconciliation |
+| D3 | An administrator can publish, unpublish, price, moderate and audit any entity | Admin E2E run + audit-row assertions |
+| D4 | Every privileged mutation writes before/after audit state | Audit completeness test over all admin endpoints |
+| D5 | A ring renders in 3D and can be tried on from a phone camera | Real GLB asset, device matrix evidence |
+| D6 | Search returns semantically relevant results with real embeddings | Recall/nDCG measured on a labelled set |
+| D7 | The AI concierge answers only from grounded data and refuses on NULL | Grounding ratio >= 0.60 with real provider |
+| D8 | Every NFR target met with evidence | Load + security matrix green |
+| D9 | The system is deployable, observable and recoverable | Deploy pipeline + dashboards + restore drill |
+
+### 37.3 Phases
+
+Dependency-ordered. A phase may not start before its predecessor's exit gate.
+
+#### P0 — Unblock (BLOCKING)
+
+| Task | Detail | Gate |
+|---|---|---|
+| P0.1 | Restore a valid `DATABASE_URL` for the `maihan_dev` Neon branch | `pnpm test` has 0 auth failures |
+| P0.2 | `next build` completes without a database | Build green on a throwaway container |
+| P0.3 | Fix the CMS handler type error on `HEAD` | `pnpm -r typecheck` green |
+
+#### P1 — The API actually runs
+
+| Task | Detail | Gate |
+|---|---|---|
+| P1.1 | Mount the handler API in Next at `app/api/[...path]/route.ts` | A live `curl` reaches `/api/v1/products` |
+| P1.2 | Wire rate limiting and the DB seam in the mount | 429 envelope observed under load |
+| P1.3 | Serve `/api/v1/health/*` from the same mount | Probes answer 200 |
+| P1.4 | Delete or demote the competing `node dist/api/server.js` start path | One documented start command |
+
+#### P2 — Identity and sessions
+
+| Task | Detail | Gate |
+|---|---|---|
+| P2.1 | `users`, `sessions`, `vendor_members` tables | Migration applies on a fresh DB |
+| P2.2 | Password hashing (scrypt/argon2id), login, logout, session cookie | Session fixation and CSRF tests |
+| P2.3 | Replace the admin `x-admin-sub` header seam with session resolution | Header seam unreachable in production build |
+| P2.4 | Customer registration, email verification, password reset | Reset-token single-use test |
+
+#### P3 — Publish, media and the working store
+
+| Task | Detail | Gate |
+|---|---|---|
+| P3.1 | Catalogue publish/unpublish service with audit | Product visible on the storefront after publish |
+| P3.2 | Object storage (S3-compatible) + upload pipeline + CDN URLs | An image renders on a product card |
+| P3.3 | Asset backfill from source URLs, with explicit `SKIPPED` reasons | 0 rows in `PENDING` without a reason |
+| P3.4 | Real payment provider, webhook verification, refunds at the PSP | Sandbox charge + refund reconciled |
+| P3.5 | Transactional email (order, shipping, reset, vendor approval) | Delivered email in staging |
+| P3.6 | Tax and shipping rate configuration | Order totals reconcile to the cent |
+
+#### P4 — Admin console (all 13 Phase-12 tasks)
+
+Vendor governance, catalogue admin with bulk edit and bounded undo, CMS with 20
+block renderers and two-person approval, navigation and 44,218 redirects, SEO,
+migration console, conflict resolution (328 rows), derived-identity queue (221),
+certificate review, AI operations, RBAC enforcement, audit completeness.
+
+#### P5 — Vendor portal
+
+Onboarding and KYC, store profile, stock intake, per-vendor pricing, order
+fulfilment, returns, payouts and statements, performance metrics, policy
+acceptance, suspension.
+
+#### P6 — Multivendor commerce
+
+Vendor-scoped inventory and pricing, per-vendor cart lines, order splitting,
+per-vendor shipping and tax, commission calculation, payout ledger, refunds that
+allocate back to vendors, dispute ownership, vendor-scoped search and AI tools.
+
+#### P7 — AR / 3D
+
+Model pipeline and ingestion, real `three.js` viewer, ring-size calibration,
+camera try-on, device capability matrix, asset budgets enforced against real
+files, fallback ladder.
+
+#### P8 — AI depth
+
+Real provider integration and streaming, real embeddings and backfill, hybrid
+retrieval with reranking, measured relevance, vendor-scoped retrieval,
+continuous evaluation in CI, cost ledger.
+
+#### P9 — Production gate
+
+Deployment pipeline, OTel/Sentry wiring, load tests, security matrix, chaos and
+degradation drills, backups and restore drill, capacity statement, runbooks.
+
+### 37.4 Non-negotiables carried forward
+
+- Source evidence labels are preserved; multivendor adds **new** entities but
+  never relabels migrated source data.
+- The 221 derived identities stay `INFERRED`, null-attribute, `DRAFT` until an
+  admin approves each one.
+- The LLM still mutates nothing. Vendor and admin mutations go through
+  deterministic application services.
+- Every new dependency needs an ADR.
+- No production database access without explicit approval.
+
+### 37.5 Current position
+
+| Phase | State |
+|---|---|
+| P0 | **Partially blocked** — P0.3 done; P0.1 needs the client's Neon credential; P0.2 open |
+| P1 | Open |
+| P2-P9 | Not started |
+
+---
+
 ## CLOSING NOTE
 
 This plan adds no technology that the Source of Truth does not already require, reopens no locked decision, and promotes no inference to source fact. Where evidence is absent, the plan says so and leaves the behaviour unimplemented rather than guessing.

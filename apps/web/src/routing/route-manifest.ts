@@ -347,6 +347,14 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     storefront: false,
     group: 'api',
   },
+  {
+    fsPath: 'src/app/api/[...path]/route.ts',
+    sotPath: 'app/api/[...path]/route.ts   # /api/**',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 + plan 37 P1.1: the Phase 3 handler pipeline (createCatalogApi) is mounted into the App Router as ONE catch-all, because src/api/routes.ts is the single routing authority and the OpenAPI parity spec already proves handler coverage. Node runtime only (pg/ioredis are not Edge APIs).',
+    storefront: false,
+    group: 'api',
+  },
 
   // ── SEO endpoints (Phase 4 Task 7: generated, never migrated) ────────────
   {
