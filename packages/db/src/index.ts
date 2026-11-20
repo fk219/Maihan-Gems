@@ -243,6 +243,23 @@ export {
   type ListAdminProductsOptions,
 } from './catalog/publish.js';
 export {
+  createVendor,
+  findVendorBySlug,
+  findVendorById,
+  listVendors,
+  transitionVendor,
+  addVendorMember,
+  findVendorsForUser,
+  assignProductVendor,
+  appendLedgerEntry,
+  vendorBalance,
+  type VendorRow,
+  type CreateVendorParams,
+  type VendorTransitionParams,
+  type VendorMemberRole,
+  type LedgerEntryType,
+} from './vendors/vendor-repository.js';
+export {
   findUserByEmail,
   findUserById,
   createUser,
