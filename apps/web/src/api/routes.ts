@@ -242,6 +242,9 @@ export const ADMIN_ROUTES: readonly RouteDefinition[] = [
   },
   { id: 'adminPublishPageHandler', method: 'POST', path: '/api/v1/admin/cms/pages/{pageId}/publish' },
   { id: 'adminArchivePageHandler', method: 'POST', path: '/api/v1/admin/cms/pages/{pageId}/archive' },
+  { id: 'adminListProductsHandler', method: 'GET', path: '/api/v1/admin/products' },
+  { id: 'adminPublishProductHandler', method: 'POST', path: '/api/v1/admin/products/{productId}/publish' },
+  { id: 'adminUnpublishProductHandler', method: 'POST', path: '/api/v1/admin/products/{productId}/unpublish' },
 ];
 
 export const ALL_ROUTES: readonly RouteDefinition[] = [

@@ -232,6 +232,17 @@ export {
 } from './cms/cms-repository.js';
 export type { CmsRepository } from './cms/cms-repository.js';
 export {
+  publishProduct,
+  unpublishProduct,
+  listProductsForAdmin,
+  countProductsForAdmin,
+  ProductPublishError,
+  type AdminProductRow,
+  type PublishParams,
+  type PublishFailureCode,
+  type ListAdminProductsOptions,
+} from './catalog/publish.js';
+export {
   findUserByEmail,
   findUserById,
   createUser,

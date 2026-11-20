@@ -10,11 +10,12 @@
  */
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { createCmsRepository, type AuditWriter } from '@maihan/db';
+import { createCmsRepository, listProductsForAdmin, type AuditWriter } from '@maihan/db';
 import { hasCapability } from '@maihan/domain';
 import { getServerDb } from '../../../api/next-adapter.js';
 import { getAdminSession, type AdminSession } from '../../../lib/admin-session.js';
 import { AdminPageActions } from '../../../components/admin/AdminPageActions.js';
+import { AdminProductActions } from '../../../components/admin/AdminProductActions.js';
 
 export const metadata: Metadata = {
   title: 'Admin',
@@ -94,7 +95,8 @@ export default async function AdminPage({ params }: PageProps): Promise<React.JS
       <div style={{ padding: '28px' }}>
         {path === '' && <Dashboard session={session} />}
         {path === 'cms/pages' && <CmsPages session={session} />}
-        {path !== '' && path !== 'cms/pages' && (
+        {path === 'catalog/products' && <Catalogue session={session} />}
+        {path !== '' && path !== 'cms/pages' && path !== 'catalog/products' && (
           <p style={{ fontSize: '14px' }}>No console module is mounted at <code>/admin/{path}</code>.</p>
         )}
       </div>
@@ -104,6 +106,7 @@ export default async function AdminPage({ params }: PageProps): Promise<React.JS
 
 function Dashboard({ session }: { session: AdminSession }): React.JSX.Element {
   const modules: Array<{ href: string; label: string; module: Parameters<typeof hasCapability>[1] }> = [
+    { href: '/admin/catalog/products', label: 'Catalogue', module: 'products' },
     { href: '/admin/cms/pages', label: 'Content pages', module: 'content' },
   ];
   return (
@@ -202,3 +205,72 @@ async function CmsPages({ session }: { session: AdminSession }): Promise<React.J
 }
 
 const cell: React.CSSProperties = { padding: '10px 12px', verticalAlign: 'middle' };
+
+async function Catalogue({ session }: { session: AdminSession }): Promise<React.JSX.Element> {
+  if (!hasCapability(session.role, 'products', 'list')) {
+    return <p style={{ fontSize: '14px' }}>Your role cannot read the catalogue.</p>;
+  }
+
+  let rows: Awaited<ReturnType<typeof listProductsForAdmin>> = [];
+  let failure: string | null = null;
+  try {
+    const db = await getServerDb();
+    rows = await listProductsForAdmin(db, { limit: 50, offset: 0 });
+  } catch (error) {
+    failure = error instanceof Error ? error.message : 'The database is unavailable.';
+  }
+
+  const active = rows.filter((row) => row.state === 'ACTIVE').length;
+
+  return (
+    <>
+      <h2 style={{ margin: '0 0 6px', fontSize: '22px' }}>Catalogue</h2>
+      <p style={{ margin: '0 0 18px', fontSize: '13px', color: '#5A5448' }}>
+        Showing {rows.length} product{rows.length === 1 ? '' : 's'} · {active} published.
+        Publishing requires verified price evidence (gate V15).
+      </p>
+      {failure !== null && (
+        <p role="alert" style={{ color: '#B3261E', fontSize: '13px' }}>
+          {failure}
+        </p>
+      )}
+      {failure === null && rows.length === 0 && (
+        <p style={{ fontSize: '13px', color: '#5A5448' }}>No products exist yet.</p>
+      )}
+      {rows.length > 0 && (
+        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#FFFFFF', fontSize: '13px' }}>
+          <thead>
+            <tr style={{ textAlign: 'left', background: '#EDEAE3' }}>
+              <th style={cell}>Title</th>
+              <th style={cell}>Slug</th>
+              <th style={cell}>Kind</th>
+              <th style={cell}>Price</th>
+              <th style={cell}>Evidence</th>
+              <th style={cell}>State</th>
+              <th style={cell}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.id} style={{ borderTop: '1px solid rgba(8,18,30,0.08)' }}>
+                <td style={cell}>{row.title}</td>
+                <td style={cell}>
+                  <code>{row.slug}</code>
+                </td>
+                <td style={cell}>{row.kind}</td>
+                <td style={cell}>
+                  {row.currency} {row.price_amount}
+                </td>
+                <td style={cell}>{row.price_evidence}</td>
+                <td style={cell}>{row.state}</td>
+                <td style={cell}>
+                  <AdminProductActions productId={row.id} state={row.state} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </>
+  );
+}

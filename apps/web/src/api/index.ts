@@ -91,6 +91,11 @@ import {
   adminArchivePageHandler,
 } from './admin/cms-handlers.js';
 import {
+  adminListProductsHandler,
+  adminPublishProductHandler,
+  adminUnpublishProductHandler,
+} from './admin/catalog-handlers.js';
+import {
   errorResponse,
   newRequestId,
   newTraceId,
@@ -221,6 +226,9 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       adminDecideRevisionHandler,
       adminPublishPageHandler,
       adminArchivePageHandler,
+      adminListProductsHandler,
+      adminPublishProductHandler,
+      adminUnpublishProductHandler,
     };
 
     const handler =
