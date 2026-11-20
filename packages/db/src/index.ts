@@ -260,6 +260,17 @@ export {
   type LedgerEntryType,
 } from './vendors/vendor-repository.js';
 export {
+  LocalDiskStorage,
+  contentAddressedKey,
+  sha256Hex,
+  extensionFor,
+  assertSafeKey,
+  StorageKeyError,
+  type ObjectStorage,
+  type PutObjectInput,
+  type StoredObject,
+} from './media/storage.js';
+export {
   findUserByEmail,
   findUserById,
   createUser,
