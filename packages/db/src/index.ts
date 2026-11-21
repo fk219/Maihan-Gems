@@ -271,6 +271,16 @@ export {
   type StoredObject,
 } from './media/storage.js';
 export {
+  MEDIA_POLICIES,
+  MediaPolicyError,
+  validateUpload,
+  sniffContentType,
+  type MediaKind,
+  type MediaPolicy,
+  type MediaPolicyCode,
+  type ValidateUploadInput,
+} from './media/policy.js';
+export {
   findUserByEmail,
   findUserById,
   createUser,
