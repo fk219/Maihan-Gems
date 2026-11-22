@@ -26,6 +26,8 @@ export interface RouteContext {
   readonly ids: CorrelationIds;
   readonly request?: Request;
   readonly db?: import('@maihan/db').CatalogDatabase;
+  /** Object storage for redirect endpoints (A5); absent when unwired. */
+  readonly storage?: import('@maihan/db').ObjectStorage;
 }
 
 export interface HandlerOutcome {

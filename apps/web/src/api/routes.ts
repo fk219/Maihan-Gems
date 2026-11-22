@@ -214,6 +214,11 @@ export const WEBAR_ROUTES: readonly RouteDefinition[] = [
   { id: 'redeemArHandoffHandler', method: 'GET', path: '/ar/handoff/{token}' },
 ];
 
+export const MEDIA_ROUTES: readonly RouteDefinition[] = [
+  { id: 'getMediaAssetHandler', method: 'GET', path: '/api/v1/media/{assetId}' },
+  { id: 'getMediaAssetHandler', method: 'GET', path: '/media/{assetId}' },
+];
+
 export const HEALTH_ROUTES: readonly RouteDefinition[] = [
   { id: 'healthLiveHandler', method: 'GET', path: '/api/v1/health/live' },
   { id: 'healthLiveHandler', method: 'GET', path: '/health/live' },
@@ -261,6 +266,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...AI_ROUTES,
   ...WHATSAPP_ROUTES,
   ...WEBAR_ROUTES,
+  ...MEDIA_ROUTES,
   ...HEALTH_ROUTES,
   ...AUTH_ROUTES,
   ...ADMIN_ROUTES,

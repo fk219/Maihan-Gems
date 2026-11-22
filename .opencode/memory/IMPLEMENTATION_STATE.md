@@ -1,3 +1,30 @@
+# TRACK A — MEDIA STORAGE, BACKFILL, DELIVERY (2026-11-23)
+
+- **A2** `packages/db/src/media/s3.ts`: `S3CompatibleStorage` over global
+  `fetch`, no SDK. Pure `signRequestV4` reproduces AWS's published
+  `get-vanilla` signature (`5fa00fa3…bf31`), proven in `s3.spec.ts`. Path-style
+  put/get/head/delete, 404 → null, content-addressed public URLs. **Live
+  R2/S3 verification has NOT been performed.**
+- **A4** `packages/db/src/media/backfill.ts`: pure `planAssetBackfill` with
+  NO_URL / UNSUPPORTED_TYPE / CHILD_CHROME / ALREADY_READY / RETRY_LIMIT, plus
+  `runAssetBackfill` over a store port. Fetches beyond `limit` are returned as
+  explicit `deferred`, never mislabelled SKIPPED. `assets:backfill` CLI wired
+  through `media/assets-repository.ts`; attempts are recorded before the fetch
+  so a crash cannot retry forever. Unit-tested with an in-memory store,
+  including two consecutive runs (second fetches nothing).
+- **A5** `apps/web/src/api/media-handlers.ts` + `MEDIA_ROUTES`: READY public
+  asset → 302 to `storage.publicUrl(key)` with `immutable` caching; unknown,
+  malformed, non-READY or private (certificate/report/appraisal) → 404
+  envelope. Storage is injected via `CatalogApiOptions.mediaStorage`, built by
+  `apps/web/src/integrations/media-storage.ts` from the new
+  `RuntimeConfig.mediaStorage` (`none` / `local` / `s3`). `none` fails closed.
+- **Verification run:** `pnpm -r run typecheck` green;
+  `pnpm --filter @maihan/db run test` 150 passed, 33 skipped (DB-backed);
+  `pnpm --filter @maihan/web run test` 412 passed, 21 skipped. No database was
+  contacted and no migration was run.
+- **Still open:** live object-store test; A3 original-bytes ingest pipeline;
+  serving local-driver files; A6–A8 DTO/UI work.
+
 # WEB BUILD — NO-DATABASE PRERENDER FIX (2026-11-22)
 
 - `pnpm --filter @maihan/web run build` failed during prerender on static

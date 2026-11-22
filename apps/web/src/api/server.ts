@@ -26,6 +26,7 @@ import type { Server } from 'node:http';
 import { loadRuntimeConfig, type RuntimeConfig } from '@maihan/config';
 import { createCatalogDatabase, createCatalogQueryPort, createPool } from '@maihan/db';
 import { createRedisClient, type RedisHandle } from '../integrations/redis.js';
+import { createMediaStorage } from '../integrations/media-storage.js';
 import {
   MemoryGenerationStore,
   NullCacheStore,
@@ -137,7 +138,13 @@ export async function wireApi(config: RuntimeConfig = loadRuntimeConfig()): Prom
     failureMode: 'allow',
   });
 
-  const api = createCatalogApi({ service, rateLimit, db: catalogDatabase });
+  const mediaStorage = createMediaStorage(config.mediaStorage);
+  const api = createCatalogApi({
+    service,
+    rateLimit,
+    db: catalogDatabase,
+    ...(mediaStorage === null ? {} : { mediaStorage }),
+  });
   const server = createNodeServer(api);
 
   return {

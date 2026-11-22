@@ -75,6 +75,7 @@ import {
   healthReadyHandler,
   metricsHandler,
 } from './health-handlers.js';
+import { MEDIA_HANDLERS } from './media-handlers.js';
 import {
   authLoginHandler,
   authLogoutHandler,
@@ -106,7 +107,7 @@ import { lookupRoute } from './routes.js';
 import { applyCacheHeaders } from './headers.js';
 import type { RateLimitDecision, RateLimitGate } from './ratelimit/gate.js';
 import type { CatalogQueryService } from '../modules/catalog/index.js';
-import type { CatalogDatabase } from '@maihan/db';
+import type { CatalogDatabase, ObjectStorage } from '@maihan/db';
 
 export type { RateLimitDecision, RateLimitGate } from './ratelimit/gate.js';
 
@@ -117,6 +118,8 @@ export interface CatalogApiOptions {
   ids?: Partial<CorrelationIds> | (() => CorrelationIds);
   /** Rate-limit gate (Task 9). Absent = no limiter wired (tests, local runs). */
   rateLimit?: RateLimitGate;
+  /** Object storage for media redirects (A5). Absent = the endpoint 500s. */
+  mediaStorage?: ObjectStorage;
 }
 
 export type CatalogApi = (request: Request) => Promise<Response>;
@@ -245,6 +248,7 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       AI_HANDLERS[lookup.route.id] ??
       WHATSAPP_HANDLERS[lookup.route.id] ??
       WEBAR_HANDLERS[lookup.route.id] ??
+      MEDIA_HANDLERS[lookup.route.id] ??
       HEALTH_HANDLERS[lookup.route.id] ??
       AUTH_HANDLERS[lookup.route.id] ??
       ADMIN_HANDLERS[lookup.route.id];
@@ -259,6 +263,7 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       ids,
       request,
       db: options.db,
+      storage: options.mediaStorage,
     };
 
     let outcome: HandlerOutcome;

@@ -24,13 +24,17 @@ database. Neon is applied last, once, with explicit approval.**
 
 - [ ] A1 `packages/db/src/media/storage.ts` — `ObjectStorage` port
       (`put`, `signGet`, `delete`, `head`) + `LocalDiskStorage` driver
-- [ ] A2 `S3CompatibleStorage` driver (R2/S3) — no new SDK unless ADR; use
-      signed HTTP against the S3 API
+- [x] A2 `S3CompatibleStorage` driver (R2/S3) — no new SDK unless ADR; use
+      signed HTTP against the S3 API. SigV4 proven against AWS's published
+      `get-vanilla` vector; driver verified against fake fetch, **not a live
+      bucket**
 - [ ] A3 `assets` pipeline: fetch source URL → validate content type/size →
       upload → set `processing_state='READY'`, `storage_key`, `storage_provider`
-- [ ] A4 Backfill command `assets:backfill` — idempotent, resumable, explicit
-      `SKIPPED` reason per row (never a silent drop)
-- [ ] A5 `GET /api/v1/media/{assetId}` — signed redirect, cache headers
+- [x] A4 Backfill command `assets:backfill` — idempotent, resumable, explicit
+      `SKIPPED` reason per row (never a silent drop). Planner/runner unit-tested
+      against an in-memory store; live run pending A3 and a database
+- [x] A5 `GET /api/v1/media/{assetId}` — signed redirect, cache headers.
+      Unit-tested with fake db/storage; live 302 pending a READY asset
 - [ ] A6 `ProductSummary` + `ProductDetail` gain `media[]` (primary first)
 - [ ] A7 `ProductCard` / PDP gallery render real images with `next/image`,
       blur placeholder, explicit alt text, and an honest "no photograph"

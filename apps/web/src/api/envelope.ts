@@ -139,6 +139,15 @@ export function successResponse(
   ids: CorrelationIds,
   headers: Record<string, string> = {},
 ): Response {
+  // Redirects and bodyless statuses must not carry a JSON body: a 302 with
+  // `Location` is the media delivery contract (A5), and `Response` rejects a
+  // body on 204/304 outright.
+  if (status === 204 || status === 304 || (status >= 300 && status < 400)) {
+    return new Response(null, {
+      status,
+      headers: { [TRACE_HEADER]: ids.traceId, ...headers },
+    });
+  }
   if (body instanceof ReadableStream) {
     return new Response(body as any, {
       status,

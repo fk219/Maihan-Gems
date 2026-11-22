@@ -32,6 +32,7 @@ import {
   createCatalogQueryService,
 } from '../modules/catalog/index.js';
 import { createRedisClient, type RedisHandle } from '../integrations/redis.js';
+import { createMediaStorage } from '../integrations/media-storage.js';
 import { createRateLimitGate } from './ratelimit/gate.js';
 import { RATE_LIMIT_POLICIES } from './ratelimit/policy.js';
 import { createBackendChain } from './ratelimit/limiter.js';
@@ -83,7 +84,13 @@ async function wire(): Promise<Wiring> {
     failureMode: 'allow',
   });
 
-  const api = createCatalogApi({ service, rateLimit, db: catalogDatabase });
+  const mediaStorage = createMediaStorage(config.mediaStorage);
+  const api = createCatalogApi({
+    service,
+    rateLimit,
+    db: catalogDatabase,
+    ...(mediaStorage === null ? {} : { mediaStorage }),
+  });
 
   return {
     api,
