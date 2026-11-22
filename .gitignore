@@ -51,6 +51,11 @@ playwright-report/
 test-results/
 
 # =============================================================================
+# Local media driver output (MEDIA_DRIVER=local)
+# =============================================================================
+.media/
+
+# =============================================================================
 # Migration working data
 # =============================================================================
 # tools/migrate writes staging and canonical data to a DATABASE, never to files

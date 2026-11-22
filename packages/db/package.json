@@ -18,7 +18,8 @@
     "seed": "node ./dist/seed.js",
     "test": "vitest run",
     "verify-schema": "node ./dist/verify-schema.js",
-    "schema-fidelity": "node ./dist/schema-fidelity.js"
+    "schema-fidelity": "node ./dist/schema-fidelity.js",
+    "assets:backfill": "node ./dist/cli/backfill-assets.js"
   },
   "dependencies": {
     "@maihan/domain": "workspace:*",
