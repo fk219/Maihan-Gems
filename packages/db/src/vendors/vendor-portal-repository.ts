@@ -429,9 +429,9 @@ export async function vendorStatement(
   const r = await db.execute<VendorStatementEntry & { period_total: string }>(sql`
     WITH ledger AS (
       SELECT id, order_id, entry_type, amount, currency, reference, created_at,
-             sum(amount) OVER (
+             (sum(amount) OVER (
                ORDER BY id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-             )::text AS running_balance
+             ))::text AS running_balance
       FROM vendor_ledger
       WHERE vendor_id = ${vendorId}::uuid
     )
@@ -443,7 +443,7 @@ export async function vendorStatement(
            reference,
            created_at,
            running_balance,
-           sum(amount) OVER ()::text AS period_total
+           (sum(amount) OVER ())::text AS period_total
     FROM ledger
     WHERE created_at >= COALESCE(${range.from ?? null}::timestamptz, '-infinity'::timestamptz)
       AND created_at <  COALESCE(${range.to ?? null}::timestamptz, 'infinity'::timestamptz)
