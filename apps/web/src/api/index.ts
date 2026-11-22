@@ -32,7 +32,7 @@
  * turns it into a `Response`, so response policy can never fork per handler.
  */
 import { ContractError } from '@maihan/contracts';
-import { HANDLERS, type HandlerOutcome, type RouteContext } from './handlers.js';
+import { HANDLERS, type HandlerOutcome, type RouteContext, type RouteHandler } from './handlers.js';
 import { SEARCH_HANDLERS } from './search-handlers.js';
 import { COMMERCE_HANDLERS } from './commerce-handlers.js';
 import { ACCOUNT_HANDLERS } from './account-handlers.js';
@@ -100,6 +100,14 @@ import {
   adminPublishProductHandler,
   adminUnpublishProductHandler,
 } from './admin/catalog-handlers.js';
+import {
+  vendorMeHandler,
+  vendorListProductsHandler,
+  vendorCreateProductHandler,
+  vendorUpdateProductHandler,
+  vendorListOrdersHandler,
+  vendorStatementHandler,
+} from './vendor-handlers.js';
 import {
   errorResponse,
   newRequestId,
@@ -182,7 +190,7 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       }
     }
 
-    const DYO_HANDLERS: Record<string, any> = {
+    const DYO_HANDLERS: Record<string, RouteHandler> = {
       createDyoConfigurationHandler,
       getDyoConfigurationHandler,
       validateDyoConfigurationHandler,
@@ -191,7 +199,7 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       addDyoToCartHandler,
     };
 
-    const CERTIFICATE_HANDLERS: Record<string, any> = {
+    const CERTIFICATE_HANDLERS: Record<string, RouteHandler> = {
       createCertificateHandler,
       getCertificateHandler,
       processOcrRunHandler,
@@ -199,31 +207,31 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       getPublicGemstoneCertificatesHandler,
     };
 
-    const AI_HANDLERS: Record<string, any> = {
+    const AI_HANDLERS: Record<string, RouteHandler> = {
       aiChatHandler,
       aiHandoffHandler,
       aiGetConversationHandler,
     };
 
-    const WHATSAPP_HANDLERS: Record<string, any> = {
+    const WHATSAPP_HANDLERS: Record<string, RouteHandler> = {
       whatsappVerificationHandler,
       whatsappWebhookHandler,
       whatsappSendTemplateHandler,
     };
 
-    const WEBAR_HANDLERS: Record<string, any> = {
+    const WEBAR_HANDLERS: Record<string, RouteHandler> = {
       getWebarAssetHandler,
       createArHandoffHandler,
       redeemArHandoffHandler,
     };
 
-    const HEALTH_HANDLERS: Record<string, any> = {
+    const HEALTH_HANDLERS: Record<string, RouteHandler> = {
       healthLiveHandler,
       healthReadyHandler,
       metricsHandler,
     };
 
-    const AUTH_HANDLERS: Record<string, any> = {
+    const AUTH_HANDLERS: Record<string, RouteHandler> = {
       authLoginHandler,
       authLogoutHandler,
       authMeHandler,
@@ -233,7 +241,16 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       authResetPasswordHandler,
     };
 
-    const ADMIN_HANDLERS: Record<string, any> = {
+    const VENDOR_HANDLERS: Record<string, RouteHandler> = {
+      vendorMeHandler,
+      vendorListProductsHandler,
+      vendorCreateProductHandler,
+      vendorUpdateProductHandler,
+      vendorListOrdersHandler,
+      vendorStatementHandler,
+    };
+
+    const ADMIN_HANDLERS: Record<string, RouteHandler> = {
       adminCreatePageHandler,
       adminListPagesHandler,
       adminGetPageHandler,
@@ -264,6 +281,7 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       MEDIA_HANDLERS[lookup.route.id] ??
       HEALTH_HANDLERS[lookup.route.id] ??
       AUTH_HANDLERS[lookup.route.id] ??
+      VENDOR_HANDLERS[lookup.route.id] ??
       ADMIN_HANDLERS[lookup.route.id];
     if (handler === undefined) {
       return errorResponse(new ContractError('INTERNAL', 'Unrouted handler.'), ids, rateHeaders);

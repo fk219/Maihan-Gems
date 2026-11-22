@@ -244,6 +244,15 @@ export const AUTH_ROUTES: readonly RouteDefinition[] = [
   { id: 'authResetPasswordHandler', method: 'POST', path: '/api/v1/auth/reset-password' },
 ];
 
+export const VENDOR_ROUTES: readonly RouteDefinition[] = [
+  { id: 'vendorMeHandler', method: 'GET', path: '/api/v1/vendor/me' },
+  { id: 'vendorListProductsHandler', method: 'GET', path: '/api/v1/vendor/products' },
+  { id: 'vendorCreateProductHandler', method: 'POST', path: '/api/v1/vendor/products' },
+  { id: 'vendorUpdateProductHandler', method: 'POST', path: '/api/v1/vendor/products/{productId}' },
+  { id: 'vendorListOrdersHandler', method: 'GET', path: '/api/v1/vendor/orders' },
+  { id: 'vendorStatementHandler', method: 'GET', path: '/api/v1/vendor/statement' },
+];
+
 export const ADMIN_ROUTES: readonly RouteDefinition[] = [
   { id: 'adminCreatePageHandler', method: 'POST', path: '/api/v1/admin/cms/pages' },
   { id: 'adminListPagesHandler', method: 'GET', path: '/api/v1/admin/cms/pages' },
@@ -279,6 +288,7 @@ export const ALL_ROUTES: readonly RouteDefinition[] = [
   ...MEDIA_ROUTES,
   ...HEALTH_ROUTES,
   ...AUTH_ROUTES,
+  ...VENDOR_ROUTES,
   ...ADMIN_ROUTES,
 ];
 
