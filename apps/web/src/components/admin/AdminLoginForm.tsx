@@ -34,8 +34,13 @@ export function AdminLoginForm(): React.JSX.Element {
         setError(body?.error?.message ?? 'Sign-in failed.');
         return;
       }
-      const body = (await response.json()) as { data?: { user?: { role?: string | null } } };
-      const role = body?.data?.user?.role ?? null;
+      const body = (await response.json()) as {
+        data?: { user?: { role?: string | null } };
+        user?: { role?: string | null };
+      };
+      // The success envelope wraps payloads in `data`; accept either shape so a
+      // transport change cannot silently break sign-in again.
+      const role = body?.data?.user?.role ?? body?.user?.role ?? null;
       if (role === null || role === undefined) {
         setError('This account has no administrative role.');
         return;
