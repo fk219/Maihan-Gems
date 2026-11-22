@@ -350,4 +350,16 @@ export {
   type CreateSessionParams,
   type AdminRoleName,
 } from './identity/identity-repository.js';
+export {
+  createVerificationToken,
+  consumeVerificationToken,
+  createResetToken,
+  consumeResetToken,
+  markEmailVerified,
+  updatePasswordHash,
+  type IssueTokenParams,
+  type IssuedTokenRow,
+  type ConsumedTokenRow,
+  type VerifiedEmailRow,
+} from './identity/customer-auth-repository.js';
 
