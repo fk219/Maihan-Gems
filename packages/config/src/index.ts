@@ -72,6 +72,28 @@ export class ConfigError extends Error {
 const POSTGRES_SCHEMES = ['postgres://', 'postgresql://'];
 const REDIS_SCHEMES = ['redis://', 'rediss://'];
 
+/**
+ * Environments that must never expose development affordances (token echo,
+ * operator CLIs, seed routes). `ENVIRONMENT` is free text by design — the
+ * cache namespace needs an operator-chosen name — so the production test is
+ * explicit and case-insensitive rather than "anything but local".
+ */
+export function isProductionEnvironment(environment: string): boolean {
+  const normalised = environment.trim().toLowerCase();
+  return normalised === 'production' || normalised === 'prod';
+}
+
+/**
+ * The environment name on its own, without requiring DATABASE_URL.
+ *
+ * Development-only tooling must be able to refuse a production host BEFORE it
+ * touches configuration or a connection string, so this is a separate read
+ * rather than a field on the loaded config.
+ */
+export function runtimeEnvironment(env: NodeJS.ProcessEnv = process.env): string {
+  return env['ENVIRONMENT'] ?? env['NODE_ENV'] ?? 'local';
+}
+
 function requireUrl(value: string | undefined, variable: string, schemes: string[]): string {
   if (value === undefined || value === '') {
     throw new ConfigError(variable, 'required but not set');
@@ -162,7 +184,7 @@ export function loadRuntimeConfig(env: NodeJS.ProcessEnv = process.env): Runtime
     databaseUrl: requireUrl(env['DATABASE_URL'], 'DATABASE_URL', POSTGRES_SCHEMES),
     redisUrl: optionalUrl(env['REDIS_URL'], 'REDIS_URL', REDIS_SCHEMES),
     apiPort: parsePort(env['API_PORT']),
-    environment: env['ENVIRONMENT'] ?? env['NODE_ENV'] ?? 'local',
+    environment: runtimeEnvironment(env),
     adminSeedEmail: env['ADMIN_SEED_EMAIL'] ?? null,
     adminSeedPassword: env['ADMIN_SEED_PASSWORD'] ?? null,
     mediaStorage: parseMediaStorage(env),
