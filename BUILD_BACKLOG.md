@@ -14,6 +14,10 @@ database. Neon is applied last, once, with explicit approval.**
 
 - [x] P1.1–P1.4 API mounted in the App Router; one start command
 - [x] P2.1–P2.3 users/sessions, scrypt, admin gate, login page, admin console
+- [x] P2.4 customer identity: register, verify-email, reset, `/account`,
+      `/account/login`, `/account/register`. **Email delivery is not wired**
+      (Track B4): the dev-only `auth-token` CLI issues tokens out of band and
+      production responses never carry one
 - [x] P3.1 product publish/unpublish with gate V15 + audit
 - [x] P5/P6.1 vendor schema, lifecycle state machine, commission split, ledger
 - [x] ADR-026 multivendor, ADR-027 sessions

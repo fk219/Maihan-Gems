@@ -1,3 +1,64 @@
+# TRACK P2.4 — CUSTOMER IDENTITY: REGISTER, VERIFY, SIGN IN, RESET, ACCOUNT (2026-11-23)
+
+- **Migration 0021** `packages/db/migrations/0021_customer_auth.sql`: expand-only
+  `email_verification_tokens` (id, user_id FK → users ON DELETE CASCADE,
+  token_hash UNIQUE, created_at, expires_at, used_at) plus a `(user_id,
+  created_at DESC)` index and a partial `(expires_at) WHERE used_at IS NULL`
+  index. Password reset reuses `password_reset_tokens` from 0019 rather than a
+  near-identical second table. Journal entry `idx 20` registered; **no migration
+  was run against any database.**
+- **Repository** `packages/db/src/identity/customer-auth-repository.ts`:
+  `createVerificationToken`, `consumeVerificationToken`, `createResetToken`,
+  `consumeResetToken`, `markEmailVerified`, `updatePasswordHash`. Redemption is
+  one atomic `UPDATE … SET used_at = now() WHERE token_hash = $1 AND used_at IS
+  NULL AND expires_at > now() RETURNING user_id`; only a SHA-256 digest is ever
+  stored or selected. `markEmailVerified` uses `COALESCE` so it is idempotent
+  and keeps the first timestamp.
+- **Domain** `packages/domain/src/auth/password-policy.ts`: 12-character floor,
+  200 ceiling, and a 100-entry breached-password blocklist matched through
+  case/leet/trailing-digit normalisation. Messages never contain the password.
+  `session.ts` gained `generateOpaqueToken`/`hashOpaqueToken`/`tokenExpiry` and
+  the 24 h verification / 1 h reset TTLs; the session functions delegate to them.
+- **API** `POST /api/v1/auth/register` (customer = `users` row with
+  `admin_role NULL`, unverified, no session opened), `verify-email` (single use,
+  one message for unknown/used/expired), `request-password-reset` (always 200,
+  identical body, token never returned even in development), `reset-password`
+  (policy first so a weak password does not burn the link, then consume, rehash,
+  revoke every session, clear the cookie). `GET /api/v1/auth/me` already served
+  customers and is proven through the full flow.
+- **No email provider.** Registration returns `devVerificationToken` ONLY for
+  `ENVIRONMENT` in {local, dev, development, test} — an allowlist, so an
+  unconfigured or `staging` deployment returns none. The sanctioned out-of-band
+  path is `pnpm --filter @maihan/web run auth-token -- --email …`, which refuses
+  to run when `ENVIRONMENT` is production **before loading config or opening a
+  connection**. It mints a NEW token and prints it once: because only the digest
+  is stored, printing an existing token is impossible by design.
+- **Pages** `/account/login`, `/account/register` (client forms in the admin
+  login's visual language; no data access, so they stay buildable without a
+  database) and `/account` (server component: redirects to `/account/login`
+  without a session, otherwise profile + an honest order-history shell). The
+  catch-all also redirects `/account/sign-in` and renders
+  `/account/verify-email?token=…`, which keeps the locked 301 targets of `/auth`
+  and `/verify-email` real. All three registered in `route-manifest.ts`.
+- **Verification run:** `pnpm -r run typecheck` green; `@maihan/domain` 265
+  passed / 11 skipped; `@maihan/db` 159 passed / 33 skipped (the new repository
+  spec is fake-executor only); `@maihan/web` 438 passed / 21 skipped.
+  `next build --webpack` exits 0 with `apps/web/.env` hidden and `DATABASE_URL`
+  unset (all storefront routes dynamic, 2 static pages). Bundle budgets PASS
+  (138.3 KB / 141.9 KB gzip). No new dependency.
+- **Honest gaps:** email delivery is NOT wired (Track B4), so a real customer
+  cannot receive a verification or reset link; the reset UI says a link "has
+  been issued", not "sent". Order history is a shell because `users` (0019) and
+  `customers` (0009) have no established mapping — joining them would invent a
+  business rule. Verification is recorded but not required to sign in (a
+  product decision that becomes a one-line change when delivery exists). Live
+  DB verification of 0021 is pending a disposable scratch database.
+- **Defect observed, not fixed (out of scope — admin file):**
+  `apps/web/src/components/admin/AdminLoginForm.tsx` reads
+  `body?.data?.user?.role`, but the API returns `{ user, expiresAt }` at the top
+  level (`successResponse` does not wrap). A successful admin sign-in therefore
+  shows "This account has no administrative role." and never redirects.
+
 # TRACK A — MEDIA STORAGE, BACKFILL, DELIVERY (2026-11-23)
 
 - **A2** `packages/db/src/media/s3.ts`: `S3CompatibleStorage` over global
