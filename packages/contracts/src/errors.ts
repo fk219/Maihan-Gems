@@ -61,6 +61,14 @@ export const CONTRACT_ERROR_CODES = [
   'UNAUTHORIZED',
   'FORBIDDEN',
   'UNPROCESSABLE',
+  // ─── Vendor portal surface codes (P5, ADR-026) ─────────────────────────────
+  // A vendor actor is valid only while the vendor is APPROVED. The three
+  // refusals are distinct on purpose: "not a vendor", "vendor not approved"
+  // and "that row is another vendor's" are different operator actions, and a
+  // single FORBIDDEN would hide the difference from the portal.
+  'VENDOR_MEMBERSHIP_REQUIRED',
+  'VENDOR_NOT_APPROVED',
+  'VENDOR_SCOPE_MISMATCH',
 ] as const;
 
 export type ContractErrorCode = (typeof CONTRACT_ERROR_CODES)[number];
@@ -92,6 +100,9 @@ const HTTP_STATUS_BY_CODE: Record<ContractErrorCode, number> = {
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   UNPROCESSABLE: 422,
+  VENDOR_MEMBERSHIP_REQUIRED: 403,
+  VENDOR_NOT_APPROVED: 403,
+  VENDOR_SCOPE_MISMATCH: 403,
 };
 
 export type ContractErrorDetail = { [field: string]: unknown };

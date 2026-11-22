@@ -51,6 +51,9 @@ describe('contract error registry', () => {
       'UNAUTHORIZED',
       'FORBIDDEN',
       'UNPROCESSABLE',
+      'VENDOR_MEMBERSHIP_REQUIRED',
+      'VENDOR_NOT_APPROVED',
+      'VENDOR_SCOPE_MISMATCH',
     ]);
     const e = new ContractError('PRODUCT_NOT_FOUND', 'x');
     expect(e.httpStatus).toBe(404);
