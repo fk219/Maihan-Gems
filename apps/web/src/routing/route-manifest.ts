@@ -31,7 +31,7 @@ export interface RouteManifestEntry {
   /** Whether the route belongs to the (storefront) group. */
   readonly storefront: boolean;
   /** Route-group-relative UI segment (or null for the group's root). */
-  readonly group: 'storefront' | 'admin' | 'api' | 'app-root';
+  readonly group: 'storefront' | 'admin' | 'vendor' | 'api' | 'app-root';
   /** Extra files required by SoT 12.2 alongside page.tsx. */
   readonly extraFiles?: readonly string[];
   /** Files documented as reserved-but-unimplemented for later tasks. */
@@ -361,6 +361,58 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
       'PROJECT_SOURCE_OF_TRUTH.md 13.2 (/admin/**) + plan 37 P2 + ADR-027: the administrative sign-in surface. A static segment outranks the optional catch-all so the console guard cannot redirect-loop.',
     storefront: false,
     group: 'admin',
+  },
+
+  // ── vendor group (BUILD_BACKLOG Track D, ADR-026) ────────────────────────
+  // A third non-storefront surface with its own chrome and its own authz, in
+  // the same shape as admin: no storefront header/cart/chat, noindex.
+  {
+    fsPath: 'src/app/vendor/layout.tsx',
+    sotPath: 'app/vendor/layout.tsx',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 (separate layout, separate authz) + BUILD_BACKLOG.md Track D (D1/D3): the vendor portal is an operator surface, delivered by ADR-026 as vendor-owned catalogue and order allocations.',
+    storefront: false,
+    group: 'vendor',
+  },
+  {
+    fsPath: 'src/app/vendor/page.tsx',
+    sotPath: 'app/vendor/page.tsx   # /vendor',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2/13.2 (/admin/** new target-only surface, applied to vendors) + BUILD_BACKLOG.md Track D (D3): vendor dashboard — state, stock counts, recent allocations, payable balance.',
+    storefront: false,
+    group: 'vendor',
+  },
+  {
+    fsPath: 'src/app/vendor/login/page.tsx',
+    sotPath: 'app/vendor/login/page.tsx   # /vendor/login',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.2 + BUILD_BACKLOG.md Track D (D1) + ADR-027: vendor sign-in reuses the first-party session and then checks vendor membership.',
+    storefront: false,
+    group: 'vendor',
+  },
+  {
+    fsPath: 'src/app/vendor/products/page.tsx',
+    sotPath: 'app/vendor/products/page.tsx   # /vendor/products',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.2 + BUILD_BACKLOG.md Track D (D4/D5): vendor stock list and DRAFT intake; publishing stays a platform decision (gate V15).',
+    storefront: false,
+    group: 'vendor',
+  },
+  {
+    fsPath: 'src/app/vendor/orders/page.tsx',
+    sotPath: 'app/vendor/orders/page.tsx   # /vendor/orders',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.2 + BUILD_BACKLOG.md Track D (D3/D6) + ADR-026: per-vendor order allocations joined to the order header.',
+    storefront: false,
+    group: 'vendor',
+  },
+  {
+    fsPath: 'src/app/vendor/statement/page.tsx',
+    sotPath: 'app/vendor/statement/page.tsx   # /vendor/statement',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.2 + BUILD_BACKLOG.md Track D (D8) + ADR-026: payout statement reconstructed from the append-only vendor_ledger.',
+    storefront: false,
+    group: 'vendor',
   },
 
   // ── api (what the SoT chart calls "api/ — route handlers, section 11") ───

@@ -61,11 +61,11 @@ describe('Phase 4 Task 1 — storefront route tree', () => {
 
   it('every manifest route belongs to exactly one known group', () => {
     for (const entry of ROUTE_MANIFEST) {
-      expect(entry.group).toMatch(/^(storefront|admin|api|app-root)$/);
+      expect(entry.group).toMatch(/^(storefront|admin|vendor|api|app-root)$/);
     }
   });
 
-  it('every storefront entry declares storefront: true, and admin/api do not', () => {
+  it('every storefront entry declares storefront: true, and non-storefront groups do not', () => {
     for (const entry of ROUTE_MANIFEST) {
       if (entry.group === 'storefront') expect(entry.storefront).toBe(true);
       else expect(entry.storefront).toBe(false);
