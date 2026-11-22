@@ -1,3 +1,66 @@
+# TRACK D — VENDOR PORTAL (2026-11-23)
+
+- **Gate** `apps/web/src/api/vendor/session-authz.ts`: `requireVendor(ctx,
+  { vendorId? })` resolves the shared ADR-027 session, then the user's
+  `vendor_members` row, then `canSell(vendor.state)`. Refusals are distinct
+  403 codes registered in `@maihan/contracts`: `VENDOR_MEMBERSHIP_REQUIRED`,
+  `VENDOR_NOT_APPROVED` (details carry the state) and `VENDOR_SCOPE_MISMATCH`.
+  The gate THROWS, so no handler can forget a return and keep running. A user
+  with several memberships resolves deterministically: APPROVED, PENDING,
+  SUSPENDED, TERMINATED.
+- **Repository** `packages/db/src/vendors/vendor-portal-repository.ts`:
+  `listVendorProducts(vendorId, …)`, `createVendorProduct(vendorId, …)`,
+  `updateVendorProduct(vendorId, productId, …)`, `listVendorOrders(vendorId,
+  …)`, `vendorStatement(vendorId, {from,to})`. Every statement binds
+  `vendor_id` as a parameter; there is no unscoped overload. Creation fixes
+  `state='DRAFT'` and `price_evidence='UNKNOWN'` as SQL literals and writes an
+  `audit_logs` row (`actor_type='STAFF'`). Update answers null for "not yours"
+  and "not there" alike. Money arrives as integer minor units and is converted
+  to `NUMERIC(12,2)` with BigInt. Statement running balance is cumulative over
+  the whole ledger; `total` is the movement inside the window.
+- **Kinds narrowed on purpose:** only `LOOSE_STONE`, `STONE_PAIR` and
+  `READY_MADE` are offered. `products_composition_ck` (INV-01) requires a
+  setting variant for `CONFIGURED` and `SETTING_ONLY`, which the portal cannot
+  capture yet; offering them would turn a user action into a 500.
+- **API** `apps/web/src/api/vendor-handlers.ts` + `VENDOR_ROUTES`:
+  `GET /api/v1/vendor/me`, `GET|POST /api/v1/vendor/products`,
+  `POST /api/v1/vendor/products/{productId}`, `GET /api/v1/vendor/orders`,
+  `GET /api/v1/vendor/statement`. Each gates first, then calls one repository
+  function. Bodies are strict Zod objects, so `state`, `price_evidence` and
+  `vendor_id` are rejected rather than silently ignored; a malformed product id
+  is a 400 before the uuid cast.
+- **UI** `apps/web/src/app/vendor/`: separate layout with no storefront chrome,
+  `noindex` on every page, dashboard (state, stock counts, recent allocations,
+  ledger balance), stock list + client DRAFT form, orders, statement with a
+  plain GET date filter. Server components read through the repository; the two
+  mutations (`login`, `create product`) are client components using
+  `credentials: 'same-origin'`. All six route files are in
+  `route-manifest.ts` under a new non-storefront `vendor` group; the manifest
+  spec accepts the group and still rejects stray files.
+- **Verification:** `pnpm -r run typecheck` green. `@maihan/db` 175 passed /
+  33 skipped (new 16-test fake-executor spec). `@maihan/web` 454 passed / 21
+  skipped (new 16-test suite drives the real handlers through
+  `createCatalogApi`). `next build --webpack` exit 0 with `apps/web/.env` moved
+  aside and `DATABASE_URL` unset; all vendor routes are `ƒ` dynamic. Bundle
+  budgets PASS (138.3 KB / 141.9 KB gzip). No new dependency.
+- **Boundary proof:** repository tests assert the emitted SQL text never
+  contains the vendor UUID (parameter only), that a mismatched vendor gets an
+  empty list/null, and the API test proves vendor A receives 404 (not 403 and
+  not another vendor's row) when targeting B's product id.
+- **Honest gaps:** no product images or media attach (Track A endpoint exists,
+  the intake form does not use it); no gemstone/setting reference intake, so no
+  `gemstones` row and no `CONFIGURED`/`SETTING_ONLY` listing; no vendor
+  onboarding/KYC/terms (D2); no fulfilment actions — accept/ship/tracking/
+  cancel (D6), stated on the orders page; no vendor-initiated returns (D7); no
+  payout execution or payout run, only the ledger statement (D8/E6); no edit
+  UI for an existing product (the POST update endpoint exists and is tested);
+  no live-DB run of any statement, so SQL is proven against the fake executor
+  and `pnpm -r run typecheck`, not against Postgres.
+- **Next.js advisory:** the installed 16.4.0 build emitted a
+  known-vulnerability upgrade reminder during `next build`. The build passes on
+  retry, but the advisory is real and the upgrade is NOT performed here because
+  a framework bump is a dependency change (AGENTS §6.5, ADR required).
+
 # TRACK P2.4 — CUSTOMER IDENTITY: REGISTER, VERIFY, SIGN IN, RESET, ACCOUNT (2026-11-23)
 
 - **Migration 0021** `packages/db/migrations/0021_customer_auth.sql`: expand-only
