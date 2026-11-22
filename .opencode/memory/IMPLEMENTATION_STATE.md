@@ -1,3 +1,18 @@
+# WEB BUILD — NO-DATABASE PRERENDER FIX (2026-11-22)
+
+- `pnpm --filter @maihan/web run build` failed during prerender on static
+  storefront routes (`/blog`, `/cart`, ...) with Postgres `28P01`: the
+  `(storefront)` group layout renders `StorefrontHeader`, which reads the
+  mega-menu taxonomy through `catalog-server.ts`, so those routes queried the
+  database at build time.
+- Fix is one route-segment config in
+  `apps/web/src/app/(storefront)/layout.tsx`:
+  `export const dynamic = 'force-dynamic'`. All storefront routes now build as
+  `ƒ (Dynamic)`; only `/_not-found` stays static. No SQL, schema, dependency,
+  data-access or route-file change.
+- Verified with `DATABASE_URL` unset and `apps/web/.env` absent: `tsc -b` and
+  `next build --webpack` (Next 16.4.0) complete successfully.
+
 # PHASE 12 — PRODUCTION OBSERVABILITY, ALERTS & OPERATIONAL HARDENING COMPLETE (2026-10-12)
 
 - **API testing reference (2026-10-12):** Added a route-derived API inventory,

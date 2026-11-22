@@ -12,6 +12,14 @@ import { StorefrontHeader } from '../../components/layout/StorefrontHeader.js';
 import { StorefrontFooter } from '../../components/layout/StorefrontFooter.js';
 import { AiConciergeDrawer } from '../../components/ai/AiConciergeDrawer.js';
 
+/**
+ * StorefrontHeader reads the mega-menu taxonomy from Postgres on every render,
+ * so every route in this group needs request-time data. Without this the build
+ * prerenders static routes (e.g. /blog, /cart) and queries a database that a
+ * CI/Vercel build does not have.
+ */
+export const dynamic = 'force-dynamic';
+
 export default function StorefrontLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
