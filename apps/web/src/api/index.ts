@@ -80,6 +80,10 @@ import {
   authLoginHandler,
   authLogoutHandler,
   authMeHandler,
+  authRegisterHandler,
+  authRequestPasswordResetHandler,
+  authResetPasswordHandler,
+  authVerifyEmailHandler,
 } from './auth-handlers.js';
 import {
   adminCreatePageHandler,
@@ -120,6 +124,11 @@ export interface CatalogApiOptions {
   rateLimit?: RateLimitGate;
   /** Object storage for media redirects (A5). Absent = the endpoint 500s. */
   mediaStorage?: ObjectStorage;
+  /**
+   * Runtime environment (`ENVIRONMENT`). Absent is treated as production, so
+   * development-only response fields stay off unless explicitly enabled.
+   */
+  environment?: string;
 }
 
 export type CatalogApi = (request: Request) => Promise<Response>;
@@ -218,6 +227,10 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       authLoginHandler,
       authLogoutHandler,
       authMeHandler,
+      authRegisterHandler,
+      authVerifyEmailHandler,
+      authRequestPasswordResetHandler,
+      authResetPasswordHandler,
     };
 
     const ADMIN_HANDLERS: Record<string, any> = {
@@ -264,6 +277,7 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       request,
       db: options.db,
       storage: options.mediaStorage,
+      ...(options.environment === undefined ? {} : { environment: options.environment }),
     };
 
     let outcome: HandlerOutcome;

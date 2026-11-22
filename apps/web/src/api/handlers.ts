@@ -28,6 +28,14 @@ export interface RouteContext {
   readonly db?: import('@maihan/db').CatalogDatabase;
   /** Object storage for redirect endpoints (A5); absent when unwired. */
   readonly storage?: import('@maihan/db').ObjectStorage;
+  /**
+   * Runtime environment name (`ENVIRONMENT`, defaulting to `NODE_ENV`).
+   *
+   * Carried so development-only affordances (echoing a verification token,
+   * because no email provider is wired yet) can fail closed: an absent value
+   * is treated as production by every consumer.
+   */
+  readonly environment?: string;
 }
 
 export interface HandlerOutcome {

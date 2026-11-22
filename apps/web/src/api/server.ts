@@ -143,6 +143,7 @@ export async function wireApi(config: RuntimeConfig = loadRuntimeConfig()): Prom
     service,
     rateLimit,
     db: catalogDatabase,
+    environment: config.environment,
     ...(mediaStorage === null ? {} : { mediaStorage }),
   });
   const server = createNodeServer(api);

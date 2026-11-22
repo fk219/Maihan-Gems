@@ -232,6 +232,16 @@ export const AUTH_ROUTES: readonly RouteDefinition[] = [
   { id: 'authLoginHandler', method: 'POST', path: '/api/v1/auth/login' },
   { id: 'authLogoutHandler', method: 'POST', path: '/api/v1/auth/logout' },
   { id: 'authMeHandler', method: 'GET', path: '/api/v1/auth/me' },
+  // Customer identity (P2.4). Registration, verification and reset are POST
+  // because each one either creates state or redeems a one-time credential.
+  { id: 'authRegisterHandler', method: 'POST', path: '/api/v1/auth/register' },
+  { id: 'authVerifyEmailHandler', method: 'POST', path: '/api/v1/auth/verify-email' },
+  {
+    id: 'authRequestPasswordResetHandler',
+    method: 'POST',
+    path: '/api/v1/auth/request-password-reset',
+  },
+  { id: 'authResetPasswordHandler', method: 'POST', path: '/api/v1/auth/reset-password' },
 ];
 
 export const ADMIN_ROUTES: readonly RouteDefinition[] = [

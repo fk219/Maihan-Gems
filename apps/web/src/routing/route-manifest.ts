@@ -240,7 +240,24 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
   {
     fsPath: 'src/app/(storefront)/account/[[...accountPath]]/page.tsx',
     sotPath: 'app/(storefront)/account/...',
-    authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2 + 13.1 + 13.2: /account/** one catch-all, sub-routes committed by Phase 6',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 + 13.1 + 13.2: /account/** one catch-all. It serves `/account` (profile or redirect to sign-in), redirects `/account/sign-in` (the 301 target of legacy `/auth`) and renders the `/account/verify-email` token landing surface (the 301 target of legacy `/verify-email`). Remaining sub-routes stay with Phase 6.',
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/account/login/page.tsx',
+    sotPath: 'app/(storefront)/account/login/page.tsx   # /account/login',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.1 (/auth -> /account/sign-in) + plan 37 P2.4 customer identity: the customer sign-in surface. A static segment outranks the optional `[[...accountPath]]` catch-all, so the page renders without the catch-all redirect guard.',
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/account/register/page.tsx',
+    sotPath: 'app/(storefront)/account/register/page.tsx   # /account/register',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.2 (/account/** target-only route) + plan 37 P2.4 customer identity: self-registration creates the `users` row (admin_role NULL, unverified) that the account surface reads.',
     storefront: true,
     group: 'storefront',
   },

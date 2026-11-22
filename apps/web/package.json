@@ -9,6 +9,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "create-admin": "node ./dist/cli/create-admin.js",
+    "auth-token": "node ./dist/cli/auth-token.js",
     "start": "next start",
     "start:api-legacy": "node ./dist/api/server.js",
     "check:budgets": "node scripts/check-bundle-budgets.mjs"

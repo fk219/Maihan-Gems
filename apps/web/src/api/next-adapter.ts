@@ -89,6 +89,7 @@ async function wire(): Promise<Wiring> {
     service,
     rateLimit,
     db: catalogDatabase,
+    environment: config.environment,
     ...(mediaStorage === null ? {} : { mediaStorage }),
   });
 
