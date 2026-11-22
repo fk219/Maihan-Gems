@@ -182,8 +182,23 @@ function buildHarness(): Harness {
     queries.push(parsed);
     const { text, values } = parsed;
 
-    // ---- listVendorProducts ------------------------------------------------
-    if (text.includes('FROM products p') && text.includes('count(*) OVER()')) {
+    // ---- listVendorProducts: count -----------------------------------------
+    if (text.startsWith('SELECT count(*)::text AS count FROM products p')) {
+      const vendorId = values[0] as string;
+      const hasState = text.includes('p.state =');
+      const state = hasState ? (values[1] as string) : undefined;
+      const count = products
+        .filter((p) => p.vendor_id === vendorId && p.deleted_at === null)
+        .filter((p) => state === undefined || p.state === state).length;
+      return { rows: [{ count: String(count) }] };
+    }
+
+    // ---- listVendorProducts: page ------------------------------------------
+    if (
+      text.startsWith('SELECT p.id, p.vendor_id') &&
+      text.includes('FROM products p') &&
+      !text.includes('WHERE p.id =')
+    ) {
       const vendorId = values[0] as string;
       const hasState = text.includes('p.state =');
       const state = hasState ? (values[1] as string) : undefined;
@@ -194,10 +209,7 @@ function buildHarness(): Harness {
         .filter((p) => p.vendor_id === vendorId && p.deleted_at === null)
         .filter((p) => state === undefined || p.state === state)
         .sort((a, b) => b.created_at.localeCompare(a.created_at) || a.id.localeCompare(b.id));
-      const page = filtered.slice(offset, offset + limit);
-      return {
-        rows: page.map((p) => ({ ...p, total_count: String(filtered.length) })),
-      };
+      return { rows: filtered.slice(offset, offset + limit).map((p) => ({ ...p })) };
     }
 
     // ---- createVendorProduct ----------------------------------------------
@@ -284,8 +296,15 @@ function buildHarness(): Harness {
       return { rows: [{ ...row }] };
     }
 
-    // ---- listVendorOrders ---------------------------------------------------
-    if (text.includes('FROM order_vendor_allocations a')) {
+    // ---- listVendorOrders: count --------------------------------------------
+    if (text.startsWith('SELECT count(*)::text AS count FROM order_vendor_allocations a')) {
+      const vendorId = values[0] as string;
+      const count = allocations.filter((a) => a.vendor_id === vendorId).length;
+      return { rows: [{ count: String(count) }] };
+    }
+
+    // ---- listVendorOrders: page ---------------------------------------------
+    if (text.startsWith('SELECT a.id AS allocation_id')) {
       const vendorId = values[0] as string;
       const limit = values[1] as number;
       const offset = values[2] as number;
@@ -311,10 +330,7 @@ function buildHarness(): Harness {
           };
         })
         .sort((a, b) => b.order_created_at.localeCompare(a.order_created_at));
-      const page = filtered.slice(offset, offset + limit);
-      return {
-        rows: page.map((row) => ({ ...row, total_count: String(filtered.length) })),
-      };
+      return { rows: filtered.slice(offset, offset + limit).map((row) => ({ ...row })) };
     }
 
     // ---- vendorStatement ----------------------------------------------------
@@ -500,8 +516,17 @@ describe('listVendorProducts', () => {
 
   it('clamps the page size to the documented maximum', async () => {
     await listVendorProducts(harness.db as never, VENDOR_A, { limit: 5000, offset: 0 });
-    const listQuery = harness.queries.find((q) => q.text.includes('FROM products p'));
-    expect(listQuery?.values).toContain(200);
+    const pageQuery = harness.queries.find((q) => q.text.includes('ORDER BY p.created_at'));
+    expect(pageQuery?.values).toContain(200);
+  });
+
+  it('keeps the true total when the offset is past the end', async () => {
+    const result = await listVendorProducts(harness.db as never, VENDOR_A, {
+      limit: 10,
+      offset: 50,
+    });
+    expect(result.items).toEqual([]);
+    expect(result.total).toBe(2);
   });
 });
 

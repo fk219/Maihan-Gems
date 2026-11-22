@@ -106,9 +106,19 @@ export async function listVendorProducts(
   const stateClause =
     options.state === undefined ? sql`` : sql`AND p.state = ${options.state}::product_state`;
 
-  const r = await db.execute<VendorProductRow & { total_count: string }>(sql`
-    SELECT ${VENDOR_PRODUCT_COLUMNS},
-           count(*) OVER()::text AS total_count
+  // Count and page are separate statements on purpose: a window count would
+  // vanish with an empty page (offset past the end), and pagination would then
+  // claim there are zero rows. The total must stay true for any offset.
+  const counted = await db.execute<{ count: string }>(sql`
+    SELECT count(*)::text AS count
+    FROM products p
+    WHERE p.vendor_id = ${vendorId}::uuid
+      AND p.deleted_at IS NULL
+      ${stateClause}
+  `);
+
+  const r = await db.execute<VendorProductRow>(sql`
+    SELECT ${VENDOR_PRODUCT_COLUMNS}
     FROM products p
     WHERE p.vendor_id = ${vendorId}::uuid
       AND p.deleted_at IS NULL
@@ -118,7 +128,7 @@ export async function listVendorProducts(
   `);
   return {
     items: r.rows,
-    total: Number(r.rows[0]?.total_count ?? '0'),
+    total: Number(counted.rows[0]?.count ?? '0'),
   };
 }
 
@@ -345,7 +355,14 @@ export async function listVendorOrders(
 ): Promise<VendorOrderList> {
   const limit = Math.min(Math.max(options.limit, 1), 200);
   const offset = Math.max(options.offset, 0);
-  const r = await db.execute<VendorOrderRow & { total_count: string }>(sql`
+
+  const counted = await db.execute<{ count: string }>(sql`
+    SELECT count(*)::text AS count
+    FROM order_vendor_allocations a
+    WHERE a.vendor_id = ${vendorId}::uuid
+  `);
+
+  const r = await db.execute<VendorOrderRow>(sql`
     SELECT a.id AS allocation_id,
            a.order_id,
            o.order_number,
@@ -358,8 +375,7 @@ export async function listVendorOrders(
            a.state::text AS allocation_state,
            a.created_at AS allocated_at,
            o.placed_at,
-           o.created_at AS order_created_at,
-           count(*) OVER()::text AS total_count
+           o.created_at AS order_created_at
     FROM order_vendor_allocations a
     JOIN orders o ON o.id = a.order_id
     WHERE a.vendor_id = ${vendorId}::uuid
@@ -368,7 +384,7 @@ export async function listVendorOrders(
   `);
   return {
     items: r.rows,
-    total: Number(r.rows[0]?.total_count ?? '0'),
+    total: Number(counted.rows[0]?.count ?? '0'),
   };
 }
 
