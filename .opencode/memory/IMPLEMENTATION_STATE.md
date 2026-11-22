@@ -37,9 +37,9 @@
   `credentials: 'same-origin'`. All six route files are in
   `route-manifest.ts` under a new non-storefront `vendor` group; the manifest
   spec accepts the group and still rejects stray files.
-- **Verification:** `pnpm -r run typecheck` green. `@maihan/db` 175 passed /
-  33 skipped (new 16-test fake-executor spec). `@maihan/web` 454 passed / 21
-  skipped (new 16-test suite drives the real handlers through
+- **Verification:** `pnpm -r run typecheck` green. `@maihan/db` 176 passed /
+  33 skipped (new 17-test fake-executor spec). `@maihan/web` 455 passed / 21
+  skipped (new 17-test suite drives the real handlers through
   `createCatalogApi`). `next build --webpack` exit 0 with `apps/web/.env` moved
   aside and `DATABASE_URL` unset; all vendor routes are `ƒ` dynamic. Bundle
   budgets PASS (138.3 KB / 141.9 KB gzip). No new dependency.
@@ -47,6 +47,10 @@
   contains the vendor UUID (parameter only), that a mismatched vendor gets an
   empty list/null, and the API test proves vendor A receives 404 (not 403 and
   not another vendor's row) when targeting B's product id.
+- **Pagination correctness:** count and page are separate statements. A window
+  count would vanish with an empty page, so `offset` past the end would claim a
+  total of zero; both the repository and API suites pin `offset=50` and assert
+  the true total survives.
 - **Honest gaps:** no product images or media attach (Track A endpoint exists,
   the intake form does not use it); no gemstone/setting reference intake, so no
   `gemstones` row and no `CONFIGURED`/`SETTING_ONLY` listing; no vendor
