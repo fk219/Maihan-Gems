@@ -6,7 +6,9 @@
  * Authority & Styling:
  *   - Design.md: Swiss Private Banking precision combined with modern Dubai luxury.
  *   - Signature Alternating Rhythm:
- *       1. Hero: Deep Obsidian Navy (#08121E) with integrated catalogue search
+ *       1. Hero: "Light through stone" — deep obsidian navy (#08121E), one
+ *          CSS-built stone under a raking key light (DESIGN_DIRECTION.md §4.1).
+ *          No client JS, no hero photograph, no fabricated product.
  *       2. Marquee Ticker: Solid Metallic Gold (#C9A84C) core values banner
  *       3. Atelier Settings: Dark Primary Navy (#0D1B2A) with real setting designs
  *       4. Bespoke Atelier Workflow: Crisp White (#FFFFFF) 3-step configurator guide
@@ -18,6 +20,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { HomeHero } from '../../components/home/HomeHero.js';
 import { catalogServer } from '../../lib/catalog-server.js';
 
 export const dynamic = 'force-dynamic';
@@ -114,223 +117,8 @@ export default async function HomePage() {
 
   return (
     <main className="storefront-home" id="main-content">
-      {/* ── SECTION 1: HERO (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
-      <section
-        className="storefront-section bg-warm-alabaster"
-        style={{
-          paddingTop: '4.5rem',
-          paddingBottom: '5.5rem',
-          backgroundImage:
-            'radial-gradient(circle at 50% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 65%)',
-        }}
-        aria-label="Hero Introduction"
-      >
-        <div className="storefront-section__container">
-          <div className="hero-grid">
-            {/* Left Column: Brand Statement & Discovery */}
-            <div>
-              <span className="section-eyebrow section-eyebrow--dark">
-                Natural Mineralogy &amp; Master Atelier
-              </span>
-              <h1
-                className="section-title"
-                style={{
-                  fontSize: 'clamp(2.5rem, 4.5vw, 4rem)',
-                  lineHeight: 1.1,
-                  margin: '0 0 1.25rem 0',
-                  color: '#1a1a18',
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                Rare Earth Gemstones <span className="text-gold-gradient">&amp; Haute Mountings</span>
-              </h1>
-              <p
-                className="storefront-section__subtitle"
-                style={{
-                  color: '#4a4740',
-                  maxWidth: '540px',
-                  margin: '0 0 2rem 0',
-                  fontSize: '1.05rem',
-                  lineHeight: 1.7,
-                }}
-              >
-                100% natural, untreated earth-mined gemstones and precision-cast 18K gold and platinum
-                mountings. Handcrafted to order in our private atelier.
-              </p>
-
-              {/* Integrated Search Discovery Form */}
-              <div style={{ maxWidth: '540px', marginBottom: '1.5rem' }}>
-                <form action="/search" method="GET" className="search-bar-form" role="search">
-                  <input
-                    type="search"
-                    name="q"
-                    placeholder="Search by mineral, cut, metal, or SKU..."
-                    className="search-input"
-                    aria-label="Search gemstones and fine settings catalogue"
-                  />
-                  <button type="submit" className="btn-primary">
-                    Search
-                  </button>
-                </form>
-
-                {/* Quick Discovery Pills */}
-                <div className="search-pills-row" style={{ marginTop: '0.85rem' }}>
-                  <Link href="/search?q=sapphire" className="search-pill-link">
-                    Sapphires
-                  </Link>
-                  <Link href="/search?q=emerald" className="search-pill-link">
-                    Emeralds
-                  </Link>
-                  <Link href="/search?q=ruby" className="search-pill-link">
-                    Rubies
-                  </Link>
-                  <Link href="/settings" className="search-pill-link">
-                    18K Mountings
-                  </Link>
-                  <Link href="/design-your-own" className="search-pill-link">
-                    Atelier Configurator
-                  </Link>
-                </div>
-              </div>
-
-              {/* Core Action Navigation Links */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '1rem',
-                  flexWrap: 'wrap',
-                  marginTop: '1.5rem',
-                }}
-              >
-                <Link href="/search" className="btn-primary">
-                  Explore Vault
-                </Link>
-                <Link href="/design-your-own" className="btn-outline">
-                  Design Your Own →
-                </Link>
-              </div>
-            </div>
-
-            {/* Right Column: 1-of-1 Vault Masterpiece Showcase */}
-            <div className="hero-showcase-card">
-              <div className="hero-showcase-image">
-                <img
-                  src="/assets/hero/atelier_hero_gem.svg"
-                  alt="4.82 ct Vivid Royal Blue Ceylon Cushion Sapphire in 18K Yellow Gold Cathedral Ring Mount"
-                  loading="eager"
-                  width="500"
-                  height="375"
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '1rem',
-                    right: '1rem',
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    letterSpacing: '0.2em',
-                    textTransform: 'uppercase',
-                    color: '#8a867e',
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    padding: '0.3rem 0.65rem',
-                    borderRadius: '9999px',
-                    border: '1px solid rgba(201, 168, 76, 0.25)',
-                  }}
-                >
-                  1-of-1 Vault
-                </div>
-              </div>
-
-              <div>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    letterSpacing: '0.18em',
-                    textTransform: 'uppercase',
-                    color: 'var(--color-gold-dark)',
-                    display: 'block',
-                    marginBottom: '0.35rem',
-                  }}
-                >
-                  Ceylon, Sri Lanka · Natural Unheated
-                </span>
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: '1.45rem',
-                    fontWeight: 600,
-                    color: '#1a1a18',
-                    margin: '0 0 0.5rem 0',
-                    lineHeight: 1.25,
-                  }}
-                >
-                  4.82 Carat Royal Blue Cushion Sapphire
-                </h3>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontSize: '12px',
-                    color: '#4a4740',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  <span>Cushion Cut</span>
-                  <span aria-hidden="true" style={{ color: 'rgba(201, 168, 76, 0.6)' }}>
-                    ·
-                  </span>
-                  <span className="font-mono tabular-nums">10.42 × 8.85 mm</span>
-                  <span aria-hidden="true" style={{ color: 'rgba(201, 168, 76, 0.6)' }}>
-                    ·
-                  </span>
-                  <span>GRS Certified</span>
-                </div>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    paddingTop: '0.85rem',
-                    borderTop: '1px solid rgba(0, 0, 0, 0.06)',
-                  }}
-                >
-                  <div>
-                    <span
-                      style={{
-                        fontSize: '10px',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.15em',
-                        color: '#8a867e',
-                        display: 'block',
-                      }}
-                    >
-                      Masterpiece In Stock
-                    </span>
-                    <span
-                      className="font-mono"
-                      style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1a1a18' }}
-                    >
-                      Private Vault
-                    </span>
-                  </div>
-                  <Link
-                    href="/search?q=sapphire"
-                    className="btn-primary"
-                    style={{ padding: '0.6rem 1.2rem', fontSize: '11px' }}
-                  >
-                    Inspect Specimen →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── SECTION 1: HERO — "Light through stone" (DESIGN_DIRECTION.md §4.1) ── */}
+      <HomeHero />
 
       {/* ── SECTION 2: INFINITE MARQUEE TICKER ── */}
       <aside className="marquee-container" aria-label="Maihan Gems core values marquee">
