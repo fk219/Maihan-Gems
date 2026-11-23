@@ -110,7 +110,7 @@ export function assertSendable(message: EmailMessage): void {
 export class NoneEmailTransport implements EmailPort {
   readonly transport = 'none' as const;
 
-  async send(): Promise<EmailSendReceipt> {
+  async send(_message: EmailMessage): Promise<EmailSendReceipt> {
     throw new EmailDeliveryError('no email transport is configured (EMAIL_TRANSPORT=none)');
   }
 }
