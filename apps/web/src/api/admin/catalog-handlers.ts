@@ -8,6 +8,7 @@
  * repository, so this file never decides what is publishable.
  */
 import { ContractError } from '@maihan/contracts';
+import { TwoPersonError } from '@maihan/domain';
 import {
   countProductsForAdmin,
   listProductsForAdmin,
@@ -33,7 +34,27 @@ async function gate(
   return { failure: authzFailureResponse(decision.status, ctx.ids) };
 }
 
-function mapPublishError(error: unknown): never {
+/**
+ * Publish refusals.
+ *
+ * A two-person refusal is a 403 with the typed code `TWO_PERSON_REQUIRED`; it
+ * is not a validation failure and never becomes a silent downgrade. Every
+ * other refusal keeps the documented ContractError mapping.
+ */
+function mapPublishError(ctx: RouteContext, error: unknown): HandlerOutcome {
+  if (error instanceof TwoPersonError) {
+    return {
+      status: 403,
+      body: {
+        error: {
+          code: 'TWO_PERSON_REQUIRED',
+          message: error.message,
+          requestId: ctx.ids.requestId,
+          traceId: ctx.ids.traceId,
+        },
+      },
+    };
+  }
   if (error instanceof ProductPublishError) {
     if (error.code === 'NOT_FOUND') {
       throw new ContractError('NOT_FOUND', 'No such product.');
@@ -111,7 +132,7 @@ async function transitionHandler(
           });
     return { status: 200, body: { data: row } };
   } catch (error) {
-    return mapPublishError(error);
+    return mapPublishError(ctx, error);
   }
 }
 

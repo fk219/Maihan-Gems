@@ -21,12 +21,14 @@
  * material field >= 0.90") rather than shown a generic failure.
  */
 import { ContractError } from '@maihan/contracts';
-import { DomainError } from '@maihan/domain';
+import { DomainError, TwoPersonError } from '@maihan/domain';
 import {
   CertificateReviewError,
   decideCertificate,
   getCertificateForReview,
+  listAnomaliesForCertificate,
   listPendingCertificates,
+  resolveAnomaly,
 } from '@maihan/db';
 import { z } from 'zod';
 
@@ -113,6 +115,12 @@ function refusal(
  *     "rejected already" without parsing prose.
  */
 function mapReviewError(ctx: RouteContext, error: unknown): HandlerOutcome {
+  // Two-person refusal is a 403 with its own code, never the generic domain
+  // conflict mapping (TwoPersonError extends DomainError).
+  if (error instanceof TwoPersonError) {
+    return refusal(ctx, 403, 'TWO_PERSON_REQUIRED', error.message);
+  }
+
   if (error instanceof CertificateReviewError) {
     switch (error.code) {
       case 'NOT_FOUND':
@@ -133,6 +141,17 @@ function mapReviewError(ctx: RouteContext, error: unknown): HandlerOutcome {
           'ALREADY_DECIDED',
           'This certificate was decided concurrently; reload the queue before deciding again.',
         );
+      case 'ANOMALY_NOT_FOUND':
+        return refusal(ctx, 404, 'NOT_FOUND', 'The requested anomaly does not exist.');
+      case 'ANOMALY_ALREADY_RESOLVED':
+        return refusal(
+          ctx,
+          409,
+          'ANOMALY_ALREADY_RESOLVED',
+          'This anomaly was already resolved; reload the certificate before resolving again.',
+        );
+      case 'RESOLUTION_REQUIRED':
+        return refusal(ctx, 400, 'VALIDATION_FAILED', 'A resolution is required to resolve an anomaly.');
     }
   }
 
@@ -186,6 +205,80 @@ export async function adminGetCertificateForReviewHandler(
     return refusal(ctx, 404, 'NOT_FOUND', 'The requested certificate does not exist.');
   }
   return { status: 200, body: { data: detail } };
+}
+
+// ─── Anomaly triage ────────────────────────────────────────────────────────
+
+/**
+ * GET /api/v1/admin/certificates/{certificateId}/anomalies
+ *
+ * Open AND resolved anomalies, oldest first. The `anomalies` module is the
+ * gate (doc 23 §3): TRUST_REVIEWER resolves, AI_OPERATIONS may only read.
+ */
+export async function adminListCertificateAnomaliesHandler(
+  ctx: RouteContext,
+  deps: AdminDeps = {},
+): Promise<HandlerOutcome> {
+  const g = await gate(ctx, { module: 'anomalies', action: 'read' }, deps);
+  if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
+
+  const db = requireDb(ctx);
+  const certificateId = requireUuid(ctx.params['certificateId'], 'certificate id');
+  const list = await listAnomaliesForCertificate(db, certificateId);
+  if (list === null) {
+    return refusal(ctx, 404, 'NOT_FOUND', 'The requested certificate does not exist.');
+  }
+  return {
+    status: 200,
+    body: {
+      data: list.items,
+      meta: {
+        certificateId: list.certificateId,
+        open: list.open,
+        resolved: list.resolved,
+        total: list.items.length,
+      },
+    },
+  };
+}
+
+const ResolveAnomalyBody = z.object({
+  resolution: z.string().trim().min(1).max(200),
+  note: z.string().trim().max(2000).optional(),
+});
+
+/**
+ * POST /api/v1/admin/certificates/anomalies/{anomalyId}/resolve
+ *
+ * One resolution per anomaly, recorded with the actor and an audit row. The
+ * anomaly is never deleted: the resolution is a record, not an erasure.
+ */
+export async function adminResolveCertificateAnomalyHandler(
+  ctx: RouteContext,
+  deps: AdminDeps = {},
+): Promise<HandlerOutcome> {
+  const g = await gate(ctx, { module: 'anomalies', action: 'resolve' }, deps);
+  if ('failure' in g) return { status: g.failure.status, body: await g.failure.json() };
+
+  const db = requireDb(ctx);
+  const anomalyId = requireUuid(ctx.params['anomalyId'], 'anomaly id');
+  const parsed = ResolveAnomalyBody.safeParse(await readOptionalJson(ctx.request));
+  if (!parsed.success) {
+    return refusal(ctx, 400, 'VALIDATION_FAILED', 'A resolution is required to resolve an anomaly.');
+  }
+
+  try {
+    const result = await resolveAnomaly(db, {
+      anomalyId,
+      actorId: g.actor.sub,
+      resolution: parsed.data.resolution,
+      ...(parsed.data.note === undefined ? {} : { note: parsed.data.note }),
+      requestId: ctx.ids.requestId,
+    });
+    return { status: 200, body: { data: result } };
+  } catch (error) {
+    return mapReviewError(ctx, error);
+  }
 }
 
 // ─── Decision ──────────────────────────────────────────────────────────────

@@ -116,7 +116,9 @@ import {
 import {
   adminDecideCertificateHandler,
   adminGetCertificateForReviewHandler,
+  adminListCertificateAnomaliesHandler,
   adminListPendingCertificatesHandler,
+  adminResolveCertificateAnomalyHandler,
 } from './admin/certificate-review-handlers.js';
 import {
   vendorMeHandler,
@@ -292,6 +294,8 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       adminListPendingCertificatesHandler,
       adminGetCertificateForReviewHandler,
       adminDecideCertificateHandler,
+      adminListCertificateAnomaliesHandler,
+      adminResolveCertificateAnomalyHandler,
     };
 
     const handler =

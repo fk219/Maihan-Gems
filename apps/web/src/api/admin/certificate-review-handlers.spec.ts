@@ -21,7 +21,9 @@ import type { RouteContext } from '../handlers.js';
 import {
   adminDecideCertificateHandler,
   adminGetCertificateForReviewHandler,
+  adminListCertificateAnomaliesHandler,
   adminListPendingCertificatesHandler,
+  adminResolveCertificateAnomalyHandler,
 } from './certificate-review-handlers.js';
 
 const CERTIFICATE_ID = '66666666-6666-4666-8666-666666666666';
@@ -156,6 +158,24 @@ describe('certificate review route table', () => {
     for (const [method, path, id] of expected) {
       expect(lookupRoute(method, path)).toMatchObject({ kind: 'match', route: { id, method } });
     }
+  });
+
+  it('registers the anomaly list and resolve endpoints without shadowing the detail route', () => {
+    const anomalyId = '88888888-8888-4888-8888-888888888888';
+    expect(lookupRoute('GET', `/api/v1/admin/certificates/${CERTIFICATE_ID}/anomalies`)).toMatchObject({
+      kind: 'match',
+      route: { id: 'adminListCertificateAnomaliesHandler', method: 'GET' },
+      params: { certificateId: CERTIFICATE_ID },
+    });
+    expect(lookupRoute('POST', `/api/v1/admin/certificates/anomalies/${anomalyId}/resolve`)).toMatchObject({
+      kind: 'match',
+      route: { id: 'adminResolveCertificateAnomalyHandler', method: 'POST' },
+      params: { anomalyId },
+    });
+    expect(lookupRoute('GET', `/api/v1/admin/certificates/${CERTIFICATE_ID}`)).toMatchObject({
+      kind: 'match',
+      route: { id: 'adminGetCertificateForReviewHandler' },
+    });
   });
 });
 
@@ -317,6 +337,7 @@ describe('POST /api/v1/admin/certificates/{certificateId}/decide', () => {
       [certificateRow()],
       highConfidenceFields(),
       [],
+      [],
       [{ id: CERTIFICATE_ID, review_id: 'r1', event_id: '42' }],
     ]);
 
@@ -340,7 +361,7 @@ describe('POST /api/v1/admin/certificates/{certificateId}/decide', () => {
       reviewId: 'r1',
       eventId: '42',
     });
-    expect(db.calls).toBe(4);
+    expect(db.calls).toBe(5);
   });
 
   it('maps an unresolved ERROR anomaly to a 422 with the doc 17 code', async () => {
@@ -381,5 +402,198 @@ describe('POST /api/v1/admin/certificates/{certificateId}/decide', () => {
 
     expect(outcome.status).toBe(409);
     expect(errorCode(outcome.body)).toBe('CERTIFICATE_ALREADY_VERIFIED');
+  });
+
+  it('refuses self-approval with 403 TWO_PERSON_REQUIRED before any write', async () => {
+    const db = fakeDb([
+      [certificateRow()],
+      highConfidenceFields(),
+      [],
+      [{ actor_id: ACTOR_ID }],
+    ]);
+
+    const outcome = await adminDecideCertificateHandler(
+      context(`/api/v1/admin/certificates/${CERTIFICATE_ID}/decide`, {
+        role: 'TRUST_REVIEWER',
+        method: 'POST',
+        body: { decision: 'APPROVE' },
+        params: { certificateId: CERTIFICATE_ID },
+        db,
+      }),
+      DEV_DEPS,
+    );
+
+    expect(outcome.status).toBe(403);
+    expect(errorCode(outcome.body)).toBe('TWO_PERSON_REQUIRED');
+    // Read, fields, anomalies, last human actor: the write statement never ran.
+    expect(db.calls).toBe(4);
+  });
+});
+
+describe('certificate anomaly triage', () => {
+  const ANOMALY_ID = '88888888-8888-4888-8888-888888888888';
+
+  function anomaly(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+    return {
+      id: ANOMALY_ID,
+      anomaly_type: 'WEIGHT_MISMATCH_SLUG',
+      severity: 'ERROR',
+      detail: { slugWeight: 2.87, certificateWeight: 1.42 },
+      created_at: '2026-11-01T00:00:00.000Z',
+      resolved_at: null,
+      resolved_by: null,
+      resolution: null,
+      ...overrides,
+    };
+  }
+
+  it('gates the list on anomalies/read and the resolve on anomalies/resolve', async () => {
+    const list = fakeDb([]);
+    const listOutcome = await adminListCertificateAnomaliesHandler(
+      context(`/api/v1/admin/certificates/${CERTIFICATE_ID}/anomalies`, {
+        role: 'CATALOG_MANAGER',
+        params: { certificateId: CERTIFICATE_ID },
+        db: list,
+      }),
+      DEV_DEPS,
+    );
+    expect(listOutcome.status).toBe(403);
+    expect(list.calls).toBe(0);
+
+    // AI_OPERATIONS may read the module but never resolve.
+    const readDb = fakeDb([[certificateRow()], [anomaly()]]);
+    const readOutcome = await adminListCertificateAnomaliesHandler(
+      context(`/api/v1/admin/certificates/${CERTIFICATE_ID}/anomalies`, {
+        role: 'AI_OPERATIONS',
+        params: { certificateId: CERTIFICATE_ID },
+        db: readDb,
+      }),
+      DEV_DEPS,
+    );
+    expect(readOutcome.status).toBe(200);
+
+    const resolve = fakeDb([]);
+    const resolveOutcome = await adminResolveCertificateAnomalyHandler(
+      context(`/api/v1/admin/certificates/anomalies/${ANOMALY_ID}/resolve`, {
+        role: 'AI_OPERATIONS',
+        method: 'POST',
+        body: { resolution: 'FALSE_POSITIVE' },
+        params: { anomalyId: ANOMALY_ID },
+        db: resolve,
+      }),
+      DEV_DEPS,
+    );
+    expect(resolveOutcome.status).toBe(403);
+    expect(resolve.calls).toBe(0);
+  });
+
+  it('returns open and resolved anomalies with honest counts', async () => {
+    const db = fakeDb([
+      [certificateRow()],
+      [
+        anomaly({
+          resolved_at: '2026-11-02T00:00:00.000Z',
+          resolved_by: ACTOR_ID,
+          resolution: 'FALSE_POSITIVE',
+        }),
+        anomaly({ id: 'a2', severity: 'WARN', created_at: '2026-11-03T00:00:00.000Z' }),
+      ],
+    ]);
+
+    const outcome = await adminListCertificateAnomaliesHandler(
+      context(`/api/v1/admin/certificates/${CERTIFICATE_ID}/anomalies`, {
+        role: 'TRUST_REVIEWER',
+        params: { certificateId: CERTIFICATE_ID },
+        db,
+      }),
+      DEV_DEPS,
+    );
+
+    expect(outcome.status).toBe(200);
+    const body = outcome.body as { data: Array<Record<string, unknown>>; meta: Record<string, unknown> };
+    expect(body.meta).toMatchObject({ open: 1, resolved: 1, total: 2 });
+    expect(body.data[0]).toMatchObject({ is_open: false, resolution: 'FALSE_POSITIVE' });
+    expect(body.data[1]).toMatchObject({ is_open: true });
+  });
+
+  it('returns 404 for an unknown certificate', async () => {
+    const db = fakeDb([[]]);
+    const outcome = await adminListCertificateAnomaliesHandler(
+      context(`/api/v1/admin/certificates/${CERTIFICATE_ID}/anomalies`, {
+        role: 'TRUST_REVIEWER',
+        params: { certificateId: CERTIFICATE_ID },
+        db,
+      }),
+      DEV_DEPS,
+    );
+    expect(outcome.status).toBe(404);
+    expect(errorCode(outcome.body)).toBe('NOT_FOUND');
+  });
+
+  it('resolves an anomaly and returns the recorded resolution', async () => {
+    const db = fakeDb([
+      [
+        anomaly({
+          resolved_at: '2026-11-23T12:00:00.000Z',
+          resolved_by: ACTOR_ID,
+          resolution: 'FALSE_POSITIVE',
+          certificate_id: CERTIFICATE_ID,
+        }),
+      ],
+    ]);
+
+    const outcome = await adminResolveCertificateAnomalyHandler(
+      context(`/api/v1/admin/certificates/anomalies/${ANOMALY_ID}/resolve`, {
+        role: 'TRUST_REVIEWER',
+        method: 'POST',
+        body: { resolution: 'FALSE_POSITIVE', note: 'Certificate is for one stone' },
+        params: { anomalyId: ANOMALY_ID },
+        db,
+      }),
+      DEV_DEPS,
+    );
+
+    expect(outcome.status).toBe(200);
+    const data = (outcome.body as { data: Record<string, unknown> }).data;
+    expect(data).toMatchObject({ certificateId: CERTIFICATE_ID, note: 'Certificate is for one stone' });
+    expect((data['anomaly'] as Record<string, unknown>)['is_open']).toBe(false);
+    expect(db.calls).toBe(1);
+  });
+
+  it('maps a second resolution to 409 ANOMALY_ALREADY_RESOLVED', async () => {
+    const db = fakeDb([[], [{ id: ANOMALY_ID, resolved_at: '2026-11-23T12:00:00.000Z' }]]);
+
+    const outcome = await adminResolveCertificateAnomalyHandler(
+      context(`/api/v1/admin/certificates/anomalies/${ANOMALY_ID}/resolve`, {
+        role: 'TRUST_REVIEWER',
+        method: 'POST',
+        body: { resolution: 'FALSE_POSITIVE' },
+        params: { anomalyId: ANOMALY_ID },
+        db,
+      }),
+      DEV_DEPS,
+    );
+
+    expect(outcome.status).toBe(409);
+    expect(errorCode(outcome.body)).toBe('ANOMALY_ALREADY_RESOLVED');
+  });
+
+  it('refuses a resolution without a resolution value before touching the database', async () => {
+    const db = fakeDb([]);
+
+    const outcome = await adminResolveCertificateAnomalyHandler(
+      context(`/api/v1/admin/certificates/anomalies/${ANOMALY_ID}/resolve`, {
+        role: 'TRUST_REVIEWER',
+        method: 'POST',
+        body: { note: 'no code given' },
+        params: { anomalyId: ANOMALY_ID },
+        db,
+      }),
+      DEV_DEPS,
+    );
+
+    expect(outcome.status).toBe(400);
+    expect(errorCode(outcome.body)).toBe('VALIDATION_FAILED');
+    expect(db.calls).toBe(0);
   });
 });

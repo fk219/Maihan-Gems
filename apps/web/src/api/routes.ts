@@ -316,6 +316,18 @@ export const ADMIN_ROUTES: readonly RouteDefinition[] = [
     method: 'POST',
     path: '/api/v1/admin/certificates/{certificateId}/decide',
   },
+  // Anomaly triage (C7 gap): resolution is a recorded fact, single-use, and
+  // the list includes resolved rows so the history stays readable.
+  {
+    id: 'adminListCertificateAnomaliesHandler',
+    method: 'GET',
+    path: '/api/v1/admin/certificates/{certificateId}/anomalies',
+  },
+  {
+    id: 'adminResolveCertificateAnomalyHandler',
+    method: 'POST',
+    path: '/api/v1/admin/certificates/anomalies/{anomalyId}/resolve',
+  },
 ];
 
 export const ALL_ROUTES: readonly RouteDefinition[] = [

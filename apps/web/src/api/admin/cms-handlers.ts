@@ -18,6 +18,7 @@ import { z } from 'zod';
 
 import type { RouteContext, HandlerOutcome } from '../handlers.js';
 import { parsePageBlocks, CONTENT_BLOCK_TYPES, type ContentBlockType } from '@maihan/contracts';
+import { TwoPersonError } from '@maihan/domain';
 import type { CmsRepository } from '@maihan/db';
 
 import {
@@ -25,10 +26,21 @@ import {
   type CapabilityRequest,
 } from './authz.js';
 import { authorizeAdminRequest } from './session-authz.js';
-import { createCmsRepository } from '@maihan/db';
+import { createCmsAuditWriter, createCmsRepository } from '@maihan/db';
 import type { CatalogDatabase } from '@maihan/db';
 
-const PAGE_KINDS = ['STATIC', 'EDUCATION', 'BLOG', 'POLICY', 'LANDING', 'SHOWROOM'] as const;
+const PAGE_KINDS = [
+  'STATIC',
+  'EDUCATION',
+  'BLOG',
+  'POLICY',
+  'LANDING',
+  'SHOWROOM',
+  // Doc 22 §4 trust-bearing kinds. `pages.page_kind` has no CHECK constraint,
+  // so the API enum was the only thing making the two-person path unreachable.
+  'BUYING_GUIDE',
+  'CERTIFICATE_GUIDE',
+] as const;
 const PageKindSchema = z.enum(PAGE_KINDS);
 
 const CreatePageSchema = z.object({
@@ -77,12 +89,27 @@ function cmsRepo(ctx: RouteContext): CmsRepository {
   if (ctx.db === undefined) {
     throw new Error('CMS handlers require the db seam (ctx.db)');
   }
-  return createCmsRepository(ctx.db as CatalogDatabase, async (entry) => {
-    // Audit rows are written by the DB layer's audit seam (one trail). This
-    // adapter is where a composition root would attach span/metric hooks;
-    // the row itself never bypasses the repository's SQL.
-    void entry;
-  });
+  return createCmsRepository(
+    ctx.db as CatalogDatabase,
+    // The audit seam writes the `audit_logs` row for every transition,
+    // including the `diff` that carries both two-person actors.
+    createCmsAuditWriter(ctx.db as CatalogDatabase, { requestId: ctx.ids.requestId }),
+  );
+}
+
+/** 403 with the typed two-person code; never a generic validation failure. */
+function twoPersonRefusal(ctx: RouteContext, error: TwoPersonError): HandlerOutcome {
+  return {
+    status: 403,
+    body: {
+      error: {
+        code: 'TWO_PERSON_REQUIRED',
+        message: error.message,
+        requestId: ctx.ids.requestId,
+        traceId: ctx.ids.traceId,
+      },
+    },
+  };
 }
 
 export async function adminCreatePageHandler(ctx: RouteContext, deps: CmsHandlerDeps = {}): Promise<HandlerOutcome> {
@@ -172,7 +199,7 @@ export async function adminSubmitForReviewHandler(ctx: RouteContext, deps: CmsHa
   try {
     const revision = await repo.submitForReview({ revisionId, editorId: g.actor.sub });
     return { status: 200, body: { data: revision } };
-  } catch (error) {
+  } catch {
     return { status: 409, body: { code: 'INVALID_TRANSITION', message: 'The revision cannot move to review.' } };
   }
 }
@@ -196,9 +223,7 @@ export async function adminDecideRevisionHandler(ctx: RouteContext, deps: CmsHan
     });
     return { status: 200, body: { data: revision } };
   } catch (error) {
-    if (error instanceof Error && error.message.includes('SELF_APPROVAL')) {
-      return { status: 409, body: { code: 'TWO_PERSON_RULE', message: 'A trust-bearing page requires a second approver.' } };
-    }
+    if (error instanceof TwoPersonError) return twoPersonRefusal(ctx, error);
     return { status: 409, body: { code: 'INVALID_TRANSITION', message: 'The revision is not awaiting a decision.' } };
   }
 }
@@ -212,7 +237,7 @@ export async function adminPublishPageHandler(ctx: RouteContext, deps: CmsHandle
     const page = await repo.publishApproved({ pageId, actorId: g.actor.sub });
     return { status: 200, body: { data: page } };
   } catch (error) {
-    void error;
+    if (error instanceof TwoPersonError) return twoPersonRefusal(ctx, error);
     return { status: 409, body: { code: 'INVALID_TRANSITION', message: 'Publishing requires an approved head revision.' } };
   }
 }
@@ -225,7 +250,7 @@ export async function adminArchivePageHandler(ctx: RouteContext, deps: CmsHandle
     const archivePageId = ctx.params['pageId'] ?? '';
     const page = await repo.archive({ pageId: archivePageId, actorId: g.actor.sub, reason: 'Archived via admin console' });
     return { status: 200, body: { data: page } };
-  } catch (error) {
+  } catch {
     return { status: 409, body: { code: 'INVALID_TRANSITION', message: 'Only published pages can be archived.' } };
   }
 }

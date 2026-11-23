@@ -13,6 +13,7 @@ import { redirect } from 'next/navigation';
 import {
   createCmsRepository,
   getCertificateForReview,
+  listAnomaliesForCertificate,
   listPendingCertificates,
   listProductsForAdmin,
   listConflicts,
@@ -20,6 +21,7 @@ import {
   listImportBatches,
   listRecentBulkOperations,
   type AuditWriter,
+  type CertificateAnomalyRow,
   type CertificateReviewDetail,
   type ConflictRow,
   type DerivedIdentityRow,
@@ -36,6 +38,7 @@ import { AdminConflictResolution } from '../../../components/admin/AdminConflict
 import { AdminDerivedIdentityActions } from '../../../components/admin/AdminDerivedIdentityActions.js';
 import { AdminBulkCatalogue } from '../../../components/admin/AdminBulkCatalogue.js';
 import { AdminCertificateDecision } from '../../../components/admin/AdminCertificateDecision.js';
+import { AdminAnomalyResolution } from '../../../components/admin/AdminAnomalyResolution.js';
 
 export const metadata: Metadata = {
   title: 'Admin',
@@ -615,18 +618,28 @@ async function Certificates({
   let rows: PendingCertificateRow[] = [];
   let total = 0;
   let detail: CertificateReviewDetail | null = null;
+  let anomalies: readonly CertificateAnomalyRow[] = [];
+  let anomalyCounts = { open: 0, resolved: 0 };
   let failure: string | null = null;
   try {
     const db = await getServerDb();
     const page = await listPendingCertificates(db, { limit: 50, offset: 0 });
     rows = page.items;
     total = page.total;
-    if (selectedId !== undefined) detail = await getCertificateForReview(db, selectedId);
+    if (selectedId !== undefined) {
+      detail = await getCertificateForReview(db, selectedId);
+      const list = await listAnomaliesForCertificate(db, selectedId);
+      if (list !== null) {
+        anomalies = list.items;
+        anomalyCounts = { open: list.open, resolved: list.resolved };
+      }
+    }
   } catch (error) {
     failure = error instanceof Error ? error.message : 'The database is unavailable.';
   }
 
   const canDecide = hasCapability(session.role, 'certificates', 'approve');
+  const canResolve = hasCapability(session.role, 'anomalies', 'resolve');
 
   return (
     <>
@@ -634,8 +647,9 @@ async function Certificates({
       <p style={{ margin: '0 0 18px', fontSize: '13px', color: '#5A5448' }}>
         Documents with an open anomaly or the least confident extraction are listed first.
         Verification is a whole-document decision: every material field at or above 0.90,
-        no open ERROR anomaly, and a named human approver. Nothing here is ever
-        auto-promoted.
+        no open ERROR anomaly, two different trust reviewers, and a named human approver.
+        An anomaly is resolved once, with a recorded reason, and is never deleted; a resolved
+        anomaly no longer blocks. Nothing here is ever auto-promoted.
       </p>
       {failure !== null && (
         <p role="alert" style={{ color: '#B3261E', fontSize: '13px' }}>
@@ -772,30 +786,57 @@ async function Certificates({
             </tbody>
           </table>
 
-          {detail.anomalies.length > 0 && (
-            <>
-              <h4 style={{ margin: '18px 0 8px', fontSize: '13px' }}>Open anomalies</h4>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                <thead>
-                  <tr style={{ textAlign: 'left', background: '#EDEAE3' }}>
-                    <th style={cell}>Type</th>
-                    <th style={cell}>Severity</th>
-                    <th style={cell}>Detail</th>
+          <h4 style={{ margin: '18px 0 8px', fontSize: '13px' }}>
+            Anomalies {anomalyCounts.open + anomalyCounts.resolved > 0 && (
+              <span style={{ fontWeight: 400, color: '#5A5448' }}>
+                ({anomalyCounts.open} open, {anomalyCounts.resolved} resolved)
+              </span>
+            )}
+          </h4>
+          {anomalies.length === 0 ? (
+            <p style={{ fontSize: '12px', color: '#5A5448' }}>No anomaly was recorded for this document.</p>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+              <thead>
+                <tr style={{ textAlign: 'left', background: '#EDEAE3' }}>
+                  <th style={cell}>Type</th>
+                  <th style={cell}>Severity</th>
+                  <th style={cell}>Detail</th>
+                  <th style={cell}>State</th>
+                  <th style={cell}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {anomalies.map((anomaly) => (
+                  <tr key={anomaly.id} style={{ borderTop: '1px solid rgba(8,18,30,0.08)', verticalAlign: 'top' }}>
+                    <td style={cell}>{anomaly.anomaly_type}</td>
+                    <td style={cell}>{anomaly.severity}</td>
+                    <td style={cell}>
+                      <code>{JSON.stringify(anomaly.detail)}</code>
+                    </td>
+                    <td style={cell}>
+                      {anomaly.is_open
+                        ? 'open'
+                        : `resolved ${anomaly.resolved_at === null ? '' : new Date(anomaly.resolved_at).toLocaleString()}`}
+                      {anomaly.resolution === null ? null : (
+                        <span style={{ display: 'block', color: '#5A5448' }}>{anomaly.resolution}</span>
+                      )}
+                    </td>
+                    <td style={cell}>
+                      {anomaly.is_open ? (
+                        canResolve ? (
+                          <AdminAnomalyResolution anomalyId={anomaly.id} />
+                        ) : (
+                          <span style={{ color: '#5A5448' }}>Your role cannot resolve anomalies.</span>
+                        )
+                      ) : (
+                        <span style={{ color: '#5A5448' }}>Recorded</span>
+                      )}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {detail.anomalies.map((anomaly) => (
-                    <tr key={anomaly.id} style={{ borderTop: '1px solid rgba(8,18,30,0.08)' }}>
-                      <td style={cell}>{anomaly.anomaly_type}</td>
-                      <td style={cell}>{anomaly.severity}</td>
-                      <td style={cell}>
-                        <code>{JSON.stringify(anomaly.detail)}</code>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
+                ))}
+              </tbody>
+            </table>
           )}
 
           {detail.latestReview !== null && (
