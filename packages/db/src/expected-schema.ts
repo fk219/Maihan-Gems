@@ -18,6 +18,13 @@
  * pg_constraint). Both components are asserted; the counting semantics are the
  * ones established by packages/db/src/introspect.ts in Task 4.
  *
+ * Those totals are the Task-5-verified baseline plus the 0018 expansion. They
+ * are NOT re-derived by hand later: migrations 0019 (identity), 0020 (vendors)
+ * and 0021 (customer auth) were merged without advancing this mirror, and 0022
+ * adds four columns to `products`. The 0022 increment is stated exactly in
+ * EXPECTED_0022_COUNT_DELTA; the absolute totals await a sanctioned
+ * fresh-database introspection (see the TODO on EXPECTED_COUNTS).
+ *
  * Extension VERSIONS are deliberately not asserted: the local image ships
  * pgvector 0.8.7 and the Neon image ships 0.8.0 — a platform property, not
  * schema drift (both satisfy the >= 0.6 architecture requirement, doc 02).
@@ -243,6 +250,7 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'products_gemstone_id_fkey',
   'products_gemstone_pair_id_fkey',
   'products_import_batch_id_fkey',
+  'products_reviewed_by_fkey',
   'products_setting_variant_id_fkey',
   'products_variety_id_fkey',
   'refunds_order_id_fkey',
@@ -300,7 +308,79 @@ export const EXPECTED_VIEWS: readonly string[] = ['certificate_public'];
 /** The 2 vector(1024) columns (ADR-018). */
 export const EXPECTED_VECTOR_COLUMNS: readonly string[] = ['knowledge_chunks.embedding', 'product_embeddings.embedding'];
 
-/** Aggregate counts — the locked architecture numbers. */
+/**
+ * 0022 — the INV-08 product review decision, as explicit columns (ADR-024).
+ * Mirrors `migrations/0022_product_review_state.sql`: the decision, its note,
+ * the reviewer (`users.id`) and the decision timestamp. All four are nullable;
+ * NULL means "no decision recorded".
+ */
+export const EXPECTED_PRODUCT_REVIEW_COLUMNS: readonly string[] = [
+  'products.review_state',
+  'products.review_note',
+  'products.reviewed_by',
+  'products.reviewed_at'
+];
+
+/**
+ * The partial index 0022 adds for the review queue and the INV-08 gate.
+ * Asserted by name and by the two fragments that make it the right index:
+ * it indexes the decision column and excludes the undecided majority.
+ */
+export const EXPECTED_PRODUCT_REVIEW_INDEX = {
+  name: 'products_review_state_idx',
+  definition_includes: ['(review_state)', 'WHERE (review_state IS NOT NULL)']
+} as const;
+
+/**
+ * The exact increment 0022 adds to EXPECTED_COUNTS, measured from the DDL (not
+ * from a database run):
+ *
+ *   foreign_key        +1  `reviewed_by UUID REFERENCES users(id)` creates
+ *                          products_reviewed_by_fkey
+ *   check              +1  the inline CHECK on review_state creates
+ *                          products_review_state_check
+ *   check_class_total  +1  CHECK + NOT NULL, and no new NOT NULL column
+ *   not_null_columns    0  all four columns are nullable by design
+ *   indexes            +1  products_review_state_idx (partial, non-unique)
+ *   tables,enums,primary_key,unique,hnsw,vector_columns,triggers,
+ *   functions,views,rls_*: 0 (no table, PK, unique, trigger, function, view or
+ *                          RLS change)
+ *
+ * A future sanctioned introspection applies this delta to the totals it
+ * measures; it is not applied to the stale absolute numbers below.
+ */
+export const EXPECTED_0022_COUNT_DELTA = {
+  foreign_key: 1,
+  check: 1,
+  check_class_total: 1,
+  not_null_columns: 0,
+  indexes: 1,
+  tables: 0,
+  primary_key: 0,
+  unique: 0,
+  enums: 0
+} as const;
+
+/**
+ * TODO(schema-fidelity — 0022): the absolute aggregate totals below are the
+ * 0018-verified baseline and are deliberately NOT advanced by this task.
+ *
+ * Why not: 0019_identity, 0020_vendors and 0021_customer_auth changed the
+ * schema after the last verified run, so `tables`, `primary_key`,
+ * `foreign_key`, `unique`, `check`, `not_null_columns`, `check_class_total`
+ * and `indexes` cannot be derived with certainty from the base recorded here.
+ * The named lists are stale by the same amount for `EXPECTED_TABLES` and
+ * `EXPECTED_FOREIGN_KEYS` (0022's own objects — the four columns, the FK name
+ * and the partial index — are already listed above).
+ * The 0022 increment itself is certain and lives in
+ * EXPECTED_0022_COUNT_DELTA.
+ *
+ * How to close it: this task may not connect to any database, so run
+ * `pnpm run schema-fidelity` against a disposable PostgreSQL 16 instance (or
+ * `pnpm --filter @maihan/db run verify-schema` against the sanctioned dev
+ * target) and transcribe the printed report. Do not "fill in" totals by
+ * arithmetic on an unverified base.
+ */
 export const EXPECTED_COUNTS = {
   tables: 75,
   enums: 33,

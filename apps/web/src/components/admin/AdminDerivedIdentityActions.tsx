@@ -21,7 +21,9 @@ export function AdminDerivedIdentityActions({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const decided = reviewState !== 'UNREVIEWED';
+  // PENDING is migration 0022's "awaiting review" state; an unqueued row
+  // projects as UNREVIEWED. Only a recorded decision is terminal.
+  const decided = reviewState === 'APPROVED' || reviewState === 'REJECTED';
 
   async function decide(decision: 'approve' | 'reject'): Promise<void> {
     const text = note.trim();

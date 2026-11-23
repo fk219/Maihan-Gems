@@ -30,6 +30,8 @@ import {
   EXPECTED_FUNCTIONS,
   EXPECTED_HNSW_INDEXES,
   EXPECTED_NAMED_INVARIANTS,
+  EXPECTED_PRODUCT_REVIEW_COLUMNS,
+  EXPECTED_PRODUCT_REVIEW_INDEX,
   EXPECTED_RLS_POLICIES,
   EXPECTED_TABLES,
   EXPECTED_TRIGGERS,
@@ -57,6 +59,11 @@ export function assertSchemaFidelity(report: IntrospectionReport): string[] {
   }
   for (const t of missingTables) add(`missing table: ${t}`);
   for (const t of unexpectedTables) add(`unexpected table: ${t}`);
+
+  // ---- 0022 review decision: real columns, never a JSON path (ADR-024) -------
+  for (const column of EXPECTED_PRODUCT_REVIEW_COLUMNS) {
+    if (!report.columns.includes(column)) add(`missing column: ${column}`);
+  }
 
   // ---- enums (names AND members: removing one member must fail) ---------------
   const expectedEnumMap = new Map(EXPECTED_ENUMS.map((e) => [e.name, e.members]));
@@ -122,6 +129,18 @@ export function assertSchemaFidelity(report: IntrospectionReport): string[] {
   // ---- indexes ----------------------------------------------------------------
   if (report.indexes.length !== EXPECTED_COUNTS.indexes) {
     add(`indexes: expected ${EXPECTED_COUNTS.indexes}, got ${report.indexes.length}`);
+  }
+
+  // The 0022 partial index is asserted by name and predicate, not by count.
+  const reviewIndex = report.indexes.find((i) => i.name === EXPECTED_PRODUCT_REVIEW_INDEX.name);
+  if (reviewIndex === undefined) {
+    add(`missing index: ${EXPECTED_PRODUCT_REVIEW_INDEX.name}`);
+  } else {
+    for (const fragment of EXPECTED_PRODUCT_REVIEW_INDEX.definition_includes) {
+      if (!reviewIndex.definition.includes(fragment)) {
+        add(`index ${EXPECTED_PRODUCT_REVIEW_INDEX.name}: definition is missing "${fragment}"`);
+      }
+    }
   }
 
   // HNSW: exact catalog definitions, not just a count (ADR-018; doc 04).

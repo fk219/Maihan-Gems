@@ -244,7 +244,6 @@ export {
 } from './catalog/publish.js';
 export {
   GovernanceError,
-  DERIVED_IDENTITY_REVIEW_KEY,
   listImportBatches,
   listConflicts,
   resolveConflict,

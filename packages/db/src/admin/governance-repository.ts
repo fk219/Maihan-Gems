@@ -22,20 +22,20 @@
  *   3. Rejection never deletes. The row keeps its derived SKU, its DRAFT
  *      state and its attributes; only the review decision is recorded.
  *
- * Where the review decision lives. The locked `products` table has no
- * `review_state` column (0005_catalog_core.sql) and adding one is a schema
- * change this task may not make. The only free-form column on the row is
- * `structured_extra`, so the decision is written there under the documented
- * `derived_identity_review` key with a literal `review_state` member. The
- * read path projects it back as a first-class `review_state` field, which is
- * the field INV-08 names.
+ * Where the review decision lives. `products.review_state`, `review_note`,
+ * `reviewed_by` and `reviewed_at` (migration 0022) are the only read and write
+ * path. The earlier workaround kept the decision in `products.structured_extra`
+ * under a `derived_identity_review` key; ADR-024 rejects JSON blobs for
+ * approval facts because they are neither filterable nor gate-enforceable, so
+ * that key is no longer read and no longer written. `structured_extra` is left
+ * untouched on every row.
  *
  * Every decision writes `audit_logs` with before/after state in the SAME
  * statement as the update (a data-modifying CTE), so a decided row without
  * an audit row is not representable.
  *
  * All values are bound parameters; the only SQL text fragments are fixed
- * column lists and the JSONB path literal.
+ * column lists.
  */
 import { sql, type SQL } from 'drizzle-orm';
 import type { CatalogDatabase } from '../catalog/executor.js';
@@ -304,9 +304,6 @@ export async function resolveConflict(
 
 // --- Derived identities (the 221) -----------------------------------------
 
-/** The JSONB key that carries the INV-08 review decision. */
-export const DERIVED_IDENTITY_REVIEW_KEY = 'derived_identity_review';
-
 export type DerivedIdentityReviewState = 'UNREVIEWED' | 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface DerivedIdentityRow extends Record<string, unknown> {
@@ -357,6 +354,16 @@ function reviewState(value: string | null): DerivedIdentityReviewState {
     : 'UNREVIEWED';
 }
 
+/**
+ * A row is decidable while no decision is recorded: NULL (never queued through
+ * 0022) or PENDING (the migration's explicit "awaiting review"). APPROVED and
+ * REJECTED are terminal, so a second decision is refused rather than silently
+ * overwriting the first.
+ */
+function isDecidable(state: DerivedIdentityReviewState): boolean {
+  return state === 'UNREVIEWED' || state === 'PENDING';
+}
+
 /** Narrow a raw row to the queue's invariant, refusing a non-derived row loudly. */
 function toDerivedIdentityRow(row: DerivedIdentityDbRow): DerivedIdentityRow {
   if (row.source_sku !== null || row.source_sku_derived === null) {
@@ -380,17 +387,14 @@ function toDerivedIdentityRow(row: DerivedIdentityDbRow): DerivedIdentityRow {
 }
 
 /**
- * Projection over the locked products columns plus the JSONB review ledger.
- * The path literal is fixed text, never caller input.
+ * Projection over the products columns (0022). Every review field is a real
+ * column, so the queue filter can use `products_review_state_idx`.
  */
 const DERIVED_IDENTITY_COLUMNS = sql`
   p.id, p.slug, p.title, p.source_url, p.source_sku, p.source_sku_derived,
   p.sku_evidence_status, p.state, p.created_at,
-  COALESCE(p.structured_extra #>> '{derived_identity_review,review_state}', 'UNREVIEWED')
-    AS review_state,
-  p.structured_extra #>> '{derived_identity_review,note}'     AS review_note,
-  p.structured_extra #>> '{derived_identity_review,actor_id}' AS reviewed_by,
-  p.structured_extra #>> '{derived_identity_review,decided_at}' AS reviewed_at
+  COALESCE(p.review_state, 'UNREVIEWED') AS review_state,
+  p.review_note, p.reviewed_by, p.reviewed_at
 `;
 
 export interface ListDerivedIdentitiesQuery extends PageQuery {
@@ -410,8 +414,8 @@ export async function listDerivedIdentities(
   if (query.reviewState !== undefined) {
     conditions.push(
       query.reviewState === 'UNREVIEWED'
-        ? sql`COALESCE(p.structured_extra #>> '{derived_identity_review,review_state}', 'UNREVIEWED') = 'UNREVIEWED'`
-        : sql`p.structured_extra #>> '{derived_identity_review,review_state}' = ${query.reviewState}`,
+        ? sql`p.review_state IS NULL`
+        : sql`p.review_state = ${query.reviewState}`,
     );
   }
   const where = sql`WHERE ${sql.join(conditions, sql` AND `)}`;
@@ -462,39 +466,30 @@ async function decideDerivedIdentity(
     throw new GovernanceError('NOT_A_DERIVED_IDENTITY');
   }
   const prior = reviewState(before.review_state);
-  if (prior !== 'UNREVIEWED') throw new GovernanceError('ALREADY_DECIDED');
+  if (!isDecidable(prior)) throw new GovernanceError('ALREADY_DECIDED');
 
   const auditAction = decision === 'APPROVED' ? 'APPROVE_DERIVED_IDENTITY' : 'REJECT_DERIVED_IDENTITY';
 
   // NOTE what is absent from the SET list: `source_sku`, `sku_evidence_status`
   // and `state`. Approval is a review decision, not an evidence promotion and
   // not a publication; rejection is a flag, never a delete and never an archive.
+  // `structured_extra` is absent too: the workaround key is no longer written.
   const updated = await db.execute<DerivedIdentityDbRow>(sql`
     WITH updated AS (
       UPDATE products AS p
-         SET structured_extra = jsonb_set(
-               p.structured_extra,
-               '{derived_identity_review}',
-               jsonb_build_object(
-                 'review_state', ${decision}::text,
-                 'actor_id', ${input.actorId}::text,
-                 'decided_at', now(),
-                 'note', ${input.note ?? null}::text
-               ),
-               true
-             ),
-             updated_at = now()
+         SET review_state = ${decision}::text,
+             review_note  = ${input.note ?? null}::text,
+             reviewed_by  = ${input.actorId}::uuid,
+             reviewed_at  = now(),
+             updated_at   = now()
        WHERE p.id = ${input.productId}::uuid
          AND p.deleted_at IS NULL
          AND p.source_sku IS NULL
          AND p.source_sku_derived IS NOT NULL
-         AND COALESCE(p.structured_extra #>> '{derived_identity_review,review_state}', 'UNREVIEWED') = 'UNREVIEWED'
+         AND (p.review_state IS NULL OR p.review_state = 'PENDING')
       RETURNING p.id, p.slug, p.title, p.source_url, p.source_sku, p.source_sku_derived,
-                p.sku_evidence_status, p.state, p.created_at, p.structured_extra,
-                p.structured_extra #>> '{derived_identity_review,review_state}' AS review_state,
-                p.structured_extra #>> '{derived_identity_review,note}'     AS review_note,
-                p.structured_extra #>> '{derived_identity_review,actor_id}' AS reviewed_by,
-                p.structured_extra #>> '{derived_identity_review,decided_at}' AS reviewed_at
+                p.sku_evidence_status, p.state, p.created_at,
+                p.review_state, p.review_note, p.reviewed_by, p.reviewed_at
     ), logged AS (
       INSERT INTO audit_logs (
         actor_type, actor_id, action, entity_type, entity_id,
@@ -513,7 +508,10 @@ async function decideDerivedIdentity(
                'source_sku_derived', updated.source_sku_derived,
                'sku_evidence_status', updated.sku_evidence_status,
                'state', updated.state,
-               'review_state', updated.review_state
+               'review_state', updated.review_state,
+               'review_note', updated.review_note,
+               'reviewed_by', updated.reviewed_by,
+               'reviewed_at', updated.reviewed_at
              ),
              ${input.requestId ?? null}::text,
              ${input.note ?? null}::text

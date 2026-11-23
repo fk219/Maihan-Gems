@@ -32,6 +32,8 @@ export interface IntrospectionReport {
   current_schema: string;
   extensions: { name: string; version: string }[];
   tables: string[];
+  /** Every ordinary-table column as "table.column" (0022 named expectations). */
+  columns: string[];
   enums: { name: string; member_count: number }[];
   enum_members: { name: string; members: string[] }[];
   constraints: {
@@ -64,6 +66,7 @@ export async function introspectSchema(client: pg.Client): Promise<Introspection
     current_schema: '',
     extensions: [],
     tables: [],
+    columns: [],
     enums: [],
     enum_members: [],
     constraints: { primary_key: 0, foreign_key: 0, unique: 0, check: 0, not_null_columns: 0, not_valid_foreign_key: 0 },
@@ -101,6 +104,21 @@ export async function introspectSchema(client: pg.Client): Promise<Introspection
       `SELECT tablename AS name FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename`,
     )
   ).rows.map((r) => r.name);
+
+  // Column names are captured so a named expectation can prove that a
+  // decision fact is a real column rather than a JSON path (ADR-024). Only
+  // ordinary tables: views are asserted separately.
+  report.columns = (
+    await client.query<{ label: string }>(
+      `SELECT c.relname || '.' || a.attname AS label
+       FROM pg_attribute a
+       JOIN pg_class c ON c.oid = a.attrelid
+       JOIN pg_namespace n ON n.oid = c.relnamespace
+       WHERE n.nspname = 'public' AND c.relkind = 'r'
+         AND a.attnum > 0 AND NOT a.attisdropped
+       ORDER BY 1`,
+    )
+  ).rows.map((r) => r.label);
 
   // Enum membership is captured alongside the count so drift can name the
   // missing or unexpected member, not just the changed count. The label is

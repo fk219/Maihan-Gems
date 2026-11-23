@@ -4,10 +4,12 @@
  * No database. The suite pins the governance contract:
  *   - a conflict is resolved exactly once; the second attempt refuses before
  *     writing anything and the update itself carries `resolution IS NULL`;
- *   - approval records the INV-08 review decision and NEVER writes
- *     `source_sku` or `sku_evidence_status`;
+ *   - approval records the INV-08 review decision in the 0022 columns
+ *     (`review_state`, `review_note`, `reviewed_by`, `reviewed_at`) and NEVER
+ *     writes `source_sku` or `sku_evidence_status`;
  *   - rejection flags the row and never deletes, archives or mutates state;
  *   - both sides of a conflict are read, never chosen by the repository;
+ *   - review filtering reads the column, never the retired JSON workaround;
  *   - pagination totals are the unfiltered count, honest past the last page.
  *
  * The executor is scripted: each statement returns a canned result and every
@@ -239,6 +241,13 @@ describe('listDerivedIdentities', () => {
     const select = db.queries[0];
     expect(select?.text).toContain('p.source_sku IS NULL');
     expect(select?.text).toContain('p.source_sku_derived IS NOT NULL');
+    // The review decision is read from the 0022 column, not from JSON.
+    expect(select?.text).toContain('p.review_state');
+    expect(select?.text).toContain('p.review_note');
+    expect(select?.text).toContain('p.reviewed_by');
+    expect(select?.text).toContain('p.reviewed_at');
+    expect(select?.text).not.toContain('structured_extra');
+    expect(select?.text).not.toContain('#>>');
     expect(select?.values).toEqual([50, 200]);
   });
 
@@ -250,6 +259,40 @@ describe('listDerivedIdentities', () => {
     expect(page.items).toHaveLength(0);
     expect(page.total).toBe(221);
     expect(db.queries[1]?.text).toContain('count(*)');
+  });
+
+  it('filters by review_state on the column, never by JSON extraction', async () => {
+    const db = createScriptedExecutor([[], [{ count: '0' }]]);
+
+    await listDerivedIdentities(db as never, {
+      reviewState: 'APPROVED',
+      limit: 50,
+      offset: 0,
+    });
+
+    const select = db.queries[0];
+    expect(select?.text).toContain('p.review_state = $1');
+    expect(select?.text).not.toContain('structured_extra');
+    expect(select?.text).not.toContain('#>>');
+    expect(select?.text).not.toContain('derived_identity_review');
+    // The decided state is a bound parameter, not spliced into the SQL text.
+    expect(select?.values).toContain('APPROVED');
+    expect(select?.text).not.toContain("'APPROVED'");
+  });
+
+  it('treats UNREVIEWED as the NULL column, so the sentinel is not stored', async () => {
+    const db = createScriptedExecutor([[], [{ count: '0' }]]);
+
+    await listDerivedIdentities(db as never, {
+      reviewState: 'UNREVIEWED',
+      limit: 50,
+      offset: 0,
+    });
+
+    const select = db.queries[0];
+    expect(select?.text).toContain('p.review_state IS NULL');
+    expect(select?.text).not.toContain('structured_extra');
+    expect(select?.values).toEqual([50, 0]);
   });
 });
 
@@ -287,6 +330,34 @@ describe('approveDerivedIdentity', () => {
     expect(write?.text).not.toContain('deleted_at =');
     expect(write?.text).toContain('p.source_sku IS NULL');
     expect(write?.values).toContain('APPROVED');
+    // The decision and its metadata are written to the 0022 columns, and the
+    // JSON workaround key is neither read nor written.
+    expect(write?.text).toContain('review_state =');
+    expect(write?.text).toContain('review_note =');
+    expect(write?.text).toContain('reviewed_by =');
+    expect(write?.text).toContain('reviewed_at =');
+    expect(write?.text).not.toContain('structured_extra');
+    expect(write?.text).not.toContain('derived_identity_review');
+    expect(write?.text).not.toContain('#>>');
+  });
+
+  it('decides a PENDING row, the state the 0022 backfill gives the 221', async () => {
+    const db = createScriptedExecutor([
+      [derivedRow({ review_state: 'PENDING' })],
+      [derivedRow({ review_state: 'APPROVED', reviewed_by: ACTOR_ID })],
+    ]);
+
+    const row = await approveDerivedIdentity(db as never, {
+      productId: PRODUCT_ID,
+      actorId: ACTOR_ID,
+      note: 'Reviewed',
+    });
+
+    expect(row.review_state).toBe('APPROVED');
+    const write = db.queries[1];
+    // PENDING is decidable; the guard refuses only a recorded decision.
+    expect(write?.text).toContain("(p.review_state IS NULL OR p.review_state = 'PENDING')");
+    expect(write?.values).toContain(ACTOR_ID);
   });
 
   it('refuses a second decision without writing anything', async () => {
@@ -328,10 +399,15 @@ describe('rejectDerivedIdentity', () => {
     const write = db.queries[1];
     expect(write?.text).not.toMatch(/\bDELETE\b/);
     expect(write?.text).not.toContain('deleted_at =');
-    expect(write?.text).not.toContain('state =');
+    // Publication `state` is never assigned; `review_state =` must not trip this.
+    expect(write?.text).not.toMatch(/(?:^|[,\s])state =/);
     expect(write?.values).toContain('REJECT_DERIVED_IDENTITY');
     expect(write?.text).toContain('INSERT INTO audit_logs');
     expect(write?.values).toContain('REJECTED');
+    expect(write?.text).toContain('review_state =');
+    expect(write?.text).toContain('review_note =');
+    expect(write?.text).not.toContain('structured_extra');
+    expect(write?.text).not.toContain('derived_identity_review');
   });
 
   it('requires a reason', async () => {
