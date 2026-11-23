@@ -1,3 +1,85 @@
+# TRACK C1 + C7 — CATALOGUE BULK EDIT AND CERTIFICATE REVIEW QUEUE (2026-11-23)
+
+- **Bulk repository** `packages/db/src/admin/catalogue-admin-repository.ts`:
+  `bulkUpdatePrices({productIds, mode: SET|ADJUST_PERCENT, value, actorId,
+  reason, dryRun})`, `bulkSetState({productIds, to, …})`,
+  `undoBulkOperation({operationId, actorId})` and the read-only
+  `listRecentBulkOperations` the console uses to keep undo reachable after a
+  reload. The planner (`planPriceUpdate` / `planStateSet`) is pure and shared by
+  the preview and the apply, so a dry run cannot describe a different change
+  set. Prices are computed in integer cents (BigInt), never float.
+- **Safety rules enforced in the repository, not the UI:** >200 ids refused
+  before any read; a price SET on UNKNOWN evidence is SKIPPED
+  (`PRICE_EVIDENCE_UNKNOWN`); a bulk publish of an UNKNOWN-evidence row is
+  SKIPPED (`GATE_V15`); `ARCHIVED → ACTIVE` is SKIPPED (`INVALID_STATE`); rows
+  that would not change are SKIPPED (`NO_CHANGE`) and are not written. No
+  statement writes `price_evidence`.
+- **Audit shape.** One data-modifying CTE statement writes the UPDATE, one
+  `audit_logs` row per changed product (`entity_type='products'`) and one
+  `entity_type='bulk_operation'` row whose after-state snapshot is built from
+  RETURNING (what the database wrote, not what the caller hoped).
+- **Undo.** Refusal order: single-use (append-only `UNDO_BULK_OPERATION`
+  marker) → 30-minute window (database clock) → data. The reversal is one
+  statement whose gate compares every recorded row's current price/state with
+  the recorded after state; if any row moved, nothing is reversed and no marker
+  is written. The restore covers price, state and `published_at`.
+- **Certificate repository** `packages/db/src/admin/certificate-review-repository.ts`:
+  `listPendingCertificates` (ERROR anomalies first, then the least confident
+  document; honest total), `getCertificateForReview` (latest extraction per
+  field with confidence, band, bbox, `publiclyDisplayable`, and the domain
+  material-field assessment) and `decideCertificate` (APPROVE/REJECT).
+  The decision rebuilds the extraction contract from the per-field rows and
+  asks `packages/domain/src/certificate`: `canPromoteToVerified` is the ≥ 0.90
+  whole-document rule and `transitionCertificateStatus` owns the legal
+  transitions. Below 0.90 the domain's
+  `INSUFFICIENT_CONFIDENCE_FOR_VERIFICATION` propagates; an unresolved ERROR
+  anomaly is `CERTIFICATE_ANOMALY`. The status update, the `certificate_reviews`
+  row, the append-only `verification_events` row and the `audit_logs` row are
+  one statement, guarded by `verification_status = <status read>`.
+- **API** `apps/web/src/api/admin/catalogue-bulk-handlers.ts` and
+  `certificate-review-handlers.ts`, registered in `routes.ts` + `index.ts`:
+  `POST /api/v1/admin/catalogue/bulk/prices`, `POST .../bulk/state`,
+  `POST .../bulk/{operationId}/undo`, `GET /api/v1/admin/certificates`,
+  `GET .../certificates/{id}`, `POST .../certificates/{id}/decide`. Gate-first
+  through `authorizeAdminRequest`: `products/bulk` for preview and apply,
+  `products/approve` for undo (CATALOG_MANAGER applies, only ADMIN_SUPER
+  reverses), `certificates/list|read|approve` for the queue, detail and
+  decision.
+- **Console** the catch-all gained `/admin/catalogue/bulk` (operation, selection,
+  preview → apply → undo, recent operations from the audit ledger) and
+  `/admin/certificates` (queue ordered anomalies-first, review panel with
+  confidence per material field, bbox, band, anomalies, and the decision form),
+  plus two dashboard cards. Two new client components; no new page files.
+- **Tests** `catalogue-admin-repository.spec.ts` (22, fake executor): >200
+  refused before a read, exactly 200 accepted, dry run = one SELECT and no
+  write, UNKNOWN never SET, `price_evidence` never assigned, NO_CHANGE skipped,
+  gate V15 and terminal ARCHIVED, undo outside the window / second undo /
+  intervening edit / unknown id / nothing to undo, exact reversal + marker, no
+  DELETE. `certificate-review-repository.spec.ts` (15): ordering, honest total,
+  missing field = confidence 0, charter 0.54 origin is LOW, approval below 0.90
+  refused with the domain code and message, ERROR anomaly refused, approve
+  writes review + ledger + audit and never UPDATEs the ledger, reject requires a
+  reason and never deletes, lost race refused. `catalogue-bulk-handlers.spec.ts`
+  (14) and `certificate-review-handlers.spec.ts` (11): route table, 403 before
+  any repository call, the refusal statuses and the domain message.
+- **Verified:** `pnpm -r run typecheck` 0 errors; `@maihan/db` 259 passed / 33
+  skipped; `@maihan/web` 492 passed / 21 skipped; `pnpm --filter @maihan/web
+  run build` exit 0 with `DATABASE_URL` unset. ESLint reports no findings in
+  the new or changed files. No new dependency, no database connection, no
+  migration.
+- **Honest gaps:** (1) anomaly *resolution* is not implemented — the queue shows
+  open anomalies and an ERROR anomaly blocks verification, so a document with an
+  ERROR anomaly cannot currently reach VERIFIED; (2) two-person enforcement
+  (C9) is not consulted by the certificate decision; (3) the undo gate compares
+  price and state only, so an edit to an unrelated column does not block an
+  undo; (4) the bulk console lists the first 50 products with no filter or
+  selection pagination; (5) no statement was executed against PostgreSQL — the
+  CTE SQL is proven by fake-executor text/shape assertions and typecheck, and
+  `FOR UPDATE OF` with `LEFT JOIN` / `jsonb_to_recordset` semantics remain
+  unverified live; (6) `apps/web`'s Next 16.4.0 build still emits its
+  known-vulnerability upgrade reminder (unchanged; a framework bump is a
+  dependency change and needs an ADR).
+
 # SCHEMA FIDELITY RECONCILED TO 0022 — MEASURED ON `maihan_dev` (2026-11-23)
 
 - **Migrations applied.** `packages/db/migrations/0021_customer_auth.sql` and

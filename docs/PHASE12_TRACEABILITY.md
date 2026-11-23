@@ -11,14 +11,14 @@ Authority: `INITIAL_IMPLEMENTATION_PLAN.md` §19 (Phase 12 — Admin + CMS),
 | 3. Two-person approval for trust content | §19 task 3; doc 23 §8 rule 3 | `TWO_PERSON_MODULES` + approval service | self-approval rejection tests | 🔲 planned (Stage E) |
 | 4. Navigation + redirects admin, 44,218 bulk import | §19 task 4; doc 34 | admin API over `navigations`/`redirects` | loop/conflict/uniqueness tests | 🔲 planned (Stage C) |
 | 5. SEO metadata management | §19 task 5 | admin API over `seo_metadata` | validation tests | 🔲 planned (Stage C) |
-| 6. Catalogue admin: bulk edit, preview, undo | §19 task 6; doc 23 §6 | admin API over catalogue repos | preview-staleness/invariant tests | 🔲 planned (Stage D) |
+| 6. Catalogue admin: bulk edit, preview, undo | §19 task 6; doc 23 §6 | `packages/db/src/admin/catalogue-admin-repository.ts`; `apps/web/api/admin/catalogue-bulk-handlers.ts`; `/admin/catalogue/bulk` | preview-staleness/invariant tests | ✅ Stage F (C1) |
 | 7. Derived-reference approval queue | §19 task 7; SoT §133–144 (V18 subset rules) | `packages/db/src/admin/governance-repository.ts`; `apps/web/api/admin/governance-handlers.ts`; `/admin/derived-identities` | INV-08 + per-row approval tests | ✅ Stage E (C6) |
 | 8. Migration console: batches/counts/conflicts/quarantine | §19 task 8; td33 §4 | `packages/db/src/admin/governance-repository.ts`; `apps/web/api/admin/governance-handlers.ts`; `/admin/migration` | visibility/authorisation tests | ✅ Stage E (C4) |
 | 9. Conflict resolution UI, never silent overwrite | §19 task 9 | `apps/web/api/admin/governance-handlers.ts`; `/admin/migration` | non-overwrite tests | ✅ Stage E (C5) |
-| 10. Certificate review queue + anomaly triage | §19 task 10; td17 state machine | admin API over cert repos; thin slice per R-17 | state-machine/authorisation tests | 🔲 planned (Stage E) |
+| 10. Certificate review queue + anomaly triage | §19 task 10; td17 state machine | `packages/db/src/admin/certificate-review-repository.ts`; `apps/web/api/admin/certificate-review-handlers.ts`; `/admin/certificates` | state-machine/authorisation tests | ✅ Stage F (C7) — queue + decision; anomaly **resolution** 🔲 |
 | 11. AI console: conversations/tool audit/guardrails/evals | §19 task 11; td18 | admin API over `@maihan/db ai` tables | redaction + no-write-path tests | 🔲 planned (Stage F) |
 | 12. RBAC ten roles + BYPASSRLS admin + audit | §19 task 12; doc 23 §3/§4 | **`@maihan/domain/auth/roles.ts`, `contracts/dto/admin/*`, `apps/web/api/admin/{authz,audit}.ts`** | **policy-matrix + role-injection + audit-redaction tests** | ✅ Stage A (GT-A1..A3) |
-| 13. Bulk ops: preview, approval, audit, bounded undo | §19 task 13; doc 23 §6–7 | admin API bulk endpoints | undo-window tests | 🔲 planned (Stage D) |
+| 13. Bulk ops: preview, approval, audit, bounded undo | §19 task 13; doc 23 §6–7 | `packages/db/src/admin/catalogue-admin-repository.ts`; `apps/web/api/admin/catalogue-bulk-handlers.ts` | undo-window tests | ✅ Stage F (C1) |
 
 ## Stage A — implemented and verified (commands + results)
 
@@ -80,4 +80,73 @@ Authority: `INITIAL_IMPLEMENTATION_PLAN.md` §19 (Phase 12 — Admin + CMS),
   pagination controls are not part of this stage.
 - No statement was executed against PostgreSQL in this stage; the SQL is
   proven by fake-executor text/shape assertions plus typecheck.
+
+## Stage F (tasks 6, 10, 13) — implemented and verified (commands + results)
+
+| Item | Verification |
+|---|---|
+| Catalogue bulk repository (`bulkUpdatePrices`, `bulkSetState`, `undoBulkOperation`, `listRecentBulkOperations`) | `packages/db`: `tsc -b` 0 errors; `vitest run src/admin/catalogue-admin-repository.spec.ts` → 22 passed |
+| Certificate review repository (`listPendingCertificates`, `getCertificateForReview`, `decideCertificate`) | `packages/db`: `tsc -b` 0 errors; `vitest run src/admin/certificate-review-repository.spec.ts` → 15 passed |
+| Six admin endpoints + gate-first authorization | `apps/web`: `tsc -b` 0 errors; `vitest run src/api/admin/catalogue-bulk-handlers.spec.ts` → 14 passed; `vitest run src/api/admin/certificate-review-handlers.spec.ts` → 11 passed |
+| Full suites after the change | `@maihan/db` → 259 passed, 33 skipped; `@maihan/web` → 492 passed, 21 skipped |
+| Workspace typecheck | `pnpm -r run typecheck` → 0 errors |
+| Production build with no database | `pnpm --filter @maihan/web run build` → exit 0 with `DATABASE_URL` unset |
+
+### Stage F contract notes
+
+- **Bulk preview is the apply.** `dryRun: true` runs the same read and the
+  same pure planner (`planPriceUpdate` / `planStateSet`) and issues exactly one
+  `SELECT`; the apply reuses that plan. A batch over 200 ids is refused before
+  any read (`TOO_MANY_PRODUCTS` → 400).
+- **Evidence is never promoted.** No statement in the bulk repository writes
+  `price_evidence`. A `SET` on an UNKNOWN-evidence row is `SKIPPED` with
+  `PRICE_EVIDENCE_UNKNOWN`; a bulk publish of such a row is `SKIPPED` with
+  `GATE_V15`; `ARCHIVED → ACTIVE` is `SKIPPED` with `INVALID_STATE`.
+- **Audit shape.** The update, one `audit_logs` row per changed product
+  (`entity_type='products'`) and one `entity_type='bulk_operation'` row are one
+  data-modifying CTE statement. The operation row's snapshot is built from
+  `RETURNING`, so it records what the database wrote.
+- **Undo.** Refusal order is single-use (append-only `UNDO_BULK_OPERATION`
+  marker) → 30-minute window → data. The reversal is one statement whose gate
+  compares every recorded row's current price/state with the recorded after
+  state; if any row moved, nothing is reversed and no marker is written. The
+  reversal restores price, state and `published_at` from the before snapshot.
+  The console lists recent operations from the audit ledger, so undo survives a
+  reload.
+- **Certificate threshold.** `decideCertificate` rebuilds the extraction
+  contract from the per-field rows and asks the DOMAIN for the decision:
+  `canPromoteToVerified` (the ≥ 0.90 whole-document rule) feeds
+  `transitionCertificateStatus`. Below 0.90 the domain's
+  `INSUFFICIENT_CONFIDENCE_FOR_VERIFICATION` is returned as a 422 whose message
+  is the domain message. An unresolved ERROR anomaly is refused as 422
+  `CERTIFICATE_ANOMALY`. The decision, the `certificate_reviews` row, the
+  append-only `verification_events` row and the `audit_logs` row are one
+  statement, guarded by `verification_status = <the status that was read>`.
+- **Read-time INV-07.** Every reviewed field carries its confidence band and
+  `publiclyDisplayable` (≥ 0.50) from the domain policy; the console labels a
+  withheld value as withheld.
+
+### Stage F explicit non-goals carried forward
+
+- **Anomaly resolution is not implemented.** `certificate_anomalies` has
+  `resolved_at` / `resolved_by` / `resolution` columns and the `anomalies`
+  module grants `resolve` to TRUST_REVIEWER, but there is no endpoint or
+  repository function to resolve one. The queue displays open anomalies and an
+  open ERROR anomaly blocks verification, so a document with an ERROR anomaly
+  cannot currently reach VERIFIED — a real dead end until resolution is built.
+- **No two-person enforcement** on certificate approval (task 3 / C9): the
+  approver is recorded, but a reviewer who submitted an extraction could
+  approve it. `requiresTwoPersonRule('certificates')` is true; nothing consults
+  it yet.
+- **Undo guards price and state, not every column.** An intervening edit to an
+  unrelated column (for example `title`) does not block an undo; an edit to a
+  guarded column does. `published_at` is restored from the snapshot and is not
+  part of the gate.
+- **The bulk console shows the first 50 products** with no selection
+  pagination or filter UI; a larger selection must come from the API.
+- **No statement was executed against PostgreSQL in this stage.** The SQL is
+  proven by fake-executor text/shape assertions plus typecheck; the CTE
+  semantics (data-modifying CTEs, `FOR UPDATE OF` with `LEFT JOIN`,
+  `jsonb_to_recordset`) have not been run live.
+
 

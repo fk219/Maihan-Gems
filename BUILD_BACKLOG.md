@@ -71,7 +71,18 @@ database. Neon is applied last, once, with explicit approval.**
 
 ## Track C — Admin modules (P4, the 11 remaining Phase-12 tasks)
 
-- [ ] C1 Catalogue admin: bulk edit, preview diff, bounded undo window
+- [x] C1 Catalogue admin: bulk edit, preview diff, bounded undo window
+      **Progress 2026-11-23:** `packages/db/src/admin/catalogue-admin-repository.ts`
+      + `POST /api/v1/admin/catalogue/bulk/{prices,state}` and
+      `POST .../bulk/{operationId}/undo` + `/admin/catalogue/bulk`. The preview is
+      the same endpoint with `dryRun: true` (one SELECT, no writes); >200 ids is
+      refused before any read; a price SET on UNKNOWN evidence and a bulk publish
+      of an UNKNOWN-evidence row are skipped with a reason (gate V15); the update,
+      one audit row per changed product and one `bulk_operation` row are one
+      statement. Undo is single-use, 30-minute-bounded, refused when any affected
+      row changed since, and reversible from the console's recent-operations list.
+      Undo gates on `products/approve`, so CATALOG_MANAGER can apply but only
+      ADMIN_SUPER can reverse.
 - [ ] C2 Navigation editor + redirect manager (bulk import of 44,218 rows)
 - [ ] C3 SEO metadata editor
 - [x] C4 Migration console: batches, counts, conflicts, quarantine
@@ -92,7 +103,18 @@ database. Neon is applied last, once, with explicit approval.**
       and never deletes. The earlier `structured_extra` JSON workaround is
       removed: no repository path reads or writes it (ADR-024). Migration 0022
       is registered but not yet applied.
-- [ ] C7 Certificate review queue + anomaly triage
+- [x] C7 Certificate review queue + anomaly triage
+      **Progress 2026-11-23:** `packages/db/src/admin/certificate-review-repository.ts`
+      + `GET /api/v1/admin/certificates`, `GET .../{id}` and
+      `POST .../{id}/decide` + `/admin/certificates`. The queue puts ERROR
+      anomalies first, then the least confident document. The detail carries
+      per-field confidence, band, bbox and the domain material-field assessment.
+      Approval is refused below the 0.90 whole-document threshold with the domain
+      reason, and refused while an ERROR anomaly is open; the decision writes the
+      review, the append-only `verification_events` row and the audit row in one
+      statement. **Still open:** anomaly *resolution* (the `anomalies/resolve`
+      capability has no endpoint, so an ERROR anomaly currently blocks a document
+      permanently) and two-person enforcement (C9).
 - [ ] C8 AI operations console: conversations, tool audit, guardrail events,
       evaluation runs
 - [ ] C9 Two-person approval enforced for trust-bearing content
