@@ -243,6 +243,27 @@ export {
   type ListAdminProductsOptions,
 } from './catalog/publish.js';
 export {
+  GovernanceError,
+  DERIVED_IDENTITY_REVIEW_KEY,
+  listImportBatches,
+  listConflicts,
+  resolveConflict,
+  listDerivedIdentities,
+  approveDerivedIdentity,
+  rejectDerivedIdentity,
+  type GovernanceErrorCode,
+  type PagedRows,
+  type PageQuery,
+  type ImportBatchRow,
+  type ConflictRow,
+  type ListConflictsQuery,
+  type ResolveConflictInput,
+  type DerivedIdentityRow,
+  type DerivedIdentityReviewState,
+  type ListDerivedIdentitiesQuery,
+  type RejectDerivedIdentityInput,
+} from './admin/governance-repository.js';
+export {
   createVendor,
   findVendorBySlug,
   findVendorById,
