@@ -8,14 +8,14 @@ Authority: `INITIAL_IMPLEMENTATION_PLAN.md` §19 (Phase 12 — Admin + CMS),
 |---|---|---|---|---|
 | 1. Typed CMS blocks + 20 renderers | td22 block catalogue; enum `content_block_type` (0002_enums.sql, 20 values) | `packages/contracts/dto/cms/blocks.ts` + `apps/web` renderers | schema + renderer snapshot tests | 🔲 planned (Stage B) |
 | 2. Page revisions DRAFT→IN_REVIEW→PUBLISHED→ARCHIVED | §19 task 2; doc 23 §7 versioning | `packages/db/src/cms/*`, `apps/web` approval API | transition/concurrency/audit tests | 🔲 planned (Stage B) |
-| 3. Two-person approval for trust content | §19 task 3; doc 23 §8 rule 3 | `TWO_PERSON_MODULES` + approval service | self-approval rejection tests | 🔲 planned (Stage E) |
+| 3. Two-person approval for trust content | §19 task 3; doc 23 §8 rule 3 | `@maihan/domain/approval/two-person.ts` + `certificate decideCertificate`, `CMS decideRevision/publishApproved`, `catalog publishProduct` | self-approval refusal in all three paths + no-recorded-editor tests | ✅ Stage G (C9) |
 | 4. Navigation + redirects admin, 44,218 bulk import | §19 task 4; doc 34 | admin API over `navigations`/`redirects` | loop/conflict/uniqueness tests | 🔲 planned (Stage C) |
 | 5. SEO metadata management | §19 task 5 | admin API over `seo_metadata` | validation tests | 🔲 planned (Stage C) |
 | 6. Catalogue admin: bulk edit, preview, undo | §19 task 6; doc 23 §6 | `packages/db/src/admin/catalogue-admin-repository.ts`; `apps/web/api/admin/catalogue-bulk-handlers.ts`; `/admin/catalogue/bulk` | preview-staleness/invariant tests | ✅ Stage F (C1) |
 | 7. Derived-reference approval queue | §19 task 7; SoT §133–144 (V18 subset rules) | `packages/db/src/admin/governance-repository.ts`; `apps/web/api/admin/governance-handlers.ts`; `/admin/derived-identities` | INV-08 + per-row approval tests | ✅ Stage E (C6) |
 | 8. Migration console: batches/counts/conflicts/quarantine | §19 task 8; td33 §4 | `packages/db/src/admin/governance-repository.ts`; `apps/web/api/admin/governance-handlers.ts`; `/admin/migration` | visibility/authorisation tests | ✅ Stage E (C4) |
 | 9. Conflict resolution UI, never silent overwrite | §19 task 9 | `apps/web/api/admin/governance-handlers.ts`; `/admin/migration` | non-overwrite tests | ✅ Stage E (C5) |
-| 10. Certificate review queue + anomaly triage | §19 task 10; td17 state machine | `packages/db/src/admin/certificate-review-repository.ts`; `apps/web/api/admin/certificate-review-handlers.ts`; `/admin/certificates` | state-machine/authorisation tests | ✅ Stage F (C7) — queue + decision; anomaly **resolution** 🔲 |
+| 10. Certificate review queue + anomaly triage | §19 task 10; td17 state machine | `packages/db/src/admin/certificate-review-repository.ts`; `apps/web/api/admin/certificate-review-handlers.ts`; `/admin/certificates` | state-machine/authorisation tests | ✅ Stage G (C7 + anomaly resolution) |
 | 11. AI console: conversations/tool audit/guardrails/evals | §19 task 11; td18 | admin API over `@maihan/db ai` tables | redaction + no-write-path tests | 🔲 planned (Stage F) |
 | 12. RBAC ten roles + BYPASSRLS admin + audit | §19 task 12; doc 23 §3/§4 | **`@maihan/domain/auth/roles.ts`, `contracts/dto/admin/*`, `apps/web/api/admin/{authz,audit}.ts`** | **policy-matrix + role-injection + audit-redaction tests** | ✅ Stage A (GT-A1..A3) |
 | 13. Bulk ops: preview, approval, audit, bounded undo | §19 task 13; doc 23 §6–7 | `packages/db/src/admin/catalogue-admin-repository.ts`; `apps/web/api/admin/catalogue-bulk-handlers.ts` | undo-window tests | ✅ Stage F (C1) |
@@ -128,16 +128,10 @@ Authority: `INITIAL_IMPLEMENTATION_PLAN.md` §19 (Phase 12 — Admin + CMS),
 
 ### Stage F explicit non-goals carried forward
 
-- **Anomaly resolution is not implemented.** `certificate_anomalies` has
-  `resolved_at` / `resolved_by` / `resolution` columns and the `anomalies`
-  module grants `resolve` to TRUST_REVIEWER, but there is no endpoint or
-  repository function to resolve one. The queue displays open anomalies and an
-  open ERROR anomaly blocks verification, so a document with an ERROR anomaly
-  cannot currently reach VERIFIED — a real dead end until resolution is built.
-- **No two-person enforcement** on certificate approval (task 3 / C9): the
-  approver is recorded, but a reviewer who submitted an extraction could
-  approve it. `requiresTwoPersonRule('certificates')` is true; nothing consults
-  it yet.
+- ~~**Anomaly resolution is not implemented.**~~ **Resolved 2026-11-23 in
+  Stage G** (`resolveAnomaly`, `listAnomaliesForCertificate`, two endpoints).
+- ~~**No two-person enforcement** on certificate approval (task 3 / C9).~~
+  **Resolved 2026-11-23 in Stage G** for all three trust paths.
 - **Undo guards price and state, not every column.** An intervening edit to an
   unrelated column (for example `title`) does not block an undo; an edit to a
   guarded column does. `published_at` is restored from the snapshot and is not
@@ -148,5 +142,75 @@ Authority: `INITIAL_IMPLEMENTATION_PLAN.md` §19 (Phase 12 — Admin + CMS),
   proven by fake-executor text/shape assertions plus typecheck; the CTE
   semantics (data-modifying CTEs, `FOR UPDATE OF` with `LEFT JOIN`,
   `jsonb_to_recordset`) have not been run live.
+
+## Stage G (tasks 3, 10) — anomaly resolution + two-person enforcement
+
+| Item | Verification |
+|---|---|
+| Pure two-person rule (`requiresSecondApprover`, `isSelfApproval`, `assertTwoPerson`, `TwoPersonError`) + classifiers | `packages/domain`: `tsc -b` 0 errors; `vitest run src/approval` → 11 passed |
+| Certificate anomaly resolution (`resolveAnomaly`, `listAnomaliesForCertificate`) + two-person in `decideCertificate` | `packages/db`: `tsc -b` 0 errors; `vitest run src/admin/certificate-review-repository.spec.ts` → 26 passed |
+| CMS two-person in `decideRevision` / `publishApproved` + real audit writer | `vitest run src/cms/cms-repository.spec.ts` → 10 passed |
+| Product publication two-person | `vitest run src/catalog/publish.spec.ts` → 9 passed |
+| Two new endpoints + gate-first authorization + 403 mapping | `apps/web`: `tsc -b` 0 errors; `vitest run src/api/admin/certificate-review-handlers.spec.ts` → 19 passed; `vitest run src/api/admin/two-person-refusals.spec.ts` → 4 passed |
+| Full suites after the change | `@maihan/domain` → 302 passed, 11 skipped; `@maihan/db` → 281 passed, 33 skipped; `@maihan/web` → 504 passed, 21 skipped |
+| Workspace typecheck | `pnpm -r run typecheck` → 0 errors |
+| Production build with no database | `pnpm --filter @maihan/web run build` → exit 0 with `DATABASE_URL` unset (first attempt prints Next's upgrade advisory; retry builds) |
+
+### Stage G contract notes
+
+- **Single-use resolution is a WHERE clause.** `resolveAnomaly` updates
+  `WHERE resolved_at IS NULL` and the three resolution columns plus the
+  before/after `audit_logs` row are one data-modifying CTE statement. A second
+  attempt is 409 `ANOMALY_ALREADY_RESOLVED`; the row is never deleted. The
+  failure path costs one extra read only to distinguish "unknown" from
+  "already resolved".
+- **The decision re-reads anomalies.** `decideCertificate` never trusts the
+  queue projection's `open_error_anomalies`: it reads `resolved_at IS NULL`
+  rows at decision time. Test: a stale projection with one ERROR anomaly and
+  zero open rows still reaches VERIFIED; one open ERROR row still refuses 422.
+- **Which edits are trust-bearing** is one list in the domain:
+  `CERTIFICATE_APPROVAL`, `CMS_TRUST_PAGE` (BUYING_GUIDE, CERTIFICATE_GUIDE,
+  any `*TREATMENT*`), `PRODUCT_PUBLISH_UNVERIFIED_PRICE` (DRAFT→ACTIVE while
+  `price_evidence != 'VERIFIED'`).
+- **Who counts as the editor.** Certificate: the last `verification_events`
+  actor with `actor_type='HUMAN'`. CMS: `page_revisions.editor_id`. Product:
+  the last `audit_logs` actor for the product. A `NULL` editor satisfies the
+  rule and is recorded as `editor_unrecorded: true` in the audit snapshot —
+  never invented and never silently skipped.
+- **Both actors are recorded.** `audit_logs.diff` carries
+  `{entity_kind, required, editor_id, second_approver_id, editor_unrecorded}`,
+  and the same object is embedded in `after_state`. The audit writer seam for
+  CMS now performs a real `INSERT INTO audit_logs`
+  (`createCmsAuditWriter`), including `diff`.
+- **The refusal is 403 `TWO_PERSON_REQUIRED`,** never a 409 and never a
+  validation failure. It is raised before the write statement in all three
+  paths.
+- **A rejection is not a trust promotion.** Only APPROVE consults the rule
+  (certificate and CMS); REJECT keeps its existing audit shape without
+  two-person fields.
+
+### Stage G explicit non-goals carried forward
+
+- **No statement ran against PostgreSQL.** The CTE
+  `UPDATE … FROM target` with `FOR UPDATE`, the `diff` write and the
+  last-editor reads are proven by fake-executor text/values assertions plus
+  typecheck.
+- **`VERIFIED` is not in the locked `evidence_status` enum,** so
+  `price_evidence != 'VERIFIED'` holds for every migrated row: every
+  DRAFT→ACTIVE publication is trust-bearing and needs two distinct
+  ADMIN_SUPER users. That is the rule applied literally; if price verification
+  becomes a recorded state it will need an approved enum/schema change.
+- **Certificate editor attribution is coarse.** OCR runs record `SYSTEM`; a
+  human who uploaded a document without a HUMAN `verification_events` row is
+  not recorded as its editor, so the rule is satisfied for that document.
+- **CMS audit completeness is not atomic.** Audit rows are now written, but as
+  a separate statement after the mutation (the repository's existing shape),
+  so a crash between them could leave a mutation without its audit row. The
+  certificate and product paths write theirs in the same statement/CTE.
+- **Anomaly resolution writes no `verification_events` row** because the
+  document status does not change; its record is `certificate_anomalies`
+  (`resolved_at/by/resolution`) plus the audit row. The anomaly list is
+  unpaginated (bounded by one document's anomalies) and the console offers four
+  resolution codes while the column accepts any text.
 
 

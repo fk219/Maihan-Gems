@@ -112,12 +112,35 @@ database. Neon is applied last, once, with explicit approval.**
       Approval is refused below the 0.90 whole-document threshold with the domain
       reason, and refused while an ERROR anomaly is open; the decision writes the
       review, the append-only `verification_events` row and the audit row in one
-      statement. **Still open:** anomaly *resolution* (the `anomalies/resolve`
-      capability has no endpoint, so an ERROR anomaly currently blocks a document
-      permanently) and two-person enforcement (C9).
+      statement.
+      **Anomaly resolution (2026-11-23):** `resolveAnomaly` is single-use
+      (`WHERE resolved_at IS NULL`, 409 on a second attempt), writes the three
+      resolution columns plus a before/after audit row in one statement, never
+      deletes the row; `listAnomaliesForCertificate` returns open and resolved
+      oldest first. Endpoints
+      `GET /api/v1/admin/certificates/{id}/anomalies` and
+      `POST /api/v1/admin/certificates/anomalies/{anomalyId}/resolve`
+      (`anomalies/read` and `anomalies/resolve`). `decideCertificate` re-reads
+      anomalies at decision time, so a resolved ERROR anomaly no longer blocks
+      and an unresolved one still does. The console records a resolution with a
+      reason and shows the history.
 - [ ] C8 AI operations console: conversations, tool audit, guardrail events,
       evaluation runs
-- [ ] C9 Two-person approval enforced for trust-bearing content
+- [x] C9 Two-person approval enforced for trust-bearing content
+      **Progress 2026-11-23:** `packages/domain/src/approval/two-person.ts`
+      (`requiresSecondApprover`, `isSelfApproval`, `assertTwoPerson`,
+      `TwoPersonError` with `code='TWO_PERSON_REQUIRED'`) plus the three
+      classifiers. Enforced in `decideCertificate` (approval to VERIFIED),
+      `decideRevision`/`publishApproved` (BUYING_GUIDE, CERTIFICATE_GUIDE,
+      TREATMENT copy) and `publishProduct` (DRAFT→ACTIVE while
+      `price_evidence != 'VERIFIED'`). The approver must differ from the last
+      recorded editor (certificate: last HUMAN `verification_events` actor;
+      CMS: revision `editor_id`; product: last ADMIN `audit_logs` actor); no
+      recorded editor satisfies the rule and is recorded as
+      `editor_unrecorded: true`. Both actors go into `audit_logs.diff` and the
+      after-state. A refusal is 403 `TWO_PERSON_REQUIRED` before any write.
+      CMS audit rows are now actually written (`createCmsAuditWriter`); before
+      this, the CMS handler's audit seam was a no-op.
 - [ ] C10 Audit completeness test sweep across every admin endpoint
 - [ ] C11 Acceptance: every privileged mutation has a before/after audit row,
       proven by a test that enumerates the routes

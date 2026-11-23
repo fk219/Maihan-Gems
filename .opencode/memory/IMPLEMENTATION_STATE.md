@@ -1,3 +1,93 @@
+# TRACK C7 GAP + C9 — ANOMALY RESOLUTION AND TWO-PERSON ENFORCEMENT (2026-11-23)
+
+- **Pure rule** `packages/domain/src/approval/two-person.ts`: `TwoPersonEntityKind`
+  names six situations, `requiresSecondApprover(entityKind)` is the single
+  decision point (`CERTIFICATE_APPROVAL`, `CMS_TRUST_PAGE`,
+  `PRODUCT_PUBLISH_UNVERIFIED_PRICE`), `isSelfApproval(editorId, approverId)`
+  and `assertTwoPerson(rule, editorId, approverId)` throw `TwoPersonError`
+  (`code='TWO_PERSON_REQUIRED'`). Classifiers
+  (`certificateApprovalEntityKind`, `cmsPageEntityKind`,
+  `productPublishEntityKind`) turn each call site's facts into a kind, so
+  "which changes are trust-bearing" is one reviewable list. A `null` editor is
+  documented as satisfying the rule and is recorded as
+  `editor_unrecorded: true`, never guessed.
+- **Anomaly resolution** `packages/db/src/admin/certificate-review-repository.ts`:
+  `resolveAnomaly({anomalyId, actorId, resolution, note})` is single-use
+  (`WHERE resolved_at IS NULL` + `FOR UPDATE` inside a data-modifying CTE), writes
+  the three resolution columns and the before/after `audit_logs` row in ONE
+  statement, and never deletes the row. A second attempt is
+  `ANOMALY_ALREADY_RESOLVED` (409); an unknown id is `ANOMALY_NOT_FOUND` (404);
+  an empty resolution is `RESOLUTION_REQUIRED` before any query.
+  `listAnomaliesForCertificate(certificateId)` returns open AND resolved,
+  oldest first, with honest counts; an unknown certificate is `null`.
+- **The block is now re-read at decision time.** `decideCertificate` already
+  read only `resolved_at IS NULL` anomalies; the new test proves a resolved
+  ERROR anomaly no longer blocks even when the queue projection is stale, and an
+  unresolved one still refuses with 422 `CERTIFICATE_ANOMALY`.
+- **Endpoints:** `GET /api/v1/admin/certificates/{certificateId}/anomalies`
+  (`anomalies/read`) and
+  `POST /api/v1/admin/certificates/anomalies/{anomalyId}/resolve`
+  (`anomalies/resolve`). Registered in `routes.ts` + `index.ts`; no existing
+  path shadowed (list is 6 segments, resolve is 7).
+- **Two-person in the three paths:**
+  - certificate: `decideCertificate` reads the last `verification_events` actor
+    with `actor_type='HUMAN'` and asserts on APPROVE only, after the domain
+    allows the transition and before the write statement. The ledger detail and
+    audit row carry both actors plus `diff`.
+  - CMS: `decideRevision` and `publishApproved` use the same domain rule.
+    `publishApproved` now reads the head revision's `editor_id`, `page_kind` and
+    the page's current `status` in one query, so the audit before-state is real.
+    The typed `SELF_APPROVAL` `CmsConflictError` is retired — only
+    `TwoPersonError` refuses now. `createCmsAuditWriter(db, {requestId})` makes
+    the previously no-op audit seam write a real `audit_logs` row including
+    `diff`. `PAGE_KINDS` gained `BUYING_GUIDE` and `CERTIFICATE_GUIDE` (the
+    `pages.page_kind` column has no CHECK; the API enum was the only blocker).
+  - product: `publishProduct` reads the last ADMIN actor from `audit_logs` for
+    DRAFT→ACTIVE with `price_evidence != 'VERIFIED'`, asserts before the UPDATE,
+    and records both actors in `diff` + `after_state`.
+- **Refusal contract:** 403 with `error.code='TWO_PERSON_REQUIRED'` in the
+  certificate, catalog and CMS handlers. No path downgrades the rule to a 409
+  or a validation error.
+- **Console:** `/admin/certificates` now lists open and resolved anomalies,
+  shows the resolution that cleared each one, and renders
+  `AdminAnomalyResolution` for open rows when the role holds
+  `anomalies/resolve`.
+- **Tests:** `packages/domain/src/approval/two-person.spec.ts` (11) — kind
+  matrix, classifiers, self-approval, null editor, non-trust no-op, audit fields.
+  `certificate-review-repository.spec.ts` 15→26 — resolution single-use / not
+  found / empty resolution / one statement / no DELETE, list open+resolved
+  oldest-first, stale-projection unblock, certificate self-approval refused with
+  no write, different approver recorded, no-editor satisfied, rejection not
+  gated. `cms-repository.spec.ts` 8→10 — typed refusal in decide and publish,
+  different approver accepted, ordinary content not gated, refusal before write.
+  New `catalog/publish.spec.ts` (9) — V15 first, self-approval refused with no
+  UPDATE/INSERT, different approver recorded, no-editor satisfied, VERIFIED
+  evidence and unpublish not gated, idempotency, ARCHIVED and NOT_FOUND.
+  New `two-person-refusals.spec.ts` (4) — product publish 403, CMS decide 403,
+  CMS publish 403, and the success case; the fake database proves the refusal
+  stops before the write.
+- **Verified:** `pnpm -r run typecheck` 0 errors; `@maihan/domain` 302 passed /
+  11 skipped; `@maihan/db` 281 passed / 33 skipped (was 259); `@maihan/web`
+  504 passed / 21 skipped (was 492); `pnpm --filter @maihan/web run build`
+  exit 0 with `DATABASE_URL` unset (the first attempt prints Next's
+  known-vulnerability advisory; the retry builds). No new dependency, no
+  database connection, no migration.
+- **Honest gaps:** (1) no statement ran against PostgreSQL — the CTE
+  `UPDATE … FROM target` with `FOR UPDATE`, the `diff` writes and the two-person
+  reads are proven by fake executors and typecheck only; (2) `VERIFIED` is not a
+  member of the locked `evidence_status` enum, so every DRAFT→ACTIVE publication
+  is trust-bearing today and needs two distinct ADMIN_SUPER users — that follows
+  the rule literally but means the product path is stricter than the enum
+  implies; (3) a certificate's "editor" is the last HUMAN `verification_events`
+  actor; OCR runs record `SYSTEM`, so a human who uploaded a document without a
+  human event is not recorded as its editor and the rule is satisfied; (4) CMS
+  audit rows are now real but are still separate statements after the mutation
+  (not one CTE), so a crash between them could leave a CMS mutation without its
+  audit row; (5) the anomaly list is unpaginated (bounded by one document's
+  anomalies) and the console offers four resolution codes while the column
+  accepts any text; (6) anomaly resolution writes an `audit_logs` row only — no
+  `verification_events` row, because the document status does not change.
+
 # TRACK C1 + C7 — CATALOGUE BULK EDIT AND CERTIFICATE REVIEW QUEUE (2026-11-23)
 
 - **Bulk repository** `packages/db/src/admin/catalogue-admin-repository.ts`:
@@ -67,10 +157,12 @@
   run build` exit 0 with `DATABASE_URL` unset. ESLint reports no findings in
   the new or changed files. No new dependency, no database connection, no
   migration.
-- **Honest gaps:** (1) anomaly *resolution* is not implemented — the queue shows
-  open anomalies and an ERROR anomaly blocks verification, so a document with an
-  ERROR anomaly cannot currently reach VERIFIED; (2) two-person enforcement
-  (C9) is not consulted by the certificate decision; (3) the undo gate compares
+- **Honest gaps:** (1) ~~anomaly *resolution* is not implemented~~ **Resolved
+  2026-11-23** by `resolveAnomaly` + `listAnomaliesForCertificate` and the two
+  endpoints (see the C7-gap/C9 entry at the top of this file); (2) ~~two-person
+  enforcement (C9) is not consulted by the certificate decision~~ **Resolved
+  2026-11-23** in all three trust paths via
+  `packages/domain/src/approval/two-person.ts`; (3) the undo gate compares
   price and state only, so an edit to an unrelated column does not block an
   undo; (4) the bulk console lists the first 50 products with no filter or
   selection pagination; (5) no statement was executed against PostgreSQL — the
