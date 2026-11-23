@@ -86,10 +86,12 @@ database. Neon is applied last, once, with explicit approval.**
 - [x] C6 Derived-identity approval queue — per-row approve/reject (221 rows,
       INV-08)
       **Progress 2026-11-23:** `/admin/derived-identities` + approve/reject
-      endpoints. Approval records `review_state='APPROVED'` in the product's
-      `structured_extra` (the locked table has no `review_state` column) and
+      endpoints. Approval writes the explicit `products.review_state` column
+      plus `review_note` / `reviewed_by` / `reviewed_at` (migration 0022) and
       never writes `source_sku` or promotes `INFERRED`. Rejection flags the row
-      and never deletes.
+      and never deletes. The earlier `structured_extra` JSON workaround is
+      removed: no repository path reads or writes it (ADR-024). Migration 0022
+      is registered but not yet applied.
 - [ ] C7 Certificate review queue + anomaly triage
 - [ ] C8 AI operations console: conversations, tool audit, guardrail events,
       evaluation runs

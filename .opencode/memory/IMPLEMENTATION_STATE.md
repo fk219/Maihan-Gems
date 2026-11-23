@@ -1,3 +1,42 @@
+# TRACK C6 FOLLOW-UP — INV-08 REVIEW DECISION MOVED TO A REAL COLUMN (2026-11-23)
+
+- **Migration 0022** `packages/db/migrations/0022_product_review_state.sql`,
+  registered in `meta/_journal.json` at `idx 21`: expand-only adds
+  `products.review_state TEXT CHECK (review_state IN ('PENDING','APPROVED','REJECTED'))`,
+  `review_note TEXT`, `reviewed_by UUID REFERENCES users(id)`, `reviewed_at
+  TIMESTAMPTZ` and the partial index `products_review_state_idx ON
+  products (review_state) WHERE review_state IS NOT NULL`. The backfill carries
+  an existing APPROVED/REJECTED decision out of
+  `structured_extra->'derived_identity_review'->>'review_state'` verbatim and
+  marks every other derived identity PENDING. `structured_extra` is not
+  modified; the JSON key stays as an untouched historical record. **No
+  migration was run against any database.**
+- **Repository** `packages/db/src/admin/governance-repository.ts`: the read
+  path projects the four columns; the queue filter binds `p.review_state` (and
+  `p.review_state IS NULL` for the UNREVIEWED sentinel); approve/reject write
+  the columns in the same CTE as the before/after audit row. INV-08 unchanged:
+  no `source_sku` write, no `sku_evidence_status` change, no state change, no
+  delete. PENDING is decidable; APPROVED/REJECTED are terminal. The
+  `DERIVED_IDENTITY_REVIEW_KEY` export was removed.
+- **Fidelity mirror** `packages/db/src/expected-schema.ts`:
+  `EXPECTED_PRODUCT_REVIEW_COLUMNS`, `EXPECTED_PRODUCT_REVIEW_INDEX` and
+  `EXPECTED_0022_COUNT_DELTA` (FK +1, CHECK +1, check-class +1, index +1,
+  NOT NULL +0). `introspect.ts` now reports column names and `assert-schema.ts`
+  asserts the four columns and the partial index. **Absolute aggregate totals
+  were deliberately NOT advanced**: the mirror has not been reconciled since
+  0018 and 0019–0021 are unaccounted; the TODO in the file records exactly
+  which numbers need a sanctioned fresh-database run.
+- **Tests/verification:** `pnpm -r run typecheck` 0 errors;
+  `pnpm --filter @maihan/db run test` 222 passed / 33 skipped (governance spec
+  17, +3); `pnpm --filter @maihan/web run test` 467 passed / 21 skipped
+  (unchanged). No database connection; the SQL is proven by fake-executor
+  text/shape assertions.
+- **Honest gap:** the migration is unapplied, so `review_state` is absent from
+  every live database until the client runs it. A row approved under the JSON
+  workaround before the migration carries its `review_state` forward, but its
+  former `note`/`actor_id`/`decided_at` remain only in `structured_extra` (the
+  new note/reviewer/timestamp columns are NULL for those rows).
+
 # TRACK C4-C6 — ADMIN DATA-GOVERNANCE CONSOLE (2026-11-23)
 
 - **Repository** `packages/db/src/admin/governance-repository.ts`:
@@ -8,13 +47,12 @@
   source_sku_derived IS NOT NULL` class), `approveDerivedIdentity` and
   `rejectDerivedIdentity`. Every value is bound; totals are a separate
   `count(*)` so the last page and any offset past it stay honest.
-- **Review-state storage decision:** the locked `products` table has no
-  `review_state` column, and adding one is a schema change this task may not
-  make. The INV-08 decision is therefore written to the only free-form column,
-  `structured_extra`, under the documented `derived_identity_review` key with a
-  literal `review_state` member; the read path projects it back as a
-  first-class `review_state`. Approval never writes `source_sku` and never
-  changes `sku_evidence_status` (stays `INFERRED`). Rejection flags the row,
+- **Review-state storage decision (SUPERSEDED 2026-11-23 by migration 0022,
+  see the section above):** the locked `products` table had no `review_state`
+  column, so the original task wrote the INV-08 decision to `structured_extra`
+  under `derived_identity_review`. It is now an explicit column and the JSON
+  key is no longer read or written. Approval never wrote `source_sku` and never
+  changed `sku_evidence_status` (stays `INFERRED`); rejection flags the row,
   leaves `state='DRAFT'`, and never deletes.
 - **API** `apps/web/src/api/admin/governance-handlers.ts`, registered in
   `routes.ts` + `index.ts`: six endpoints under `/api/v1/admin/` for batches,

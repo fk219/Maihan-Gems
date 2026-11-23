@@ -65,6 +65,7 @@ approved. `DEFERRED` = deliberately postponed.
 | **`products.jsonl` is NOT the complete catalogue.** It holds 1,245 records = 2.4% of commerce URLs. | ACCEPTED | ADR-007, defect D1 |
 | **`urls.jsonl` is the migration spine.** Never migrate from `products.jsonl` alone. | ACCEPTED | ADR-007 |
 | **The 221 derived DYO identities remain `INFERRED`.** `source_sku` stays null, every attribute column null, `state='DRAFT'`, unpublished, pending human approval. | ACCEPTED | ADR-008, INV-08 |
+| **Approval facts are explicit columns, not JSON.** The INV-08 review decision lives in `products.review_state` (+ `review_note`, `reviewed_by`, `reviewed_at`) with a partial index; the `structured_extra` workaround key is no longer read or written. ADR-024's shape is applied to this one fact on explicit client instruction; ADR-024 itself remains Proposed. | ACCEPTED (client instruction, 2026-11-23) | ADR-024; migration 0022 |
 | Never manufacture a source SKU. Never infer attributes from a sibling product sharing a stone reference. | ACCEPTED | Source of Truth §19.1 |
 | Per-stone measurements are modelled, never concatenated. | ACCEPTED | ADR-009 |
 | The unknown component of price is modelled **explicitly**, not hidden in an opaque total. Derived setting prices are labelled estimates. | ACCEPTED | ADR-010 |

@@ -49,12 +49,30 @@ Authority: `INITIAL_IMPLEMENTATION_PLAN.md` §19 (Phase 12 — Admin + CMS),
 | Workspace typecheck | `pnpm -r run typecheck` → 0 errors |
 | Production build with no database | `pnpm --filter @maihan/web run build` → exit 0 with `DATABASE_URL` unset (Next 16.4.0 advisory reminder on first attempt; build continues on retry) |
 
+### Stage E follow-up — INV-08 decision moved to a real column (2026-11-23)
+
+| Item | Verification |
+|---|---|
+| Migration 0022 `packages/db/migrations/0022_product_review_state.sql` | expand-only: four nullable `products` columns (`review_state`, `review_note`, `reviewed_by` FK → `users`, `reviewed_at`), one CHECK, one partial index `products_review_state_idx`; JSON-era APPROVED/REJECTED carried forward, every other derived identity set PENDING; `structured_extra` untouched; journal `idx 21` |
+| Governance repository reads/writes the columns | `@maihan/db`: `tsc -b` 0 errors; `vitest run src/admin/governance-repository.spec.ts` → 17 passed |
+| Full suites after the change | `@maihan/db` → 222 passed, 33 skipped; `@maihan/web` → 467 passed, 21 skipped |
+| Workspace typecheck | `pnpm -r run typecheck` → 0 errors |
+| Not done here | no database was connected and migration 0022 was not applied; the schema-fidelity absolute counts still await a sanctioned fresh-database run (TODO in `expected-schema.ts`) |
+
 ### Stage E explicit non-goals carried forward
 
-- The locked `products` table has no `review_state` column. The INV-08
+- ~~The locked `products` table has no `review_state` column. The INV-08
   decision is recorded in `products.structured_extra` under
   `derived_identity_review` and projected as `review_state`; a future approved
-  schema change should move it to a real column.
+  schema change should move it to a real column.~~ **Resolved 2026-11-23 by
+  migration 0022.** `products.review_state`, `review_note`, `reviewed_by` and
+  `reviewed_at` are explicit columns with the partial index
+  `products_review_state_idx`; the governance repository reads and writes those
+  columns and no longer reads the `structured_extra` `derived_identity_review`
+  key (ADR-024: an approval fact must be filterable and gate-enforceable). The
+  JSON itself is left untouched on existing rows. Migration 0022 is registered
+  in `_journal.json` (idx 21) but **has not been applied to any database** — the
+  client applies it.
 - Quarantine is a per-batch recorded count (`records_quarantined`); the schema
   has no per-row quarantine ledger, so the console cannot list quarantined
   rows.
