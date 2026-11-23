@@ -385,4 +385,42 @@ export {
   type ConsumedTokenRow,
   type VerifiedEmailRow,
 } from './identity/customer-auth-repository.js';
+export {
+  DEFAULT_BACKOFF,
+  DEFAULT_MAX_ATTEMPTS,
+  computeBackoffMs,
+  type BackoffPolicy,
+} from './worker/backoff.js';
+export {
+  claimOutboxBatch,
+  getOutboxHealth,
+  hasEventConsumer,
+  markOutboxFailed,
+  markOutboxPublished,
+  recordEventConsumer,
+  redactErrorText,
+  type ClaimOutboxOptions,
+  type DomainEventRow,
+  type DomainEventStatus,
+  type EventConsumerKey,
+  type MarkFailedOptions,
+  type MarkFailedResult,
+  type MarkPublishedResult,
+} from './worker/outbox-repository.js';
+export {
+  claimJobs,
+  completeJob,
+  enqueueJob,
+  failJob,
+  findJobByKey,
+  hasSucceededJob,
+  type ClaimJobsOptions,
+  type CompleteJobOptions,
+  type EnqueueJobInput,
+  type EnqueueJobResult,
+  type FailJobOptions,
+  type FailJobResult,
+  type JobRow,
+  type JobState,
+} from './worker/jobs-repository.js';
 
