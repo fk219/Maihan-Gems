@@ -54,6 +54,16 @@ database. Neon is applied last, once, with explicit approval.**
 - [ ] B3 Refund execution at the provider, reconciled to `refunds`
 - [ ] B4 Email port + provider adapter; templates for order, shipping,
       password reset, vendor approval
+      **Progress 2026-11-23:** `EmailPort` with `none` / `sink` (default) /
+      `smtp` transports; six strict notification contracts; pure, escaping
+      renderers for order confirmation, shipping update, password reset, email
+      verification, vendor approval and vendor suspension; the outbox
+      dispatcher, the job runner and the reservation-expiry schedule in
+      `apps/worker`; the transactional-outbox and job-queue repositories in
+      `packages/db`. **Still open:** a real provider adapter (client decision),
+      a producer for `OrderCreated` / `OrderFulfilled` / `VendorApproved` /
+      `VendorSuspended`, and the auth-token emails (apps/web still issues
+      tokens out of band).
 - [ ] B5 Tax configuration and calculation on order placement
 - [ ] B6 Shipping rates and selection
 - [ ] B7 Acceptance: sandbox card charge → order → confirmation email →

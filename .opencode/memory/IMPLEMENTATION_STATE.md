@@ -1,3 +1,95 @@
+# TRACK B4 — WORKER, OUTBOX DISPATCHER AND EMAIL PORT (2026-11-23)
+
+- **Contracts** `packages/contracts/src/dto/notifications/`: six strict,
+  discriminated payloads — order_confirmation, shipping_update,
+  password_reset, email_verification, vendor_approved, vendor_suspended. The
+  recipient is `{ email }` only; `data` carries only what a template prints.
+  Money is a decimal string, dates are ISO-8601, URLs must be absolute http(s).
+  `packages/contracts/src/events/notifications.ts` holds the four event
+  payloads, identifiers only, no PII. The contract spec proves the wire types
+  are assignable to the domain render inputs at compile time.
+- **Templates** `packages/domain/src/notifications/`: `renderNotification(kind,
+  data)` returns `{subject, text, html}` with no I/O, no clock and no secrets.
+  Every interpolated value is sanitised; HTML is escaped; only http(s) becomes
+  an `href`; subjects cannot contain CR/LF. 26 tests drive an injection attempt
+  through EVERY user-controlled field of EVERY template, plus a
+  `javascript:`/`data:` URL and a header-injection subject.
+- **Outbox repository** `packages/db/src/worker/outbox-repository.ts`:
+  `claimOutboxBatch` is one `UPDATE ... WHERE id IN (SELECT ... FOR UPDATE SKIP
+  LOCKED LIMIT $n)` with a lease expressed through `available_at` (the enum has
+  no CLAIMED state; adding one would be a migration). `markOutboxPublished`,
+  `markOutboxFailed` (attempt ceiling 5, bound exponential backoff, immediate
+  dead-letter for non-retryable), and the `event_consumers` ledger keyed on
+  `domain_events.id` (BIGINT), NOT the UUID `event_id`. Errors are redacted
+  before storage: an email-shaped value becomes `[REDACTED_EMAIL]`, because a
+  dead-letter row inherits the outbox's no-PII rule.
+- **Job repository** `packages/db/src/worker/jobs-repository.ts`: `enqueueJob`
+  is idempotent on `job_key` and returns the ORIGINAL row; `claimJobs` uses
+  `SKIP LOCKED` + a lease and reclaims expired `RUNNING` rows; `completeJob` /
+  `failJob` require the caller to still own the lease, so a stale worker cannot
+  overwrite the new owner's outcome; exhaustion dead-letters with the row's own
+  `max_attempts`. Every value is bound; specs assert the SQL text never contains
+  the value.
+- **Dispatcher** `apps/worker/src/dispatch/`: claim → per-consumer ledger check
+  → handle → ledger write → publish/fail. The ledger is written AFTER the
+  handler succeeds; a crash between the side effect and the ledger re-runs the
+  handler, which is safe because every handler's effect is an idempotent
+  `job_key` enqueue (doc 26 §5: `event_consumers` plus `job_key`). An event with
+  no consumer in this worker is published and logged, not failed. Shutdown is an
+  AbortSignal: no new batch, no new event within a batch, in-flight handler
+  finishes, loop resolves.
+- **Handlers** `apps/worker/src/handlers/`: one module per consumed event
+  (`OrderCreated` → order confirmation, `OrderFulfilled` → shipping update,
+  `VendorApproved`, `VendorSuspended`). They resolve the recipient from the
+  aggregate through ports and enqueue an `EMAIL_SEND` job; **only**
+  `email-send.ts` holds the `EmailPort`. The job key is the idempotency
+  boundary (`email.order_confirmation:{orderId}`, shipping includes the
+  tracking number, suspension includes the event id).
+- **Email** `apps/worker/src/email/`: `EmailPort` with `none` (fails closed),
+  `sink` (bounded ring buffer; `.eml` files under `./.mail` in non-production
+  only; filename generated from clock + counter, never from the message; path
+  containment asserted) and `smtp` (EHLO, STARTTLS/implicit TLS, AUTH LOGIN,
+  MAIL/RCPT/DATA/QUIT over `node:net`/`node:tls`, dot-stuffing, header-injection
+  refusal before connecting, fail-closed STARTTLS). No new dependency.
+- **Schedule** `apps/worker/src/schedules/reservation-expiry.ts`: interval loop
+  that calls the existing `sweepExpiredReservations` from `@maihan/db`; the
+  sweep itself is not reimplemented.
+- **Config** `packages/config`: `EMAIL_TRANSPORT` (`none|sink|smtp`, default
+  `sink`), `EMAIL_FROM`, sink capacity/dir/write-to-disk (production refuses
+  disk), SMTP host/port/security/credentials/timeout (fails closed at startup),
+  and `APP_BASE_URL` (default localhost; the WORKER refuses a localhost origin
+  in production, so apps/web gains no new mandatory variable).
+- **Entry** `apps/worker/src/main.ts`: config → pool → ports → registries →
+  dispatcher + job runner + schedule; SIGTERM/SIGINT abort the shared signal,
+  in-flight work finishes, the pool drains, exit 0. Only the `default` queue is
+  served; `critical` is deliberately not served because payments are not built.
+- **Verification:** `pnpm -r run typecheck` green. `@maihan/domain` 291 passed /
+  11 skipped; `@maihan/contracts` 56 passed; `@maihan/db` 205 passed / 33
+  skipped; `@maihan/worker` 60 passed; `@maihan/web` 455 passed / 21 skipped
+  (unchanged); `@maihan/ai` 14; `@maihan/observability` 12; `tools/migrate` 20
+  passed / 11 skipped. `node apps/worker/dist/main.js` with no `DATABASE_URL`
+  exits 1 with `[CONFIG] DATABASE_URL: required but not set` and no stack.
+  ESLint reports no findings in the new files (the repository's 200+ existing
+  findings elsewhere are unchanged).
+- **Boundary proof:** the dispatcher spec runs two dispatchers and two job
+  runners against one event and asserts exactly one sink message; a replay is
+  suppressed by `event_consumers` and `job_key`; a sibling consumer that already
+  succeeded is not re-run; SIGTERM leaves the unstarted events PENDING and the
+  unstarted jobs RUNNING for the lease to reclaim.
+- **Honest gaps:** no email PROVIDER adapter — the provider is a deferred client
+  decision; SMTP is the protocol, not a vendor, and is proven against a scripted
+  local server, not a live relay. No producer emits `OrderCreated`,
+  `OrderFulfilled`, `VendorApproved` or `VendorSuspended` yet (apps/web writes
+  `InventoryReleased` only), so the notification pipeline is wired and tested
+  but not exercised end to end in production. `password_reset` and
+  `email_verification` have contracts and renderers but no delivery path:
+  apps/web still issues tokens out of band, and putting a reset token in a job
+  payload is a secrets decision that needs a deliberate design. No payment
+  handling (no PSP decision). No live database run: all new SQL is proven
+  against fake executors and captured statements, not PostgreSQL. The SMTP
+  STARTTLS path is unit-tested only for the fail-closed case; the upgrade itself
+  has no test because there is no TLS test server in this task.
+
 # TRACK D — VENDOR PORTAL (2026-11-23)
 
 - **Gate** `apps/web/src/api/vendor/session-authz.ts`: `requireVendor(ctx,
