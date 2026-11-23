@@ -294,6 +294,28 @@ export const ADMIN_ROUTES: readonly RouteDefinition[] = [
     method: 'POST',
     path: '/api/v1/admin/derived-identities/{productId}/reject',
   },
+  // Catalogue bulk edit with preview and bounded undo (Phase 12 tasks 6/13).
+  // The preview is the same endpoint with `dryRun: true`; undo is a separate
+  // POST because it reverses an operation, not a selection.
+  { id: 'adminBulkPricesHandler', method: 'POST', path: '/api/v1/admin/catalogue/bulk/prices' },
+  { id: 'adminBulkStateHandler', method: 'POST', path: '/api/v1/admin/catalogue/bulk/state' },
+  {
+    id: 'adminUndoBulkOperationHandler',
+    method: 'POST',
+    path: '/api/v1/admin/catalogue/bulk/{operationId}/undo',
+  },
+  // Certificate review queue and the human verification decision (task 10).
+  { id: 'adminListPendingCertificatesHandler', method: 'GET', path: '/api/v1/admin/certificates' },
+  {
+    id: 'adminGetCertificateForReviewHandler',
+    method: 'GET',
+    path: '/api/v1/admin/certificates/{certificateId}',
+  },
+  {
+    id: 'adminDecideCertificateHandler',
+    method: 'POST',
+    path: '/api/v1/admin/certificates/{certificateId}/decide',
+  },
 ];
 
 export const ALL_ROUTES: readonly RouteDefinition[] = [

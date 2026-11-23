@@ -109,6 +109,16 @@ import {
   adminResolveConflictHandler,
 } from './admin/governance-handlers.js';
 import {
+  adminBulkPricesHandler,
+  adminBulkStateHandler,
+  adminUndoBulkOperationHandler,
+} from './admin/catalogue-bulk-handlers.js';
+import {
+  adminDecideCertificateHandler,
+  adminGetCertificateForReviewHandler,
+  adminListPendingCertificatesHandler,
+} from './admin/certificate-review-handlers.js';
+import {
   vendorMeHandler,
   vendorListProductsHandler,
   vendorCreateProductHandler,
@@ -276,6 +286,12 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       adminListDerivedIdentitiesHandler,
       adminApproveDerivedIdentityHandler,
       adminRejectDerivedIdentityHandler,
+      adminBulkPricesHandler,
+      adminBulkStateHandler,
+      adminUndoBulkOperationHandler,
+      adminListPendingCertificatesHandler,
+      adminGetCertificateForReviewHandler,
+      adminDecideCertificateHandler,
     };
 
     const handler =
