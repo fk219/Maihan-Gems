@@ -12,22 +12,30 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import {
   createCmsRepository,
+  getCertificateForReview,
+  listPendingCertificates,
   listProductsForAdmin,
   listConflicts,
   listDerivedIdentities,
   listImportBatches,
+  listRecentBulkOperations,
   type AuditWriter,
+  type CertificateReviewDetail,
   type ConflictRow,
   type DerivedIdentityRow,
   type ImportBatchRow,
+  type PendingCertificateRow,
+  type RecentBulkOperationRow,
 } from '@maihan/db';
-import { hasCapability } from '@maihan/domain';
+import { evaluateConfidenceBand, hasCapability } from '@maihan/domain';
 import { getServerDb } from '../../../api/next-adapter.js';
 import { getAdminSession, type AdminSession } from '../../../lib/admin-session.js';
 import { AdminPageActions } from '../../../components/admin/AdminPageActions.js';
 import { AdminProductActions } from '../../../components/admin/AdminProductActions.js';
 import { AdminConflictResolution } from '../../../components/admin/AdminConflictResolution.js';
 import { AdminDerivedIdentityActions } from '../../../components/admin/AdminDerivedIdentityActions.js';
+import { AdminBulkCatalogue } from '../../../components/admin/AdminBulkCatalogue.js';
+import { AdminCertificateDecision } from '../../../components/admin/AdminCertificateDecision.js';
 
 export const metadata: Metadata = {
   title: 'Admin',
@@ -41,13 +49,15 @@ const readOnlyAudit: AuditWriter = async () => undefined;
 
 interface PageProps {
   readonly params: Promise<{ adminPath?: string[] }>;
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function AdminPage({ params }: PageProps): Promise<React.JSX.Element> {
+export default async function AdminPage({ params, searchParams }: PageProps): Promise<React.JSX.Element> {
   const session = await getAdminSession();
   if (session === null) redirect('/admin/login');
 
   const { adminPath } = await params;
+  const query = await searchParams;
   const path = (adminPath ?? []).join('/');
 
   return (
@@ -108,11 +118,15 @@ export default async function AdminPage({ params }: PageProps): Promise<React.JS
         {path === '' && <Dashboard session={session} />}
         {path === 'cms/pages' && <CmsPages session={session} />}
         {path === 'catalog/products' && <Catalogue session={session} />}
+        {path === 'catalogue/bulk' && <CatalogueBulk session={session} />}
+        {path === 'certificates' && <Certificates session={session} query={query} />}
         {path === 'migration' && <Migration session={session} />}
         {path === 'derived-identities' && <DerivedIdentities session={session} />}
         {path !== '' &&
           path !== 'cms/pages' &&
           path !== 'catalog/products' &&
+          path !== 'catalogue/bulk' &&
+          path !== 'certificates' &&
           path !== 'migration' &&
           path !== 'derived-identities' && (
             <p style={{ fontSize: '14px' }}>No console module is mounted at <code>/admin/{path}</code>.</p>
@@ -125,7 +139,9 @@ export default async function AdminPage({ params }: PageProps): Promise<React.JS
 function Dashboard({ session }: { session: AdminSession }): React.JSX.Element {
   const modules: Array<{ href: string; label: string; module: Parameters<typeof hasCapability>[1] }> = [
     { href: '/admin/catalog/products', label: 'Catalogue', module: 'products' },
+    { href: '/admin/catalogue/bulk', label: 'Catalogue bulk edit', module: 'products' },
     { href: '/admin/cms/pages', label: 'Content pages', module: 'content' },
+    { href: '/admin/certificates', label: 'Certificates', module: 'certificates' },
     { href: '/admin/migration', label: 'Migration console', module: 'import_batches' },
     { href: '/admin/derived-identities', label: 'Derived identities', module: 'derived_approvals' },
   ];
@@ -526,6 +542,279 @@ async function Catalogue({ session }: { session: AdminSession }): Promise<React.
             ))}
           </tbody>
         </table>
+      )}
+    </>
+  );
+}
+
+async function CatalogueBulk({ session }: { session: AdminSession }): Promise<React.JSX.Element> {
+  if (!hasCapability(session.role, 'products', 'bulk')) {
+    return <p style={{ fontSize: '14px' }}>Your role cannot run bulk catalogue edits.</p>;
+  }
+
+  let rows: Awaited<ReturnType<typeof listProductsForAdmin>> = [];
+  let recent: RecentBulkOperationRow[] = [];
+  let failure: string | null = null;
+  try {
+    const db = await getServerDb();
+    rows = await listProductsForAdmin(db, { limit: 50, offset: 0 });
+    recent = await listRecentBulkOperations(db, { limit: 10 });
+  } catch (error) {
+    failure = error instanceof Error ? error.message : 'The database is unavailable.';
+  }
+
+  return (
+    <>
+      <h2 style={{ margin: '0 0 6px', fontSize: '22px' }}>Catalogue bulk edit</h2>
+      <p style={{ margin: '0 0 18px', fontSize: '13px', color: '#5A5448' }}>
+        Preview first: the dry run returns the per-row outcome and writes nothing. The
+        apply writes one audit row per changed product plus one operation row, and can be
+        undone exactly once within 30 minutes — only if no affected row changed since.
+        Showing the first {rows.length} products.
+      </p>
+      {failure !== null && (
+        <p role="alert" style={{ color: '#B3261E', fontSize: '13px' }}>
+          {failure}
+        </p>
+      )}
+      {failure === null && rows.length === 0 && (
+        <p style={{ fontSize: '13px', color: '#5A5448' }}>No products exist yet.</p>
+      )}
+      {rows.length > 0 && (
+        <AdminBulkCatalogue
+          products={rows.map((row) => ({
+            id: row.id,
+            slug: row.slug,
+            title: row.title,
+            state: row.state,
+            priceAmount: `${row.currency} ${row.price_amount}`,
+            priceEvidence: row.price_evidence,
+          }))}
+          recentOperations={recent}
+        />
+      )}
+    </>
+  );
+}
+
+async function Certificates({
+  session,
+  query,
+}: {
+  readonly session: AdminSession;
+  readonly query: Record<string, string | string[] | undefined>;
+}): Promise<React.JSX.Element> {
+  if (!hasCapability(session.role, 'certificates', 'list')) {
+    return <p style={{ fontSize: '14px' }}>Your role cannot read the certificate queue.</p>;
+  }
+
+  const rawSelected = query['certificate'];
+  const selectedId = typeof rawSelected === 'string' ? rawSelected : undefined;
+
+  let rows: PendingCertificateRow[] = [];
+  let total = 0;
+  let detail: CertificateReviewDetail | null = null;
+  let failure: string | null = null;
+  try {
+    const db = await getServerDb();
+    const page = await listPendingCertificates(db, { limit: 50, offset: 0 });
+    rows = page.items;
+    total = page.total;
+    if (selectedId !== undefined) detail = await getCertificateForReview(db, selectedId);
+  } catch (error) {
+    failure = error instanceof Error ? error.message : 'The database is unavailable.';
+  }
+
+  const canDecide = hasCapability(session.role, 'certificates', 'approve');
+
+  return (
+    <>
+      <h2 style={{ margin: '0 0 6px', fontSize: '22px' }}>Certificates</h2>
+      <p style={{ margin: '0 0 18px', fontSize: '13px', color: '#5A5448' }}>
+        Documents with an open anomaly or the least confident extraction are listed first.
+        Verification is a whole-document decision: every material field at or above 0.90,
+        no open ERROR anomaly, and a named human approver. Nothing here is ever
+        auto-promoted.
+      </p>
+      {failure !== null && (
+        <p role="alert" style={{ color: '#B3261E', fontSize: '13px' }}>
+          {failure}
+        </p>
+      )}
+      {failure === null && rows.length === 0 && (
+        <p style={{ fontSize: '13px', color: '#5A5448' }}>No certificate is awaiting review.</p>
+      )}
+      {rows.length > 0 && (
+        <>
+          <p style={{ margin: '0 0 10px', fontSize: '13px', color: '#5A5448' }}>
+            Showing {rows.length} of {total}.
+          </p>
+          <table style={{ width: '100%', borderCollapse: 'collapse', background: '#FFFFFF', fontSize: '13px' }}>
+            <thead>
+              <tr style={{ textAlign: 'left', background: '#EDEAE3' }}>
+                <th style={cell}>Subject</th>
+                <th style={cell}>Kind</th>
+                <th style={cell}>Status</th>
+                <th style={cell}>Fields</th>
+                <th style={cell}>Min confidence</th>
+                <th style={cell}>Open anomalies</th>
+                <th style={cell}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.id} style={{ borderTop: '1px solid rgba(8,18,30,0.08)' }}>
+                  <td style={cell}>
+                    <code>{row.subject_ref ?? row.id}</code>
+                  </td>
+                  <td style={cell}>{row.kind}</td>
+                  <td style={cell}>{row.verification_status}</td>
+                  <td style={cell}>{row.field_count}</td>
+                  <td style={cell}>
+                    {row.min_confidence === null ? '—' : row.min_confidence.toFixed(3)}
+                  </td>
+                  <td style={cell}>
+                    {row.open_error_anomalies} error / {row.open_warn_anomalies} warn
+                  </td>
+                  <td style={cell}>
+                    <a href={`/admin/certificates?certificate=${encodeURIComponent(row.id)}`}>
+                      Review
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      {detail !== null && (
+        <section
+          style={{
+            marginTop: '26px',
+            background: '#FFFFFF',
+            border: '1px solid rgba(201,168,76,0.35)',
+            borderRadius: '10px',
+            padding: '18px',
+          }}
+        >
+          <h3 style={{ margin: '0 0 4px', fontSize: '16px' }}>
+            Review · <code>{detail.certificate.subject_ref ?? detail.certificate.id}</code>
+          </h3>
+          <p style={{ margin: '0 0 14px', fontSize: '12px', color: '#5A5448' }}>
+            {detail.certificate.kind} · {detail.certificate.verification_status} ·{' '}
+            {detail.fields.length} extracted field{detail.fields.length === 1 ? '' : 's'} ·{' '}
+            {detail.openErrorAnomalies} open error · {detail.openWarnAnomalies} open warn ·{' '}
+            {detail.verifiable ? 'threshold met' : 'threshold NOT met'}
+          </p>
+
+          <h4 style={{ margin: '0 0 8px', fontSize: '13px' }}>Material fields</h4>
+          {detail.materialFields.length === 0 ? (
+            <p style={{ fontSize: '12px', color: '#5A5448' }}>
+              No material field was extracted, so the document cannot be verified.
+            </p>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+              <thead>
+                <tr style={{ textAlign: 'left', background: '#EDEAE3' }}>
+                  <th style={cell}>Field</th>
+                  <th style={cell}>Confidence</th>
+                  <th style={cell}>Band</th>
+                  <th style={cell}>At or above 0.90</th>
+                </tr>
+              </thead>
+              <tbody>
+                {detail.materialFields.map((field) => (
+                  <tr key={field.fieldName} style={{ borderTop: '1px solid rgba(8,18,30,0.08)' }}>
+                    <td style={cell}>{field.fieldName}</td>
+                    <td style={cell}>{field.confidence.toFixed(3)}</td>
+                    <td style={cell}>{evaluateConfidenceBand(field.confidence)}</td>
+                    <td style={cell}>{field.isHighConfidence ? 'yes' : 'no'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          <h4 style={{ margin: '18px 0 8px', fontSize: '13px' }}>Extracted fields</h4>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <thead>
+              <tr style={{ textAlign: 'left', background: '#EDEAE3' }}>
+                <th style={cell}>Field</th>
+                <th style={cell}>Value</th>
+                <th style={cell}>Confidence</th>
+                <th style={cell}>Band</th>
+                <th style={cell}>Publicly displayable</th>
+                <th style={cell}>Bounding box</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detail.fields.map((field) => (
+                <tr key={field.fieldName} style={{ borderTop: '1px solid rgba(8,18,30,0.08)' }}>
+                  <td style={cell}>
+                    {field.fieldName}
+                    {field.isMaterial ? ' · material' : ''}
+                  </td>
+                  <td style={cell}>{field.normalizedValue ?? '—'}</td>
+                  <td style={cell}>{field.confidence.toFixed(3)}</td>
+                  <td style={cell}>{field.band}</td>
+                  <td style={cell}>{field.publiclyDisplayable ? 'yes' : 'withheld (below 0.50)'}</td>
+                  <td style={cell}>
+                    <code>
+                      {field.bbox === null || field.bbox === undefined
+                        ? '—'
+                        : JSON.stringify(field.bbox)}
+                    </code>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {detail.anomalies.length > 0 && (
+            <>
+              <h4 style={{ margin: '18px 0 8px', fontSize: '13px' }}>Open anomalies</h4>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                <thead>
+                  <tr style={{ textAlign: 'left', background: '#EDEAE3' }}>
+                    <th style={cell}>Type</th>
+                    <th style={cell}>Severity</th>
+                    <th style={cell}>Detail</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {detail.anomalies.map((anomaly) => (
+                    <tr key={anomaly.id} style={{ borderTop: '1px solid rgba(8,18,30,0.08)' }}>
+                      <td style={cell}>{anomaly.anomaly_type}</td>
+                      <td style={cell}>{anomaly.severity}</td>
+                      <td style={cell}>
+                        <code>{JSON.stringify(anomaly.detail)}</code>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+
+          {detail.latestReview !== null && (
+            <p style={{ margin: '16px 0 0', fontSize: '12px', color: '#5A5448' }}>
+              Last review: {detail.latestReview.decision} on{' '}
+              {new Date(detail.latestReview.created_at).toLocaleString()}
+              {detail.latestReview.notes === null ? '' : ` — ${detail.latestReview.notes}`}
+            </p>
+          )}
+
+          <div style={{ marginTop: '18px' }}>
+            {canDecide ? (
+              <AdminCertificateDecision certificateId={detail.certificate.id} />
+            ) : (
+              <p style={{ fontSize: '12px', color: '#5A5448' }}>
+                Your role can read this document but cannot approve or reject it.
+              </p>
+            )}
+          </div>
+        </section>
       )}
     </>
   );
