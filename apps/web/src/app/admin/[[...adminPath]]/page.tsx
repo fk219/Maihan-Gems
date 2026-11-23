@@ -432,6 +432,7 @@ async function DerivedIdentities({ session }: { session: AdminSession }): Promis
                 <th style={cell}>State</th>
                 <th style={cell}>Evidence</th>
                 <th style={cell}>Review</th>
+                <th style={cell}>Note</th>
                 <th style={cell}>Action</th>
               </tr>
             </thead>
@@ -447,6 +448,7 @@ async function DerivedIdentities({ session }: { session: AdminSession }): Promis
                   <td style={cell}>{row.state}</td>
                   <td style={cell}>{row.sku_evidence_status}</td>
                   <td style={cell}>{row.review_state}</td>
+                  <td style={cell}>{row.review_note ?? '—'}</td>
                   <td style={cell}>
                     <AdminDerivedIdentityActions productId={row.id} reviewState={row.review_state} />
                   </td>
