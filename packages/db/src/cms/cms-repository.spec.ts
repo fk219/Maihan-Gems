@@ -74,10 +74,47 @@ describe('page lifecycle (E12.2 / doc 22 §4)', () => {
     const { revision } = await repo.updateBlocks({ pageId: page.id, blocks: [], expectedVersion: 1, editorId: 'trust-editor' });
     await repo.submitForReview({ revisionId: revision.id, editorId: 'trust-editor' });
     await expect(repo.decideRevision({ revisionId: revision.id, approverId: 'trust-editor', approve: true }))
-      .rejects.toMatchObject({ kind: 'SELF_APPROVAL' });
+      .rejects.toMatchObject({ code: 'TWO_PERSON_REQUIRED', entityKind: 'CMS_TRUST_PAGE' });
+    // The refusal happened before the write: the revision is still in review.
+    expect(auditLog.filter((a) => a.action === 'APPROVE')).toHaveLength(0);
     // A DIFFERENT approver is accepted.
     const ok = await repo.decideRevision({ revisionId: revision.id, approverId: 'trust-reviewer', approve: true });
     expect(ok.review_state).toBe('APPROVED');
+  });
+
+  it('does not require a second approver for ordinary content', async () => {
+    const page = await repo.createPage({ slug: 'blog-post', title: 'Post', pageKind: 'BLOG', blocks: [], actorId: 'editor-1' });
+    const { revision } = await repo.updateBlocks({ pageId: page.id, blocks: [], expectedVersion: 1, editorId: 'editor-1' });
+    await repo.submitForReview({ revisionId: revision.id, editorId: 'editor-1' });
+    const decided = await repo.decideRevision({ revisionId: revision.id, approverId: 'editor-1', approve: true });
+    expect(decided.review_state).toBe('APPROVED');
+    expect(auditLog.find((a) => a.action === 'APPROVE')?.diff).toMatchObject({
+      entity_kind: 'CMS_PAGE',
+      required: false,
+    });
+  });
+
+  it('refuses to publish a trust page as the revision editor, and records both actors otherwise', async () => {
+    const page = await repo.createPage({ slug: 'buying-guide', title: 'Buying Guide', pageKind: 'BUYING_GUIDE', blocks: [], actorId: 'editor-1' });
+    const { revision } = await repo.updateBlocks({ pageId: page.id, blocks: [], expectedVersion: 1, editorId: 'trust-editor' });
+    await repo.submitForReview({ revisionId: revision.id, editorId: 'trust-editor' });
+    await repo.decideRevision({ revisionId: revision.id, approverId: 'trust-approver', approve: true });
+
+    await expect(repo.publishApproved({ pageId: page.id, actorId: 'trust-editor' }))
+      .rejects.toMatchObject({ code: 'TWO_PERSON_REQUIRED', entityKind: 'CMS_TRUST_PAGE' });
+    expect(auditLog.filter((a) => a.action === 'PUBLISH')).toHaveLength(0);
+    expect((await repo.getPage(page.id))?.status).toBe('DRAFT');
+
+    const published = await repo.publishApproved({ pageId: page.id, actorId: 'trust-approver' });
+    expect(published.status).toBe('PUBLISHED');
+    const publishAudit = auditLog.find((a) => a.action === 'PUBLISH');
+    expect(publishAudit?.diff).toMatchObject({
+      entity_kind: 'CMS_TRUST_PAGE',
+      required: true,
+      editor_id: 'trust-editor',
+      second_approver_id: 'trust-approver',
+    });
+    expect(publishAudit?.before_state).toEqual({ status: 'DRAFT' });
   });
 
   it('refuses publishing when the head revision is not APPROVED', async () => {

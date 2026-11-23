@@ -35,6 +35,13 @@
  *   6. INV-07 AT READ TIME. Every field carries its confidence band and
  *      `publicly_displayable` (>= 0.50) from the domain policy, so the review
  *      panel cannot render a sub-threshold value as fact.
+ *   7. AN ANOMALY IS RESOLVED, NEVER ERASED. `resolveAnomaly` records
+ *      `resolved_at` / `resolved_by` / `resolution` once; a second resolution is
+ *      refused (409 semantics) and there is no DELETE path.
+ *   8. TWO-PERSON APPROVAL. Approval to VERIFIED requires an approver different
+ *      from the last recorded human actor on the document
+ *      (`verification_events.actor_type='HUMAN'`). No recorded editor satisfies
+ *      the rule and the fact is written into the audit snapshot.
  *
  * No database connection and no transaction is opened here: the caller
  * supplies the executor (technical_design/03).
@@ -42,14 +49,19 @@
 import { sql } from 'drizzle-orm';
 import {
   assessMaterialFields,
+  assertTwoPerson,
   canPromoteToVerified,
+  certificateApprovalEntityKind,
   evaluateConfidenceBand,
   isFieldPubliclyDisplayable,
   transitionCertificateStatus,
+  twoPersonAuditFields,
+  twoPersonRuleFor,
   type CertificateExtractionSchema,
   type ConfidenceBand,
   type ExtractedField,
   type MaterialFieldAssessment,
+  type TwoPersonAuditFields,
   type VerificationStatus,
 } from '@maihan/domain';
 import type { CatalogDatabase } from '../catalog/executor.js';
@@ -58,7 +70,10 @@ export type CertificateReviewErrorCode =
   | 'NOT_FOUND'
   | 'NOTE_REQUIRED'
   | 'UNRESOLVED_ERROR_ANOMALY'
-  | 'ALREADY_DECIDED';
+  | 'ALREADY_DECIDED'
+  | 'ANOMALY_NOT_FOUND'
+  | 'ANOMALY_ALREADY_RESOLVED'
+  | 'RESOLUTION_REQUIRED';
 
 export class CertificateReviewError extends Error {
   constructor(readonly code: CertificateReviewErrorCode) {
@@ -270,6 +285,40 @@ export interface CertificateAnomalyRow extends Record<string, unknown> {
   readonly severity: 'INFO' | 'WARN' | 'ERROR';
   readonly detail: unknown;
   readonly created_at: string;
+  readonly resolved_at: string | null;
+  readonly resolved_by: string | null;
+  readonly resolution: string | null;
+  /** Derived, never stored: an anomaly is open exactly when it is unresolved. */
+  readonly is_open: boolean;
+}
+
+interface CertificateAnomalyDbRow extends Record<string, unknown> {
+  id: string;
+  anomaly_type: string;
+  severity: 'INFO' | 'WARN' | 'ERROR';
+  detail: unknown;
+  created_at: string;
+  resolved_at: string | null;
+  resolved_by: string | null;
+  resolution: string | null;
+}
+
+interface ResolvedAnomalyDbRow extends CertificateAnomalyDbRow {
+  certificate_id: string;
+}
+
+function toAnomalyRow(row: CertificateAnomalyDbRow): CertificateAnomalyRow {
+  return {
+    id: row.id,
+    anomaly_type: row.anomaly_type,
+    severity: row.severity,
+    detail: row.detail,
+    created_at: row.created_at,
+    resolved_at: row.resolved_at,
+    resolved_by: row.resolved_by,
+    resolution: row.resolution,
+    is_open: row.resolved_at === null,
+  };
 }
 
 export interface CertificateReviewRecord extends Record<string, unknown> {
@@ -424,15 +473,16 @@ async function readAnomalies(
   db: CatalogDatabase,
   certificateId: string,
 ): Promise<CertificateAnomalyRow[]> {
-  const rows = await db.execute<CertificateAnomalyRow>(sql`
-    SELECT a.id, a.anomaly_type, a.severity, a.detail, a.created_at
+  const rows = await db.execute<CertificateAnomalyDbRow>(sql`
+    SELECT a.id, a.anomaly_type, a.severity, a.detail, a.created_at,
+           a.resolved_at, a.resolved_by, a.resolution
       FROM certificate_anomalies a
      WHERE a.certificate_id = ${certificateId}::uuid
        AND a.resolved_at IS NULL
      ORDER BY CASE a.severity WHEN 'ERROR' THEN 0 WHEN 'WARN' THEN 1 ELSE 2 END,
               a.created_at ASC
   `);
-  return rows.rows;
+  return rows.rows.map(toAnomalyRow);
 }
 
 async function readLatestReview(
@@ -447,6 +497,29 @@ async function readLatestReview(
      LIMIT 1
   `);
   return rows.rows[0] ?? null;
+}
+
+/**
+ * The last human who acted on this document, from the append-only trust
+ * ledger. That is the recorded editor the two-person rule compares against:
+ * a reviewer who submitted or rejected an extraction is recorded here, and a
+ * document no human has touched returns null (the rule is then satisfied and
+ * the audit snapshot says `editor_unrecorded: true`).
+ */
+async function readLastHumanActor(
+  db: CatalogDatabase,
+  certificateId: string,
+): Promise<string | null> {
+  const rows = await db.execute<{ actor_id: string | null }>(sql`
+    SELECT v.actor_id
+      FROM verification_events v
+     WHERE v.certificate_id = ${certificateId}::uuid
+       AND v.actor_type = 'HUMAN'
+       AND v.actor_id IS NOT NULL
+     ORDER BY v.id DESC
+     LIMIT 1
+  `);
+  return rows.rows[0]?.actor_id ?? null;
 }
 
 export async function getCertificateForReview(
@@ -492,6 +565,151 @@ export async function getCertificateForReview(
   };
 }
 
+// --- Anomaly triage -------------------------------------------------------
+
+export interface CertificateAnomalyList {
+  readonly certificateId: string;
+  /** Open and resolved, oldest first — the record, not just the blockers. */
+  readonly items: readonly CertificateAnomalyRow[];
+  readonly open: number;
+  readonly resolved: number;
+}
+
+/**
+ * Every anomaly recorded against a document, resolved ones included, oldest
+ * first. Resolution is a recorded fact, so the console must be able to show
+ * what blocked a document and how it was cleared — hiding resolved rows would
+ * make the history unreadable.
+ */
+export async function listAnomaliesForCertificate(
+  db: CatalogDatabase,
+  certificateId: string,
+): Promise<CertificateAnomalyList | null> {
+  const certificate = await readCertificate(db, certificateId);
+  if (certificate === null) return null;
+
+  const rows = await db.execute<CertificateAnomalyDbRow>(sql`
+    SELECT a.id, a.anomaly_type, a.severity, a.detail, a.created_at,
+           a.resolved_at, a.resolved_by, a.resolution
+      FROM certificate_anomalies a
+     WHERE a.certificate_id = ${certificateId}::uuid
+     ORDER BY a.created_at ASC, a.id ASC
+  `);
+  const items = rows.rows.map(toAnomalyRow);
+  const resolved = items.filter((item) => !item.is_open).length;
+
+  return {
+    certificateId,
+    items,
+    open: items.length - resolved,
+    resolved,
+  };
+}
+
+export interface ResolveAnomalyInput {
+  readonly anomalyId: string;
+  readonly actorId: string;
+  /** The recorded resolution — a short, reviewable statement of what was done. */
+  readonly resolution: string;
+  /** Optional human detail; kept in the audit snapshot, never instead of it. */
+  readonly note?: string;
+  readonly requestId?: string;
+}
+
+export interface ResolveAnomalyResult {
+  readonly anomaly: CertificateAnomalyRow;
+  readonly certificateId: string;
+  readonly resolvedAt: string;
+  readonly note: string | null;
+}
+
+/**
+ * Resolve one anomaly exactly once.
+ *
+ * Single-use is a WHERE clause (`resolved_at IS NULL`), not a read-then-write:
+ * two concurrent resolutions cannot both win. The update, the resolution
+ * columns and the before/after audit row are ONE data-modifying CTE statement,
+ * and the anomaly row is never deleted — the resolution is a record.
+ *
+ * A failure costs a second read only to say WHICH refusal it is (unknown
+ * anomaly vs already resolved); the success path stays one statement.
+ */
+export async function resolveAnomaly(
+  db: CatalogDatabase,
+  input: ResolveAnomalyInput,
+): Promise<ResolveAnomalyResult> {
+  const resolution = input.resolution.trim();
+  if (resolution.length === 0) throw new CertificateReviewError('RESOLUTION_REQUIRED');
+  const note = (input.note ?? '').trim();
+  const recordedNote = note.length === 0 ? null : note;
+  const reason = recordedNote ?? 'Anomaly resolved from the admin console';
+
+  const resolved = await db.execute<ResolvedAnomalyDbRow>(sql`
+    WITH target AS (
+      SELECT a.id, a.certificate_id, a.anomaly_type, a.severity
+        FROM certificate_anomalies a
+       WHERE a.id = ${input.anomalyId}::uuid
+       FOR UPDATE
+    ), resolved AS (
+      UPDATE certificate_anomalies a
+         SET resolved_at = now(),
+             resolved_by = ${input.actorId}::uuid,
+             resolution = ${resolution}
+        FROM target t
+       WHERE a.id = t.id
+         AND a.resolved_at IS NULL
+      RETURNING a.id, a.anomaly_type, a.severity, a.detail, a.created_at,
+                a.resolved_at, a.resolved_by, a.resolution, a.certificate_id
+    ), logged AS (
+      INSERT INTO audit_logs (
+        actor_type, actor_id, action, entity_type, entity_id,
+        before_state, after_state, diff, request_id, reason
+      )
+      SELECT 'ADMIN', ${input.actorId}::uuid, 'RESOLVE_CERTIFICATE_ANOMALY',
+             'certificate_anomalies', r.id,
+             jsonb_build_object('resolved_at', NULL, 'resolution', NULL),
+             jsonb_build_object(
+               'resolved_at', r.resolved_at,
+               'resolved_by', r.resolved_by,
+               'resolution', r.resolution,
+               'certificate_id', r.certificate_id,
+               'note', ${recordedNote}::text
+             ),
+             jsonb_build_object(
+               'anomaly_type', t.anomaly_type,
+               'severity', t.severity,
+               'resolution', r.resolution
+             ),
+             ${input.requestId ?? null}::text,
+             ${reason}::text
+        FROM resolved r
+        JOIN target t ON t.id = r.id
+      RETURNING id
+    )
+    SELECT r.id, r.anomaly_type, r.severity, r.detail, r.created_at,
+           r.resolved_at, r.resolved_by, r.resolution, r.certificate_id
+      FROM resolved r
+  `);
+
+  const row = resolved.rows[0];
+  if (row === undefined) {
+    const existing = await db.execute<{ id: string; resolved_at: string | null }>(sql`
+      SELECT a.id, a.resolved_at
+        FROM certificate_anomalies a
+       WHERE a.id = ${input.anomalyId}::uuid
+    `);
+    if (existing.rows[0] === undefined) throw new CertificateReviewError('ANOMALY_NOT_FOUND');
+    throw new CertificateReviewError('ANOMALY_ALREADY_RESOLVED');
+  }
+
+  return {
+    anomaly: toAnomalyRow(row),
+    certificateId: row.certificate_id,
+    resolvedAt: String(row.resolved_at),
+    note: recordedNote,
+  };
+}
+
 // --- Decision -------------------------------------------------------------
 
 export type CertificateDecision = 'APPROVE' | 'REJECT';
@@ -513,6 +731,8 @@ export interface DecideCertificateResult {
   readonly reviewId: string;
   readonly eventId: string;
   readonly materialFields: readonly MaterialFieldAssessment[];
+  /** Both actors of the trust decision; null for a rejection. */
+  readonly twoPerson: TwoPersonAuditFields | null;
 }
 
 interface DecidedRow extends Record<string, unknown> {
@@ -543,6 +763,7 @@ export async function decideCertificate(
 
   let materialFields: readonly MaterialFieldAssessment[] = [];
   let toStatus: VerificationStatus;
+  let twoPerson: TwoPersonAuditFields | null = null;
 
   if (input.decision === 'APPROVE') {
     const [fields, anomalies] = await Promise.all([
@@ -566,6 +787,15 @@ export async function decideCertificate(
       isHumanReviewer: true,
       allMaterialFieldsAbove90,
     });
+
+    // Two-person rule (plan task 3): checked only once the decision is
+    // otherwise legal, and always BEFORE the write statement. The "editor" is
+    // the last recorded human actor on this document; a document no human has
+    // touched has no editor and satisfies the rule.
+    const rule = twoPersonRuleFor(certificateApprovalEntityKind(toStatus));
+    const editorId = rule.required ? await readLastHumanActor(db, input.certificateId) : null;
+    assertTwoPerson(rule, editorId, input.actorId);
+    twoPerson = twoPersonAuditFields(rule, editorId, input.actorId);
   } else {
     toStatus = transitionCertificateStatus(fromStatus, {
       type: 'REJECT',
@@ -575,6 +805,7 @@ export async function decideCertificate(
 
   const eventType = input.decision === 'APPROVE' ? 'APPROVED' : 'REJECTED';
   const auditAction = input.decision === 'APPROVE' ? 'APPROVE_CERTIFICATE' : 'REJECT_CERTIFICATE';
+  const twoPersonJson = twoPerson === null ? null : JSON.stringify(twoPerson);
 
   const decided = await db.execute<DecidedRow>(sql`
     WITH decided AS (
@@ -604,7 +835,8 @@ export async function decideCertificate(
                'decision', ${input.decision}::text,
                'note', ${note.length === 0 ? null : note}::text,
                'review_id', r.id,
-               'material_fields', ${JSON.stringify(materialFields)}::jsonb
+               'material_fields', ${JSON.stringify(materialFields)}::jsonb,
+               'two_person', ${twoPersonJson}::jsonb
              )
         FROM decided d
         JOIN review r ON TRUE
@@ -612,7 +844,7 @@ export async function decideCertificate(
     ), logged AS (
       INSERT INTO audit_logs (
         actor_type, actor_id, action, entity_type, entity_id,
-        before_state, after_state, request_id, reason
+        before_state, after_state, diff, request_id, reason
       )
       SELECT 'ADMIN', ${input.actorId}::uuid, ${auditAction}, 'certificates', d.id,
              jsonb_build_object('verification_status', ${fromStatus}::text),
@@ -620,8 +852,10 @@ export async function decideCertificate(
                'verification_status', ${toStatus}::text,
                'decision', ${input.decision}::text,
                'review_id', r.id,
-               'verification_event_id', l.id
+               'verification_event_id', l.id,
+               'two_person', ${twoPersonJson}::jsonb
              ),
+             ${twoPersonJson}::jsonb,
              ${input.requestId ?? null}::text,
              ${note.length === 0 ? null : note}::text
         FROM decided d
@@ -649,5 +883,6 @@ export async function decideCertificate(
     reviewId: String(written.review_id),
     eventId: String(written.event_id),
     materialFields,
+    twoPerson,
   };
 }

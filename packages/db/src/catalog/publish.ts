@@ -11,11 +11,23 @@
  * Gate V15 is enforced here, not in the UI: a product whose price evidence is
  * `UNKNOWN` may not be published. Hiding a button is not a control.
  *
+ * The two-person rule (plan task 3) is enforced here too: a DRAFT -> ACTIVE
+ * move whose price evidence is not VERIFIED requires an approver different from
+ * the last recorded editor of the product. The editor is read from the audit
+ * ledger before any write; when no editor is recorded the rule is satisfied and
+ * the fact is written into the audit snapshot.
+ *
  * Every transition writes `audit_logs` with before and after state. The audit
  * row is written in the SAME statement batch as the update, so a published row
  * without an audit row is not representable.
  */
 import { sql } from 'drizzle-orm';
+import {
+  assertTwoPerson,
+  productPublishEntityKind,
+  twoPersonAuditFields,
+  twoPersonRuleFor,
+} from '@maihan/domain';
 import type { CatalogDatabase } from './executor.js';
 
 export type PublishFailureCode = 'NOT_FOUND' | 'INVALID_STATE' | 'UNVERIFIED_PRICE';
@@ -103,6 +115,30 @@ export interface PublishParams {
   readonly requestId?: string;
 }
 
+/**
+ * The last actor recorded against this product in the audit ledger.
+ *
+ * `products` has no `updated_by` column, so the audit ledger is the recorded
+ * source of "who edited it last". This is the same fact the console shows, and
+ * it is read BEFORE the write so a refused self-approval writes nothing.
+ */
+async function readLastProductEditor(
+  db: CatalogDatabase,
+  productId: string,
+): Promise<string | null> {
+  const rows = await db.execute<{ actor_id: string | null }>(sql`
+    SELECT a.actor_id
+      FROM audit_logs a
+     WHERE a.entity_type = 'products'
+       AND a.entity_id = ${productId}::uuid
+       AND a.actor_type = 'ADMIN'
+       AND a.actor_id IS NOT NULL
+     ORDER BY a.id DESC
+     LIMIT 1
+  `);
+  return rows.rows[0]?.actor_id ?? null;
+}
+
 async function transition(
   db: CatalogDatabase,
   params: PublishParams,
@@ -131,6 +167,16 @@ async function transition(
     throw new ProductPublishError('INVALID_STATE');
   }
 
+  // Two-person rule, checked before the write. `assertTwoPerson` throws the
+  // typed TwoPersonError, which the API maps to 403 TWO_PERSON_REQUIRED.
+  const rule = twoPersonRuleFor(
+    productPublishEntityKind(before.state, target, before.price_evidence),
+  );
+  const editorId = rule.required ? await readLastProductEditor(db, params.productId) : null;
+  assertTwoPerson(rule, editorId, params.actorId);
+  const twoPerson = twoPersonAuditFields(rule, editorId, params.actorId);
+  const twoPersonJson = JSON.stringify(twoPerson);
+
   const updated = await db.execute<AdminProductRow>(sql`
     UPDATE products
     SET state = ${target},
@@ -144,13 +190,16 @@ async function transition(
   await db.execute(sql`
     INSERT INTO audit_logs (
       actor_type, actor_id, action, entity_type, entity_id,
-      before_state, after_state, request_id, reason
+      before_state, after_state, diff, request_id, reason
     ) VALUES (
       'ADMIN', ${params.actorId}::uuid, ${action}, 'products', ${params.productId}::uuid,
       ${JSON.stringify({ state: before.state, published_at: before.published_at })}::jsonb,
-      ${JSON.stringify({ state: after.state, published_at: after.published_at })}::jsonb,
+      ${JSON.stringify({ state: after.state, published_at: after.published_at, two_person: twoPerson })}::jsonb,
+      ${twoPersonJson}::jsonb,
       ${params.requestId ?? null},
-      ${`Product ${action.toLowerCase()} from the admin console`}
+      ${rule.required
+        ? `Product ${action.toLowerCase()} with second approver recorded`
+        : `Product ${action.toLowerCase()} from the admin console`}
     )
   `);
 

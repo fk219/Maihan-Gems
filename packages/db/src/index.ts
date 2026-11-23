@@ -222,6 +222,7 @@ export {
 } from './webar/webar-repository.js';
 export {
   createCmsRepository,
+  createCmsAuditWriter,
   TRUST_BEARING_KINDS,
   CmsConflictError,
   type CmsRepository as CmsRepositoryApi,
@@ -294,7 +295,10 @@ export {
   listPendingCertificates,
   getCertificateForReview,
   decideCertificate,
+  listAnomaliesForCertificate,
+  resolveAnomaly,
   extractionSchemaFromFields,
+  type CertificateAnomalyList,
   type CertificateAnomalyRow,
   type CertificateDecision,
   type CertificateExtractionRow,
@@ -306,6 +310,8 @@ export {
   type ListPendingCertificatesQuery,
   type PendingCertificateRow,
   type PendingCertificatesPage,
+  type ResolveAnomalyInput,
+  type ResolveAnomalyResult,
   type ReviewedField,
 } from './admin/certificate-review-repository.js';
 export {

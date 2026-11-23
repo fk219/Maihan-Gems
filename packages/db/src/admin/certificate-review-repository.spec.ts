@@ -23,15 +23,21 @@ import {
   decideCertificate,
   extractionSchemaFromFields,
   getCertificateForReview,
+  listAnomaliesForCertificate,
   listPendingCertificates,
+  resolveAnomaly,
   type CertificateExtractionRow,
 } from './certificate-review-repository.js';
 
 const CERTIFICATE_ID = '66666666-6666-4666-8666-666666666666';
 const ACTOR_ID = '44444444-4444-4444-8444-444444444444';
 
-function certificateRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  return {
+/** Every string parameter, joined: JSON payloads are bound as strings. */
+function paramText(values: readonly unknown[] | undefined): string {
+  return (values ?? []).filter((value): value is string => typeof value === 'string').join('\n');
+}
+
+function certificateRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {  return {
     id: CERTIFICATE_ID,
     kind: 'CERTIFICATE',
     gemstone_id: '77777777-7777-4777-8777-777777777777',
@@ -101,6 +107,21 @@ function highConfidenceFields(): Record<string, unknown>[] {
     field({ field_name: 'origin', confidence: '0.920', normalized_value: 'Nigeria' }),
     field({ field_name: 'treatment_0', confidence: '0.910', normalized_value: 'HEAT_TREATED' }),
   ];
+}
+
+/** A closed anomaly: present in the record, no longer blocking. */
+function anomalyRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    id: 'a1',
+    anomaly_type: 'WEIGHT_MISMATCH_SLUG',
+    severity: 'ERROR',
+    detail: {},
+    created_at: '2026-11-23T09:05:00.000Z',
+    resolved_at: null,
+    resolved_by: null,
+    resolution: null,
+    ...overrides,
+  };
 }
 
 describe('listPendingCertificates', () => {
@@ -245,7 +266,7 @@ describe('decideCertificate — approval threshold', () => {
     const db = createScriptedExecutor([
       [certificateRow({ open_error_anomalies: '1' })],
       highConfidenceFields(),
-      [{ id: 'a1', anomaly_type: 'WEIGHT_MISMATCH_SLUG', severity: 'ERROR', detail: {}, created_at: 'x' }],
+      [anomalyRow()],
     ]);
 
     await expect(
@@ -259,10 +280,34 @@ describe('decideCertificate — approval threshold', () => {
     expect(db.queries).toHaveLength(3);
   });
 
+  it('no longer blocks once the ERROR anomaly is resolved, even if the queue projection is stale', async () => {
+    // The queue row still says one open ERROR (the projection was read before
+    // the resolution); the decision re-reads the anomalies and sees none open.
+    const db = createScriptedExecutor([
+      [certificateRow({ open_error_anomalies: '1' })],
+      highConfidenceFields(),
+      [],
+      [],
+      [{ id: CERTIFICATE_ID, review_id: 'r1', event_id: '42' }],
+    ]);
+
+    const result = await decideCertificate(db as never, {
+      certificateId: CERTIFICATE_ID,
+      decision: 'APPROVE',
+      actorId: ACTOR_ID,
+    });
+
+    expect(result.toStatus).toBe('VERIFIED');
+    const anomalyRead = db.queries[2];
+    expect(anomalyRead?.text).toContain('a.resolved_at IS NULL');
+    expect(db.queries[4]?.text).toContain('INSERT INTO verification_events');
+  });
+
   it('approves a fully confident document and writes review + ledger + audit in one statement', async () => {
     const db = createScriptedExecutor([
       [certificateRow()],
       highConfidenceFields(),
+      [],
       [],
       [{ id: CERTIFICATE_ID, review_id: 'r1', event_id: '42' }],
     ]);
@@ -283,8 +328,15 @@ describe('decideCertificate — approval threshold', () => {
       eventId: '42',
     });
     expect(result.certificate.verification_status).toBe('VERIFIED');
+    expect(result.twoPerson).toMatchObject({
+      entity_kind: 'CERTIFICATE_APPROVAL',
+      required: true,
+      editor_id: null,
+      second_approver_id: ACTOR_ID,
+      editor_unrecorded: true,
+    });
 
-    const write = db.queries[3];
+    const write = db.queries[4];
     expect(write?.text).toContain('UPDATE certificates');
     expect(write?.text).toContain('INSERT INTO certificate_reviews');
     expect(write?.text).toContain('INSERT INTO verification_events');
@@ -375,6 +427,7 @@ describe('decideCertificate — rejection', () => {
       highConfidenceFields(),
       [],
       [],
+      [],
     ]);
 
     await expect(
@@ -384,5 +437,241 @@ describe('decideCertificate — rejection', () => {
         actorId: ACTOR_ID,
       }),
     ).rejects.toMatchObject({ code: 'ALREADY_DECIDED' });
+  });
+});
+
+describe('decideCertificate — two-person approval (plan task 3)', () => {
+  const OTHER_ACTOR = '55555555-5555-4555-8555-555555555555';
+
+  it('refuses self-approval: the last human actor cannot approve their own document', async () => {
+    const db = createScriptedExecutor([
+      [certificateRow()],
+      highConfidenceFields(),
+      [],
+      [{ actor_id: ACTOR_ID }],
+    ]);
+
+    await expect(
+      decideCertificate(db as never, {
+        certificateId: CERTIFICATE_ID,
+        decision: 'APPROVE',
+        actorId: ACTOR_ID,
+      }),
+    ).rejects.toMatchObject({
+      name: 'TwoPersonError',
+      code: 'TWO_PERSON_REQUIRED',
+      entityKind: 'CERTIFICATE_APPROVAL',
+    });
+
+    // Read, fields, anomalies, last human actor — and no write statement.
+    expect(db.queries).toHaveLength(4);
+    expect(db.queries.every((query) => !/\bINSERT\b/.test(query.text))).toBe(true);
+    expect(db.queries[3]?.text).toContain("v.actor_type = 'HUMAN'");
+  });
+
+  it('accepts a different approver and records both actors in the audit snapshot', async () => {
+    const db = createScriptedExecutor([
+      [certificateRow()],
+      highConfidenceFields(),
+      [],
+      [{ actor_id: OTHER_ACTOR }],
+      [{ id: CERTIFICATE_ID, review_id: 'r1', event_id: '42' }],
+    ]);
+
+    const result = await decideCertificate(db as never, {
+      certificateId: CERTIFICATE_ID,
+      decision: 'APPROVE',
+      actorId: ACTOR_ID,
+    });
+
+    expect(result.toStatus).toBe('VERIFIED');
+    expect(result.twoPerson).toMatchObject({
+      editor_id: OTHER_ACTOR,
+      second_approver_id: ACTOR_ID,
+      editor_unrecorded: false,
+    });
+
+    const write = db.queries[4];
+    const writeParameters = paramText(write?.values);
+    expect(writeParameters).toContain(OTHER_ACTOR);
+    expect(writeParameters).toContain(ACTOR_ID);
+    expect(write?.text).toContain('diff');
+  });
+
+  it('satisfies the rule when no human actor is recorded, and says so in the audit row', async () => {
+    const db = createScriptedExecutor([
+      [certificateRow()],
+      highConfidenceFields(),
+      [],
+      [],
+      [{ id: CERTIFICATE_ID, review_id: 'r1', event_id: '42' }],
+    ]);
+
+    const result = await decideCertificate(db as never, {
+      certificateId: CERTIFICATE_ID,
+      decision: 'APPROVE',
+      actorId: ACTOR_ID,
+    });
+
+    expect(result.twoPerson).toMatchObject({ editor_id: null, editor_unrecorded: true });
+    expect(paramText(db.queries[4]?.values)).toContain('"editor_unrecorded":true');
+  });
+
+  it('does not require a second approver to reject', async () => {
+    const db = createScriptedExecutor([
+      [certificateRow({ verification_status: 'EXTRACTED' })],
+      [{ id: CERTIFICATE_ID, review_id: 'r2', event_id: '43' }],
+    ]);
+
+    const result = await decideCertificate(db as never, {
+      certificateId: CERTIFICATE_ID,
+      decision: 'REJECT',
+      actorId: ACTOR_ID,
+      note: 'Duplicate of K1161-NSC',
+    });
+
+    expect(result.twoPerson).toBeNull();
+    // Rejection never reads the editor: no rule to satisfy.
+    expect(db.queries).toHaveLength(2);
+  });
+});
+
+describe('listAnomaliesForCertificate', () => {
+  it('returns open and resolved anomalies oldest first', async () => {
+    const db = createScriptedExecutor([
+      [certificateRow()],
+      [
+        anomalyRow({
+          id: 'a1',
+          anomaly_type: 'WEIGHT_MISMATCH_SLUG',
+          created_at: '2026-11-01T00:00:00.000Z',
+          resolved_at: '2026-11-02T00:00:00.000Z',
+          resolved_by: ACTOR_ID,
+          resolution: 'Corrected the weight against the lab PDF',
+        }),
+        anomalyRow({
+          id: 'a2',
+          anomaly_type: 'ORIGIN_CONFLICT',
+          severity: 'WARN',
+          created_at: '2026-11-03T00:00:00.000Z',
+        }),
+      ],
+    ]);
+
+    const list = await listAnomaliesForCertificate(db as never, CERTIFICATE_ID);
+
+    expect(list).not.toBeNull();
+    expect(list?.open).toBe(1);
+    expect(list?.resolved).toBe(1);
+    expect(list?.items.map((item) => item.id)).toEqual(['a1', 'a2']);
+    expect(list?.items[0]).toMatchObject({ is_open: false, resolution: 'Corrected the weight against the lab PDF' });
+    expect(list?.items[1]).toMatchObject({ is_open: true, resolved_at: null });
+
+    const select = db.queries[1];
+    expect(select?.text).toContain('ORDER BY a.created_at ASC, a.id ASC');
+    // The list is a record, not a filter: resolved rows are included.
+    expect(select?.text).not.toContain('a.resolved_at IS NULL');
+    expect(select?.text).not.toMatch(/\b(DELETE|UPDATE|INSERT)\b/);
+  });
+
+  it('returns null for an unknown certificate', async () => {
+    const db = createScriptedExecutor([[]]);
+    expect(await listAnomaliesForCertificate(db as never, CERTIFICATE_ID)).toBeNull();
+    expect(db.queries).toHaveLength(1);
+  });
+});
+
+describe('resolveAnomaly', () => {
+  const ANOMALY_ID = '88888888-8888-4888-8888-888888888888';
+
+  it('records the resolution and the before/after audit row in one statement, and never deletes', async () => {
+    const db = createScriptedExecutor([
+      [
+        anomalyRow({
+          id: ANOMALY_ID,
+          resolved_at: '2026-11-23T12:00:00.000Z',
+          resolved_by: ACTOR_ID,
+          resolution: 'FALSE_POSITIVE',
+          certificate_id: CERTIFICATE_ID,
+        }),
+      ],
+    ]);
+
+    const result = await resolveAnomaly(db as never, {
+      anomalyId: ANOMALY_ID,
+      actorId: ACTOR_ID,
+      resolution: 'FALSE_POSITIVE',
+      note: 'Slug weight is for the pair; the certificate is for one stone',
+      requestId: 'req_resolve',
+    });
+
+    expect(result).toMatchObject({
+      certificateId: CERTIFICATE_ID,
+      resolvedAt: '2026-11-23T12:00:00.000Z',
+      note: 'Slug weight is for the pair; the certificate is for one stone',
+    });
+    expect(result.anomaly).toMatchObject({
+      id: ANOMALY_ID,
+      is_open: false,
+      resolution: 'FALSE_POSITIVE',
+      resolved_by: ACTOR_ID,
+    });
+
+    expect(db.queries).toHaveLength(1);
+    const write = db.queries[0];
+    expect(write?.text).toContain('UPDATE certificate_anomalies');
+    expect(write?.text).toContain('INSERT INTO audit_logs');
+    expect(write?.text).toContain('RESOLVE_CERTIFICATE_ANOMALY');
+    // Single-use is the WHERE clause, not a read-then-write.
+    expect(write?.text).toContain('a.resolved_at IS NULL');
+    expect(write?.text).toContain('FOR UPDATE');
+    expect(write?.text).not.toMatch(/\bDELETE\b/);
+    expect(write?.text).not.toContain('deleted_at');
+    expect(write?.values).toContain(ACTOR_ID);
+    expect(write?.values).toContain('FALSE_POSITIVE');
+  });
+
+  it('refuses a second resolution with 409 semantics', async () => {
+    const db = createScriptedExecutor([
+      [],
+      [{ id: ANOMALY_ID, resolved_at: '2026-11-23T12:00:00.000Z' }],
+    ]);
+
+    await expect(
+      resolveAnomaly(db as never, {
+        anomalyId: ANOMALY_ID,
+        actorId: ACTOR_ID,
+        resolution: 'FALSE_POSITIVE',
+      }),
+    ).rejects.toMatchObject({ code: 'ANOMALY_ALREADY_RESOLVED' });
+
+    expect(db.queries).toHaveLength(2);
+    expect(db.queries[1]?.text).toContain('SELECT a.id, a.resolved_at');
+  });
+
+  it('refuses an unknown anomaly', async () => {
+    const db = createScriptedExecutor([[], []]);
+
+    await expect(
+      resolveAnomaly(db as never, {
+        anomalyId: ANOMALY_ID,
+        actorId: ACTOR_ID,
+        resolution: 'FALSE_POSITIVE',
+      }),
+    ).rejects.toMatchObject({ code: 'ANOMALY_NOT_FOUND' });
+  });
+
+  it('requires a resolution and touches nothing without one', async () => {
+    const db = createScriptedExecutor([]);
+
+    await expect(
+      resolveAnomaly(db as never, {
+        anomalyId: ANOMALY_ID,
+        actorId: ACTOR_ID,
+        resolution: '   ',
+      }),
+    ).rejects.toMatchObject({ code: 'RESOLUTION_REQUIRED' });
+
+    expect(db.queries).toHaveLength(0);
   });
 });

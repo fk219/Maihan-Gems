@@ -162,7 +162,7 @@ export function buildFakeExecutor(): FakeExecutorState {
     }
 
     // ---- listRevisions ----------------------------------------------------
-    if (text.includes('FROM page_revisions r') && text.includes('WHERE r.page_id =')) {
+    if (text.includes('FROM page_revisions r') && text.includes('WHERE r.page_id =') && !text.includes('LIMIT 1')) {
       const pageId = values[0];
       const all = [...revisions.values()].filter((r) => r.page_id === pageId)
         .sort((a, b) => b.version - a.version)
@@ -190,7 +190,15 @@ export function buildFakeExecutor(): FakeExecutorState {
         .sort((a, b) => b.version - a.version);
       if (revs.length === 0) return { rows: [] };
       const s = review.get(revs[0]!.id);
-      return { rows: [{ review_state: s?.review_state ?? null }] };
+      const page = pages.get(pageId as string);
+      return {
+        rows: [{
+          review_state: s?.review_state ?? null,
+          editor_id: revs[0]!.editor_id ?? null,
+          page_kind: page?.page_kind ?? '',
+          status: page?.status ?? 'DRAFT',
+        }],
+      };
     }
 
     // ---- publishApproved UPDATE ----------------------------------------------

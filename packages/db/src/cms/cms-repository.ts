@@ -17,7 +17,9 @@
  *
  * Trust-bearing kinds (doc 22 §4): BUYING_GUIDE + CERTIFICATE_GUIDE (+ any
  * page_kind TREATMENT copy) require a second approver — the approver must
- * differ from the revising editor (the two-person rule, plan task 3).
+ * differ from the revising editor (the two-person rule, plan task 3). The rule
+ * itself lives in `@maihan/domain` (`assertTwoPerson`); this module only
+ * supplies the recorded editor and refuses before any write.
  *
  * Revision integrity (doc 23 §7): concurrent writes must detect a version
  * mismatch and refuse (409 semantics at the API; here VERSION_CONFLICT).
@@ -28,6 +30,14 @@
  * through the SAME shape the commerce repositories use (one audit trail).
  */
 import { sql } from 'drizzle-orm';
+import {
+  TRUST_BEARING_CMS_PAGE_KINDS,
+  assertTwoPerson,
+  cmsPageEntityKind,
+  twoPersonAuditFields,
+  twoPersonRuleFor,
+  type TwoPersonAuditFields,
+} from '@maihan/domain';
 import type { CatalogDatabase } from '../catalog/executor.js';
 
 export type PageWorkflowState = 'DRAFT' | 'IN_REVIEW' | 'PUBLISHED' | 'ARCHIVED';
@@ -57,11 +67,11 @@ export interface RevisionRow extends Record<string, unknown> {
   decided_at?: string | null;
 }
 
-/** doc 22 §4: the two-person kinds. */
-export const TRUST_BEARING_KINDS = new Set(['BUYING_GUIDE', 'CERTIFICATE_GUIDE']);
+/** doc 22 §4: the two-person kinds, from the single domain list. */
+export const TRUST_BEARING_KINDS = new Set<string>(TRUST_BEARING_CMS_PAGE_KINDS);
 
 export class CmsConflictError extends Error {
-  constructor(readonly kind: 'VERSION_CONFLICT' | 'INVALID_TRANSITION' | 'SELF_APPROVAL' | 'MISSING_REVISION') {
+  constructor(readonly kind: 'VERSION_CONFLICT' | 'INVALID_TRANSITION' | 'MISSING_REVISION') {
     super(`CMS_CONFLICT: ${kind}`);
     this.name = 'CmsConflictError';
   }
@@ -76,6 +86,8 @@ export interface AuditWriter {
     entity_id: string;
     before_state: Record<string, unknown> | null;
     after_state: Record<string, unknown> | null;
+    /** The two-person actors, when the transition was trust-bearing. */
+    diff?: Record<string, unknown> | null;
     reason: string;
     request_id?: string;
   }): Promise<void>;
@@ -95,6 +107,36 @@ export interface CmsRepository {
 }
 
 const PAGE_COLUMNS = sql`id, slug, title, page_kind, status, blocks, version`;
+
+/**
+ * The production audit seam: one INSERT into `audit_logs` per transition,
+ * including the `diff` column that carries both two-person actors. The console's
+ * read-only page uses a no-op writer because it never mutates.
+ */
+export function createCmsAuditWriter(
+  db: CatalogDatabase,
+  options: { readonly requestId?: string } = {},
+): AuditWriter {
+  return async (entry) => {
+    await db.execute(sql`
+      INSERT INTO audit_logs (
+        actor_type, actor_id, action, entity_type, entity_id,
+        before_state, after_state, diff, request_id, reason
+      ) VALUES (
+        ${entry.actor_type},
+        ${entry.actor_id}::uuid,
+        ${entry.action},
+        ${entry.entity_type},
+        ${entry.entity_id},
+        ${entry.before_state === null ? null : JSON.stringify(entry.before_state)}::jsonb,
+        ${entry.after_state === null ? null : JSON.stringify(entry.after_state)}::jsonb,
+        ${entry.diff === undefined || entry.diff === null ? null : JSON.stringify(entry.diff)}::jsonb,
+        ${options.requestId ?? entry.request_id ?? null}::text,
+        ${entry.reason}
+      )
+    `);
+  };
+}
 
 /** Revision columns LEFT-JOINed to the 0018 review-state ledger. */
 const REVISION_COLUMNS = sql`r.id, r.page_id, r.version, r.blocks, r.raw_markdown, r.editor_id, r.note, r.created_at, s.review_state, s.approved_by, s.decided_at`;
@@ -230,16 +272,23 @@ export function createCmsRepository(db: CatalogDatabase, audit: AuditWriter): Cm
       const revision = existing.rows[0];
       if (revision === undefined) throw new CmsConflictError('MISSING_REVISION');
       if (revision.review_state !== 'IN_REVIEW') throw new CmsConflictError('INVALID_TRANSITION');
-      // Two-person rule (doc 22 §4): a trust-bearing page's approver must
-      // differ from its editor. Content of any kind also prevents
-      // self-approval when the same actor both edited and decided —
-      // enforced uniformly.
-      const page = await db.execute<{ page_kind: string }>(sql`SELECT page_kind FROM pages WHERE id = ${revision.page_id}`);
-      const kind = page.rows[0]?.page_kind ?? '';
-      const trustBearing = TRUST_BEARING_KINDS.has(kind) || kind.includes('TREATMENT');
-      if (trustBearing && revision.editor_id !== null && revision.editor_id === approverId) {
-        throw new CmsConflictError('SELF_APPROVAL');
+
+      // Two-person rule (doc 22 §4, plan task 3): the approver of a
+      // trust-bearing page must differ from the revision's editor. Checked
+      // BEFORE the UPDATE, so a refusal writes nothing. A revision with no
+      // recorded editor satisfies the rule (documented, not invented).
+      let twoPerson: TwoPersonAuditFields | null = null;
+      if (approve) {
+        const page = await db.execute<{ page_kind: string }>(
+          sql`SELECT page_kind FROM pages WHERE id = ${revision.page_id}`,
+        );
+        const kind = page.rows[0]?.page_kind ?? '';
+        const rule = twoPersonRuleFor(cmsPageEntityKind(kind));
+        const editorId = revision.editor_id ?? null;
+        assertTwoPerson(rule, editorId, approverId);
+        twoPerson = twoPersonAuditFields(rule, editorId, approverId);
       }
+
       const decision = approve ? 'APPROVED' : 'REJECTED';
       const r = await db.execute<RevisionRow>(sql`
         UPDATE page_review_state
@@ -256,21 +305,39 @@ export function createCmsRepository(db: CatalogDatabase, audit: AuditWriter): Cm
         actor_type: 'STAFF', actor_id: approverId, action: approve ? 'APPROVE' : 'REJECT',
         entity_type: 'page_revisions', entity_id: revisionId,
         before_state: { review_state: 'IN_REVIEW' },
-        after_state: { review_state: decision, approved_by: approverId },
+        after_state: { review_state: decision, approved_by: approve ? approverId : null, two_person: twoPerson },
+        diff: twoPerson,
         reason: note ?? (approve ? 'Revision approved' : 'Revision rejected'),
       });
       return after;
     },
 
     async publishApproved({ pageId, actorId }) {
-      // Only a page whose HEAD revision is APPROVED may publish.
-      const head = await db.execute<{ review_state: string | null }>(sql`
-        SELECT s.review_state FROM page_revisions r
+      // Only a page whose HEAD revision is APPROVED may publish. The same read
+      // supplies the editor the two-person rule compares the publisher with.
+      const head = await db.execute<{
+        review_state: string | null;
+        editor_id: string | null;
+        page_kind: string;
+        status: string;
+      }>(sql`
+        SELECT s.review_state, r.editor_id, p.page_kind, p.status
+          FROM page_revisions r
           JOIN page_review_state s ON s.revision_id = r.id
+          JOIN pages p ON p.id = r.page_id
          WHERE r.page_id = ${pageId}
          ORDER BY r.version DESC LIMIT 1
       `);
-      if (head.rows[0]?.review_state !== 'APPROVED') throw new CmsConflictError('INVALID_TRANSITION');
+      const headRow = head.rows[0];
+      if (headRow?.review_state !== 'APPROVED') throw new CmsConflictError('INVALID_TRANSITION');
+
+      // The publisher is the second approver: the person who wrote the copy
+      // never publishes it. Refused before the UPDATE.
+      const rule = twoPersonRuleFor(cmsPageEntityKind(headRow.page_kind));
+      const editorId = headRow.editor_id ?? null;
+      assertTwoPerson(rule, editorId, actorId);
+      const twoPerson = twoPersonAuditFields(rule, editorId, actorId);
+
       const r = await db.execute<PageRow>(sql`
         UPDATE pages
            SET status = 'PUBLISHED', published_at = now(), updated_at = now()
@@ -282,8 +349,9 @@ export function createCmsRepository(db: CatalogDatabase, audit: AuditWriter): Cm
       await audit({
         actor_type: 'STAFF', actor_id: actorId, action: 'PUBLISH',
         entity_type: 'pages', entity_id: pageId,
-        before_state: { status: 'DRAFT' },
-        after_state: { status: 'PUBLISHED' },
+        before_state: { status: headRow.status },
+        after_state: { status: 'PUBLISHED', two_person: twoPerson },
+        diff: twoPerson,
         reason: 'Approved revision published',
       });
       return after;
