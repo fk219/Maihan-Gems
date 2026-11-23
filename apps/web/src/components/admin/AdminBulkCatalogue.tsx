@@ -65,9 +65,12 @@ type Operation = 'PRICES' | 'STATE';
 export function AdminBulkCatalogue({
   products,
   recentOperations,
+  canUndo,
 }: {
   readonly products: readonly BulkCatalogueProduct[];
   readonly recentOperations: readonly RecentBulkOperation[];
+  /** `products/approve`: the console must not offer an action the policy denies. */
+  readonly canUndo: boolean;
 }): React.JSX.Element {
   const [operation, setOperation] = useState<Operation>('PRICES');
   const [mode, setMode] = useState<'SET' | 'ADJUST_PERCENT'>('SET');
@@ -355,7 +358,7 @@ export function AdminBulkCatalogue({
           <button type="button" disabled={busy} onClick={() => void run(false)} style={primary}>
             Apply
           </button>
-          {appliedOperationId !== null && (
+          {canUndo && appliedOperationId !== null && (
             <button
               type="button"
               disabled={busy}
@@ -461,6 +464,8 @@ export function AdminBulkCatalogue({
                   <td style={cell}>
                     {operation.already_undone ? (
                       <span style={{ color: '#5A5448' }}>Undone</span>
+                    ) : !canUndo ? (
+                      <span style={{ color: '#5A5448' }}>Your role cannot reverse</span>
                     ) : operation.within_window ? (
                       <button
                         type="button"

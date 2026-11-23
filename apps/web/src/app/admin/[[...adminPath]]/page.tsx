@@ -591,6 +591,7 @@ async function CatalogueBulk({ session }: { session: AdminSession }): Promise<Re
             priceEvidence: row.price_evidence,
           }))}
           recentOperations={recent}
+          canUndo={hasCapability(session.role, 'products', 'approve')}
         />
       )}
     </>
