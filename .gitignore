@@ -56,6 +56,13 @@ test-results/
 .media/
 
 # =============================================================================
+# Local email sink output (EMAIL_TRANSPORT=sink, development only)
+# =============================================================================
+# Rendered transactional email contains customer data. It is written to disk
+# only in non-production, and it must never be committed.
+.mail/
+
+# =============================================================================
 # Migration working data
 # =============================================================================
 # tools/migrate writes staging and canonical data to a DATABASE, never to files

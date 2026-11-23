@@ -203,6 +203,10 @@ importers:
       '@maihan/observability':
         specifier: workspace:*
         version: link:../../packages/observability
+    devDependencies:
+      vitest:
+        specifier: 5.0.3
+        version: 5.0.3(@types/node@26.6.4)(happy-dom@20.14.5)(vite@8.3.3(@types/node@26.6.4))
 
   packages/ai:
     dependencies:

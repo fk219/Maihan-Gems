@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "tsc -b",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "start": "node ./dist/main.js"
   },
   "dependencies": {
     "@maihan/config": "workspace:*",
@@ -13,5 +15,8 @@
     "@maihan/db": "workspace:*",
     "@maihan/domain": "workspace:*",
     "@maihan/observability": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "5.0.3"
   }
 }
