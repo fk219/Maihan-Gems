@@ -1,34 +1,51 @@
 /**
  * packages/db — the authoritative schema-fidelity expectations.
  *
- * Phase 1 Task 5. Every value here is transcribed from the authoritative,
+ * Phase 1 Task 5 established this mirror by transcribing the authoritative,
  * validated schema (PROJECT_SOURCE_OF_TRUTH.md section 8; technical_design/04)
- * as reproduced by the Task 4 ordered migrations and introspected on both
+ * as reproduced by the Task 4 ordered migrations, introspected on both
  * sanctioned PostgreSQL 16.15 dev targets (local container and the Neon
  * "Maihan Gems Dev" project), where the two introspections matched exactly.
+ * The 2026-11-23 measurement below is the current source of the numbers.
  *
- * The aggregate counts are the locked architecture numbers (AGENTS.md section 7;
- * INITIAL_IMPLEMENTATION_PLAN.md section 36 task 5):
- *   75 tables (74 locked + the 0018 CMS review-ledger expansion), 33 enums, 95 FKs, 595 CHECK-class constraints, 266 indexes,
- *   9 named invariant constraints, 6 RLS tables with 6 policies and
- *   0 policy-less tables, 2 HNSW indexes, 1 trigger, 1 view, 2 functions.
+ * The aggregate counts are MEASURED, never reasoned: every number in
+ * EXPECTED_COUNTS, and every name in EXPECTED_TABLES / EXPECTED_FOREIGN_KEYS,
+ * was read out of the live schema of the Neon `maihan_dev` database
+ * (PostgreSQL 18.7) on 2026-11-23 with the shared introspection in
+ * packages/db/src/introspect.ts, after migrations 0001-0022 had been applied by
+ * packages/db's own runner (`pnpm --filter @maihan/db run migrate`):
+ *   83 tables, 33 enums, 83 primary keys, 108 foreign keys, 657 CHECK-class
+ *   constraints, 294 indexes, 9 named invariant constraints, 6 RLS tables with
+ *   6 policies and 0 policy-less tables, 2 HNSW indexes, 1 trigger, 1 view,
+ *   2 functions.
  *
- * The "591 CHECK" figure reconciles as 28 pg_constraint CHECK entries plus
- * 563 NOT NULL column constraints (PG16 keeps NOT NULL in pg_attribute, not
+ * The 657 CHECK class reconciles as 40 pg_constraint CHECK entries plus 617
+ * NOT NULL column constraints (PostgreSQL keeps NOT NULL in pg_attribute, not
  * pg_constraint). Both components are asserted; the counting semantics are the
  * ones established by packages/db/src/introspect.ts in Task 4.
  *
- * Those totals are the Task-5-verified baseline plus the 0018 expansion. They
- * are NOT re-derived by hand later: migrations 0019 (identity), 0020 (vendors)
- * and 0021 (customer auth) were merged without advancing this mirror, and 0022
- * adds four columns to `products`. The 0022 increment is stated exactly in
- * EXPECTED_0022_COUNT_DELTA; the absolute totals await a sanctioned
- * fresh-database introspection (see the TODO on EXPECTED_COUNTS).
+ * The locked baseline (AGENTS.md section 7; INITIAL_IMPLEMENTATION_PLAN.md
+ * section 36 task 5) is 74 tables / 94 FKs / 591 CHECK / 263 indexes. The
+ * measured totals sit above it by the approved post-0018 expansions, each of
+ * which has an accepted ADR or a recorded client instruction, and the measured
+ * delta is accounted for object by object:
+ *   0018 CMS review ledger     page_review_state
+ *   0019 identity (ADR-027)    users, sessions, password_reset_tokens
+ *   0020 vendors (ADR-026)     vendors, vendor_members, vendor_ledger,
+ *                              order_vendor_allocations, the nullable
+ *                              vendor_id columns on products and gemstones
+ *   0021 customer auth         email_verification_tokens
+ *   0022 INV-08 review state   four products columns + one partial index
+ *                              (ADR-024 shape applied on the client
+ *                              instruction of 2026-11-23; ADR-024 itself
+ *                              remains Proposed)
+ * No object outside those five migrations is present in the measurement.
  *
- * Extension VERSIONS are deliberately not asserted: the local image ships
- * pgvector 0.8.7 and the Neon image ships 0.8.0 — a platform property, not
- * schema drift (both satisfy the >= 0.6 architecture requirement, doc 02).
- * Extension NAMES are asserted because the schema cannot exist without them.
+ * Extension VERSIONS are deliberately not asserted: they are a platform
+ * property, not schema drift. The 2026-11-23 measurement of `maihan_dev`
+ * reported pgvector 0.8.7, and the architecture only requires >= 0.6 (doc 02),
+ * so a platform upgrade must never fail this assertion. Extension NAMES are
+ * asserted because the schema cannot exist without them.
  *
  * A drift in any of these expectations means a migration changed the locked
  * schema — which requires an ADR that supersedes or extends Source of Truth
@@ -61,7 +78,7 @@ export const EXPECTED_EXTENSIONS: readonly string[] = [
   'pg_stat_statements'
 ];
 
-/** The 74 public tables of the locked schema, exact names. */
+/** The 83 public tables of the locked schema plus its approved expansions, exact names. */
 export const EXPECTED_TABLES: readonly string[] = [
   'addresses',
   'ai_evaluations',
@@ -89,6 +106,8 @@ export const EXPECTED_TABLES: readonly string[] = [
   'dyo_configurations',
   'dyo_price_snapshots',
   'dyo_quotes',
+  // 0021 customer auth.
+  'email_verification_tokens',
   'event_consumers',
   'feature_flags',
   'fulfillments',
@@ -109,9 +128,13 @@ export const EXPECTED_TABLES: readonly string[] = [
   'navigations',
   'order_events',
   'order_items',
+  // 0020 vendors: per-vendor split of one order (ADR-026).
+  'order_vendor_allocations',
   'orders',
   'page_revisions',
   'pages',
+  // 0019 identity: password reset reuses one token discipline (ADR-027).
+  'password_reset_tokens',
   'payments',
   'price_entries',
   'price_lists',
@@ -124,6 +147,8 @@ export const EXPECTED_TABLES: readonly string[] = [
   'redirects',
   'refunds',
   'seo_metadata',
+  // 0019 identity: opaque hashed sessions for admin and vendor users (ADR-027).
+  'sessions',
   'setting_compatibility_rules',
   'setting_styles',
   'setting_variants',
@@ -134,6 +159,11 @@ export const EXPECTED_TABLES: readonly string[] = [
   'tool_calls',
   'treatment_labels',
   'treatments',
+  // 0019 identity + 0020 vendors (ADR-026, ADR-027).
+  'users',
+  'vendor_ledger',
+  'vendor_members',
+  'vendors',
   'verification_events',
   'webar_assets',
   'webhook_receipts',
@@ -178,7 +208,7 @@ export const EXPECTED_ENUMS: readonly { name: string; members: readonly string[]
   { name: 'verification_status', members: ['UNVERIFIED', 'EXTRACTED', 'CROSS_CHECKED', 'VERIFIED', 'REJECTED'] },
 ];
 
-/** The 94 foreign-key constraint names of the locked schema. */
+/** The 108 foreign-key constraint names, exact names as measured. */
 export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'addresses_customer_id_fkey',
   'ai_interactions_conversation_id_fkey',
@@ -210,6 +240,7 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'dyo_price_snapshots_configuration_id_fkey',
   'dyo_quotes_configuration_id_fkey',
   'dyo_quotes_price_snapshot_id_fkey',
+  'email_verification_tokens_user_id_fkey',
   'event_consumers_event_id_fkey',
   'fulfillments_order_id_fkey',
   'fulfillments_order_item_id_fkey',
@@ -224,6 +255,7 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'gemstones_species_id_fkey',
   'gemstones_treatment_id_fkey',
   'gemstones_variety_id_fkey',
+  'gemstones_vendor_id_fkey',
   'guardrail_events_conversation_id_fkey',
   'guardrail_events_interaction_id_fkey',
   'knowledge_chunks_document_id_fkey',
@@ -235,9 +267,12 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'order_items_configuration_id_fkey',
   'order_items_order_id_fkey',
   'order_items_product_id_fkey',
+  'order_vendor_allocations_order_id_fkey',
+  'order_vendor_allocations_vendor_id_fkey',
   'orders_customer_id_fkey',
   'page_revisions_page_id_fkey',
   'pages_hero_asset_id_fkey',
+  'password_reset_tokens_user_id_fkey',
   'payments_order_id_fkey',
   'price_entries_price_list_id_fkey',
   'price_model_observations_import_batch_id_fkey',
@@ -253,8 +288,10 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'products_reviewed_by_fkey',
   'products_setting_variant_id_fkey',
   'products_variety_id_fkey',
+  'products_vendor_id_fkey',
   'refunds_order_id_fkey',
   'refunds_payment_id_fkey',
+  'sessions_user_id_fkey',
   'setting_compatibility_rules_colour_id_fkey',
   'setting_compatibility_rules_forbids_treatment_id_fkey',
   'setting_compatibility_rules_requires_treatment_id_fkey',
@@ -270,6 +307,12 @@ export const EXPECTED_FOREIGN_KEYS: readonly string[] = [
   'tool_calls_conversation_id_fkey',
   'tool_calls_message_id_fkey',
   'treatment_labels_treatment_id_fkey',
+  // 0020 vendors (ADR-026): the double-entry ledger and membership FKs.
+  'vendor_ledger_order_id_fkey',
+  'vendor_ledger_vendor_id_fkey',
+  'vendor_members_user_id_fkey',
+  'vendor_members_vendor_id_fkey',
+  'vendors_approved_by_fkey',
   'verification_events_certificate_id_fkey',
   'verification_events_gemstone_id_fkey',
   'verification_events_product_id_fkey',
@@ -332,8 +375,9 @@ export const EXPECTED_PRODUCT_REVIEW_INDEX = {
 } as const;
 
 /**
- * The exact increment 0022 adds to EXPECTED_COUNTS, measured from the DDL (not
- * from a database run):
+ * The increment 0022 contributes to EXPECTED_COUNTS, derived from the DDL and
+ * confirmed by the 2026-11-23 measurement (the measured total already includes
+ * it; this object is the cross-check, not an instruction to add again):
  *
  *   foreign_key        +1  `reviewed_by UUID REFERENCES users(id)` creates
  *                          products_reviewed_by_fkey
@@ -345,9 +389,6 @@ export const EXPECTED_PRODUCT_REVIEW_INDEX = {
  *   tables,enums,primary_key,unique,hnsw,vector_columns,triggers,
  *   functions,views,rls_*: 0 (no table, PK, unique, trigger, function, view or
  *                          RLS change)
- *
- * A future sanctioned introspection applies this delta to the totals it
- * measures; it is not applied to the stale absolute numbers below.
  */
 export const EXPECTED_0022_COUNT_DELTA = {
   foreign_key: 1,
@@ -362,36 +403,26 @@ export const EXPECTED_0022_COUNT_DELTA = {
 } as const;
 
 /**
- * TODO(schema-fidelity — 0022): the absolute aggregate totals below are the
- * 0018-verified baseline and are deliberately NOT advanced by this task.
+ * The measured aggregate totals. Source: the shared introspection in
+ * packages/db/src/introspect.ts, run against Neon `maihan_dev`
+ * (PostgreSQL 18.7) on 2026-11-23 with migrations 0001-0022 applied. Every
+ * number below is transcribed from that report; none is derived by arithmetic.
  *
- * Why not: 0019_identity, 0020_vendors and 0021_customer_auth changed the
- * schema after the last verified run, so `tables`, `primary_key`,
- * `foreign_key`, `unique`, `check`, `not_null_columns`, `check_class_total`
- * and `indexes` cannot be derived with certainty from the base recorded here.
- * The named lists are stale by the same amount for `EXPECTED_TABLES` and
- * `EXPECTED_FOREIGN_KEYS` (0022's own objects — the four columns, the FK name
- * and the partial index — are already listed above).
- * The 0022 increment itself is certain and lives in
- * EXPECTED_0022_COUNT_DELTA.
- *
- * How to close it: this task may not connect to any database, so run
- * `pnpm run schema-fidelity` against a disposable PostgreSQL 16 instance (or
- * `pnpm --filter @maihan/db run verify-schema` against the sanctioned dev
- * target) and transcribe the printed report. Do not "fill in" totals by
- * arithmetic on an unverified base.
+ * `check` counts pg_constraint CHECK entries and `not_null_columns` counts
+ * pg_attribute NOT NULL columns; their sum is `check_class_total` (40 + 617 =
+ * 657), which is the "CHECK" class the architecture counts.
  */
 export const EXPECTED_COUNTS = {
-  tables: 75,
+  tables: 83,
   enums: 33,
-  primary_key: 75,
-  foreign_key: 95,
-  unique: 59,
-  check: 29,
-  not_null_columns: 566,
-  /** check + not_null_columns: the documented "591 CHECK". */
-  check_class_total: 595,
-  indexes: 266,
+  primary_key: 83,
+  foreign_key: 108,
+  unique: 66,
+  check: 40,
+  not_null_columns: 617,
+  /** check + not_null_columns: 40 + 617 = 657. */
+  check_class_total: 657,
+  indexes: 294,
   hnsw: 2,
   vector_columns: 2,
   triggers: 1,
