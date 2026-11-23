@@ -12,9 +12,9 @@ Authority: `INITIAL_IMPLEMENTATION_PLAN.md` §19 (Phase 12 — Admin + CMS),
 | 4. Navigation + redirects admin, 44,218 bulk import | §19 task 4; doc 34 | admin API over `navigations`/`redirects` | loop/conflict/uniqueness tests | 🔲 planned (Stage C) |
 | 5. SEO metadata management | §19 task 5 | admin API over `seo_metadata` | validation tests | 🔲 planned (Stage C) |
 | 6. Catalogue admin: bulk edit, preview, undo | §19 task 6; doc 23 §6 | admin API over catalogue repos | preview-staleness/invariant tests | 🔲 planned (Stage D) |
-| 7. Derived-reference approval queue | §19 task 7; SoT §133–144 (V18 subset rules) | admin API over `products` derived class | INV-08 + per-row approval tests | 🔲 planned (Stage E) |
-| 8. Migration console: batches/counts/conflicts/quarantine | §19 task 8; td33 §4 | admin API over `import_batches`/`staging_conflicts` | visibility/authorisation tests | 🔲 planned (Stage E) |
-| 9. Conflict resolution UI, never silent overwrite | §19 task 9 | admin API resolution endpoints | non-overwrite tests | 🔲 planned (Stage E) |
+| 7. Derived-reference approval queue | §19 task 7; SoT §133–144 (V18 subset rules) | `packages/db/src/admin/governance-repository.ts`; `apps/web/api/admin/governance-handlers.ts`; `/admin/derived-identities` | INV-08 + per-row approval tests | ✅ Stage E (C6) |
+| 8. Migration console: batches/counts/conflicts/quarantine | §19 task 8; td33 §4 | `packages/db/src/admin/governance-repository.ts`; `apps/web/api/admin/governance-handlers.ts`; `/admin/migration` | visibility/authorisation tests | ✅ Stage E (C4) |
+| 9. Conflict resolution UI, never silent overwrite | §19 task 9 | `apps/web/api/admin/governance-handlers.ts`; `/admin/migration` | non-overwrite tests | ✅ Stage E (C5) |
 | 10. Certificate review queue + anomaly triage | §19 task 10; td17 state machine | admin API over cert repos; thin slice per R-17 | state-machine/authorisation tests | 🔲 planned (Stage E) |
 | 11. AI console: conversations/tool audit/guardrails/evals | §19 task 11; td18 | admin API over `@maihan/db ai` tables | redaction + no-write-path tests | 🔲 planned (Stage F) |
 | 12. RBAC ten roles + BYPASSRLS admin + audit | §19 task 12; doc 23 §3/§4 | **`@maihan/domain/auth/roles.ts`, `contracts/dto/admin/*`, `apps/web/api/admin/{authz,audit}.ts`** | **policy-matrix + role-injection + audit-redaction tests** | ✅ Stage A (GT-A1..A3) |
@@ -38,3 +38,28 @@ Authority: `INITIAL_IMPLEMENTATION_PLAN.md` §19 (Phase 12 — Admin + CMS),
 - RLS `BYPASSRLS` wiring and the append-only DB grant checks for
   `audit_logs` are enforced at the DB layer (0016_rls.sql) and re-validated
   in the Stage G gate.
+
+## Stage E (tasks 7-9) — implemented and verified (commands + results)
+
+| Item | Verification |
+|---|---|
+| Data-governance repository (batches / conflicts / derived identities) | `packages/db`: `tsc -b` 0 errors; `vitest run src/admin/governance-repository.spec.ts` → 14 passed |
+| Six admin endpoints + gate-first authorization | `apps/web`: `tsc -b` 0 errors; `vitest run src/api/admin/governance-handlers.spec.ts` → 12 passed |
+| Full suites after the change | `@maihan/db` → 219 passed, 33 skipped; `@maihan/web` → 467 passed, 21 skipped |
+| Workspace typecheck | `pnpm -r run typecheck` → 0 errors |
+| Production build with no database | `pnpm --filter @maihan/web run build` → exit 0 with `DATABASE_URL` unset (Next 16.4.0 advisory reminder on first attempt; build continues on retry) |
+
+### Stage E explicit non-goals carried forward
+
+- The locked `products` table has no `review_state` column. The INV-08
+  decision is recorded in `products.structured_extra` under
+  `derived_identity_review` and projected as `review_state`; a future approved
+  schema change should move it to a real column.
+- Quarantine is a per-batch recorded count (`records_quarantined`); the schema
+  has no per-row quarantine ledger, so the console cannot list quarantined
+  rows.
+- The console renders the first 50 rows of each queue with the true total;
+  pagination controls are not part of this stage.
+- No statement was executed against PostgreSQL in this stage; the SQL is
+  proven by fake-executor text/shape assertions plus typecheck.
+

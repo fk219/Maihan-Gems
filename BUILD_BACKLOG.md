@@ -74,10 +74,22 @@ database. Neon is applied last, once, with explicit approval.**
 - [ ] C1 Catalogue admin: bulk edit, preview diff, bounded undo window
 - [ ] C2 Navigation editor + redirect manager (bulk import of 44,218 rows)
 - [ ] C3 SEO metadata editor
-- [ ] C4 Migration console: batches, counts, conflicts, quarantine
-- [ ] C5 Conflict resolution UI — never silent overwrite (328 open conflicts)
-- [ ] C6 Derived-identity approval queue — per-row approve/reject (221 rows,
+- [x] C4 Migration console: batches, counts, conflicts, quarantine
+      **Progress 2026-11-23:** `/admin/migration` + `GET
+      /api/v1/admin/import-batches`; per-batch staged / conflict / open-conflict
+      and `records_quarantined` counts. No per-row quarantine ledger exists in
+      the locked schema, so the count is the recorded fact.
+- [x] C5 Conflict resolution UI — never silent overwrite (328 open conflicts)
+      **Progress 2026-11-23:** both sides shown; a human records one resolution;
+      a second resolve is 409 `CONFLICT_ALREADY_RESOLVED`; the update and its
+      before/after audit row are one statement.
+- [x] C6 Derived-identity approval queue — per-row approve/reject (221 rows,
       INV-08)
+      **Progress 2026-11-23:** `/admin/derived-identities` + approve/reject
+      endpoints. Approval records `review_state='APPROVED'` in the product's
+      `structured_extra` (the locked table has no `review_state` column) and
+      never writes `source_sku` or promotes `INFERRED`. Rejection flags the row
+      and never deletes.
 - [ ] C7 Certificate review queue + anomaly triage
 - [ ] C8 AI operations console: conversations, tool audit, guardrail events,
       evaluation runs

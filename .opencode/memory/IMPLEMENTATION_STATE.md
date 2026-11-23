@@ -1,3 +1,55 @@
+# TRACK C4-C6 — ADMIN DATA-GOVERNANCE CONSOLE (2026-11-23)
+
+- **Repository** `packages/db/src/admin/governance-repository.ts`:
+  `listImportBatches` (per-batch staged / all-conflict / open-conflict counts),
+  `listConflicts` (both sides, optional batch/resolved filters),
+  `resolveConflict` (single-use, before/after audit in the same CTE as the
+  update), `listDerivedIdentities` (the `source_sku IS NULL AND
+  source_sku_derived IS NOT NULL` class), `approveDerivedIdentity` and
+  `rejectDerivedIdentity`. Every value is bound; totals are a separate
+  `count(*)` so the last page and any offset past it stay honest.
+- **Review-state storage decision:** the locked `products` table has no
+  `review_state` column, and adding one is a schema change this task may not
+  make. The INV-08 decision is therefore written to the only free-form column,
+  `structured_extra`, under the documented `derived_identity_review` key with a
+  literal `review_state` member; the read path projects it back as a
+  first-class `review_state`. Approval never writes `source_sku` and never
+  changes `sku_evidence_status` (stays `INFERRED`). Rejection flags the row,
+  leaves `state='DRAFT'`, and never deletes.
+- **API** `apps/web/src/api/admin/governance-handlers.ts`, registered in
+  `routes.ts` + `index.ts`: six endpoints under `/api/v1/admin/` for batches,
+  conflicts, resolution, derived identities, approve and reject. Each gates
+  first (`import_batches` / `conflicts` / `derived_approvals`), then calls one
+  repository function. A second resolution is 409
+  `CONFLICT_ALREADY_RESOLVED`; a second review is 409 `ALREADY_DECIDED`.
+- **Console** the existing catch-all gained `/admin/migration` (batches +
+  unresolved conflicts + resolve form) and `/admin/derived-identities`
+  (per-row approve/reject), plus two dashboard cards. Server components read;
+  the two client components mutate with `credentials: 'same-origin'`. No new
+  page files.
+- **Tests** `packages/db/src/admin/governance-repository.spec.ts` (14,
+  fake executor): single-use resolution, no write on the second attempt,
+  concurrent-race refusal, both sides preserved, approve keeps `INFERRED` and
+  never sets `source_sku`, reject never deletes/archives, 221-row pagination
+  with offset 200 and 500. `apps/web/src/api/admin/governance-handlers.spec.ts`
+  (12): route table, 403 before the repository for a role without the module,
+  first resolve 200 / second 409, approve response INFERRED + null source_sku,
+  reject stays DRAFT, 422 for a non-derived product, total 221 at offset 500.
+- **Verified:** `pnpm -r run typecheck` 0 errors; `pnpm --filter @maihan/db run
+  test` 219 passed / 33 skipped; `pnpm --filter @maihan/web run test` 467
+  passed / 21 skipped; `pnpm --filter @maihan/web run build` exits 0 with
+  `DATABASE_URL` unset (Next 16.4.0 emitted its known-vulnerability upgrade
+  reminder; the build continues on retry).
+- **Honest gaps:** (1) no per-row quarantine ledger exists in the locked
+  schema — the console shows each batch's `records_quarantined` count, which is
+  the only recorded quarantine fact; (2) the console shows the first 50 rows of
+  each queue with the true total, but has no pagination controls yet; (3) no
+  statement was executed against PostgreSQL in this task (fake executors only),
+  so the CTE SQL is proven by text/shape assertions and typecheck, not a live
+  run; (4) the `derived_identity_review` JSONB ledger is a documented workaround
+  for the missing `products.review_state` column and should move to a real
+  column if that schema change is ever approved.
+
 # TRACK B4 — WORKER, OUTBOX DISPATCHER AND EMAIL PORT (2026-11-23)
 
 - **Contracts** `packages/contracts/src/dto/notifications/`: six strict,
