@@ -34,6 +34,7 @@ export * from './commerce/inventory.js';
 export * from './commerce/order.js';
 export * from './certificate/index.js';
 export * from './auth/roles.js';
+export * from './approval/two-person.js';
 export * from './auth/password.js';
 export * from './auth/password-policy.js';
 export * from './auth/session.js';
