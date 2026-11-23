@@ -38,4 +38,5 @@ export * from './auth/password.js';
 export * from './auth/password-policy.js';
 export * from './auth/session.js';
 export * from './vendor/vendor.js';
+export * from './notifications/index.js';
 

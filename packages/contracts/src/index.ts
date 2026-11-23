@@ -48,6 +48,8 @@ export * from './dto/webar/index.js';
 export * from './dto/observability/index.js';
 export * from './dto/admin/roles.js';
 export * from './dto/auth/index.js';
+export * from './dto/notifications/index.js';
+export * from './events/notifications.js';
 export * from './dto/cms/blocks.js';
 export {
   AdminRoleSchema,
