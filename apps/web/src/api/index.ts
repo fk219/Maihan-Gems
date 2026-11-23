@@ -101,6 +101,14 @@ import {
   adminUnpublishProductHandler,
 } from './admin/catalog-handlers.js';
 import {
+  adminApproveDerivedIdentityHandler,
+  adminListConflictsHandler,
+  adminListDerivedIdentitiesHandler,
+  adminListImportBatchesHandler,
+  adminRejectDerivedIdentityHandler,
+  adminResolveConflictHandler,
+} from './admin/governance-handlers.js';
+import {
   vendorMeHandler,
   vendorListProductsHandler,
   vendorCreateProductHandler,
@@ -262,6 +270,12 @@ export function createCatalogApi(options: CatalogApiOptions): CatalogApi {
       adminListProductsHandler,
       adminPublishProductHandler,
       adminUnpublishProductHandler,
+      adminListImportBatchesHandler,
+      adminListConflictsHandler,
+      adminResolveConflictHandler,
+      adminListDerivedIdentitiesHandler,
+      adminApproveDerivedIdentityHandler,
+      adminRejectDerivedIdentityHandler,
     };
 
     const handler =

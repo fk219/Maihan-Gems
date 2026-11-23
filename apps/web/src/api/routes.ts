@@ -269,6 +269,31 @@ export const ADMIN_ROUTES: readonly RouteDefinition[] = [
   { id: 'adminListProductsHandler', method: 'GET', path: '/api/v1/admin/products' },
   { id: 'adminPublishProductHandler', method: 'POST', path: '/api/v1/admin/products/{productId}/publish' },
   { id: 'adminUnpublishProductHandler', method: 'POST', path: '/api/v1/admin/products/{productId}/unpublish' },
+  // Data governance (Phase 12 tasks 7-9): migration batches, conflicts and the
+  // derived-identity queue. The catch-all console renders them; the API is the
+  // only mutation path and every route gates before the repository.
+  { id: 'adminListImportBatchesHandler', method: 'GET', path: '/api/v1/admin/import-batches' },
+  { id: 'adminListConflictsHandler', method: 'GET', path: '/api/v1/admin/conflicts' },
+  {
+    id: 'adminResolveConflictHandler',
+    method: 'POST',
+    path: '/api/v1/admin/conflicts/{conflictId}/resolve',
+  },
+  {
+    id: 'adminListDerivedIdentitiesHandler',
+    method: 'GET',
+    path: '/api/v1/admin/derived-identities',
+  },
+  {
+    id: 'adminApproveDerivedIdentityHandler',
+    method: 'POST',
+    path: '/api/v1/admin/derived-identities/{productId}/approve',
+  },
+  {
+    id: 'adminRejectDerivedIdentityHandler',
+    method: 'POST',
+    path: '/api/v1/admin/derived-identities/{productId}/reject',
+  },
 ];
 
 export const ALL_ROUTES: readonly RouteDefinition[] = [
