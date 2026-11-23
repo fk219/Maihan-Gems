@@ -1,3 +1,33 @@
+# SCHEMA FIDELITY RECONCILED TO 0022 — MEASURED ON `maihan_dev` (2026-11-23)
+
+- **Migrations applied.** `packages/db/migrations/0021_customer_auth.sql` and
+  `0022_product_review_state.sql` were applied to the Neon `maihan_dev`
+  database (PostgreSQL 18.7) with the project's own runner
+  (`pnpm --filter @maihan/db run build` then `run migrate`, `DATABASE_URL` =
+  maihan_dev). `drizzle.__drizzle_migrations` went from **20 to 22** rows.
+  Both are expand-only. 0022's backfill `UPDATE` ran against `products`, which
+  held 0 rows, so no data changed.
+- **Mirror advanced from measurement.** `packages/db/src/expected-schema.ts`
+  now carries the numbers printed by the shared introspection
+  (`packages/db/src/introspect.ts`, via `verify-schema`): tables 75→**83**,
+  primary_key 75→**83**, foreign_key 95→**108**, unique 59→**66**,
+  check 29→**40**, not_null_columns 566→**617**, check_class_total 595→**657**,
+  indexes 266→**294**; enums 33, hnsw 2, vector columns 2, triggers 1,
+  functions 2, views 1, RLS 6/6/0 and not_valid FK 0 are unchanged.
+  `EXPECTED_TABLES` 75→**83** and `EXPECTED_FOREIGN_KEYS` 96→**108** entries.
+  The `TODO(schema-fidelity — 0022)` block is deleted because every number it
+  named is now measured. The deltas reconcile object by object to 0018-0022
+  (review ledger, identity, vendors, customer auth, review columns); no
+  unaccounted object exists.
+- **Verification.** `node packages/db/dist/assert-schema.js` with
+  `DATABASE_URL` = maihan_dev → `Schema fidelity PASS ... tables=83 enums=33
+  foreign_keys=108 check_class=657 indexes=294 ... rls=6/6`.
+  `pnpm -r run typecheck` 0 errors. The Neon refusal guard in
+  `schema-fidelity.ts` was not touched.
+- **Environment note.** The live `maihan_dev` branch reports PostgreSQL 18.7,
+  not the 16.15 recorded in `.env` and the Task 2 notes. The introspection is
+  version-agnostic; the documentation claim is stale and should be corrected.
+
 # TRACK C6 FOLLOW-UP — INV-08 REVIEW DECISION MOVED TO A REAL COLUMN (2026-11-23)
 
 - **Migration 0022** `packages/db/migrations/0022_product_review_state.sql`,
