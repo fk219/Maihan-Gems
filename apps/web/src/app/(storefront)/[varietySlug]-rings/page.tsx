@@ -15,6 +15,7 @@ import { catalogServer } from '../../../lib/catalog-server.js';
 import { listingBasePath, listingQuery, productItems, type ListingParams } from '../../../lib/catalog-view.js';
 import { ProductCard } from '../../../components/catalog/ProductCard.js';
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
+import { EditorialMasthead } from '../../../components/design-system/EditorialMasthead.js';
 import { EmptyState } from '../../../components/design-system/EmptyState.js';
 import { Pagination } from '../../../components/design-system/Pagination.js';
 
@@ -54,7 +55,7 @@ export default async function VarietyRingsIndexPage({ params, searchParams }: Pa
   const items = productItems(result);
 
   return (
-    <main className="page variety-rings-page">
+    <main className="page variety-rings-page mh-page">
       <Breadcrumbs
         crumbs={[
           { label: 'Home', href: '/' },
@@ -62,20 +63,30 @@ export default async function VarietyRingsIndexPage({ params, searchParams }: Pa
           { label: 'Rings' },
         ]}
       />
-      <span className="page-eyebrow">Ready-Made Fine Jewellery</span>
-      <h1>{variety.display_name} Rings</h1>
-      <p className="page-subtitle">
-        Completed fine rings combining untreated natural {variety.display_name.toLowerCase()} gems with master goldsmith mountings.
-      </p>
-      <p className="result-count">
-        {items.length === 0 ? 'No ready-made rings currently listed.' : `${items.length} ring${items.length === 1 ? '' : 's'} listed`}
-      </p>
+
+      <EditorialMasthead
+        eyebrow="Ready-made rings"
+        title={`${variety.display_name} Rings`}
+        lead={`Completed rings recorded with a ${variety.display_name.toLowerCase()} stone. Metal, weight and price are shown only where the record carries them.`}
+        meta={
+          items.length === 0 ? (
+            <>No rings currently listed</>
+          ) : (
+            <>
+              <span className="tabular">{items.length}</span>{' '}
+              {items.length === 1 ? 'ring' : 'rings'} on this page
+            </>
+          )
+        }
+      />
 
       {items.length === 0 ? (
         <EmptyState
           title={`No ready-made ${variety.display_name} rings are currently listed.`}
           action={<Link href={`/${varietySlug}`}>Browse all {variety.display_name}</Link>}
-        />
+        >
+          Ready-made rings appear here when a completed piece has been recorded.
+        </EmptyState>
       ) : (
         <ul className="product-grid">
           {items.map((product) => (

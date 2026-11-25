@@ -10,6 +10,10 @@
  *
  * 404 semantics: a slug that is not an ACTIVE variety in the taxonomy is a
  * not-found (notFound()), not an empty list — the variety must exist.
+ *
+ * Copy discipline: the lead describes what the record carries. It does not
+ * call every stone certified, untreated or lab-tested; those are per-field
+ * evidence statuses, not a category promise.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -19,6 +23,7 @@ import { catalogServer } from '../../../lib/catalog-server.js';
 import { listingBasePath, listingQuery, productItems, type ListingParams } from '../../../lib/catalog-view.js';
 import { ProductCard } from '../../../components/catalog/ProductCard.js';
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
+import { EditorialMasthead } from '../../../components/design-system/EditorialMasthead.js';
 import { EmptyState } from '../../../components/design-system/EmptyState.js';
 import { Pagination } from '../../../components/design-system/Pagination.js';
 
@@ -41,7 +46,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function VarietyIndexPage({ params, searchParams }: PageProps) {
   const { varietySlug } = await params;
-  const query = listingQuery(await searchParams);
+  const urlParams = await searchParams;
+  const query = listingQuery(urlParams);
   const service = catalogServer();
 
   // Taxonomy decides existence (doc 12: filters validate against a whitelist
@@ -54,7 +60,7 @@ export default async function VarietyIndexPage({ params, searchParams }: PagePro
   const items = productItems(result);
 
   return (
-    <main className="page variety-page">
+    <main className="page variety-page mh-page">
       <Breadcrumbs
         crumbs={[
           { label: 'Home', href: '/' },
@@ -62,14 +68,22 @@ export default async function VarietyIndexPage({ params, searchParams }: PagePro
           { label: variety.display_name },
         ]}
       />
-      <span className="page-eyebrow">Untreated Natural Mineralogy</span>
-      <h1>{variety.display_name}</h1>
-      <p className="page-subtitle">
-        Direct-source untreated {variety.display_name} gemstones with lab-certified mineralogical verification.
-      </p>
-      <p className="result-count">
-        {items.length === 0 ? 'No gemstones currently listed.' : `${items.length} gemstone${items.length === 1 ? '' : 's'} listed`}
-      </p>
+
+      <EditorialMasthead
+        eyebrow="Loose gemstones"
+        title={variety.display_name}
+        lead={`Loose ${variety.display_name} stones recorded in the catalogue. Weight, price and provenance appear only where the record carries them.`}
+        meta={
+          items.length === 0 ? (
+            <>No stones currently listed</>
+          ) : (
+            <>
+              <span className="tabular">{items.length}</span>{' '}
+              {items.length === 1 ? 'stone' : 'stones'} on this page
+            </>
+          )
+        }
+      />
 
       {items.length === 0 ? (
         <EmptyState
@@ -89,7 +103,7 @@ export default async function VarietyIndexPage({ params, searchParams }: PagePro
       )}
 
       <Pagination
-        basePath={listingBasePath(`/${varietySlug}`, await searchParams)}
+        basePath={listingBasePath(`/${varietySlug}`, urlParams)}
         previousCursor={null}
         nextCursor={result.meta.next_cursor}
         hasNext={result.meta.has_more}

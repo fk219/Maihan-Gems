@@ -13,6 +13,7 @@ import { catalogServer } from '../../../lib/catalog-server.js';
 import { listingBasePath, listingQuery, productItems, type ListingParams } from '../../../lib/catalog-view.js';
 import { ProductCard } from '../../../components/catalog/ProductCard.js';
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
+import { EditorialMasthead } from '../../../components/design-system/EditorialMasthead.js';
 import { EmptyState } from '../../../components/design-system/EmptyState.js';
 import { Pagination } from '../../../components/design-system/Pagination.js';
 
@@ -52,7 +53,7 @@ export default async function VarietyPairsIndexPage({ params, searchParams }: Pa
   const items = productItems(result);
 
   return (
-    <main className="page variety-pairs-page">
+    <main className="page variety-pairs-page mh-page">
       <Breadcrumbs
         crumbs={[
           { label: 'Home', href: '/' },
@@ -60,20 +61,30 @@ export default async function VarietyPairsIndexPage({ params, searchParams }: Pa
           { label: 'Pairs' },
         ]}
       />
-      <span className="page-eyebrow">Matched Earring Suites</span>
-      <h1>{variety.display_name} Pairs</h1>
-      <p className="page-subtitle">
-        Strictly matched natural gemstone pairs curated for balance, color saturation, and dimensional optical harmony.
-      </p>
-      <p className="result-count">
-        {items.length === 0 ? 'No pairs currently listed.' : `${items.length} pair${items.length === 1 ? '' : 's'} listed`}
-      </p>
+
+      <EditorialMasthead
+        eyebrow="Matched pairs"
+        title={`${variety.display_name} Pairs`}
+        lead={`Pairs of ${variety.display_name} recorded as a single matched set. Each record states the weight it carries; no balance claim is made beyond the data.`}
+        meta={
+          items.length === 0 ? (
+            <>No pairs currently listed</>
+          ) : (
+            <>
+              <span className="tabular">{items.length}</span>{' '}
+              {items.length === 1 ? 'pair' : 'pairs'} on this page
+            </>
+          )
+        }
+      />
 
       {items.length === 0 ? (
         <EmptyState
           title={`No ${variety.display_name} pairs are currently listed.`}
           action={<Link href={`/${varietySlug}`}>Browse all {variety.display_name}</Link>}
-        />
+        >
+          Pairs appear here when a matched set has been recorded.
+        </EmptyState>
       ) : (
         <ul className="product-grid">
           {items.map((product) => (

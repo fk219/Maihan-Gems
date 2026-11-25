@@ -5,6 +5,10 @@
  * 60 observed /{colour}-gemstones 301s). Same data-driven shape as the
  * variety page: one dynamic route, taxonomy decides existence, the colour
  * filter rides the Phase 3 port.
+ *
+ * The breadcrumb's middle crumb is deliberately not a link: there is no
+ * /colour index route in the route map, and a link to a 404 is worse than a
+ * plain label.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -14,6 +18,7 @@ import { catalogServer } from '../../../../lib/catalog-server.js';
 import { listingBasePath, listingQuery, productItems, type ListingParams } from '../../../../lib/catalog-view.js';
 import { ProductCard } from '../../../../components/catalog/ProductCard.js';
 import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
+import { EditorialMasthead } from '../../../../components/design-system/EditorialMasthead.js';
 import { EmptyState } from '../../../../components/design-system/EmptyState.js';
 import { Pagination } from '../../../../components/design-system/Pagination.js';
 
@@ -48,28 +53,38 @@ export default async function ColourIndexPage({ params, searchParams }: PageProp
   const items = productItems(result);
 
   return (
-    <main className="page colour-page">
+    <main className="page colour-page mh-page">
       <Breadcrumbs
         crumbs={[
           { label: 'Home', href: '/' },
-          { label: 'Colour', href: '/colour' },
+          { label: 'Colour' },
           { label: colour.name },
         ]}
       />
-      <span className="page-eyebrow">Chromatic Palette</span>
-      <h1>{colour.name} Gemstones</h1>
-      <p className="page-subtitle">
-        Curated natural gemstones exhibiting exceptional {colour.name.toLowerCase()} hue saturation, crystal transparency, and scintillation.
-      </p>
-      <p className="result-count">
-        {items.length === 0 ? 'No gemstones currently listed.' : `${items.length} gemstone${items.length === 1 ? '' : 's'} listed`}
-      </p>
+
+      <EditorialMasthead
+        eyebrow="Colour family"
+        title={`${colour.name} Gemstones`}
+        lead={`Stones recorded in the ${colour.name.toLowerCase()} colour family. The catalogue does not promise a hue, tone or saturation beyond the fields each record carries.`}
+        meta={
+          items.length === 0 ? (
+            <>No stones currently listed</>
+          ) : (
+            <>
+              <span className="tabular">{items.length}</span>{' '}
+              {items.length === 1 ? 'stone' : 'stones'} on this page
+            </>
+          )
+        }
+      />
 
       {items.length === 0 ? (
         <EmptyState
           title={`No ${colour.name.toLowerCase()} gemstones are currently listed.`}
           action={<Link href="/">Browse all gemstones</Link>}
-        />
+        >
+          The catalogue is updated as stones are graded and photographed.
+        </EmptyState>
       ) : (
         <ul className="product-grid">
           {items.map((product) => (

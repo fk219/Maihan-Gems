@@ -1,21 +1,30 @@
 /**
  * apps/web/src/app/(storefront)/settings/page.tsx
  *
- * `/gemstone-rings` — settings catalog index (Task 3, target of the observed
+ * `/settings` — the setting-design catalogue (target of the observed
  * /gemstone-ring-settings and /gemstone-bracelet-settings routes). Driven by
- * the Phase 3 `listSettings` contract (design summaries + keyset pagination);
- * no invented fields, no per-design pages.
+ * the Phase 3 `listSettings` contract (design summaries + keyset pagination).
+ *
+ * Design: the same unboxed LightPlate slot as ProductCard, because a design
+ * record has no photograph either. The previous category SVG was a generic
+ * drawing of a ring, not this design, so presenting it as the product image
+ * would have been a quiet fabrication. A caption states the truth instead.
+ *
+ * No invented fields, no claims about metal purity or certification that the
+ * record does not carry, no per-design page source.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { catalogServer } from '../../../lib/catalog-server.js';
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
+import { EditorialMasthead } from '../../../components/design-system/EditorialMasthead.js';
 import { EmptyState } from '../../../components/design-system/EmptyState.js';
+import { LightPlate } from '../../../components/design-system/LightPlate.js';
 import { Pagination } from '../../../components/design-system/Pagination.js';
 
 // Route segment config. Catalog views render per request from the cached
-// CatalogQueryService (doc 12.3: Server-rendered, cacheable, no per-user
+// CatalogQueryService (doc 12.3: server-rendered, cacheable, no per-user
 // state); there is deliberately no build-time catalogue, so Next must not
 // prerender this route (it would otherwise invoke the page with empty params
 // during `next build`). Runtime caching stays in the service, not in Next.
@@ -29,20 +38,6 @@ export const metadata: Metadata = {
   title: 'Gemstone settings | Maihan Gems',
 };
 
-function getSettingImage(jewelleryType: string, styleLabel: string | null): string {
-  if (jewelleryType.toUpperCase() === 'EARRINGS') {
-    return '/assets/settings/stud_earrings.svg';
-  }
-  const s = (styleLabel ?? '').toLowerCase();
-  if (s.includes('halo')) {
-    return '/assets/settings/halo_ring.svg';
-  }
-  if (s.includes('three') || s.includes('trilogy') || s.includes('side')) {
-    return '/assets/settings/three_stone_ring.svg';
-  }
-  return '/assets/settings/solitaire_ring.svg';
-}
-
 export default async function SettingsIndexPage({ searchParams }: PageProps) {
   const { cursor, limit } = await searchParams;
   const limitRaw = Number(limit);
@@ -55,137 +50,83 @@ export default async function SettingsIndexPage({ searchParams }: PageProps) {
     })
   ).value;
 
+  const designCount = result.items.length;
+
   return (
-    <main className="page settings-page">
+    <main className="page settings-page mh-page">
       <Breadcrumbs
         crumbs={[
           { label: 'Home', href: '/' },
           { label: 'Settings' },
         ]}
       />
-      <span className="page-eyebrow">Master Goldsmith Mountings</span>
-      <h1>Gemstone Settings</h1>
-      <p className="page-subtitle">
-        Precision hand-crafted fine jewellery mountings in 18K gold and platinum.
-        Engineered with exact millimeter tolerances for natural certified gemstones.
-      </p>
-      <p className="result-count">
-        {result.items.length === 0
-          ? 'No settings currently listed.'
-          : `${result.items.length} setting design${result.items.length === 1 ? '' : 's'}`}
-      </p>
 
-      {result.items.length === 0 ? (
+      <EditorialMasthead
+        eyebrow="Atelier mountings"
+        title="Gemstone Settings"
+        lead="Mounting designs recorded with their metal options. A design lists only the variants, prices and evidence its record actually carries."
+        meta={
+          designCount === 0 ? (
+            <>No designs currently listed</>
+          ) : (
+            <>
+              <span className="tabular">{designCount}</span>{' '}
+              {designCount === 1 ? 'design' : 'designs'} shown
+            </>
+          )
+        }
+      />
+
+      {designCount === 0 ? (
         <EmptyState
           title="No settings are currently listed."
           action={<Link href="/">Browse gemstones</Link>}
-        />
+        >
+          The atelier catalogue is published as designs are documented.
+        </EmptyState>
       ) : (
-        <ul className="settings-grid">
-          {result.items.map((setting) => (
-            <li key={setting.design_code}>
-              <article className="card settings-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-                <div
-                  style={{
-                    position: 'relative',
-                    aspectRatio: '16/10',
-                    background: '#FAFAF8',
-                    borderRadius: 'calc(var(--radius) - 4px)',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '1rem',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  <img
-                    src={getSettingImage(setting.jewellery_type, setting.style?.label ?? null)}
-                    alt={setting.name}
-                    loading="lazy"
-                    style={{
-                      maxWidth: '85%',
-                      maxHeight: '85%',
-                      objectFit: 'contain',
-                      transition: 'transform 0.4s ease',
-                    }}
-                  />
-                  <div style={{ position: 'absolute', top: '0.75rem', left: '0.75rem' }}>
-                    <span
-                      style={{
-                        padding: '0.2rem 0.55rem',
-                        borderRadius: '9999px',
-                        background: 'rgba(255, 255, 255, 0.9)',
-                        border: '1px solid rgba(201, 168, 76, 0.3)',
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: '0.625rem',
-                        fontWeight: 700,
-                        letterSpacing: '0.08em',
-                        textTransform: 'uppercase',
-                        color: 'var(--color-gold-dark)',
-                      }}
-                    >
-                      {setting.jewellery_type.toLowerCase()}
-                    </span>
+        <ul className="mh-card-grid mh-card-grid--settings">
+          {result.items.map((setting) => {
+            return (
+              <li key={setting.design_code}>
+                <article className="mh-card">
+                  <div className="mh-card__status">
+                    <span className="mh-card__kind">{setting.jewellery_type.toLowerCase()}</span>
+                    <span className="mh-card__ref tabular">{setting.design_code}</span>
                   </div>
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '0.75rem',
-                      right: '0.75rem',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.6875rem',
-                      color: '#8a867e',
-                      background: 'rgba(255, 255, 255, 0.85)',
-                      padding: '0.15rem 0.4rem',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    {setting.design_code}
-                  </div>
-                </div>
 
-                <div>
-                  <h2 className="settings-card__title">{setting.name}</h2>
-                  <p className="settings-card__meta">
-                    {setting.jewellery_type.toLowerCase()}
-                    {setting.style !== null && <> · {setting.style.label}</>}
-                    {' · '}
-                    <span className="font-mono tabular-nums">
-                      {setting.variant_count} metal option{setting.variant_count === 1 ? '' : 's'}
-                    </span>
-                  </p>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 'auto',
-                    paddingTop: '1rem',
-                    borderTop: '1px solid rgba(0, 0, 0, 0.05)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Link
+                  <a
+                    className="mh-card__link"
                     href={`/settings/${setting.design_code}`}
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      color: '#4a4740',
-                      textDecoration: 'none',
-                    }}
                   >
-                    Details →
-                  </Link>
-                  <Link href="/design-your-own" className="settings-card__action">
-                    Configure in Atelier <span aria-hidden="true">→</span>
-                  </Link>
-                </div>
-              </article>
-            </li>
-          ))}
+                    <LightPlate caption="No photograph on file" />
+
+                    <div className="mh-card__body">
+                      <h2 className="mh-card__title">{setting.name}</h2>
+
+                      <p className="mh-card__meta">
+                        {setting.style !== null && (
+                          <>
+                            <span>{setting.style.label}</span>
+                            <span aria-hidden="true"> · </span>
+                          </>
+                        )}
+                        <span className="tabular">
+                          {setting.variant_count} metal option{setting.variant_count === 1 ? '' : 's'}
+                        </span>
+                      </p>
+
+                      <div className="mh-card__foot">
+                        <span className="mh-card__cue">
+                          View design <span aria-hidden="true">→</span>
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                </article>
+              </li>
+            );
+          })}
         </ul>
       )}
 
