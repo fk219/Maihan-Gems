@@ -11,12 +11,17 @@
  * honest state, never a fabricated menu.
  */
 import { catalogServer } from '../../lib/catalog-server.js';
-import { assertCanonicalHrefs, buildMegaMenu } from '../../lib/mega-menu.js';
+import { assertCanonicalHrefs, buildMegaMenu, staticMenuGroups } from '../../lib/mega-menu.js';
 import { MegaMenu } from './MegaMenu.js';
 
 export async function StorefrontHeader() {
   const taxonomy = (await catalogServer().getTaxonomy()).value;
-  const groups = buildMegaMenu(taxonomy);
+  // The taxonomy read model filters state='ACTIVE'. Migrated reference rows are
+  // DRAFT, so `buildMegaMenu` returns zero groups and the navigation disappears.
+  // The static families are the canonical fallback: a nav that always exists,
+  // never a broken panel. Once taxonomy is published, the richer menu returns.
+  const built = buildMegaMenu(taxonomy);
+  const groups = built.length > 0 ? built : staticMenuGroups();
   // Guard the canonical-route contract at render time too (defence in depth;
   // the pure builder is unit-tested for this).
   assertCanonicalHrefs(groups);
