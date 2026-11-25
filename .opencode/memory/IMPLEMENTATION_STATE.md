@@ -1,3 +1,57 @@
+# STOREFRONT DESIGN PASS — "LIGHT THROUGH STONE" (2026-11-26)
+
+- **Scope:** `ProductCard`, `ProductDetailContent`, `/settings` index + detail,
+  `/search` + facet panel, `/cart` + `CartView`, `StorefrontFooter`,
+  `/varieties` (hub, landing, pairs, rings, nested), `/colour/[slug]`,
+  `theme-styles.ts`, and two new design-system primitives (`LightPlate`,
+  `EditorialMasthead`). Header touched only for contrast + document-overflow
+  containment. Hero untouched.
+- **One vocabulary:** Enter on the page masthead (520 ms, 12 px, blur decay,
+  `cubic-bezier(.16,1,.3,1)`); Pass as the single card-hover sweep and the
+  masthead rule; Hold only on the product/setting study. Gold is a hairline,
+  sweep or focus ring, never a filled card. Cards are unboxed with an editorial
+  serif title and tabular mono price.
+- **Honest image slot:** `ProductSummary`/`ProductDetail` carry no media, so
+  the card and PDP render a CSS light study captioned "No photograph on file"
+  and an explanatory line. No stock image, no fabricated alt text, no colour.
+- **PDP:** two-column opening (study | identity, price, dual CTA), hairline
+  spec table, provenance list with evidence statuses verbatim and an explicit
+  INV-07 note. `Money` is now shown on the PDP (the DTO carried it all along).
+- **Truth fixes:** setting detail previously hard-coded prong alloy, finish,
+  compatibility and four metals; it now loads `getSettingByDesignCode`, renders
+  the real variants/prices/evidence and 404s an unknown code. Removed footer
+  blanket claims ("100% Earth-Mined", "all authenticated", "70+ varieties"),
+  cart's invented free shipping / included certificate, and search's internal
+  ranker labels. Removed category SVG drawings from setting cards because they
+  were not the design.
+- **Missing CSS fixed:** `.badge`, `.spec-table`, `.breadcrumbs`,
+  `.pagination`, `.empty-state`, `.visually-hidden` had no rules at all; the
+  search page set white text on the ivory document; the cart used Tailwind
+  classes without Tailwind. All are now real token-driven CSS.
+- **Accessibility:** header CTA white-on-gold (1.6–2.3:1) replaced with ink on
+  a gold hairline; header submark raised from 3.5:1; gold text uses
+  `--mh-gold-ink: #7d5d10` (5.31:1 worst case over the masthead glow). Axe-core
+  WCAG 2.0/2.1/2.2 A+AA in Chromium: **0 violations** across 8 pages × 3 widths
+  (24 runs). Colour-contrast is reported *incomplete* over gradient fields;
+  palette pairs were checked numerically against the composited backgrounds.
+- **Verification:** `pnpm -r run typecheck` 0 errors; `@maihan/web` 506 passed /
+  21 skipped (baseline 504/21; +2 setting-detail truth tests); `next build`
+  exit 0 with `DATABASE_URL` empty (first attempt stops on Next's
+  known-vulnerability advisory, retry builds — same as previous record);
+  budgets PASS category 138.3/170 KB gzip, product 141.9/190 KB gzip. No new
+  dependency and no source-archive access. The design/screenshot harness used
+  the contract fake port; the mandated existing test suite reads `.env` when
+  present and its order-events test can exercise the dev database (21 tests
+  skipped in this run).
+- **Screenshots:** `docs/design-shots/*.png` (1440/768/390, 8 pages) with a
+  README explaining the fixture basis.
+- **Honest gaps:** header nav is hidden at ≤1180 px because the existing header
+  has no mobile-nav component and overflowed the document at 1440 (actions
+  ended at 1622 px); policy pages remain stubs; screenshots use contract
+  fixtures, not live catalogue rows; LCP p75 is not measurable from a build.
+
+---
+
 # TRACK C7 GAP + C9 — ANOMALY RESOLUTION AND TWO-PERSON ENFORCEMENT (2026-11-23)
 
 - **Pure rule** `packages/domain/src/approval/two-person.ts`: `TwoPersonEntityKind`
