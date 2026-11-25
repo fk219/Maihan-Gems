@@ -107,8 +107,8 @@ describe('Phase 7 DYO Storefront Flow & UI Verification', () => {
 
   it('renders CartPage with atelier shopping bag layout', async () => {
     const markup = renderToStaticMarkup(<CartPage />);
-    expect(markup).toContain('Shopping Bag');
-    expect(markup).toContain('cart-container');
+    expect(markup).toContain('Shopping bag');
+    expect(markup).toContain('mh-cart');
   });
 
   describe('Accessibility Audits (axe-core WCAG 2.2 AA)', () => {

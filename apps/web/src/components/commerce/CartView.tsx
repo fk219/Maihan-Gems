@@ -3,14 +3,28 @@
 /**
  * apps/web/src/components/commerce/CartView.tsx
  *
- * Storefront shopping bag interface.
- * Authority:
- *   - INITIAL_IMPLEMENTATION_PLAN.md Phase 6
- *   - Design.md (Silk & Stone Haute Couture luxury design system)
+ * The storefront shopping bag.
+ *
+ * This is the only client island touched by the storefront design pass: the
+ * bag token lives in localStorage and the contents are fetched at runtime, so
+ * it cannot be a Server Component. It stays small and adds no dependency.
+ *
+ * Design honesty: the previous totals block asserted complimentary armored
+ * delivery and an included appraisal certificate. Neither is in the cart
+ * response, so both are removed. The summary states the subtotal and says that
+ * shipping, duties and documentation are quoted at checkout — nothing is
+ * invented, nothing is added silently.
+ *
+ * `initialItems` is an SSR/preview seam: the storefront route passes nothing
+ * and reads the token exactly as before; the design-test harness can render a
+ * populated bag without fabricating a runtime fetch.
  */
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
-interface CartItem {
+import { Money } from '../design-system/Money.js';
+
+export interface CartItem {
   id: string;
   productId: string;
   title: string;
@@ -19,11 +33,21 @@ interface CartItem {
   quantity: number;
 }
 
-export function CartView() {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+export interface CartViewProps {
+  /** Preview state for SSR screenshots/tests. Omit in the storefront. */
+  readonly initialItems?: readonly CartItem[];
+}
+
+export function CartView({ initialItems }: CartViewProps = {}) {
+  const isPreview = initialItems !== undefined;
+  const [items, setItems] = useState<CartItem[]>(() =>
+    initialItems !== undefined ? [...initialItems] : [],
+  );
+  const [loading, setLoading] = useState<boolean>(initialItems === undefined);
 
   useEffect(() => {
+    if (isPreview) return;
+
     const fetchCart = async () => {
       const token = typeof window !== 'undefined' ? localStorage.getItem('maihan_cart_token') : null;
       if (!token) {
@@ -41,126 +65,104 @@ export function CartView() {
           setItems(cartItems);
         }
       } catch {
-        // Test/offline environment default
+        // A failed read leaves the bag empty rather than showing a guess.
       } finally {
         setLoading(false);
       }
     };
 
     fetchCart();
-  }, []);
+  }, [isPreview]);
 
   const subtotalCents = items.reduce((sum, item) => sum + item.unitPriceCents * item.quantity, 0);
 
-  const formatPrice = (cents: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(cents / 100);
-
   if (loading) {
     return (
-      <div className="cart-container text-center py-16" aria-busy="true">
-        <div className="font-mono text-xs uppercase tracking-widest text-[#8A867E]">
-          Loading Atelier Bag...
-        </div>
+      <div className="mh-cart mh-cart--state" aria-busy="true">
+        <p className="mh-cart__loading">Opening your bag…</p>
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="cart-container text-center py-20">
-        <span className="eyebrow block mb-3">Atelier Shopping Bag</span>
-        <h2 className="font-serif text-3xl font-medium text-[#1A1A18] mb-4">
-          Your Shopping Bag is Empty
-        </h2>
-        <p className="text-sm text-[#4A4740] max-w-md mx-auto mb-8 leading-relaxed">
-          Explore our vault of certified unheated natural gemstones or commission a bespoke mounting in the configurator.
+      <div className="mh-cart mh-cart--state">
+        <p className="mh-masthead__eyebrow">Acquisition bag</p>
+        <h1>Your bag is empty</h1>
+        <p className="mh-cart__lead">
+          Browse loose stones, matched pairs and atelier mountings. Nothing is held until you add it.
         </p>
-
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <a
-            href="/design-your-own"
-            className="px-6 py-3.5 text-[11px] font-semibold tracking-[0.2em] uppercase text-white bg-gradient-to-r from-[#C9A84C] via-[#E8C96A] to-[#8B6914] rounded-[12px] shadow-sm hover:brightness-105 transition-all"
-          >
-            Design Your Own Piece
-          </a>
-          <a
-            href="/"
-            className="px-6 py-3.5 text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1A1A18] bg-white border border-[rgba(201,168,76,0.3)] rounded-[12px] hover:border-[#C9A84C] transition-all"
-          >
-            Explore Gemstones
-          </a>
+        <div className="mh-cart__actions">
+          <Link href="/design-your-own" className="mh-cta">
+            Design your own piece
+            <span aria-hidden="true">→</span>
+          </Link>
+          <Link href="/search" className="mh-cta mh-cta--quiet">
+            Explore the collection
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="cart-container">
-      <header className="dyo-header mb-8">
-        <span className="eyebrow block mb-2">Acquisition Bag</span>
-        <h1 className="font-serif text-3xl font-medium text-[#1A1A18]">Your Atelier Bag</h1>
+    <div className="mh-cart">
+      <header className="mh-cart__head">
+        <p className="mh-masthead__eyebrow">Acquisition bag</p>
+        <h1>Your bag</h1>
+        <p className="mh-cart__count">
+          <span className="tabular">{items.length}</span> {items.length === 1 ? 'piece' : 'pieces'}
+        </p>
       </header>
 
-      <div className="bg-white border border-[rgba(201,168,76,0.15)] rounded-[12px] p-6 shadow-sm mb-8">
-        <table className="cart-items-table">
-          <thead>
-            <tr>
-              <th scope="col">Piece Description</th>
-              <th scope="col" className="text-center">Qty</th>
-              <th scope="col" className="text-right">Investment</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="mh-cart__layout">
+        <div className="mh-cart__main">
+          <ul className="mh-cart__list">
             {items.map((item) => (
-              <tr key={item.id}>
-                <td>
-                  <div className="font-serif text-lg font-medium text-[#1A1A18]">{item.title}</div>
-                  <div className="text-xs font-mono text-[#8A867E]">SKU: {item.sku}</div>
-                </td>
-                <td className="text-center font-mono text-sm text-[#1A1A18]">{item.quantity}</td>
-                <td className="text-right font-mono text-sm font-semibold text-[#1A1A18]">
-                  {formatPrice(item.unitPriceCents * item.quantity)}
-                </td>
-              </tr>
+              <li key={item.id} className="mh-cart__item">
+                <div className="mh-cart__item-main">
+                  <h2 className="mh-cart__title">{item.title}</h2>
+                  <p className="mh-cart__sku">
+                    Reference <span className="tabular">{item.sku}</span>
+                  </p>
+                </div>
+
+                <p className="mh-cart__qty">
+                  <span className="mh-cart__label">Qty</span>{' '}
+                  <span className="tabular">{item.quantity}</span>
+                </p>
+
+                <p className="mh-cart__amount">
+                  <Money amount={(item.unitPriceCents * item.quantity) / 100} currency="USD" />
+                </p>
+              </li>
             ))}
-          </tbody>
-        </table>
+          </ul>
 
-        <div className="border-t border-[rgba(0,0,0,0.06)] pt-6 space-y-3">
-          <div className="flex justify-between text-sm text-[#4A4740]">
-            <span>Armored Global Delivery (Brinks / Malca-Amit)</span>
-            <span className="font-mono text-[#1A1A18]">Complimentary</span>
-          </div>
-          <div className="flex justify-between text-sm text-[#4A4740]">
-            <span>Laboratory Documentation &amp; Appraisal Certificate</span>
-            <span className="font-mono text-[#1A1A18]">Included</span>
-          </div>
-          <div className="flex justify-between items-center pt-4 border-t border-[rgba(0,0,0,0.06)]">
-            <span className="font-serif text-xl font-medium text-[#1A1A18]">Total Investment</span>
-            <span className="font-mono text-2xl font-semibold text-[#8B6914]">{formatPrice(subtotalCents)}</span>
-          </div>
+          <Link href="/design-your-own" className="mh-cart__continue">
+            <span aria-hidden="true">←</span> Continue designing
+          </Link>
         </div>
-      </div>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <a
-          href="/design-your-own"
-          className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#8A867E] hover:text-[#C9A84C] transition-colors"
-        >
-          ← Continue Designing
-        </a>
+        <section className="mh-cart__summary" aria-labelledby="mh-cart-summary-heading">
+          <h2 id="mh-cart-summary-heading">Summary</h2>
 
-        <a
-          href="/checkout/payment-order"
-          className="px-8 py-4 text-[11px] font-semibold tracking-[0.2em] uppercase text-white bg-gradient-to-r from-[#C9A84C] via-[#E8C96A] to-[#8B6914] rounded-[12px] shadow-sm hover:brightness-105 transition-all text-center"
-        >
-          Proceed to Secure Checkout →
-        </a>
+          <div className="mh-cart__row">
+            <span>Subtotal</span>
+            <span>
+              <Money amount={subtotalCents / 100} currency="USD" />
+            </span>
+          </div>
+
+          <p className="mh-cart__note">
+            Shipping, duties and documentation are quoted at checkout. Nothing is added silently.
+          </p>
+
+          <Link href="/checkout/payment-order" className="mh-cta mh-cart__checkout">
+            Proceed to secure checkout
+            <span aria-hidden="true">→</span>
+          </Link>
+        </section>
       </div>
     </div>
   );

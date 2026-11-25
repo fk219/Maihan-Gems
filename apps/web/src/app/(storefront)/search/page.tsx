@@ -8,11 +8,16 @@
  *   - PROJECT_SOURCE_OF_TRUTH.md §11.3, §14
  *   - technical_design/08_FRONTEND_ARCHITECTURE.md (Search form & facets)
  *   - technical_design/12_SEARCH_ARCHITECTURE.md (Hybrid search pipeline)
- *   - Design.md (Swiss Private Banking precision combined with modern Dubai luxury)
+ *
+ * Design: one editorial masthead, one hairline filter column, one unboxed
+ * result grid. The previous page set white text on the ivory document (a
+ * contrast failure) and surfaced internal ranker labels ("STRUCTURED_ONLY",
+ * "PRODUCT_SEARCH") as if they were customer-facing facts. Those labels are
+ * removed; only the honest degraded-mode notice remains.
  *
  * Invariants:
  *   - INV-01, INV-02, INV-03, INV-07, INV-08 honoured.
- *   - Zero LLM on synchronous search path.
+ *   - Zero LLM on the synchronous search path.
  *   - Treated stone neutrality (never demoted).
  *   - Server-rendered, cacheable, zero client-island overhead for search results.
  */
@@ -30,9 +35,9 @@ import {
 import { SearchFilterPanel } from '../../../components/filters/SearchFilterPanel.js';
 import { ProductCard } from '../../../components/catalog/ProductCard.js';
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
+import { EditorialMasthead } from '../../../components/design-system/EditorialMasthead.js';
 import { EmptyState } from '../../../components/design-system/EmptyState.js';
 import { Pagination } from '../../../components/design-system/Pagination.js';
-import { Badge } from '../../../components/design-system/Badge.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,9 +50,16 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
   const q = typeof sp['q'] === 'string' ? sp['q'].trim() : '';
   return {
     title: q.length > 0 ? `Search: "${q}" | Maihan Gems` : 'Search gemstones & fine settings | Maihan Gems',
-    description: 'Explore certified natural untreated gemstones and fine settings with hybrid search and faceted filtering.',
+    description:
+      'Search natural gemstones and fine settings by variety, colour, shape, treatment and origin. Every record shows its evidence status.',
   };
 }
+
+const SORT_OPTIONS = [
+  { value: 'relevance', label: 'Relevance' },
+  { value: 'price', label: 'Price' },
+  { value: 'weight', label: 'Carat weight' },
+] as const;
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const sp = await searchParams;
@@ -57,9 +69,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const searchResult = (await service.search(query)).value;
   const { items, facets, rejected_filters, meta } = searchResult;
   const activeChips = extractActiveFilterChips(sp);
+  const resultCount = meta.candidate_count ?? items.length;
 
   return (
-    <main className="search-page" id="main-content">
+    <main className="search-page mh-page" id="main-content">
       <Breadcrumbs
         crumbs={[
           { label: 'Home', href: '/' },
@@ -67,190 +80,102 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         ]}
       />
 
-      <div className="search-header" style={{ marginBottom: '2rem' }}>
-        <span className="section-eyebrow">Mineralogical Discovery &amp; Intelligent Search</span>
-        <h1 className="section-title text-gold-gradient" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
-          Search Catalogue
-        </h1>
+      <EditorialMasthead
+        eyebrow="Mineralogical discovery"
+        title="Search the collection"
+        lead="Search by variety, colour, cut, treatment or origin. Filters are ordinary links: the URL is the state, so every result set can be shared and revisited."
+      />
 
-        {/* Search Input Bar */}
-        <form action="/search" method="GET" className="search-bar-form" role="search">
-          <input
-            type="search"
-            name="q"
-            defaultValue={query.query}
-            placeholder="Search by variety, colour, shape, origin, or SKU..."
-            className="search-input"
-            aria-label="Search gemstones and jewellery catalogue"
-          />
-          {/* Preserve active filters in form submission if present */}
-          {Array.isArray(query.filters.variety) &&
-            query.filters.variety.map((v) => <input key={v} type="hidden" name="variety" value={v} />)}
-          {Array.isArray(query.filters.color) &&
-            query.filters.color.map((c) => <input key={c} type="hidden" name="color" value={c} />)}
-          {Array.isArray(query.filters.shape) &&
-            query.filters.shape.map((s) => <input key={s} type="hidden" name="shape" value={s} />)}
-          {query.sort !== 'relevance' && <input type="hidden" name="sort" value={query.sort} />}
-          <button type="submit" className="btn-primary">
-            Search
-          </button>
-        </form>
+      <form action="/search" method="GET" className="mh-search-form" role="search">
+        <label className="visually-hidden" htmlFor="mh-search-q">
+          Search gemstones and jewellery catalogue
+        </label>
+        <input
+          id="mh-search-q"
+          type="search"
+          name="q"
+          defaultValue={query.query}
+          placeholder="Variety, colour, shape, origin, or reference…"
+          className="mh-search-form__input"
+        />
+        {/* Preserve active filters in form submission if present */}
+        {Array.isArray(query.filters.variety) &&
+          query.filters.variety.map((v) => <input key={v} type="hidden" name="variety" value={v} />)}
+        {Array.isArray(query.filters.color) &&
+          query.filters.color.map((c) => <input key={c} type="hidden" name="color" value={c} />)}
+        {Array.isArray(query.filters.shape) &&
+          query.filters.shape.map((s) => <input key={s} type="hidden" name="shape" value={s} />)}
+        {query.sort !== 'relevance' && <input type="hidden" name="sort" value={query.sort} />}
+        <button type="submit" className="mh-cta mh-search-form__submit">
+          Search
+        </button>
+      </form>
 
-        {/* Active Filter Chips */}
-        {activeChips.length > 0 && (
-          <div className="active-chips-bar" aria-label="Active filters">
-            <span
-              style={{
-                fontSize: '0.75rem',
-                fontFamily: 'var(--font-sans)',
-                fontWeight: 600,
-                color: 'rgba(255, 255, 255, 0.6)',
-              }}
+      {activeChips.length > 0 && (
+        <div className="mh-chips" aria-label="Active filters">
+          <span className="mh-chips__label">Active filters</span>
+          {activeChips.map((chip) => (
+            <Link
+              key={`${chip.key}-${chip.value}`}
+              href={chip.removeHref}
+              className="mh-chip"
+              title={`Remove ${chip.label}`}
             >
-              Active Filters:
-            </span>
-            {activeChips.map((chip) => (
-              <Link
-                key={`${chip.key}-${chip.value}`}
-                href={chip.removeHref}
-                className="active-chip"
-                title={`Remove ${chip.label}`}
-              >
-                <span>{chip.label}</span>
-                <span className="active-chip__remove" aria-hidden="true">
-                  ×
-                </span>
-              </Link>
-            ))}
-            <Link href="/search" className="clear-all-link">
-              Clear all
+              <span>{chip.label}</span>
+              <span aria-hidden="true">×</span>
             </Link>
-          </div>
-        )}
-      </div>
+          ))}
+          <Link href="/search" className="mh-chips__clear">
+            Clear all
+          </Link>
+        </div>
+      )}
 
-      {/* Main 2-Column Search Layout */}
-      <div className="search-layout">
-        {/* Left Column: Facet Panel */}
+      <div className="mh-search__layout">
         <SearchFilterPanel facets={facets} searchParams={sp} />
 
-        {/* Right Column: Search Results */}
-        <div className="search-results-area">
-          {/* Status & Observability Bar */}
-          <div className="search-meta-bar">
-            <div className="search-meta-stats">
-              <span className="font-mono font-bold" style={{ color: '#ffffff' }}>
-                {meta.candidate_count ?? items.length}
-              </span>
-              <span>item{items.length === 1 ? '' : 's'} found</span>
+        <section className="mh-search__results" aria-label="Search results">
+          <div className="mh-search__meta">
+            <p className="mh-search__count">
+              <span className="tabular">{resultCount}</span>{' '}
+              {resultCount === 1 ? 'item' : 'items'}
               {query.query.length > 0 && (
-                <span>
-                  for &ldquo;<strong style={{ color: 'var(--color-gold-light)' }}>{query.query}</strong>&rdquo;
-                </span>
+                <>
+                  {' '}for <em>“{query.query}”</em>
+                </>
               )}
-            </div>
+            </p>
 
-            <div className="search-meta-badges">
-              <Badge tone="neutral">{meta.strategy}</Badge>
-              <Badge tone="neutral">{meta.intent}</Badge>
-              {meta.degraded && (
-                <Badge tone="warning" live>
-                  Degraded Mode
-                </Badge>
-              )}
-            </div>
+            <nav className="mh-sort" aria-label="Sort results">
+              <span className="mh-sort__label">Sort</span>
+              {SORT_OPTIONS.map((option) => (
+                <Link
+                  key={option.value}
+                  href={buildSearchHref(sp, 'sort', option.value)}
+                  className="mh-sort__link"
+                  aria-current={query.sort === option.value ? 'true' : undefined}
+                >
+                  {option.label}
+                </Link>
+              ))}
+            </nav>
           </div>
 
-          {/* Sort Selector Bar */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginBottom: '1.25rem',
-              fontSize: '0.75rem',
-              fontFamily: 'var(--font-sans)',
-            }}
-          >
-            <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Sort By:</span>
-            <Link
-              href={buildSearchHref(sp, 'sort', 'relevance')}
-              style={{
-                color: query.sort === 'relevance' ? 'var(--color-gold)' : 'rgba(255, 255, 255, 0.7)',
-                fontWeight: query.sort === 'relevance' ? 700 : 400,
-                textDecoration: 'none',
-                padding: '0.2rem 0.5rem',
-              }}
-            >
-              Relevance
-            </Link>
-            <span style={{ color: 'rgba(255, 255, 255, 0.2)' }}>|</span>
-            <Link
-              href={buildSearchHref(sp, 'sort', 'price')}
-              style={{
-                color: query.sort === 'price' ? 'var(--color-gold)' : 'rgba(255, 255, 255, 0.7)',
-                fontWeight: query.sort === 'price' ? 700 : 400,
-                textDecoration: 'none',
-                padding: '0.2rem 0.5rem',
-              }}
-            >
-              Price
-            </Link>
-            <span style={{ color: 'rgba(255, 255, 255, 0.2)' }}>|</span>
-            <Link
-              href={buildSearchHref(sp, 'sort', 'weight')}
-              style={{
-                color: query.sort === 'weight' ? 'var(--color-gold)' : 'rgba(255, 255, 255, 0.7)',
-                fontWeight: query.sort === 'weight' ? 700 : 400,
-                textDecoration: 'none',
-                padding: '0.2rem 0.5rem',
-              }}
-            >
-              Carat Weight
-            </Link>
-          </div>
-
-          {/* Degraded Search Warning */}
           {meta.degraded && (
-            <div
-              style={{
-                background: 'rgba(251, 191, 36, 0.1)',
-                border: '1px solid rgba(251, 191, 36, 0.3)',
-                borderRadius: '0.75rem',
-                padding: '1rem',
-                marginBottom: '1.5rem',
-                fontSize: '0.8125rem',
-                color: '#fbbf24',
-              }}
-              role="status"
-            >
-              <strong>Notice:</strong> Semantic vector ranking is currently operating in degraded mode
-              ({meta.degradation_reason ?? 'Service fallback'}). Deterministic structured filtering and full-text search remain active.
+            <div className="mh-notice" role="status">
+              <strong>Search notice.</strong> Semantic vector ranking is operating in degraded mode
+              ({meta.degradation_reason ?? 'service fallback'}). Structured filters and full-text
+              search remain active.
             </div>
           )}
 
-          {/* Rejected Filters Notification */}
           {rejected_filters.length > 0 && (
-            <div
-              style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(201, 168, 76, 0.2)',
-                borderRadius: '0.75rem',
-                padding: '1rem',
-                marginBottom: '1.5rem',
-                fontSize: '0.8125rem',
-                color: 'rgba(255, 255, 255, 0.75)',
-              }}
-              role="status"
-            >
-              <strong>Filter Notice:</strong> The following unrecognized filter parameters were disregarded:
-              {' '}
-              {rejected_filters.map((rf) => `${rf.filter}: "${rf.value}"`).join(', ')}.
+            <div className="mh-notice mh-notice--muted" role="status">
+              <strong>Filter notice.</strong> These unrecognised parameters were disregarded:{' '}
+              {rejected_filters.map((rf) => `${rf.filter}: “${rf.value}”`).join(', ')}.
             </div>
           )}
 
-          {/* Product Items or Empty State */}
           {items.length === 0 ? (
             <EmptyState
               title={
@@ -259,13 +184,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   : 'No items currently match the selected filters.'
               }
               action={
-                <Link href="/search" className="btn-primary">
-                  Clear All Filters
+                <Link href="/search" className="mh-cta">
+                  Clear all filters
                 </Link>
               }
             >
-              Try expanding your search query, selecting different colour or variety facets, or browsing
-              the general catalogue collections.
+              Try a broader term, remove a facet, or browse the variety directory.
             </EmptyState>
           ) : (
             <>
@@ -285,7 +209,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               />
             </>
           )}
-        </div>
+        </section>
       </div>
     </main>
   );
