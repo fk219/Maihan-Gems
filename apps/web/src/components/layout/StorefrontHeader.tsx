@@ -29,7 +29,7 @@ export async function StorefrontHeader() {
     <header className="site-header">
       <div className="site-header__container">
         {/* Zone 1: Brand Wordmark in Cormorant Garamond */}
-        <a href="/" className="site-header__brand" aria-label="Maihan Gems Atelier Homepage">
+        <a href="/" className="site-header__brand">
           <span className="site-header__wordmark">MAIHAN GEMS</span>
           <span className="site-header__divider" aria-hidden="true" />
           <span className="site-header__submark">Atelier</span>
