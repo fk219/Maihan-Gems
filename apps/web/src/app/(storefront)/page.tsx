@@ -1,982 +1,311 @@
 /**
  * apps/web/src/app/(storefront)/page.tsx — `/`
  *
- * Storefront Homepage for Maihan Gems: Product Discovery & Mineralogical Architecture.
+ * The storefront frontispiece. It is a catalogue cover, not a campaign page:
+ * one statement, three doors, the published varieties, the colour families
+ * and three real mounting designs.
  *
- * Authority & Styling:
- *   - Design.md: Swiss Private Banking precision combined with modern Dubai luxury.
- *   - Signature Alternating Rhythm:
- *       1. Hero: "Light through stone" — deep obsidian navy (#08121E), one
- *          CSS-built stone under a raking key light (DESIGN_DIRECTION.md §4.1).
- *          No client JS, no hero photograph, no fabricated product.
- *       2. Marquee Ticker: Solid Metallic Gold (#C9A84C) core values banner
- *       3. Atelier Settings: Dark Primary Navy (#0D1B2A) with real setting designs
- *       4. Bespoke Atelier Workflow: Crisp White (#FFFFFF) 3-step configurator guide
- *       5. Mineralogical Discovery: Midnight Obsidian (#080D19) variety & colour search portals
- *       6. Gemmological Integrity: Ivory Off-White (#FAFAF8) verified standard pillars
- *   - Real data seam: catalogServer().listSettings({ limit: 6 }) and catalogServer().getTaxonomy().
- *   - Invariants: INV-01/02/03/07/08 honoured. No fake products, prices or unverified claims.
+ * Every value comes from the Phase 3 catalogue service. There is no marquee,
+ * no invented certification, no "100% natural" claim, no shipping promise and
+ * no trust badge. The only promise on the page is the evidence rule the
+ * product pages actually enforce (INV-07).
+ *
+ * If the taxonomy is empty, the page says so and offers the routes that still
+ * work — a purpose-built empty state, never a wall of placeholder cards.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { HomeHero } from '../../components/home/HomeHero.js';
+import { LightPlate } from '../../components/design-system/LightPlate.js';
 import { catalogServer } from '../../lib/catalog-server.js';
+import { browsableColours, browsableVarieties } from '../../lib/catalog-view.js';
 
+// The page reads request-time catalogue data. Forcing dynamic keeps
+// `next build` database-free (the build gate runs with DATABASE_URL unset).
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Maihan Gems — Natural Untreated Gemstones & Master Atelier Settings',
+  title: 'Maihan Gems — Natural gemstones and atelier mountings',
   description:
-    'Discover 100% natural earth-mined loose gemstones, certified mineral varieties, and precision master goldsmith settings in 18K gold and platinum.',
+    'Loose gemstones, matched pairs, ready-made rings and atelier settings, catalogued with the evidence each record carries.',
 };
-
-/** Iconic mineral varieties for curated discovery */
-const CURATED_VARIETIES = [
-  { slug: 'emerald', name: 'Emerald', species: 'Beryl', color: '#10B981' },
-  { slug: 'sapphire', name: 'Sapphire', species: 'Corundum', color: '#3B82F6' },
-  { slug: 'ruby', name: 'Ruby', species: 'Corundum', color: '#EF4444' },
-  { slug: 'spinel', name: 'Spinel', species: 'Spinel', color: '#DB2777' },
-  { slug: 'tsavorite-garnet', name: 'Tsavorite Garnet', species: 'Grossular Garnet', color: '#059669' },
-  { slug: 'tourmaline', name: 'Tourmaline', species: 'Tourmaline Group', color: '#06B6D4' },
-  { slug: 'tanzanite', name: 'Tanzanite', species: 'Zoisite', color: '#6366F1' },
-  { slug: 'aquamarine', name: 'Aquamarine', species: 'Beryl', color: '#38BDF8' },
-];
-
-/** Chromatic colour swatches for spectrum discovery */
-const CHROMATIC_COLOURS = [
-  { slug: 'blue', name: 'Royal Blue', gradient: 'radial-gradient(circle at 35% 35%, #60A5FA 0%, #2563EB 50%, #0F172A 100%)' },
-  { slug: 'green', name: 'Vivid Green', gradient: 'radial-gradient(circle at 35% 35%, #34D399 0%, #059669 50%, #064E3B 100%)' },
-  { slug: 'red', name: 'Pigeon Blood Red', gradient: 'radial-gradient(circle at 35% 35%, #F87171 0%, #DC2626 50%, #450A0A 100%)' },
-  { slug: 'pink', name: 'Vivid Pink', gradient: 'radial-gradient(circle at 35% 35%, #F472B6 0%, #DB2777 50%, #700B34 100%)' },
-  { slug: 'yellow', name: 'Warm Yellow', gradient: 'radial-gradient(circle at 35% 35%, #FCD34D 0%, #D97706 50%, #78350F 100%)' },
-  { slug: 'purple', name: 'Royal Purple', gradient: 'radial-gradient(circle at 35% 35%, #C084FC 0%, #7C3AED 50%, #3B0764 100%)' },
-];
-
-/** Curated gemstone specimen collections with verified vector artwork */
-const VAULT_COLLECTIONS = [
-  {
-    slug: 'sapphire',
-    title: 'Ceylon Royal Sapphires',
-    provenance: 'Sri Lanka & Kashmir · Natural Unheated',
-    description: 'Vivid royal blue, cornflower, and sunset padparadscha corundum crystals.',
-    image: '/assets/gemstones/sapphire.svg',
-    href: '/search?q=sapphire',
-    spec: '3.42 ct · Cushion Cut · GRS Certified',
-  },
-  {
-    slug: 'emerald',
-    title: 'Muzo & Panjshir Emeralds',
-    provenance: 'Colombia & Afghanistan · Natural Beryl',
-    description: 'Deep crystalline forest green beryls with verified traditional treatment disclosure.',
-    image: '/assets/gemstones/emerald.svg',
-    href: '/search?q=emerald',
-    spec: '2.85 ct · Emerald Cut · GIA Certified',
-  },
-  {
-    slug: 'ruby',
-    title: "Burmese Pigeon's Blood Rubies",
-    provenance: 'Mogok, Myanmar · Untreated Corundum',
-    description: 'Rare fluorescent crimson corundum specimens possessing supreme saturation.',
-    image: '/assets/gemstones/ruby.svg',
-    href: '/search?q=ruby',
-    spec: '2.14 ct · Oval Brilliant · SSEF Verified',
-  },
-  {
-    slug: 'paraiba',
-    title: 'Paraíba & Exotic Minerals',
-    provenance: 'Brazil & Mozambique · Copper-Bearing',
-    description: 'Electric neon-cyan tourmalines, cobalt spinels, and vivid tsavorite garnets.',
-    image: '/assets/gemstones/tourmaline.svg',
-    href: '/search?q=tourmaline',
-    spec: '1.92 ct · Pear Cut · Gübelin Certified',
-  },
-];
-
-/** Selects appropriate master jewelry setting illustration based on type & style */
-function getSettingImage(jewelleryType: string, styleLabel: string | null): string {
-  if (jewelleryType.toUpperCase() === 'EARRINGS') {
-    return '/assets/settings/stud_earrings.svg';
-  }
-  const s = (styleLabel ?? '').toLowerCase();
-  if (s.includes('halo')) {
-    return '/assets/settings/halo_ring.svg';
-  }
-  if (s.includes('three') || s.includes('trilogy') || s.includes('side')) {
-    return '/assets/settings/three_stone_ring.svg';
-  }
-  return '/assets/settings/solitaire_ring.svg';
-}
 
 export default async function HomePage() {
   const service = catalogServer();
+  const [taxonomyResult, settingsResult] = await Promise.all([
+    service.getTaxonomy(),
+    service.listSettings({ limit: 3 }),
+  ]);
 
-  // Load live reference settings (doc 10: settings are not publication-gated)
-  const settingsRes = await service.listSettings({ limit: 6 });
-  const settings = settingsRes.value.items;
+  const varieties = browsableVarieties(taxonomyResult.value);
+  const colours = browsableColours(taxonomyResult.value);
+  const settings = settingsResult.value.items;
+  const shownVarieties = varieties.slice(0, 9);
 
   return (
-    <main className="storefront-home" id="main-content">
-      {/* ── SECTION 1: HERO — "Light through stone" (DESIGN_DIRECTION.md §4.1) ── */}
+    <main className="sf-home" id="main-content">
       <HomeHero />
 
-      {/* ── SECTION 2: INFINITE MARQUEE TICKER ── */}
-      <aside className="marquee-container" aria-label="Maihan Gems core values marquee">
-        <div className="marquee-track">
-          <div className="marquee-content">
-            <span>100% Earth-Mined Natural Gemstones</span>
-            <span className="marquee-dot">✦</span>
-            <span>Swiss &amp; Dubai Private Vault Custody</span>
-            <span className="marquee-dot">✦</span>
-            <span>GIA &amp; GRS Laboratory Verified</span>
-            <span className="marquee-dot">✦</span>
-            <span>Transparent Treatment Disclosure</span>
-            <span className="marquee-dot">✦</span>
-            <span>Master Goldsmith Mountings in 18K &amp; Platinum</span>
-            <span className="marquee-dot">✦</span>
-            <span>Bespoke Atelier Craftsmanship</span>
-            <span className="marquee-dot">✦</span>
-            <span>Insured Worldwide Express Delivery</span>
-            <span className="marquee-dot">✦</span>
-          </div>
-          {/* Duplicated Track for Continuous Seamless Loop */}
-          <div className="marquee-content" aria-hidden="true">
-            <span>100% Earth-Mined Natural Gemstones</span>
-            <span className="marquee-dot">✦</span>
-            <span>Swiss &amp; Dubai Private Vault Custody</span>
-            <span className="marquee-dot">✦</span>
-            <span>GIA &amp; GRS Laboratory Verified</span>
-            <span className="marquee-dot">✦</span>
-            <span>Transparent Treatment Disclosure</span>
-            <span className="marquee-dot">✦</span>
-            <span>Master Goldsmith Mountings in 18K &amp; Platinum</span>
-            <span className="marquee-dot">✦</span>
-            <span>Bespoke Atelier Craftsmanship</span>
-            <span className="marquee-dot">✦</span>
-            <span>Insured Worldwide Express Delivery</span>
-            <span className="marquee-dot">✦</span>
-          </div>
-        </div>
-      </aside>
-
-      {/* ── SECTION 3: CURATED GEMSTONE VAULT COLLECTIONS ── */}
-      <section className="storefront-section bg-studio-white" aria-labelledby="collections-title">
-        <div className="storefront-section__container">
-          <div className="storefront-section__header">
-            <span className="section-eyebrow section-eyebrow--dark">Natural Mineral Treasures</span>
-            <h2
-              id="collections-title"
-              className="section-title"
-              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#1a1a18' }}
-            >
-              Curated Gemstone <span className="text-gold-gradient">Vault Collections</span>
-            </h2>
-            <p className="storefront-section__subtitle" style={{ color: '#4a4740' }}>
-              Direct-source untreated mineral treasures authenticated by premier international gemmological laboratories.
-            </p>
-          </div>
-
-          <div className="grid-cards-4" style={{ marginBottom: '3rem' }}>
-            {VAULT_COLLECTIONS.map((c) => (
-              <div
-                key={c.slug}
-                className="luxury-card luxury-card--light"
-                style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}
-              >
-                <div
-                  style={{
-                    position: 'relative',
-                    aspectRatio: '1',
-                    background: '#FAFAF8',
-                    borderRadius: 'calc(var(--radius) - 4px)',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '1.25rem',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  <img
-                    src={c.image}
-                    alt={c.title}
-                    loading="lazy"
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '100%',
-                      objectFit: 'contain',
-                      transition: 'transform 0.5s ease',
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '0.75rem',
-                      right: '0.75rem',
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: '9px',
-                      fontWeight: 700,
-                      letterSpacing: '0.15em',
-                      textTransform: 'uppercase',
-                      color: '#8a867e',
-                    }}
-                  >
-                    Natural
-                  </div>
-                </div>
-
-                <span
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: '10px',
-                    fontWeight: 600,
-                    letterSpacing: '0.18em',
-                    textTransform: 'uppercase',
-                    color: 'var(--color-gold-dark)',
-                    display: 'block',
-                    marginBottom: '0.35rem',
-                  }}
-                >
-                  {c.provenance}
-                </span>
-
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: '1.35rem',
-                    fontWeight: 600,
-                    color: '#1a1a18',
-                    margin: '0 0 0.5rem 0',
-                    lineHeight: 1.25,
-                  }}
-                >
-                  {c.title}
-                </h3>
-
-                <p
-                  style={{
-                    fontSize: '0.8125rem',
-                    color: '#4a4740',
-                    lineHeight: 1.5,
-                    margin: '0 0 1rem 0',
-                  }}
-                >
-                  {c.description}
-                </p>
-
-                <div
-                  style={{
-                    marginTop: 'auto',
-                    paddingTop: '0.75rem',
-                    borderTop: '1px solid rgba(0, 0, 0, 0.05)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <span className="font-mono" style={{ fontSize: '11px', color: '#8a867e' }}>
-                    {c.spec}
-                  </span>
-                  <Link
-                    href={c.href}
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      letterSpacing: '0.12em',
-                      textTransform: 'uppercase',
-                      color: 'var(--color-gold-dark)',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    Explore →
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <Link href="/search" className="btn-primary">
-              View All Loose Gemstones
-            </Link>
-          </div>
-        </div>
+      {/* The catalogue's position, in two voices: a statement and a note. */}
+      <section className="sf-home__lede" aria-label="About the catalogue">
+        <p>
+          A gemstone is not a colour. It is a <span className="sf-gold-word">path of light</span>,
+          and a record is the only honest way to describe it.
+        </p>
+        <p className="sf-home__lede-note">
+          Maihan Gems publishes natural stones and atelier mountings. Each product page states
+          what the record contains: weight, colour, cut, price, availability and the evidence
+          behind each value. Where a field is absent, the page says so rather than inventing it.
+        </p>
       </section>
 
-      {/* ── SECTION 4: ATELIER SETTINGS SHOWCASE (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
-      <section className="storefront-section bg-warm-alabaster" aria-labelledby="settings-title">
-        <div className="storefront-section__container">
-          <div className="storefront-section__header">
-            <span className="section-eyebrow section-eyebrow--dark">Atelier Mountings</span>
-            <h2
-              id="settings-title"
-              className="section-title"
-              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#1a1a18' }}
-            >
-              Master Goldsmith <span className="text-gold-gradient">Setting Designs</span>
-            </h2>
-            <p
-              className="storefront-section__subtitle"
-              style={{ color: '#4a4740' }}
-            >
-              Precision-cast in 18K Yellow Gold, White Gold, Rose Gold, and 950 Platinum. Choose a signature
-              mounting engineered to showcase bespoke natural gemstones.
-            </p>
-          </div>
-
-          {settings.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem 0' }}>
-              <p style={{ color: '#4a4740', marginBottom: '1.5rem' }}>
-                Explore over 950 master mountings in our complete atelier catalogue.
-              </p>
-              <Link href="/settings" className="btn-primary">
-                View All Settings
-              </Link>
-            </div>
-          ) : (
-            <div className="grid-cards-3" style={{ marginBottom: '3.5rem' }}>
-              {settings.map((setting) => (
-                <div
-                  key={setting.design_code}
-                  className="luxury-card luxury-card--light"
-                  style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}
-                >
-                  <div
-                    style={{
-                      position: 'relative',
-                      aspectRatio: '16/10',
-                      background: '#FAFAF8',
-                      borderRadius: 'calc(var(--radius) - 4px)',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '1rem',
-                      marginBottom: '1.25rem',
-                    }}
-                  >
-                    <img
-                      src={getSettingImage(setting.jewellery_type, setting.style?.label ?? null)}
-                      alt={setting.name}
-                      loading="lazy"
-                      style={{
-                        maxWidth: '85%',
-                        maxHeight: '85%',
-                        objectFit: 'contain',
-                        transition: 'transform 0.4s ease',
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '0.75rem',
-                        left: '0.75rem',
-                      }}
-                    >
-                      <span
-                        style={{
-                          padding: '0.2rem 0.55rem',
-                          borderRadius: '9999px',
-                          background: 'rgba(255, 255, 255, 0.9)',
-                          border: '1px solid rgba(201, 168, 76, 0.3)',
-                          fontFamily: 'var(--font-sans)',
-                          fontSize: '0.625rem',
-                          fontWeight: 700,
-                          letterSpacing: '0.08em',
-                          textTransform: 'uppercase',
-                          color: 'var(--color-gold-dark)',
-                        }}
-                      >
-                        {setting.jewellery_type.toLowerCase()}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '0.75rem',
-                        right: '0.75rem',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.6875rem',
-                        color: '#8a867e',
-                        background: 'rgba(255, 255, 255, 0.85)',
-                        padding: '0.15rem 0.4rem',
-                        borderRadius: '4px',
-                      }}
-                    >
-                      {setting.design_code}
-                    </div>
-                  </div>
-
-                  <h3
-                    style={{
-                      fontFamily: 'var(--font-serif)',
-                      fontSize: '1.35rem',
-                      fontWeight: 600,
-                      margin: '0 0 0.4rem 0',
-                      color: '#1a1a18',
-                      lineHeight: 1.25,
-                    }}
-                  >
-                    {setting.name}
-                  </h3>
-
-                  <p
-                    style={{
-                      fontSize: '0.8125rem',
-                      color: '#4a4740',
-                      margin: '0 0 1.25rem 0',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {setting.style !== null ? setting.style.label : 'Classic Master Setting'}
-                    {' · '}
-                    {setting.variant_count} metal option{setting.variant_count === 1 ? '' : 's'}{' '}
-                    available
-                  </p>
-
-                  <div
-                    style={{
-                      marginTop: 'auto',
-                      paddingTop: '0.75rem',
-                      borderTop: '1px solid rgba(0, 0, 0, 0.05)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <span className="font-mono" style={{ fontSize: '11px', color: '#8a867e' }}>
-                      18K &amp; Platinum
-                    </span>
-                    <Link
-                      href={`/search?q=${setting.design_code}`}
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        letterSpacing: '0.12em',
-                        textTransform: 'uppercase',
-                        color: 'var(--color-gold-dark)',
-                        textDecoration: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                      }}
-                    >
-                      <span>Explore Mounting</span>
-                      <span>→</span>
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div
-            style={{
-              display: 'flex',
-              gap: '1.25rem',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-            }}
-          >
-            <Link href="/settings" className="btn-primary">
-              Browse All Setting Designs
-            </Link>
-            <Link href="/design-your-own" className="btn-outline">
-              Design Your Custom Piece
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 5: BESPOKE ATELIER WORKFLOW (Crisp White #FFFFFF) ── */}
-      <section className="storefront-section bg-crisp-white" aria-labelledby="bespoke-workflow-title">
-        <div className="storefront-section__container">
-          <div className="storefront-section__header">
-            <span className="section-eyebrow section-eyebrow--dark">Bespoke Creation</span>
-            <h2
-              id="bespoke-workflow-title"
-              className="section-title"
-              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#1a1a18' }}
-            >
-              Craft Your <span className="text-gold-gradient">Custom Jewel</span>
-            </h2>
-            <p className="storefront-section__subtitle" style={{ color: '#4a4740' }}>
-              A disciplined three-stage atelier process pairing rare earth gemstones with master goldsmith mountings.
-            </p>
-          </div>
-
-          <div className="grid-cards-3" style={{ marginBottom: '3rem' }}>
-            {/* Step 1 */}
-            <div className="luxury-card luxury-card--light" style={{ padding: '2.25rem 2rem' }}>
-              <div
-                style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '50%',
-                  background: 'rgba(201, 168, 76, 0.15)',
-                  border: '1.5px solid var(--color-gold)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: 'var(--font-sans)',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  color: 'var(--color-gold-dark)',
-                  marginBottom: '1.25rem',
-                }}
-              >
-                1
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.4rem',
-                  fontWeight: 600,
-                  margin: '0 0 0.75rem 0',
-                  color: '#1a1a18',
-                }}
-              >
-                Select Master Mounting
-              </h3>
-              <p style={{ fontSize: '0.875rem', color: '#4a4740', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                Explore over 950 solitaire, halo, three-stone, and vintage designs cast in 18K yellow, white,
-                rose gold, or platinum.
-              </p>
-              <Link
-                href="/settings"
-                style={{
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  color: 'var(--color-gold-dark)',
-                  textDecoration: 'none',
-                }}
-              >
-                Browse Mountings →
-              </Link>
-            </div>
-
-            {/* Step 2 */}
-            <div className="luxury-card luxury-card--light" style={{ padding: '2.25rem 2rem' }}>
-              <div
-                style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '50%',
-                  background: 'rgba(201, 168, 76, 0.15)',
-                  border: '1.5px solid var(--color-gold)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: 'var(--font-sans)',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  color: 'var(--color-gold-dark)',
-                  marginBottom: '1.25rem',
-                }}
-              >
-                2
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.4rem',
-                  fontWeight: 600,
-                  margin: '0 0 0.75rem 0',
-                  color: '#1a1a18',
-                }}
-              >
-                Pair Natural Gemstone
-              </h3>
-              <p style={{ fontSize: '0.875rem', color: '#4a4740', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                Filter our catalogue by species, carat weight, colour saturation, and cut to select an
-                exceptional centre stone or earring pair.
-              </p>
-              <Link
-                href="/search"
-                style={{
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  color: 'var(--color-gold-dark)',
-                  textDecoration: 'none',
-                }}
-              >
-                Intelligent Search →
-              </Link>
-            </div>
-
-            {/* Step 3 */}
-            <div className="luxury-card luxury-card--light" style={{ padding: '2.25rem 2rem' }}>
-              <div
-                style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '50%',
-                  background: 'rgba(201, 168, 76, 0.15)',
-                  border: '1.5px solid var(--color-gold)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: 'var(--font-sans)',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  color: 'var(--color-gold-dark)',
-                  marginBottom: '1.25rem',
-                }}
-              >
-                3
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.4rem',
-                  fontWeight: 600,
-                  margin: '0 0 0.75rem 0',
-                  color: '#1a1a18',
-                }}
-              >
-                Hand-Set &amp; Hallmarked
-              </h3>
-              <p style={{ fontSize: '0.875rem', color: '#4a4740', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                Master jewelers set your stone with exact prong tension, finish the piece to mirror luster,
-                and provide official laboratory documentation.
-              </p>
-              <Link
-                href="/design-your-own"
-                style={{
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  color: 'var(--color-gold-dark)',
-                  textDecoration: 'none',
-                }}
-              >
-                Launch Configurator →
-              </Link>
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <Link href="/design-your-own" className="btn-primary">
-              Begin Custom Design
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 6: MINERALOGICAL DISCOVERY (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
-      <section className="storefront-section bg-warm-alabaster" aria-labelledby="discovery-title">
-        <div className="storefront-section__container">
-          <div className="storefront-section__header">
-            <span className="section-eyebrow section-eyebrow--dark">Mineralogical Discovery</span>
-            <h2
-              id="discovery-title"
-              className="section-title"
-              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#1a1a18' }}
-            >
-              Explore by Mineral Variety <span className="text-gold-gradient">&amp; Chromatic Hue</span>
-            </h2>
-            <p
-              className="storefront-section__subtitle"
-              style={{ color: '#4a4740' }}
-            >
-              Search our mineralogical database by certified species and vibrant colour families.
-            </p>
-          </div>
-
-          {/* Curated Variety Search Cards */}
-          <div className="grid-cards-4" style={{ marginBottom: '3.5rem' }}>
-            {CURATED_VARIETIES.map((v) => (
-              <Link
-                key={v.slug}
-                href={`/search?q=${encodeURIComponent(v.name)}`}
-                className="luxury-card luxury-card--light"
-                style={{ padding: '1.75rem 1.5rem' }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '0.75rem',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: '0.6875rem',
-                      fontWeight: 700,
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
-                      color: 'var(--color-gold-dark)',
-                    }}
-                  >
-                    {v.species}
-                  </span>
-                  <span style={{ color: v.color, fontSize: '0.875rem' }}>●</span>
-                </div>
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: '1.5rem',
-                    fontWeight: 600,
-                    margin: '0 0 0.5rem 0',
-                    color: '#1a1a18',
-                  }}
-                >
-                  {v.name}
-                </h3>
-                <p
-                  style={{
-                    fontSize: '0.8125rem',
-                    color: '#4a4740',
-                    margin: '0 0 1rem 0',
-                    lineHeight: 1.4,
-                  }}
-                >
-                  Search natural {v.name.toLowerCase()} gemstones &amp; jewellery.
-                </p>
-                <div
-                  style={{
-                    marginTop: 'auto',
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: 'var(--color-gold-dark)',
-                  }}
-                >
-                  Search {v.name} →
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {/* Chromatic Spectrum Row */}
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: '0.8125rem',
-                fontWeight: 600,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color: '#4a4740',
-              }}
-            >
-              Discover by Chromatic Family:
+      {/* Three doors, one job each. */}
+      <nav className="sf-home__doors" aria-label="Start browsing">
+        <Link className="sf-door" href="/varieties">
+          <span className="sf-door__index">01</span>
+          <span>
+            <span className="sf-door__title">Loose gemstones</span>
+            <span className="sf-door__note">
+              Browse by mineral variety, then open the stones recorded under it.
             </span>
-          </div>
+          </span>
+          <span className="sf-door__cue">
+            The varieties <span aria-hidden="true">→</span>
+          </span>
+        </Link>
 
-          <div
-            style={{
-              display: 'flex',
-              gap: '1rem',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              marginBottom: '3rem',
-            }}
-          >
-            {CHROMATIC_COLOURS.map((c) => (
-              <Link
-                key={c.slug}
-                href={`/search?color=${c.slug}`}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.6rem',
-                  padding: '0.6rem 1.15rem',
-                  borderRadius: '9999px',
-                  background: '#ffffff',
-                  border: '1px solid rgba(201, 168, 76, 0.25)',
-                  boxShadow: '0 2px 8px -2px rgba(0, 0, 0, 0.04)',
-                  textDecoration: 'none',
-                  color: '#1a1a18',
-                  fontSize: '0.8125rem',
-                  fontFamily: 'var(--font-sans)',
-                  fontWeight: 600,
-                  transition: 'border-color 0.2s ease, background 0.2s ease, transform 0.2s ease',
-                }}
-              >
-                <span
-                  style={{
-                    width: '14px',
-                    height: '14px',
-                    borderRadius: '50%',
-                    background: c.gradient,
-                    display: 'inline-block',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-                  }}
-                  aria-hidden="true"
-                />
-                <span>{c.name}</span>
+        <Link className="sf-door" href="/settings">
+          <span className="sf-door__index">02</span>
+          <span>
+            <span className="sf-door__title">Atelier settings</span>
+            <span className="sf-door__note">
+              Mounting designs with the metal variants, prices and evidence each record carries.
+            </span>
+          </span>
+          <span className="sf-door__cue">
+            The mountings <span aria-hidden="true">→</span>
+          </span>
+        </Link>
+
+        <Link className="sf-door" href="/design-your-own">
+          <span className="sf-door__index">03</span>
+          <span>
+            <span className="sf-door__title">Design your own</span>
+            <span className="sf-door__note">
+              Pair one mounting with one stone, or a matched pair with earrings. The rule is
+              enforced, not suggested.
+            </span>
+          </span>
+          <span className="sf-door__cue">
+            The configurator <span aria-hidden="true">→</span>
+          </span>
+        </Link>
+      </nav>
+
+      {/* Variety index — the catalogue's real table of contents. */}
+      <section className="sf-section" aria-labelledby="home-varieties">
+        <div className="sf-section__head">
+          <div>
+            <p className="sf-eyebrow">The table of contents</p>
+            <h2 className="sf-section__title" id="home-varieties">
+              Published varieties
+            </h2>
+          </div>
+          <p className="sf-section__note">
+            Only ACTIVE varieties appear. Each entry opens the loose-stone listing; the pair
+            listing is one step further in.
+          </p>
+        </div>
+
+        {shownVarieties.length === 0 ? (
+          <div className="empty-state">
+            <h3 className="empty-state__title">No varieties are published yet.</h3>
+            <p className="empty-state__body">
+              The directory is driven by the taxonomy. When a variety is marked ACTIVE it appears
+              here, with no hardcoded list in between.
+            </p>
+            <div className="empty-state__action">
+              <Link className="mh-cta" href="/search">
+                Search the catalogue
               </Link>
+              <Link className="mh-cta mh-cta--quiet" href="/settings">
+                Browse settings
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            <ul className="sf-variety-list">
+              {shownVarieties.map((variety) => (
+                <li key={variety.slug}>
+                  <Link href={`/${variety.slug}`}>
+                    <span className="sf-variety-name">{variety.name}</span>
+                    <span className="sf-variety-meta">
+                      Loose · Pairs <span aria-hidden="true">→</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {varieties.length > shownVarieties.length && (
+              <p style={{ marginTop: 24 }}>
+                <Link className="sf-text-link" href="/varieties">
+                  All {varieties.length} varieties <span aria-hidden="true">→</span>
+                </Link>
+              </p>
+            )}
+          </>
+        )}
+      </section>
+
+      {/* Colour families. Text chips, not colour pills: the name is the datum. */}
+      {colours.length > 0 && (
+        <section className="sf-section" aria-labelledby="home-colours">
+          <div className="sf-section__head">
+            <div>
+              <p className="sf-eyebrow">The spectrum</p>
+              <h2 className="sf-section__title" id="home-colours">
+                Shop by colour
+              </h2>
+            </div>
+            <p className="sf-section__note">
+              A colour family is a catalogue grouping, not a promise of hue, tone or saturation.
+              The stone record carries those fields where they are known.
+            </p>
+          </div>
+          <ul className="sf-colour-row">
+            {colours.map((colour) => (
+              <li key={colour.slug}>
+                <Link href={`/colour/${colour.slug}`}>{colour.name}</Link>
+              </li>
             ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Three real mounting designs. A design has no headline price, so the
+          preview shows the recorded style and metal count, never a guess. */}
+      <section className="sf-section" aria-labelledby="home-settings">
+        <div className="sf-section__head">
+          <div>
+            <p className="sf-eyebrow">The atelier</p>
+            <h2 className="sf-section__title" id="home-settings">
+              Mounting designs
+            </h2>
+          </div>
+          <p className="sf-section__note">
+            Each design lists the metal variants it actually has. A design without a price is
+            shown as “price on request”, not with a plausible number.
+          </p>
+        </div>
+
+        {settings.length === 0 ? (
+          <div className="empty-state">
+            <h3 className="empty-state__title">No mounting designs are published.</h3>
+            <p className="empty-state__body">
+              The setting catalogue is read from the same service as the listing page. When a
+              design is recorded it appears here.
+            </p>
+            <div className="empty-state__action">
+              <Link className="mh-cta" href="/settings">
+                Open the settings index
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <ul className="product-grid sf-settings-preview">
+            {settings.map((setting) => (
+              <li key={setting.design_code}>
+                <article className="mh-card">
+                  <div className="mh-card__status">
+                    <span className="mh-card__kind">{setting.jewellery_type.toLowerCase()}</span>
+                    <span className="mh-card__ref">{setting.design_code}</span>
+                  </div>
+                  <Link className="mh-card__link" href={`/settings/${setting.design_code}`}>
+                    <LightPlate caption="No photograph on file" />
+                    <div className="mh-card__body">
+                      <h3 className="mh-card__title">{setting.name}</h3>
+                      <p className="mh-card__meta">
+                        {setting.style !== null ? `${setting.style.label} · ` : ''}
+                        {setting.variant_count} metal option
+                        {setting.variant_count === 1 ? '' : 's'}
+                      </p>
+                      <div className="mh-card__foot">
+                        <span className="mh-card__cue">
+                          View design <span aria-hidden="true">→</span>
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </article>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* The process, stated as a rule rather than a romance. */}
+      <section className="sf-section" aria-labelledby="home-process">
+        <div className="sf-section__head">
+          <div>
+            <p className="sf-eyebrow">How a piece is assembled</p>
+            <h2 className="sf-section__title" id="home-process">
+              One mounting, one stone
+            </h2>
+          </div>
+          <p className="sf-section__note">
+            The configurator composes the piece; the catalogue service validates the composition
+            against the same invariants the database enforces.
+          </p>
+        </div>
+        <div className="sf-process">
+          <div className="sf-process__step">
+            <h3>Choose the mounting</h3>
+            <p>
+              Open a design and compare its recorded metal variants. The base price belongs to the
+              variant, not to the design, so nothing is averaged.
+            </p>
+          </div>
+          <div className="sf-process__step">
+            <h3>Choose the stone</h3>
+            <p>
+              A single stone attaches to a ring, pendant, necklace or bracelet. A matched pair
+              attaches only to earrings. The rule is INV-02/03.
+            </p>
+          </div>
+          <div className="sf-process__step">
+            <h3>Review the record</h3>
+            <p>
+              The review page repeats the configuration and its evidence statuses. A quote is
+              issued separately; the page never prints a total it cannot support.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 7: GEMMOLOGICAL INTEGRITY (Warm Alabaster #FAFAF8 Silk & Stone) ── */}
-      <section className="storefront-section bg-warm-alabaster" aria-labelledby="standards-title">
-        <div className="storefront-section__container">
-          <div className="storefront-section__header">
-            <span className="section-eyebrow section-eyebrow--dark">The Maihan Standard</span>
-            <h2
-              id="standards-title"
-              className="section-title"
-              style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', color: '#1a1a18' }}
-            >
-              Grounded <span className="text-gold-gradient">Gemmological Integrity</span>
-            </h2>
-            <p className="storefront-section__subtitle" style={{ color: '#4a4740' }}>
-              Rigorous physical evaluation, transparent disclosure, and master atelier craftsmanship.
-            </p>
-          </div>
-
-          <div className="grid-cards-4">
-            {/* Pillar 1 */}
-            <div className="luxury-card luxury-card--light" style={{ padding: '2rem 1.75rem' }}>
-              <div
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '0.5rem',
-                  background: 'rgba(201, 168, 76, 0.12)',
-                  border: '1px solid rgba(201, 168, 76, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--color-gold-dark)',
-                  fontSize: '1rem',
-                  marginBottom: '1rem',
-                }}
-              >
-                ✦
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.3rem',
-                  fontWeight: 600,
-                  margin: '0 0 0.5rem 0',
-                  color: '#1a1a18',
-                }}
-              >
-                100% Earth-Mined
-              </h3>
-              <p style={{ fontSize: '0.8125rem', color: '#4a4740', lineHeight: 1.6, margin: 0 }}>
-                Every gemstone in our collection is natural and earth-mined. We maintain a strict prohibition
-                against synthetic or lab-grown mineral imitations.
-              </p>
-            </div>
-
-            {/* Pillar 2 */}
-            <div className="luxury-card luxury-card--light" style={{ padding: '2rem 1.75rem' }}>
-              <div
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '0.5rem',
-                  background: 'rgba(201, 168, 76, 0.12)',
-                  border: '1px solid rgba(201, 168, 76, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--color-gold-dark)',
-                  fontSize: '1rem',
-                  marginBottom: '1rem',
-                }}
-              >
-                📜
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.3rem',
-                  fontWeight: 600,
-                  margin: '0 0 0.5rem 0',
-                  color: '#1a1a18',
-                }}
-              >
-                Treatment Disclosure
-              </h3>
-              <p style={{ fontSize: '0.8125rem', color: '#4a4740', lineHeight: 1.6, margin: 0 }}>
-                Complete transparency on every specimen: unheated stones are clearly verified, and traditional
-                enhancements (such as oil in emeralds) are fully disclosed.
-              </p>
-            </div>
-
-            {/* Pillar 3 */}
-            <div className="luxury-card luxury-card--light" style={{ padding: '2rem 1.75rem' }}>
-              <div
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '0.5rem',
-                  background: 'rgba(201, 168, 76, 0.12)',
-                  border: '1px solid rgba(201, 168, 76, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--color-gold-dark)',
-                  fontSize: '1rem',
-                  marginBottom: '1rem',
-                }}
-              >
-                ⚒
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.3rem',
-                  fontWeight: 600,
-                  margin: '0 0 0.5rem 0',
-                  color: '#1a1a18',
-                }}
-              >
-                Master Goldsmithing
-              </h3>
-              <p style={{ fontSize: '0.8125rem', color: '#4a4740', lineHeight: 1.6, margin: 0 }}>
-                Every mounting is cast in solid 18K gold or 950 platinum, precision-engineered to protect
-                and highlight the unique optical qualities of your stone.
-              </p>
-            </div>
-
-            {/* Pillar 4 */}
-            <div className="luxury-card luxury-card--light" style={{ padding: '2rem 1.75rem' }}>
-              <div
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '0.5rem',
-                  background: 'rgba(201, 168, 76, 0.12)',
-                  border: '1px solid rgba(201, 168, 76, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--color-gold-dark)',
-                  fontSize: '1rem',
-                  marginBottom: '1rem',
-                }}
-              >
-                ⚖
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.3rem',
-                  fontWeight: 600,
-                  margin: '0 0 0.5rem 0',
-                  color: '#1a1a18',
-                }}
-              >
-                Private Advisory
-              </h3>
-              <p style={{ fontSize: '0.8125rem', color: '#4a4740', lineHeight: 1.6, margin: 0 }}>
-                Personalized gemmological consultations for collectors, investment buyers, and bespoke
-                fine jewellery commissions.
-              </p>
-            </div>
-          </div>
+      {/* The one promise the platform can keep. */}
+      <section className="sf-evidence" aria-labelledby="home-evidence">
+        <h2 id="home-evidence">
+          Evidence,
+          <br />
+          not adjectives.
+        </h2>
+        <div>
+          <p>
+            <code>INV-07</code> A specification is presented as verified only when its stored
+            evidence status is VERIFIED. Every other status is shown beside the value it
+            qualifies.
+          </p>
+          <p>
+            <code>INV-08</code> A derived identifier is not a confirmed external reference until
+            its review state is APPROVED. Until then the storefront labels it as derived.
+          </p>
+          <p>
+            <Link className="sf-text-link" href="/policy/provenance">
+              Read the provenance policy <span aria-hidden="true">→</span>
+            </Link>
+          </p>
         </div>
       </section>
     </main>

@@ -22,12 +22,15 @@ export const dynamic = 'force-dynamic';
 
 export default function StorefrontLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <div className="sf-v2">
+      <a className="sf-skip" href="#sf-main">
+        Skip to content
+      </a>
       <StorefrontHeader />
-      {children}
+      <div id="sf-main">{children}</div>
       <StorefrontFooter />
       <AiConciergeDrawer />
-    </>
+    </div>
   );
 }
 

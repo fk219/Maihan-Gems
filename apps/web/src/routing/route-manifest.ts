@@ -47,7 +47,7 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: the root of the listed app route tree; every group inherits <html>/<body> from it (not drawn as an explicit line in the SoT chart, implied as the tree root)',
     storefront: false,
     group: 'app-root',
-    extraFiles: ['src/app/error.tsx'],
+    extraFiles: ['src/app/error.tsx', 'src/app/not-found.tsx'],
   },
   // ── (storefront) group ────────────────────────────────────────────────────
   {
@@ -56,6 +56,11 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: header, mega menu, footer, chat launcher',
     storefront: true,
     group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/error.tsx',
+      'src/app/(storefront)/loading.tsx',
+      'src/app/(storefront)/not-found.tsx',
+    ],
   },
   {
     fsPath: 'src/app/(storefront)/page.tsx',

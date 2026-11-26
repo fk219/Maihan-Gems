@@ -36,11 +36,11 @@ const INITIAL_MESSAGE: Message = {
   id: 'init-msg',
   role: 'assistant',
   content:
-    'Welcome to Maihan Gems Private Client Concierge. I can assist you with natural earth-mined gemstone provenance, 18K gold and platinum mounting compatibility, laboratory certification standards, or commissioning a bespoke piece with our atelier.',
+    'This is the Maihan Gems catalogue concierge. I can help you find a stone or a mounting, explain what a record contains, or pass you to a person. I cannot value, certify, reserve or sell a piece, and I will not guess a field the record does not contain.',
   suggestions: [
-    { label: 'Explore Ceylon Sapphires', href: '/search?q=sapphire' },
-    { label: 'Design Your Own Piece', href: '/design-your-own' },
-    { label: 'View Master Mountings', href: '/settings' },
+    { label: 'Explore sapphires', href: '/search?q=sapphire' },
+    { label: 'Design your own piece', href: '/design-your-own' },
+    { label: 'View mounting designs', href: '/settings' },
   ],
 };
 

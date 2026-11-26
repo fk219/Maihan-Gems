@@ -12,10 +12,12 @@ import { organizationJsonLdPayload } from '../lib/jsonld.js';
 import { JsonLd } from '../components/seo/JsonLd.js';
 import { AgentationOverlay } from '../components/development/AgentationOverlay.js';
 import { MAIHAN_THEME_CSS } from '../lib/theme-styles.js';
+import { LIGHT_TOKENS_CSS } from '../lib/light-tokens.js';
+import { STOREFRONT_V2_CSS } from '../lib/storefront-v2-styles.js';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -30,6 +32,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         <style id="maihan-theme" dangerouslySetInnerHTML={{ __html: MAIHAN_THEME_CSS }} />
+        <style id="maihan-light-tokens" dangerouslySetInnerHTML={{ __html: LIGHT_TOKENS_CSS }} />
+        <style id="maihan-storefront-v2" dangerouslySetInnerHTML={{ __html: STOREFRONT_V2_CSS }} />
       </head>
       <body>
         {/* Task 8: the site-wide Organization entity, emitted only when the
