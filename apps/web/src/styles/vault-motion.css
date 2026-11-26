@@ -1,0 +1,327 @@
+/* ============================================================================
+   The reveal choreography + per-surface finishing (final append)
+   ============================================================================
+   Motion contract (design-motion lens: POLISH):
+     - every page: elements enter once on first viewport entry (staggered)
+     - after entry: motion only answers an action (hover/focus/open)
+     - prefers-reduced-motion: items land as plain presence, instantly
+   ========================================================================== */
+
+.vault-reveal__item {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.72s cubic-bezier(0.22, 0.68, 0.32, 1) var(--reveal-delay, 0ms),
+    transform 0.72s cubic-bezier(0.22, 0.68, 0.32, 1) var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.vault-reveal__item.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vault-reveal__item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ── Checkout: the checkpoint rail (real markup classes) ────────────────── */
+
+.checkout-shell {
+  border-radius: var(--radius-hairline, var(--radius));
+  border-color: var(--hairline-border);
+  box-shadow: none;
+}
+
+.checkout-steps {
+  counter-reset: checkpoint;
+  position: relative;
+}
+
+.checkout-step span:first-child {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 1px solid var(--hairline-border);
+  border-radius: 50%;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.68rem;
+  letter-spacing: 0;
+  font-weight: 500;
+  background: #ffffff;
+  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+}
+
+.checkout-step--active span:first-child {
+  border-color: var(--gold);
+  color: #14100a;
+  background-image: var(--gold-sheen);
+  background-size: var(--gold-sheen-size, 220% 100%);
+}
+
+.checkout-step--completed span:first-child {
+  border-color: var(--gold);
+  color: var(--gold-dark);
+  background: var(--gold-hover-wash);
+}
+
+/* the connecting hairline between checkpoints */
+.checkout-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  height: 1px;
+  top: 0.85rem;
+  left: calc(1.7rem + 0.5rem);
+  right: calc(-0.5rem);
+  background: var(--hairline-border);
+  pointer-events: none;
+}
+
+.checkout-step--completed:not(:last-child)::after {
+  background: linear-gradient(90deg, var(--gold) 0%, var(--hairline-border) 100%);
+}
+
+.checkout-shell .lx-account-card {
+  border-color: var(--hairline-border);
+  box-shadow: none;
+  border-radius: var(--radius-hairline);
+}
+
+.checkout-shell .lx-btn--solid {
+  background-image: var(--gold-sheen);
+  background-size: var(--gold-sheen-size, 220% 100%);
+  color: #14100a;
+  border-radius: var(--radius-hairline);
+}
+
+/* ── Collection: facets as the vault index ──────────────────────────────── */
+
+.lx-facets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--hairline-border);
+  border-bottom: 1px solid var(--hairline-border);
+  margin-bottom: 2.2rem;
+}
+
+.lx-facets a,
+.lx-facets span {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 0.32rem 0.78rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-hairline, 2px);
+  transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+}
+
+.lx-facets a:hover {
+  border-color: var(--card-border-hover);
+  color: var(--text-primary);
+  background: var(--gold-hover-wash);
+}
+
+/* ── PDP dossier: quiet surface, evidence-first ─────────────────────────── */
+
+.product-detail__summary {
+  border-color: var(--hairline-border);
+  box-shadow: none;
+  border-radius: var(--radius-hairline, var(--radius));
+}
+
+.product-detail__subtitle {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  color: var(--text-secondary);
+}
+
+.product-detail__badges [class*='badge'] {
+  font-family: var(--font-sans);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.provenance-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.provenance-list dt {
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.provenance-list dd {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ── DYO atelier: the workshop ledger ───────────────────────────────────── */
+
+.atelier__kicker,
+.atelier-card__kicker {
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.atelier__kicker::before {
+  content: '';
+  display: inline-block;
+  width: 0.85rem;
+  height: 1px;
+  background: var(--gold);
+  vertical-align: middle;
+  margin-right: 0.55rem;
+}
+
+.atelier__stage,
+.atelier__summary {
+  border: 1px solid var(--hairline-border);
+  border-radius: var(--radius-hairline);
+}
+
+.atelier-card {
+  border: 1px solid transparent;
+  border-radius: var(--radius-hairline);
+  transition: border-color 0.3s ease, background 0.3s ease, transform 0.45s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+
+.atelier-card:hover {
+  border-color: var(--card-border-hover);
+  background: var(--gold-hover-wash);
+  transform: translateY(-2px);
+}
+
+.atelier-card__media img {
+  border-radius: var(--radius-hairline);
+  transition: transform 0.55s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+
+.atelier-card:hover .atelier-card__media img {
+  transform: scale(1.03);
+}
+
+/* ── Auth / account: the private ledger card ────────────────────────────── */
+
+.lx-account-card {
+  border-color: var(--hairline-border);
+  box-shadow: none;
+  border-radius: var(--radius-hairline);
+}
+
+.lx-account-card__title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.lx-account-field input {
+  border-radius: var(--radius-hairline);
+  background: #ffffff;
+  border: 1px solid var(--search-border);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lx-account-field input:focus-visible {
+  border-color: var(--card-border-hover);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  outline: none;
+}
+
+.lx-account-form .lx-btn--solid {
+  background-image: var(--gold-sheen);
+  background-size: var(--gold-sheen-size, 220% 100%);
+  color: #14100a;
+  border-radius: var(--radius-hairline);
+}
+
+/* ── Bag: quiet rows ────────────────────────────────────────────────────── */
+
+.lx-order-items {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.lx-order-items li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--subtle-divider);
+}
+
+.lx-order-items__title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.02rem;
+}
+
+.lx-order-items__qty,
+.lx-order-items__total {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.lx-order-items__total {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* ── CMS reading pages ──────────────────────────────────────────────────── */
+
+.ngc-article,
+.ngc-policy,
+.blog-body,
+.education-body {
+  max-width: 72ch;
+}
+
+/* ── Micro-typography everywhere ────────────────────────────────────────── */
+
+.mgh,
+.lx-page-hero,
+.page {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Selection + focus stay gold */
+::selection {
+  background: rgba(212, 164, 55, 0.3);
+}
+
+/* ── Motion guard for the appended transitions ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .atelier-card,
+  .atelier-card__media img,
+  .lx-facets a,
+  .lx-account-field input,
+  .checkout-step span:first-child {
+    transition: none;
+    transform: none;
+  }
+}

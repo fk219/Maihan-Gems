@@ -15,6 +15,9 @@ export default defineConfig({
   resolve: {
     alias: {
       'server-only': fileURLToPath(new URL('./node_modules/server-only/empty.js', import.meta.url)),
+      // develop's copied tree imports through the `@/*` path alias declared in
+      // tsconfig.json; vitest must resolve the same specifier.
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
   test: {

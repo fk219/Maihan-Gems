@@ -1,0 +1,509 @@
+Paste October 23, 2026 - 5:56PM
+
+# MAIHAN GEMS
+## COMPLETE PRODUCTION-GRADE LUXURY GEMSTONE & FINE-JEWELLERY ECOMMERCE PLATFORM
+
+### YOUR ROLE
+
+You are the Principal Software Architect, Senior Full-Stack Engineer, Backend Engineer, Frontend Engineer, Database Engineer, Application Security Engineer, UX Designer, Accessibility Engineer, and QA Lead for a single engagement.
+
+Your assignment: design and implement a complete, cohesive, production-grade luxury ecommerce platform — **Maihan Gems** — covering the full customer journey, a vendor (trade partner) portal, and an administrator back office, with real authentication, real role-based access control, a real database, real payments lifecycle, and real data integrity guarantees.
+
+This is NOT a landing page. This is NOT a design mock. This is NOT a demo with hardcoded data. Every visible action must do something real against a real backend and a real database. Every page must be reachable, responsive, accessible, and complete with loading, empty, error, and success states.
+
+Do not stop after auditing or planning. Build. Work feature by feature, keep the app running at every step, and finish with a verification report.
+
+---
+
+## 1. THE BUSINESS — UNDERSTAND BEFORE YOU BUILD
+
+**Maihan Gems** is a private luxury gemstone house operating between **Dubai (DIFC)** and **Bangkok (Silom gem bourse)**, with private salons in **Dubai, Geneva (Rue du Rhône), London (Mayfair), and Bangkok**. It sells:
+
+1. **Natural loose gemstones** — 1-of-1 earth-mined mineral specimens. Gemstones come in **many types — Ruby, Sapphire, Emerald, Tanzanite, Spinel, Tourmaline (incl. Paraíba), Padparadscha, Alexandrite, Garnet (Tsavorite, Demantoid, Rhodolite, Spessartine), Zircon, Topaz, Aquamarine, Morganite, Kunzite, Moonstone, Peridot, Opal, Quartz, Beryl and more** — and each type further subdivides by colour variety (e.g. Sapphire → Royal Blue, Cornflower Blue, Padparadscha, Pink, Yellow, Teal, Parti; Ruby → Pigeon's Blood, Star; Spinel → Cobalt Blue, Mahenge, Vivid Red). **Every type and sub-variety page must list the ACTUAL live products** — real stones with real photos, carats, origins, shapes and prices — never placeholders.
+2. **Matched gemstone pairs** — pairs calibrated for colour, cut and size, used for earrings and suites.
+3. **Jewellery settings (mountings)** — master-goldsmith mountings sold by design core and precious metal (a second, separate catalogue with its own SKUs).
+4. **Ready-made fine jewellery** — finished pieces (rings, earrings, pendants, necklaces, bracelets).
+5. **Design Your Own (DYO)** — the signature experience: a customer pairs a setting with a compatible stone (or pair) and the system **composes a genuinely NEW product** out of the two, validates compatibility, prices it, and sells it as one configured item.
+
+### Verified business facts that must shape the domain model
+
+- The catalogue is **not a flat product list** — it is a **materialised composition** of a settings catalogue and a gemstone inventory joined by a deterministic SKU grammar:
+  ```
+  SETTING     JS<designCode><metalCode>            e.g. JS1016W18
+  CONFIGURED  JS<designCode><metalCode>-<gemRef>   e.g. JS1383R18-PR5681
+  READY-MADE  J<digits>                            e.g. J10347
+  STONE       K<digits>                            e.g. K1324
+  STONE PAIR  PR<digits>                           e.g. PR5681
+  ```
+- Scale of the real source business: **44,218 total URLs**; **19,665 loose stones**; **3,072 pairs**; **951 setting design cores**; **10,349 distinct setting SKUs (design × metal)** across 15 metal codes; **9,812 DYO configuration URLs** (1,024 with observed SKUs); **88 ready-made products**; **1,024 recovered prices (range $1,074–$17,599)**.
+- **Price is NOT weight × price-per-carat** — verified `0 of 1,024`. Price is an authoritative stored value, never recomputed in the browser.
+- Observed jewellery types: RING, EARRINGS, PENDANT, NECKLACE, BRACELET (+ BROOCH, CUFFLINKS, CHARM in the target enum).
+- Observed setting styles: three-stone, pave, accent-stones, vedic, solitaire, halo, wedding-set, antique, bezel, studs, mens, floral, celtic, drops, flush-set (+ pendant variants).
+- Observed treatments include **no enhancement (unheated), traditional heat, vapor coating, irradiation, fracture fill, oil**.
+- Observed origins: Sri Lanka (Ceylon), Kashmir, Burma (Mogok), Mozambique, Colombia, Zambia, Tanzania (Merelani), Madagascar, Brazil, Afghanistan, and more.
+- Availability in the source was `schema.org/InStock`; there are **no quantities** — a natural stone is a unique physical object.
+- Financing and protection plans are real observed products (`/financing`, `/extend-protection-plan`).
+
+### The trust charter (this is the brand's core USP)
+
+Gemstones are a trust product. The platform's differentiator is **radical data honesty**:
+
+- Every attribute carries an **evidence label**: `OBSERVED` (seen in a source artefact), `EXTRACTED` (deterministically derived), `PATTERN` (regular across samples), `INFERRED` (a reasoned proposal), `UNKNOWN` (not determinable).
+- **`UNKNOWN` is a valid, final answer.** A null field must render as an explicit "Not evidenced" marker — never as a guess, a placeholder value, or a plausible fabrication.
+- **INV-07: A field that is not VERIFIED may never render as verified truth.** No invented origins, treatments, certificates, prices, or stock claims. No fake testimonials, fake review counts, or fake scarcity.
+- If data is missing, the UI says so elegantly and honestly. This honesty IS the luxury positioning.
+
+---
+
+## 2. NON-NEGOTIABLE TECH STACK
+
+| Concern | Choice |
+|---|---|
+| Framework | **Next.js (App Router, TypeScript, strict mode)** — server components by default, client islands only where interaction requires |
+| Language | TypeScript everywhere (frontend, backend, shared packages) |
+| Database | **PostgreSQL 16** as the single source of truth |
+| ORM / migrations | **Drizzle ORM** (or raw parameterised SQL via the pool); forward-only migrations |
+| Validation | **Zod** — one schema per request/response, shared between API and forms |
+| State | Server components + minimal client state; no heavy global state library |
+| Styling | Tailwind CSS + CSS variables for design tokens |
+| Monorepo | pnpm workspaces: `apps/web` (storefront), `apps/worker` (background jobs), `packages/{db,domain,contracts,config,observability,ai}` |
+| Cache | Optional Redis (cache + rate-limit counters only; **Postgres is always the truth**; absent Redis must degrade gracefully) |
+| Tests | Vitest for unit/integration; Playwright for E2E |
+| 3D | Three.js (lazy-loaded client island, WebGL2 with honest fallback) |
+| AR | WebXR / model-viewer with MediaPipe landmark tracking; camera frames stay in device memory — **never uploaded** |
+| Media | Cloudinary (or equivalent CDN) for product imagery/video |
+| Email | Transactional email provider behind an interface (order confirmation, verification, password reset, shipment updates) |
+
+**Prohibited:** Prisma, MongoDB, Elasticsearch, external vector DBs, GraphQL, microservices, and any second frontend architecture. Do not add a dependency without a written one-line justification.
+
+---
+
+## 3. VISUAL DIRECTION — ULTRA-PREMIUM (YOU DECIDE THE SYSTEM)
+
+The look is a core deliverable: **ultra-premium, bespoke, editorial luxury** — the feel of Place Vendôme high-jewellery houses and Geneva watchmaking salons, explicitly NOT a generic SaaS template and NOT "AI slop" (no purple neon gradients, no pill badges, no rounded-tag clutter, no decorative glow spam).
+
+**Brand colour direction (non-negotiable):** a **golden gradient flowing into dark** — light gold highlights (#D4AF37 family) descending through deep bronze into near-black/obsidian darkness (#0A0A0B–#08121E family) for heroes, headers, footers and CTA metal. Gold is the accent metal on an otherwise dark/elegant neutral canvas; never a neon wash. Choose and document your own exact token scale, spacing scale, elevation system, and dark/light surface strategy around this direction.
+
+**Fonts (unique, non-default):** choose a distinctive premium pairing — an elegant display **serif** for editorial headings (something with character, e.g. Cormorant Garamond, Playfair Display, Fraunces or similar), a refined clean **sans** for UI/body, and a **tabular monospace** for every price, carat weight and millimetre figure. Load via `next/font` (or equivalent); never ship default system stacks as the brand voice.
+
+**Hard rules that remain:** tabular numerals for all money/weights/dimensions; hairline-gold borders and generous whitespace; one elevation depth per view; restrained motion with `prefers-reduced-motion` support; skeleton loading with `aria-busy` (never spinners); fully responsive (360px → 1920px); keyboard accessible, WCAG 2.2 AA with visible focus rings; product photography gets maximum prominence.
+
+---
+
+## 4. DATABASE — SCHEMA & INVARIANTS
+
+PostgreSQL 16, Drizzle ORM, forward-only migrations. Money is `NUMERIC(12,2)` or integer minor units — **never floats**. Every table: `id UUID PK`, `created_at`, `updated_at`, soft-delete `deleted_at` where sensible.
+
+### 4.1 Core tables (minimum)
+
+**Identity & auth**
+- `customers` (id, identity_user_id UNIQUE, email CITEXT UNIQUE, email_verified_at, phone, first_name, last_name, marketing_opt_in, preferred_currency CHAR(3), state)
+- `auth_credentials` (customer_id PK/FK, password_hash TEXT — scrypt/bcrypt format with per-hash salt, failed_attempts INT, locked_until TIMESTAMPTZ, password_changed_at)
+- `auth_sessions` (id, token_hash TEXT UNIQUE (sha256 of raw token — raw token never stored), customer_id FK, csrf_token_hash, expires_at, revoked_at, ip_hash, user_agent_hash)
+- `auth_tokens` (id, kind ENUM('EMAIL_VERIFICATION','PASSWORD_RESET'), token_hash UNIQUE, customer_id FK, expires_at, consumed_at — single use enforced)
+- `addresses` (customer_id FK, kind ENUM('SHIPPING','BILLING','SHOWROOM','PICKUP'), full_name, recipient, line1..line3, city, region, postal_code, country_code CHAR(2), phone, is_default)
+
+**Vendors**
+- `vendors` (id, owner_customer_id FK, slug UNIQUE, display_name, legal_name, country_code CHAR(2), city, bourse_member BOOLEAN, description, contact_phone, status ENUM('PENDING','APPROVED','SUSPENDED','REJECTED'), rejection_reason)
+
+**Catalogue**
+- `products` (id, kind ENUM('CONFIGURED','READY_MADE','LOOSE_STONE','STONE_PAIR','SETTING_ONLY'), product_number BIGINT IDENTITY UNIQUE, slug UNIQUE, title, subtitle, description,
+  setting_variant_id FK→setting_variants, gemstone_id FK→gemstones, gemstone_pair_id FK→gemstones,
+  jewellery_type jewellery_type ENUM, total_weight_ct NUMERIC(8,3), stone_count SMALLINT,
+  price_amount NUMERIC(12,2) NOT NULL, currency CHAR(3) DEFAULT 'USD', price_evidence evidence_status DEFAULT 'UNKNOWN',
+  state ENUM('DRAFT','ACTIVE','ARCHIVED','SOLD_OUT','DISCONTINUED'), availability BOOLEAN, availability_source, availability_checked_at,
+  moderation_status ENUM('DRAFT','SUBMITTED','APPROVED','REJECTED','PUBLISHED','ARCHIVED'), rejection_reason, submitted_at, reviewed_by, reviewed_at,
+  source_url UNIQUE, source_sku, source_sku_derived, sku_evidence_status, engraving_enabled, engraving_text, options JSONB,
+  published_at, vendor_id FK→vendors, version INTEGER for optimistic concurrency)
+- `gemstones` (gem_ref TEXT UNIQUE — 'K1324'/'PR5681', kind ENUM('SINGLE','PAIR'), variety_id FK, species_id FK, total_weight_ct, stone_count, length/width/depth_mm NUMERIC(8,3), colour_id FK, intensity_id FK, clarity_id FK, shape stone_shape ENUM, cut_label, cutting_style ENUM, treatment_id FK, origin_id FK, price_per_carat, currency, price_amount, price_evidence, availability, availability_source, raw_spec JSONB, evidence_status)
+- `gemstone_stones` (gemstone_id FK, position 1|2, weight_ct, dims, raw_weight_text, raw_dimensions_text, parse_confidence — per-stone measurements for pairs)
+- `settings` (design_code TEXT UNIQUE, sku_prefix, name, style_id FK, jewellery_type, description, side_stone_count)
+- `setting_variants` (setting_id FK, metal_code metal_code ENUM(15 codes), sku TEXT UNIQUE — 'JS1150W14', slug UNIQUE, base_price NUMERIC(12,2), price_evidence, availability, production_days)
+- `setting_accepts` (setting_id FK, shape, min_carat, max_carat, min/max length & width mm — the DYO compatibility rules)
+- `setting_compatibility_rules` (setting_id FK, stone_kind, variety_id, colour_id, shape, weight & dimension ranges, requires/forbids treatment, rule_kind ENUM('ALLOW','DENY'), priority, explanation — DENY beats ALLOW, unknown → UNKNOWN)
+- Taxonomy: `gemstone_varieties`, `gemstone_species`, `gemstone_colours`, `colour_intensities`, `clarities` (+ labels), `gemstone_origins`, `treatments` (+ labels), `jewellery_types`, `setting_styles`, `metals`
+- Media: `assets` (kind media_kind ENUM, role media_role ENUM, storage_key UNIQUE, source_url, cdn_url, mime_type, bytes, width/height, checksum, alt_text, position, processing_state ENUM('PENDING','FETCHING','VALIDATING','PROCESSING','READY','FAILED','SKIPPED')), `asset_variants`, `asset_usages` (asset_id, entity_type, entity_id, role, position)
+- `certificates` (simple display records only — gemstone_id FK, product_id FK, certificate_number, lab_name, report_type, issued_at, url; **NO OCR/extraction/verification pipeline in this build**), `certificate_links`
+
+**Commerce**
+- `carts` (cart_token TEXT UNIQUE, customer_id FK nullable, anonymous_session_id, currency, state ENUM('ACTIVE','CONVERTED','ABANDONED','EXPIRED'), pricing_snapshot JSONB — advisory only, expires_at, converted_order_id)
+- `cart_items` (cart_id FK, product_id FK, configuration_id FK→dyo_configurations nullable, quantity, unit_price NUMERIC(12,2), price_snapshot_id FK nullable, engraving_text, options JSONB, UNIQUE(cart_id, product_id, configuration_id))
+- `checkout_sessions` (id, cart_token FK, customer_id nullable, email, current_step ENUM('CART','SHIPPING','PAYMENT','CONFIRM','COMPLETED'), pricing_snapshot JSONB, shipping_address JSONB, shipping_method JSONB, payment_intent_id, reservation_id, reservation_expires_at, completed_order_id)
+- `inventory_reservations` (checkout_session_id, product_id, quantity, expires_at 30min, state — created inside the checkout transaction with row locks)
+- `orders` (order_number TEXT UNIQUE 'MG-YYYY-NNNNNN', customer_id FK nullable, email NOT NULL, state order_state ENUM('PENDING_PAYMENT','PAID','IN_FULFILLMENT','FULFILLED','CANCELLED','REFUNDED','PARTIALLY_REFUNDED'), currency, subtotal, discount_total, shipping_total, tax_total, grand_total, **pricing_snapshot JSONB NOT NULL (frozen)**, shipping_address JSONB NOT NULL, billing_address JSONB, customer_note, internal_note, placed_at, paid_at, fulfilled_at, cancelled_at, cancel_reason, version INTEGER, idempotency_key TEXT UNIQUE)
+- `order_items` (order_id FK RESTRICT, product_id FK nullable, configuration_id nullable, **sku_snapshot, title_snapshot, configuration_snapshot JSONB, gem_snapshot JSONB NOT NULL, document_snapshot JSONB**, quantity, unit_price, line_total, production_days, state — immutable purchase record)
+- `order_events` (order_id FK, from_state, to_state, actor_type, actor_id, reason, metadata JSONB, created_at — **append-only timeline**)
+- `payments` (order_id FK, provider, provider_payment_id UNIQUE, state payment_state ENUM('CREATED','AUTHORIZED','CAPTURED','FAILED','VOIDED','PARTIALLY_REFUNDED','REFUNDED'), amount, captured_amount, refunded_amount, currency, method_type, method_last4, failure_code/message, idempotency_key UNIQUE, captured_at)
+- `refunds` (payment_id FK, order_id FK, amount CHECK(amount > 0 AND amount <= captured), currency, reason NOT NULL, state refund_state ENUM('REQUESTED','APPROVED','PROCESSING','SUCCEEDED','FAILED','REJECTED'), provider_refund_id, requested_by, approved_by, requested_at, processed_at)
+- `fulfillments` (order_id FK, order_item_id FK nullable, kind ENUM('SHIPMENT','PICKUP','APPRAISAL','ENGRAVING','CERTIFICATE','WHITE_GLOVE_VIDEO'), carrier, tracking_number, tracking_url, state, shipped_at, delivered_at)
+- `discounts` (code UNIQUE nullable, name, type ENUM('PERCENTAGE','FIXED_AMOUNT','FREE_SHIPPING','FINANCING','PROTECTION_PLAN'), value NUMERIC, currency, scope JSONB, min_subtotal, max_redemptions, redemption_count, per_customer_limit, valid_from, valid_to, state)
+- `product_addons` (product_id FK nullable, addon_type, code UNIQUE, name, price, currency — financing & protection plans attach as separate order lines)
+- `wishlist_items` (customer_id FK, product_id FK, UNIQUE pair), `compare_items` (session/customer, product_id, max 4)
+
+**Platform**
+- `dyo_configurations` (configuration_hash UNIQUE, hash_version, short_code base62 UNIQUE, jewellery_type, setting_id, setting_variant_id, gemstone_id XOR gemstone_pair_id, side_stones, engraving_text, selected_options JSONB, state ENUM('DRAFT','VALIDATING','VALID','INCOMPATIBLE','PRICED','ADDED_TO_CART','ORDERED','EXPIRED'), compatibility_status ENUM('COMPATIBLE','INCOMPATIBLE','UNKNOWN','REQUIRES_REVIEW'), compatibility_detail JSONB, compatibility_checked_at, customer_id FK nullable, anonymous_session_id)
+- `dyo_price_snapshots` (configuration_id FK, gemstone_component, setting_component, side_stone_component, making_component, discount_component, tax_component, total, currency, pricing_rule_version, breakdown JSONB, computed_at, expires_at, consumed_at — quote consumed exactly once)
+- `domain_events` (event_id UUID UNIQUE, event_type, aggregate_type, aggregate_id, aggregate_version, payload JSONB no PII, trace_id, status ENUM('PENDING','PUBLISHED','FAILED','DEAD_LETTER'), attempts, available_at — **transactional outbox**, written in the same transaction as the state change)
+- `event_consumers` (consumer_name, event_id, processed_at, PK(consumer_name, event_id) — idempotent consumption)
+- `jobs` (job_key TEXT UNIQUE — idempotency, queue ENUM('critical','default','assets','ai','certificates','search','migration','maintenance','notifications','auth_sessions','auth_tokens','auth_credentials','vendors'), job_type, payload JSONB, state ENUM('QUEUED','RUNNING','SUCCEEDED','FAILED','DEAD_LETTER','CANCELLED'), priority, attempts, max_attempts, locked_by, locked_until, run_after, last_error, result JSONB)
+- `webhook_receipts` (provider, external_event_id, signature_valid, event_type, payload, received_at, processed_at, processing_error, UNIQUE(provider, external_event_id))
+- `audit_logs` (id BIGINT IDENTITY, actor_type ENUM('CUSTOMER','VENDOR','ADMIN','SYSTEM','AI','JOB'), actor_id, action, entity_type, entity_id, before_state JSONB, after_state JSONB, diff JSONB, ip_hash, user_agent_hash, trace_id, request_id, reason, created_at — **append-only: application role has no UPDATE/DELETE**)
+- `notifications` (customer_id FK, kind, subject, body, metadata JSONB, read_at, created_at)
+- `rate_limit_counters` (bucket, window_start, count, PK(bucket, window_start))
+- `redirects` (from_path UNIQUE, to_path, status_code), `seo_metadata` (entity_kind, entity_id, title, description, canonical_path, og_image_url, robots, structured_extra), `pages` + `page_revisions` + `page_review_state` for CMS, `feature_flags`
+
+### 4.2 Enforced invariants (DB CHECK constraints + domain predicates + tests)
+
+| ID | Invariant |
+|---|---|
+| INV-01 | A CONFIGURED product/DYO configuration has exactly one setting variant and exactly one gemstone **XOR** one pair |
+| INV-02 | A pair may attach **only** to EARRINGS |
+| INV-03 | A single gemstone may attach **only** to RING, PENDANT, NECKLACE or BRACELET |
+| INV-06 | Per-stone measurements exist for every stone in a pair |
+| INV-07 | A document/attribute field not VERIFIED may never render as verified truth |
+| INV-08 | An inferred identifier may never be a confirmed external reference without human approval |
+| Money | Client is never authoritative for price; all totals re-derived server-side; 409 PRICE_CHANGED on mismatch |
+| Immutability | Placed orders freeze pricing/gem/config snapshots; changes are append-only via order_events |
+
+---
+
+## 5. AUTHENTICATION & RBAC
+
+### 5.1 Auth requirements (all server-enforced)
+
+- Register (customer or vendor application), sign in, sign out, session retrieval, email verification, forgot password, reset password.
+- Password hashing: **scrypt** (N=16384, r=8, p=1, 16-byte random salt, 64-byte key) or argon2id — with `timingSafeEqual`. Dummy-hash verification on unknown emails so timing cannot enumerate accounts.
+- Sessions: signed opaque tokens (`rawToken.hmacSha256`), HttpOnly + Secure (production) + SameSite=Lax cookies, 7-day TTL, **stored only as SHA-256 hashes**, revocable server-side; password reset revokes all sessions.
+- Email verification and password-reset tokens: single-use, hashed at rest, expiring (24h / 30m).
+- Brute-force lockout: 5 consecutive failures → 15-minute lockout (429).
+- Rate limiting on auth, checkout, and mutating endpoints (per-IP buckets in Redis or `rate_limit_counters`).
+- Server-side Zod validation on every request; safe error messages; generic responses that never leak account existence where required.
+- CSRF: SameSite cookies + double-submit token on state-changing requests. CORS restricted to the storefront origin. Security headers: CSP (no `unsafe-eval`), HSTS, X-Frame-Options/frame-ancestors 'none', Referrer-Policy.
+- Guest browsing and guest carts supported (server-held anonymous session id; guest cart merges into the customer cart on sign-in, re-priced at merge).
+- **Identity is derived server-side from the verified session — never from a client-asserted header or body field.**
+
+### 5.2 RBAC role matrix (server-side capability checks on every route)
+
+| Role | Scope |
+|---|---|
+| CUSTOMER | own profile, addresses, cart, checkout, own orders (view/cancel/refund-request), wishlist, notifications |
+| VENDOR | own profile (gated on onboarding APPROVED), own products CRUD + submit-for-review, own inventory, own order lines + fulfilment updates, own summaries |
+| ADMIN_SUPER | everything |
+| CATALOG_MANAGER | products, gemstones, settings, taxonomy, media (approve/reject/publish/unpublish/archive) |
+| CONTENT_EDITOR | content, navigation, SEO (write; cannot approve/publish) |
+| CONTENT_PUBLISHER | content + approve/publish (two-person rule with editor) |
+| COMMERCE_OPERATOR | orders, refunds (approve/execute), inventory, fulfilment oversight |
+| TRUST_REVIEWER | review queues for anomalies and flagged records |
+| CONCIERGE_AGENT | assigned conversations, customer read |
+| AI_OPERATIONS | conversations, tool-call audit, evaluations, guardrails |
+| MIGRATION_ENGINEER | import batches, conflicts, derived approvals |
+| READ_ONLY_ANALYST | dashboards only, PII-free by role |
+
+Rules: policy denial = **403 with an internal reason only** (rule text never returned); separation of duties — **a vendor can never approve or publish their own product**; CMS approval is two-person (editor ≠ approver); every privileged mutation writes `audit_logs` with before and after state; audit write failure fails the action closed.
+
+---
+
+## 6. COMPLETE ROUTE MAP
+
+### 6.1 Public storefront
+
+| Route | Purpose |
+|---|---|
+| `/` | Editorial hero (dark obsidian + gold), live search bar, curated collections, settings showcase, DYO entry, colour/variety navigation, trust pillars, marquee of verified gemmological values |
+| `/browse` | Full vault grid with filters (stone type, shape, colour, carat range, price range, origin, treatment, availability, 3D/AR availability), sort (relevance, price, weight, newest), pagination |
+| `/shop` | Simple catalogue grid by kind (gemstone / jewellery / setting) |
+| `/pairs` | Matched pairs drawer |
+| `/jewellery` | Finished jewellery drawer |
+| `/{variety}` | Variety landing (e.g. `/sapphire`) with collection facets |
+| `/{variety}-pairs`, `/{variety}-rings`, `/{variety}-earrings`, `/{variety}-pendants`, `/{variety}-settings` | Faceted collection views (parse the suffix inside the variety route — suffix folders crash Next.js) |
+| `/varieties`, `/varieties/{slug}` | Mineralogical directory + variety detail |
+| `/colour/{colourSlug}` | Colour-family listings (e.g. `/colour/padparadscha`) |
+| `/settings` | Settings catalogue by jewellery type (ring/earrings/pendant/bracelet) + style hub |
+| `/settings/{sku}` | Setting variant detail (design + metal, accepts rules, production days) |
+| `/search?q=` | Hybrid search: parsed natural-language intent (stone, shape, origin, treatment, carat, price), full-text + trigram fuzzy fallback, facet counts, rejected-filter honesty |
+| `/search/suggest` | Search autocomplete |
+| `/products/{slug}` | Canonical product detail (see §7.2) |
+| `/product/{slug}` | Legacy source PDP route preserved (redirect/canonicalize to `/products/{slug}`) |
+| `/{variety}/{slug}` | Collection-scoped PDP (source shape preserved) |
+| `/cart` | Shopping bag |
+| `/checkout/order-summary` → `/checkout/payment-order` → `/checkout/secure-payment` → `/checkout/confirmation/{orderId}` | 4-step checkpoint funnel (mirrors the observed source funnel; each step is a server checkpoint that rejects skipping) |
+| `/design-your-own` | DYO entry + configurator |
+| `/design-your-own/review/{code}` | Configuration review: verified invariants ledger + authoritative price snapshot + add-to-cart |
+| `/ar/{assetId}` | Full-screen WebAR try-on |
+| `/ar/handoff/{token}` | QR desktop→mobile handoff redemption (one-time, 10-min expiry) |
+| `/favorites`, `/compare` | Wishlist + side-by-side comparison matrix (2–4 items, attribute alignment, explicit nulls shown) |
+| `/education/[[...path]]` | Gemmology compendium hub + articles |
+| `/blog` | Journal dispatches |
+| `/about`, `/about/{slug}` | House story, team |
+| `/showrooms`, `/showrooms/{slug}` | Dubai DIFC / Geneva / London / Bangkok salons, appointment info |
+| `/contact` | Concierge contact (advisory lines per salon, appointment request) |
+| `/policy/{slug}` | shipping, returns, privacy, terms (real policy content, no invented legal claims) |
+| `/financing`, `/protection-plan` | Add-on product pages |
+| `/account/**` | Customer portal (§7.3) |
+| `/vendor/**` | Vendor portal (§7.9) |
+| `/admin/**` | Admin back office (§7.10) |
+| `/sitemap.xml`, `/sitemap-products/{n}` | Generated sitemaps (sharded > 50k URLs), `robots.txt` |
+| Error/loading/not-found states | Every dynamic route gets `loading.tsx`, `error.tsx` (client boundary with retry + contextual link, never leaking stack traces), `not-found.tsx` (with browse/search/home navigation) |
+
+### 6.2 API surface (`/api/v1/**`, all under `/api/v1` with an optional un-prefixed alias)
+
+Catalogue (GET, public): `/products`, `/products/{slug}`, `/gemstones/{gemRef}`, `/settings`, `/settings/variants/{sku}`, `/settings/designs/{designCode}`, `/taxonomy/{varieties|colours|origins|metals|facets}`
+Search (public): `POST /search`, `GET /search/suggest`, `GET /search/similar-gemstones/{gemRef}`
+Auth (public): `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/session`, `POST /auth/verify-email`, `POST /auth/forgot-password`, `POST /auth/reset-password`
+Account (authenticated): `GET|PATCH /account/profile`, `GET|POST /account/addresses`, `PATCH|DELETE /account/addresses/{id}`, `GET /account/orders`, `GET /account/orders/{id}`, `GET /account/notifications`
+Cart/checkout (guest+customer): `POST /carts`, `GET /carts/{token}`, `POST /carts/{token}/items`, `PATCH|DELETE /carts/{token}/items/{itemId}`, `POST /carts/{token}/merge`, `POST /checkout/sessions`, `GET /checkout/sessions/{id}`, `POST /checkout/sessions/{id}/shipping`, `POST /checkout/sessions/{id}/payment`, `POST /checkout/sessions/{id}/confirm`
+Orders: `POST /orders` (idempotent), `GET /orders/{id}` (ownership-enforced), `GET /orders/{id}/events`, `POST /orders/{id}/cancel`
+Payments: `POST /webhooks/payments/{provider}` (HMAC over raw body, verified before parsing)
+Refunds: `POST /orders/{id}/refunds` (customer request), `GET /orders/{id}/refunds`, `POST /refunds/{id}/approve|reject|execute` (COMMERCE_OPERATOR/ADMIN only)
+Wishlist/compare: `GET|POST /favorites`, `DELETE /favorites/{productId}`, `GET /compare`
+Add-ons & discounts: `GET /addons`, `POST /orders/{id}/addons`, `POST /discounts/validate`, `GET /discounts/{code}`
+DYO: `POST /dyo/configurations`, `GET /dyo/configurations/{shortCode}`, `POST .../validate`, `POST .../quote`, `GET .../compatible-settings`, `POST .../add-to-cart`
+3D/AR: `GET /webar/{assetId}`, `POST /ar/handoff`, `GET /ar/handoff/{token}`
+AI concierge: `POST /ai/chat` (SSE streaming), `POST /ai/handoff`, `GET /ai/conversations/{key}`
+Vendor (session, role=VENDOR): `GET /vendor/dashboard`, `GET|PATCH /vendor/profile`, `GET|POST /vendor/products`, `PATCH /vendor/products/{id}`, `POST /vendor/products/{id}/submit`, `GET /vendor/orders`, `POST /vendor/orders/{orderId}/items/{itemId}/fulfill`
+Admin (RBAC-gated): `GET /admin/dashboards/summary`, `GET /admin/products`, `POST /admin/products/{id}/moderate`, `GET /admin/vendors`, `POST /admin/vendors/{id}/moderate`, `GET /admin/orders`, `GET /admin/refunds`, `GET|POST /admin/discounts`, `GET /admin/customers`, `GET /admin/users`, `POST /admin/users/{id}/role`, `GET /admin/audit-logs`, `GET /admin/content/pages`, plus CMS workflow: `POST /admin/cms/pages`, `GET /admin/cms/pages`, `GET /admin/cms/pages/{id}`, `PATCH /admin/cms/pages/{id}/blocks`, `POST /admin/cms/revisions/{id}/submit-review|decide`, `POST /admin/cms/pages/{id}/publish|archive`
+Ops: `GET /health/live`, `GET /health/ready`, `GET /health/metrics` (Prometheus format)
+
+---
+
+## 7. FEATURE SPECIFICATIONS
+
+### 7.1 Discovery & navigation
+
+- Sticky 3-zone header: (1) serif wordmark + gold hairline divider + tracked "Atelier" submark; (2) central nav with accessible mega-menu (keyboard navigable, Escape closes, `aria-expanded`, hover AND focus/keyboard activation — never hover-only); (3) utilities: search, currency switcher (USD/AED/THB — server-verified FX rates from `fx_rates`, display-only until checkout lock), favourites with count badge, compare, bag with live count, account.
+- Footer: institutional (dark obsidian), contact lines per salon, policy links, truth disclosure line.
+- Filters must use REAL data only: facets computed server-side from the actual catalogue with counts; unsupported filter values are honestly reported as `rejectedFilters` in the API envelope, never silently dropped.
+- URL query params carry filter state (shareable, refresh-safe). Reset filters works. Mobile filter drawer.
+- Breadcrumbs on all catalogue/PDP/policy routes.
+
+### 7.2 Product detail (PDP)
+
+- Thumbnail rail gallery: photos, video, 360-spin, certificates (posters + play badges), hover zoom.
+- 3D viewer tab when a validated model exists (lazy Three.js island, orbit + zoom controls, loading/error/fallback states, resource cleanup on unmount); absent model = tab absent, never a placeholder model.
+- AR try-on button only when an AR-ready asset + device capability exist; camera permission requested ONLY on explicit user action; frames never leave the device; unsupported device/browser gets an honest explanation + QR handoff to mobile.
+- Title, SKU, authoritative price (server-derived), availability with source and last-checked timestamp.
+- Full specification table from real columns: variety, shape, cut, carat weight (total + per-stone for pairs), L×W×D mm, colour, intensity, clarity, treatment (verbatim, evidence-labelled), origin (evidence-labelled).
+- Certificate block when present (lab, number, report type — display only, from the basic certificates record); unverifiable fields shown as "Not evidenced" (INV-07).
+- Description; shipping/returns summary linking to policy pages.
+- Add to bag (with quantity where stock allows), wishlist, compare, DYO customise link for stones/settings.
+- Related products: same variety/kind, real rows only.
+- DRAFT/SOLD_OUT/deleted/unpublished → honest 404 with recovery navigation. Out-of-stock → "Enquire" CTA instead of dead add-to-cart.
+- JSON-LD (Product + BreadcrumbList) from the same server data the page renders.
+
+### 7.3 Cart & checkout (server-authoritative, all steps)
+
+**Cart:** add/remove items, quantity update (clamped to stock), line totals, authoritative server repricing on every read (`409 PRICE_CHANGED` surfaced honestly with the current price), unavailable/changed items flagged, DYO lines show their bound quote, totals from server snapshot, discount code apply (validated server-side: active window, min subtotal, scope, per-customer limit, atomic redemption count), guest cart via server token in HttpOnly cookie, empty state with vault CTA.
+
+**Checkout funnel (each step a server checkpoint that rejects skipping with 422):**
+1. **Order summary** — creates/uses server cart, shows frozen pricing snapshot + 30-minute reservation expiry countdown.
+2. **Delivery & contact** — authenticated customer picks a saved address (or enters new, saved to address book); guest enters contact email + address; shipping method selection when configured.
+3. **Payment order** — payment method selection through the provider abstraction; hosted/tokenized fields only (no raw PAN ever in your code).
+4. **Review & place** — final snapshot review; idempotency key generated once and reused on retry; order placed with immutable snapshots; server responds with the order number.
+5. **Confirmation** — rendered strictly from `GET /orders/{id}`: order number `MG-YYYY-NNNNNN`, items with snapshots, authoritative totals, real payment state. **A freshly placed order shows PENDING_PAYMENT until the provider webhook reconciles it — the browser never declares payment success.**
+
+**Edge cases (all handled in UI):** network interruption (retry with same idempotency key), duplicate submission (idempotency replay returns the original order), session/cart expiry (honest restart offer), price change mid-checkout (409 → clear message + re-review), stock lost during checkout (422 → clear message), payment failure/cancellation/pending/delayed confirmation (order state page shows real state + "check back / contact advisory"), guest→customer cart merge on sign-in.
+
+### 7.4 Payments & webhooks
+
+- `PaymentProvider` interface (`authorize`, `capture`, `refund`, `verifyWebhook`) — provider SDK isolated in an integrations adapter. If no live provider is configured, ship the test adapter wired only for non-production, and say so honestly in the UI ("Development settlement adapter").
+- Webhooks: **verify HMAC over the raw body before parsing** (constant-time compare), timestamp tolerance ≤ 5 min, persist to `webhook_receipts` (UNIQUE(provider, external_event_id)) → duplicate replay returns "duplicate" and changes nothing; out-of-order events handled by re-deriving order state from the event + current state machine.
+- Amounts re-derived server-side from `order_items`/`orders` — never trusted from the payload.
+- Map provider events to the order/payment state machine; capture → PAID (+ `paid_at`, order_event, notification); failed → FAILED (+ notification); refund reconciles refund rows.
+- Never log payment secrets, full card data, or tokens.
+
+### 7.5 Orders, fulfilment, returns & refunds
+
+- Order state machine as a **pure function in the domain package**: `(current, event) -> next`, unit-tested including illegal transitions; every transition appends `order_events` and `audit_logs`.
+- Customer: order history, detail (items with snapshots, totals, delivery address, timeline), cancellation when PENDING_PAYMENT (returns stock), return/refund request when PAID+.
+- Fulfilment: per order-item shipment records with carrier + tracking (e.g. Brink's, Malca-Amit); vendor updates its own lines through permitted transitions (IN_FULFILLMENT → SHIPPED → DELIVERED), which roll up the parent order state (IN_FULFILLMENT / FULFILLED) and notify the customer.
+- Refunds: REQUESTED → APPROVED → (PROCESSING) → SUCCEEDED / REJECTED; bounds enforced (`amount ≤ captured_amount`, 422 REFUND_EXCEEDS_CAPTURED); partial refunds create new rows and never edit payment totals; order transitions to PARTIALLY_REFUNDED/REFUNDED; approval/execution restricted to COMMERCE_OPERATOR/ADMIN_SUPER; refunds above a configurable threshold require dual authorisation.
+
+### 7.6 Design Your Own (DYO) — signature USP
+
+**The core logic (explain this everywhere in the UI, it is the heart of the platform):** a DYO configuration is **not a cart line** — it is a **new product that genuinely gets created**. When a customer selects a setting variant (design × metal) and a compatible stone (or pair), the server composes a **brand-new CONFIGURED product**: it receives its own configured SKU per the grammar (`JS<designCode><metalCode>-<gemRef>`, e.g. `JS1383R18-PR5681`), its own slug, its own 1-of-1 inventory, its own price quote, and its own product page. The composed product is referenced by every downstream surface (cart line, order item snapshot, review page) through its own identity — never by re-selecting "some random product". The three invariants below are enforced as database CHECK constraints AND a pure domain engine.
+
+- **Entry page:** premium editorial intro to the atelier process (choose jewellery type → setting → compatible stone/pair → validate → quote → review → purchase).
+- **Configurator (step-based, responsive, state preserved in URL `?setting=&stone=`):**
+  1. Choose jewellery category (ring/earrings/pendant/necklace/bracelet).
+  2. Choose a setting — real rows: image, name, design code, style, metal options, accepted stone shapes + carat/mm ranges (from `setting_accepts`), authoritative price, availability.
+  3. Choose a gemstone — real rows: image, variety, shape/cut, mm, carat, colour, treatment (evidence-labelled), origin (evidence-labelled), certificate lab when present (display only), authoritative price, availability. Only stones the selected setting accepts are offered; stones that don't fit are visibly filtered with a reason.
+  4. Metal + ring size + optional engraving (length-limited).
+- **Compatibility engine (server-authoritative, pure domain function):** INV-01 (1 setting + 1 stone XOR 1 pair), INV-02 (pairs only with EARRINGS), INV-03 (singles only with non-earrings); rule precedence DENY > ALLOW > UNKNOWN; verdict + human-readable explanations returned and rendered as a ledger.
+- **Quote:** server-side pricing calculator producing a versioned, reproducible snapshot (setting component + stone component + metal adjustment + making fee − discount + tax = total) stored in `dyo_price_snapshots` with rule version + expiry.
+- **Review page:** the honest ledger — mounting specs (real), mineralogy specs (real), the three invariants with the engine's actual verdict, and the authoritative snapshot with components and computed-at. Unresolved references render "Not yet evidenced" markers. Never invented stones/origins/prices.
+- **Add to cart:** transactional — locks the configuration + exact quote, re-validates compatibility, re-checks evidenced component prices, anchors the cart line to the snapshot, consumes the quote exactly once (replay/second consumption fails), advances state once, writes an outbox event; the cart line and order freeze the exact price snapshot.
+- **Save/resume (authenticated):** saved designs list, resume unfinished configuration, duplicate, edit, delete — private to the owner.
+- **3D preview:** when a validated model exists for the configuration, a real interactive viewer; otherwise honest image/pending states. AI-generated imagery is labelled as a concept preview, never as a 3D model or manufacturing-ready asset.
+
+### 7.7 3D renderer & AR try-on — USP
+
+- **Gemstone 3D renderer (a real differentiator — build it):** loose stones get a genuinely rendered 3D experience — a watertight **faceted gem mesh** (57-facet round brilliant base; oval/cushion/pear/marquise/heart warps; emerald/asscher step cuts; princess/trillion/radiant/other shapes) with physically-based **transmission, refraction and dispersion** tinted by the actual stone colour, studio-HDRI lighting, soft contact shadow, drag-to-rotate + zoom, slow auto-rotate (disabled under `prefers-reduced-motion`), millimetre-scale stamp, and elegant loading/fallback states. This renderer is generic across shapes and colours — driven by the product's real shape, carat and colour attributes, never a hardcoded one-size model.
+- **3D for jewellery/configurations:** when a validated model exists for a setting, finished piece or composed DYO configuration, a real interactive viewer (orbit/zoom/reset); absent model = tab/button absent, never an unrelated placeholder model. Resource cleanup (WebGL contexts, GPU textures) on unmount; WebGL2-absent → honest fallback message.
+- **AR try-on:** per jewellery type (ring: hand landmark anchoring; earrings/pendant/necklace: face landmark anchoring); eligibility = AR-ready asset exists AND device/browser capability; explicit states for: eligible, ineligible product, unsupported device, unsupported browser, permission required, permission denied, tracking lost (>3s → repositioning prompt), loading, active, user cancel. On desktop → QR handoff token (10-min, one-time, SHA-256 hashed at rest) deep-linking the phone. Zero frame upload; stream tracks stopped on exit/unmount. Never claim realistic ring sizing or physical scale without validated fit data.
+
+### 7.8 AI concierge — USP (orchestrator, never a database client)
+
+- Chat drawer (accessible: `role="dialog"`, `aria-modal`, focus trap, Escape) with SSE streaming from `POST /ai/chat`.
+- The LLM is an **orchestration layer over a fixed registry of 9 deterministic read-only tools**: `search_inventory`, `get_product`, `get_gemstone`, `compare_gemstones`, `search_knowledge`, `check_dyo_compatibility`, `get_price_quote`, `create_customer_request`, `transfer_to_human`.
+- **Structural invariant: zero tools mutate price, inventory, orders, payments, certificates or permissions** (the mutating tool does not exist, so it cannot be called). Every tool declares `mutates` and names its application service; runtime authorization runs before execute.
+- Grounding gate: refuses when structured data is NULL (e.g. stone type unknown) instead of guessing; strips unverified claims; grounded-ratio SLO monitored.
+- Guardrails: untrusted content delimited and labelled; state-mutation directives blocked.
+- Human handoff engine: 9 triggers (customer request, low confidence, price negotiation, bespoke, negative sentiment, dispute, authenticity question, repeated intent, agent-initiated) → conversation → AWAITING_HUMAN.
+- Honest telemetry only (never record provider calls that didn't happen). If no LLM key is configured: the UI shows a truthful "concierge unavailable" state and deterministic keyword search still works.
+
+### 7.9 Vendor portal (`/vendor/**`)
+
+- Gated by session with role=VENDOR + vendor onboarding APPROVED; else honest gate with register/sign-in links.
+- **Dashboard:** real counts only — total/draft/submitted/approved/published/rejected/out-of-stock products, order lines, pending fulfilment, revenue total; recent products & order lines.
+- **Products:** list + create/edit (SKU uniqueness enforced, title/price/quantity validated, image URL + type/size validation → `assets` rows), submit for review, see moderation status and rejection reasons verbatim, edit-and-resubmit loop; **any vendor edit returns the product to DRAFT** (no bypass of moderation).
+- **Orders:** vendor-scoped order lines only (their products inside orders); fulfilment updates with carrier + tracking; cross-vendor access = 403.
+- **Profile:** display/legal name, bourse city/country, WFDB/ICA/DMCC/BGL bourse membership, trade desk phone, specialisation notes; onboarding status banner (PENDING shows what's locked and why).
+- Isolation: a vendor never sees another vendor's products, orders, or financials (tested).
+
+### 7.10 Admin back office (`/admin/**`)
+
+- Shell: sidebar grouped by domain (Executive & Commerce / Catalogue & Partners / Security & Governance), page titles, role context, responsive; every page capability-gated server-side.
+- **Dashboard:** real metrics — active/draft/submitted products, vendor onboarding queue (pending/approved), orders, refunds pending, gemstones, evidenced gem prices, setting designs/variants, DYO configurations, CMS pages in review, assets not ready. Every metric a real query.
+- **Product moderation:** catalogue table with state + moderation status + vendor + inventory + price evidence; actions: Approve, Reject (reason required), Publish, Unpublish, Archive — each audited with before/after; DRAFT never silently published.
+- **Vendors:** list + Approve / Suspend / Reactivate / Reject (with reason) + notification to the vendor owner.
+- **Orders & refunds:** order list/detail with timeline; refund queue with approve/reject/execute (role-gated).
+- **Discounts:** create/list promo codes (percentage, fixed, free-shipping; min subtotal; max redemptions).
+- **Customers:** directory with role, verification, status.
+- **Users & roles:** assign/modify roles — ADMIN_SUPER only; audited.
+- **CMS:** pages with locking workflow (DRAFT → IN_REVIEW → APPROVED → PUBLISHED / ARCHIVED), version column (409 VERSION_CONFLICT on stale edit), two-person rule on trust-bearing content, block registry validation.
+- **Audit logs:** append-only review with actor/action/entity/before/after/reason.
+- **Ops visibility:** failed jobs / dead letters / webhook processing errors (read-only queue views).
+
+### 7.11 CMS & content
+
+- `pages` with typed content blocks (HERO, RICH_TEXT, IMAGE, GALLERY, PRODUCT_COLLECTION, GEMSTONE_COLLECTION, CATEGORY_GRID, FAQ, BUYING_GUIDE, CERTIFICATE_GUIDE, COMPARISON_TABLE, VIDEO, CTA, BANNER, TESTIMONIAL, SHOWROOM_CTA, CUSTOM_DESIGN_CTA, CONTACT_CTA), template selection, version + revisions, publish workflow per §7.10.
+- Storefront renders published pages: `/education/**`, `/blog/**`, `/policy/**` read from the CMS (published head revision only); `navigations` (header/footer/mega menu/mobile) DB-driven; `seo_metadata` per entity; `redirects` enforced at the edge (301/302) from the migration spine.
+
+### 7.12 Live catalogue integration — gemstock.org (actual product supply)
+
+The storefront's gemstones are **real products fetched from [gemstock.org](https://gemstock.org)** — an established Bangkok gem-dealer house (GEMSTOCK.ORG COMPANY LIMITED, Jewelry Trade Center, Silom Road, Bangkok — the same bourse quarter as the Maihan Bangkok salon). Build a first-class **catalogue ingestion pipeline** against it:
+
+- **What gemstock.org actually publishes (observed):** collection pages per gem type and sub-variety (Emerald, Tourmaline, Sapphire, Spinel, Ruby, Garnet, Alexandrite, Tanzanite, Topaz, Zircon, Beryl, Chrysoberyl, Kunzite, Moonstone, Morganite, Opal, Peridot, Quartz, Pearls, Diamonds…), with deep colour collections (e.g. Sapphire → Royal Blue / Cornflower Blue / Padparadscha / Pink / Yellow / Teal / Parti; Ruby → Pigeon's Blood / Star; Spinel → Cobalt Blue / Mahenge / Vivid Red; Paraíba → Neon Blue / Neon Green), shape filters (cushion, pear, heart, octagon, oval, radiant), price-band filters (< $1k up to > $200k), a Jewellery collection (rings, pendants, brooches), and product pages carrying: full title with carats + cut + colour + origin, **price and price-per-carat**, multiple photos, availability (`free worldwide shipping` vs **"Item is sold"**), and descriptive copy.
+- **Ingestion:** a deterministic, idempotent **sync service** (worker job + manual admin trigger) crawls/fetches the collection and product pages (respect `robots.txt`, rate-limit politely ~1 request / 2s, identify with a proper UA), parses each product into the canonical catalogue rows: `gemstones` (gem_ref, carat, shape, colour, origin, treatment when stated, price_amount, price_per_carat, availability incl. sold), products with kind=LOOSE_STONE (and jewellery items as READY_MADE), plus `assets` + `asset_usages` for photos (media imported into your own storage/CDN with a content hash — never hotlinked at runtime).
+- **Idempotency & freshness:** upsert keyed on the source product URL/id; re-sync updates price/availability/sold-status; sold items remain visible but marked **SOLD** with an enquiry CTA; deletions on the source are soft-flagged, never hard-deleted. Every sync run records an `import_batches` row (count, added/updated/sold-marked/errors) visible in the admin back office.
+- **Provenance & honesty:** every synced product carries `source_url` pointing to the gemstock.org product page, `evidence_status='OBSERVED'` for parsed fields, and **UNKNOWN for anything the source does not state** (clarity, dimensions, treatment…) — rendered as "Not evidenced", never invented. DYO compatibility uses the synced stones exactly like native ones.
+- **Fallback:** when gemstock.org is unreachable or rate-limits you, the storefront keeps serving the last synced snapshot and the admin sees the sync failure — the site never renders fake products in its place.
+- **Seed:** the initial database seed IS a gemstock.org sync (plus the reference vocabulary); the builder should ship a small offline fixture copy of synced products only for tests/CI, clearly marked as fixture data.
+
+### 7.13 Notifications
+
+- In-app notifications page in the account portal; notification records persisted and idempotent (dedupe keys) so replayed events never double-send.
+- Events covered: email verification, password reset, order confirmation, payment status, shipment updates, refund updates, vendor status, product moderation decisions.
+- Real email provider behind an interface; unconfigured provider = recorded-and-honest state (never fake "email sent" claims).
+
+---
+
+## 8. DATA HONESTY RULES (APPLY EVERYWHERE)
+
+1. Never fabricate a source value, an observed count, or a behaviour. Never invent prices, availability, certifications, origins, treatments, tracking numbers, or statistics.
+2. Every factual claim renders with its evidence label where relevant; `UNKNOWN` renders as an elegant "Not evidenced" marker.
+3. The AI refuses rather than guesses when structured data is missing.
+4. DRAFT products are never silently published to populate the storefront; publication is an explicit, audited admin action.
+5. No fake testimonials, review counts, scarcity timers, or marketing puffery presented as fact.
+6. If a backend capability is missing, the UI shows an honest unavailable/pending state — never a simulation of success.
+
+---
+
+## 9. API CONVENTIONS
+
+- One handler pattern: resolve input → strict Zod validate → call exactly one service → serialize → respond. No SQL in handlers; no business branching in handlers.
+- Success envelope: `{ data, meta?, facets?, rejectedFilters? }`. Error envelope: `{ error: { code, message, details? } }` + `requestId` + `traceId` headers (X-Trace-Id on every response).
+- Closed error-code registry (no internals leaked): `VALIDATION_FAILED` 400, `UNAUTHORIZED` 401, `FORBIDDEN` 403, `NOT_FOUND`/`PRODUCT_NOT_FOUND`/`CART_NOT_FOUND`/`ORDER_NOT_FOUND` 404, `METHOD_NOT_ALLOWED` 405, `RATE_LIMITED` 429 (+ RateLimit-* + Retry-After headers), `IDEMPOTENCY_CONFLICT` 409, `PRICE_CHANGED` 409, `VERSION_CONFLICT` 409, `UNPROCESSABLE` 422 (with domain detail codes like `PAIR_RESERVATION_FAILED`, `REFUND_EXCEEDS_CAPTURED`, `DYO_QUOTE_INVALID`, `CHECKOUT_STEP_SKIPPED`), `INTERNAL` 500, `BAD_GATEWAY` 502.
+- Idempotency keys on every mutating endpoint/job/event consumer. Pagination: bounded limits + keyset cursors (deterministic, no overlap). Sorting/filtering whitelisted.
+- OpenAPI generated from the same Zod contracts; a parity test proves documented ↔ routed ↔ handled are identical.
+- Cache headers from surface policy (public catalogue cacheable with generation-based invalidation; account/commerce `no-store`).
+
+---
+
+## 10. SECURITY CHECKLIST (implementation-level)
+
+- [ ] Server-side session on every protected operation; no client-asserted identity/role headers trusted in production.
+- [ ] Ownership predicates on every resource read/mutation (customer↔own orders/profile/addresses/wishlist; vendor↔own products/order-lines; admin capability per module).
+- [ ] Horizontal/vertical privilege escalation + IDOR tests (cross-customer order read = 403; cross-vendor edit = 403; customer refund-approve = 403; non-admin on admin routes = 401/403).
+- [ ] Mass-assignment protection (strict Zod schemas; unknown fields rejected).
+- [ ] SQL injection surface eliminated (parameterised queries/query builder only; identifiers whitelisted).
+- [ ] XSS: React escaping; any rich text sanitised against an explicit tag allow-list; never `dangerouslySetInnerHTML` with unsanitised input.
+- [ ] Uploads: presigned direct-to-storage; content sniffing not extension; type/size caps; virus scan seam; EXIF stripped; storage keys server-generated.
+- [ ] Webhooks: raw-body HMAC before parse; timestamp tolerance; idempotent receipts; no payload-URL following; amounts re-derived server-side.
+- [ ] Secrets: platform secret manager only; never in repo/DB/logs/traces; leaked secret = rotate first.
+- [ ] PII: never in logs, metrics, analytics, embeddings, or event payloads; redaction before any log/model call.
+- [ ] Rate limits on auth + mutating endpoints; fail closed on money/trust/authorization; fail open only on cache.
+- [ ] Every privileged mutation audited (before/after) — audit failure fails the action.
+- [ ] Appraisal/certificate documents private; short-lived signed URLs only.
+- [ ] Production error responses leak nothing (no stack, no SQL, no driver text).
+
+---
+
+## 11. PERFORMANCE & ACCESSIBILITY
+
+- Server components by default; client islands only for interaction (configurator, cart, AR/3D, forms); route-level `loading.tsx` skeletons (`aria-busy`), no spinners.
+- Initial-JS budgets enforced (category route ≤ 170 KB gzip, product route ≤ 190 KB gzip) with a CI check.
+- `next/image` (or equivalent) + remote patterns for catalogue imagery; lazy 3D/AR bundles; request cancellation; resource cleanup (WebGL contexts, media streams, timers).
+- Postgres indexes on every filtered/sorted column; no N+1 in catalogue/order flows (batch or lateral joins).
+- WCAG 2.2 AA: semantic HTML, keyboard-complete journeys (mega-menu, drawers, modals, configurator), focus rings, labels + error associations, alt text, contrast ≥ 4.5:1, status not colour-only, screen-reader announcements for important changes, `prefers-reduced-motion`.
+
+---
+
+## 12. TESTING
+
+- **Unit (Vitest):** SKU grammar parser (SETTING/CONFIGURED/READY-MADE/STONE/PAIR, 100% on a golden corpus), pricing calculator (exact decimal math, versioned snapshots), compatibility engine (INV-01/02/03, DENY>ALLOW>UNKNOWN), order state machine (all legal + illegal transitions), discount validation, refund bounds, permission matrix (every role × module × action).
+- **Integration (Vitest + live Postgres):** auth lifecycle (register→verify→login→reset→session revocation), lockout, cart repricing + 409 tampering rejection, quantity clamping, checkout checkpoint ordering (skip = 422), atomic stock depletion + oversell prevention (concurrent final-item orders), idempotent order replay, webhook HMAC verification + duplicate suppression + out-of-order events, refund lifecycle + bounds, customer/vendor/admin isolation, DB constraint enforcement.
+- **E2E (Playwright) — the 14 journeys:** (1) visitor browse→PDP; (2) register→verify→sign-in; (3) search+filter real data; (4) add to cart + quantity update; (5) complete checkout through the test provider; (6) payment state correct; (7) view order + history; (8) DYO configuration→quote→review→add-to-cart; (9) 3D/AR eligibility honesty; (10) vendor upload→processing status; (11) vendor edit→submit→correct moderation state; (12) admin review→approve→publication follows rules; (13) unauthorized users blocked from protected routes/data; (14) duplicate requests/replayed payment events create no duplicates.
+- Tests use isolated fixtures and explicitly isolated test data; never production data or production payment credentials; DB-gated suites skip gracefully (never fail) when no database is reachable.
+
+---
+
+## 13. BUILD ORDER (follow sequentially; keep the app runnable after every step)
+
+1. **Scaffold:** monorepo, workspace packages, config (env contract: `DATABASE_URL` single secret variable, `MAIHAN_ENV` local|preview|staging|production, optional `REDIS_URL`, optional `API_PORT`, `NEXT_PUBLIC_SITE_URL`, optional AI/email/PSP keys), design tokens + fonts + global CSS.
+2. **Database:** full migration chain (§4.1) + schema-fidelity assertion (introspect the migrated schema and assert exact counts/names in CI) + reference seed (metals, jewellery types, setting styles, treatments + labels, colour intensities, clarities + labels) — idempotent.
+3. **Domain package (pure, zero runtime deps):** enums, value objects (Money, WeightCt, DimensionsMm, SourceSku/DerivedSku, ConfigurationHash), SKU grammar parser + composer, configuration hash + base62 slug, compatibility engine, pricing calculator, order state machine. All unit-tested.
+4. **Contracts package:** Zod DTOs for every endpoint + envelopes + OpenAPI generation + parity test.
+5. **DB repositories:** catalogue reads (products/gemstones/settings/variants/taxonomy, publication-gated), auth, vendors, cart/checkout/reservation, orders/payments/refunds, DYO, CMS, notifications, outbox/jobs, **gemstock.org catalogue sync**.
+6. **API handlers + route table** (§6.2) + error envelope + rate limiting + cache headers + health endpoints.
+7. **Auth backend + session middleware** (§5) wired into every protected handler; ownership predicates everywhere.
+8. **Storefront:** layout chrome (header/mega-menu/footer), home, browse/shop/pairs/jewellery, variety/colour collections, settings hub + variant detail, search, PDP, JSON-LD, sitemaps/robots/redirects.
+9. **Cart + checkout + payments + confirmation** (§7.3–7.4).
+10. **Account portal + wishlist/compare + notifications** (§7.3, §7.13).
+11. **DYO configurator + review + save/resume** (§7.6).
+12. **3D viewer + AR try-on + QR handoff** (§7.7).
+13. **3D renderer + AR try-on + QR handoff** (§7.7).
+14. **AI concierge** (§7.8) with the fixed read-only tool registry + grounding + handoff.
+15. **Vendor portal** (§7.9) + **Admin back office** (§7.10) + **CMS** (§7.11) + **gemstock.org sync admin views** (§7.12).
+16. **Background worker (`apps/worker`):** outbox dispatcher (PENDING → PUBLISHED, backoff, dead-letter), reservation TTL sweeper, checkout-session expiry, webhook retry sweep, notification dispatch, sitemap rebuild, retention sweeps — all idempotent via `job_key` + `event_consumers`.
+17. **Cross-cutting QA:** responsive pass, a11y audit (axe-core), performance/budget pass, security checklist pass, route-completeness audit, regression run.
+
+---
+
+## 14. ACCEPTANCE GATE (all must hold before you claim completion)
+
+- Complete route coverage per §6 — every route implemented with real data, loading/empty/error/success states, responsive and accessible.
+- Working navigation with no dead links; every visible action performs its real operation.
+- Auth works end to end; RBAC enforced server-side; customer/vendor isolation proven by tests; privilege escalation blocked.
+- Cart + checkout create real orders with authoritative totals; payment states come from the provider/webhook — the browser never decides success.
+- DYO preserves selections, validates server-side, quotes server-side, and converts to cart transactionally with the exact quote.
+- 3D/AR reflect real eligibility; missing capability renders honestly.
+- Certificates respect INV-07; AI cannot reach any write path; no fabricated data anywhere.
+- All validation gates pass: typecheck, lint, unit, integration, E2E, build, bundle budgets, migration/schemafidelity, secret scan.
+- The final report distinguishes: **Implemented / Tested / Integration-verified / Production-ready / Blocked** — with evidence for each, and never claims production readiness for capabilities whose real providers or devices were not exercised.
+
+---
+
+## 15. FINAL REPORT (deliver at the end)
+
+1. Executive summary. 2. Routes implemented (complete inventory with status per route). 3. Auth + RBAC architecture and role matrix as implemented. 4. Database schema/migrations added. 5. Customer journeys completed. 6. Vendor workflows completed. 7. Admin workflows completed. 8. Payment/shipping/tax/notification integrations verified (and which remain test-only and why). 9. Security controls + escalation/IDOR test results. 10. Exact commands executed + outcomes (pass/fail/skip counts). 11. Remaining blockers, missing credentials/decisions. 12. Honest release-readiness status.
+
+---
+
+## 16. SEED DATA GUIDANCE
+
+Ship with an idempotent seed containing: the 70-row reference vocabulary (15 metals incl. `SL` sterling silver, 8 jewellery types, 22 setting styles, 3 treatments + 5 verbatim labels, 5 intensities, 5 clarities + 7 labels); a representative demo catalogue of **at least 40 loose stones across 10+ varieties** (with plausible gem-ref IDs clearly seeded as demo data, real-shaped specs: carat/mm/colour/shape/treatment/origin), **8+ matched pairs**, **12+ setting designs with 3–5 metal variants each and accepts rules**, **10+ finished pieces**, 4 showrooms, education/blog/policy pages, and 2 promo codes. Mark every seeded row with a `seed_batch` provenance so demo data can never masquerade as verified production inventory. Availability/quantities in seeds must be consistent (pairs → EARRINGS only per INV-02).
+
+---
+
+*End of prompt. Build the complete platform, keep it running, verify honestly, and report with evidence.*

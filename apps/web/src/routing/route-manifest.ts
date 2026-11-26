@@ -38,6 +38,16 @@ export interface RouteManifestEntry {
   readonly reserved?: readonly string[];
 }
 
+/**
+ * The citation every develop-parity route carries. The client asked for the
+ * storefront to look exactly like develop (verbatim design), so these routes
+ * are copied from the develop worktree as demo surfaces and are cited to the
+ * SoT route tree they extend plus that instruction. They do not create a new
+ * business rule and they do not replace a SoT route.
+ */
+const DEVELOP_PARITY =
+  'PROJECT_SOURCE_OF_TRUTH.md 12.2 (the route tree this extends) + docs/AUDIT_MAIN_VS_DEVELOP.md §6 Phase 2 step 9 and the client decision of 2026-11-26: a develop-parity demo route copied verbatim from develop so the storefront renders develop\'s design. It reads main\'s catalogue through lib/mgh/adapters and falls back to labelled demo content.';
+
 /** The single authoritative list. Order mirrors the SoT 12.2 block. */
 export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
   // ── app root ─────────────────────────────────────────────────────────────
@@ -47,7 +57,20 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: the root of the listed app route tree; every group inherits <html>/<body> from it (not drawn as an explicit line in the SoT chart, implied as the tree root)',
     storefront: false,
     group: 'app-root',
-    extraFiles: ['src/app/error.tsx', 'src/app/not-found.tsx'],
+    extraFiles: [
+      'src/app/error.tsx',
+      'src/app/not-found.tsx',
+      // develop's root stylesheets, adopted with develop's root layout so the
+      // storefront renders the design it was drawn against.
+      'src/app/globals.css',
+      'src/app/storefront-luxury.css',
+      // main's two non-storefront sign-in frames, kept out of develop's sheet.
+      'src/app/console-auth.css',
+      // the fixture-content notice (one rule set, separate by design).
+      'src/app/demo-content.css',
+      // two mobile-fit rules over develop's copied sheets.
+      'src/app/storefront-overrides.css',
+    ],
   },
   // ── (storefront) group ────────────────────────────────────────────────────
   {
@@ -80,6 +103,18 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
       'src/app/(storefront)/[varietySlug]/not-found.tsx',
       'src/app/(storefront)/[varietySlug]/loading.tsx',
       'src/app/(storefront)/[varietySlug]/error.tsx',
+    ],
+  },
+  {
+    fsPath: 'src/app/(storefront)/[varietySlug]/[productSlug]/page.tsx',
+    sotPath: 'app/(storefront)/[variety]/[productSlug]/page.tsx',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/[varietySlug]/[productSlug]/not-found.tsx',
+      'src/app/(storefront)/[varietySlug]/[productSlug]/loading.tsx',
+      'src/app/(storefront)/[varietySlug]/[productSlug]/error.tsx',
     ],
   },
   {
@@ -140,6 +175,7 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
       // The settings index always exists; only loading/error apply (Task 5).
       'src/app/(storefront)/settings/loading.tsx',
       'src/app/(storefront)/settings/error.tsx',
+      'src/app/(storefront)/settings/not-found.tsx',
     ],
   },
   {
@@ -158,6 +194,7 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     extraFiles: [
       'src/app/(storefront)/search/loading.tsx',
       'src/app/(storefront)/search/error.tsx',
+      'src/app/(storefront)/search/not-found.tsx',
     ],
   },
   {
@@ -340,6 +377,157 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     fsPath: 'src/app/(storefront)/varieties/[varietySlug]/page.tsx',
     sotPath: 'app/(storefront)/varieties/[slug]/page.tsx',
     authority: 'PROJECT_SOURCE_OF_TRUTH.md 13.2: /varieties/{slug} new target-only route',
+    storefront: true,
+    group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/varieties/[varietySlug]/not-found.tsx',
+      'src/app/(storefront)/varieties/[varietySlug]/loading.tsx',
+      'src/app/(storefront)/varieties/[varietySlug]/error.tsx',
+    ],
+  },
+
+  // ── develop-parity route families (client decision 2026-11-26) ───────────
+  // Copied verbatim from develop so the storefront renders develop's design.
+  // Each entry's authority cites both the SoT route tree it extends and the
+  // audit's parity instruction; none of them invents a business rule.
+  {
+    fsPath: 'src/app/(storefront)/about/page.tsx',
+    sotPath: 'app/(storefront)/about/page.tsx   # /about',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/ai-gemologist/page.tsx',
+    sotPath: 'app/(storefront)/ai-gemologist/page.tsx   # /ai-gemologist',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/blog/[postSlug]/page.tsx',
+    sotPath: 'app/(storefront)/blog/[postSlug]/page.tsx   # /blog/<post>',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/browse/page.tsx',
+    sotPath: 'app/(storefront)/browse/page.tsx   # /browse',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/browse/not-found.tsx',
+      'src/app/(storefront)/browse/loading.tsx',
+      'src/app/(storefront)/browse/error.tsx',
+    ],
+  },
+  {
+    fsPath: 'src/app/(storefront)/card-preview/page.tsx',
+    sotPath: 'app/(storefront)/card-preview/page.tsx   # /card-preview',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/checkout/layout.tsx',
+    sotPath: 'app/(storefront)/checkout/layout.tsx',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/checkout/confirmation/[orderId]/page.tsx',
+    sotPath: 'app/(storefront)/checkout/confirmation/[orderId]/page.tsx',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/checkout/confirmation/[orderId]/loading.tsx',
+      'src/app/(storefront)/checkout/confirmation/[orderId]/error.tsx',
+    ],
+  },
+  {
+    fsPath: 'src/app/(storefront)/concierge/page.tsx',
+    sotPath: 'app/(storefront)/concierge/page.tsx   # /concierge',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/demo/page.tsx',
+    sotPath: 'app/(storefront)/demo/page.tsx   # /demo',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/gemstones/page.tsx',
+    sotPath: 'app/(storefront)/gemstones/page.tsx   # /gemstones',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/jewellery/page.tsx',
+    sotPath: 'app/(storefront)/jewellery/page.tsx   # /jewellery',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/jewellery/not-found.tsx',
+      'src/app/(storefront)/jewellery/loading.tsx',
+      'src/app/(storefront)/jewellery/error.tsx',
+    ],
+  },
+  {
+    fsPath: 'src/app/(storefront)/pairs/page.tsx',
+    sotPath: 'app/(storefront)/pairs/page.tsx   # /pairs',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/pairs/not-found.tsx',
+      'src/app/(storefront)/pairs/loading.tsx',
+      'src/app/(storefront)/pairs/error.tsx',
+    ],
+  },
+  {
+    fsPath: 'src/app/(storefront)/policy/page.tsx',
+    sotPath: 'app/(storefront)/policy/page.tsx   # /policy',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+  },
+  {
+    fsPath: 'src/app/(storefront)/product/[slug]/page.tsx',
+    sotPath: 'app/(storefront)/product/[slug]/page.tsx   # /product/<slug>',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/product/[slug]/not-found.tsx',
+      'src/app/(storefront)/product/[slug]/loading.tsx',
+      'src/app/(storefront)/product/[slug]/error.tsx',
+    ],
+  },
+  {
+    fsPath: 'src/app/(storefront)/shop/page.tsx',
+    sotPath: 'app/(storefront)/shop/page.tsx   # /shop',
+    authority: DEVELOP_PARITY,
+    storefront: true,
+    group: 'storefront',
+    extraFiles: [
+      'src/app/(storefront)/shop/not-found.tsx',
+      'src/app/(storefront)/shop/loading.tsx',
+      'src/app/(storefront)/shop/error.tsx',
+    ],
+  },
+  {
+    fsPath: 'src/app/(storefront)/unsubscribe/page.tsx',
+    sotPath: 'app/(storefront)/unsubscribe/page.tsx   # /unsubscribe',
+    authority: DEVELOP_PARITY,
     storefront: true,
     group: 'storefront',
   },

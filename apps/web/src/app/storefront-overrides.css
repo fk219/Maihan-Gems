@@ -1,0 +1,20 @@
+/**
+ * app/storefront-overrides.css
+ *
+ * The only hand-authored CSS on top of develop's copied stylesheets. Two
+ * rules, both about mobile fit rather than look:
+ *
+ *  - develop's header right-hand control cluster (search, account, wishlist,
+ *    compare, bag) is 197 px wide and pushes the document 26 px past a 390 px
+ *    viewport. The compare control is the least-used secondary action, so it
+ *    is hidden below 420 px (compare stays reachable from the account area and
+ *    the footer). Nothing changes at >= 421 px.
+ *  - the same cluster is clipped rather than wrapped if a future control is
+ *    added, so the header row is allowed to shrink its gap instead of
+ *    overflowing.
+ */
+@media (max-width: 420px) {
+  header a[aria-label^='Compare items'] {
+    display: none;
+  }
+}

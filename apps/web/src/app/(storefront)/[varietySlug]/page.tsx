@@ -1,113 +1,123 @@
-/**
- * apps/web/src/app/(storefront)/[varietySlug]/page.tsx
- *
- * `/tsavorite-garnet` — variety landing for loose stones (Task 3).
- *
- * Data-driven: the slug is validated against the taxonomy the Phase 3 port
- * serves; products are fetched through the cached CatalogQueryService with
- * the variety filter. NO per-variety page exists — this ONE dynamic route
- * renders every variety (SoT 12.1 rule 1, doc 08 catalogue rule).
- *
- * 404 semantics: a slug that is not an ACTIVE variety in the taxonomy is a
- * not-found (notFound()), not an empty list — the variety must exist.
- *
- * Copy discipline: the lead describes what the record carries. It does not
- * call every stone certified, untreated or lab-tested; those are per-field
- * evidence statuses, not a category promise.
- */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { CollectionExplorer } from '@/components/mgh/catalog/CollectionExplorer';
+import { ProductDetailView } from '@/components/mgh/catalog/ProductDetailView';
+import {
+  getCatalogColourCollection,
+  getCatalogGemstoneBySlugOrId,
+  getCatalogVarietyCollection,
+} from '@/lib/mgh/adapters/catalog';
+import { SITE_URL } from '@/lib/mgh/site-url';
 
-import { catalogServer } from '../../../lib/catalog-server.js';
-import { listingBasePath, listingQuery, productItems, type ListingParams } from '../../../lib/catalog-view.js';
-import { ProductCard } from '../../../components/catalog/ProductCard.js';
-import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
-import { EditorialMasthead } from '../../../components/design-system/EditorialMasthead.js';
-import { EmptyState } from '../../../components/design-system/EmptyState.js';
-import { Pagination } from '../../../components/design-system/Pagination.js';
-
-// Route segment config. Catalog views render per request from the cached
-// CatalogQueryService (doc 12.3: Server-rendered, cacheable, no per-user
-// state); there is deliberately no build-time catalogue, so Next must not
-// prerender this route (it would otherwise invoke the page with empty params
-// during `next build`). Runtime caching stays in the service, not in Next.
 export const dynamic = 'force-dynamic';
 
-interface PageProps {
+export async function generateMetadata({
+  params,
+}: {
   params: Promise<{ varietySlug: string }>;
-  searchParams: Promise<ListingParams>;
+}): Promise<Metadata> {
+  const { varietySlug } = await params;
+  const variety = await getCatalogVarietyCollection(varietySlug);
+  if (variety) {
+    return {
+      title: `${variety.meta.name} Loose Gemstones`,
+      description: variety.meta.lede,
+      alternates: { canonical: `${SITE_URL}/${variety.meta.slug}` },
+    };
+  }
+  const colour = await getCatalogColourCollection(varietySlug);
+  if (colour) {
+    return {
+      title: `${colour.meta.name} Gemstones Collection`,
+      description: colour.meta.lede,
+      alternates: { canonical: `${SITE_URL}/${colour.meta.slug}` },
+    };
+  }
+  const stone = await getCatalogGemstoneBySlugOrId(varietySlug);
+  if (stone) {
+    return {
+      title: `${stone.name} (${stone.sku})`,
+      description: stone.lede,
+      alternates: { canonical: `${SITE_URL}/product/${stone.slug}` },
+    };
+  }
+  // Soft-404 fix: throwing here (metadata phase) yields a true 404 status —
+  // the body-phase notFound() fired too late, after the shell had streamed.
+  notFound();
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export default async function RootVarietyCatchAllPage({
+  params,
+}: {
+  params: Promise<{ varietySlug: string }>;
+}) {
   const { varietySlug } = await params;
-  return { title: `${varietySlug.replace(/-/g, ' ')} gemstones | Maihan Gems` };
-}
 
-export default async function VarietyIndexPage({ params, searchParams }: PageProps) {
-  const { varietySlug } = await params;
-  const urlParams = await searchParams;
-  const query = listingQuery(urlParams);
-  const service = catalogServer();
+  const variety = await getCatalogVarietyCollection(varietySlug);
+  if (variety) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+        <nav aria-label="Breadcrumb" className="text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#76726A]">
+          <ol className="flex items-center gap-2">
+            <li><Link href="/" className="hover:text-[#121211]">Home</Link></li>
+            <li aria-hidden="true">/</li>
+            <li><Link href="/varieties" className="hover:text-[#121211]">Varieties</Link></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" className="font-medium text-[#121211]">{variety.meta.name}</li>
+          </ol>
+        </nav>
 
-  // Taxonomy decides existence (doc 12: filters validate against a whitelist
-  // derived from the taxonomy tables).
-  const taxonomy = (await service.getTaxonomy()).value;
-  const variety = taxonomy.varieties.find((v) => v.slug === varietySlug);
-  if (variety === undefined || variety.state !== 'ACTIVE') notFound();
+        <div className="border-b border-[#E4DFD5] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] text-[#9A7B2C]">
+              {variety.meta.mineralSpecies.toUpperCase()} · {variety.stones.length} LOTS
+            </p>
+            <h1 className="mt-1 font-[family-name:var(--font-display)] text-4xl font-semibold text-[#121211]">
+              {variety.meta.name}
+            </h1>
+          </div>
+          <div className="flex items-center gap-6 text-xs font-[family-name:var(--font-mono)] text-[#4E4C47]">
+            <span>RI {variety.meta.refractiveIndexRange}</span>
+            <span>Mohs {variety.meta.mohsHardness}</span>
+          </div>
+        </div>
 
-  const result = (await service.listProducts({ ...query, filters: { variety: [varietySlug] } })).value;
-  const items = productItems(result);
+        <CollectionExplorer initialItems={variety.stones} lockedVarietySlug={variety.meta.slug} />
+      </div>
+    );
+  }
 
-  return (
-    <main className="page variety-page mh-page">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Varieties', href: '/varieties' },
-          { label: variety.display_name },
-        ]}
-      />
+  const colour = await getCatalogColourCollection(varietySlug);
+  if (colour) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+        <nav aria-label="Breadcrumb" className="text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#76726A]">
+          <ol className="flex items-center gap-2">
+            <li><Link href="/" className="hover:text-[#121211]">Home</Link></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" className="font-medium text-[#121211]">{colour.meta.name}</li>
+          </ol>
+        </nav>
 
-      <EditorialMasthead
-        eyebrow="Loose gemstones"
-        title={variety.display_name}
-        lead={`Loose ${variety.display_name} stones recorded in the catalogue. Weight, price and provenance appear only where the record carries them.`}
-        meta={
-          items.length === 0 ? (
-            <>No stones currently listed</>
-          ) : (
-            <>
-              <span className="tabular">{items.length}</span>{' '}
-              {items.length === 1 ? 'stone' : 'stones'} on this page
-            </>
-          )
-        }
-      />
+        <div className="border-b border-[#E4DFD5] pb-6">
+          <p className="text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] text-[#9A7B2C]">
+            SPECTRAL HUE COLLECTION
+          </p>
+          <h1 className="mt-1 font-[family-name:var(--font-display)] text-4xl font-semibold text-[#121211]">
+            {colour.meta.name}
+          </h1>
+        </div>
 
-      {items.length === 0 ? (
-        <EmptyState
-          title={`No ${variety.display_name} gemstones are currently listed.`}
-          action={<Link href="/">Browse all gemstones</Link>}
-        >
-          The catalogue is updated as stones are graded and photographed.
-        </EmptyState>
-      ) : (
-        <ul className="product-grid">
-          {items.map((product) => (
-            <li key={product.slug}>
-              <ProductCard product={product.summary} />
-            </li>
-          ))}
-        </ul>
-      )}
+        <CollectionExplorer initialItems={colour.stones} lockedColourSlug={colour.meta.slug} />
+      </div>
+    );
+  }
 
-      <Pagination
-        basePath={listingBasePath(`/${varietySlug}`, urlParams)}
-        previousCursor={null}
-        nextCursor={result.meta.next_cursor}
-        hasNext={result.meta.has_more}
-      />
-    </main>
-  );
+  const stone = await getCatalogGemstoneBySlugOrId(varietySlug);
+  if (stone) {
+    return <ProductDetailView stone={stone} />;
+  }
+
+  notFound();
 }

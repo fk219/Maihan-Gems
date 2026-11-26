@@ -1,215 +1,92 @@
-/**
- * apps/web/src/app/(storefront)/search/page.tsx
- *
- * `/search` — hybrid search with facets, business ranking, and degradation (Phase 5).
- *
- * Authority & Architecture:
- *   - INITIAL_IMPLEMENTATION_PLAN.md Phase 5
- *   - PROJECT_SOURCE_OF_TRUTH.md §11.3, §14
- *   - technical_design/08_FRONTEND_ARCHITECTURE.md (Search form & facets)
- *   - technical_design/12_SEARCH_ARCHITECTURE.md (Hybrid search pipeline)
- *
- * Design: one editorial masthead, one hairline filter column, one unboxed
- * result grid. The previous page set white text on the ivory document (a
- * contrast failure) and surfaced internal ranker labels ("STRUCTURED_ONLY",
- * "PRODUCT_SEARCH") as if they were customer-facing facts. Those labels are
- * removed; only the honest degraded-mode notice remains.
- *
- * Invariants:
- *   - INV-01, INV-02, INV-03, INV-07, INV-08 honoured.
- *   - Zero LLM on the synchronous search path.
- *   - Treated stone neutrality (never demoted).
- *   - Server-rendered, cacheable, zero client-island overhead for search results.
- */
 import type { Metadata } from 'next';
 import Link from 'next/link';
-
-import { catalogServer } from '../../../lib/catalog-server.js';
-import {
-  parseSearchParamsToSearchQuery,
-  extractActiveFilterChips,
-  searchPaginationBasePath,
-  buildSearchHref,
-  type RawSearchParams,
-} from '../../../lib/search-view.js';
-import { SearchFilterPanel } from '../../../components/filters/SearchFilterPanel.js';
-import { ProductCard } from '../../../components/catalog/ProductCard.js';
-import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
-import { EditorialMasthead } from '../../../components/design-system/EditorialMasthead.js';
-import { EmptyState } from '../../../components/design-system/EmptyState.js';
-import { Pagination } from '../../../components/design-system/Pagination.js';
+import { Search } from 'lucide-react';
+import { ProductCard } from '@/components/mgh/ProductCard';
+import { searchCatalogGemstones } from '@/lib/mgh/adapters/catalog';
+import { SITE_URL } from '@/lib/mgh/site-url';
 
 export const dynamic = 'force-dynamic';
 
-interface SearchPageProps {
-  readonly searchParams: Promise<RawSearchParams>;
-}
-
-export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
-  const sp = await searchParams;
-  const q = typeof sp['q'] === 'string' ? sp['q'].trim() : '';
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}): Promise<Metadata> {
+  const { q } = await searchParams;
+  const query = q?.trim() || '';
   return {
-    title: q.length > 0 ? `Search: "${q}" | Maihan Gems` : 'Search gemstones & fine settings | Maihan Gems',
-    description:
-      'Search natural gemstones and fine settings by variety, colour, shape, treatment and origin. Every record shows its evidence status.',
+    title: query ? `Search “${query}” | Maihan Gems` : 'Search the Vault | Maihan Gems',
+    description: 'Search the live Maihan Gems catalogue by reference, variety, origin or cut.',
+    alternates: { canonical: `${SITE_URL}/search` },
+    robots: { index: false, follow: true },
   };
 }
 
-const SORT_OPTIONS = [
-  { value: 'relevance', label: 'Relevance' },
-  { value: 'price', label: 'Price' },
-  { value: 'weight', label: 'Carat weight' },
-] as const;
-
-export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const sp = await searchParams;
-  const query = parseSearchParamsToSearchQuery(sp);
-  const service = catalogServer();
-
-  const searchResult = (await service.search(query)).value;
-  const { items, facets, rejected_filters, meta } = searchResult;
-  const activeChips = extractActiveFilterChips(sp);
-  const resultCount = meta.candidate_count ?? items.length;
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const query = q?.trim() || '';
+  const stones = query ? await searchCatalogGemstones(query, 24) : [];
 
   return (
-    <main className="search-page mh-page" id="main-content">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Search' },
-        ]}
-      />
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+      <nav aria-label="Breadcrumb" className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-wider text-[#76726A]">
+        <ol className="flex items-center gap-2">
+          <li><Link href="/" className="hover:text-[#121211]">Home</Link></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" className="font-medium text-[#121211]">Search</li>
+        </ol>
+      </nav>
 
-      <EditorialMasthead
-        eyebrow="The catalogue"
-        title="Search the collection"
-        lead="Search by variety, colour, cut, treatment or origin. Filters are ordinary links: the URL is the state, so every result set can be shared and revisited."
-      />
+      <div className="border-b border-[#E4DFD5] pb-6 space-y-4">
+        <div>
+          <p className="text-xs font-[family-name:var(--font-eb-garamond)] uppercase tracking-[0.2em] text-[#9A7B2C]">THE VAULT LEDGER</p>
+          <h1 className="mt-1 font-[family-name:var(--font-eb-garamond)] text-4xl font-normal text-[#121211]">
+            {query ? `Results for “${query}”` : 'Search the vault'}
+          </h1>
+          <p className="mt-2 text-sm font-[family-name:var(--font-eb-garamond)] text-[#4E4C47]">
+            {query ? `${stones.length} live result${stones.length === 1 ? '' : 's'}` : 'Search by reference, variety, origin or cut.'}
+          </p>
+        </div>
+        <form action="/search" method="GET" role="search" className="flex max-w-xl items-center gap-2 rounded-full border border-[#E4DFD5] bg-white p-1.5 pl-4 focus-within:border-[#D4AF37]">
+          <Search className="h-4 w-4 shrink-0 text-[#9A7B2C]" />
+          <label htmlFor="vault-search-q" className="sr-only">Search the vault</label>
+          <input id="vault-search-q" name="q" defaultValue={query} placeholder="Search reference, variety, origin or shape…" className="min-w-0 flex-1 bg-transparent py-2 text-sm text-[#121211] placeholder:text-[#A39E93] focus:outline-none" />
+          <button type="submit" className="rounded-full px-5 py-2.5 text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.16em] font-semibold gold-gradient-cta">Search</button>
+        </form>
+      </div>
 
-      <form action="/search" method="GET" className="mh-search-form" role="search">
-        <label className="visually-hidden" htmlFor="mh-search-q">
-          Search gemstones and jewellery catalogue
-        </label>
-        <input
-          id="mh-search-q"
-          type="search"
-          name="q"
-          defaultValue={query.query}
-          placeholder="Variety, colour, shape, origin, or reference…"
-          className="mh-search-form__input"
-        />
-        {/* Preserve active filters in form submission if present */}
-        {Array.isArray(query.filters.variety) &&
-          query.filters.variety.map((v) => <input key={v} type="hidden" name="variety" value={v} />)}
-        {Array.isArray(query.filters.color) &&
-          query.filters.color.map((c) => <input key={c} type="hidden" name="color" value={c} />)}
-        {Array.isArray(query.filters.shape) &&
-          query.filters.shape.map((s) => <input key={s} type="hidden" name="shape" value={s} />)}
-        {query.sort !== 'relevance' && <input type="hidden" name="sort" value={query.sort} />}
-        <button type="submit" className="mh-cta mh-search-form__submit">
-          Search
-        </button>
-      </form>
-
-      {activeChips.length > 0 && (
-        <div className="mh-chips" aria-label="Active filters">
-          <span className="mh-chips__label">Active filters</span>
-          {activeChips.map((chip) => (
-            <Link
-              key={`${chip.key}-${chip.value}`}
-              href={chip.removeHref}
-              className="mh-chip"
-              title={`Remove ${chip.label}`}
-            >
-              <span>{chip.label}</span>
-              <span aria-hidden="true">×</span>
-            </Link>
-          ))}
-          <Link href="/search" className="mh-chips__clear">
-            Clear all
-          </Link>
+      {!query ? (
+        <div className="rounded-sm border border-[#E4DFD5] bg-white p-10 text-center space-y-4">
+          <Search className="mx-auto h-6 w-6 text-[#9A7B2C]" />
+          <p className="text-sm text-[#4E4C47]">Start with a stone, a colour, an origin or a cut — or ask the concierge in plain language.</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href="/browse" className="rounded-sm px-4 py-2.5 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider font-semibold gold-gradient-cta">Browse the vault</Link>
+            <Link href="/concierge" className="rounded-sm border border-[#E4DFD5] px-4 py-2.5 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#4E4C47] hover:border-[#D4AF37]/60">Ask the concierge</Link>
+          </div>
+        </div>
+      ) : stones.length === 0 ? (
+        <div className="rounded-sm border border-[#E4DFD5] bg-white p-10 text-center space-y-3">
+          <p className="text-sm text-[#4E4C47]">No stones in the vault match “{query}”.</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href={`/concierge?q=${encodeURIComponent(query)}`} className="rounded-sm px-4 py-2.5 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider font-semibold gold-gradient-cta">Ask the concierge</Link>
+            <Link href="/browse" className="rounded-sm border border-[#E4DFD5] px-4 py-2.5 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#4E4C47] hover:border-[#D4AF37]/60">Browse all stones</Link>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
+          {stones.map((stone) => <ProductCard key={stone.id} stone={stone} />)}
         </div>
       )}
 
-      <div className="mh-search__layout">
-        <SearchFilterPanel facets={facets} searchParams={sp} />
-
-        <section className="mh-search__results" aria-label="Search results">
-          <div className="mh-search__meta">
-            <p className="mh-search__count">
-              <span className="tabular">{resultCount}</span>{' '}
-              {resultCount === 1 ? 'item' : 'items'}
-              {query.query.length > 0 && (
-                <>
-                  {' '}for <em>“{query.query}”</em>
-                </>
-              )}
-            </p>
-
-            <nav className="mh-sort" aria-label="Sort results">
-              <span className="mh-sort__label">Sort</span>
-              {SORT_OPTIONS.map((option) => (
-                <Link
-                  key={option.value}
-                  href={buildSearchHref(sp, 'sort', option.value)}
-                  className="mh-sort__link"
-                  aria-current={query.sort === option.value ? 'true' : undefined}
-                >
-                  {option.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {meta.degraded && (
-            <div className="mh-notice" role="status">
-              <strong>Search notice.</strong> Semantic ranking is unavailable right now, so results
-              are ordered by text match and the filters you selected. Nothing has been hidden.
-            </div>
-          )}
-
-          {rejected_filters.length > 0 && (
-            <div className="mh-notice mh-notice--muted" role="status">
-              <strong>Filter notice.</strong> These values were not recognised and were ignored:{' '}
-              {rejected_filters.map((rf) => `${rf.filter}: “${rf.value}”`).join(', ')}.
-            </div>
-          )}
-
-          {items.length === 0 ? (
-            <EmptyState
-              title={
-                query.query.length > 0
-                  ? `No items found matching "${query.query}"`
-                  : 'No items currently match the selected filters.'
-              }
-              action={
-                <Link href="/search" className="mh-cta">
-                  Clear all filters
-                </Link>
-              }
-            >
-              Try a broader term, remove a facet, or browse the variety directory.
-            </EmptyState>
-          ) : (
-            <>
-              <ul className="product-grid">
-                {items.map((product) => (
-                  <li key={product.slug}>
-                    <ProductCard product={product} />
-                  </li>
-                ))}
-              </ul>
-
-              <Pagination
-                basePath={searchPaginationBasePath(sp)}
-                previousCursor={null}
-                nextCursor={meta.next_cursor}
-                hasNext={meta.has_more}
-              />
-            </>
-          )}
-        </section>
+      <div className="flex flex-wrap items-center justify-center gap-4 border-t border-[#E4DFD5] pt-5 text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#76726A]">
+        <Link href="/browse" className="hover:text-[#9A7B2C]">Browse the vault</Link>
+        <Link href="/concierge" className="hover:text-[#9A7B2C]">Ask the concierge</Link>
+        <Link href="/design-your-own" className="hover:text-[#9A7B2C]">Design your own</Link>
       </div>
-    </main>
+    </div>
   );
 }

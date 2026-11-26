@@ -1,0 +1,446 @@
+/*
+ * Per-route composition for the Daylight Salon.
+ * Loaded after maison.css on the storefront only.
+ */
+
+body .ngc-pages .lx-catalog {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+body .ngc-pages .lx-toolbar {
+  position: sticky;
+  top: 0.6rem;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  padding: 0.7rem 0.9rem;
+  background: rgba(253, 251, 245, 0.94);
+  border: 1px solid rgba(29, 23, 16, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+body .ngc-pages .lx-toolbar__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+body .ngc-pages .lx-toolbar select {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(29, 23, 16, 0.25);
+  font: inherit;
+  color: inherit;
+  padding: 0.2rem 0.2rem 0.25rem;
+}
+
+body .ngc-pages .lx-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+body .ngc-pages .lx-chips button {
+  border: 1px solid rgba(212, 164, 55, 0.45);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+}
+
+body .ngc-pages .lx-filters {
+  position: fixed;
+  z-index: 40;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: min(24rem, 100vw);
+  overflow: auto;
+  margin: 0;
+  padding: 1.25rem 1.2rem 5.5rem;
+  background: #f6f2e9;
+  border-right: 1px solid rgba(212, 164, 55, 0.35);
+  transform: translateX(-105%);
+  transition: transform 0.28s ease;
+}
+
+body .ngc-pages .lx-filters.is-open,
+body .ngc-pages .lx-filters--sheet {
+  position: static;
+  transform: none;
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+body .ngc-pages .lx-filters__foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.9rem 0 0.2rem;
+  background: linear-gradient(to top, #f6f2e9 70%, transparent);
+}
+
+body .ngc-pages .lx-filters-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  border: 0;
+  background: rgba(22, 17, 12, 0.42);
+  cursor: pointer;
+}
+
+body .ngc-pages .lx-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 1.75rem 0 0.5rem;
+}
+
+body .ngc-pages .lx-pager button {
+  min-width: 2.2rem;
+  border: 1px solid rgba(29, 23, 16, 0.12);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
+}
+
+body .ngc-pages .lx-pager button[aria-current='page'] {
+  background: #16110c;
+  color: #f6f2e9;
+  border-color: #16110c;
+}
+
+body .ngc-pages .ngc-pdp__grid {
+  align-items: start;
+  gap: 2rem;
+}
+
+body .ngc-pages .ngc-pdp__buy {
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
+  position: sticky;
+  top: 1rem;
+}
+
+body .ngc-pages .salon-read {
+  position: relative;
+}
+
+body .ngc-pages .salon-read:not(.is-open) .salon-read__body {
+  max-height: 9.5rem;
+  overflow: hidden;
+}
+
+body .ngc-pages .salon-read:not(.is-open) .salon-read__body::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1.8rem;
+  height: 3.2rem;
+  background: linear-gradient(to bottom, transparent, #f6f2e9);
+  pointer-events: none;
+}
+
+body .ngc-pages .ngc-certificate__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+
+body .ngc-pages .ngc-certificate figure {
+  margin: 0;
+  background: #fdfbf5;
+  border: 1px solid rgba(29, 23, 16, 0.08);
+}
+
+body .ngc-pages .ngc-certificate img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+body .ngc-pages .atelier__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(16rem, 0.9fr);
+  gap: 1.5rem;
+  align-items: end;
+  margin-bottom: 1.25rem;
+}
+
+body .ngc-pages .atelier__guide {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  background: #fdfbf5;
+  border-left: 2px solid #d4a437;
+}
+
+body .ngc-pages .atelier__advance {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+body .ngc-pages .lx-bag {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.7fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+body .ngc-pages .lx-bag__line {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(29, 23, 16, 0.08);
+}
+
+body .ngc-pages .lx-bag__qty {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.55rem;
+}
+
+body .ngc-pages .lx-summary {
+  position: sticky;
+  top: 1rem;
+  padding: 1.2rem 1.15rem 1.3rem;
+  background: #16110c;
+  color: #f6f2e9;
+}
+
+body .ngc-pages .lx-summary .lx-kicker,
+body .ngc-pages .lx-summary .lx-h2,
+body .ngc-pages .lx-summary dt,
+body .ngc-pages .lx-summary dd,
+body .ngc-pages .lx-summary .lx-summary__note {
+  color: inherit;
+}
+
+body .ngc-pages .lx-summary .lx-btn--ghost {
+  color: #f6f2e9;
+  border-color: rgba(246, 242, 233, 0.35);
+}
+
+body .ngc-pages .checkout-salon {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(15rem, 0.7fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+body .ngc-pages .checkout-trust {
+  position: sticky;
+  top: 1rem;
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.1rem 1rem 1.2rem;
+  background: #fdfbf5;
+  border-top: 2px solid #d4a437;
+}
+
+body .ngc-pages .checkout-trust ol {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+body .ngc-pages .salon-account {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: 2rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+body .ngc-pages .salon-account__rail .lx-account-nav {
+  display: grid;
+  gap: 0.25rem;
+}
+
+body .ngc-pages .salon-essay {
+  display: grid;
+  gap: 0;
+  max-width: 42rem;
+  margin-top: 1.5rem;
+}
+
+body .ngc-pages .salon-essay .lx-account-card {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid rgba(29, 23, 16, 0.1);
+  border-radius: 0;
+  padding: 1.1rem 0;
+}
+
+body .ngc-pages .mgh-pack__stage {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 0.7rem;
+  margin-top: 1.4rem;
+}
+
+body .ngc-pages .mgh-pack__rest {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+body .ngc-pages .mgh-pack__item {
+  margin: 0;
+  overflow: hidden;
+  background: #efe9dc;
+}
+
+body .ngc-pages .mgh-pack__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 1;
+}
+
+body .ngc-pages .mgh-pack__item--lead img {
+  aspect-ratio: 4 / 5;
+  min-height: 100%;
+}
+
+body .ngc-pages .mgh-history__timeline {
+  display: grid;
+  grid-template-columns: 1.35fr 0.8fr 0.8fr;
+  gap: 0.8rem;
+  list-style: none;
+  margin: 1.4rem 0 0;
+  padding: 0;
+}
+
+body .ngc-pages .mgh-history__card {
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+  height: 100%;
+  background: #fdfbf5;
+}
+
+body .ngc-pages .mgh-history__card img {
+  width: 100%;
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+}
+
+body .ngc-pages .mgh-history__timeline li:first-child .mgh-history__card img {
+  aspect-ratio: 4 / 5;
+}
+
+body .ngc-pages .mgh-peace__grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 0;
+  border-top: 1px solid rgba(246, 242, 233, 0.2);
+}
+
+body .ngc-pages .mgh-peace__card {
+  padding: 1.2rem 1rem 0.2rem 0;
+  border-right: 1px solid rgba(246, 242, 233, 0.16);
+}
+
+body .ngc-pages .mgh-peace__card:first-child {
+  padding-right: 1.4rem;
+}
+
+body .ngc-pages .mgh-charity__row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 1.2rem;
+  list-style: none;
+  margin: 1.2rem 0 0;
+  padding: 0;
+}
+
+body .ngc-pages .mgh-charity__row li:first-child {
+  border-top: 2px solid #d4a437;
+  padding-top: 0.8rem;
+}
+
+body .ngc-pages .mgh-feedback__layout {
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+body .ngc-pages .mgh-quote--feature {
+  margin: 0;
+  padding: 0.2rem 0 0;
+}
+
+body .ngc-pages .mgh-quote--feature p {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(1.6rem, 2.4vw, 2.3rem);
+  line-height: 1.2;
+}
+
+@media (max-width: 900px) {
+  body .ngc-pages .atelier__head,
+  body .ngc-pages .lx-bag,
+  body .ngc-pages .checkout-salon,
+  body .ngc-pages .salon-account,
+  body .ngc-pages .mgh-pack__stage,
+  body .ngc-pages .mgh-history__timeline,
+  body .ngc-pages .mgh-peace__grid,
+  body .ngc-pages .mgh-charity__row,
+  body .ngc-pages .mgh-feedback__layout {
+    grid-template-columns: 1fr;
+  }
+
+  body .ngc-pages .ngc-pdp__buy,
+  body .ngc-pages .lx-summary,
+  body .ngc-pages .checkout-trust {
+    position: static;
+  }
+
+  body .ngc-pages .lx-bag__line {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+  }
+
+  body .ngc-pages .lx-bag__price {
+    grid-column: 2;
+  }
+}
+
+@media (min-width: 700px) and (max-width: 1100px) {
+  body .ngc-pages .mgh-peace__grid,
+  body .ngc-pages .mgh-history__timeline {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .ngc-pages .lx-filters {
+    transition: none;
+  }
+}

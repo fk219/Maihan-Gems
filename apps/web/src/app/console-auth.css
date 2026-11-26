@@ -1,0 +1,196 @@
+/**
+ * app/console-auth.css
+ *
+ * The sign-in frames main already shipped (console-auth for /admin/login,
+ * auth-shell for the customer account surfaces). Extracted verbatim from
+ * lib/storefront-v2-styles.ts when the root layout adopted develop-s
+ * stylesheet: develop-s globals.css owns the storefront, and these two
+ * non-storefront frames must keep their existing look without dragging the
+ * whole .sf-v2 layer into every page.
+ *
+ * Selector bodies are unchanged; only the block order is preserved.
+ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   13. Auth (storefront + console sign-in)
+   ───────────────────────────────────────────────────────────────────────────── */
+.sf-v2 .auth-shell,
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(32px, 6vw, 72px) 20px;
+  background: #0b1117;
+  color: #f6f3ec;
+}
+
+.auth-shell { color-scheme: dark; }
+
+.auth-shell__frame {
+  width: 100%;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  background: #f6f3ec;
+  color: #0b1117;
+}
+
+.auth-shell__aside {
+  padding: clamp(28px, 4vw, 48px);
+  background:
+    radial-gradient(120% 80% at 70% 10%, rgba(232, 201, 106, 0.14), transparent 60%),
+    #0b1117;
+  color: #f6f3ec;
+  display: grid;
+  align-content: space-between;
+  gap: 40px;
+  border-right: 1px solid rgba(201, 168, 76, 0.35);
+}
+
+.auth-shell__brand {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 22px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  line-height: 1;
+  margin: 0;
+}
+
+.auth-shell__aside-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.8;
+  color: rgba(246, 243, 236, 0.62);
+  max-width: 30ch;
+}
+
+.auth-shell__panel { padding: clamp(28px, 4vw, 48px); display: grid; gap: 8px; align-content: start; }
+
+.auth-shell__eyebrow {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #7a5a10;
+}
+
+.auth-shell__title {
+  margin: 6px 0 6px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(34px, 4vw, 44px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+
+.auth-shell__subtitle { margin: 0 0 22px; font-size: 13px; line-height: 1.7; color: #5f5a50; }
+
+.auth-shell__footer { margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(11, 17, 23, 0.12); font-size: 12px; color: #5f5a50; }
+
+.auth-shell__footer a { color: #6e4f0e; text-underline-offset: 3px; }
+
+.auth-shell input {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 13px;
+  background: #fff;
+  border: 1px solid rgba(11, 17, 23, 0.18);
+  border-radius: 0;
+  color: #0b1117;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+}
+
+.auth-shell input:focus { outline: 2px solid #0b1117; outline-offset: 1px; }
+
+.auth-shell label { font-size: 9.5px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #474339; }
+
+.auth-shell button[type='submit'] {
+  min-height: 48px;
+  width: 100%;
+  border: 1px solid #0b1117;
+  background: #0b1117;
+  color: #f6f3ec;
+  border-radius: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.auth-shell button[type='submit']:hover { background: #000; }
+
+.auth-shell button[type='submit']:disabled { opacity: 0.55; cursor: progress; }
+
+/* The console sign-in is not inside .sf-v2; it borrows the same frame. */
+.console-auth {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(28px, 5vw, 64px) 20px;
+  background:
+    radial-gradient(100% 70% at 70% 0%, rgba(201, 168, 76, 0.12), transparent 60%),
+    #0b1117;
+  color: #f6f3ec;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.console-auth__card {
+  width: 100%;
+  max-width: 440px;
+  background: #f6f3ec;
+  color: #0b1117;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  padding: clamp(28px, 5vw, 44px);
+}
+
+.console-auth__brand { margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 19px; letter-spacing: 0.26em; text-transform: uppercase; }
+
+.console-auth__title { margin: 10px 0 6px; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 36px; font-weight: 400; line-height: 1; }
+
+.console-auth__note { margin: 0 0 24px; font-size: 12.5px; line-height: 1.7; color: #5f5a50; }
+
+.console-auth__link { display: inline-flex; align-items: center; min-height: 44px; font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6e4f0e; text-decoration: none; }
+
+.console-auth input {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 13px;
+  background: #fff;
+  border: 1px solid rgba(11, 17, 23, 0.18);
+  border-radius: 0;
+  color: #0b1117;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.console-auth label { font-size: 9.5px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #474339; }
+
+.console-auth__form { display: grid; gap: 14px; max-width: 380px; }
+
+.console-auth__form label { display: grid; gap: 6px; }
+
+.console-auth button[type='submit'] {
+  min-height: 48px;
+  width: 100%;
+  border: 1px solid #0b1117;
+  background: #0b1117;
+  color: #f6f3ec;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+@media (max-width: 1023px) {
+.auth-shell__frame { grid-template-columns: 1fr; }
+.auth-shell__aside { display: none; }
+}

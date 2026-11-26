@@ -10,19 +10,58 @@
  */
 import { organizationJsonLdPayload } from '../lib/jsonld.js';
 import { JsonLd } from '../components/seo/JsonLd.js';
-import { AgentationOverlay } from '../components/development/AgentationOverlay.js';
+import './globals.css';
+import './console-auth.css';
+import '../styles/maison.css';
 import { MAIHAN_THEME_CSS } from '../lib/theme-styles.js';
-import { LIGHT_TOKENS_CSS } from '../lib/light-tokens.js';
-import { STOREFRONT_V2_CSS } from '../lib/storefront-v2-styles.js';
+import { Geist, EB_Garamond, Plus_Jakarta_Sans, Urbanist } from "next/font/google";
+import { cn } from "@/lib/utils";
+import { StorefrontProvider as AppletStorefrontProvider } from '../components/mgh/providers/StorefrontProvider.js';
+
+/**
+ * Default document title. develop's pages provide their own; the surfaces that
+ * do not (the 404 shell, /demo, /card-preview) would otherwise ship a missing
+ * <title>, which axe reports as a serious violation.
+ */
+export const metadata = {
+  title: 'Maihan Gems — Natural Gemstones & Fine Jewelry',
+};
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+
+// Applet (mgh namespace) fonts — variables referenced by src/styles/mgh-applet.css.
+// EB Garamond's available weights are 400–800 (300 is not offered by Google Fonts),
+// so the applet's proven weight list is kept instead of a 300–700 range.
+const ebGaramondApplet = EB_Garamond({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  style: ['normal', 'italic'],
+  variable: '--font-display-applet',
+  display: 'swap',
+});
+
+const jakartaSansApplet = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-sans-applet',
+  display: 'swap',
+});
+
+const urbanistPortal = Urbanist({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-urbanist',
+  display: 'swap',
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={cn("font-sans", geist.variable, ebGaramondApplet.variable, jakartaSansApplet.variable, urbanistPortal.variable)}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Jost:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
         <script
@@ -32,10 +71,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         <style id="maihan-theme" dangerouslySetInnerHTML={{ __html: MAIHAN_THEME_CSS }} />
-        <style id="maihan-light-tokens" dangerouslySetInnerHTML={{ __html: LIGHT_TOKENS_CSS }} />
-        <style id="maihan-storefront-v2" dangerouslySetInnerHTML={{ __html: STOREFRONT_V2_CSS }} />
       </head>
-      <body>
+      {/* Applet-exact body: background #F8F7F4, ink #141413, EB Garamond as the
+          display face, gold selection. The applet's skip link and provider
+          mount are reproduced verbatim (the applet mounted its provider at the
+          ROOT, so admin/vendor inherit the same cart/currency context). */}
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-[#F8F7F4] text-[#141413] antialiased font-[family-name:var(--font-eb-garamond)] selection:bg-[#D4AF37] selection:text-black"
+      >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-[#141413] focus:text-[#F8F7F4] focus:px-4 focus:py-2.5 focus:text-sm focus:font-medium focus:rounded"
+        >
+          Skip to main content
+        </a>
+        <AppletStorefrontProvider>
         {/* Task 8: the site-wide Organization entity, emitted only when the
             canonical base (SITE_URL) is configured. Statically prerendered
             pages build without it; the honest fallback omits the entity rather
@@ -43,7 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             the base (sitemap, product canonicals) still fail loudly. */}
         {organizationJsonLdPayload() !== null && <JsonLd payload={organizationJsonLdPayload() as string} />}
         {children}
-        <AgentationOverlay />
+        </AppletStorefrontProvider>
       </body>
     </html>
   );

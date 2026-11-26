@@ -92,8 +92,20 @@ describe('EMPTY — listings integrate the shared EmptyState with a next action'
     expect(html).toContain('href="/"');
   });
 
-  it.each(LISTING_ROUTES.slice(0, 4))('%s/page.tsx uses EmptyState for zero results', (route) => {
+  it.each(['[varietySlug]-pairs', '[varietySlug]-rings'])('%s/page.tsx uses EmptyState for zero results', (route) => {
     expect(read(`${SF}/${route}/page.tsx`)).toContain('EmptyState');
+  });
+
+  // develop's browsable listings own their empty state inside the client
+  // explorer (the design renders a filter-aware message with a real reset
+  // action), so the page delegates instead of mounting the shared view.
+  it('develop-parity listings delegate the empty state to CollectionExplorer', () => {
+    for (const route of ['[varietySlug]', 'colour/[colourSlug]']) {
+      expect(read(`${SF}/${route}/page.tsx`)).toContain('CollectionExplorer');
+    }
+    expect(read('src/components/mgh/catalog/CollectionExplorer.tsx')).toContain(
+      'No vault specimens match',
+    );
   });
 });
 

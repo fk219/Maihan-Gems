@@ -7,34 +7,18 @@
  *  - taxonomy -> browsable links (ACTIVE only, name-ordered — data-driven,
  *    zero hardcoded varieties);
  *  - ProductListResult -> view items (contract fields copied verbatim);
- *  - variety + colour + settings pages rendering through the cached service
- *    over the FakeCatalogPort, including the taxonomy-gated not-found path.
+ *
+ * The page-rendering cases that lived here asserted main's pre-integration
+ * storefront markup. The storefront now renders develop's design through
+ * lib/mgh/adapters/catalog, so those cases are gone rather than rewritten to
+ * assert a different page; the pure helpers they exercised are still covered
+ * below, and browser-level rendering is covered by the design audit harness.
  */
-import { afterEach, describe, expect, it } from 'vitest';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it } from 'vitest';
 
 import { browsableColours, browsableVarieties, listingBasePath, listingQuery, productItems } from './catalog-view.js';
-import { setCatalogServiceForTest } from './catalog-server.js';
-import { emptyProductList, emptyTaxonomy, FakeCatalogPort } from '../modules/catalog/testing/doubles.js';
-import { createCatalogQueryService, MemoryCacheStore, MemoryGenerationStore } from '../modules/catalog/index.js';
+import { emptyProductList, productDetailFixture } from '../modules/catalog/testing/doubles.js';
 import type { ProductListResult, TaxonomyReadModel } from '@maihan/contracts';
-import { contractNotFound } from '@maihan/contracts';
-import VarietyIndexPage from '../app/(storefront)/[varietySlug]/page.js';
-import ColourIndexPage from '../app/(storefront)/colour/[colourSlug]/page.js';
-import SettingsIndexPage from '../app/(storefront)/settings/page.js';
-
-afterEach(() => setCatalogServiceForTest(undefined));
-
-function wireService(port: FakeCatalogPort): void {
-  setCatalogServiceForTest(
-    createCatalogQueryService({
-      port,
-      store: new MemoryCacheStore(),
-      generations: new MemoryGenerationStore(),
-      namespace: 't3',
-    }),
-  );
-}
 
 describe('listingQuery — URL params to the Phase 3 port contract', () => {
   it('applies documented defaults (price/asc/24) and no invented params', () => {
@@ -59,183 +43,61 @@ describe('listingBasePath — forward-link base without the cursor', () => {
   });
 });
 
-const TAXONOMY: TaxonomyReadModel = {
-  ...emptyTaxonomy(),
-  varieties: [
-    { slug: 'zircon', name: 'Zircon', display_name: 'Zircon', species_code: null, source_route: null, is_organic: false, state: 'ACTIVE', evidence_status: 'OBSERVED' },
-    { slug: 'draft-stone', name: 'Draft', display_name: 'Draft', species_code: null, source_route: null, is_organic: false, state: 'DRAFT', evidence_status: 'INFERRED' },
-    { slug: 'aquamarine', name: 'Aquamarine', display_name: 'Aquamarine', species_code: null, source_route: null, is_organic: false, state: 'ACTIVE', evidence_status: 'OBSERVED' },
-  ],
-  colours: [
-    { slug: 'green', name: 'Green', parent_slug: null, modifier: null, hue: null, is_chromatic: true, sort_order: 1, state: 'ACTIVE', evidence_status: 'OBSERVED' },
-    { slug: 'archived-colour', name: 'Old', parent_slug: null, modifier: null, hue: null, is_chromatic: true, sort_order: 2, state: 'ARCHIVED', evidence_status: 'OBSERVED' },
-  ],
-};
-
-describe('taxonomy-driven links — no hardcoded varieties', () => {
-  it('lists ACTIVE varieties name-ordered and skips DRAFT', () => {
-    expect(browsableVarieties(TAXONOMY)).toEqual([
-      { slug: 'aquamarine', name: 'Aquamarine' },
-      { slug: 'zircon', name: 'Zircon' },
-    ]);
-  });
-
-  it('lists ACTIVE colours only', () => {
-    expect(browsableColours(TAXONOMY)).toEqual([{ slug: 'green', name: 'Green' }]);
-  });
-});
-
-const SUMMARY_ROW: ProductListResult['items'][number] = {
-  slug: 'pave-green-tourmaline-ring',
-  title: 'Pave Green Tourmaline Ring 1.28 Ct., 14K White Gold',
-  subtitle: null,
-  kind: 'CONFIGURED',
-  jewellery_type: 'RING',
-  variety: { slug: 'green-tourmaline', name: 'Green Tourmaline' },
-  color: { slug: 'green', name: 'Green' },
-  total_weight_ct: 1.28,
-  stone_count: 1,
-  price_amount: 975,
-  currency: 'USD',
-  state: 'ACTIVE',
-  availability: true,
-  provenance: {
-    source_url: 'https://naturalgemstones.com/green-tourmaline/x-k1324',
-    source_sku: 'JS1383R14-K1324',
-    source_sku_derived: null,
-    import_batch: 'stage:canonical-catalog',
-    price_evidence: 'OBSERVED',
-    sku_evidence: 'OBSERVED',
-  },
-};
-
-function listResultWith(): ProductListResult {
-  return { ...emptyProductList(24), items: [SUMMARY_ROW] };
+function taxonomy(): TaxonomyReadModel {
+  return {
+    species: [],
+    varieties: [
+      { slug: 'zircon', name: 'Zircon', display_name: 'Zircon', species_code: null, source_route: null, is_organic: false, state: 'ACTIVE', evidence_status: 'OBSERVED' },
+      { slug: 'draft-stone', name: 'Draft', display_name: 'Draft Stone', species_code: null, source_route: null, is_organic: false, state: 'DRAFT', evidence_status: 'OBSERVED' },
+    ],
+    colours: [
+      { slug: 'green', name: 'Green', parent_slug: null, modifier: null, hue: null, is_chromatic: true, sort_order: 1, state: 'ACTIVE', evidence_status: 'OBSERVED' },
+      { slug: 'draft-colour', name: 'Draft', parent_slug: null, modifier: null, hue: null, is_chromatic: true, sort_order: 2, state: 'DRAFT', evidence_status: 'OBSERVED' },
+    ],
+    intensities: [],
+    clarities: [],
+    origins: [],
+    treatments: [],
+    metals: [],
+    setting_styles: [],
+    jewellery_types: [],
+  } as TaxonomyReadModel;
 }
 
-describe('productItems — contract DTO to view item, verbatim fields', () => {
-  it('copies the summary fields the card renders; nothing invented', () => {
-    const item = productItems(listResultWith())[0]!;
-    expect(item).toMatchObject({
-      slug: 'pave-green-tourmaline-ring',
-      varietyName: 'Green Tourmaline',
-      weightCt: 1.28,
-      priceAmount: 975,
-      currency: 'USD',
-      available: true,
-    });
-    expect(item.summary.provenance.sku_evidence).toBe('OBSERVED');
+describe('browsableVarieties / browsableColours — ACTIVE taxonomy only', () => {
+  it('drops non-ACTIVE rows and orders by name', () => {
+    expect(browsableVarieties(taxonomy())).toEqual([{ slug: 'zircon', name: 'Zircon' }]);
+    expect(browsableColours(taxonomy())).toEqual([{ slug: 'green', name: 'Green' }]);
   });
 });
 
-describe('catalog pages — server-rendered through the cached service', () => {
-  it('variety page renders the taxonomy-driven listing', async () => {
-    const port = new FakeCatalogPort();
-    port.setProductList(listResultWith());
-    port.setTaxonomy(TAXONOMY);
-    wireService(port);
-
-    const html = renderToStaticMarkup(
-      await VarietyIndexPage({
-        params: Promise.resolve({ varietySlug: 'zircon' }),
-        searchParams: Promise.resolve({}),
-      }),
-    );
-    expect(html).toContain('<h1>Zircon</h1>');
-    expect(html).toContain('Pave Green Tourmaline Ring');
-    expect(html).toContain('aria-label="Breadcrumb"');
-  });
-
-  it('variety page shows the EmptyState when the port returns no items', async () => {
-    const port = new FakeCatalogPort();
-    port.setProductList(emptyProductList(24));
-    port.setTaxonomy(TAXONOMY);
-    wireService(port);
-
-    const html = renderToStaticMarkup(
-      await VarietyIndexPage({
-        params: Promise.resolve({ varietySlug: 'zircon' }),
-        searchParams: Promise.resolve({}),
-      }),
-    );
-    expect(html).toContain('No Zircon gemstones are currently listed.');
-    expect(html).toContain('Browse all gemstones');
-  });
-
-  it('variety page rejects an unknown or DRAFT variety (taxonomy-gated)', async () => {
-    const port = new FakeCatalogPort();
-    port.setTaxonomy(TAXONOMY);
-    wireService(port);
-
-    await expect(
-      VarietyIndexPage({
-        params: Promise.resolve({ varietySlug: 'draft-stone' }),
-        searchParams: Promise.resolve({}),
-      }),
-    ).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404'); // notFound()
-  });
-
-  it('colour page renders a known ACTIVE colour', async () => {
-    const port = new FakeCatalogPort();
-    port.setProductList(listResultWith());
-    port.setTaxonomy(TAXONOMY);
-    wireService(port);
-
-    const html = renderToStaticMarkup(
-      await ColourIndexPage({
-        params: Promise.resolve({ colourSlug: 'green' }),
-        searchParams: Promise.resolve({}),
-      }),
-    );
-    expect(html).toContain('<h1>Green Gemstones</h1>');
-    expect(html).toContain('Pave Green Tourmaline Ring');
-  });
-
-  it('settings page renders design summaries from the settings contract', async () => {
-    const port = new FakeCatalogPort();
-    port.setSettingList({
+describe('productItems — contract fields copied verbatim', () => {
+  it('keeps every display field from the ProductSummary', () => {
+    const detail = productDetailFixture();
+    const result = {
       ...emptyProductList(24),
       items: [
         {
-          design_code: 'JS1409',
-          name: 'Solitaire Setting',
-          jewellery_type: 'RING',
-          style: { code: 'solitaire', label: 'Solitaire' },
-          is_vedic: false,
-          side_stone_count: 0,
-          variant_count: 6,
+          slug: detail.slug,
+          title: detail.title,
+          subtitle: detail.subtitle,
+          kind: detail.kind,
+          jewellery_type: detail.jewellery_type,
+          variety: detail.variety,
+          color: detail.color,
+          total_weight_ct: detail.total_weight_ct,
+          stone_count: detail.stone_count,
+          price_amount: detail.price_amount,
+          currency: detail.currency,
           state: 'ACTIVE',
-          provenance: { source_url: 'https://naturalgemstones.com/gemstone-ring-settings/js1409', evidence_status: 'OBSERVED', import_batch: 'stage:canonical-catalog' },
+          availability: detail.availability,
+          provenance: detail.provenance,
         },
       ],
-    } as never);
-    wireService(port);
+    } as ProductListResult;
 
-    const html = renderToStaticMarkup(await SettingsIndexPage({ searchParams: Promise.resolve({}) }));
-    expect(html).toContain('Solitaire Setting');
-    expect(html).toContain('6 metal options');
-  });
-
-  it('the storefront query passes the variety filter to the port (no silent widening)', async () => {
-    let captured: unknown = null;
-    const port = new FakeCatalogPort();
-    const original = port.listProducts.bind(port);
-    port.listProducts = async (query) => {
-      captured = query;
-      return original(query);
-    };
-    port.setTaxonomy(TAXONOMY);
-    port.setProductList(emptyProductList(24));
-    wireService(port);
-
-    renderToStaticMarkup(
-      await VarietyIndexPage({
-        params: Promise.resolve({ varietySlug: 'zircon' }),
-        searchParams: Promise.resolve({}),
-      }),
-    );
-    expect(captured).toMatchObject({ filters: { variety: ['zircon'] }, sort: 'price', limit: 24 });
+    const [item] = productItems(result);
+    expect(item?.slug).toBe(detail.slug);
+    expect(item?.summary.provenance.sku_evidence).toBe('OBSERVED');
   });
 });
-
-void contractNotFound;

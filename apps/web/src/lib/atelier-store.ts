@@ -1,0 +1,124 @@
+'use client';
+
+import type { AtelierItem } from './atelier-item.js';
+
+export type { AtelierItem } from './atelier-item.js';
+
+const KEYS = {
+  bag: 'maihan_bag',
+  favs: 'maihan_favs',
+  compare: 'maihan_compare',
+  currency: 'maihan_currency',
+} as const;
+
+function read<T>(key: string, fallback: T): T {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function write<T>(key: string, value: T): void {
+  window.localStorage.setItem(key, JSON.stringify(value));
+  window.dispatchEvent(new Event('maihan-atelier'));
+}
+
+export function getBag(): AtelierItem[] {
+  return read<AtelierItem[]>(KEYS.bag, []);
+}
+
+export function getFavs(): AtelierItem[] {
+  return read<AtelierItem[]>(KEYS.favs, []);
+}
+
+export function getCompare(): AtelierItem[] {
+  return read<AtelierItem[]>(KEYS.compare, []);
+}
+
+export function toggleFav(item: AtelierItem): boolean {
+  const favs = getFavs();
+  const exists = favs.some((f) => f.id === item.id);
+  write(KEYS.favs, exists ? favs.filter((f) => f.id !== item.id) : [...favs, item]);
+  return !exists;
+}
+
+export function isFav(id: string): boolean {
+  return getFavs().some((f) => f.id === id);
+}
+
+export function addToBag(item: AtelierItem, qty = 1): void {
+  const bag = getBag();
+  const safeQty = Math.max(1, Math.min(99, Math.floor(qty || 1)));
+  const existing = bag.find((b) => b.id === item.id);
+  if (existing) {
+    const nextQty = Math.min(99, (existing.quantity ?? 1) + safeQty);
+    write(
+      KEYS.bag,
+      bag.map((b) => (b.id === item.id ? { ...b, quantity: nextQty } : b)),
+    );
+  } else {
+    write(KEYS.bag, [...bag, { ...item, quantity: safeQty }]);
+  }
+}
+
+export function updateBagQuantity(id: string, quantity: number): void {
+  const safeQty = Math.floor(Number(quantity));
+  if (!Number.isFinite(safeQty) || safeQty <= 0) {
+    removeFromBag(id);
+    return;
+  }
+  const capped = Math.min(99, safeQty);
+  write(
+    KEYS.bag,
+    getBag().map((b) => (b.id === id ? { ...b, quantity: capped } : b)),
+  );
+}
+
+export function removeFromBag(id: string): void {
+  write(KEYS.bag, getBag().filter((b) => b.id !== id));
+}
+
+export function clearBag(): void {
+  write(KEYS.bag, []);
+}
+
+export function toggleCompare(item: AtelierItem): boolean {
+  const list = getCompare();
+  const exists = list.some((c) => c.id === item.id);
+  const next = exists ? list.filter((c) => c.id !== item.id) : [...list, item].slice(-4);
+  write(KEYS.compare, next);
+  return !exists;
+}
+
+export function isCompared(id: string): boolean {
+  return getCompare().some((c) => c.id === id);
+}
+
+export function removeFromCompare(id: string): void {
+  write(KEYS.compare, getCompare().filter((c) => c.id !== id));
+}
+
+export function removeFav(id: string): void {
+  write(KEYS.favs, getFavs().filter((f) => f.id !== id));
+}
+
+export function seedListIfEmpty(key: 'bag' | 'favs' | 'compare', items: AtelierItem[]): AtelierItem[] {
+  const storageKey = KEYS[key];
+  const current = read<AtelierItem[]>(storageKey, []);
+  if (current.length > 0) return current;
+  write(storageKey, items);
+  return items;
+}
+
+export function subscribeAtelier(listener: () => void): () => void {
+  const on = () => listener();
+  window.addEventListener('maihan-atelier', on);
+  window.addEventListener('storage', on);
+  return () => {
+    window.removeEventListener('maihan-atelier', on);
+    window.removeEventListener('storage', on);
+  };
+}

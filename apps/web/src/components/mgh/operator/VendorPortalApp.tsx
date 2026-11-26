@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { MediaImage } from '../ui/MediaImage.js';
+import { MediaImage } from '@/components/mgh/ui/MediaImage';
 import type { LucideIcon } from 'lucide-react';
 import {
   AlertCircle, ArrowUpRight, Bell, CheckCircle2, ChevronDown, ChevronRight, ClipboardCheck,

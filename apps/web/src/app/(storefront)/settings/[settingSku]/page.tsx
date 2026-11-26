@@ -1,205 +1,102 @@
-/**
- * apps/web/src/app/(storefront)/settings/[settingSku]/page.tsx
- *
- * `/settings/{designCode}` — one setting-design record.
- *
- * DATA DISCIPLINE: the previous implementation rendered a fixed list of four
- * metals and a table of "specifications" (prong alloy, finish, compatibility)
- * that did not come from any record. That is exactly the kind of quiet
- * fabrication INV-07 forbids. The page now loads the design through the
- * catalog service and renders only fields the contract carries. A missing
- * price is "Price on request", not a guess; a missing description is absent,
- * not invented.
- *
- * Layout: the same two-column editorial opening as the product detail
- * (light study | identity and actions), followed by a hairline record.
- */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getFreshSettingBySkuOrSlug as getSettingBySkuOrSlug } from '@/lib/mgh/adapters/catalog';
+import {
+  SettingDetailGallery,
+  SettingDetailClient,
+  SettingDetailBelowFoldSections,
+} from '@/components/mgh/catalog/SettingDetailClient';
+import { SITE_URL } from '@/lib/mgh/site-url';
 
-import { catalogServer } from '../../../../lib/catalog-server.js';
-import { isProductNotFound } from '../../../../lib/catalog-errors.js';
-import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
-import { Badge } from '../../../../components/design-system/Badge.js';
-import { LightPlate } from '../../../../components/design-system/LightPlate.js';
-import { Money } from '../../../../components/design-system/Money.js';
-import { SpecTable, type SpecRow } from '../../../../components/design-system/SpecTable.js';
-import type { EvidenceStatus, SettingDesignReadModel } from '@maihan/contracts';
-
-// A design record is request-time data. Force-dynamic keeps `next build`
-// database-free while the service cache remains the runtime cache.
-export const dynamic = 'force-dynamic';
-
-interface PageProps {
+export async function generateMetadata({
+  params,
+}: {
   params: Promise<{ settingSku: string }>;
-}
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+}): Promise<Metadata> {
   const { settingSku } = await params;
+  const setting = await getSettingBySkuOrSlug(settingSku);
+  if (!setting) {
+    return {
+      title: 'Setting Not Found',
+      description: 'The requested setting SKU does not exist in the Maihan Gems ledger.',
+    };
+  }
   return {
-    title: `Setting ${settingSku} | Maihan Gems Atelier`,
-    description: `Setting design ${settingSku} with its recorded metal variants and provenance.`,
+    title: `${setting.name} (${setting.sku})`,
+    description: setting.lede,
+    alternates: {
+      canonical: `${SITE_URL}/settings/${setting.sku}`,
+    },
   };
 }
 
-function specRows(design: SettingDesignReadModel): SpecRow[] {
-  const rows: SpecRow[] = [
-    { label: 'Design reference', value: design.design_code },
-    { label: 'Jewellery class', value: design.jewellery_type.toLowerCase() },
-    { label: 'Metal options', value: String(design.variant_count) },
-    { label: 'Side stones', value: String(design.side_stone_count) },
-    { label: 'Record state', value: design.state },
-  ];
-  if (design.style !== null) {
-    rows.splice(2, 0, { label: 'Style', value: design.style.label });
-  }
-  return rows;
-}
-
-function Evidence({ value }: { readonly value: EvidenceStatus }) {
-  return <span className={`mh-evidence mh-evidence--${value.toLowerCase()}`}>{value}</span>;
-}
-
-export default async function SettingDetailPage({ params }: PageProps) {
+export default async function SettingDetailPage({
+  params,
+}: {
+  params: Promise<{ settingSku: string }>;
+}) {
   const { settingSku } = await params;
-
-  let design: SettingDesignReadModel;
-  try {
-    design = (await catalogServer().getSettingByDesignCode(settingSku)).value;
-  } catch (error) {
-    if (isProductNotFound(error)) notFound();
-    throw error;
+  const setting = await getSettingBySkuOrSlug(settingSku);
+  if (!setting) {
+    notFound();
   }
 
   return (
-    <main className="page setting-detail-page mh-page">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Settings', href: '/settings' },
-          { label: design.name },
-        ]}
-      />
-
-      <article className="mh-pdp">
-        <div className="mh-pdp__top">
-          <section className="mh-pdp__study" aria-label="Setting study">
-            <LightPlate className="mh-plate--tall" hold caption="No photograph on file" />
-            <p className="mh-pdp__study-note">
-              A study of light through a step-cut stone. It is not a photograph of this mounting.
-            </p>
-          </section>
-
-          <section className="mh-pdp__summary">
-            <p className="mh-masthead__eyebrow">{design.jewellery_type.toLowerCase()} mounting</p>
-            <h1>{design.name}</h1>
-
-            <p className="mh-pdp__ref">
-              Design <span className="tabular">{design.design_code}</span>
-            </p>
-
-            <div className="mh-pdp__badges">
-              <Badge tone={design.state === 'ACTIVE' ? 'positive' : 'neutral'}>
-                {design.state === 'ACTIVE' ? 'Active design' : design.state}
-              </Badge>
-              <Badge tone={design.provenance.evidence_status === 'OBSERVED' ? 'neutral' : 'warning'} live>
-                Design evidence: {design.provenance.evidence_status}
-              </Badge>
-            </div>
-
-            {design.description !== null && (
-              <p className="mh-pdp__short">{design.description}</p>
-            )}
-
-            <p className="mh-pdp__short">
-              Metal variants are listed below with the price and evidence status carried on each
-              record. A design does not carry a single headline price, so this page does not invent one.
-            </p>
-
-            <div className="mh-pdp__actions">
-              <Link href="/design-your-own" className="mh-cta">
-                Customise in the atelier
-                <span aria-hidden="true">→</span>
+    <div className="golden-cloud-gallery min-h-screen font-[family-name:var(--font-eb-garamond)] text-[#1A1612]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-8 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#76726A]"
+        >
+          <ol className="flex items-center gap-2">
+            <li>
+              <Link href="/" className="hover:text-[#1A1612]">
+                Home
               </Link>
-              <Link href="/contact" className="mh-cta mh-cta--quiet">
-                Inquire with the concierge
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <Link href="/settings" className="hover:text-[#1A1612]">
+                Settings
               </Link>
-            </div>
-          </section>
-        </div>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" className="font-medium text-[#1A1612]">
+              {setting.name}
+            </li>
+          </ol>
+        </nav>
 
-        <div className="mh-pdp__details">
-          <section className="mh-pdp__panel" aria-labelledby="mh-setting-variants-heading">
-            <h2 id="mh-setting-variants-heading">Metal variants</h2>
-            {design.variants.length === 0 ? (
-              <p className="mh-pdp__muted">No metal variants are recorded for this design.</p>
-            ) : (
-              <div className="mh-table-scroll" tabIndex={0} role="region" aria-label="Metal variants table">
-                <table className="mh-table">
-                  <caption className="visually-hidden">Recorded metal variants</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Metal</th>
-                      <th scope="col">Price</th>
-                      <th scope="col">Availability</th>
-                      <th scope="col">Evidence</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {design.variants.map((variant) => (
-                      <tr key={variant.sku}>
-                        <th scope="row">
-                          <span className="tabular">{variant.metal}</span>
-                          <span className="mh-table__sub tabular">{variant.sku}</span>
-                        </th>
-                        <td>
-                          {variant.base_price === null ? (
-                            <span className="mh-pdp__muted">Price on request</span>
-                          ) : (
-                            <Money amount={variant.base_price} currency={variant.currency} />
-                          )}
-                        </td>
-                        <td>{variant.availability ? 'Available' : 'Unavailable'}</td>
-                        <td><Evidence value={variant.provenance.evidence_status} /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+        {/* Above-the-Fold 2-Column Showcase */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+          {/* Left: Vertical Thumbnail Rail + Main Stage Image */}
+          <div className="lg:col-span-7">
+            <SettingDetailGallery setting={setting} />
+          </div>
+
+          {/* Right: Kicker, Title, Description, Price, Metal/Size Selectors & Actions */}
+          <div className="lg:col-span-5 space-y-5">
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2.5 text-xs uppercase tracking-[0.28em] text-[#9A7432] font-semibold">
+                <span className="h-px w-6 bg-[#C5A059]" />
+                <span>SETTING</span>
               </div>
-            )}
-          </section>
+              <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-normal text-[#1A1612] leading-[1.12]">
+                {setting.name}
+              </h1>
+              <p className="text-base text-[#5C4E3C] leading-relaxed">
+                {setting.lede}
+              </p>
+            </div>
 
-          <section className="mh-pdp__panel" aria-labelledby="mh-setting-specs-heading">
-            <h2 id="mh-setting-specs-heading">Specifications</h2>
-            <SpecTable caption="Mounting specifications" rows={specRows(design)} />
-          </section>
-
-          <section className="mh-pdp__panel mh-pdp__panel--wide" aria-labelledby="mh-setting-provenance-heading">
-            <h2 id="mh-setting-provenance-heading">Provenance</h2>
-            <dl className="mh-provenance">
-              <dt>Design evidence</dt>
-              <dd><Evidence value={design.provenance.evidence_status} /></dd>
-              {design.provenance.source_url !== null && (
-                <>
-                  <dt>Source page</dt>
-                  <dd className="mh-provenance__url">{design.provenance.source_url}</dd>
-                </>
-              )}
-              {design.provenance.import_batch !== null && (
-                <>
-                  <dt>Import batch</dt>
-                  <dd className="tabular">{design.provenance.import_batch}</dd>
-                </>
-              )}
-            </dl>
-            <p className="mh-pdp__evidence-note">
-              Evidence statuses are shown exactly as stored. Nothing on this page promotes a field
-              beyond the evidence the record carries (INV-07).
-            </p>
-          </section>
+            <SettingDetailClient setting={setting} />
+          </div>
         </div>
-      </article>
-    </main>
+
+        {/* Below-the-Fold Interactive Tabs, Specifications, Craftsmanship Banner & Gemstone Pairings */}
+        <SettingDetailBelowFoldSections setting={setting} />
+      </div>
+    </div>
   );
 }

@@ -112,6 +112,15 @@ describe('Phase 4 Task 1 — storefront route tree', () => {
       'loading.tsx',
       'route.ts',
       'README.md',
+      // Co-located stylesheets (develop's design ships globals.css and the
+      // storefront sheet inside src/app; main's two extra sheets are the
+      // non-storefront sign-in frame and the demo-content notice). CSS is not
+      // a route: the filenames are listed explicitly, not wildcarded.
+      'globals.css',
+      'storefront-luxury.css',
+      'console-auth.css',
+      'demo-content.css',
+      'storefront-overrides.css',
     ]);
     const appFiles = listFiles(APP_ROOT);
     for (const file of appFiles) {

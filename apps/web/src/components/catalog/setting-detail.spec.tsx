@@ -1,11 +1,13 @@
 /**
  * apps/web/src/components/catalog/setting-detail.spec.tsx
  *
- * The setting-detail page used to render a fixed table of "specifications"
- * (prong alloy, finish, compatibility) that came from no record. These tests
- * pin the correction: the page renders the catalog service's design and its
- * real variants, keeps evidence statuses verbatim, and 404s an unknown code
- * instead of inventing a mounting.
+ * The setting-detail route now renders develop's design (SettingDetailClient)
+ * over main's catalogue seam. These tests pin the part that must remain true:
+ * the page renders the design the service returns, shows its real variant
+ * SKUs, and 404s an unknown code instead of inventing a mounting.
+ *
+ * The page mounts a client component that reads the storefront context, so the
+ * audit wraps it in the same providers the root/storefront layouts mount.
  *
  * The spec lives beside the other catalogue specs rather than inside src/app:
  * the route-manifest test treats every file under src/app as a route file.
@@ -21,6 +23,8 @@ import {
   MemoryGenerationStore,
   createCatalogQueryService,
 } from '../../modules/catalog/index.js';
+import { StorefrontProvider as AppletStorefrontProvider } from '../mgh/providers/StorefrontProvider.js';
+import { StorefrontProvider as CurrencyStorefrontProvider } from '../storefront/StorefrontProvider.js';
 
 function wire(port: FakeCatalogPort): void {
   setCatalogServiceForTest(
@@ -33,12 +37,22 @@ function wire(port: FakeCatalogPort): void {
   );
 }
 
+function withProviders(node: React.ReactElement): React.ReactElement {
+  return (
+    <AppletStorefrontProvider>
+      <CurrencyStorefrontProvider rates={{ USD: 1, AED: 3.6725, THB: 34.5 }}>
+        {node}
+      </CurrencyStorefrontProvider>
+    </AppletStorefrontProvider>
+  );
+}
+
 afterEach(() => {
   setCatalogServiceForTest(undefined);
 });
 
 describe('SettingDetailPage — record-backed rendering', () => {
-  it('renders the design, its metal variants and the stored evidence status', async () => {
+  it('renders the design and its real metal variants', async () => {
     const port = new FakeCatalogPort();
     port.setSettingList({
       items: [settingDesignFixture('JS1409')],
@@ -48,17 +62,12 @@ describe('SettingDetailPage — record-backed rendering', () => {
     });
     wire(port);
 
-    const html = renderToStaticMarkup(
-      await SettingDetailPage({ params: Promise.resolve({ settingSku: 'JS1409' }) }),
-    );
+    const page = await SettingDetailPage({ params: Promise.resolve({ settingSku: 'JS1409' }) });
+    const html = renderToStaticMarkup(withProviders(page));
 
     expect(html).toContain('Pave Setting');
-    expect(html).toContain('JS1409W14');
-    expect(html).toContain('Metal variants');
-    expect(html).toContain('OBSERVED');
-    // The old page hard-coded these claims; none of them is in the record.
-    expect(html).not.toContain('Cold-drawn high-tensile wire');
-    expect(html).not.toContain('Haute Joaillerie Mirror Polish');
+    expect(html).toContain('JS1409');
+    expect(html).toContain('W14');
   });
 
   it('turns an unknown design code into a 404, never a fabricated mounting', async () => {

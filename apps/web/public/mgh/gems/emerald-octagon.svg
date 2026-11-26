@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <defs>
+    <radialGradient id="bgEm" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#F6F4EF"/>
+      <stop offset="100%" stop-color="#EAE6DF"/>
+    </radialGradient>
+    <radialGradient id="shadowEm" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#141413" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#141413" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="emMain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="50%" stop-color="#047857"/>
+      <stop offset="100%" stop-color="#064E3B"/>
+    </linearGradient>
+    <linearGradient id="emTable" x1="10%" y1="10%" x2="90%" y2="90%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="55%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#064E3B"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgEm)"/>
+  <ellipse cx="400" cy="450" rx="145" ry="22" fill="url(#shadowEm)"/>
+  <g transform="translate(400, 285)">
+    <polygon points="-85,-145 85,-145 125,-105 125,105 85,145 -85,145 -125,105 -125,-105" fill="url(#emMain)" stroke="#064E3B" stroke-width="1.5"/>
+    <polygon points="-68,-118 68,-118 98,-88 98,88 68,118 -68,118 -98,88 -98,-88" fill="#047857" stroke="#A7F3D0" stroke-width="0.9"/>
+    <polygon points="-50,-90 50,-90 72,-68 72,68 50,90 -50,90 -72,68 -72,-68" fill="url(#emTable)" stroke="#D1FAE5" stroke-width="1.2"/>
+    <line x1="-85" y1="-145" x2="-50" y2="-90" stroke="#ECFDF5" stroke-width="1" opacity="0.8"/>
+    <line x1="85" y1="-145" x2="50" y2="-90" stroke="#ECFDF5" stroke-width="1" opacity="0.8"/>
+    <line x1="125" y1="-105" x2="72" y2="-68" stroke="#ECFDF5" stroke-width="1" opacity="0.8"/>
+    <line x1="-125" y1="-105" x2="-72" y2="-68" stroke="#ECFDF5" stroke-width="1" opacity="0.8"/>
+    <line x1="-85" y1="145" x2="-50" y2="90" stroke="#6EE7B7" stroke-width="1" opacity="0.6"/>
+    <line x1="85" y1="145" x2="50" y2="90" stroke="#6EE7B7" stroke-width="1" opacity="0.6"/>
+    <line x1="125" y1="105" x2="72" y2="68" stroke="#6EE7B7" stroke-width="1" opacity="0.6"/>
+    <line x1="-125" y1="105" x2="-72" y2="68" stroke="#6EE7B7" stroke-width="1" opacity="0.6"/>
+    <polygon points="-50,-90 35,-90 -20,25 -72,25 -72,-68" fill="#ECFDF5" opacity="0.28"/>
+  </g>
+</svg>

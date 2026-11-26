@@ -1,36 +1,40 @@
-/**
- * apps/web/src/app/not-found.tsx
- *
- * Root 404 for a URL that matches no route at all. It replaces the tree, so
- * it carries its own brand frame and two real exits.
- */
 import Link from 'next/link';
+import { StorefrontHeader } from '@/components/mgh/shell/StorefrontHeader';
+import { StorefrontFooter } from '@/components/mgh/shell/StorefrontFooter';
 
-export default function RootNotFound() {
+export default function NotFound() {
   return (
-    <main className="error-page">
-      <div className="error-page__frame">
-        <p className="error-page__brand">Maihan Gems</p>
-        <p className="error-page__eyebrow">404</p>
-        <h1 className="error-page__title">That address is not in the catalogue.</h1>
-        <p className="error-page__body">
-          It may have been sold, renamed, or the address may be incorrect. The varieties and the
-          search index are the shortest way back to a real record.
+    <div className="min-h-screen flex flex-col bg-[#0A0A0B] text-[#F7F5F0]">
+      <StorefrontHeader />
+      <main
+        id="main-content"
+        className="flex-1 mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-28 text-center space-y-6"
+      >
+        <p className="text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.26em] text-[#D4AF37]">
+          HTTP 404 · RECORD NOT IN VAULT LEDGER
         </p>
-        <div className="error-page__actions">
-          <Link href="/varieties" className="error-page__button">
-            Browse the varieties
+        <h1 className="font-[family-name:var(--font-display)] text-4xl sm:text-5xl font-normal text-[#F7F5F0] tracking-tight text-balance">
+          The requested specimen or dossier was not found.
+        </h1>
+        <p className="text-xs text-[#A39E93] max-w-md mx-auto leading-relaxed">
+          Unverified slugs, configuration codes, and order references are never fabricated.
+        </p>
+        <div className="pt-4 flex flex-wrap items-center justify-center gap-3 text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em]">
+          <Link
+            href="/browse"
+            className="px-6 py-3 gold-gradient-cta transition-all"
+          >
+            Browse Vault
           </Link>
-          <Link href="/search" className="error-page__button error-page__button--quiet">
-            Search the catalogue
+          <Link
+            href="/"
+            className="px-6 py-3 border border-[#D4AF37]/40 text-[#E6C97A] hover:bg-[#D4AF37]/10 transition-colors"
+          >
+            Return to Maison
           </Link>
         </div>
-        <p style={{ marginTop: 24 }}>
-          <Link href="/" className="error-page__link">
-            ← Return home
-          </Link>
-        </p>
-      </div>
-    </main>
+      </main>
+      <StorefrontFooter />
+    </div>
   );
 }

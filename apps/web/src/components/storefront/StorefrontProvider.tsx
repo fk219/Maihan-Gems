@@ -1,0 +1,106 @@
+'use client';
+
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+
+import {
+  CURRENCY_COOKIE,
+  DEFAULT_FX,
+  detectCurrencyFromLocale,
+  parseCurrency,
+  type StorefrontCurrency,
+} from '../../lib/currency.js';
+import { getBag, getFavs, subscribeAtelier } from '../../lib/atelier-store.js';
+
+interface StorefrontContextValue {
+  currency: StorefrontCurrency;
+  setCurrency: (c: StorefrontCurrency) => void;
+  rates: Record<StorefrontCurrency, number>;
+  bagCount: number;
+  favCount: number;
+}
+
+const StorefrontContext = createContext<StorefrontContextValue | null>(null);
+
+function readCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.split('; ').find((row) => row.startsWith(`${name}=`));
+  return match ? decodeURIComponent(match.split('=')[1] ?? '') : null;
+}
+
+export function StorefrontProvider({
+  children,
+  rates,
+  initialCurrency = 'USD',
+}: {
+  children: React.ReactNode;
+  rates: Record<StorefrontCurrency, number>;
+  initialCurrency?: StorefrontCurrency;
+}) {
+  const [currency, setCurrencyState] = useState<StorefrontCurrency>(initialCurrency);
+  const [bagCount, setBagCount] = useState(0);
+  const [favCount, setFavCount] = useState(0);
+
+  useEffect(() => {
+    const cookie = parseCurrency(readCookie(CURRENCY_COOKIE));
+    if (cookie) {
+      setCurrencyState(cookie);
+    } else if (!initialCurrency || initialCurrency === 'USD') {
+      setCurrencyState(detectCurrencyFromLocale());
+    }
+    const sync = () => {
+      const localBag = getBag();
+      setBagCount(localBag.length);
+      setFavCount(getFavs().length);
+      const token = typeof window !== 'undefined' ? window.localStorage.getItem('maihan_cart_token') : null;
+      if (token && typeof fetch === 'function') {
+        void fetch(`/api/v1/carts/${encodeURIComponent(token)}`)
+          .then((r) => (r.ok ? r.json() : null))
+          .then((body: { data?: { state?: string; items?: Array<{ product_id: string }> } } | null) => {
+            if (body?.data?.state === 'ACTIVE' && Array.isArray(body.data.items)) {
+              const serverIds = new Set(body.data.items.map((i) => i.product_id));
+              const extraLocal = localBag.filter((l) => !serverIds.has(l.id)).length;
+              setBagCount(body.data.items.length + extraLocal);
+            }
+          })
+          .catch(() => undefined);
+      }
+    };
+    sync();
+    return subscribeAtelier(sync);
+  }, []);
+
+  const setCurrency = (next: StorefrontCurrency) => {
+    setCurrencyState(next);
+    document.cookie = `${CURRENCY_COOKIE}=${next}; path=/; max-age=31536000; SameSite=Lax`;
+  };
+
+  const value = useMemo(
+    () => ({
+      currency,
+      setCurrency,
+      rates: { ...DEFAULT_FX, ...rates },
+      bagCount,
+      favCount,
+    }),
+    [currency, rates, bagCount, favCount],
+  );
+
+  return <StorefrontContext.Provider value={value}>{children}</StorefrontContext.Provider>;
+}
+
+export function useStorefront() {
+  const ctx = useContext(StorefrontContext);
+  if (!ctx) {
+    // Isolated renders (server templates, spec harnesses) outside the live
+    // storefront chrome get the documented defaults — USD + fallback FX.
+    // Interactive surfaces always mount the provider.
+    return {
+      currency: 'USD' as const,
+      setCurrency: () => undefined,
+      rates: { ...DEFAULT_FX },
+      bagCount: 0,
+      favCount: 0,
+    };
+  }
+  return ctx;
+}

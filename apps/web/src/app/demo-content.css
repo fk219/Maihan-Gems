@@ -1,0 +1,57 @@
+/**
+ * app/demo-content.css
+ *
+ * One rule set, for the fixture-content notice only. Kept out of the copied
+ * develop stylesheets so the design files stay byte-identical and the notice
+ * can be removed in one place when the catalogue is populated.
+ *
+ * It is a fixed chip at the lower-left rather than a bar above the header:
+ * storefront hero pages render the header absolutely at top:0, so a bar in
+ * normal flow would sit underneath it and clip the wordmark. A fixed chip is
+ * visible on every surface without moving any design element.
+ */
+.demo-content-badge {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 60;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0;
+  max-width: 430px;
+  padding: 9px 12px;
+  background: #fbf3dd;
+  border: 1px solid #e3cf94;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(24, 22, 19, 0.18);
+  color: #4a3a0c;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.demo-content-badge strong {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.demo-content-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #b8860b;
+  align-self: center;
+}
+.demo-content-badge__text {
+  color: #6b5619;
+}
+@media (max-width: 640px) {
+  .demo-content-badge {
+    right: 16px;
+    left: 16px;
+    max-width: none;
+    font-size: 11px;
+  }
+}
