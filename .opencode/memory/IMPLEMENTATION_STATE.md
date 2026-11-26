@@ -1,3 +1,61 @@
+# FRESH COMPATIBILITY LAYER — DEVELOP'S UI ON MAIN'S BACKEND (2026-11-26)
+
+- **Goal.** `develop`'s console, vendor portal and variety picker call
+  `/api/fresh/*`; on develop that path was a transparent proxy to its own
+  service (`ok(json)` returns the body unwrapped). Make those exact URLs answer
+  from main's locked schema **without touching any file under
+  `apps/web/src/components`, `app/(storefront)`, `app/vendor` or `app/admin`**.
+- **Proof of the seam.** `AdminConsoleApp.tsx:338-341` casts the response body
+  straight to an array and calls `.filter` on it at 962-963, so the compat layer
+  must return **bare arrays** where the develop caller expects one; a
+  `{data, meta}` object is a render-time TypeError. Recorded in
+  `docs/FRESH_COMPAT_LAYER.md` §5.2 (the `unsupported` flag is carried in
+  `X-Maihan-Compat-Unsupported`, not the body).
+- **Data layer** `packages/db/src/compat/fresh-compat-repository.ts` — 9
+  read-only projections that main's storefront repositories do not expose:
+  `readConsoleStats`, `listConsoleInventory`, `listConsoleOrders`,
+  `listConsoleVendors`, `listConsoleAudit`, `listConsoleDiscounts`,
+  `readVendorInventory`, `readVendorAnalytics`, `listActiveVarieties`, plus
+  `resolveVendorSegment`. Every value is bound; every statement is a SELECT;
+  count and page are separate statements so `total` stays true past the last
+  page. A concept main does not model is `null` and named in an `unsupported`
+  list — never a fabricated zero.
+- **HTTP layer** `apps/web/src/api/fresh/**` +
+  `apps/web/src/app/api/fresh/[...path]/route.ts` (nodejs, force-dynamic,
+  registered in `route-manifest.ts`). The static segment outranks the generic
+  `app/api/[...path]` catch-all, so only `/api/fresh/**` lands here. Pipeline:
+  ids → lookup (404/405) → gate → one read → the shared envelope.
+- **Routes ready:** `/admin/stats|inventory|orders|vendors|audit|discounts`,
+  `/vendor/auth/me` (added: the vendor portal exits at line 265 without it),
+  `/vendors/{code}/inventory|analytics`, `/catalogue/varieties`. **Honest empty
+  with the flag:** `/admin/leads`, `/admin/submissions`,
+  `/vendors/{code}/submissions`. Everything else under `/api/fresh/**` is a
+  documented **404 NOT_FOUND** — never a 500, never an invented success.
+- **Auth reused, not invented.** `authorizeAdminRequest` (ADR-027) with a
+  capability per route (`dashboards/read`, `inventory/list`, `orders/list`,
+  `products/list`, `certificates/list`); `requireVendor` (ADR-026) for the
+  vendor paths, with the `{code}` segment resolved to a vendor id and asserted so
+  another vendor's code is `403 VENDOR_SCOPE_MISMATCH`. Both helpers had their
+  first parameter narrowed to `Pick<RouteContext,'db'|'request'>` so this
+  surface can call them without a catalogue service; no call site changed.
+- **Honest gaps:** develop's own sign-in endpoints (`/api/fresh-admin/*`,
+  `/api/fresh-auth/*`, `/api/fresh-vendor*`) are deliberately NOT implemented —
+  one session model (ADR-027); an operator must sign in through main first.
+  `analytics.units` is null (no quantity on allocations), `top_items`/`payments`
+  are empty (no per-vendor attribution), `inventory.quantity` is null (products
+  carry `availability`, not stock). No `vendors`/`discounts` module exists in the
+  locked RBAC matrix, so those two routes gate on `products/list` and
+  `orders/list`. No rate limiter and no cache participation on this surface. No
+  statement ran against PostgreSQL.
+- **Verified:** `@maihan/db` 298 passed / 32 skipped (new fake-executor suite 16);
+  `@maihan/web` 540 passed / 21 skipped (new HTTP-contract suite 34; baseline
+  506/21, no regression); `pnpm -r run typecheck` 0 errors; `next build --webpack`
+  exit 0 with `apps/web/.env` moved aside and `DATABASE_URL` unset, and
+  `/api/fresh/[...path]` builds as `ƒ (Dynamic)`. No new dependency, no
+  migration, no database connection, no edit to develop's worktree.
+
+---
+
 # STOREFRONT DESIGN PASS — "LIGHT THROUGH STONE" (2026-11-26)
 
 - **Scope:** `ProductCard`, `ProductDetailContent`, `/settings` index + detail,
