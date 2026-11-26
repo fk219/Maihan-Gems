@@ -51,7 +51,7 @@
   complete page: reference, catalogue context, the reason (with the real count
   of registered calibrated assets, currently 0), and next actions. No model and
   no `.glb` were fabricated.
-- **Verified.** `pnpm -r run typecheck` 0 errors. `@maihan/web` **603 passed /
+- **Verified.** `pnpm -r run typecheck` 0 errors. `@maihan/web` **604 passed /
   21 skipped** (baseline 541/21). `@maihan/db` **325 passed / 32 skipped**
   (baseline 298/32). `next build --webpack` exit 0 with `apps/web/.env` moved
   aside and `DATABASE_URL`/`SITE_URL` unset; both `/api/fresh/[...path]` and

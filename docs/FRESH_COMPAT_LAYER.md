@@ -462,7 +462,10 @@ is `null` for the same reason. Nothing is derived from weight or price.
 `submitShippingCheckpoint` -> `submitPaymentCheckpoint` -> `placeOrder`. A
 `discount_code` is validated through `validateDiscount` and applied to the
 frozen snapshot before placement. The idempotency key is
-`fresh-checkout:{cartToken}`, so a retry returns the original order.
+`fresh-checkout:{cartToken}`, so a retry returns the original order; the
+ownership read also carries `converted_order_id`, so a repeated checkout on a
+CONVERTED cart returns that order **before** any new checkout session or stock
+reservation is created.
 
 Tax is `0.00` with label `UNCONFIGURED` and shipping is `0.00`: main has no tax
 rule table and no shipping-rate catalogue. Those are main's honest limits, not
@@ -570,7 +573,7 @@ against a database at 0023.
 | Command | Result |
 |---|---|
 | `pnpm -r run typecheck` | **0 errors**, 9 projects |
-| `pnpm --filter @maihan/web run test` | **603 passed / 21 skipped** (baseline 541/21, +62, no regression) |
+| `pnpm --filter @maihan/web run test` | **604 passed / 21 skipped** (baseline 541/21, +63, no regression) |
 | `pnpm --filter @maihan/db run test` | **325 passed / 32 skipped** (baseline 298/32, +27) |
 | `pnpm --filter @maihan/web run build` with `apps/web/.env` moved aside and `DATABASE_URL`/`SITE_URL` unset | **exit 0**; `/api/fresh/[...path]` and `/api/fresh-auth/[...path]` both `ƒ (Dynamic)` |
 
