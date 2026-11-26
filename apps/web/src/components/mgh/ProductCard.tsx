@@ -251,7 +251,7 @@ export function ProductCard({
         <div className="w-7 h-[1.5px] bg-[#C5A059] mb-0.5" />
 
         <div className="space-y-1">
-          <h3 className="font-[family-name:var(--font-eb-garamond)] text-2xl sm:text-[28px] font-normal text-[#181613] tracking-normal leading-tight group-hover:text-[#7A5C1B] transition-colors line-clamp-1">
+          <h3 className="font-[family-name:var(--font-eb-garamond)] text-2xl sm:text-[28px] font-normal text-[#181613] tracking-normal leading-tight group-hover:text-[#7A5C1B] transition-colors line-clamp-2">
             {displayName}
           </h3>
 

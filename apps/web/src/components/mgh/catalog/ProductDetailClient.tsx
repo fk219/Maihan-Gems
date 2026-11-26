@@ -112,7 +112,7 @@ export function ProductDetailGallery({ stone }: { stone: GemstoneItem }) {
                 className={`relative h-20 w-20 sm:h-22 sm:w-24 shrink-0 overflow-hidden rounded-[16px] border transition-all cursor-pointer ${
                   isSelected
                     ? 'border-[#C5A059] ring-2 ring-[#C5A059]/40 shadow-md scale-[1.02]'
-                    : 'border-[#E5D4B3] opacity-75 hover:opacity-100 hover:border-[#C5A059]/60'
+                    : 'border-[#E5D4B3] hover:border-[#C5A059]/60'
                 } bg-[#14110D]`}
               >
                 <img
@@ -120,7 +120,7 @@ export function ProductDetailGallery({ stone }: { stone: GemstoneItem }) {
                   alt={`${stone.name} thumbnail ${idx + 1}`}
                   referrerPolicy="no-referrer"
                   className={`h-full w-full object-cover ${
-                    item.type === 'cert' ? 'opacity-35 blur-[1px]' : ''
+                    item.type === 'cert' ? 'opacity-35 blur-[1px]' : isSelected ? '' : 'opacity-80'
                   }`}
                 />
                 {item.type === '360' && (

@@ -70,6 +70,9 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
       'src/app/demo-content.css',
       // two mobile-fit rules over develop's copied sheets.
       'src/app/storefront-overrides.css',
+      // the v4 craft layer (type scale, contrast, states, motion, details);
+      // loaded last by the storefront layout only.
+      'src/app/storefront-craft.css',
     ],
   },
   // ── (storefront) group ────────────────────────────────────────────────────

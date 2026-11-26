@@ -1,0 +1,607 @@
+/* ============================================================================
+   storefront-craft.css — the craft layer (v4)
+   ============================================================================
+   This file changes NO layout, composition, copy or hue. It is the finishing
+   pass that turns the ported storefront into a resolved product:
+
+     1. one type scale (5 steps + the hero instance of the display step)
+     2. one leading / tracking rule per role
+     3. one contextual colour pair for gold + muted text (AA on both surfaces)
+     4. one focus ring (2 px, offset 2 px, dual-tone: passes 3:1 light and dark)
+     5. interaction states: hover / active / focus-visible / disabled / busy
+     6. one easing curve and three durations, all behind prefers-reduced-motion
+     7. details: selection, scrollbar, hairlines, radii, tabular numerals,
+        locked media ratios, form focus-within, print fallback
+
+   Loaded LAST on the storefront only, so it wins over the design sheets and
+   over Tailwind's utility layer (layered rules lose to unlayered ones).
+   Every value below is a token; nothing here is a one-off pixel.
+   ========================================================================== */
+
+/* ── 1. TOKENS ─────────────────────────────────────────────────────────────
+   Type: five steps. 11 / 12 / 14 are fixed; the two display steps are fluid so
+   a 390 px phone and a 1440 px desktop share one curve. Measured before:
+   28 distinct rendered sizes and 127 size/leading/tracking/family buckets.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --mh-fs-label: 0.6875rem; /* 11 px — uppercase eyebrows, chips, micro-meta */
+  --mh-fs-meta: 0.75rem; /* 12 px — captions, table meta, nav */
+  --mh-fs-body: 0.875rem; /* 14 px — running text, controls */
+  --mh-fs-title: clamp(1.375rem, 1.7vw, 1.625rem); /* 22 → 26 px — h3/h4 */
+  --mh-fs-display: clamp(2.25rem, 3.4vw, 3rem); /* 36 → 48 px — h1/h2 */
+  --mh-fs-hero: calc(var(--mh-fs-display) * 1.55); /* 56 → 74 px — hero h1 */
+
+  --mh-lh-display: 1.02;
+  --mh-lh-title: 1.12;
+  --mh-lh-body: 1.6;
+  --mh-lh-meta: 1.45;
+  --mh-lh-label: 1.2;
+
+  --mh-track-display: -0.015em;
+  --mh-track-title: -0.01em;
+  --mh-track-body: 0;
+  --mh-track-label: 0.18em;
+
+  /* Spacing: 4 px base / 8 px rhythm — 4, 8, 12, 16, 24, 32, 48, 72, 96.
+     Only the three steps the craft rules below actually consume are declared;
+     the design's own layout paddings are untouched. */
+  --mh-s-6: 1.5rem; /* 24 */
+  --mh-s-8: 2rem; /* 32 */
+  --mh-section: clamp(4.5rem, 6vw, 6rem); /* 72 → 96 */
+
+  /* One easing, three durations. */
+  --mh-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --mh-dur-state: 150ms; /* colour / border feedback */
+  --mh-dur-move: 300ms; /* transform / shadow */
+  --mh-dur-enter: 520ms; /* entrance choreography */
+
+  /* Radius: hairlined controls, 8 px soft controls, 24 px media plates,
+     circles. Three values, no 10/12/16/20 mix. */
+  --mh-radius-control: 2px;
+  --mh-radius-soft: 8px;
+  --mh-radius-plate: 24px;
+
+  /* One hairline. */
+  --mh-hairline: 1px;
+
+  /* Contrast: gold and muted ink are contextual. The base pair is solved for
+     the paper stack (#FFFFFF → #F6F2E9); the dark pair is solved for
+     #0A0A0B. Elements inherit the pair from their nearest dark container. */
+  --mh-gold-ink: #7c6323; /* 5.73:1 on #FFFFFF, 5.13:1 on #F6F2E9 */
+  --mh-muted-ink: #6b675f; /* 5.63:1 on #FFFFFF, 5.04:1 on #F6F2E9 */
+  --mh-gold-on-dark: #e6c97a; /* 12.2:1 on #0A0A0B */
+  --mh-muted-on-dark: #a8a29a; /* 8.2:1 on #0A0A0B */
+  --mh-focus-ring: #7c6323;
+  --mh-focus-halo: rgba(253, 251, 245, 0.9);
+  /* consumed by the global :focus-visible rule in mgh-applet.css */
+  --focus-ring-ink: #7c6323;
+}
+
+/* Dark containers re-solve the pair. Any element inside one inherits it, so a
+   gold link in the footer and the same class in a card both pass. */
+header,
+footer,
+.mgh-hero,
+[class*='bg-[#0A0A0C]'],
+[class*='bg-[#0A0A0B]'],
+[class*='bg-[#141416]'],
+[class*='bg-[#14110D]'],
+[class*='bg-[#121316]'],
+[class*='bg-[#1A150E]'] {
+  --mh-gold-ink: var(--mh-gold-on-dark);
+  --mh-muted-ink: var(--mh-muted-on-dark);
+  --mh-focus-ring: #e6c97a;
+  --mh-focus-halo: rgba(10, 10, 12, 0.9);
+  --focus-ring-ink: #e6c97a;
+}
+
+/* ── 2. TYPE SCALE ─────────────────────────────────────────────────────────
+   The design ships ad-hoc values (9 / 9.5 / 10 / 10.5 / 11 / 11.5 / 12.5 /
+   13 / 13.5). Each one is routed to the nearest step, so the rendered page has
+   five sizes instead of twenty-eight. Sizes above 18 px are role-based
+   (heading) rather than class-based, because a tab label and a section title
+   must not share a step.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* The step selectors carry `.golden-cloud-gallery` so a size class outranks the
+   role rule below (a hero h1 must be able to be bigger than a page h1). */
+
+/* step 1 — label */
+.golden-cloud-gallery [class*='text-[9px]'],
+.golden-cloud-gallery [class*='text-[9.5px]'],
+.golden-cloud-gallery [class*='text-[10px]'],
+.golden-cloud-gallery [class*='text-[10.5px]'],
+.golden-cloud-gallery [class*='text-[11px]'],
+.golden-cloud-gallery [class*='text-[11.5px]'] {
+  font-size: var(--mh-fs-label);
+  line-height: var(--mh-lh-label);
+}
+
+/* step 2 — meta */
+.golden-cloud-gallery [class*='text-[12.5px]'],
+.golden-cloud-gallery [class*='text-[13px]'],
+.golden-cloud-gallery [class*='text-[13.5px]'],
+.golden-cloud-gallery .text-xs {
+  font-size: var(--mh-fs-meta);
+  line-height: var(--mh-lh-meta);
+}
+
+/* step 3 — body */
+.golden-cloud-gallery [class*='text-[15px]'],
+.golden-cloud-gallery [class*='text-[17px]'],
+.golden-cloud-gallery .text-sm,
+.golden-cloud-gallery .text-base,
+.golden-cloud-gallery .text-lg {
+  font-size: var(--mh-fs-body);
+  line-height: var(--mh-lh-body);
+}
+
+/* step 4 — title */
+.golden-cloud-gallery [class*='text-[18px]'],
+.golden-cloud-gallery [class*='text-[19px]'],
+.golden-cloud-gallery [class*='text-[20px]'],
+.golden-cloud-gallery [class*='text-[22px]'],
+.golden-cloud-gallery [class*='text-[26px]'],
+.golden-cloud-gallery [class*='text-[28px]'],
+.golden-cloud-gallery .text-xl,
+.golden-cloud-gallery .text-2xl,
+.golden-cloud-gallery .text-3xl {
+  font-size: var(--mh-fs-title);
+  line-height: var(--mh-lh-title);
+  letter-spacing: var(--mh-track-title);
+}
+
+/* step 5 — display */
+.golden-cloud-gallery [class*='text-[30px]'],
+.golden-cloud-gallery [class*='text-[36px]'],
+.golden-cloud-gallery [class*='text-[42px]'],
+.golden-cloud-gallery [class*='text-[44px]'],
+.golden-cloud-gallery [class*='text-[48px]'],
+.golden-cloud-gallery [class*='text-[52px]'],
+.golden-cloud-gallery [class*='text-[60px]'],
+.golden-cloud-gallery .text-4xl,
+.golden-cloud-gallery .text-5xl,
+.golden-cloud-gallery .text-6xl {
+  font-size: var(--mh-fs-display);
+  line-height: var(--mh-lh-display);
+  letter-spacing: var(--mh-track-display);
+}
+
+/* the hero instance of the display step. The two clamps reproduce the design's
+   own hero arc (72 px at 768, 88 px at 1440) rather than inventing a new one.
+   Guarded to >= 640 px because the attribute selector matches the raw class
+   string `sm:text-7xl` at every width; below 640 px the h1 carries `text-4xl`
+   and belongs to the display step. */
+@media (min-width: 640px) {
+  :root {
+    --mh-fs-hero: clamp(4.5rem, 6.2vw, 5.5rem);
+  }
+
+  .golden-cloud-gallery [class*='text-[5.5rem]'],
+  .golden-cloud-gallery .text-7xl {
+    font-size: var(--mh-fs-hero);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* The portal design system carries its own 10-step scale (11 / 12 / 12.5 /
+   13.5 / 14 / 15 / 17 / 20 / 22 / 26 / 34). It styles real storefront pages —
+   showrooms, education, journal, about, policy, bag, compare, checkout — so it
+   is re-pointed at the storefront steps instead of introducing a second voice.
+   `body` is part of the selector because the portal sheet is imported by the
+   components that use it, so in the bundled order it arrives after this file;
+   one extra element in the selector settles the cascade without !important. */
+body .portal-shell,
+body .portal-theme {
+  --p-fs-2xs: var(--mh-fs-label);
+  --p-fs-xs: var(--mh-fs-meta);
+  --p-fs-sm: var(--mh-fs-meta);
+  --p-fs-md: var(--mh-fs-body);
+  --p-fs-base: var(--mh-fs-body);
+  --p-fs-lg: var(--mh-fs-body);
+  --p-fs-xl: var(--mh-fs-title);
+  --p-fs-2xl: var(--mh-fs-title);
+  --p-fs-3xl: var(--mh-fs-title);
+  --p-fs-4xl: var(--mh-fs-title);
+  --p-fs-display: var(--mh-fs-display);
+}
+
+body .portal-badge {
+  font-size: var(--mh-fs-label);
+  letter-spacing: var(--mh-track-label);
+}
+
+/* The document base sits on the body step, so text without a size class is on
+   the scale rather than at the design's old 15 px. */
+body {
+  font-size: var(--mh-fs-body);
+  line-height: var(--mh-lh-body);
+}
+
+/* The fixture notice and the floating concierge pill are plain CSS classes,
+   not utilities; they join the same steps. */
+.demo-content-badge {
+  font-size: var(--mh-fs-meta);
+  line-height: var(--mh-lh-meta);
+}
+
+.demo-content-badge strong {
+  font-size: var(--mh-fs-label);
+  line-height: var(--mh-lh-label);
+  letter-spacing: var(--mh-track-label);
+}
+
+.ai-concierge-trigger__label {
+  font-size: var(--mh-fs-meta);
+}
+
+/* Heading roles, scoped to the storefront so a console page that shares an
+   element name keeps its own display size. `body` and the gallery class put
+   the selector one class ahead of any component rule (`.ngc-x h1`), which is
+   what the 52 px not-found headline needed. Element rules come first so a
+   heading keeps its level even when it carries no size class; the class map
+   above then refines the ones that opt into a larger step. */
+body .golden-cloud-gallery h1,
+body .golden-cloud-gallery h2 {
+  font-size: var(--mh-fs-display);
+  line-height: var(--mh-lh-display);
+  letter-spacing: var(--mh-track-display);
+  text-wrap: balance;
+  hanging-punctuation: first last;
+}
+
+body .golden-cloud-gallery h3,
+body .golden-cloud-gallery h4 {
+  font-size: var(--mh-fs-title);
+  line-height: var(--mh-lh-title);
+  letter-spacing: var(--mh-track-title);
+  text-wrap: balance;
+  hanging-punctuation: first last;
+}
+
+body .golden-cloud-gallery h5,
+body .golden-cloud-gallery h6 {
+  font-size: var(--mh-fs-meta);
+  line-height: var(--mh-lh-meta);
+  letter-spacing: var(--mh-track-label);
+  text-transform: uppercase;
+}
+
+/* Prose: one measure, one leading, no orphan last word. */
+p,
+li,
+dd,
+blockquote {
+  text-wrap: pretty;
+}
+
+/* Optical alignment: a quotation mark hangs outside the text block instead of
+   indenting the first line by its own width. Works in every engine;
+   `hanging-punctuation` refines it where supported. */
+blockquote p {
+  text-indent: -0.4em;
+  hanging-punctuation: first last;
+}
+
+/* Vertical rhythm: the listing pages mix 80 px, 96 px and 112 px section gaps.
+   They converge on one fluid step, so consecutive sections breathe equally. */
+main section[class*='py-20'],
+main section[class*='py-24'],
+main section[class*='py-28'] {
+  padding-block: var(--mh-section);
+}
+
+.prose,
+[class*='leading-relaxed'] {
+  line-height: var(--mh-lh-body);
+}
+
+/* One tracking value for every small uppercase label. Before: 0.12–0.38 em
+   across 9 sizes. */
+[class*='uppercase'][class*='tracking-'] {
+  letter-spacing: var(--mh-track-label);
+}
+
+/* Numerals: tabular wherever a count or a price can change width. Tracking on
+   figures is a tell, so tabular rows lose it; the gallery prefix puts this rule
+   at the same weight as the size steps, and it comes later. */
+.golden-cloud-gallery [class*='tabular-nums'],
+.golden-cloud-gallery .font-mono,
+.golden-cloud-gallery [class*='font-[family-name:var(--font-mono)]'],
+time,
+output,
+[data-price],
+[data-count] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+
+.golden-cloud-gallery [class*='tabular-nums'] {
+  letter-spacing: 0;
+}
+
+/* ── 3. CONTRAST ───────────────────────────────────────────────────────────
+   The design's gold (#9A7B2C) and grey (#8A857B) fail AA on paper. Only the
+   lightness moves; hue and saturation are unchanged (same HSL hue, L lowered).
+   Measured pairs are in docs/design-shots/v4/README.md.
+   ─────────────────────────────────────────────────────────────────────────── */
+[class*='text-[#9A7B2C]'],
+[class*='text-[#9A7432]'],
+[class*='text-[#8C6D2F]'],
+[class*='text-[#8B6B23]'] {
+  color: var(--mh-gold-ink);
+}
+
+[class*='text-[#8A857B]'],
+[class*='text-[#76726A]'] {
+  color: var(--mh-muted-ink);
+}
+
+/* The 360° badge inherited the thumbnail's 0.75 opacity, so its chip text
+   composited to 4.46:1. The badge keeps full opacity; the photograph behind it
+   carries the inactive state instead. */
+[class*='h-20'][class*='w-20'] [class*='bg-[#C5A059]'],
+[class*='sm:h-22'] [class*='bg-[#C5A059]'] {
+  opacity: 1;
+}
+
+/* ── 4. FOCUS ──────────────────────────────────────────────────────────────
+   2 px ring, 2 px offset, 3:1 against the adjacent surface in both modes.
+   The previous single gold ring was 2.10:1 on white and 1.88:1 on the cream.
+   ─────────────────────────────────────────────────────────────────────────── */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--mh-focus-ring);
+  outline-offset: 2px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 4px var(--mh-focus-halo);
+}
+
+/* Do not remove the ring on mouse focus for controls that need it — but never
+   let a component swallow it either. */
+:where(a, button, input, select, textarea):focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── 5. INTERACTION STATES ─────────────────────────────────────────────────
+   Every control gets the same five states. No hover scale on buttons (only
+   surfaces that are not actions may scale), and no active transform, so a
+   press reads as a colour change rather than a wobble.
+   ─────────────────────────────────────────────────────────────────────────── */
+:where(a, button, summary, [role='button']) {
+  transition-duration: var(--mh-dur-state);
+  transition-timing-function: var(--mh-ease);
+}
+
+:where(button, [role='button'], a[class*='rounded-full'], a[class*='rounded-sm']) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+:where(button, [role='button']):active:not(:disabled) {
+  transform: none;
+  filter: brightness(0.96);
+}
+
+:where(button, input, select, textarea, [role='button'])[disabled],
+:where(button, input, select, textarea)[aria-disabled='true'],
+:where(button, input, select, textarea)[data-loading='true'] {
+  cursor: not-allowed;
+  opacity: 0.55;
+  filter: grayscale(0.2);
+  pointer-events: none;
+}
+
+:where(button, [role='button'])[aria-busy='true'] {
+  cursor: progress;
+  opacity: 0.8;
+}
+
+/* Field groups: the label acknowledges focus anywhere inside the group, so a
+   form reads as one object rather than a stack of boxes. */
+label:has(+ :where(input, textarea, select):focus-visible),
+:where(.lx-account-field, .mgh-field, fieldset):focus-within > label {
+  color: var(--mh-gold-ink);
+}
+
+/* ── 6. TARGET SIZE ────────────────────────────────────────────────────────
+   WCAG 2.2 2.5.8 needs 24×24 for a pointer target. The home category links
+   were 16×11 and were the only failures axe reported. Inline links inside
+   running prose stay inline (2.5.8 exempts them); block links and controls are
+   raised to the 24 px minimum, and primary controls to 40–44 px.
+   ─────────────────────────────────────────────────────────────────────────── */
+a[class*='underline-offset-4'] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+/* Pill CTAs and form controls reach 40 px. Icon-only header controls and nav
+   chevrons are excluded on purpose: they live in rows whose height is fixed by
+   the design, and they already clear the 24 px floor. */
+:where(.lx-btn, select, input:not([type='checkbox']):not([type='radio'])) {
+  min-height: 40px;
+}
+
+:where(button, a)[class*='rounded-full'][class*='px-'] {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Icon-only controls in the header sit in a 32 px box to fit a 390 px viewport.
+   24 px is the accessible floor and they clear it; the pseudo-element takes the
+   *hit* area to 44 px without moving a single pixel of layout. */
+header :where(button, a)[class*='rounded-full']:not([class*='px-']) {
+  position: relative;
+}
+
+header :where(button, a)[class*='rounded-full']:not([class*='px-'])::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+/* ── 7. DETAILS ────────────────────────────────────────────────────────────
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Selection: one gold, legible on paper and on obsidian. */
+::selection {
+  background: rgba(212, 164, 55, 0.32);
+  color: #14100a;
+}
+
+header ::selection,
+footer ::selection,
+[class*='bg-[#0A0A0C]'] ::selection,
+[class*='bg-[#0A0A0B]'] ::selection {
+  background: rgba(230, 201, 122, 0.28);
+  color: #f7f5f0;
+}
+
+/* Scrollbar: thin, warm, present on both surfaces. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #c5a059 rgba(0, 0, 0, 0.04);
+}
+
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(29, 23, 16, 0.04);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #c5a059;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a8873f;
+    background-clip: content-box;
+  }
+}
+
+/* One hairline weight and one radius scale. The design mixes 1px and 1.5px
+   rules (a 1.5 px gold rule under card eyebrows) and 2/8/10/12/16/20/24 px
+   radii. Radii are grouped by role, not flattened. Only widths the design
+   actually mixed are corrected — a blanket border-width would add borders
+   where a utility only set a colour. */
+article[class*='rounded-[24px]'] {
+  border-radius: var(--mh-radius-plate);
+  padding: var(--mh-s-6);
+}
+
+@media (min-width: 640px) {
+  article[class*='rounded-[24px]'] {
+    padding: var(--mh-s-8);
+  }
+}
+
+[class*='rounded-[20px]'],
+[class*='rounded-[16px]'],
+[class*='rounded-2xl'] {
+  border-radius: var(--mh-radius-soft);
+}
+
+[class*='rounded-xl']:not(article) {
+  border-radius: var(--mh-radius-soft);
+}
+
+[class*='rounded-[10px]'],
+[class*='rounded-lg'],
+[class*='rounded-md']:not([class*='rounded-full']) {
+  border-radius: var(--mh-radius-soft);
+}
+
+/* The 1.5 px eyebrow rule was the only sub-pixel line in the design. */
+[class*='h-[1.5px]'] {
+  height: var(--mh-hairline);
+}
+
+/* Media: every image slot is locked before paint, so no image can shift a
+   layout. Cards already declare an aspect; this guards the loose ones. */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* A fixed aspect plus a height floor implies a width floor: 450 px at 3:4 is
+   337.5 px, wider than the third column at a 1024 px viewport, which is the
+   measured 7 px document overflow. The ratio owns the height; the floor goes. */
+article[class*='aspect-[3/4]'][class*='min-h-[450px]'] {
+  min-height: 0;
+}
+
+img[class*='absolute'][class*='inset-0'],
+img[class*='h-full'][class*='w-full'] {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+[class*='aspect-'] {
+  overflow: hidden;
+}
+
+/* Motion: one curve, three durations, and a hard stop under reduced motion.
+   The entrance choreography now uses the enter duration (it was an untimed
+   inline-style jump between 0.01 and 1), a hover lift uses the move duration,
+   and colour feedback uses the state duration. A button never scales. */
+[data-reveal],
+.vault-reveal__item {
+  transition-property: opacity, transform;
+  transition-duration: var(--mh-dur-enter);
+  transition-timing-function: var(--mh-ease);
+}
+
+[class*='hover:-translate-y'] {
+  transition-duration: var(--mh-dur-move);
+  transition-timing-function: var(--mh-ease);
+}
+
+:where(button, a, [role='button'])[class*='hover:scale']:hover {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [class*='hover:scale-'],
+  [class*='hover:-translate-y'],
+  [class*='group-hover:scale-'] {
+    transform: none !important;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Print: content that relies on an entrance animation must be visible. */
+@media print {
+  *,
+  *::before,
+  *::after {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}

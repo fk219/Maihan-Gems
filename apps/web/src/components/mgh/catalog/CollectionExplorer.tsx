@@ -340,7 +340,7 @@ export function CollectionExplorer({
           className="pt-4 border-t border-[#F0ECE3] grid grid-cols-1 md:grid-cols-12 gap-5 items-center"
         >
           <div className="md:col-span-8 space-y-2">
-            <div className="flex items-center justify-between text-xs font-[family-name:var(--font-mono)]">
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs font-[family-name:var(--font-mono)]">
               <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#76726A]">
                 <SlidersHorizontal className="h-3.5 w-3.5 text-[#9A7B2C]" />
                 <span>Price Range Filter</span>

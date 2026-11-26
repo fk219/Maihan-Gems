@@ -121,6 +121,7 @@ describe('Phase 4 Task 1 — storefront route tree', () => {
       'console-auth.css',
       'demo-content.css',
       'storefront-overrides.css',
+      'storefront-craft.css',
     ]);
     const appFiles = listFiles(APP_ROOT);
     for (const file of appFiles) {

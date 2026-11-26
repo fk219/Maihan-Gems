@@ -77,9 +77,12 @@
     }
   }
 
-  /* Universal visible focus-visible ring for WCAG AA keyboard operability */
+  /* Universal visible focus-visible ring for WCAG AA keyboard operability.
+     The colour is themeable so a dark surface can pick a light ring and a
+     paper surface a dark one; #D4AF37 is the fallback for surfaces that set
+     neither (it is 9.4:1 on the consoles' obsidian). */
   *:focus-visible {
-    outline: 2px solid #D4AF37 !important;
+    outline: 2px solid var(--focus-ring-ink, #D4AF37) !important;
     outline-offset: 2px !important;
   }
 }

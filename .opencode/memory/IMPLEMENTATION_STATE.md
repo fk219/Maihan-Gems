@@ -1,3 +1,77 @@
+# DESIGN CRAFT PASS v4 — TYPE SCALE, CONTRAST, STATES, MOTION (2026-11-27)
+
+- **Goal.** Elevate the *craft* of develop's ported storefront without
+  redesigning it: one type scale, one leading/tracking rule per role, AA
+  contrast that closes the axe findings, one focus ring, five interaction
+  states, one easing curve, and the details (selection, scrollbar, hairlines,
+  radii, tabular numerals, locked media ratios, form focus-within). No layout,
+  structure, copy, component or hue changed.
+- **Where.** One new stylesheet `apps/web/src/app/storefront-craft.css`, imported
+  last by `app/(storefront)/layout.tsx` (storefront only, so the admin/vendor
+  consoles keep their own design). Five small edits elsewhere:
+  `mgh-applet.css` focus ring is now themeable
+  (`--focus-ring-ink`, fallback `#D4AF37`); `ProductCard` card title
+  `line-clamp-1` → `line-clamp-2`; `ProductDetailClient` inactive gallery
+  thumbnail opacity moved off the button (it was fading the opaque 360° chip to
+  4.46:1); `CollectionExplorer` price-filter row gains `flex-wrap` (the 390 px
+  label/value collision); `route-manifest` + its spec register the new sheet.
+- **Scale.** label 11 / meta 12 / body 14 / title `clamp(22→26)` / display
+  `clamp(36→48)`; the hero is the display step at `clamp(72→88)`, reproducing
+  the design's own breakpoints. Leading 1.2 / 1.45 / 1.6 / 1.12 / 1.02.
+  Tracking: +0.18 em uppercase labels only; −0.015 / −0.01 on display/title; 0
+  on tabular figures. `portal-premium.css`'s second 10-step scale (which styles
+  bag, compare, checkout, about, policy, showrooms, education, journal) is
+  re-pointed at the same steps.
+- **Contrast.** Gold `#9A7B2C` → `#7C6323` (same hue/sat, L 39→31) and muted
+  `#8A857B` → `#6B675F` (L 51→42), applied through contextual tokens so a gold
+  label inside a dark band resolves to `#E6C97A` instead of darkening.
+  Measured: 4.00→5.73 (white), 3.58→5.13 (#F6F2E9), 3.67→5.63, 3.29→5.04,
+  4.37→5.18, 4.20→5.64, 4.40→5.17, 4.46→9.90 (badge opacity), focus ring
+  2.10→5.73 light and 9.41→12.25 dark. No hue changed.
+- **States.** Focus ring 2 px / offset 2 px, dual-tone (5.73:1 on paper,
+  12.25:1 on obsidian); hover state 150 ms, lift 300 ms; active never
+  transforms and no button/link scales on hover; disabled and `aria-busy`
+  styled; field-group labels acknowledge `:focus-within`; the nine 16×11 home
+  category links are `inline-flex; min-height: 24px`; pills and form controls
+  40 px; header icon buttons keep a 32 px box and gain a 44 px hit area via a
+  pseudo-element (a 44 px row does not fit 390 px — measured).
+- **Motion.** One curve `cubic-bezier(.16,1,.3,1)`; durations 150 / 300 / 520 ms.
+  The reveal used to be an untimed inline-style jump between opacity 0.01 and 1;
+  it is now the 520 ms enter. Reduced motion kills transitions, transforms,
+  drift and smooth scroll. Print reveals all content.
+- **Measured (`apps/web/scripts/craft-audit.mjs`, new).** 47 routes × 3 widths =
+  141 captures per side. Captures with zero axe violations and no overflow
+  **96 → 141**; axe nodes **125 → 0** (`color-contrast` 99 → 0, `target-size`
+  26 → 0); distinct font sizes per storefront route (mean @1440) **12.7 → 5.2**
+  (every catalogue/editorial page is exactly 11/12/14/24.5/48; home adds the
+  88 px hero); site-wide size/leading/tracking/family buckets **127 → 60**;
+  horizontal overflow at 1024 **84/7/4 px → 0** on all 47 routes.
+- **Measurement honesty.** v3's 109 contrast nodes included 10 artefacts: a
+  static capture leaves `[data-reveal]` sections at `opacity: 0.01`, and axe
+  composited a solid black CTA to white-on-white. The v4 harness scrolls the
+  page before axe and before the screenshot, so the before baseline is 99
+  genuine nodes and the screenshots show the page a reader gets. The 26
+  `target-size` nodes are unaffected.
+- **Gates.** `pnpm -r run typecheck` 0 errors; `next build --webpack` exit 0
+  with `apps/web/.env` moved aside and `DATABASE_URL` unset; `@maihan/web`
+  **604 passed / 21 skipped** (baseline unchanged); `check-slop` clean;
+  `check:budgets` **213.1 / 208.0 KB** — byte-identical to the baseline (the
+  pre-existing overrun is untouched, not worsened).
+- **Screenshots.** `docs/design-shots/v4/{before,after}` — 16 representative
+  routes × 1440/768/390, plus `before/audit.json` and `after/audit.json` for all
+  47 routes, and `docs/design-shots/v4/README.md` with the element-by-element
+  table.
+- **Deliberately left alone.** Hue/saturation; layout and composition; the card
+  price staying on the title step (24.5 vs 26 px — the design's own hierarchy);
+  the 32 px header control boxes; the four type families; the admin/vendor
+  consoles (they share `mgh-applet.css` but none of the storefront scale rules);
+  `/account/login` + `/account/register` (they mount `console-auth.css`, shared
+  with the consoles); the 12 environmental `/api/fresh/**` 500 captures; and
+  `contrast-incomplete` over gradient fields (axe cannot decide — every pair is
+  checked numerically in the README).
+
+---
+
 # SHOPPER COMMERCE + ACCOUNT + SITE ORIGIN + DYO DOSSIER + AR (2026-11-26)
 
 - **Goal.** Close the six shopper-facing gaps left by the storefront design port.
