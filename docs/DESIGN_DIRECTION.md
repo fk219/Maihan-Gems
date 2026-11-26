@@ -112,3 +112,65 @@ ever conveyed by motion alone.
 9. Cross-page audit: one motion vocabulary, no leftovers.
 
 Each step ships with a screenshot at 1440/768/390 and a budget check.
+
+---
+
+## 8. Anti-slop audit
+
+A design reads as AI-generated when it is composed of generic superlatives,
+uniform section rhythm, and decoration standing in for information. This is the
+gate every surface must pass before it is considered finished.
+
+### 8.1 The five-second brand test
+
+Remove the logo. Can a stranger still name the brand from typography, spacing,
+photography and copy? If not, the page is generic and is not done.
+
+### 8.2 Prohibited copy
+
+| Banned | Replace with |
+|---|---|
+| Timeless elegance, crafted with passion, elevate your style | A fact: carat, origin, treatment, certificate, metal |
+| "Not just a gemstone, but a story" | Delete |
+| 10,000+ happy clients | A measured number, or nothing |
+| Explore / Discover / Unlock / Learn more | See the certificate / View 12 pairs / Request a viewing |
+| 100% natural, 100% verified | The evidence label and the certificate reference |
+
+Rule: every marketing line carries a fact or is removed. `INV-07` already
+forbids rendering unverified fields as truth; this extends it to adjectives.
+
+### 8.3 Prohibited patterns
+
+1. **Fake social proof** - named testimonials without an attributed, dated
+   source, and hardcoded demo products presented as inventory.
+2. **Gradient everywhere** - one light source, not a gradient per component.
+3. **Uniform rhythm** - eyebrow + heading + 3-card grid on every section.
+4. **Icon clutter** - an icon per feature. Icons only on actions.
+5. **Eyebrow inflation** - more than one uppercase tracked label per page.
+6. **Glassmorphism cards** - translucent blur panels as a substitute for layout.
+7. **Motion on everything** - hover scale, tilt, magnetic buttons.
+8. **Decorative numbers** - counts that do not come from data.
+9. **Placeholder imagery** - one SVG or gradient used for every product.
+10. **Demo badges in production** - a demo label means the content is not real.
+
+### 8.4 Required qualities
+
+- Asymmetry with intent: one full-bleed section, one text-only section, one
+  split, in the same page.
+- Typography discipline: five sizes, two weights, one display and one text
+  family. Hierarchy from size and space, not colour.
+- Negative space as the primary layout tool.
+- Every surface answers: what is this, what does it cost, what is the evidence.
+- Numbers only when measured. Empty states speak plainly rather than filling.
+
+### 8.5 Gate
+
+Before a page ships:
+
+1. Logo removed - brand still recognisable.
+2. Grep the copy for the banned list. Zero hits.
+3. No demo/sample data rendered without an explicit, visible reason.
+4. At most one gradient, one eyebrow, no decorative icons.
+5. Screenshot at 1440/768/390 compared against the previous version; if the only
+   change is decoration, it does not count as progress.
+
