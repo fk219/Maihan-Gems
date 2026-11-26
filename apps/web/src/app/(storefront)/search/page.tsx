@@ -81,7 +81,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       />
 
       <EditorialMasthead
-        eyebrow="Mineralogical discovery"
+        eyebrow="The catalogue"
         title="Search the collection"
         lead="Search by variety, colour, cut, treatment or origin. Filters are ordinary links: the URL is the state, so every result set can be shared and revisited."
       />
@@ -163,15 +163,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
           {meta.degraded && (
             <div className="mh-notice" role="status">
-              <strong>Search notice.</strong> Semantic vector ranking is operating in degraded mode
-              ({meta.degradation_reason ?? 'service fallback'}). Structured filters and full-text
-              search remain active.
+              <strong>Search notice.</strong> Semantic ranking is unavailable right now, so results
+              are ordered by text match and the filters you selected. Nothing has been hidden.
             </div>
           )}
 
           {rejected_filters.length > 0 && (
             <div className="mh-notice mh-notice--muted" role="status">
-              <strong>Filter notice.</strong> These unrecognised parameters were disregarded:{' '}
+              <strong>Filter notice.</strong> These values were not recognised and were ignored:{' '}
               {rejected_filters.map((rf) => `${rf.filter}: “${rf.value}”`).join(', ')}.
             </div>
           )}

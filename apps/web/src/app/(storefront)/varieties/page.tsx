@@ -69,6 +69,7 @@ export default async function VarietiesIndexPage() {
                   <Link href={`/${variety.slug}`}>{variety.name}</Link>
                 </h2>
                 <div className="mh-directory__links">
+                  <Link href={`/${variety.slug}`}>Loose gemstones</Link>
                   <Link href={`/${variety.slug}-pairs`}>Matched pairs</Link>
                 </div>
               </div>

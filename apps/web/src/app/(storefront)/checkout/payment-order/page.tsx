@@ -1,82 +1,73 @@
 /**
  * apps/web/src/app/(storefront)/checkout/payment-order/page.tsx
  *
- * `/checkout/payment-order` — checkout step 2 (target of the observed
- * /cart/payment-order 301). SoT 12.2.
+ * Checkout step 2 — the payment order.
+ *
+ * No payment provider or order-placement flow is enabled. Rather than render
+ * a form whose submit does nothing (the previous version rendered two
+ * invented service promises instead), the page states the step's real state
+ * and lists exactly what the step will collect when it opens.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { Breadcrumbs } from '../../../../components/design-system/Breadcrumbs.js';
+import { EditorialMasthead } from '../../../../components/design-system/EditorialMasthead.js';
+import { CheckoutSteps } from '../../../../components/commerce/CheckoutSteps.js';
 
 export const metadata: Metadata = {
-  title: 'Payment Order | Maihan Gems Checkout',
-  description: 'Issue customer payment order and verify delivery address details.',
+  title: 'Payment order | Maihan Gems',
+  description: 'The recipient and billing details step of checkout.',
 };
 
 export default function CheckoutPaymentOrderPage() {
   return (
-    <main className="page checkout-page">
+    <main className="page checkout-page mh-page">
       <Breadcrumbs
         crumbs={[
           { label: 'Home', href: '/' },
-          { label: 'Shopping Bag', href: '/cart' },
-          { label: 'Order Summary', href: '/checkout/order-summary' },
-          { label: 'Payment Order' },
+          { label: 'Bag', href: '/cart' },
+          { label: 'Order summary', href: '/checkout/order-summary' },
+          { label: 'Payment order' },
         ]}
       />
 
-      <div className="checkout-shell">
-        <div className="checkout-steps">
-          <div className="checkout-step checkout-step--completed">
-            <span>✓</span>
-            <span>Order Summary</span>
-          </div>
-          <div className="checkout-step checkout-step--active">
-            <span>2</span>
-            <span>Payment Order</span>
-          </div>
-          <div className="checkout-step">
-            <span>3</span>
-            <span>Secure Settlement</span>
-          </div>
-        </div>
+      <EditorialMasthead
+        eyebrow="Checkout · Step 2 of 3"
+        title="Payment order"
+        lead="The recipient, the billing address and the delivery method. These details belong to an order; they are not collected until an order can be placed."
+      />
 
-        <span className="eyebrow" style={{ marginBottom: '0.5rem' }}>
-          Checkpoint Funnel · Step 2 of 3
-        </span>
-        <h1 style={{ color: 'var(--text-primary)', marginTop: 0 }}>Payment Order Details</h1>
-        <p className="page-subtitle" style={{ color: 'var(--text-secondary)' }}>
-          Provide the recipient identity and billing details to authorize payment order reservation.
+      <CheckoutSteps current={2} />
+
+      <div className="sf-checkout__panel">
+        <h2>This step is not open.</h2>
+        <p>
+          The platform has no approved payment provider in this environment, so it does not
+          collect recipient or billing details. A form here would be a promise the next step
+          cannot keep.
         </p>
+        <p>When the step opens it will ask for:</p>
+        <ul className="sf-prose" style={{ paddingLeft: 20 }}>
+          <li>the recipient name and a delivery address;</li>
+          <li>a billing address and, where required, a tax identifier;</li>
+          <li>the delivery method offered for the piece;</li>
+          <li>confirmation that the summary is correct.</li>
+        </ul>
+      </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', margin: '2rem 0' }}>
-          <div style={{ padding: '1.5rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-              Vault Reservation Lock
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              Upon issuing the payment order, the selected 1-of-1 gemstones are temporarily locked in the inventory vault for 30 minutes to guarantee exclusivity during checkout.
-            </p>
-          </div>
-          <div style={{ padding: '1.5rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-              Tax &amp; Customs Cleared
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              Compliant with UAE, GCC, and International cross-border luxury customs regulations. Complete harmonized tariff documentation accompanies shipment.
-            </p>
-          </div>
-        </div>
+      <div className="sf-checkout__notice" role="status">
+        <strong>No order has been created.</strong> Nothing has been charged and no details have
+        been stored. The bag remains available.
+      </div>
 
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}>
-          <Link href="/checkout/secure-payment" className="btn-primary">
-            Proceed to Secure Payment →
-          </Link>
-          <Link href="/checkout/order-summary" className="btn-secondary">
-            Back to Order Summary
-          </Link>
-        </div>
+      <div className="sf-checkout__actions">
+        <Link className="mh-cta mh-cta--quiet" href="/checkout/order-summary">
+          Back to the summary
+        </Link>
+        <Link className="mh-cta" href="/cart">
+          Return to the bag
+        </Link>
       </div>
     </main>
   );

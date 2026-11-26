@@ -1,51 +1,49 @@
 /**
  * apps/web/src/app/(storefront)/favorites/page.tsx
  *
- * `/favorites` — wishlist. SoT 12.2 `favorites/page.tsx`.
+ * `/favorites` — saved pieces.
+ *
+ * Saving requires a customer session and the favourites API. This surface is
+ * still an empty state; it says so, and it offers the collection rather than
+ * a sign-in wall the visitor did not ask for.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
-import { EmptyState } from '../../../components/design-system/EmptyState.js';
+import { EditorialMasthead } from '../../../components/design-system/EditorialMasthead.js';
 
 export const metadata: Metadata = {
-  title: 'Curated Vault Favorites | Maihan Gems',
-  description: 'Your saved 1-of-1 untreated gemstones and bespoke setting favorites.',
+  title: 'Saved pieces | Maihan Gems',
+  description: 'Pieces you have set aside while considering them.',
 };
 
 export default function FavoritesPage() {
   return (
-    <main className="page favorites-page">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Vault Favorites' },
-        ]}
+    <main className="page favorites-page mh-page">
+      <Breadcrumbs crumbs={[{ label: 'Home', href: '/' }, { label: 'Saved pieces' }]} />
+
+      <EditorialMasthead
+        eyebrow="Private selection"
+        title="Saved pieces"
+        lead="A place for the stones and mountings you want to return to. Saving is tied to your account, so the list follows you rather than the browser."
       />
 
-      <span className="page-eyebrow">Client Private Portfolio</span>
-      <h1>Your Curated Vault</h1>
-      <p className="page-subtitle">
-        Save and monitor 1-of-1 earth-mined loose gemstones, matched suites, and bespoke goldsmith settings.
-      </p>
-
-      <div className="vault-shell">
-        <EmptyState
-          title="Your Vault Wishlist is currently empty."
-          action={
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Link href="/varieties" className="btn-primary">
-                Explore Loose Gemstones
-              </Link>
-              <Link href="/design-your-own" className="btn-secondary">
-                Configure Bespoke Atelier
-              </Link>
-            </div>
-          }
-        >
-          Add rare certified gems or master mountings to your vault to monitor availability and request private salon viewings.
-        </EmptyState>
+      <div className="empty-state">
+        <h2 className="empty-state__title">Nothing is saved yet.</h2>
+        <p className="empty-state__body">
+          When you save a piece it appears here with the price and availability its record
+          carried at the time. A saved piece is not a reservation.
+        </p>
+        <div className="empty-state__action">
+          <Link className="mh-cta" href="/varieties">
+            Browse the varieties
+            <span aria-hidden="true">→</span>
+          </Link>
+          <Link className="mh-cta mh-cta--quiet" href="/account">
+            Open your account
+          </Link>
+        </div>
       </div>
     </main>
   );
