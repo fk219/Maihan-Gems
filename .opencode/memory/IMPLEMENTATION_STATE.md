@@ -1,3 +1,52 @@
+# DEVELOP CONSOLES ON MAIN — ADMIN + VENDOR UI PORT (2026-11-26)
+
+- **Goal.** Put develop's admin console and vendor portal on `main` as-is, with
+  the `/api/fresh/**` compatibility layer as their only data seam, and main's
+  session model as the only auth.
+- **Copied byte-for-byte** (develop worktree → `apps/web/src`):
+  `components/mgh/operator/{AdminConsoleApp,AdminConsoleFresh,AdminShellMount,VendorPortalApp,VendorConsoleFresh,VendorShellMount}.tsx`,
+  `components/mgh/ui/MediaImage.tsx`, `styles/mgh-applet.css`,
+  `styles/portal-premium.css`. The only edit in the closure is one import:
+  `VendorPortalApp` `@/components/mgh/ui/MediaImage` → `../ui/MediaImage.js`
+  (main has no `@/*` alias). No behaviour, markup, copy or API call changed.
+- **Routes.** `app/admin/[[...adminPath]]/page.tsx` now renders
+  `AdminShellMount` behind `getAdminSession()` → redirect `/admin/login`
+  (metadata robots noindex and `force-dynamic` kept). New
+  `app/vendor/[[...vendorPath]]/page.tsx` renders `VendorShellMount` behind
+  `getVendorSession()` (session + vendor membership) → redirect `/vendor/login`.
+  Main's `app/vendor/{page,products/page,orders/page,statement/page}.tsx` were
+  removed (they are what the develop portal replaces); `vendor/login` is
+  untouched and outranks the catch-all. `route-manifest.ts` was updated: one
+  vendor catch-all entry replaces the four deleted page entries.
+- **Dependencies.** Added `lucide-react@1.61.0`, `tailwindcss@4.3.3`,
+  `@tailwindcss/postcss@4.3.3` — the exact versions develop's lockfile pins —
+  plus `apps/web/postcss.config.mjs`. These are required by the copied code and
+  stylesheets (the console imports ~40 icons; `mgh-applet.css` imports Tailwind
+  theme/utilities). `[INFERRED / PROPOSED]` This is a dependency addition under
+  AGENTS.md §6.5 and **requires an ADR**; nothing else was added. The two radix
+  packages named in the brief are not imported by these consoles, so they were
+  not added.
+- **Deliberately not done.** develop's own sign-in/logout/2FA endpoints
+  (`/api/fresh-admin/*`, `/api/fresh-auth/*`, `/api/fresh-vendor*`) remain
+  unimplemented; the consoles work only after main's `/admin/login` or
+  `/vendor/login` session exists (ADR-027). develop's `admin.css` / `maison.css`
+  / `operator.css` were not copied because the consoles import only
+  `mgh-applet.css` + `portal-premium.css` (every class token develop styles is
+  defined in those two or generated as a Tailwind utility; `portal-kpi` and
+  `portal-input--mono` have no rule even in develop). develop's root-layout
+  `next/font`
+  variables (`--font-urbanist`, `--font-display-applet`, `--font-sans-applet`)
+  are not ported, so Urbanist/EB Garamond fall back to main's loaded fonts.
+- **Verified.** `pnpm -r run typecheck` 0 errors (9 projects);
+  `pnpm --filter @maihan/web run build` exit 0 with `apps/web/.env` moved aside
+  and `DATABASE_URL` unset (`/admin/[[...adminPath]]` and
+  `/vendor/[[...vendorPath]]` both `ƒ (Dynamic)`); `@maihan/web` **540 passed /
+  21 skipped** (baseline unchanged); `check:budgets` PASS 139.9 KB / 143.4 KB
+  gzip. Production smoke: `/admin` → 307 `/admin/login`, `/vendor` → 307
+  `/vendor/login`, both login pages 200, `/api/fresh/admin/stats` 401.
+
+---
+
 # FRESH COMPATIBILITY LAYER — DEVELOP'S UI ON MAIN'S BACKEND (2026-11-26)
 
 - **Goal.** `develop`'s console, vendor portal and variety picker call

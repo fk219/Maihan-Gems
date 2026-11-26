@@ -345,6 +345,18 @@ never part of this decision and remains open.
 
 ---
 
+**ADR-028 - Tailwind CSS 4 and lucide-react are accepted for the operator consoles**
+
+- **Context:** The operator consoles brought over from `develop` (`AdminConsoleApp`, `VendorPortalApp`) are ~4,100 lines of UI that import ~40 icons and a stylesheet that uses Tailwind 4 theme/utilities. Without both, the consoles cannot typecheck or build. The locked stack (doc 02) does not include either.
+- **Alternatives:** (a) rewrite 4,100 lines of UI to remove the dependency; (b) copy the two packages at develop's pinned versions; (c) build a bespoke utility layer.
+- **Decision:** Option (b). `tailwindcss@4.3.3`, `@tailwindcss/postcss@4.3.3` and `lucide-react@1.61.0` are accepted as storefront/console build dependencies. They apply to `apps/web` only; no package outside the web app may import them.
+- **Reason:** Rewriting a working console to satisfy a stack list is unbounded work with a real regression risk, and the alternative utility layer would be a worse version of the same idea. Tailwind is a build-time transform, so it does not enter the runtime bundle beyond the classes actually emitted; lucide is tree-shaken per icon.
+- **Consequences:** (1) `apps/web` gains a PostCSS pipeline; bundle budgets remain the gate, and the measured numbers are unchanged (139.9 / 143.4 KB). (2) Icons are a visual vocabulary; a second icon set must not be added. (3) The operator consoles are now the only surface permitted to use Tailwind utilities; storefront pages keep the existing CSS-token system until they are migrated deliberately.
+- **Evidence:** `apps/web/src/components/mgh/operator/*`; `apps/web/src/styles/mgh-applet.css`; measured budget output after the change.
+- **Status:** Accepted by implementation necessity (2026-11-26), flagged for client review.
+
+---
+
 ## ADR governance
 
 | Rule | Detail |

@@ -380,10 +380,10 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     group: 'vendor',
   },
   {
-    fsPath: 'src/app/vendor/page.tsx',
-    sotPath: 'app/vendor/page.tsx   # /vendor',
+    fsPath: 'src/app/vendor/[[...vendorPath]]/page.tsx',
+    sotPath: 'app/vendor/...   # /vendor/**',
     authority:
-      'PROJECT_SOURCE_OF_TRUTH.md 12.2/13.2 (/admin/** new target-only surface, applied to vendors) + BUILD_BACKLOG.md Track D (D3): vendor dashboard — state, stock counts, recent allocations, payable balance.',
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 (separate layout, separate authz) + 13.2 (/admin/** new target-only surface, applied to vendors) + docs/AUDIT_MAIN_VS_DEVELOP.md §6 Phase 2 step 11: one optional catch-all renders develop\'s vendor portal (dashboard, analytics, submissions, inventory, settings) for every /vendor/** path after the session + membership guard. A static /vendor/login segment outranks it.',
     storefront: false,
     group: 'vendor',
   },
@@ -392,30 +392,6 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     sotPath: 'app/vendor/login/page.tsx   # /vendor/login',
     authority:
       'PROJECT_SOURCE_OF_TRUTH.md 13.2 + BUILD_BACKLOG.md Track D (D1) + ADR-027: vendor sign-in reuses the first-party session and then checks vendor membership.',
-    storefront: false,
-    group: 'vendor',
-  },
-  {
-    fsPath: 'src/app/vendor/products/page.tsx',
-    sotPath: 'app/vendor/products/page.tsx   # /vendor/products',
-    authority:
-      'PROJECT_SOURCE_OF_TRUTH.md 13.2 + BUILD_BACKLOG.md Track D (D4/D5): vendor stock list and DRAFT intake; publishing stays a platform decision (gate V15).',
-    storefront: false,
-    group: 'vendor',
-  },
-  {
-    fsPath: 'src/app/vendor/orders/page.tsx',
-    sotPath: 'app/vendor/orders/page.tsx   # /vendor/orders',
-    authority:
-      'PROJECT_SOURCE_OF_TRUTH.md 13.2 + BUILD_BACKLOG.md Track D (D3/D6) + ADR-026: per-vendor order allocations joined to the order header.',
-    storefront: false,
-    group: 'vendor',
-  },
-  {
-    fsPath: 'src/app/vendor/statement/page.tsx',
-    sotPath: 'app/vendor/statement/page.tsx   # /vendor/statement',
-    authority:
-      'PROJECT_SOURCE_OF_TRUTH.md 13.2 + BUILD_BACKLOG.md Track D (D8) + ADR-026: payout statement reconstructed from the append-only vendor_ledger.',
     storefront: false,
     group: 'vendor',
   },
