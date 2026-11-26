@@ -45,6 +45,7 @@ export interface CartOwnershipRow {
   readonly customer_id: string | null;
   readonly state: string;
   readonly expires_at: Date | string;
+  readonly converted_order_id: string | null;
 }
 
 export interface PurchasableProductRow {
@@ -277,7 +278,7 @@ export async function findCartOwnership(
   cartToken: string,
 ): Promise<CartOwnershipRow | null> {
   const res = await db.execute(sql`
-    SELECT id, cart_token, customer_id, state::text AS state, expires_at
+    SELECT id, cart_token, customer_id, state::text AS state, expires_at, converted_order_id
     FROM carts
     WHERE cart_token = ${cartToken}
     LIMIT 1
@@ -290,6 +291,7 @@ export async function findCartOwnership(
     customer_id: text(row['customer_id']),
     state: String(row['state'] ?? 'ACTIVE'),
     expires_at: (row['expires_at'] as Date | string) ?? new Date(0),
+    converted_order_id: text(row['converted_order_id']),
   };
 }
 

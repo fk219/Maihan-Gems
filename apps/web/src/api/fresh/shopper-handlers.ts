@@ -28,6 +28,7 @@ import {
   executeSearch,
   getCartByToken,
   getCheckoutSession,
+  getOrderById,
   placeOrder,
   removeCartItem,
   saveCheckoutSession,
@@ -124,16 +125,27 @@ async function loadAuthorizedCart(ctx: FreshContext, token: string): Promise<Car
   if (owner === null) {
     throw new ContractError('CART_NOT_FOUND', 'Cart not found.');
   }
-  if (owner.customer_id !== null) {
-    const actor = await resolveShopperActor(ctx);
-    if (actor === null || actor.customer.id !== owner.customer_id) {
-      throw new ContractError('CART_NOT_FOUND', 'Cart not found.');
-    }
-  }
+  await authorizeCartOwner(ctx, owner);
   if (owner.state !== 'ACTIVE') {
     throw new ContractError('CART_EXPIRED', 'Cart is not active.');
   }
   return getCartByToken(ctx.db, token);
+}
+
+/**
+ * The ownership predicate, shared by every cart read and by checkout. A cart
+ * bound to a customer is 404 to an anonymous caller or another customer; an
+ * unbound guest cart is readable by whoever holds its token (develop's model).
+ */
+async function authorizeCartOwner(
+  ctx: FreshContext,
+  owner: { readonly customer_id: string | null; readonly cart_token: string },
+): Promise<void> {
+  if (owner.customer_id === null) return;
+  const actor = await resolveShopperActor(ctx);
+  if (actor === null || actor.customer.id !== owner.customer_id) {
+    throw new ContractError('CART_NOT_FOUND', 'Cart not found.');
+  }
 }
 
 function requireCartToken(ctx: FreshContext): string {
@@ -332,6 +344,30 @@ function totalsFromOrder(order: {
   };
 }
 
+interface PlacedOrderLike {
+  readonly id: string;
+  readonly order_number: string;
+  readonly subtotal: string;
+  readonly discount_total: string;
+  readonly tax_total: string;
+  readonly shipping_total: string;
+  readonly grand_total: string;
+  readonly currency: string;
+}
+
+function checkoutResult(order: PlacedOrderLike): Record<string, unknown> {
+  return {
+    order_number: order.order_number,
+    order_id: order.id,
+    // main's orders table has no guest access-token column, and this surface
+    // does not invent one. The order dossier is readable by the owning session
+    // only; a guest sees the confirmation above.
+    access_token: '',
+    totals: totalsFromOrder(order),
+    payment_pending: true,
+  };
+}
+
 /**
  * POST /api/fresh/carts/{token}/checkout — place the order.
  *
@@ -343,7 +379,23 @@ function totalsFromOrder(order: {
  */
 export async function cartCheckoutHandler(ctx: FreshContext): Promise<HandlerOutcome> {
   const token = requireCartToken(ctx);
-  const cart = await loadAuthorizedCart(ctx, token);
+  const owner = await findCartOwnership(ctx.db, token);
+  if (owner === null) {
+    throw new ContractError('CART_NOT_FOUND', 'Cart not found.');
+  }
+  await authorizeCartOwner(ctx, owner);
+
+  // Idempotent replay: a cart that already converted returns its order instead
+  // of reserving stock a second time.
+  if (owner.state === 'CONVERTED' && owner.converted_order_id !== null) {
+    const existing = await getOrderById(ctx.db, owner.converted_order_id);
+    return ok(checkoutResult(existing));
+  }
+  if (owner.state !== 'ACTIVE') {
+    throw new ContractError('CART_EXPIRED', 'Cart is not active.');
+  }
+
+  const cart = await getCartByToken(ctx.db, token);
   if (cart.items.length === 0) {
     throw new ContractError('UNPROCESSABLE', 'Cannot place an order for an empty cart.');
   }
@@ -393,19 +445,7 @@ export async function cartCheckoutHandler(ctx: FreshContext): Promise<HandlerOut
     ...(customerNote === undefined ? {} : { customer_note: customerNote }),
   });
 
-  return ok(
-    {
-      order_number: order.order_number,
-      order_id: order.id,
-      // main's orders table has no guest access-token column, and this surface
-      // does not invent one. The order dossier is readable by the owning
-      // session only; a guest sees the confirmation above.
-      access_token: '',
-      totals: totalsFromOrder(order),
-      payment_pending: true,
-    },
-    201,
-  );
+  return ok(checkoutResult(order), 201);
 }
 
 /** POST /api/fresh/checkout — start a checkout session (reserves stock). */

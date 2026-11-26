@@ -41,6 +41,8 @@ interface Fake {
   readonly writes: string[];
   sessionUser: string | null;
   cartCustomerId: string | null;
+  cartState: string;
+  cartConvertedOrderId: string | null;
   orderOwnerId: string | null;
   readonly jobs: Map<string, unknown>;
 }
@@ -95,7 +97,7 @@ function buildFake(): Fake {
     customer_id: fake.cartCustomerId,
     anonymous_session_id: null,
     currency: 'USD',
-    state: 'ACTIVE',
+    state: fake.cartState,
     pricing_snapshot: {
       currency: 'USD',
       subtotal: '1250.00',
@@ -107,7 +109,7 @@ function buildFake(): Fake {
       computed_at: '2026-11-26T00:00:00.000Z',
     },
     expires_at: future(),
-    converted_order_id: null,
+    converted_order_id: fake.cartConvertedOrderId,
     created_at: '2026-11-25T00:00:00.000Z',
     updated_at: '2026-11-25T00:00:00.000Z',
   });
@@ -497,6 +499,8 @@ function buildFake(): Fake {
     writes,
     sessionUser: null,
     cartCustomerId: null,
+    cartState: 'ACTIVE',
+    cartConvertedOrderId: null,
     orderOwnerId: null,
     jobs,
   };
@@ -727,6 +731,31 @@ describe('checkout', () => {
     expect(orderInsert).toBeGreaterThan(-1);
     if (reservation !== -1) expect(reservation).toBeLessThan(orderInsert);
     expectNoInterpolation(fake);
+  });
+
+  it('a converted cart replays its order instead of reserving stock again', async () => {
+    const fake = buildFake();
+    fake.cartState = 'CONVERTED';
+    fake.cartConvertedOrderId = ORDER_ID;
+    const response = await call(fake, {
+      path: `/api/fresh/carts/${CART}/checkout`,
+      method: 'POST',
+      body: {
+        email: EMAIL,
+        shipping_address: {
+          recipient: 'Amina',
+          line1: '1 Creek Road',
+          city: 'Dubai',
+          postal_code: '00000',
+          country: 'AE',
+        },
+      },
+    });
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as Record<string, unknown>;
+    expect(body['order_number']).toBe(ORDER_NUMBER);
+    expect(fake.queries.some((q) => q.text.includes('INSERT INTO orders'))).toBe(false);
+    expect(fake.queries.some((q) => q.text.includes("'inventory_reservations'"))).toBe(false);
   });
 
   it('POST /checkout/{id}/advance moves SHIPPING and requires an address', async () => {
