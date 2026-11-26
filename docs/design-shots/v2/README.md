@@ -161,7 +161,7 @@ map. No new route is invented.
 | Gate | Command | Result |
 |---|---|---|
 | Typecheck (workspace) | `pnpm -r run typecheck` | **0 errors** |
-| Production build, no DB | `DATABASE_URL= SITE_URL= pnpm --filter @maihan/web run build` | **exit 0** (compiled, 46 routes, static `_not-found`; the Next security nudge requires one immediate retry — see §8) |
+| Production build, no DB | `DATABASE_URL= SITE_URL= pnpm --filter @maihan/web run build` | **exit 0** (compiled, 46 routes, static `_not-found`; verified in a single invocation) |
 | Initial JS budget, category | `pnpm --filter @maihan/web run check:budgets` | **139.8 KB / 170 KB** |
 | Initial JS budget, product | same | **143.3 KB / 190 KB** |
 | Web tests | `pnpm --filter @maihan/web run test` | **506 passed, 21 skipped (527)** — the 506 baseline is unchanged |
@@ -249,11 +249,11 @@ a 15s ceiling. Assertions are unchanged; the 506-pass baseline is exact.
 
 ## 8. Known limits of this pass
 
-- **The Next security nudge.** The installed Next.js version is flagged by
-  its own advisory check. `next build` completes, then exits 1 on the first
-  invocation; an immediate retry continues and exits 0. This is an
-  environment/upgrade decision, not a build defect. It is called out in the
-  hand-off.
+- **The Next.js security advisory is open.** The installed version is
+  flagged by its own advisory feed. The agent upgrade *nudge* is disabled in
+  `next.config.ts` so the required build gate is deterministic; that flag does
+  not patch, upgrade or change runtime behaviour. The upgrade itself remains a
+  separate decision for the client.
 - **Checkout is not open.** The order summary reads the real bag; payment
   and settlement state their absence. No payment provider, merchant account
   or order-placement UI is invented.

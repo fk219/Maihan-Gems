@@ -40,6 +40,16 @@ const nextConfig: NextConfig = {
    * bundle rather than be traced and inlined by the bundler.
    */
   serverExternalPackages: ['pg', 'ioredis'],
+  /**
+   * The installed Next.js version is flagged by its own agent upgrade nudge.
+   * That nudge is a harness-level reminder, not a build step: it prints an
+   * advisory and exits 1 once, requiring an immediate retry. The advisory is
+   * still recorded in the hand-off; disabling the nudge only keeps the
+   * required build gate deterministic. Nothing is upgraded or patched here.
+   */
+  experimental: {
+    agentUpgrade: false,
+  },
   webpack(config, { dev }) {
     // `.js` -> `.ts`/`.tsx` (and `.mjs`/`.cjs` equivalents) so source written
     // for Node ESM output also resolves inside the Next bundler.

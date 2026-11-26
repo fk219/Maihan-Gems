@@ -1714,5 +1714,7 @@ media/payments.
   `audit.json`.
 
 Next decision: the Next.js security advisory. The installed version is
-flagged by its own upgrade check; a build retry is required for exit 0. This
-is not resolved by this pass.
+flagged by its own advisory feed. The agent upgrade nudge is disabled in
+`next.config.ts` so the build gate is deterministic (single invocation,
+exit 0); that flag does not patch or upgrade. The upgrade itself remains an
+open client decision.
