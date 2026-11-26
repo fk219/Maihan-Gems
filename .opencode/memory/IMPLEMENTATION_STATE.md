@@ -1679,3 +1679,40 @@ uses functional and architecture language, clarifies the configured-jewellery
 composition constraints, and omits repository progress and implementation
 identifiers from the client-facing text. Markdown structure and seven Mermaid
 diagrams were checked.
+
+## Storefront v2 design pass — 2026-11-26
+
+The client rejected the first storefront design. A complete visual rebuild was
+delivered without reopening the locked architecture or touching api/worker/
+media/payments.
+
+- **Navbar restored**: wordmark centred, links split left/right, two-row bar
+  (utility rule + editorial rail), real mobile drawer below 1120px. The link
+  set is the historical view model from `apps/web/src/lib/mega-menu.ts` at
+  `09b98fe`: Loose gemstones, Matched pairs, Ready-made rings, Shop by colour,
+  Settings, Design your own. No destination invented.
+- **Visual system**: ink/paper, gold as light, Cormorant display + Inter data +
+  tabular money, hairlines instead of cards, Enter/Pass/Hold only.
+- **All storefront routes** redesigned, plus console/vendor sign-in, error,
+  not-found and loading. Empty/unpublished/disabled states are explicit; no
+  fabricated certifications, treatments, origins, shipping, financing or
+  protection terms.
+- **Demo catalogue**: `packages/db/seed-demo-catalogue.mjs`, idempotent and
+  parameterised. `maihan_dev` now holds 2 ACTIVE varieties, 2 ACTIVE colours,
+  10 ACTIVE demo products (2 per kind; CONFIGURED satisfies INV-01), 2 setting
+  designs / 4 variants, and 1 demo DYO review (`DEMO-REVIEW`). Second run
+  inserted 0 rows.
+- **Verification**: typecheck 0; build exit 0 with DATABASE_URL/SITE_URL
+  unset; budgets 139.8/170 and 143.3/190 KB; web tests 506 passed / 21 skipped
+  (baseline preserved); axe 140/140 route-width captures with 0 violations and
+  0 overflow; nav open states clean.
+- **Latent fixes exposed by real demo rows**: favourites and order repositories
+  queried non-existent columns / enum values; corrected against the real
+  schema. Commerce tests now run sequentially with a 15s ceiling because they
+  share one 1-of-1 stone on one dev database.
+- **Evidence**: `docs/design-shots/v2/README.md` and 140 screenshots plus
+  `audit.json`.
+
+Next decision: the Next.js security advisory. The installed version is
+flagged by its own upgrade check; a build retry is required for exit 0. This
+is not resolved by this pass.
