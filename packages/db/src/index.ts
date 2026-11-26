@@ -495,4 +495,39 @@ export {
   type JobRow,
   type JobState,
 } from './worker/jobs-repository.js';
+// ---------------------------------------------------------------------------
+// Develop-UI compatibility surface (read-only). See
+// docs/FRESH_COMPAT_LAYER.md. These projections exist because the develop
+// consoles read operator lists that the storefront repositories do not expose.
+// No function here writes.
+// ---------------------------------------------------------------------------
+export {
+  PRODUCT_KINDS,
+  PRODUCT_STATES,
+  listActiveVarieties,
+  listConsoleAudit,
+  listConsoleDiscounts,
+  listConsoleInventory,
+  listConsoleOrders,
+  listConsoleVendors,
+  readConsoleStats,
+  readVendorAnalytics,
+  readVendorInventory,
+  resolveVendorSegment,
+  type ConsoleAuditRow,
+  type ConsoleDiscountRow,
+  type ConsoleInventoryItem,
+  type ConsoleInventoryPage,
+  type ConsoleInventoryQuery,
+  type ConsoleOrderPage,
+  type ConsoleOrderRow,
+  type ConsoleStats,
+  type ConsoleVendorAnalytics,
+  type ConsoleVendorRow,
+  type ConsoleVarietyRow,
+  type ProductKind,
+  type ProductState,
+  type VendorInventoryPage,
+  type VendorInventoryStats,
+} from './compat/fresh-compat-repository.js';
 
