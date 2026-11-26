@@ -21,6 +21,7 @@
  * build without a database still succeeds and the shell still renders.
  */
 import { ContractError } from '@maihan/contracts';
+import { runtimeEnvironment } from '@maihan/config';
 import { getServerDb } from '../../../../api/next-adapter.js';
 import { createFreshCompatApi } from '../../../../api/fresh/index.js';
 import { errorResponse, newRequestId, newTraceId } from '../../../../api/envelope.js';
@@ -44,8 +45,10 @@ async function handle(request: Request): Promise<Response> {
   }
 
   // No `allowRoleHeader`: the compatibility surface accepts the same session
-  // cookie as the rest of main, and nothing else.
-  return createFreshCompatApi({ db })(request);
+  // cookie as the rest of main, and nothing else. `environment` lets the
+  // development-only payment instrument fail closed outside the four local
+  // names.
+  return createFreshCompatApi({ db, environment: runtimeEnvironment() })(request);
 }
 
 // Every verb is exported so a non-GET request to a compatibility path gets the

@@ -283,7 +283,7 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     fsPath: 'src/app/(storefront)/account/[[...accountPath]]/page.tsx',
     sotPath: 'app/(storefront)/account/...',
     authority:
-      'PROJECT_SOURCE_OF_TRUTH.md 12.2 + 13.1 + 13.2: /account/** one catch-all. It serves `/account` (profile or redirect to sign-in), redirects `/account/sign-in` (the 301 target of legacy `/auth`) and renders the `/account/verify-email` token landing surface (the 301 target of legacy `/verify-email`). Remaining sub-routes stay with Phase 6.',
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 + 13.1 + 13.2: /account/** one catch-all. It mounts develop\'s CustomerAccountApp (docs/AUDIT_MAIN_VS_DEVELOP.md §6 Phase 2 step 11) over main\'s ADR-027 session and the /api/fresh/auth/** adapters; static /account/login and /account/register keep main\'s sign-in pages. The app derives its section (overview, orders, saved, addresses, settings) from the trailing segments.',
     storefront: true,
     group: 'storefront',
   },
@@ -606,6 +606,14 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     sotPath: 'app/api/fresh/[...path]/route.ts   # /api/fresh/**',
     authority:
       'PROJECT_SOURCE_OF_TRUTH.md 12.2 (api/ route handlers) + docs/AUDIT_MAIN_VS_DEVELOP.md §6 Phase 2 step 10 (re-point the UI at main without editing it): the develop-UI compatibility surface. develop\'s console and vendor portal call /api/fresh/**, so main answers those exact paths from the locked schema (src/api/fresh/**, packages/db/src/compat/**). A static segment outranks the generic catch-all above.',
+    storefront: false,
+    group: 'api',
+  },
+  {
+    fsPath: 'src/app/api/fresh-auth/[...path]/route.ts',
+    sotPath: 'app/api/fresh-auth/[...path]/route.ts   # /api/fresh-auth/**',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 (api/ route handlers) + ADR-027 (one session model): develop\'s CustomerAccountApp posts to /api/fresh-auth/{login,register,request-reset,logout}. Those four paths are thin adapters over main\'s existing auth handlers; they set the same maihan_session cookie and add no second identity table. The first path segment is fresh-auth, so this needs its own mount.',
     storefront: false,
     group: 'api',
   },

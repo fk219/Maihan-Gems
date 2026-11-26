@@ -37,10 +37,22 @@ import {
   type ProductState,
 } from '@maihan/db';
 import type { AdminModule, AdminAction } from '@maihan/domain';
+import type { SearchQuery, SearchResult } from '@maihan/contracts';
 import type { CorrelationIds } from '../envelope.js';
 import type { HandlerOutcome } from '../handlers.js';
 import { authorizeAdminRequest, type AdminDeps } from '../admin/session-authz.js';
 import { requireVendor } from '../vendor/session-authz.js';
+
+/**
+ * Injectable seams for this surface.
+ *
+ * `search` is the existing search service (`executeSearch` from `@maihan/db`)
+ * in production wiring. It is injectable so the HTTP-contract suite can prove
+ * the response shapes without a database or a running search arm.
+ */
+export interface FreshDeps {
+  readonly search?: (db: CatalogDatabase, query: SearchQuery) => Promise<SearchResult>;
+}
 
 /**
  * Everything a compatibility handler needs. Deliberately narrower than
@@ -54,6 +66,14 @@ export interface FreshContext {
   readonly params: Record<string, string>;
   /** Production wiring passes `{ environment }` only, so the header seam stays closed. */
   readonly adminDeps: AdminDeps;
+  /** Injected search service; production passes `executeSearch`. */
+  readonly deps: FreshDeps;
+  /**
+   * Runtime environment name (`ENVIRONMENT`). The development-only payment
+   * instrument refuses when this is absent or is not one of the four local
+   * names, so an unconfigured deployment fails closed.
+   */
+  readonly environment?: string | undefined;
 }
 
 /**
