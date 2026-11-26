@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { createCatalogDatabase, createCatalogQueryPort, createPool } from '@maihan/db';
 import {
   createCatalogQueryService,
@@ -71,6 +71,27 @@ describe('Checkout HTTP API & Checkpoint Funnel Endpoints (Phase 6 Tasks 2-3)', 
       hasDb = true;
     } catch {
       hasDb = false;
+    }
+  });
+
+  afterEach(async () => {
+    // Reservation isolation: each checkpoint test composes the same sample
+    // product, so a session must not hold the stone into the next test. The
+    // jobs remain for afterAll to delete; this only releases the hold.
+    if (!pool || createdSessionIds.length === 0) return;
+    const client = await pool.connect();
+    try {
+      for (const sid of createdSessionIds) {
+        await client.query(
+          `UPDATE jobs SET state = 'CANCELLED', updated_at = now()
+           WHERE queue = 'inventory_reservations'
+             AND state = 'QUEUED'
+             AND payload->>'sessionId' = $1`,
+          [sid],
+        );
+      }
+    } finally {
+      client.release();
     }
   });
 

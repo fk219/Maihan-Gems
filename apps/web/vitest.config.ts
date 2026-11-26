@@ -24,5 +24,14 @@ export default defineConfig({
     // opt into `happy-dom` per-file via the `@vitest-environment` comment —
     // no global environment change, no extra runner.
     environment: 'node',
+    /**
+     * The commerce/checkout suites share one development database and reserve
+     * the same 1-of-1 stone. Running those files in parallel made them collide
+     * on `ALREADY_RESERVED`, and a cold Neon pooler can exceed the 5 s default.
+     * Files therefore run sequentially with a 15 s ceiling; assertions are
+     * unchanged. Pure unit suites are unaffected.
+     */
+    fileParallelism: false,
+    testTimeout: 15000,
   },
 });
