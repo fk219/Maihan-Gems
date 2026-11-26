@@ -80,6 +80,10 @@ export {
   createCatalogQueryPort,
 } from './catalog/port.js';
 export {
+  executeSearch,
+  type SearchExecutionOptions,
+} from './search/search-service.js';
+export {
   VectorCircuitBreaker,
   defaultVectorCircuitBreaker,
   type CircuitBreakerState,
@@ -530,4 +534,47 @@ export {
   type VendorInventoryPage,
   type VendorInventoryStats,
 } from './compat/fresh-compat-repository.js';
+// ---------------------------------------------------------------------------
+// Shopper compatibility surface (carts, orders, account, newsletter,
+// customer requests, catalogue typeahead). Reads plus FOUR new-record writes;
+// no price, inventory, order, payment, certificate or permission mutation.
+// See docs/FRESH_COMPAT_LAYER.md.
+// ---------------------------------------------------------------------------
+export {
+  createCustomerRequestRecord,
+  ensureCustomerForIdentity,
+  findActiveCartTokenForCustomer,
+  findCartOwnership,
+  findCompatGemstoneByRef,
+  findPublicCertificateForGemRef,
+  getCustomerOrderByNumber,
+  listCompatGemstones,
+  listCompatSettings,
+  listCustomerOrderSummaries,
+  resolvePurchasableProductRef,
+  subscribeNewsletter,
+  unsubscribeNewsletter,
+  type CartOwnershipRow,
+  type CompatCustomerRow,
+  type CompatGemstoneRow,
+  type CompatOrderDetail,
+  type CompatOrderEventRow,
+  type CompatOrderItemRow,
+  type CompatOrderSummaryRow,
+  type CompatSettingRow,
+  type CustomerRequestRow,
+  type NewsletterSubscriptionRow,
+  type PublicCertificateRow,
+  type PurchasableProductRow,
+} from './compat/fresh-shopper-repository.js';
+export {
+  loadDyoReviewDetail,
+  readDyoGemstone,
+  readDyoSettingVariant,
+  readLatestDyoQuote,
+  type DyoReviewDetail,
+  type DyoReviewGemstone,
+  type DyoReviewQuote,
+  type DyoReviewSettingVariant,
+} from './dyo/dyo-review-repository.js';
 
