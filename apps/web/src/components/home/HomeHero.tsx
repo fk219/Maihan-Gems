@@ -13,9 +13,9 @@
  * the stone on hover of the figure. All three are the shared vocabulary; the
  * reduced-motion switch in the token layer resolves them instantly.
  *
- * Copy discipline: no "100% natural", no laboratory names, no "hand-set",
- * no shipping promise. The only claim is the one the catalogue can keep:
- * every record shows the evidence it carries.
+ * Copy discipline: no unqualified purity claim, no laboratory names, no
+ * "hand-set", no shipping promise. The only claim is the one the catalogue can
+ * keep: every record shows the evidence it carries.
  */
 import Link from 'next/link';
 
