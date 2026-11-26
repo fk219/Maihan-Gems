@@ -1,3 +1,74 @@
+# SHOPPER COMMERCE + ACCOUNT + SITE ORIGIN + DYO DOSSIER + AR (2026-11-26)
+
+- **Goal.** Close the six shopper-facing gaps left by the storefront design port.
+  The storefront is still develop's design verbatim; the `/api/fresh/**` compat
+  layer now answers the commerce/account calls the design makes, from main's
+  locked schema and main's own application services.
+- **Commerce surface** (`apps/web/src/api/fresh/shopper-handlers.ts`,
+  `packages/db/src/compat/fresh-shopper-repository.ts`): carts (current / create
+  / view / add / update / remove / quote), checkout (start / get / advance) and
+  the develop `/carts/{token}/checkout` placement, orders (list / detail / dev
+  pay), leads + `/viewing-requests`, `/newsletter`, `/catalogue/gemstones` and
+  `/catalogue/settings`, and `/concierge`. Checkout is main's chain:
+  `createCheckoutSession` -> shipping -> payment -> `placeOrder`, so stock
+  reservation is main's `reserveStockForCart` (30-minute TTL) and never a second
+  implementation. The concierge runs the existing `AiOrchestrator` with
+  tool services backed by the real search/repository reads and **writes
+  nothing** (no conversation/message/interaction rows). Search/typeahead uses
+  `executeSearch` (exported from `@maihan/db` for this seam).
+- **Boundaries.** A customer-bound cart is `404` to every other caller after the
+  ownership read and before the contents are read. Orders are
+  `WHERE customer_id = $n`; unknown and other-customer orders are the same
+  `404 ORDER_NOT_FOUND`. Anonymous `GET /carts`, `/orders`, `/auth/**` are `401`
+  with zero queries. Every value is bound; both new repository suites assert the
+  SQL text never contains the caller's id/email/token.
+- **Account** (`account-handlers.ts` + `apps/web/src/app/api/fresh-auth/**`):
+  `/api/fresh-auth/{login,register,request-reset,logout}` are thin adapters over
+  main's `auth-handlers`; registration translates develop's first/last name into
+  main's strict `displayName`. `/api/fresh/auth/**` adds me (GET/PATCH), orders,
+  favourites (GET/PUT), addresses (CRUD + default), verify-email,
+  resend-verification, change-password (current-hash check, policy, hash update,
+  revoke all, fresh cookie) and reset. `/account` now mounts develop's
+  `CustomerAccountApp` byte-identically; `/account/login` and
+  `/account/register` remain main's static pages.
+- **Migration 0023** (`packages/db/migrations/0023_newsletter_and_requests.sql`,
+  journal idx 22, **unapplied**): `newsletter_subscriptions` (citext unique
+  email, `consent_at`, `source`, `unsubscribed_at`) and `customer_requests`
+  (the durable record behind the `create_customer_request` tool). Expand-only;
+  no existing table altered. `expected-schema.ts` is a measured mirror and was
+  deliberately not advanced — a sanctioned run must reconcile 83 -> 85 tables
+  and the column/FK/index deltas.
+- **SITE_URL.** `apps/web/src/lib/site-origin.ts`: SITE_URL wins; otherwise the
+  origin is derived from `x-forwarded-proto` + `x-forwarded-host`/`host` (loopback
+  defaults to http). Product JSON-LD and the cart canonical use it; with neither
+  the URL is omitted. `lib/sitemap.ts` keeps the strict `siteBaseUrl()`.
+- **DYO dossier.** `packages/db/src/dyo/dyo-review-repository.ts` joins the real
+  gemstone/pair by id, the setting variant + design, and the newest non-expired
+  `dyo_price_snapshots` row. `loadDyoReviewModel` maps it; NULL stays NULL and
+  the page keeps `Not evidenced`. The test override still supplies a bare
+  configuration row (null components), so the existing INV-07 test is unchanged.
+- **AR.** `/ar/{assetId}` keeps the honest missing-asset state and is now a
+  complete page: reference, catalogue context, the reason (with the real count
+  of registered calibrated assets, currently 0), and next actions. No model and
+  no `.glb` were fabricated.
+- **Verified.** `pnpm -r run typecheck` 0 errors. `@maihan/web` **603 passed /
+  21 skipped** (baseline 541/21). `@maihan/db` **325 passed / 32 skipped**
+  (baseline 298/32). `next build --webpack` exit 0 with `apps/web/.env` moved
+  aside and `DATABASE_URL`/`SITE_URL` unset; both `/api/fresh/[...path]` and
+  `/api/fresh-auth/[...path]` build dynamic. No live database statement ran.
+- **Honest gaps.** (1) no guest order access-token column, so a guest's order
+  dossier is not readable and the checkout response returns `access_token: ''`;
+  (2) `configuration_code` cannot join a cart (`cart_items.product_id NOT NULL`),
+  so that route refuses and points at main's `/api/v1/dyo/.../add-to-cart`;
+  (3) pay is a dev-only `test` payment instrument gated on `ENVIRONMENT`;
+  (4) tax/shipping are `0.00` with `UNCONFIGURED` (no rule tables); (5) no rate
+  limiter or cache participation on this surface; (6) `/api/fresh/configurations`
+  remains unimplemented.
+- **Next.** Reconcile `expected-schema.ts` on a sanctioned database run of
+  0023; then the remaining budget/axe work the client deferred.
+
+---
+
 # STOREFRONT DESIGN PORT — DEVELOP VERBATIM ON MAIN'S CATALOGUE (2026-11-26)
 
 - **Client decision.** The storefront must look exactly like `develop`; design

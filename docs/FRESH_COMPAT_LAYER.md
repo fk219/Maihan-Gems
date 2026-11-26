@@ -407,3 +407,174 @@ Test coverage of the three required properties:
 * **unsupported concepts** — `leads`, `admin/submissions` and
   `vendors/{code}/submissions` return `[]` with the flag header and issue zero
   queries.
+
+---
+
+# ADDENDUM — SHOPPER COMMERCE, ACCOUNT, SITE ORIGIN, DYO DOSSIER, AR (2026-11-26)
+
+This pass closes the six gaps recorded in `.opencode/memory/IMPLEMENTATION_STATE.md`
+under "Honest gaps" of the storefront design port. The console/vendor surface
+above is unchanged; everything below is additive.
+
+## 8. `/api/fresh/**` shopper routes
+
+The route table now carries a method per entry and dynamic segments. A path hit
+with the wrong method is still `405` with `Allow` (now the full method list for
+that path), and a miss is still `404 NOT_FOUND`.
+
+| Path | Method | Handler | Actor | Body / response |
+|---|---|---|---|---|
+| `/carts` | GET | `cartCurrentHandler` | customer (401) | current ACTIVE cart as `CartView`; 404 if none |
+| `/carts` | POST | `cartCreateHandler` | public | `{token?}` -> `{token, created}`; adopts an unbound token, never another customer's |
+| `/carts/{token}` | GET | `cartViewHandler` | cart | `CartView`; a customer-bound cart is 404 to anyone else |
+| `/carts/{token}/items` | POST | `cartAddItemHandler` | cart | `{ref, quantity?}` -> `CartView`. `{configuration_code}` is refused (see §10.2) |
+| `/carts/{token}/items/{itemId}` | PATCH / DELETE | update / remove | cart | `{quantity?}` -> `CartView` |
+| `/carts/{token}/quote` | GET | `cartQuoteHandler` | cart | `{subtotal, discount, tax, tax_label, shipping, grand_total, currency}`; read-only |
+| `/carts/{token}/checkout` | POST | `cartCheckoutHandler` | cart | places the order (below) |
+| `/checkout` | POST | `checkoutStartHandler` | cart | `{cart_token, email?}` -> session view (reserves stock) |
+| `/checkout/{sessionId}` | GET | `checkoutSessionHandler` | session id | session view |
+| `/checkout/{sessionId}/advance` | POST | `checkoutAdvanceHandler` | session id | `{step: SHIPPING|PAYMENT|CONFIRM, ...}` |
+| `/orders` | GET | `orderListHandler` | customer (401) | bare array of `{order_number,status,currency,grand_total,placed_at,item_count}` |
+| `/orders/{orderNumber}` | GET | `orderDetailHandler` | customer (401) | develop's order detail; 404 outside `customer_id` |
+| `/orders/{orderNumber}/pay` | POST | `orderPayHandler` | customer (401) | dev-only test instrument (§10.3) |
+| `/leads` | POST | `leadCreateHandler` | public | newsletter consent, or a customer request via the tool |
+| `/viewing-requests` | POST | `viewingRequestCreateHandler` | public | same tool, source fixed to `viewing_request` |
+| `/leads/unsubscribe` | POST | `leadUnsubscribeHandler` | public | idempotent, never enumerates |
+| `/newsletter` | POST | `newsletterSubscribeHandler` | public | explicit consent record |
+| `/catalogue/gemstones` | GET | `catalogueGemstonesHandler` | public | `{kind:'gemstones',count,items}`; `q` uses `executeSearch` |
+| `/catalogue/settings` | GET | `catalogueSettingsHandler` | public | `{kind:'settings',count,items}`, one row per design |
+| `/concierge` | POST | `conciergeHandler` | public | live rail + orchestrator reply, `model:false` |
+
+Only the URLs develop actually calls are listed; no alias is invented.
+
+### 8.1 Cart mapping (renames only)
+
+`token` <- `cart_token`, `status` <- `state`, `items[].product_ref/slug` <-
+`product_slug`, `product_name` <- `title`, `subtotal` <- the cart's advisory
+`pricing_snapshot.subtotal` after the repository's authoritative re-pricing.
+`product_kind` is `null` because the cart DTO does not carry it; `gemstone_ref`
+is `null` for the same reason. Nothing is derived from weight or price.
+
+### 8.2 Checkout and stock reservation
+
+`POST /carts/{token}/checkout` is main's own chain, in main's own order:
+`createCheckoutSession` (which calls `reserveStockForCart` inside Postgres) ->
+`submitShippingCheckpoint` -> `submitPaymentCheckpoint` -> `placeOrder`. A
+`discount_code` is validated through `validateDiscount` and applied to the
+frozen snapshot before placement. The idempotency key is
+`fresh-checkout:{cartToken}`, so a retry returns the original order.
+
+Tax is `0.00` with label `UNCONFIGURED` and shipping is `0.00`: main has no tax
+rule table and no shipping-rate catalogue. Those are main's honest limits, not
+develop's assessed rates re-invented.
+
+### 8.3 The customer boundary
+
+A cart bound to a customer (`carts.customer_id`) is readable only by that
+session; every other caller — anonymous or a different customer — gets
+`404 CART_NOT_FOUND` after the ownership read and **before** the cart contents
+are touched. Orders are read with `WHERE customer_id = $n`; an unknown order and
+another customer's order are the same `404 ORDER_NOT_FOUND`. The business SQL
+never contains the customer id or the order number as text (asserted in
+`fresh-shopper-repository.spec.ts` and `fresh-shopper.spec.ts`).
+
+## 9. `/api/fresh/auth/**` and `/api/fresh-auth/**` (develop's account app)
+
+`apps/web/src/app/api/fresh-auth/[...path]/route.ts` is a second mount because
+the first path segment is `fresh-auth`, not `fresh`. Its four handlers delegate
+to main's `authLoginHandler` / `authRegisterHandler` /
+`authRequestPasswordResetHandler` / `authLogoutHandler`, so the same `users`
+row, the same scrypt hash, the same `sessions` table and the same
+`maihan_session` cookie are used. Registration translates develop's
+`first_name`/`last_name` into main's strict `displayName` (falling back to the
+email, never a name guessed from its local part) and aliases
+`devVerificationToken` to `dev_verification_token`.
+
+`/api/fresh/auth/**` adds the reads/writes the component uses: `me` (GET/PATCH),
+`orders`, `favourites` (GET/PUT), `addresses` (GET/POST/PATCH/DELETE and
+`/default`), `verify-email`, `resend-verification`, `change-password` and
+`reset`. Profile, address and favourite writes go through main's
+`packages/db` account repositories. Change-password verifies the current hash,
+applies the same domain password policy, updates the hash, revokes every session
+and issues a fresh cookie.
+
+`/account` now mounts develop's `CustomerAccountApp` byte-identically (the
+component file was not edited). `/account/login` and `/account/register` remain
+main's static pages, which outrank the optional catch-all.
+
+## 10. Honest gaps in this pass
+
+1. **Guest order access token.** main's `orders` table has no access-token
+   column, so the checkout response returns `access_token: ''` and the order
+   dossier route is session-only. develop's "View order dossier" link for a
+   guest order therefore does not resolve; the confirmation panel still shows
+   the order number and totals. Adding a token column is a schema change and
+   was not taken.
+2. **DYO configuration-to-cart.** `cart_items.product_id` is `NOT NULL`, so a
+   bare `configuration_code` cannot join a cart. The route refuses with `422`
+   and points at main's real `/api/v1/dyo/.../add-to-cart` conversion (which
+   materialises the configured product and re-validates INV-01/02/03).
+   `/api/fresh/configurations` remains unimplemented; the DYO review page uses
+   main's own DYO endpoints.
+3. **Payment.** `POST /orders/{number}/pay` is develop's test instrument. It
+   writes a `payments` row with provider `test` and transitions the order to
+   PAID **only** when `ENVIRONMENT` is `local|dev|development|test`; otherwise it
+   refuses with `422`. No PSP is integrated.
+4. **Tax and shipping** are `0.00` / `UNCONFIGURED` (main has no rule tables).
+5. **No rate limiter and no cache participation** on this surface; the same
+   gap as §5.6/5.7, unchanged.
+6. **No live database run.** Every statement is proven by fake executors and
+   `tsc`; the `LATERAL` aggregates, `ON CONFLICT (email)`, and the
+   `certificate_public` join are not executed against PostgreSQL here.
+
+## 11. Migration 0023 (unapplied)
+
+`packages/db/migrations/0023_newsletter_and_requests.sql`, registered at
+`idx 22` in `meta/_journal.json`, is expand-only:
+
+* `newsletter_subscriptions` — `email CITEXT`, `consent_at`, `source`,
+  `unsubscribed_at`, one unique index on `email`; unsubscribe is a timestamp,
+  never a delete.
+* `customer_requests` — the durable record behind the `create_customer_request`
+  tool: `intent` (four-value CHECK), `source`, `email`, `name`, `notes`,
+  `state`, optional `customer_id` FK, timestamps. No price, inventory, order,
+  payment, certificate or permission column.
+
+The migration was **not run against any database**. `expected-schema.ts` is a
+measured mirror and was not advanced; a sanctioned run must reconcile its table
+count (83 -> 85) and column/FK/index deltas before `verify-schema` can pass
+against a database at 0023.
+
+## 12. SITE_URL, DYO dossier, AR
+
+* `lib/site-origin.ts` resolves the canonical origin from `SITE_URL` first and
+  otherwise from `x-forwarded-proto` + `x-forwarded-host`/`host`. The product
+  JSON-LD and the cart canonical now use it; with neither source the URL is
+  omitted, never thrown and never guessed. `lib/sitemap.ts` keeps the strict
+  `siteBaseUrl()` because a sitemap is generated outside a request.
+* `lib/dyo-server.ts` now joins the real rows via
+  `packages/db/src/dyo/dyo-review-repository.ts`: the gemstone (or pair) by id,
+  the setting variant and design, and the newest non-expired
+  `dyo_price_snapshots` row. A NULL id or missing row stays `null`, so the page
+  keeps its `Not evidenced` markers (INV-07). The test override still returns a
+  bare configuration row with null components, which is why the existing
+  INV-07 test is unchanged.
+* `/ar/{assetId}` keeps the honest missing-asset state and is now a complete
+  page: the requested reference, what the catalogue can still answer, the
+  reason no model is rendered (with the real count of registered calibrated
+  assets), and three next actions. No placeholder model and no `.glb` were
+  added.
+
+## 13. Verification for this addendum
+
+| Command | Result |
+|---|---|
+| `pnpm -r run typecheck` | **0 errors**, 9 projects |
+| `pnpm --filter @maihan/web run test` | **603 passed / 21 skipped** (baseline 541/21, +62, no regression) |
+| `pnpm --filter @maihan/db run test` | **325 passed / 32 skipped** (baseline 298/32, +27) |
+| `pnpm --filter @maihan/web run build` with `apps/web/.env` moved aside and `DATABASE_URL`/`SITE_URL` unset | **exit 0**; `/api/fresh/[...path]` and `/api/fresh-auth/[...path]` both `ƒ (Dynamic)` |
+
+New suites: `fresh-shopper.spec.ts` (shape, 401/404 boundaries, no interpolation),
+`fresh-auth.spec.ts` (route/method, register translation, non-enumerating reset,
+logout), `fresh-shopper-repository.spec.ts`, `dyo-review-repository.spec.ts`,
+`dyo-review-model.spec.ts`, `site-origin.spec.ts`.
