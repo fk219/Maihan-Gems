@@ -10,8 +10,10 @@
  *   - the WebAR hue asset feeds the applet's 3D/AR paths via the adapter.
  */
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 
-import { siteBaseUrl, productJsonLd } from '../../../../lib/jsonld.js';
+import { productJsonLd } from '../../../../lib/jsonld.js';
+import { resolveSiteOrigin } from '../../../../lib/site-origin.js';
 import { JsonLd } from '../../../../components/seo/JsonLd.js';
 import { ProductDetailView } from '@/components/mgh/catalog/ProductDetailView';
 import { getPdpCatalogGemstone } from '@/lib/mgh/adapters/catalog';
@@ -43,22 +45,25 @@ export default async function ProductDetailPage({ params }: PageProps) {
     notFound();
   }
   // Task 8 (unchanged rule): JSON-LD from the SAME server data the page
-  // renders — the port DTO plus the breadcrumb trail this page builds
-  // (SITE_URL provides the canonical base; the adapter keeps the row's own
-  // provenance, so nothing is synthesised for the offer).
-  const jsonLdPayload = resolved.productDetail
-    ? (() => {
-        const base = siteBaseUrl();
-        const crumbs = [
-          { label: 'Home', href: '/' },
-          ...(resolved.productDetail.variety !== null
-            ? [{ label: resolved.productDetail.variety.name, href: `/${resolved.productDetail.variety.slug}` }]
-            : []),
-          { label: resolved.productDetail.title },
-        ];
-        return productJsonLd(base, resolved.productDetail, crumbs);
-      })()
-    : null;
+  // renders — the port DTO plus the breadcrumb trail this page builds. The
+  // canonical base is SITE_URL when configured, otherwise the origin of the
+  // request that is being served; with neither, the JSON-LD is omitted rather
+  // than emitted against a guessed host. The adapter keeps the row's own
+  // provenance, so nothing is synthesised for the offer.
+  const base = resolveSiteOrigin(await headers());
+  const jsonLdPayload =
+    resolved.productDetail !== null && base !== null
+      ? (() => {
+          const crumbs = [
+            { label: 'Home', href: '/' },
+            ...(resolved.productDetail.variety !== null
+              ? [{ label: resolved.productDetail.variety.name, href: `/${resolved.productDetail.variety.slug}` }]
+              : []),
+            { label: resolved.productDetail.title },
+          ];
+          return productJsonLd(base, resolved.productDetail, crumbs);
+        })()
+      : null;
   return (
     <>
       {jsonLdPayload ? <JsonLd payload={jsonLdPayload} /> : null}

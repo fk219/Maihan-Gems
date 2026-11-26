@@ -7,35 +7,26 @@
  * the applet provider bag + the authoritative server cart).
  */
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 
-import { siteBaseUrl } from '../../../lib/jsonld.js';
+import { resolveSiteOrigin } from '../../../lib/site-origin.js';
 import { CartPageClient } from '@/components/mgh/catalog/CartPageClient';
 import '../../../styles/portal-premium.css';
 import { ClientSurface } from '@/components/mgh/providers/ClientSurface';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Vault Selection Cart',
-  description: 'Review your selected loose gemstones, matched pairs, and custom settings.',
-  alternates: {
-    ...(canonicalBase() ? { canonical: `${canonicalBase()}/cart` } : {}),
-  },
-  robots: { index: false, follow: false },
-};
-
-/**
- * The applet page derived its canonical from its root layout's SITE_URL
- * constant; the repo keeps that data seam by reading the same server-side
- * base. A deployment without SITE_URL gets no canonical rather than an
- * invented domain.
- */
-function canonicalBase(): string | null {
-  try {
-    return siteBaseUrl();
-  } catch {
-    return null;
-  }
+export async function generateMetadata(): Promise<Metadata> {
+  // The canonical base is SITE_URL when configured, otherwise the origin of
+  // the request. A deployment with neither gets no canonical rather than an
+  // invented domain (and no runtime crash).
+  const base = resolveSiteOrigin(await headers());
+  return {
+    title: 'Vault Selection Cart',
+    description: 'Review your selected loose gemstones, matched pairs, and custom settings.',
+    ...(base === null ? {} : { alternates: { canonical: `${base}/cart` } }),
+    robots: { index: false, follow: false },
+  };
 }
 
 export default function CartPage() {
