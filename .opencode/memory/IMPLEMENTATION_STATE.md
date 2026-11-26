@@ -1,3 +1,99 @@
+# STOREFRONT DESIGN PORT — DEVELOP VERBATIM ON MAIN'S CATALOGUE (2026-11-26)
+
+- **Client decision.** The storefront must look exactly like `develop`; design
+  correctness outranks a minimal diff. This entry records what moved, what was
+  substituted, and what still does not work.
+- **Copied verbatim** (develop worktree → `apps/web/src`, byte-identical unless
+  listed under "deviations"):
+  - `components/mgh/**` — 52 files, 17,762 lines (the design);
+  - `app/(storefront)/**` — all 85 develop route files (86 minus the account
+    catch-all, which stays main's session-backed page);
+  - `lib/mgh/**` — 22 files including the fixture ledger;
+  - `engine/**`, `hooks/**`, `data/**`, `styles/**` (12 stylesheets);
+  - the import-closure support files: `components/ai/{AiConciergeLauncher,
+    AiConciergeDrawer}.tsx`, `components/storefront/StorefrontProvider.tsx`,
+    `components/ui/sonner.tsx`, `lib/{atelier-item,atelier-store,
+    currency,storefront-images,storefront-types,webar-server,utils}.ts`;
+  - develop's root `app/layout.tsx`, `globals.css`, `storefront-luxury.css`.
+  Result: 196-file closure, all reachable files byte-identical to develop.
+- **Deviations (all documented, none visual at 1440):**
+  1. `@/*` path alias added to `apps/web/tsconfig.json` and `vitest.config.ts`.
+  2. Root layout gains `console-auth.css` (main's admin/account sign-in frame,
+     extracted from `storefront-v2-styles.ts`), `demo-content.css` and
+     `storefront-overrides.css`; `metadata.title` added for surfaces that ship
+     no title (404, /demo, /card-preview).
+  3. `CollectionExplorer` was missing its `useStorefront` import and read
+     `pool` before its `useState` declared it — both hidden by `@ts-nocheck`;
+     the page 500'd. Import added, state declared before the memo.
+  4. Header: currency/language/cart `aria-label`s now include their visible
+     text (axe label-content-name-mismatch); desktop nav shows at >= 1366 px
+     and the mobile drawer below it (the full nav needs 1366 px and overflowed
+     768-1365); compare control hidden <= 420 px; `ShopKindTabs` wraps.
+  5. `ProductCard` gets `min-w-0`; the DYO page's card grid is 2-up at md and
+     3-up at xl; product gallery cert thumbnail label includes its visible
+     text.
+  6. `lib/mgh/fixtures/index.ts` exports `DEMO_CONTENT = true`; a visible
+     `DemoContentBadge` sits under the header on every storefront page.
+- **Dependencies (ADR-029).** develop's exact pins: three 0.170.0,
+  three-mesh-bvh 0.8.3, motion 14.5.0, gsap 3.15.0, lenis 1.3.27, sonner 2.0.8,
+  radix-ui 1.8.1 + the four scoped radix packages, class-variance-authority
+  0.7.1, cmdk 1.1.1, embla-carousel-react 8.6.0, vaul 1.1.2, cn 0.5.0,
+  clsx 2.1.1, tailwind-merge 3.7.0, @mediapipe/tasks-vision 0.10.17,
+  tw-animate-css 1.4.0, shadcn 4.22.1, next-themes 0.4.6, @types/three 0.170.0.
+  `apps/web` only.
+- **Adapter substitution.** `lib/mgh/adapters/catalog.ts` keeps every exported
+  signature and now reads main's `catalogServer()` (`listProducts`,
+  `getProductBySlug`, `getGemstoneByGemRef`, `listSettings`,
+  `getSettingByDesignCode`, `getSettingVariantBySku`, `getTaxonomy`, `search`).
+  Any failure (no DATABASE_URL, empty table, zero-row query) falls back to
+  develop's fixture rows, which is why the design renders. Fields main's DTOs
+  do not carry stay null/''/[] (shape on lists, clarity codes, media,
+  laboratory plate) — no invention. `lib/webar-server.ts` no longer calls the
+  absent fresh API; it returns the honest miss/empty.
+- **Routes.** `route-manifest.ts` gained 20 entries (16 develop families + the
+  root CSS files) each cited to `PROJECT_SOURCE_OF_TRUTH.md` and
+  `docs/AUDIT_MAIN_VS_DEVELOP.md §6`, marked develop-parity demo routes; every
+  file under `src/app` is in the manifest (0 stray). Main-only routes kept:
+  `[varietySlug]-pairs`, `[varietySlug]-rings`, `[varietySlug]-rings/[productSlug]`,
+  `account/login`, `account/register`, `account/[[...accountPath]]`.
+- **Gates measured.** `pnpm -r run typecheck` 0 errors. `next build` exit 0 with
+  `apps/web/.env` moved aside and `DATABASE_URL` unset; every storefront
+  route `ƒ` dynamic. `@maihan/web` **541 passed / 21 skipped**, 0 failed
+  (baseline 540/21; +21 adapter tests, page-level tests that asserted main's
+  old markup replaced). `check:budgets` **FAIL**: category **213.1 KB** gzip
+  vs 170, product **208.0 KB** vs 190; largest chunks 65.4 `930-*`, 62.6
+  `dc99267f-*`, 12.1 `279-*`, 11.6 `4758-*`, 11.5 `9366-*`. Budget file not
+  changed.
+- **Lazy heavy deps proven.** `scripts/check-lazy-heavy-deps.mjs`: three exists
+  as one 490 KB raw lazy chunk (`6284d963.*.js`) and is in **no** route's
+  initial JS (AR included); MediaPipe ships no bytes (unused). AR loads three
+  through `next/dynamic` + `ssr:false`.
+- **Axe (Chromium, WCAG 2.0/2.1/2.2 A+AA, 141 captures).** 0 JS page errors.
+  Remaining serious findings are develop's palette and small targets:
+  `color-contrast` (#9A7B2C / #8A857B on paper) on most catalogue pages and
+  `target-size` on the home rail; both are design decisions, reported not
+  silently changed. `label-content-name-mismatch` fixed. Horizontal overflow
+  fixed at 1440/768/390 (7 px at 1024 remains, outside the audited widths).
+  Screenshots: `docs/design-shots/v3/*.png` + `audit.json`.
+- **Honest gaps.** (1) Client-side commerce still calls `/api/fresh/carts`,
+  `/orders`, `/checkout`, `/leads`, `/concierge`, `/catalogue/*`, `/auth/*` —
+  unimplemented on main, so bag/checkout/lead/concierge actions answer 500 (or
+  404 when configured). The console/vendor-compat routes are the only ones
+  implemented. (2) With no DATABASE_URL, `/api/fresh/**` answers 500
+  "API is not configured"; checkout surfaces log that request. (3) `/account`
+  remains main's session-backed page, not develop's `CustomerAccountApp`
+  (develop's depends on `/api/fresh-auth/*`). (4) `loadDyoReviewModel` fills the
+  configuration columns but has no joined gemstone/setting/quote, so the
+  review page renders `Not evidenced` for them. (5) `/products/[slug]` and
+  `/cart` call `siteBaseUrl()` and require `SITE_URL` at runtime (main's
+  documented fail-loud rule). (6) Variety/colour stone counts are counts in the
+  loaded pool, not catalogue totals. (7) `next/font` downloads Geist/EB
+  Garamond/Plus Jakarta/Urbanist at build time; an offline build cannot fetch
+  them. (8) No data was read from PostgreSQL in these gates; screenshots use
+  fixture/demo content and the badge says so.
+
+---
+
 # DEVELOP CONSOLES ON MAIN — ADMIN + VENDOR UI PORT (2026-11-26)
 
 - **Goal.** Put develop's admin console and vendor portal on `main` as-is, with

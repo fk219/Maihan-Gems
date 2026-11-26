@@ -1,0 +1,2103 @@
+{
+  "base": "http://localhost:3100",
+  "generatedAt": "2026-11-26T16:19:46.648Z",
+  "widths": [
+    1440,
+    768,
+    390
+  ],
+  "routes": 47,
+  "passes": 96,
+  "failures": 45,
+  "results": [
+    {
+      "route": "/",
+      "name": "home",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 5,
+          "targets": [
+            ".bg-\\[\\#181613\\]",
+            ".bg-\\[\\#FFFDF9\\].py-2.hover\\:bg-\\[\\#FAF4E6\\]:nth-child(2)",
+            ".bg-\\[\\#FFFDF9\\].py-2.hover\\:bg-\\[\\#FAF4E6\\]:nth-child(3)"
+          ]
+        },
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "help": "All touch targets must be 24px large, or leave sufficient space",
+          "nodes": 9,
+          "targets": [
+            ".underline-offset-4.hover\\:underline[href=\"/design-your-own?step=setting\"]",
+            ".underline-offset-4.hover\\:underline[href$=\"elysian-ring\"]",
+            ".sm\\:p-8.min-h-\\[460px\\].sm\\:min-h-\\[500px\\]:nth-child(1) > .space-y-3.justify-end.z-10 > .gap-4.pt-2.justify-between > .gap-x-3.gap-y-1\\.5.tracking-\\[0\\.18em\\] > .underline-offset-4.hover\\:underline[href$=\"settings\"]"
+          ]
+        }
+      ],
+      "incompleteContrast": 176,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/home-1440.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/catalogue/gemstones?limit=40",
+        "2 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/shop",
+      "name": "shop",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 47,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/shop-1440.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/browse",
+      "name": "browse",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 48,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/browse-1440.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/jewellery",
+      "name": "jewellery",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 107,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/jewellery-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/gemstones",
+      "name": "gemstones",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 139,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/gemstones-1440.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/search",
+      "name": "search",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 16,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/search-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/varieties",
+      "name": "varieties",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 152,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/varieties-1440.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/emerald",
+      "name": "variety",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 25,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/variety-1440.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/varieties/emerald",
+      "name": "variety-nested",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 25,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/variety-nested-1440.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/pairs",
+      "name": "pairs",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 26,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/pairs-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/emerald-pairs",
+      "name": "pairs-listing",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 11,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/pairs-listing-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/emerald-rings",
+      "name": "rings",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 11,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/rings-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/products/merelani-violetish-blue-tanzanite-1-31ct",
+      "name": "product",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 2,
+          "targets": [
+            ".px-2.py-0\\.5.font-bold",
+            ".rounded-md"
+          ]
+        }
+      ],
+      "incompleteContrast": 108,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/product-1440.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/product/merelani-violetish-blue-tanzanite-1-31ct",
+      "name": "product-gem",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 2,
+          "targets": [
+            ".px-2.py-0\\.5.font-bold",
+            ".rounded-md"
+          ]
+        }
+      ],
+      "incompleteContrast": 108,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/product-gem-1440.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/settings",
+      "name": "settings",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 81,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/settings-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/settings/SET-ARCH-SOL-01",
+      "name": "setting",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 6,
+          "targets": [
+            ".hover\\:shadow-md.rounded-\\[20px\\].shadow-sm:nth-child(1) > .group.block.space-y-2\\.5 > div:nth-child(2) > .mt-1.text-\\[\\#9A7432\\].text-sm > span",
+            ".hover\\:shadow-md.rounded-\\[20px\\].shadow-sm:nth-child(2) > .group.block.space-y-2\\.5 > div:nth-child(2) > .mt-1.text-\\[\\#9A7432\\].text-sm > span",
+            ".hover\\:shadow-md.rounded-\\[20px\\].shadow-sm:nth-child(3) > .group.block.space-y-2\\.5 > div:nth-child(2) > .mt-1.text-\\[\\#9A7432\\].text-sm > span"
+          ]
+        }
+      ],
+      "incompleteContrast": 66,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/setting-1440.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/colour/green",
+      "name": "colour",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 35,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/colour-1440.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/cart",
+      "name": "cart",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/cart-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/design-your-own",
+      "name": "design-your-own",
+      "width": 1440,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 2,
+          "targets": [
+            "li:nth-child(4) > .border-\\[\\#E4DFD5\\]\\/60.bg-\\[\\#F7F5F0\\].text-\\[\\#4E4C47\\] > .text-\\[\\#76726A\\].truncate.mt-1",
+            ".text-\\[\\#9A7B2C\\].font-\\[family-name\\:var\\(--font-mono\\)\\]"
+          ]
+        }
+      ],
+      "incompleteContrast": 79,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/design-your-own-1440.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/design-your-own/review/DEMO-REVIEW",
+      "name": "dyo-review",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 10,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/dyo-review-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/concierge",
+      "name": "concierge",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 16,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/concierge-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/compare",
+      "name": "compare",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/compare-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/favorites",
+      "name": "favorites",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/favorites-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/checkout/order-summary",
+      "name": "checkout-summary",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/checkout-summary-1440.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/auth/addresses"
+      ]
+    },
+    {
+      "route": "/checkout/payment-order",
+      "name": "checkout-payment",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/checkout-payment-1440.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/auth/addresses"
+      ]
+    },
+    {
+      "route": "/checkout/secure-payment",
+      "name": "checkout-secure",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/checkout-secure-1440.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/auth/addresses"
+      ]
+    },
+    {
+      "route": "/account/login",
+      "name": "account-login",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 7,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/account-login-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/account/register",
+      "name": "account-register",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 7,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/account-register-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/contact",
+      "name": "contact",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 24,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/contact-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/showrooms",
+      "name": "showrooms",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/showrooms-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/showrooms/new-york",
+      "name": "showroom",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/showroom-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/education",
+      "name": "education",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/education-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/education/reading-a-record",
+      "name": "education-chapter",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/education-chapter-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/blog",
+      "name": "blog",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/blog-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/blog/inside-the-vault",
+      "name": "blog-post",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/blog-post-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/about",
+      "name": "about",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/about-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/about/atelier",
+      "name": "about-atelier",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/about-atelier-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/policy",
+      "name": "policy",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/policy-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/policy/provenance",
+      "name": "policy-provenance",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/policy-provenance-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/policy/terms",
+      "name": "policy-terms",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/policy-terms-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/financing",
+      "name": "financing",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 10,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/financing-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/protection-plan",
+      "name": "protection-plan",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 10,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/protection-plan-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/demo",
+      "name": "demo",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 11,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/demo-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/card-preview",
+      "name": "card-preview",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 13,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/card-preview-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/admin/login",
+      "name": "admin-login",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 1,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/admin-login-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/vendor/login",
+      "name": "vendor-login",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 1,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/vendor-login-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/definitely-not-a-real-route-xyz",
+      "name": "not-found",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 11,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/not-found-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/",
+      "name": "home",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "help": "All touch targets must be 24px large, or leave sufficient space",
+          "nodes": 8,
+          "targets": [
+            ".underline-offset-4.hover\\:underline[href=\"/design-your-own?step=setting\"]",
+            ".underline-offset-4.hover\\:underline[href$=\"elysian-ring\"]",
+            ".sm\\:p-8.min-h-\\[460px\\].sm\\:min-h-\\[500px\\]:nth-child(1) > .space-y-3.justify-end.z-10 > .gap-4.pt-2.justify-between > .gap-x-3.gap-y-1\\.5.tracking-\\[0\\.18em\\] > .underline-offset-4.hover\\:underline[href$=\"settings\"]"
+          ]
+        }
+      ],
+      "incompleteContrast": 159,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/home-768.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/catalogue/gemstones?limit=40",
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/shop",
+      "name": "shop",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 46,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/shop-768.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/browse",
+      "name": "browse",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 48,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/browse-768.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/jewellery",
+      "name": "jewellery",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 98,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/jewellery-768.png",
+      "errors": []
+    },
+    {
+      "route": "/gemstones",
+      "name": "gemstones",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 130,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/gemstones-768.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/search",
+      "name": "search",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 15,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/search-768.png",
+      "errors": []
+    },
+    {
+      "route": "/varieties",
+      "name": "varieties",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 135,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/varieties-768.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/emerald",
+      "name": "variety",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 25,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/variety-768.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/varieties/emerald",
+      "name": "variety-nested",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 25,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/variety-nested-768.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/pairs",
+      "name": "pairs",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 27,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/pairs-768.png",
+      "errors": []
+    },
+    {
+      "route": "/emerald-pairs",
+      "name": "pairs-listing",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 10,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/pairs-listing-768.png",
+      "errors": []
+    },
+    {
+      "route": "/emerald-rings",
+      "name": "rings",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 10,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/rings-768.png",
+      "errors": []
+    },
+    {
+      "route": "/products/merelani-violetish-blue-tanzanite-1-31ct",
+      "name": "product",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 2,
+          "targets": [
+            ".px-2.py-0\\.5.font-bold",
+            ".rounded-md"
+          ]
+        }
+      ],
+      "incompleteContrast": 108,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/product-768.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/product/merelani-violetish-blue-tanzanite-1-31ct",
+      "name": "product-gem",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 2,
+          "targets": [
+            ".px-2.py-0\\.5.font-bold",
+            ".rounded-md"
+          ]
+        }
+      ],
+      "incompleteContrast": 108,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/product-gem-768.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/settings",
+      "name": "settings",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 73,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/settings-768.png",
+      "errors": []
+    },
+    {
+      "route": "/settings/SET-ARCH-SOL-01",
+      "name": "setting",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 6,
+          "targets": [
+            ".hover\\:shadow-md.rounded-\\[20px\\].shadow-sm:nth-child(1) > .group.block.space-y-2\\.5 > div:nth-child(2) > .mt-1.text-\\[\\#9A7432\\].text-sm > span",
+            ".hover\\:shadow-md.rounded-\\[20px\\].shadow-sm:nth-child(2) > .group.block.space-y-2\\.5 > div:nth-child(2) > .mt-1.text-\\[\\#9A7432\\].text-sm > span",
+            ".hover\\:shadow-md.rounded-\\[20px\\].shadow-sm:nth-child(3) > .group.block.space-y-2\\.5 > div:nth-child(2) > .mt-1.text-\\[\\#9A7432\\].text-sm > span"
+          ]
+        }
+      ],
+      "incompleteContrast": 66,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/setting-768.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/colour/green",
+      "name": "colour",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 35,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/colour-768.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/cart",
+      "name": "cart",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/cart-768.png",
+      "errors": []
+    },
+    {
+      "route": "/design-your-own",
+      "name": "design-your-own",
+      "width": 768,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 2,
+          "targets": [
+            "li:nth-child(4) > .border-\\[\\#E4DFD5\\]\\/60.bg-\\[\\#F7F5F0\\].text-\\[\\#4E4C47\\] > .text-\\[\\#76726A\\].truncate.mt-1",
+            ".text-\\[\\#9A7B2C\\].font-\\[family-name\\:var\\(--font-mono\\)\\]"
+          ]
+        }
+      ],
+      "incompleteContrast": 70,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/design-your-own-768.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/design-your-own/review/DEMO-REVIEW",
+      "name": "dyo-review",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 9,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/dyo-review-768.png",
+      "errors": []
+    },
+    {
+      "route": "/concierge",
+      "name": "concierge",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 16,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/concierge-768.png",
+      "errors": []
+    },
+    {
+      "route": "/compare",
+      "name": "compare",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/compare-768.png",
+      "errors": []
+    },
+    {
+      "route": "/favorites",
+      "name": "favorites",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/favorites-768.png",
+      "errors": []
+    },
+    {
+      "route": "/checkout/order-summary",
+      "name": "checkout-summary",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/checkout-summary-768.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/auth/addresses"
+      ]
+    },
+    {
+      "route": "/checkout/payment-order",
+      "name": "checkout-payment",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/checkout-payment-768.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/auth/addresses"
+      ]
+    },
+    {
+      "route": "/checkout/secure-payment",
+      "name": "checkout-secure",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/checkout-secure-768.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/auth/addresses"
+      ]
+    },
+    {
+      "route": "/account/login",
+      "name": "account-login",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/account-login-768.png",
+      "errors": []
+    },
+    {
+      "route": "/account/register",
+      "name": "account-register",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/account-register-768.png",
+      "errors": []
+    },
+    {
+      "route": "/contact",
+      "name": "contact",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 25,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/contact-768.png",
+      "errors": []
+    },
+    {
+      "route": "/showrooms",
+      "name": "showrooms",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 7,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/showrooms-768.png",
+      "errors": []
+    },
+    {
+      "route": "/showrooms/new-york",
+      "name": "showroom",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 7,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/showroom-768.png",
+      "errors": []
+    },
+    {
+      "route": "/education",
+      "name": "education",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 8,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/education-768.png",
+      "errors": []
+    },
+    {
+      "route": "/education/reading-a-record",
+      "name": "education-chapter",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 8,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/education-chapter-768.png",
+      "errors": []
+    },
+    {
+      "route": "/blog",
+      "name": "blog",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 7,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/blog-768.png",
+      "errors": []
+    },
+    {
+      "route": "/blog/inside-the-vault",
+      "name": "blog-post",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 7,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/blog-post-768.png",
+      "errors": []
+    },
+    {
+      "route": "/about",
+      "name": "about",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 7,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/about-768.png",
+      "errors": []
+    },
+    {
+      "route": "/about/atelier",
+      "name": "about-atelier",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 7,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/about-atelier-768.png",
+      "errors": []
+    },
+    {
+      "route": "/policy",
+      "name": "policy",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 7,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/policy-768.png",
+      "errors": []
+    },
+    {
+      "route": "/policy/provenance",
+      "name": "policy-provenance",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 7,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/policy-provenance-768.png",
+      "errors": []
+    },
+    {
+      "route": "/policy/terms",
+      "name": "policy-terms",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 7,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/policy-terms-768.png",
+      "errors": []
+    },
+    {
+      "route": "/financing",
+      "name": "financing",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 10,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/financing-768.png",
+      "errors": []
+    },
+    {
+      "route": "/protection-plan",
+      "name": "protection-plan",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 11,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/protection-plan-768.png",
+      "errors": []
+    },
+    {
+      "route": "/demo",
+      "name": "demo",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 11,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/demo-768.png",
+      "errors": []
+    },
+    {
+      "route": "/card-preview",
+      "name": "card-preview",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 13,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/card-preview-768.png",
+      "errors": []
+    },
+    {
+      "route": "/admin/login",
+      "name": "admin-login",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 1,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/admin-login-768.png",
+      "errors": []
+    },
+    {
+      "route": "/vendor/login",
+      "name": "vendor-login",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 1,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/vendor-login-768.png",
+      "errors": []
+    },
+    {
+      "route": "/definitely-not-a-real-route-xyz",
+      "name": "not-found",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 10,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/not-found-768.png",
+      "errors": []
+    },
+    {
+      "route": "/",
+      "name": "home",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 5,
+          "targets": [
+            ".bg-\\[\\#181613\\]",
+            ".bg-\\[\\#FFFDF9\\].py-2.hover\\:bg-\\[\\#FAF4E6\\]:nth-child(2)",
+            ".bg-\\[\\#FFFDF9\\].py-2.hover\\:bg-\\[\\#FAF4E6\\]:nth-child(3)"
+          ]
+        },
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "help": "All touch targets must be 24px large, or leave sufficient space",
+          "nodes": 9,
+          "targets": [
+            ".underline-offset-4.hover\\:underline[href=\"/design-your-own?step=setting\"]",
+            ".underline-offset-4.hover\\:underline[href$=\"elysian-ring\"]",
+            ".sm\\:p-8.min-h-\\[460px\\].sm\\:min-h-\\[500px\\]:nth-child(1) > .space-y-3.justify-end.z-10 > .gap-4.pt-2.justify-between > .gap-x-3.gap-y-1\\.5.tracking-\\[0\\.18em\\] > .underline-offset-4.hover\\:underline[href$=\"settings\"]"
+          ]
+        }
+      ],
+      "incompleteContrast": 154,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/home-390.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/catalogue/gemstones?limit=40",
+        "2 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/shop",
+      "name": "shop",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 45,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/shop-390.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/browse",
+      "name": "browse",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 46,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/browse-390.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/jewellery",
+      "name": "jewellery",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 97,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/jewellery-390.png",
+      "errors": []
+    },
+    {
+      "route": "/gemstones",
+      "name": "gemstones",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 126,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/gemstones-390.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/search",
+      "name": "search",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 14,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/search-390.png",
+      "errors": []
+    },
+    {
+      "route": "/varieties",
+      "name": "varieties",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].font-\\[family-name\\:var\\(--font-mono\\)\\].text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 130,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/varieties-390.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/emerald",
+      "name": "variety",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 24,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/variety-390.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/varieties/emerald",
+      "name": "variety-nested",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.text-\\[10px\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 24,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/variety-nested-390.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/pairs",
+      "name": "pairs",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 24,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/pairs-390.png",
+      "errors": []
+    },
+    {
+      "route": "/emerald-pairs",
+      "name": "pairs-listing",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 8,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/pairs-listing-390.png",
+      "errors": []
+    },
+    {
+      "route": "/emerald-rings",
+      "name": "rings",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 8,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/rings-390.png",
+      "errors": []
+    },
+    {
+      "route": "/products/merelani-violetish-blue-tanzanite-1-31ct",
+      "name": "product",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 2,
+          "targets": [
+            ".px-2.py-0\\.5.font-bold",
+            ".rounded-md"
+          ]
+        }
+      ],
+      "incompleteContrast": 107,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/product-390.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/product/merelani-violetish-blue-tanzanite-1-31ct",
+      "name": "product-gem",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 2,
+          "targets": [
+            ".px-2.py-0\\.5.font-bold",
+            ".rounded-md"
+          ]
+        }
+      ],
+      "incompleteContrast": 107,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/product-gem-390.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/settings",
+      "name": "settings",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 71,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/settings-390.png",
+      "errors": []
+    },
+    {
+      "route": "/settings/SET-ARCH-SOL-01",
+      "name": "setting",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 6,
+          "targets": [
+            ".hover\\:shadow-md.rounded-\\[20px\\].shadow-sm:nth-child(1) > .group.block.space-y-2\\.5 > div:nth-child(2) > .mt-1.text-\\[\\#9A7432\\].text-sm > span",
+            ".hover\\:shadow-md.rounded-\\[20px\\].shadow-sm:nth-child(2) > .group.block.space-y-2\\.5 > div:nth-child(2) > .mt-1.text-\\[\\#9A7432\\].text-sm > span",
+            ".hover\\:shadow-md.rounded-\\[20px\\].shadow-sm:nth-child(3) > .group.block.space-y-2\\.5 > div:nth-child(2) > .mt-1.text-\\[\\#9A7432\\].text-sm > span"
+          ]
+        }
+      ],
+      "incompleteContrast": 64,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/setting-390.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/colour/green",
+      "name": "colour",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 3,
+          "targets": [
+            "span[data-testid=\"price-range-display\"] > .text-\\[\\#9A7B2C\\]",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(1)",
+            ".text-\\[\\#8A857B\\].tabular-nums.font-\\[family-name\\:var\\(--font-mono\\)\\] > span:nth-child(2)"
+          ]
+        }
+      ],
+      "incompleteContrast": 34,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/colour-390.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/cart",
+      "name": "cart",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 4,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/cart-390.png",
+      "errors": []
+    },
+    {
+      "route": "/design-your-own",
+      "name": "design-your-own",
+      "width": 390,
+      "status": 200,
+      "axe": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 2,
+          "targets": [
+            "li:nth-child(4) > .border-\\[\\#E4DFD5\\]\\/60.bg-\\[\\#F7F5F0\\].text-\\[\\#4E4C47\\] > .text-\\[\\#76726A\\].truncate.mt-1",
+            ".text-\\[\\#9A7B2C\\].font-\\[family-name\\:var\\(--font-mono\\)\\]"
+          ]
+        }
+      ],
+      "incompleteContrast": 68,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/design-your-own-390.png",
+      "errors": [
+        "1 axe violation(s)"
+      ]
+    },
+    {
+      "route": "/design-your-own/review/DEMO-REVIEW",
+      "name": "dyo-review",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 8,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/dyo-review-390.png",
+      "errors": []
+    },
+    {
+      "route": "/concierge",
+      "name": "concierge",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 14,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/concierge-390.png",
+      "errors": []
+    },
+    {
+      "route": "/compare",
+      "name": "compare",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 4,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/compare-390.png",
+      "errors": []
+    },
+    {
+      "route": "/favorites",
+      "name": "favorites",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 4,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/favorites-390.png",
+      "errors": []
+    },
+    {
+      "route": "/checkout/order-summary",
+      "name": "checkout-summary",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 4,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/checkout-summary-390.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/auth/addresses"
+      ]
+    },
+    {
+      "route": "/checkout/payment-order",
+      "name": "checkout-payment",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 4,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/checkout-payment-390.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/auth/addresses"
+      ]
+    },
+    {
+      "route": "/checkout/secure-payment",
+      "name": "checkout-secure",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 4,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/checkout-secure-390.png",
+      "errors": [
+        "HTTP 500 http://localhost:3100/api/fresh/auth/addresses"
+      ]
+    },
+    {
+      "route": "/account/login",
+      "name": "account-login",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 4,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/account-login-390.png",
+      "errors": []
+    },
+    {
+      "route": "/account/register",
+      "name": "account-register",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 4,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/account-register-390.png",
+      "errors": []
+    },
+    {
+      "route": "/contact",
+      "name": "contact",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 23,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/contact-390.png",
+      "errors": []
+    },
+    {
+      "route": "/showrooms",
+      "name": "showrooms",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/showrooms-390.png",
+      "errors": []
+    },
+    {
+      "route": "/showrooms/new-york",
+      "name": "showroom",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/showroom-390.png",
+      "errors": []
+    },
+    {
+      "route": "/education",
+      "name": "education",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/education-390.png",
+      "errors": []
+    },
+    {
+      "route": "/education/reading-a-record",
+      "name": "education-chapter",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/education-chapter-390.png",
+      "errors": []
+    },
+    {
+      "route": "/blog",
+      "name": "blog",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/blog-390.png",
+      "errors": []
+    },
+    {
+      "route": "/blog/inside-the-vault",
+      "name": "blog-post",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/blog-post-390.png",
+      "errors": []
+    },
+    {
+      "route": "/about",
+      "name": "about",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/about-390.png",
+      "errors": []
+    },
+    {
+      "route": "/about/atelier",
+      "name": "about-atelier",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/about-atelier-390.png",
+      "errors": []
+    },
+    {
+      "route": "/policy",
+      "name": "policy",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 6,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/policy-390.png",
+      "errors": []
+    },
+    {
+      "route": "/policy/provenance",
+      "name": "policy-provenance",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/policy-provenance-390.png",
+      "errors": []
+    },
+    {
+      "route": "/policy/terms",
+      "name": "policy-terms",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 5,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/policy-terms-390.png",
+      "errors": []
+    },
+    {
+      "route": "/financing",
+      "name": "financing",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 9,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/financing-390.png",
+      "errors": []
+    },
+    {
+      "route": "/protection-plan",
+      "name": "protection-plan",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 9,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/protection-plan-390.png",
+      "errors": []
+    },
+    {
+      "route": "/demo",
+      "name": "demo",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 9,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/demo-390.png",
+      "errors": []
+    },
+    {
+      "route": "/card-preview",
+      "name": "card-preview",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 12,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/card-preview-390.png",
+      "errors": []
+    },
+    {
+      "route": "/admin/login",
+      "name": "admin-login",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 1,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/admin-login-390.png",
+      "errors": []
+    },
+    {
+      "route": "/vendor/login",
+      "name": "vendor-login",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 1,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/vendor-login-390.png",
+      "errors": []
+    },
+    {
+      "route": "/definitely-not-a-real-route-xyz",
+      "name": "not-found",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "incompleteContrast": 8,
+      "overflowPx": 0,
+      "screenshot": "docs/design-shots/v3/not-found-390.png",
+      "errors": []
+    }
+  ]
+}

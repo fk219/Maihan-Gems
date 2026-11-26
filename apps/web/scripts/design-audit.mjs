@@ -24,28 +24,39 @@ import { chromium } from 'playwright';
 
 const BASE = process.env['BASE_URL'] ?? 'http://localhost:3000';
 const here = path.dirname(fileURLToPath(import.meta.url));
-const outDir = path.resolve(here, '../../../docs/design-shots/v2');
+const OUT_DIR = process.env['OUT_DIR'] ?? '../../../docs/design-shots/v2';
+const outDir = path.resolve(here, OUT_DIR);
 const axePath = path.resolve(here, '../node_modules/axe-core/axe.min.js');
 const AXE = readFileSync(axePath, 'utf8');
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
-const WIDTHS = [1440, 1024, 768, 390];
+const WIDTHS = (process.env['WIDTHS'] ?? '1440,1024,768,390')
+  .split(',')
+  .map((value) => Number(value.trim()))
+  .filter((value) => Number.isFinite(value) && value > 0);
 
 const ROUTES = [
   { name: 'home', path: '/' },
+  { name: 'shop', path: '/shop' },
+  { name: 'browse', path: '/browse' },
+  { name: 'jewellery', path: '/jewellery' },
+  { name: 'gemstones', path: '/gemstones' },
   { name: 'search', path: '/search' },
   { name: 'varieties', path: '/varieties' },
   { name: 'variety', path: '/emerald' },
   { name: 'variety-nested', path: '/varieties/emerald' },
-  { name: 'pairs', path: '/emerald-pairs' },
+  { name: 'pairs', path: '/pairs' },
+  { name: 'pairs-listing', path: '/emerald-pairs' },
   { name: 'rings', path: '/emerald-rings' },
-  { name: 'product', path: '/products/demo-configured-emerald-halo-ring' },
+  { name: 'product', path: '/products/merelani-violetish-blue-tanzanite-1-31ct' },
+  { name: 'product-gem', path: '/product/merelani-violetish-blue-tanzanite-1-31ct' },
   { name: 'settings', path: '/settings' },
-  { name: 'setting', path: '/settings/9801' },
+  { name: 'setting', path: '/settings/SET-ARCH-SOL-01' },
   { name: 'colour', path: '/colour/green' },
   { name: 'cart', path: '/cart' },
   { name: 'design-your-own', path: '/design-your-own' },
   { name: 'dyo-review', path: '/design-your-own/review/DEMO-REVIEW' },
+  { name: 'concierge', path: '/concierge' },
   { name: 'compare', path: '/compare' },
   { name: 'favorites', path: '/favorites' },
   { name: 'checkout-summary', path: '/checkout/order-summary' },
@@ -59,11 +70,16 @@ const ROUTES = [
   { name: 'education', path: '/education' },
   { name: 'education-chapter', path: '/education/reading-a-record' },
   { name: 'blog', path: '/blog' },
-  { name: 'about', path: '/about/atelier' },
+  { name: 'blog-post', path: '/blog/inside-the-vault' },
+  { name: 'about', path: '/about' },
+  { name: 'about-atelier', path: '/about/atelier' },
+  { name: 'policy', path: '/policy' },
   { name: 'policy-provenance', path: '/policy/provenance' },
   { name: 'policy-terms', path: '/policy/terms' },
   { name: 'financing', path: '/financing' },
   { name: 'protection-plan', path: '/protection-plan' },
+  { name: 'demo', path: '/demo' },
+  { name: 'card-preview', path: '/card-preview' },
   { name: 'admin-login', path: '/admin/login' },
   { name: 'vendor-login', path: '/vendor/login' },
   { name: 'not-found', path: '/definitely-not-a-real-route-xyz', expect: [200, 404] },

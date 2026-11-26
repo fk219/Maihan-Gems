@@ -357,6 +357,26 @@ never part of this decision and remains open.
 
 ---
 
+**ADR-029 - develop's storefront dependency set is accepted, storefront-only**
+
+- **Context:** The client decision of 2026-11-26 is that the storefront must look exactly like `develop` — a verbatim copy of its design tree (`components/mgh`, `app/(storefront)`, `lib/mgh`, styles, engine, hooks, data). That tree is written against the dependency set `develop` pins. The locked stack (doc 02) does not include any of it, and `apps/web` had already accepted Tailwind 4 and lucide-react for the operator consoles under ADR-028.
+- **Alternatives:** (a) rewrite ~25,000 lines of design code to remove the dependencies; (b) copy the packages at develop's pinned versions; (c) vendor the libraries into the repository. (a) is unbounded and would not be the design the client approved; (c) imports licence and upgrade debt and hides the version.
+- **Decision:** Option (b). `apps/web` declares exactly this set, at develop's pins:
+  `three@0.170.0`, `three-mesh-bvh@0.8.3`, `motion@^14.5.0` (14.5.0), `gsap@^3.15.0` (3.15.0), `lenis@^1.3.27` (1.3.27), `sonner@^2.0.8` (2.0.8), `radix-ui@^1.8.1` (1.8.1), `@radix-ui/react-dialog@^1.3.1` (1.3.1), `@radix-ui/react-label@^2.1.17` (2.1.17), `@radix-ui/react-separator@^1.2.0` (1.2.0), `@radix-ui/react-slot@^1.5.0` (1.5.0), `class-variance-authority@^0.7.1` (0.7.1), `cmdk@^1.1.1` (1.1.1), `embla-carousel-react@^8.6.0` (8.6.0), `vaul@^1.1.2` (1.1.2), `cn@^0.5.0` (0.5.0), `clsx@^2.1.1` (2.1.1), `tailwind-merge@^3.7.0` (3.7.0), `@mediapipe/tasks-vision@0.10.17`, plus build-time `tw-animate-css@^1.4.0` (1.4.0) and `shadcn@^4.22.1` (4.22.1), and `next-themes@^0.4.6` (0.4.6) which develop also pins. `@types/three@0.170.0` is the matching dev type package. Parenthesised versions are what the lockfile resolved.
+- **Scope:** `apps/web` only. No package outside the web app may import any of them; the API, worker, db, domain and contracts packages remain on the locked stack. `shadcn` is a CLI, not a runtime import; `tw-animate-css` is a CSS import consumed by `styles/operator.css`.
+- **Reason:** The design is the deliverable. Pinning develop's versions means the copied CSS/JS behaves as it did in the reference rather than against a drifted major. Installing the whole set once (rather than adding a package per build failure) keeps the lockfile and the review in one place.
+- **Bundle implications (measured, not tuned):** after the copy, `check:budgets` FAILs both existing budgets:
+  - category page: **213.1 KB gzip** initial JS vs <= 170 KB (22 chunks)
+  - product page: **208.0 KB gzip** initial JS vs <= 190 KB (20 chunks)
+  - largest chunks: 65.4 KB `930-*.js` (three/react vendor), 62.6 KB `dc99267f-*.js`, 12.1 KB `279-*.js`, 11.6 KB `4758-6b21*.js`, 11.5 KB `9366-*.js`.
+  The overrun is recorded, not hidden: the budget file is unchanged. Three's chunk is the single largest object and is lazy (below); the remaining growth is the develop design runtime (header, motion layer, currency/cart providers, carousel/filter client).
+- **Heavy dependencies are route-local and lazy:** `three` is imported by exactly one module, `components/mgh/ar/ThreeGemstoneStudio.tsx`, which `ArViewerPageClient` loads through `next/dynamic` with `ssr: false`. `scripts/check-lazy-heavy-deps.mjs` scans every built client chunk for three's class fingerprints, then checks each route's `page_client-reference-manifest.js` plus `rootMainFiles`: the three chunk (490 KB raw, `static/chunks/6284d963.*.js`) is in **no route's initial JS**, including `/ar/[assetId]`. `@mediapipe/tasks-vision` is installed but not imported anywhere in the copied tree, so no MediaPipe bytes ship. Re-run the script after any AR change; it exits 1 if a heavy chunk becomes eager.
+- **Consequences:** (1) A framework or library bump is a dependency change and needs its own ADR. (2) The unused-now packages (`three-mesh-bvh`, `motion`, `radix-ui`, the four scoped radix packages, `class-variance-authority`, `cmdk`, `embla-carousel-react`, `vaul`, `@mediapipe/tasks-vision`, `next-themes`, `shadcn`) contribute no runtime bytes today because nothing imported by the copied subset references them; they are declared because the design tree is not complete and the client asked for develop's exact set. Deleting them is a later decision, not a silent trim. (3) The storefront now shares Tailwind 4 with the consoles; ADR-028's "storefront keeps the existing CSS-token system" sentence is superseded for the storefront by this ADR, while main's admin/vendor surfaces keep their own styles.
+- **Evidence:** `apps/web/package.json`; `pnpm-lock.yaml`; measured output of `pnpm --filter @maihan/web run check:budgets`; `apps/web/scripts/check-lazy-heavy-deps.mjs`; `apps/web/src/components/mgh/ar/*`; `apps/web/src/styles/operator.css` (tw-animate-css).
+- **Status:** Accepted by explicit client decision (2026-11-26), with the budget overrun flagged for client review.
+
+---
+
 ## ADR governance
 
 | Rule | Detail |
