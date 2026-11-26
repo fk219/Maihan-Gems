@@ -28,13 +28,34 @@
  */
 import { useEffect, useId, useRef, useState } from 'react';
 
-import type { MenuGroup } from '../../lib/mega-menu.js';
+import type { MenuGroup, MenuLink } from '../../lib/mega-menu.js';
 
 export interface MegaMenuProps {
   readonly groups: readonly MenuGroup[];
+  /**
+   * The accessible name for this navigation landmark. The storefront header
+   * renders TWO wings around the centred wordmark, so each wing needs its own
+   * distinct name ("Collections" / "Atelier"); the default keeps the original
+   * single-menu contract (and the existing tests) intact.
+   */
+  readonly ariaLabel?: string;
+  /** Extra classes, used by the header to position the wing. */
+  readonly className?: string;
+  /**
+   * Canonical destinations rendered as single links beside the groups, not as
+   * one-item dropdowns. The historical menu already carried /design-your-own
+   * as a direct entry; a one-item panel would be a disclosure with nothing to
+   * disclose.
+   */
+  readonly directLinks?: readonly MenuLink[];
 }
 
-export function MegaMenu({ groups }: MegaMenuProps) {
+export function MegaMenu({
+  groups,
+  ariaLabel = 'Main',
+  className = 'mega-menu',
+  directLinks = [],
+}: MegaMenuProps) {
   const [openId, setOpenId] = useState<string | null>(null);
   const rootRef = useRef<HTMLElement | null>(null);
   const baseId = useId();
@@ -64,7 +85,7 @@ export function MegaMenu({ groups }: MegaMenuProps) {
   }, [openId, baseId]);
 
   return (
-    <nav className="mega-menu" aria-label="Main" ref={rootRef}>
+    <nav className={className} aria-label={ariaLabel} ref={rootRef}>
       <ul className="mega-menu__groups">
         {groups.map((group) => {
           const open = openId === group.id;
@@ -104,6 +125,13 @@ export function MegaMenu({ groups }: MegaMenuProps) {
             </li>
           );
         })}
+        {directLinks.map((link) => (
+          <li key={link.href} className="mega-menu__group">
+            <a className="sf-nav__link" href={link.href}>
+              {link.label}
+            </a>
+          </li>
+        ))}
       </ul>
     </nav>
   );
