@@ -437,6 +437,14 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     storefront: false,
     group: 'api',
   },
+  {
+    fsPath: 'src/app/api/fresh/[...path]/route.ts',
+    sotPath: 'app/api/fresh/[...path]/route.ts   # /api/fresh/**',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 (api/ route handlers) + docs/AUDIT_MAIN_VS_DEVELOP.md §6 Phase 2 step 10 (re-point the UI at main without editing it): the develop-UI compatibility surface. develop\'s console and vendor portal call /api/fresh/**, so main answers those exact paths from the locked schema (src/api/fresh/**, packages/db/src/compat/**). A static segment outranks the generic catch-all above.',
+    storefront: false,
+    group: 'api',
+  },
 
   // ── SEO endpoints (Phase 4 Task 7: generated, never migrated) ────────────
   {

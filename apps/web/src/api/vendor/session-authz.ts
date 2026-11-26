@@ -83,7 +83,7 @@ export interface RequireVendorOptions {
  * for a handler to keep executing past a denied gate by forgetting a return.
  */
 export async function requireVendor(
-  ctx: RouteContext,
+  ctx: Pick<RouteContext, 'db' | 'request'>,
   options: RequireVendorOptions = {},
 ): Promise<VendorActor> {
   if (ctx.db === undefined) {

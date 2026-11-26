@@ -35,7 +35,7 @@ export function roleHeaderAllowed(deps: AdminDeps): boolean {
 }
 
 export async function authorizeAdminRequest(
-  ctx: RouteContext,
+  ctx: Pick<RouteContext, 'db' | 'request'>,
   request: CapabilityRequest,
   deps: AdminDeps = {},
 ): Promise<AuthzFailure> {
