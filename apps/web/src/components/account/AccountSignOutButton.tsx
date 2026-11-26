@@ -39,18 +39,7 @@ export function AccountSignOutButton(): React.JSX.Element {
         type="button"
         onClick={() => void signOut()}
         disabled={busy}
-        style={{
-          background: 'transparent',
-          border: '1px solid rgba(201,168,76,0.55)',
-          borderRadius: '8px',
-          padding: '11px 18px',
-          minHeight: '44px',
-          fontSize: '12px',
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          color: '#08121E',
-          cursor: 'pointer',
-        }}
+        className="mh-cta mh-cta--quiet"
       >
         {busy ? 'Signing out…' : 'Sign out'}
       </button>

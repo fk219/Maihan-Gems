@@ -128,7 +128,7 @@ export function AccountRegisterForm(): React.JSX.Element {
               type="button"
               onClick={() => void verifyNow(devToken)}
               disabled={verifyBusy}
-              style={AUTH_BUTTON_STYLE}
+              className="mh-cta"
             >
               {verifyBusy ? 'Verifying…' : 'Verify this email now'}
             </button>
@@ -139,19 +139,8 @@ export function AccountRegisterForm(): React.JSX.Element {
         )}
         <a
           href="/account/login"
-          style={{
-            display: 'inline-block',
-            minHeight: '44px',
-            padding: '13px 18px',
-            border: '1px solid rgba(201,168,76,0.55)',
-            borderRadius: '8px',
-            color: '#08121E',
-            textDecoration: 'none',
-            fontSize: '13px',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            textAlign: 'center',
-          }}
+          className="mh-cta mh-cta--quiet"
+          style={{ display: 'inline-flex', justifyContent: 'center' }}
         >
           Continue to sign in
         </a>

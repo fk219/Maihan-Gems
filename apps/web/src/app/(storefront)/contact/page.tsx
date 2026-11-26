@@ -1,79 +1,99 @@
 /**
  * apps/web/src/app/(storefront)/contact/page.tsx
  *
- * `/contact` — target of the observed /contact-us 301. SoT 12.2
- * `contact/page.tsx`.
+ * `/contact` — private appointments.
+ *
+ * The source evidence carries ONE observed salon identity (608 5th Avenue,
+ * New York; +1-212-804-9994). The previous page invented a Dubai flagship, a
+ * Geneva salon and "armored transit". Those are gone. What remains is the
+ * address that is actually recorded, the telephone number, and a clear
+ * statement of what an appointment can and cannot confirm.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
+import { EditorialMasthead } from '../../../components/design-system/EditorialMasthead.js';
+import { ORGANIZATION_EVIDENCE } from '../../../lib/jsonld.js';
 
 export const metadata: Metadata = {
-  title: 'Contact Atelier Concierge | Maihan Gems',
-  description: 'Schedule a private appointment with our gemmologists in Dubai, Geneva, London, or Bangkok.',
+  title: 'Private appointments | Maihan Gems',
+  description: 'Arrange a private viewing at the Maihan Gems salon in New York.',
 };
+
+const a = ORGANIZATION_EVIDENCE;
+const telHref = `tel:${a.telephone.replace(/[^+\d]/g, '')}`;
 
 export default function ContactPage() {
   return (
-    <main className="page contact-page">
-      <Breadcrumbs
-        crumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Atelier Concierge' },
-        ]}
+    <main className="page contact-page mh-page">
+      <Breadcrumbs crumbs={[{ label: 'Home', href: '/' }, { label: 'Contact' }]} />
+
+      <EditorialMasthead
+        eyebrow="Private appointments"
+        title="By appointment"
+        lead="A viewing is a conversation about one stone, not a tour of a showroom. Appointments are arranged by telephone so the piece and its documentation can be prepared before you arrive."
       />
 
-      <span className="page-eyebrow">Private Client Advisory</span>
-      <h1>Contact Atelier Concierge</h1>
-      <p className="page-subtitle">
-        Schedule a private gemstone viewing or commission a bespoke high-jewellery mounting with our master goldsmiths.
-      </p>
+      <section className="sf-contact-grid" aria-label="Salon contact">
+        <div>
+          <address className="sf-address">
+            <span className="sf-address__name">Maihan Gems</span>
+            <span className="sf-address__lines">
+              {a.streetAddress}
+              <br />
+              {a.addressLocality}, {a.addressRegion} {a.postalCode}
+              <br />
+              United States
+            </span>
+            <a className="sf-address__phone" href={telHref}>
+              {a.telephone}
+            </a>
+          </address>
 
-      <div className="concierge-shell">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
-          <div style={{ padding: '1.75rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
-            <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>Direct Line</span>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', margin: '0 0 0.5rem 0' }}>Dubai Flagship Atelier</h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-              DIFC Gate Village, Building 3, Level 4<br />
-              Dubai, United Arab Emirates<br />
-              <strong className="font-mono" style={{ color: 'var(--gold-dark)', display: 'block', marginTop: '0.5rem' }}>
-                +971 4 800 GEMS
-              </strong>
-            </p>
-          </div>
-
-          <div style={{ padding: '1.75rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
-            <span className="eyebrow" style={{ marginBottom: '0.35rem' }}>European Salon</span>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', margin: '0 0 0.5rem 0' }}>Geneva Salon Privé</h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-              Rue du Rhône 42, 1204 Genève<br />
-              Switzerland<br />
-              <strong className="font-mono" style={{ color: 'var(--gold-dark)', display: 'block', marginTop: '0.5rem' }}>
-                +41 22 700 8820
-              </strong>
-            </p>
-          </div>
-        </div>
-
-        <div style={{ padding: '2rem', background: '#FAFAF8', borderRadius: '12px', border: '1px solid rgba(201, 168, 76, 0.2)' }}>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
-            Request Private Gemstone Viewing
-          </h2>
-          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-            Our gemmologists arrange armored transit and secure salon viewings for qualified collectors and private clients.
+          <p className="sf-fine-print" style={{ marginTop: 24 }}>
+            The number and address above are the identity recorded in the source catalogue. No
+            other salon is claimed on this site.
           </p>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <Link href="/design-your-own" className="btn-primary">
-              Launch Bespoke Configurator
-            </Link>
-            <Link href="/showrooms" className="btn-secondary">
-              View International Salons
+        </div>
+
+        <div>
+          <ul className="sf-contact-list">
+            <li>
+              <span className="sf-contact-list__label">Appointments</span>
+              <span>By telephone, Monday to Friday.</span>
+            </li>
+            <li>
+              <span className="sf-contact-list__label">What to bring</span>
+              <span>
+                Any reference you already have — a product slug, a stone reference, or a setting
+                design code — so the exact record can be opened.
+              </span>
+            </li>
+            <li>
+              <span className="sf-contact-list__label">What we can confirm</span>
+              <span>
+                The fields the record carries, its evidence status, its price and its availability.
+              </span>
+            </li>
+            <li>
+              <span className="sf-contact-list__label">What we will not confirm</span>
+              <span>
+                A treatment, origin, certificate or delivery date that the record does not contain.
+              </span>
+            </li>
+          </ul>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 28 }}>
+            <a className="mh-cta" href={telHref}>
+              Call the salon
+            </a>
+            <Link className="mh-cta mh-cta--quiet" href="/showrooms">
+              The salon
             </Link>
           </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

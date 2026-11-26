@@ -125,18 +125,7 @@ export function AccountLoginForm(): React.JSX.Element {
           type="button"
           onClick={requestReset}
           disabled={resetBusy}
-          style={{
-            background: 'transparent',
-            border: '1px solid rgba(201,168,76,0.55)',
-            borderRadius: '8px',
-            padding: '10px 16px',
-            minHeight: '40px',
-            fontSize: '12px',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            color: '#08121E',
-            cursor: 'pointer',
-          }}
+          className="mh-cta mh-cta--quiet"
         >
           {resetBusy ? 'Requesting…' : 'Email me a reset link'}
         </button>

@@ -55,11 +55,9 @@ export function AdminLoginForm(): React.JSX.Element {
   }
 
   return (
-    <form onSubmit={onSubmit} style={{ display: 'grid', gap: '14px', maxWidth: '380px' }}>
-      <label style={{ display: 'grid', gap: '6px' }}>
-        <span style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-          Email
-        </span>
+    <form onSubmit={onSubmit} className="console-auth__form">
+      <label>
+        <span>Email</span>
         <input
           type="email"
           name="email"
@@ -67,13 +65,10 @@ export function AdminLoginForm(): React.JSX.Element {
           required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          style={inputStyle}
         />
       </label>
-      <label style={{ display: 'grid', gap: '6px' }}>
-        <span style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-          Password
-        </span>
+      <label>
+        <span>Password</span>
         <input
           type="password"
           name="password"
@@ -81,36 +76,14 @@ export function AdminLoginForm(): React.JSX.Element {
           required
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          style={inputStyle}
         />
       </label>
-      <p aria-live="polite" role="status" style={{ minHeight: '18px', color: '#B3261E', fontSize: '13px' }}>
+      <p aria-live="polite" role="status" style={{ minHeight: '18px', color: '#9a3412', fontSize: '13px', margin: 0 }}>
         {error ?? ''}
       </p>
-      <button type="submit" disabled={busy} style={buttonStyle}>
+      <button type="submit" disabled={busy}>
         {busy ? 'Signing in…' : 'Sign in'}
       </button>
     </form>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  background: '#FFFFFF',
-  border: '1px solid rgba(201,168,76,0.45)',
-  borderRadius: '8px',
-  padding: '11px 12px',
-  fontSize: '14px',
-  color: '#08121E',
-};
-
-const buttonStyle: React.CSSProperties = {
-  background: '#C9A84C',
-  color: '#08121E',
-  border: 'none',
-  borderRadius: '8px',
-  padding: '12px 18px',
-  fontSize: '13px',
-  letterSpacing: '0.12em',
-  textTransform: 'uppercase',
-  cursor: 'pointer',
-};
