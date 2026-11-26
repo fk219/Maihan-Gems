@@ -1,35 +1,34 @@
 /**
  * apps/web/src/app/(storefront)/design-your-own/page.tsx
  *
- * `/design-your-own` — interactive configurator entry (target of
- * /custom-design-gemstone-rings-jewelry 301 redirect).
+ * `/design-your-own` — the composition entry.
  *
- * Authority:
- *   - INITIAL_IMPLEMENTATION_PLAN.md Phase 7 (Tasks 8, 9)
- *   - Design.md (Silk & Stone luxury brand specification)
- *   - Invariants INV-01, INV-02, INV-03 enforced.
+ * The page frame is a masthead and the configurator. The metadata no longer
+ * claims "ethically-sourced unheated" stones: sourcing claims belong to a
+ * record, not to a route.
  */
 import type { Metadata } from 'next';
+
 import { Breadcrumbs } from '../../../components/design-system/Breadcrumbs.js';
+import { EditorialMasthead } from '../../../components/design-system/EditorialMasthead.js';
 import { DyoConfigurator } from '../../../components/dyo/DyoConfigurator.js';
 
 export const metadata: Metadata = {
-  title: 'Design Your Own High Jewellery | Maihan Gems Atelier',
+  title: 'Design your own | Maihan Gems',
   description:
-    'Craft a bespoke one-of-a-kind ring, earrings, or necklace. Pair ethically-sourced unheated natural gemstones with precision architectural mountings.',
+    'Compose a piece from one mounting and one stone, or a matched pair and earrings. The structural rules are enforced before review.',
 };
 
 export default function DesignYourOwnEntryPage() {
   return (
-    <main className="page dyo-page" id="main-content">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-6">
-        <Breadcrumbs
-          crumbs={[
-            { label: 'Home', href: '/' },
-            { label: 'Design Your Own' },
-          ]}
-        />
-      </div>
+    <main className="page dyo-page mh-page" id="main-content">
+      <Breadcrumbs crumbs={[{ label: 'Home', href: '/' }, { label: 'Design your own' }]} />
+
+      <EditorialMasthead
+        eyebrow="The configurator"
+        title="Design your own"
+        lead="Three decisions: the mounting and its metal, the stone, then the options that qualify the composition. A review page records what was chosen; the atelier quotes the piece."
+      />
 
       <DyoConfigurator />
     </main>
