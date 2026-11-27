@@ -133,22 +133,43 @@ export function ProductCard({
     setCartOpen(true);
   };
 
+  const mediaCategory =
+    stone?.varietySlug === 'rings'
+      ? 'rings'
+      : stone?.varietySlug === 'necklaces'
+        ? 'pendants'
+        : /ring/i.test(displayCategory)
+          ? 'rings'
+          : /necklace|pendant/i.test(displayCategory)
+            ? 'pendants'
+            : /earring|pair/i.test(displayCategory)
+              ? 'earrings'
+              : 'gemstones';
+
   return (
     <article
       data-testid="product-card"
       data-stone-id={stoneId}
-      className={`group relative min-w-0 overflow-hidden rounded-[24px] border border-[#E5D4B3] bg-[#FAF8F4] transition-all duration-500 hover:-translate-y-1 hover:border-[#C5A059] shadow-[0_14px_38px_rgba(185,150,75,0.12)] hover:shadow-[0_24px_56px_rgba(185,150,75,0.24)] flex flex-col justify-between p-6 sm:p-7 aspect-[10/14] sm:aspect-[3/4] min-h-[450px] ${className}`}
+      data-media-category={mediaCategory}
+      className={`mh-card group relative min-w-0 overflow-hidden rounded-[24px] border border-[#E5D4B3] bg-[#FAF8F4] hover:border-[#C5A059] flex flex-col justify-between p-6 sm:p-7 aspect-[10/14] sm:aspect-[3/4] min-h-[450px] ${className}`}
     >
       {/* 1. Full-Bleed Background Cover: real photo when evidenced, house
           gem tile (gradient + variety initial) otherwise — never a fixture
           photo on a card for a stone we have not photographed. */}
       {hasRealImage ? (
-        <MediaImage
-          src={displayImage}
-          alt={displayName}
-          onError={() => setImgError(true)}
-          className="absolute inset-0 z-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        />
+        <>
+          <div
+            aria-hidden="true"
+            className="mh-blurup__ghost"
+            style={{ backgroundImage: `url("${displayImage}")` }}
+          />
+          <MediaImage
+            src={displayImage}
+            alt={displayName}
+            onError={() => setImgError(true)}
+            className="absolute inset-0 z-0 h-full w-full object-cover"
+          />
+        </>
       ) : (
         <div
           aria-hidden="true"

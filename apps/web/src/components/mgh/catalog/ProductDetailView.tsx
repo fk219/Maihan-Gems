@@ -14,27 +14,34 @@ export function ProductDetailSkeleton() {
   return (
     <div
       data-testid="product-detail-skeleton"
+      aria-busy="true"
+      aria-live="polite"
       className="golden-cloud-gallery min-h-screen font-[family-name:var(--font-eb-garamond)]"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-14 animate-pulse space-y-12">
-        <div className="h-3 w-56 bg-[#EAE5DC] rounded-full" />
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          <div className="lg:col-span-7 flex gap-4">
-            <div className="w-24 space-y-3 hidden sm:block">
-              <div className="h-20 w-24 rounded-2xl bg-[#EFECE6]" />
-              <div className="h-20 w-24 rounded-2xl bg-[#EFECE6]" />
-              <div className="h-20 w-24 rounded-2xl bg-[#EFECE6]" />
+      <span className="visually-hidden text-[11px]">Loading product</span>
+      <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <div className="mh-skeleton h-3 w-56" />
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
+          {/* Gallery: thumbnail rail + 4:3.5 stage, exactly as the PDP renders. */}
+          <div className="flex gap-4 lg:col-span-7">
+            <div className="hidden w-24 space-y-3 sm:block">
+              <div className="mh-skeleton h-20 w-24 rounded-[16px]" />
+              <div className="mh-skeleton h-20 w-24 rounded-[16px]" />
+              <div className="mh-skeleton h-20 w-24 rounded-[16px]" />
             </div>
-            <div className="flex-1 aspect-[4/3.5] rounded-[24px] bg-[#EFECE6]" />
+            <div className="mh-skeleton aspect-[4/3.5] flex-1 rounded-[24px]" />
           </div>
-          <div className="lg:col-span-5 space-y-6">
-            <div className="h-3 w-36 bg-[#E2DED6] rounded-full" />
-            <div className="h-10 w-4/5 bg-[#DDD8CF] rounded-lg" />
-            <div className="h-8 w-36 bg-[#DDD8CF] rounded-lg" />
+
+          {/* Summary: eyebrow, title, price, actions, evidence block. */}
+          <div className="space-y-6 lg:col-span-5">
+            <div className="mh-skeleton h-3 w-36" />
+            <div className="mh-skeleton h-10 w-4/5 rounded-lg" />
+            <div className="mh-skeleton h-8 w-36 rounded-lg" />
             <div className="grid grid-cols-2 gap-3">
-              <div className="h-12 bg-[#D4AF37]/35 rounded-full" />
-              <div className="h-12 bg-[#0A0A0B]/20 rounded-full" />
+              <div className="mh-skeleton h-12 rounded-full" />
+              <div className="mh-skeleton h-12 rounded-full" />
             </div>
+            <div className="mh-skeleton h-24 w-full rounded-lg" />
           </div>
         </div>
       </div>

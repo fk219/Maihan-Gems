@@ -81,12 +81,26 @@ export function SettingDetailGallery({ setting }: { setting: SettingItem }) {
         </div>
 
         {/* Main Rounded Stage Image */}
-        <div className="relative flex-1 w-full aspect-[4/3.5] overflow-hidden rounded-[24px] border border-[#E5D4B3] bg-[#12100D] shadow-[0_24px_60px_rgba(20,16,12,0.16)]">
+        <div
+          data-media-category={
+            /necklace|pendant/i.test(setting.category)
+              ? 'pendants'
+              : /earring/i.test(setting.category)
+                ? 'earrings'
+                : 'rings'
+          }
+          className="relative flex-1 w-full aspect-[4/3.5] overflow-hidden rounded-[24px] border border-[#E5D4B3] bg-[#12100D] shadow-[0_24px_60px_rgba(20,16,12,0.16)]"
+        >
+          <div
+            aria-hidden="true"
+            className="mh-blurup__ghost"
+            style={{ backgroundImage: `url("${currentView.src}")` }}
+          />
           <img
             src={currentView.src}
             alt={`${setting.name} — ${currentView.label}`}
             referrerPolicy="no-referrer"
-            className="h-full w-full object-cover transition-transform duration-500"
+            className="relative z-[1] h-full w-full object-cover transition-transform duration-500"
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10" />
 

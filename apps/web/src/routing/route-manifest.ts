@@ -91,6 +91,7 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     extraFiles: [
       'src/app/(storefront)/error.tsx',
       'src/app/(storefront)/loading.tsx',
+      'src/app/(storefront)/template.tsx',
       'src/app/(storefront)/not-found.tsx',
     ],
   },

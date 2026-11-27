@@ -270,7 +270,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div data-reveal-list className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredStones.map((stone) => (
               <ProductCard key={stone.id} stone={stone} />
             ))}
@@ -302,14 +302,23 @@ export default async function HomePage() {
               <article
                 key={cat.title}
                 data-testid="shop-by-category-card"
-                className="group relative overflow-hidden rounded-[24px] border border-[#E5D4B3] bg-[#FAF8F4] transition-all duration-500 hover:-translate-y-1 hover:border-[#C5A059] shadow-[0_14px_38px_rgba(185,150,75,0.12)] hover:shadow-[0_24px_56px_rgba(185,150,75,0.24)] flex flex-col justify-between p-6 sm:p-8 min-h-[460px] sm:min-h-[500px]"
+                data-media-category={
+                  /ring/i.test(cat.title)
+                    ? 'rings'
+                    : /necklace|pendant/i.test(cat.title)
+                      ? 'pendants'
+                      : /earring/i.test(cat.title)
+                        ? 'earrings'
+                        : 'gemstones'
+                }
+                className="mh-card group relative overflow-hidden rounded-[24px] border border-[#E5D4B3] bg-[#FAF8F4] hover:border-[#C5A059] flex flex-col justify-between p-6 sm:p-8 min-h-[460px] sm:min-h-[500px]"
               >
                 {/* 1. Full-Bleed Background Image Covering the Entire Card */}
                 <img
                   src={cat.image}
                   alt={cat.title}
                   referrerPolicy="no-referrer"
-                  className="absolute inset-0 z-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  className="absolute inset-0 z-0 h-full w-full object-cover"
                 />
 
                 {/* 2. Luminous Light-Colored Pearl & Golden Cloud Overlays */}
@@ -408,7 +417,7 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div data-reveal-list className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <ProductCard
                 category="Rings"
                 name="Elysian Ring"

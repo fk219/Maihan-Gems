@@ -60,7 +60,7 @@ export default async function SearchPage({
       </div>
 
       {!query ? (
-        <div className="rounded-sm border border-[#E4DFD5] bg-white p-10 text-center space-y-4">
+        <div className="mh-empty rounded-sm border border-[#E4DFD5] bg-white">
           <Search className="mx-auto h-6 w-6 text-[#9A7B2C]" />
           <p className="text-sm text-[#4E4C47]">Start with a stone, a colour, an origin or a cut — or ask the concierge in plain language.</p>
           <div className="flex flex-wrap justify-center gap-3">
@@ -69,15 +69,15 @@ export default async function SearchPage({
           </div>
         </div>
       ) : stones.length === 0 ? (
-        <div className="rounded-sm border border-[#E4DFD5] bg-white p-10 text-center space-y-3">
-          <p className="text-sm text-[#4E4C47]">No stones in the vault match “{query}”.</p>
+        <div className="mh-empty rounded-sm border border-[#E4DFD5] bg-white">
+          <p className="text-sm text-[#4E4C47]">No stones in the vault match "{query}".</p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href={`/concierge?q=${encodeURIComponent(query)}`} className="rounded-sm px-4 py-2.5 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider font-semibold gold-gradient-cta">Ask the concierge</Link>
             <Link href="/browse" className="rounded-sm border border-[#E4DFD5] px-4 py-2.5 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#4E4C47] hover:border-[#D4AF37]/60">Browse all stones</Link>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
+        <div data-reveal-list className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
           {stones.map((stone) => <ProductCard key={stone.id} stone={stone} />)}
         </div>
       )}

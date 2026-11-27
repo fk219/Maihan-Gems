@@ -482,7 +482,7 @@ export function GemstoneMarquee({ varieties }: GemstoneMarqueeProps) {
             key={`${v.slug}-${idx}`}
             href={`/varieties/${v.slug}`}
             data-testid="gemstone-marquee-item"
-            className="group flex flex-col items-center text-center w-44 sm:w-48 shrink-0 transition-transform duration-500 hover:-translate-y-2"
+            className="group flex flex-col items-center text-center w-44 sm:w-48 shrink-0"
           >
             {/* Floating Individual Gemstone without any card box or background */}
             <div className="relative flex items-center justify-center h-32 w-32 sm:h-36 sm:w-36 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">

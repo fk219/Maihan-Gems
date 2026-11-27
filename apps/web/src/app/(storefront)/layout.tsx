@@ -50,9 +50,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
           </p>
         ) : null}
         <StorefrontMotionWrapper />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
+        {children}
         <ScrollToTopButton />
         <CartDrawer />
         <Toaster />

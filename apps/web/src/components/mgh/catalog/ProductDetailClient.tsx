@@ -144,7 +144,16 @@ export function ProductDetailGallery({ stone }: { stone: GemstoneItem }) {
         </div>
 
         {/* Main Rounded Stage Image */}
-        <div className="relative flex-1 w-full aspect-[4/3.5] overflow-hidden rounded-[24px] border border-[#E5D4B3] bg-[#12100D] shadow-[0_24px_60px_rgba(20,16,12,0.16)] group">
+        <div
+          data-media-category={
+            stone.varietySlug === 'rings'
+              ? 'rings'
+              : stone.varietySlug === 'necklaces'
+                ? 'pendants'
+                : 'gemstones'
+          }
+          className="relative flex-1 w-full aspect-[4/3.5] overflow-hidden rounded-[24px] border border-[#E5D4B3] bg-[#12100D] shadow-[0_24px_60px_rgba(20,16,12,0.16)] group"
+        >
           {currentItem.type === 'cert' ? (
             <div className="h-full w-full flex flex-col items-center justify-center p-8 bg-gradient-to-br from-[#FAF3E3] via-[#F5E8CE] to-[#EAD7B3] text-[#1A1612]">
               <div className="w-full max-w-md rounded-[20px] border-2 border-[#C5A059] bg-[#FFFDF9] p-6 shadow-xl space-y-4">
@@ -186,17 +195,24 @@ export function ProductDetailGallery({ stone }: { stone: GemstoneItem }) {
               </div>
             </div>
           ) : (
-            <img
-              src={currentItem.src}
-              alt={`${stone.name} — ${currentItem.label}`}
-              referrerPolicy="no-referrer"
-              style={
-                currentItem.type === '360'
-                  ? { transform: `rotate(${rotationDeg}deg)` }
-                  : undefined
-              }
-              className="h-full w-full object-cover transition-transform duration-500"
-            />
+            <>
+              <div
+                aria-hidden="true"
+                className="mh-blurup__ghost"
+                style={{ backgroundImage: `url("${currentItem.src}")` }}
+              />
+              <img
+                src={currentItem.src}
+                alt={`${stone.name} — ${currentItem.label}`}
+                referrerPolicy="no-referrer"
+                style={
+                  currentItem.type === '360'
+                    ? { transform: `rotate(${rotationDeg}deg)` }
+                    : undefined
+                }
+                className="relative z-[1] h-full w-full object-cover transition-transform duration-500"
+              />
+            </>
           )}
 
           {/* Subtle vignette */}

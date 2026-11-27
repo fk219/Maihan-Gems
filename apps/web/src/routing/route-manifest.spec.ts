@@ -99,14 +99,17 @@ describe('Phase 4 Task 1 — storefront route tree', () => {
   });
 
   it('no raw identifier appears in a page filename other than the reserved structural file classes', () => {
-    // Route-file conventions: only page / layout / not-found / error /
-    // loading / route filenames may appear inside the src/app tree.
+    // Route-file conventions: only page / layout / template / not-found /
+    // error / loading / route filenames may appear inside the src/app tree.
     // `route.ts` is the Next.js Route Handler convention (Phase 4 Task 7's
     // generated sitemap endpoints); `sitemap.ts`/`robots.ts` are metadata
-    // file conventions. Both are framework route files, not invented UI.
+    // file conventions. `template.tsx` is the framework convention for a
+    // segment that remounts per navigation (the route crossfade). All are
+    // structural framework files, not invented UI.
     const allowed = new Set([
       'page.tsx',
       'layout.tsx',
+      'template.tsx',
       'not-found.tsx',
       'error.tsx',
       'loading.tsx',

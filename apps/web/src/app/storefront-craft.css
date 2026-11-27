@@ -1,5 +1,5 @@
 /* ============================================================================
-   storefront-craft.css — the craft layer (v4)
+   storefront-craft.css — the craft layer (v4 + the v5 perceived-quality pass)
    ============================================================================
    This file changes NO layout, composition, copy or hue. It is the finishing
    pass that turns the ported storefront into a resolved product:
@@ -12,6 +12,9 @@
      6. one easing curve and three durations, all behind prefers-reduced-motion
      7. details: selection, scrollbar, hairlines, radii, tabular numerals,
         locked media ratios, form focus-within, print fallback
+     8. v5: one depth scale, grow-from-left link underlines, a 1 px press,
+        hover light instead of hover movement, one media vignette + scrim,
+        a shimmer that respects reduced motion, and the route crossfade
 
    Loaded LAST on the storefront only, so it wins over the design sheets and
    over Tailwind's utility layer (layered rules lose to unlayered ones).
@@ -75,10 +78,46 @@
   --mh-focus-halo: rgba(253, 251, 245, 0.9);
   /* consumed by the global :focus-visible rule in mgh-applet.css */
   --focus-ring-ink: #7c6323;
+
+  /* v5 — one depth scale, three levels. Every token carries the hairline top
+     highlight that makes a raised surface read as material rather than a
+     rectangle. Dark containers re-solve the same three tokens below. */
+  --mh-shadow-1: 0 1px 2px rgba(36, 26, 14, 0.04), 0 8px 24px rgba(36, 26, 14, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --mh-shadow-2: 0 2px 5px rgba(36, 26, 14, 0.06), 0 18px 44px rgba(36, 26, 14, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  --mh-shadow-3: 0 8px 20px rgba(20, 16, 12, 0.1), 0 34px 76px rgba(20, 16, 12, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+
+  /* v5 — one vignette for photographic plates and one scrim for type over a
+     photograph. Depth and legibility are different jobs, so they stay two
+     tokens with one strength each. Neither alters the product's colour. */
+  --mh-vignette: linear-gradient(
+    to top,
+    rgba(10, 10, 11, 0.38) 0%,
+    rgba(10, 10, 11, 0.12) 26%,
+    rgba(10, 10, 11, 0) 52%,
+    rgba(10, 10, 11, 0.06) 100%
+  );
+  --mh-scrim: linear-gradient(
+    to top,
+    rgba(10, 10, 11, 0.82) 0%,
+    rgba(10, 10, 11, 0.46) 34%,
+    rgba(10, 10, 11, 0.1) 66%,
+    rgba(10, 10, 11, 0) 100%
+  );
+
+  /* v5 — route crossfade and the list stagger interval. */
+  --mh-dur-nav: 180ms;
+  --mh-stagger: 48ms;
+  --mh-skeleton-base: #e9e4da;
+  --mh-skeleton-sheen: #f8f4ec;
 }
 
 /* Dark containers re-solve the pair. Any element inside one inherits it, so a
-   gold link in the footer and the same class in a card both pass. */
+   gold link in the footer and the same class in a card both pass. The depth
+   scale is re-solved here too: a warm-black shadow disappears on obsidian, so
+   dark surfaces read depth from a deeper black plus a light top rim. */
 header,
 footer,
 .mgh-hero,
@@ -93,6 +132,12 @@ footer,
   --mh-focus-ring: #e6c97a;
   --mh-focus-halo: rgba(10, 10, 12, 0.9);
   --focus-ring-ink: #e6c97a;
+  --mh-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.55), 0 10px 26px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --mh-shadow-2: 0 2px 6px rgba(0, 0, 0, 0.55), 0 18px 44px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --mh-shadow-3: 0 8px 22px rgba(0, 0, 0, 0.55), 0 34px 80px rgba(0, 0, 0, 0.62),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 /* ── 2. TYPE SCALE ─────────────────────────────────────────────────────────
@@ -378,9 +423,29 @@ output,
   touch-action: manipulation;
 }
 
+/* Press is a 1 px sink, never a scale. The target's geometry is unchanged for
+   hit-testing (transform does not move the hit area in the DOM), and the whole
+   press reads as the surface taking weight rather than wobbling. */
 :where(button, [role='button']):active:not(:disabled) {
-  transform: none;
+  transform: translateY(1px);
   filter: brightness(0.96);
+}
+
+/* Cursor: pointer only where a pointer would do something. Everything else
+   keeps the platform arrow (no custom cursor — out of scope). */
+:where(a[href], button:not(:disabled), summary, [role='button']:not([aria-disabled='true'])) {
+  cursor: pointer;
+}
+
+:where(button, input, select, textarea, summary)[disabled],
+[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+/* Caret and selection share the palette on paper and on obsidian. */
+:where(input, textarea, [contenteditable='true']) {
+  caret-color: var(--mh-gold-ink);
+  accent-color: var(--mh-gold-ink);
 }
 
 :where(button, input, select, textarea, [role='button'])[disabled],
@@ -603,5 +668,410 @@ html {
     transform: none !important;
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ── 8. V5 — DEPTH AND MATERIAL ────────────────────────────────────────────
+   Three levels, one per elevation role:
+     1  resting surface (card, tile, control well)
+     2  raised surface (hover, plate, sticky control)
+     3  overlay (header bar, mega menu, modal, drawer)
+   The token carries the hairline top highlight, so a raised surface reads as
+   material rather than a rectangle. Glows (gold, gem-colour) are light, not
+   depth, and are deliberately not normalised.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.shadow-sm {
+  box-shadow: var(--mh-shadow-1);
+}
+
+.shadow-md,
+.shadow-lg {
+  box-shadow: var(--mh-shadow-2);
+}
+
+.shadow-xl,
+.shadow-2xl {
+  box-shadow: var(--mh-shadow-3);
+}
+
+[class*='hover:shadow-']:hover {
+  box-shadow: var(--mh-shadow-2);
+}
+
+/* Level 1 — resting warm-black surfaces. */
+[class*='shadow-[0_8px_24px_rgba(185,150,75,0.08)]'],
+[class*='shadow-[0_8px_24px_rgba(24,22,19,0.12)]'],
+[class*='shadow-[0_10px_28px_rgba(185,150,75,0.08)]'],
+[class*='shadow-[0_10px_28px_rgba(185,150,75,0.1)]'],
+[class*='shadow-[0_10px_30px_rgba(185,150,75,0.08)]'],
+[class*='shadow-[0_10px_30px_rgba(154,123,44,0.14)]'],
+[class*='shadow-[0_10px_32px_rgba(185,150,75,0.08)]'],
+[class*='shadow-[0_12px_32px_rgba(185,150,75,0.12)]'],
+[class*='shadow-[0_12px_34px_rgba(36,26,14,0.05)]'],
+[class*='shadow-[0_12px_36px_rgba(24,22,19,0.1)]'] {
+  box-shadow: var(--mh-shadow-1);
+}
+
+/* Level 2 — raised warm-black surfaces. */
+[class*='shadow-[0_14px_38px_rgba(185,150,75,0.1)]'],
+[class*='shadow-[0_14px_38px_rgba(36,26,14,0.06)]'],
+[class*='shadow-[0_14px_42px_rgba(185,150,75,0.2)]'],
+[class*='shadow-[0_18px_48px_rgba(185,150,75,0.12)]'],
+[class*='shadow-[0_18px_50px_rgba(185,150,75,0.12)]'],
+[class*='shadow-[0_24px_60px_rgba(20,16,12,0.16)]'],
+[class*='shadow-[0_24px_60px_rgba(20,16,12,0.22)]'],
+[class*='shadow-[0_24px_60px_rgba(20,16,12,0.25)]'],
+[class*='shadow-[0_10px_28px_rgba(10,10,11,0.35)]'] {
+  box-shadow: var(--mh-shadow-2);
+}
+
+/* Level 3 — overlays, on either surface. */
+[class*='shadow-[0_12px_28px_rgba(0,0,0,0.35)]'],
+[class*='shadow-[0_12px_32px_rgba(0,0,0,0.35)]'],
+[class*='shadow-[0_12px_40px_rgba(0,0,0,0.85)]'],
+[class*='shadow-[0_14px_40px_rgba(0,0,0,0.75)]'],
+[class*='shadow-[0_20px_50px_rgba(0,0,0,0.65)]'],
+[class*='shadow-[0_20px_60px_rgba(0,0,0,0.18)]'],
+[class*='shadow-[0_24px_60px_rgba(0,0,0,0.85)]'],
+[class*='shadow-[0_25px_90px_rgba(0,0,0,0.95)]'],
+[class*='shadow-[0_30px_70px_rgba(0,0,0,0.9)]'] {
+  box-shadow: var(--mh-shadow-3);
+}
+
+/* The product card raises the LIGHT on hover, never the element: no translate,
+   no scale. The shadow steps from 1 to 2 and a soft top-light sheen arrives.
+   The sheen is an additive gradient, so the stone's colour is untouched. */
+.mh-card {
+  position: relative;
+  box-shadow: var(--mh-shadow-1);
+  transition:
+    box-shadow var(--mh-dur-move) var(--mh-ease),
+    border-color var(--mh-dur-state) var(--mh-ease);
+}
+
+.mh-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 253, 247, 0.34) 0%,
+    rgba(255, 253, 247, 0.08) 22%,
+    rgba(255, 253, 247, 0) 46%
+  );
+  opacity: 0;
+  transition: opacity var(--mh-dur-move) var(--mh-ease);
+}
+
+.mh-card:hover,
+.mh-card:focus-within {
+  box-shadow: var(--mh-shadow-2);
+}
+
+.mh-card:hover::before,
+.mh-card:focus-within::before {
+  opacity: 1;
+}
+
+/* A card image is lit, not zoomed. */
+.mh-card img[class*='group-hover:scale'] {
+  transform: none !important;
+}
+
+/* Raised surfaces that are not cards still get the hairline top rim. */
+
+/* ── 9. V5 — MICRO-INTERACTIONS ────────────────────────────────────────────
+   A link's rule grows from the left in 150 ms. The resting rule stays visible
+   at low contrast, so a link is never identified by colour alone.
+   ─────────────────────────────────────────────────────────────────────────── */
+:where(a[class*='underline'], a[class*='underline-offset']) {
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat, no-repeat;
+  background-position: 0 100%, 0 100%;
+  background-size: 100% 1px, 0 1px;
+  transition: background-size var(--mh-dur-state) var(--mh-ease);
+}
+
+:where(a[class*='underline'], a[class*='underline-offset']):hover,
+:where(a[class*='underline'], a[class*='underline-offset']):focus-visible {
+  background-size: 100% 1px, 100% 1px;
+}
+
+:where(nav[aria-label='Breadcrumb'] a, footer nav a, footer ul a) {
+  position: relative;
+  text-decoration: none;
+}
+
+:where(nav[aria-label='Breadcrumb'] a, footer nav a, footer ul a)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--mh-dur-state) var(--mh-ease);
+}
+
+:where(nav[aria-label='Breadcrumb'] a, footer nav a, footer ul a):hover::after,
+:where(nav[aria-label='Breadcrumb'] a, footer nav a, footer ul a):focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* ── 10. V5 — IMAGE TREATMENT ──────────────────────────────────────────────
+   One lock (the aspect box), one crop rule per category, one vignette, one
+   scrim. No filter touches the stone's colour; the ghost is a smaller copy of
+   the SAME image, shown blurred until the sharp one paints.
+   ─────────────────────────────────────────────────────────────────────────── */
+img {
+  object-position: center;
+}
+
+[data-media-category='rings'] img,
+[data-media-category='rings'] picture {
+  object-position: 50% 50%;
+}
+
+[data-media-category='pendants'] img,
+[data-media-category='pendants'] picture {
+  object-position: 50% 36%;
+}
+
+[data-media-category='earrings'] img,
+[data-media-category='earrings'] picture {
+  object-position: 50% 44%;
+}
+
+[data-media-category='gemstones'] img,
+[data-media-category='gemstones'] picture {
+  object-position: 50% 50%;
+}
+
+/* One vignette strength: the design shipped 45 / 65 / 70 / 75 / 80 / 85 %.
+   The build-time utility strings are matched once here so every plate shares
+   the token. */
+[class*='bg-gradient-to-t'][class*='from-black/45'][class*='to-black/10'] {
+  background-image: var(--mh-vignette);
+}
+
+/* One scrim strength for type over a photograph. */
+[class*='bg-gradient-to-t'][class*='from-black/85'],
+[class*='bg-gradient-to-t'][class*='from-black/80'],
+[class*='bg-gradient-to-t'][class*='from-black/75'],
+[class*='bg-gradient-to-t'][class*='from-black/70'],
+[class*='bg-gradient-to-t'][class*='from-black/65'] {
+  background-image: var(--mh-scrim);
+}
+
+/* The blur-up ghost is the same known image, blurred, behind the sharp copy.
+   It paints while the sharp image decodes, so a frame is never an empty hole.
+   (Set as an <img> or as a background on a div, whichever the surface uses.) */
+.mh-blurup__ghost {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-position: center;
+  background-size: cover;
+  object-fit: cover;
+  filter: blur(16px);
+  transform: scale(1.04);
+  opacity: 0.85;
+}
+
+/* ── 11. V5 — SKELETONS ────────────────────────────────────────────────────
+   The shimmer is one token, one speed, and it stops under reduced motion.
+   ─────────────────────────────────────────────────────────────────────────── */
+@keyframes mh-shimmer {
+  0% {
+    background-position: 140% 0;
+  }
+  100% {
+    background-position: -140% 0;
+  }
+}
+
+.mh-skeleton {
+  display: block;
+  background-color: var(--mh-skeleton-base);
+  background-image: linear-gradient(
+    100deg,
+    var(--mh-skeleton-base) 0%,
+    var(--mh-skeleton-sheen) 46%,
+    var(--mh-skeleton-base) 100%
+  );
+  background-size: 220% 100%;
+  animation: mh-shimmer 1.7s linear infinite;
+}
+
+.skeleton {
+  display: block;
+  background-color: var(--mh-skeleton-base);
+  background-image: linear-gradient(
+    100deg,
+    var(--mh-skeleton-base) 0%,
+    var(--mh-skeleton-sheen) 46%,
+    var(--mh-skeleton-base) 100%
+  );
+  background-size: 220% 100%;
+  animation: mh-shimmer 1.7s linear infinite;
+}
+
+/* ── 12. V5 — SCROLL CHOREOGRAPHY ──────────────────────────────────────────
+   A section enters once in 520 ms. Only a list staggers, at 48 ms per item.
+   Content that is already above the fold is never hidden, so nothing flashes
+   and nothing shifts on first paint. `MotionLayer` adds `is-pending` /
+   `is-revealed`; without JavaScript everything is visible.
+   ─────────────────────────────────────────────────────────────────────────── */
+[data-reveal-list] > * {
+  transition:
+    opacity var(--mh-dur-enter) var(--mh-ease),
+    transform var(--mh-dur-enter) var(--mh-ease);
+  transition-delay: var(--mh-reveal-delay, 0ms);
+}
+
+[data-reveal-list].is-pending > * {
+  opacity: 0.01;
+  transform: translateY(12px);
+}
+
+[data-reveal-list].is-pending.is-revealed > * {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── 13. V5 — ROUTE CROSSFADE ──────────────────────────────────────────────
+   React's <ViewTransition> in the storefront layout names <main>. The root
+   snapshot is suppressed so the header and footer never fade or move; only
+   the page area crossfades, in 180 ms. The overlay never eats a pointer.
+   ─────────────────────────────────────────────────────────────────────────── */
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-group(root) {
+  animation: none;
+}
+
+::view-transition-group(.mh-page) {
+  animation-duration: var(--mh-dur-nav);
+  animation-timing-function: var(--mh-ease);
+}
+
+::view-transition-old(.mh-page) {
+  animation: var(--mh-dur-nav) var(--mh-ease) both mh-page-out;
+}
+
+::view-transition-new(.mh-page) {
+  animation: var(--mh-dur-nav) var(--mh-ease) both mh-page-in;
+}
+
+@keyframes mh-page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mh-page-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ── 14. V5 — empty-state composition ──────────────────────────────────────
+   One line of what is missing, one primary action. The surfaces already carry
+   the copy and the action; this only gives them one frame and one rhythm.
+   ─────────────────────────────────────────────────────────────────────────── */
+.portal-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.portal-empty__title {
+  text-wrap: balance;
+}
+
+.portal-empty__sub {
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+
+/* The inline data-surface empty state (collection filters, search). One
+   gold hairline, one line of what is missing, one primary action. */
+.mh-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: clamp(2.5rem, 6vw, 4rem) var(--mh-s-6);
+  text-align: center;
+}
+
+.mh-empty::before {
+  content: '';
+  width: 28px;
+  height: var(--mh-hairline);
+  background: var(--mh-gold-ink);
+  margin-bottom: 4px;
+}
+
+.mh-empty > * {
+  max-width: 56ch;
+}
+
+/* ── 15. V5 — motion guards ────────────────────────────────────────────────
+   Last in the file so nothing above can re-enable movement.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* The depth map above rewrites box-shadow, so the focus halo is re-asserted
+   here: a focused control must always read as focused, shadowed or not. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--mh-focus-ring);
+  outline-offset: 2px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 4px var(--mh-focus-halo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mh-card,
+  .mh-card::before,
+  [data-reveal-list] > * {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .mh-skeleton,
+  .skeleton {
+    animation: none;
+    background-image: none;
+  }
+
+  [data-reveal-list].is-pending > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
 }

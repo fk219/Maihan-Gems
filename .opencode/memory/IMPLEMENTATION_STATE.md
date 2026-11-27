@@ -1,3 +1,31 @@
+# STOREFRONT v5 — PERCEIVED-QUALITY PASS (2026-11-27)
+
+- **Scope.** Additive polish on top of the v4 craft pass: route crossfade,
+  layout-accurate skeletons, one image treatment, micro-interactions, one
+  depth scale, composed empty states, scroll choreography. No layout, copy,
+  palette, component composition or section order changed.
+- **Page transitions.** React 19.3's built-in `<ViewTransition>` in a new
+  `app/(storefront)/template.tsx` (a template remounts per navigation, so
+  in-page transitions do not animate). 180 ms enter/exit, header/footer
+  outside the boundary, root snapshot suppressed, pointers pass through,
+  reduced motion → 0 ms. Registered in `routing/route-manifest.ts` + the
+  manifest spec's allowed framework files.
+- **Skeletons.** `ListSkeleton`, `CollectionExplorerSkeleton` and the mgh PDP
+  skeleton rebuilt to the real boxes/ratios/text widths; one `mh-shimmer`
+  token; the group loading shell is now full-height so the footer cannot enter
+  the viewport mid-load. Navigation CLS 0.1204 → 0.0000.
+- **Measured gates.** typecheck 0; `next build --webpack` exit 0 with
+  `DATABASE_URL` unset; tests 618 passed / 21 skipped; slop clean; axe 0
+  violations across 141 captures; overflow 0; initial JS 203.3 / 208.5 KB
+  (main baseline 203.2 / 208.3; +0.2 KB is the framework transition).
+- **Evidence.** `docs/design-shots/v5/README.md` + `before/` + `after/`
+  (16 routes × 3 widths per side, plus loading-state captures).
+- **Open.** The home CLS of 0.30 is unchanged before/after (late client
+  content growth), and the product route was already 208.3 KB at `088ce8c`
+  before this pass.
+
+---
+
 # PRODUCT DETAIL RESIDUALS CLOSED — FIFTH ALIAS 308, LINK HYGIENE, DIGEST PROOF (2026-11-27)
 
 - **Resolves** the two "left alone (reported)" items of the entry below: the

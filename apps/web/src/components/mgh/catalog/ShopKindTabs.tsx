@@ -72,7 +72,7 @@ export function ShopKindTabs({
           <div className="rounded-xl border border-[#D4AF37]/30 bg-[#0A0A0B] text-[#E6C97A] px-4 py-3 text-sm font-[family-name:var(--font-eb-garamond)]">
             Matched gemstone pairs are designed for earrings only.
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div data-reveal-list className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {pairs.map((pair) => (
               <ProductCard
                 key={pair.id}

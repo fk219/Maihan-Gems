@@ -21,22 +21,22 @@ export function CollectionExplorerSkeleton({
     return (
       <div
         data-testid="collection-explorer-skeleton"
-        className="divide-y divide-[#E4DFD5] rounded-sm border border-[#EAE5DC] bg-white animate-pulse"
+        className="divide-y divide-[#E4DFD5] rounded-sm border border-[#EAE5DC] bg-white"
       >
         {Array.from({ length: count }).map((_, idx) => (
           <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
             <div className="flex items-center gap-4">
-              <div className="h-20 w-24 rounded-sm bg-[#EFECE6] shrink-0" />
+              <div className="mh-skeleton h-20 w-24 shrink-0 rounded-sm" />
               <div className="space-y-2">
-                <div className="h-2.5 w-32 bg-[#E2DED6] rounded-xs" />
-                <div className="h-4 w-48 bg-[#DCD8D0] rounded-xs" />
-                <div className="h-2.5 w-40 bg-[#E2DED6] rounded-xs" />
+                <div className="mh-skeleton h-2.5 w-32" />
+                <div className="mh-skeleton h-4 w-48" />
+                <div className="mh-skeleton h-2.5 w-40" />
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="h-5 w-20 bg-[#DCD8D0] rounded-xs" />
-              <div className="h-8 w-20 bg-[#EFECE6] rounded-sm" />
-              <div className="h-8 w-24 bg-[#0A0A0B]/20 rounded-sm" />
+              <div className="mh-skeleton h-5 w-20" />
+              <div className="mh-skeleton h-8 w-20 rounded-sm" />
+              <div className="mh-skeleton h-8 w-24 rounded-sm" />
             </div>
           </div>
         ))}
@@ -47,29 +47,30 @@ export function CollectionExplorerSkeleton({
   return (
     <div
       data-testid="collection-explorer-skeleton"
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 animate-pulse"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7"
     >
       {Array.from({ length: count }).map((_, idx) => (
         <div
           key={idx}
-          className="flex flex-col bg-white border border-[#EAE5DC] overflow-hidden"
+          className="relative flex flex-col justify-between overflow-hidden rounded-[24px] border border-[#E5D4B3] bg-[#FAF8F4] p-6 sm:p-7 aspect-[10/14] sm:aspect-[3/4]"
         >
-          {/* Portrait stage shimmer */}
-          <div className="relative aspect-[4/5] w-full bg-[#EFECE6]">
-            <div className="absolute top-3.5 right-3.5 flex gap-1.5">
-              <div className="h-7 w-7 rounded-sm bg-white/70" />
-              <div className="h-7 w-7 rounded-sm bg-white/70" />
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-2">
+              <div className="mh-skeleton h-[11px] w-[72px]" />
+              <div className="mh-skeleton h-[2px] w-7" />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="mh-skeleton h-10 w-10 rounded-full" />
+              <div className="mh-skeleton h-10 w-10 rounded-full" />
             </div>
           </div>
-          {/* Card body shimmer */}
-          <div className="p-5 space-y-4">
-            <div className="space-y-2">
-              <div className="h-2.5 w-24 bg-[#E2DED6] rounded-xs" />
-              <div className="h-5 w-3/4 bg-[#DCD8D0] rounded-xs" />
-            </div>
-            <div className="pt-3.5 border-t border-[#F0ECE3] flex items-center justify-between">
-              <div className="h-4 w-20 bg-[#E2DED6] rounded-xs" />
-              <div className="h-8 w-24 bg-[#0A0A0B]/20 rounded-sm" />
+          <div className="space-y-2.5">
+            <div className="mh-skeleton h-[2px] w-7" />
+            <div className="mh-skeleton h-[26px] w-[86%]" />
+            <div className="mh-skeleton h-[11px] w-[64%]" />
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <div className="mh-skeleton h-6 w-24" />
+              <div className="mh-skeleton h-12 w-12 rounded-full" />
             </div>
           </div>
         </div>
@@ -478,7 +479,7 @@ export function CollectionExplorer({
       {isBusy ? (
         <CollectionExplorerSkeleton count={6} viewMode={viewMode} />
       ) : filtered.length === 0 ? (
-        <div className="rounded-sm border border-[#EAE5DC] bg-white p-12 text-center space-y-4">
+        <div className="mh-empty rounded-sm border border-[#EAE5DC] bg-white">
           <h3 className="font-[family-name:var(--font-display)] text-2xl text-[#121211]">
             No vault specimens match this budget and filter combination.
           </h3>
@@ -496,7 +497,7 @@ export function CollectionExplorer({
           </div>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+        <div data-reveal-list className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
           {paginated.map((stone) => (
             <div key={stone.id} className="relative group">
               <ProductCard stone={stone} varietyScoped={Boolean(lockedVarietySlug)} />
