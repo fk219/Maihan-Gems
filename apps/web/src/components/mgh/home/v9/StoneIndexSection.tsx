@@ -23,7 +23,7 @@ const VARIETY_PLATES: Record<
   sapphire: {
     src: '/media/stock/sapphire.jpg',
     alt: 'An oval blue sapphire with violet and pink zoning, held on a pin against a warm beige ground',
-    position: '50% 38%',
+    position: '50% 20%',
     width: 3000,
     height: 4000,
   },

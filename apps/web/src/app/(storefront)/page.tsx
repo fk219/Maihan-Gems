@@ -2,22 +2,21 @@ import type { Metadata } from 'next';
 import type { GemstoneItem, MatchedPairItem } from '@/lib/mgh/fixtures';
 import {
   getCatalogGemstoneBySlugOrId,
-  getFreshSettingsCatalog,
-  getFreshVarietyLinks,
   getHomeCatalogGemstones,
   getHomeCatalogMatchedPairs,
 } from '@/lib/mgh/adapters/catalog';
 import { HomeHero } from '@/components/mgh/home/HomeHero';
 import type { HomePiece } from '@/components/mgh/home/PiecesSection';
 import { formatCarat, formatUsd } from '@/components/mgh/home/format';
-import { AtelierSection } from '@/components/mgh/home/v9/AtelierSection';
-import { CertificateSection } from '@/components/mgh/home/v9/CertificateSection';
-import { ClosingSection } from '@/components/mgh/home/v9/ClosingSection';
-import { ConfiguratorSection } from '@/components/mgh/home/v9/ConfiguratorSection';
-import { GemologistSection } from '@/components/mgh/home/v9/GemologistSection';
-import { StoneIndexSection } from '@/components/mgh/home/v9/StoneIndexSection';
-import { VendorSection } from '@/components/mgh/home/v9/VendorSection';
-import '@/styles/home-v9.css';
+import { StoneMarquee } from '@/components/mgh/home/v11/StoneMarquee';
+import { CollectionSection } from '@/components/mgh/home/v11/CollectionSection';
+import { AtelierSection } from '@/components/mgh/home/v11/AtelierSection';
+import { DesignYourOwnSection } from '@/components/mgh/home/v11/DesignYourOwnSection';
+import { CertificateSection } from '@/components/mgh/home/v11/CertificateSection';
+import { GemologistSection } from '@/components/mgh/home/v11/GemologistSection';
+import { TryOnSection } from '@/components/mgh/home/v11/TryOnSection';
+import { ClosingSection } from '@/components/mgh/home/v11/ClosingSection';
+import '@/styles/home-v11.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,32 +28,6 @@ export const metadata: Metadata = {
     canonical: '/',
   },
 };
-
-/** Variety slugs that describe a jewellery form, not a gemstone variety. */
-const JEWELLERY_FORMS = new Set(['rings', 'necklaces', 'earrings', 'bracelets', 'pendants']);
-
-/**
- * One record per gemstone variety, for the index. The taxonomy decides the
- * order; a variety with no record is omitted rather than filled. If the
- * taxonomy and the loaded rows share no slug, the section renders nothing:
- * an honest empty state, not a stand-in.
- */
-function selectIndexRecords(
-  stones: readonly GemstoneItem[],
-  varieties: readonly { slug: string }[],
-): GemstoneItem[] {
-  const selected: GemstoneItem[] = [];
-  const seen = new Set<string>();
-  for (const variety of varieties) {
-    if (JEWELLERY_FORMS.has(variety.slug)) continue;
-    const record = stones.find((stone) => stone.varietySlug === variety.slug);
-    if (record && !seen.has(record.id)) {
-      selected.push(record);
-      seen.add(record.id);
-    }
-  }
-  return selected;
-}
 
 function pieceSpec(variety: string, carat: number): string {
   const form = variety === 'Rings' ? 'Ring' : variety === 'Necklaces' ? 'Necklace' : variety;
@@ -100,27 +73,27 @@ function buildPieces(
 }
 
 export default async function HomePage() {
-  const [allStones, pairs, varieties, settings, elysian, verdant] = await Promise.all([
+  const [allStones, pairs, elysian, verdant] = await Promise.all([
     getHomeCatalogGemstones(),
     getHomeCatalogMatchedPairs(),
-    getFreshVarietyLinks(),
-    getFreshSettingsCatalog(),
     getCatalogGemstoneBySlugOrId('elysian-ring'),
     getCatalogGemstoneBySlugOrId('verdant-drop'),
   ]);
 
-  const indexRecords = selectIndexRecords(allStones, varieties);
   const pieces = buildPieces(elysian, verdant, pairs[0] ?? null);
+  const atelierPlate =
+    pieces.find((piece) => piece.image !== null && piece.image.length > 0) ?? null;
 
   return (
-    <div className="mh6-home v9-home">
+    <div className="mh6-home v11-home">
       <HomeHero />
-      <StoneIndexSection records={indexRecords} />
-      <ConfiguratorSection />
-      <GemologistSection />
+      <StoneMarquee records={allStones} />
+      <CollectionSection />
+      <AtelierSection piece={atelierPlate} />
+      <DesignYourOwnSection />
       <CertificateSection record={elysian} />
-      <AtelierSection pieces={pieces} settings={settings} />
-      <VendorSection />
+      <GemologistSection />
+      <TryOnSection />
       <ClosingSection />
     </div>
   );

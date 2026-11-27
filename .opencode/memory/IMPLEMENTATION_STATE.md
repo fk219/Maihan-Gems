@@ -1,3 +1,42 @@
+# STOREFRONT v10 — REAL PHOTOGRAPHY, PROOFS REPLACED (2026-11-27)
+
+- **Scope.** The homepage sections only (the v9 section components in
+  `apps/web/src/components/mgh/home/v9/` + `src/styles/home-v9.css`). Navbar,
+  hero search, footer, api/, packages/, admin/vendor consoles untouched. No new
+  dependency (downloads via Node 24 fetch; JPEG checks parsed SOF markers;
+  contrast probe via PowerShell System.Drawing).
+- **Client verdict answered.** The app-screenshot proof captures looked cheap and
+  are gone: `apps/web/public/proof/*` deleted, `scripts/capture-proofs.mjs`
+  removed (nothing else referenced it). Sections rebuilt around nine real
+  Wikimedia Commons photographs committed at `apps/web/public/media/stock/`
+  (served locally, no hotlinking; ~8.6 MB): tanzanite (cut + rough), sapphire,
+  ruby, emerald, spinel, opal, amethyst, diamond.
+- **Sections.** Collection = photography-first mosaic (lead plate + 4 variety
+  tiles, variety name + carat over the image, hairline-ruled index). DYO = rough
+  tanzanite portrait on black. Certificate = record fields beside an illustrative
+  diamond. Gemologist = amethysts under raking light. Atelier = two large 4:5
+  plates (records' own images). Vendor = copy-only (a login-card screenshot is
+  not evidence). Every plate is labelled "Illustrative" on the image itself; the
+  demo-content badge stays (global chrome, untouched).
+- **Imagery provenance.** `docs/IMAGE_CREDITS.md` records source page, author and
+  licence per file (PD/CC0/CC BY only; CC BY-SA excluded). Re-download +
+  re-verify with `scripts/fetch-stock-stones.mjs` (magic bytes, long edge ≥ 1200
+  px from SOF).
+- **Measured gates.** typecheck 0; build exit 0 with `DATABASE_URL` empty; tests
+  618 passed / 21 skipped; slop clean; axe 0 violations across 4 home captures
+  (1440/1024/768/390); overflow 0 px. Caption-over-image contrast sampled
+  numerically from the committed JPEGs: 11.7–17.3:1 on the real plates, 6.29:1
+  worst-case pure-white.
+- **Parallel-session hazard.** A sibling session (v11) ran in this tree with a
+  brief that makes the v11 composition own `page.tsx`. v10 captures were taken
+  with v9 wiring temporarily restored; `page.tsx` was then restored byte-identically
+  to the v11 wiring (SHA-256 B990C4A4 verified). The v10 section code lives in the
+  v9 files and re-renders whenever `page.tsx` imports it.
+- **Evidence.** `docs/design-shots/v10/README.md`, `after/` (4 widths +
+  audit.json), `sections/` (7 sections × 4 widths), `docs/IMAGE_CREDITS.md`.
+
+---
+
 # STOREFRONT v11 — THE APPLE FORMULA: TYPE IS THE DESIGN (2026-11-27)
 
 - **Scope.** The homepage composition, the footer's presentation CSS, and the
