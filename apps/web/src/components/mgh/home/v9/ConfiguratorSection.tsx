@@ -19,13 +19,12 @@ const STEPS = [
 ];
 
 /**
- * The configurator section sells the sequence, not a mood. The proof is a
- * capture of the shipped studio at `/design-your-own`: the five-step bar and
- * the commission ledger are the actual interface, not a drawn mock.
+ * The configurator section sells the sequence, not a mood. The plate is an
+ * illustrative photograph of a rough tanzanite crystal — the stone as it is
+ * before the bench — and the caption says so. The studio itself configures the
+ * record: shape, carat and certificate reference, never a stand-in stone.
  *
- * The capture was taken while the vault had no evidenced stone to configure,
- * so the studio's own empty state is visible. The caption states that plainly;
- * no stand-in specimen is photographed into the picture.
+ * The steps carry no photograph; they are the sequence the studio enforces.
  */
 export function ConfiguratorSection() {
   return (
@@ -44,18 +43,21 @@ export function ConfiguratorSection() {
       </div>
 
       <figure className="v9-dyo__figure">
-        <img
-          src="/proof/configurator.jpg"
-          alt="The Design Your Own studio: a five-step bar from stone to review, a stone selection panel, and the commission ledger"
-          width={1280}
-          height={942}
-          loading="lazy"
-          decoding="async"
-        />
+        <div className="v9-plate v9-dyo__media">
+          <img
+            src="/media/stock/tanzanite-rough.jpg"
+            alt="A rough violet-blue tanzanite crystal with parallel striations, photographed on a dark ground"
+            width={1920}
+            height={2891}
+            loading="lazy"
+            decoding="async"
+            style={{ objectPosition: '50% 22%' }}
+          />
+        </div>
         <figcaption className="v9-dyo__caption">
-          The live configurator, captured from <span className="v9-mono">/design-your-own</span>.
-          With no evidenced stone in the vault, the studio states that it has nothing to
-          configure instead of inventing a specimen.
+          Illustrative photograph — a rough tanzanite crystal, the stone before the bench. The
+          studio configures the record: shape, carat and certificate reference, never a stand-in
+          stone.
         </figcaption>
       </figure>
 

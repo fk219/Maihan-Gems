@@ -4,6 +4,8 @@ import { HomeSearch } from './HomeSearch';
 /**
  * The hero is deliberately four things: one editorial line, one supporting
  * line, the search, and one quiet alternative. Everything else was removed.
+ * Its title rides the v11 statement scale, and one word carries the page's
+ * accent gold; the composition is otherwise as approved.
  *
  * The image is a single lit still (not the old stock video), cropped so the
  * stone sits in raking light on the right; the left edge dissolves into the
@@ -28,7 +30,7 @@ export function HomeHero() {
       <div className="mh6-hero__inner">
         <div className="mh6-hero__content">
           <h1 id="mh6-hero-title" className="mh6-hero__title">
-            The stone comes first.
+            The <span className="v11-gold">stone</span> comes first.
           </h1>
           <p className="mh6-hero__lede">
             Maihan Gems is a gemstone house: loose stones, matched pairs and atelier mountings,

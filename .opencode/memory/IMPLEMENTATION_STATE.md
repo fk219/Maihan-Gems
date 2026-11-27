@@ -1,3 +1,52 @@
+# STOREFRONT v11 — THE APPLE FORMULA: TYPE IS THE DESIGN (2026-11-27)
+
+- **Scope.** The homepage composition, the footer's presentation CSS, and the
+  hero's title size + one gold accent word. Navbar untouched; no other route,
+  API or package changed. No new dependency, no new client component; the
+  scroll story is CSS-only.
+- **System.** One statement per screen (Cormorant 600, −0.02em,
+  clamp(48px → 8vw → 128px), one sentence); one statement + one visual + one
+  action per section; full-bleed photography with locked ratios; hard
+  paper/obsidian cuts; gold spent exactly four times (hero accent word,
+  marquee band, closing hairline, closing CTA border) — everything else ink.
+- **Sections.** Hero → typographic marquee (names + carat + origin from real
+  records, 90s loop, pause on hover/focus) → collection (full-bleed
+  illustrative tanzanite) → atelier split (record's own plate) → DYO (dark,
+  rough tanzanite) → certificate intelligence (real fields + illustrative
+  diamond) → AI gemologist (one italic question + full-bleed amethyst) →
+  try-on (one image, one line) → closing (one line + gold CTA) → footer
+  refined (large wordmark, neutral hairlines, INV-07/08 note).
+- **Scroll behaviour.** CSS scroll-driven entrances via
+  `animation-timeline: view()` with `@supports` + `no-preference` guards;
+  statements fade/rise/unblur over entry 0→55%, media settles from 1.06
+  scale over entry 0→cover 35%; reduced motion renders everything static and
+  visible. No JS, no scroll-jacking.
+- **Removed.** Vendor section (not in the brief's order), collection index
+  ledger (folded into the marquee), atelier ledgers, DYO step list, gemologist
+  fact table, gold eyebrows/actions/search hairline (gold budget).
+- **Measured gates.** typecheck 0; build exit 0 with `DATABASE_URL` empty;
+  tests 618 passed / 21 skipped; slop clean; axe 0 violations across 4 home
+  captures (1440/1024/768/390); overflow 0 px; home initial JS 173.3 KB gzip
+  (−8.5 vs v9); 27/27 internal links resolve; contrast probe 20/20 pass
+  (lowest 6.50).
+- **Imagery provenance.** Collection/DYO/certificate/gemologist plates from
+  `apps/web/public/media/stock/` (Wikimedia Commons; licences + per-use
+  captions in `docs/IMAGE_CREDITS.md`, each plate captioned "Illustrative",
+  demo badge on). Atelier plate is the fixture record's own image. The v9
+  proof captures were deleted by the parallel v10 stock session; their
+  sections now carry the illustrative photography that doc maps.
+- **Parallel-session hazard.** A sibling session (v10 stock pass) writes the
+  same tree: it reverted `page.tsx` once (re-applied), broke `tsc -b` in
+  `v9/StoneIndexSection.tsx` (fixed with equivalent narrowing), and rebuilt
+  `.next` under the audit server twice (transient unstyled captures). If the
+  homepage renders as v9 sections again, check whether `page.tsx` was
+  reverted — the v11 composition must win per this brief.
+- **Evidence.** `docs/design-shots/v11/README.md` (section table, gates,
+  scroll notes), `after/` (+ audit.json), `sections/` (8 sections × 1440/390),
+  `scroll/` (hero → marquee → collection sequence).
+
+---
+
 # STOREFRONT v9 — EDITORIAL LUXURY, PROOF PER SECTION (2026-11-27)
 
 - **Scope.** The homepage only. Navbar untouched; footer structure untouched;

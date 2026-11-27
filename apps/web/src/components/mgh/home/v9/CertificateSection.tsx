@@ -7,9 +7,9 @@ function value(raw: string | null | undefined, fallback = 'Not recorded'): strin
 }
 
 /**
- * Certificate intelligence is a proof section: a real certificate dossier
- * captured from a real product record, the fields the record carries printed
- * beside it, and the fields it does not carry left visibly empty.
+ * Certificate intelligence is a proof section: the record's fields are printed
+ * beside an illustrative diamond photograph, and the two never blend. The
+ * caption says plainly that the stone pictured is not the record's stone.
  *
  * It renders nothing when the supplied record has no report number. A
  * certificate section with no certificate would be decoration.
@@ -69,17 +69,20 @@ export function CertificateSection({ record }: { record: GemstoneItem | null }) 
         </div>
 
         <figure className="v9-certificate__figure">
-          <img
-            src="/proof/certificate.jpg"
-            alt={`The ${record.name} certificate dossier, showing the laboratory, report number, specimen, carat, origin, treatment and dimensions`}
-            width={576}
-            height={425}
-            loading="lazy"
-            decoding="async"
-          />
+          <div className="v9-plate v9-certificate__media">
+            <img
+              src="/media/stock/diamond.jpg"
+              alt="A large cushion-cut deep blue diamond ringed by white diamonds, photographed against a grey ground"
+              width={2367}
+              height={2193}
+              loading="lazy"
+              decoding="async"
+              style={{ objectPosition: '50% 45%' }}
+            />
+          </div>
           <figcaption className="v9-certificate__caption">
-            The {record.name} certificate dossier, captured from{' '}
-            <span className="v9-mono">/products/{record.slug}</span>.
+            Illustrative photography — a deep blue diamond, not the record's stone. The fields at
+            left belong to the <span className="v9-mono">{record.name}</span> record alone.
           </figcaption>
         </figure>
       </div>

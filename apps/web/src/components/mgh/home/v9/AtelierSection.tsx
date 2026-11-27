@@ -5,8 +5,9 @@ import type { HomePiece } from '../PiecesSection';
 
 /**
  * The atelier is the page's photographic spread: two records' own images at
- * plate scale, each captioned with that record's name, weight, form and price.
- * The ledger under the plates carries the rest of the register.
+ * plate scale — the largest plates on the page — each captioned with that
+ * record's name, weight, form and price. The ledger under the plates carries
+ * the rest of the register.
  *
  * Only images that belong to the named record are captioned with its name.
  * A record with no image stays in the ledger and is not given a borrowed

@@ -1,0 +1,707 @@
+/* ============================================================================
+   home-v11.css — the homepage rebuilt on the Apple formula
+   ============================================================================
+   One system for the page:
+
+     1. TYPE IS THE DESIGN. One enormous statement per screen: Cormorant 600,
+        -0.02em, clamp(48px → 8vw → 128px), one sentence.
+     2. WHITESPACE IS THE LUXURY. One statement + one visual + one action per
+        section. No card grids, no ledgers, no eyebrows.
+     3. SCROLL IS THE STORY. Sections fade, rise and unblur as they enter,
+        driven by CSS scroll timelines (animation-timeline: view()) behind an
+        @supports guard and a reduced-motion fallback. No scroll-jacking.
+     4. PHOTOGRAPHY IS THE HERO ART. Full-bleed, locked ratios, object-position,
+        caption on a controlled scrim.
+     5. LIGHT AND DARK ALTERNATE as hard cuts: paper → obsidian → paper.
+     6. GOLD IS SPENT FOUR TIMES, all sanctioned: the hero accent word, the
+        marquee band (gold on obsidian), the closing hairline, the closing CTA
+        border. Everything else is ink on paper or cream on obsidian.
+     7. MOTION: opacity + transform + blur only, linear timeline progress for
+        scroll-driven entry, the house curve for hover states, reduced motion
+        honoured everywhere.
+
+   The hero's composition is untouched (media, scrim, search, one line); only
+   its title rides the statement scale and one word carries gold. The navbar
+   and every other route keep their own sheets.
+   ========================================================================== */
+
+.mh6-home.v11-home {
+  --v11-paper: #f7f4ec;
+  --v11-obsidian: #070a0f;
+  --v11-obsidian-2: #0a0e15;
+  --v11-ink: #17140f;
+  --v11-ink-muted: #5e574b;
+  --v11-cream: #f7f3e8;
+  --v11-cream-muted: #b9b3a7;
+  --v11-hairline-paper: rgba(23, 20, 15, 0.16);
+  --v11-hairline-dark: rgba(247, 243, 232, 0.18);
+  /* The page's gold, spent on purpose (see the header). */
+  --v11-gold: #c9a84c;
+  --v11-gold-bright: #e6c97a;
+  /* The statement scale. 48 px floor at 390 px, 8vw mid, 128 px ceiling. */
+  --v11-statement: clamp(3rem, 8vw, 8rem);
+  --v11-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  background: var(--v11-paper);
+  color: var(--v11-ink);
+}
+
+/* Dark sections re-solve the focus ring so it stays visible on obsidian. */
+.mh6-home.v11-home .v11-dark {
+  --focus-ring-ink: #e6c97a;
+  --mh-focus-ring: #e6c97a;
+}
+
+.v11-wrap {
+  width: 100%;
+  max-width: var(--mh6-home-max, 1360px);
+  margin-inline: auto;
+  padding-inline: var(--mh6-home-gutter);
+}
+
+/* ── the statement ─────────────────────────────────────────────────────────
+   One enormous line per screen. Serif 600, tight, balanced. Copy is one
+   sentence; hierarchy comes from size and space alone. */
+
+.v11-statement {
+  margin: 0;
+  max-width: 15ch;
+  font-family: var(--font-serif);
+  font-size: var(--v11-statement);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.v11-dark .v11-statement {
+  color: var(--v11-cream);
+}
+
+/* One supporting clause where a section needs it — never a paragraph. */
+.v11-line {
+  margin: 2rem 0 0;
+  max-width: 38ch;
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+  line-height: 1.55;
+  color: var(--v11-ink-muted);
+  text-wrap: pretty;
+}
+
+.v11-dark .v11-line {
+  color: var(--v11-cream-muted);
+}
+
+/* Captions carry provenance, never marketing. Dark sections re-solve them. */
+.v11-caption {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  line-height: 1.55;
+  color: var(--v11-ink-muted);
+}
+
+.v11-dark .v11-caption {
+  color: var(--v11-cream-muted);
+}
+
+/* ── the one action per section ────────────────────────────────────────────
+   A rule, a verb, an arrow. Monochrome; gold is not spent here. */
+
+.v11-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 48px;
+  padding: 0 0 0.65rem;
+  border-bottom: 1px solid var(--v11-ink);
+  color: var(--v11-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: opacity var(--mh-dur-state, 150ms) var(--v11-ease);
+}
+
+.v11-action:hover {
+  opacity: 0.72;
+}
+
+.v11-action__arrow {
+  display: inline-block;
+  font-size: 1rem;
+  letter-spacing: 0;
+  transition: transform 240ms var(--v11-ease);
+}
+
+.v11-action:hover .v11-action__arrow {
+  transform: translateX(4px);
+}
+
+.v11-dark .v11-action {
+  border-bottom-color: var(--v11-cream);
+  color: var(--v11-cream);
+}
+
+.v11-action.v11-action--gold {
+  /* The one gold-bordered CTA on the page (the closing section). */
+  border: 1px solid var(--v11-gold);
+  padding: 0 1.6rem;
+  min-height: 56px;
+  letter-spacing: 0.14em;
+  color: var(--v11-cream);
+  transition:
+    background-color var(--mh-dur-state, 150ms) var(--v11-ease),
+    color var(--mh-dur-state, 150ms) var(--v11-ease);
+}
+
+.v11-action.v11-action--gold:hover {
+  background: var(--v11-gold);
+  color: #14100a;
+  opacity: 1;
+}
+
+.v11-action.v11-action--gold:hover .v11-action__arrow {
+  transform: translateX(4px);
+}
+
+/* ── section rhythm ──────────────────────────────────────────────────────── */
+
+.v11-section {
+  padding-block: clamp(7rem, 14vh, 11rem);
+}
+
+/* ── the hero rides the statement scale ────────────────────────────────────
+   The hero's composition is as built; the title joins the type system and
+   one word carries the page's accent gold. The search control loses its gold
+   hairline so gold stays inside its budget. */
+
+.mh6-home.v11-home .mh6-hero__title {
+  max-width: 12ch;
+  font-size: var(--v11-statement);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.v11-gold {
+  color: var(--v11-gold-bright);
+}
+
+.mh6-home.v11-home .mh6-search__form {
+  border-color: rgba(247, 243, 232, 0.3);
+}
+
+.mh6-home.v11-home .mh6-search__icon {
+  color: rgba(247, 243, 232, 0.72);
+}
+
+.mh6-home.v11-home .mh6-search__form:focus-within {
+  border-color: var(--v11-cream);
+}
+
+/* ── the marquee ───────────────────────────────────────────────────────────
+   Typographic only: stone name, carat, origin — all read from the records.
+   Gold on obsidian, one slow loop, paused on hover and on focus. Under
+   reduced motion it does not move. */
+
+.v11-marquee {
+  overflow: hidden;
+  padding-block: 1.35rem;
+  background: var(--v11-obsidian);
+  color: var(--v11-gold-bright);
+}
+
+.v11-marquee__track {
+  display: flex;
+  width: max-content;
+  user-select: none;
+  animation: v11-marquee 90s linear infinite;
+}
+
+.v11-marquee:hover .v11-marquee__track,
+.v11-marquee:focus-within .v11-marquee__track {
+  animation-play-state: paused;
+}
+
+.v11-marquee__list {
+  display: flex;
+  flex: none;
+  align-items: baseline;
+  gap: 3.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* Each half ends with the same gap it starts with, so the -50% loop is seamless. */
+  padding-right: 3.5rem;
+}
+
+.v11-marquee__item {
+  display: flex;
+  flex: none;
+  align-items: baseline;
+  gap: 0.75rem;
+  white-space: nowrap;
+}
+
+.v11-marquee__name {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.v11-marquee__meta {
+  color: rgba(230, 201, 122, 0.72);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+
+@keyframes v11-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v11-marquee__track {
+    animation: none;
+  }
+}
+
+/* ── the collection ────────────────────────────────────────────────────────
+   Statement → action → one full-bleed catalogue photograph. No card chrome.
+   The caption sits on the controlled scrim at the image's foot. */
+
+.v11-collection__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem 4rem;
+  padding-bottom: clamp(3rem, 6vh, 5rem);
+}
+
+.v11-collection__head .v11-action {
+  margin-bottom: 0.9rem;
+}
+
+.v11-collection__figure {
+  margin: 0;
+  overflow: hidden;
+  background: var(--v11-obsidian);
+}
+
+.v11-collection__figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.v11-collection__figcap {
+  position: relative;
+  margin-top: 0.9rem;
+  padding-inline: var(--mh6-home-gutter);
+}
+
+.v11-collection__figcap-inner {
+  max-width: var(--mh6-home-max, 1360px);
+  margin-inline: auto;
+}
+
+/* ── the atelier ───────────────────────────────────────────────────────────
+   A split: the record's own photograph on the left, the statement on the
+   right. The plate keeps the record's native 4 / 5 ratio. */
+
+.v11-atelier__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(3rem, 7vw, 7rem);
+  align-items: center;
+}
+
+.v11-atelier__figure {
+  margin: 0;
+}
+
+/* The obsidian plate belongs to the photograph alone, so the caption below
+   reads on paper. */
+.v11-atelier__plate {
+  overflow: hidden;
+  background: var(--v11-obsidian);
+}
+
+.v11-atelier__plate img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+.v11-atelier__figcap {
+  margin-top: 0.9rem;
+}
+
+.v11-atelier__name {
+  display: block;
+  color: var(--v11-ink);
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.v11-atelier__meta {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--v11-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+}
+
+.v11-atelier__copy .v11-action {
+  margin-top: 2.5rem;
+}
+
+/* ── design your own ───────────────────────────────────────────────────────
+   Obsidian, one line. The proof is the shipped studio's own capture; its
+   caption names the empty vault honestly. */
+
+.v11-dyo {
+  background: var(--v11-obsidian-2);
+  color: var(--v11-cream);
+}
+
+.v11-dyo .v11-statement {
+  max-width: 12ch;
+}
+
+.v11-dyo__figure {
+  width: min(100%, 34rem);
+  margin: clamp(3.5rem, 7vh, 5.5rem) auto 0;
+  text-align: center;
+}
+
+.v11-dyo__figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: 50% 42%;
+  background: var(--v11-obsidian);
+}
+
+.v11-dyo__figure figcaption {
+  max-width: 46ch;
+  margin: 1rem auto 0;
+}
+
+.v11-dyo .v11-action {
+  margin-top: 3rem;
+}
+
+/* ── certificate intelligence ──────────────────────────────────────────────
+   One record: its dossier capture and the real fields the record carries.
+   Labels are data, not eyebrows — mono ink, no gold. */
+
+.v11-cert__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(3rem, 7vw, 7rem);
+  align-items: center;
+}
+
+.v11-cert__facts {
+  margin: 2.75rem 0 0;
+  border-top: 1px solid var(--v11-hairline-paper);
+}
+
+.v11-cert__facts > div {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--v11-hairline-paper);
+}
+
+.v11-cert__facts dt {
+  color: var(--v11-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  line-height: 1.8;
+  text-transform: uppercase;
+}
+
+.v11-cert__facts dd {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--v11-ink);
+}
+
+.v11-cert__copy .v11-action {
+  margin-top: 2.5rem;
+}
+
+.v11-cert__figure {
+  margin: 0;
+}
+
+.v11-cert__plate {
+  overflow: hidden;
+  background: var(--v11-obsidian);
+}
+
+.v11-cert__plate img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+.v11-cert__figure figcaption {
+  margin-top: 0.9rem;
+}
+
+/* ── the AI gemologist ─────────────────────────────────────────────────────
+   Obsidian, one question set in italic. The capture is the shipped ask
+   surface; the refusal rule is stated in the product's own words. */
+
+.v11-gem {
+  background: var(--v11-obsidian);
+  color: var(--v11-cream);
+}
+
+.v11-gem__head {
+  text-align: center;
+}
+
+.v11-gem .v11-statement {
+  margin-inline: auto;
+  max-width: 16ch;
+  font-style: italic;
+}
+
+.v11-gem .v11-line {
+  margin-inline: auto;
+}
+
+.v11-gem__figure {
+  width: 100%;
+  margin: clamp(3.5rem, 7vh, 5.5rem) 0 0;
+}
+
+.v11-gem__figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+  object-position: 50% 55%;
+  background: var(--v11-obsidian);
+}
+
+.v11-gem__figcap {
+  margin-top: 1rem;
+}
+
+.v11-gem__foot {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.v11-gem__foot .v11-action {
+  border-bottom-color: var(--v11-cream);
+}
+
+/* ── try-on ────────────────────────────────────────────────────────────────
+   One image, one line: the copy left, the catalogue photograph right. The
+   caption states exactly what opens and when. */
+
+.v11-tryon__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(3rem, 7vw, 7rem);
+  align-items: center;
+}
+
+.v11-tryon__copy .v11-action {
+  margin-top: 2.5rem;
+}
+
+.v11-tryon__copy .v11-caption {
+  margin-top: 1.1rem;
+}
+
+.v11-tryon__figure {
+  margin: 0;
+}
+
+.v11-tryon__plate {
+  overflow: hidden;
+  background: var(--v11-obsidian);
+}
+
+.v11-tryon__plate img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+.v11-tryon__figcap {
+  margin-top: 0.9rem;
+}
+
+/* ── the closing ───────────────────────────────────────────────────────────
+   Two elements: one line and one action. The page's one gold hairline rule
+   and the one gold-bordered CTA are spent here. */
+
+.v11-close {
+  position: relative;
+  padding-block: clamp(8rem, 16vh, 13rem);
+  background: var(--v11-obsidian);
+  color: var(--v11-cream);
+}
+
+.v11-close::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: var(--mh6-home-gutter);
+  left: var(--mh6-home-gutter);
+  height: 1px;
+  background: var(--v11-gold);
+}
+
+.v11-close .v11-statement {
+  max-width: 14ch;
+}
+
+.v11-close__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2.5rem 4rem;
+}
+
+.v11-close__inner .v11-action {
+  margin-bottom: 1rem;
+}
+
+/* ── scroll is the story ───────────────────────────────────────────────────
+   Content fades, rises and unblurs as it enters the viewport, holds fully
+   visible, and hands over to the next section's own entrance. Driven purely
+   by CSS scroll timelines: no JS, no scroll listeners, no hijacking.
+
+   Two guards, so content is never hidden from anyone:
+     - @supports (animation-timeline: view()) — browsers without scroll
+       timelines render everything static and fully visible;
+     - prefers-reduced-motion: no-preference — reduced motion gets the static
+       page (the global reduced-motion kill also stops the keyframes). */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .v11-enter {
+      animation: v11-enter linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+
+    /* Photography settles from a slow zoom: the stone arrives already lit. */
+    .v11-enter-media {
+      animation: v11-enter-media linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 35%;
+    }
+  }
+}
+
+@keyframes v11-enter {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.985);
+    filter: blur(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes v11-enter-media {
+  from {
+    opacity: 0.35;
+    transform: scale(1.06);
+    filter: blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* ── responsive ────────────────────────────────────────────────────────────
+   The phone layout is composed, not squashed: splits stack, the photograph
+   band tightens to 4 / 3, and the marquee keeps one slow line. */
+
+@media (max-width: 1024px) {
+  .v11-atelier__grid,
+  .v11-cert__grid,
+  .v11-tryon__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  /* On a stacked split the statement reads first. */
+  .v11-tryon__copy {
+    order: -1;
+  }
+
+  .v11-atelier__plate img {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (max-width: 640px) {
+  .v11-collection__figure img,
+  .v11-gem__figure img {
+    aspect-ratio: 4 / 3;
+    object-position: 50% 50%;
+  }
+
+  .v11-collection__head,
+  .v11-close__inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .v11-cert__facts > div {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+  }
+
+  .v11-action--gold {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .v11-marquee__name {
+    font-size: 1.2rem;
+  }
+}

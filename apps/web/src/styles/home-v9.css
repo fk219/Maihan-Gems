@@ -149,10 +149,34 @@
   outline-color: var(--v9-gold-bright);
 }
 
+/* One plate treatment for every photograph on the page: the image is cropped,
+   never filtered, and a single subtle vignette keeps the edges quiet. */
+.v9-plate {
+  position: relative;
+  overflow: hidden;
+  background: var(--v9-black);
+}
+
+.v9-plate::after {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 clamp(2.5rem, 6vw, 6rem) rgba(11, 10, 8, 0.32);
+  content: '';
+  pointer-events: none;
+}
+
+.v9-plate img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* ── the collection ────────────────────────────────────────────────────────
-   A full-height photograph on the left, a paper index on the right. The
-   photograph is the catalogue's representative stone; the index is the proof
-   that the range is made of records. */
+   Photography first: a lead plate with the variety's name and the record's
+   carat over it, a strip of variety tiles beneath, then the paper index whose
+   rows are ruled with hairlines. The plates are illustrative photographs and
+   every one of them is labelled as such on the plate itself. */
 
 .v9-gallery {
   background: var(--v9-paper);
@@ -161,25 +185,24 @@
 
 .v9-gallery__grid {
   display: grid;
-  min-height: 100svh;
   grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.82fr);
+}
+
+.v9-gallery__mosaic {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  padding: clamp(2.5rem, 4.5vw, 5.5rem) 0 clamp(2.5rem, 4.5vw, 5.5rem) clamp(2rem, 4vw, 4.5rem);
 }
 
 .v9-gallery__plate {
   position: relative;
   min-width: 0;
+  aspect-ratio: 3 / 2;
   margin: 0;
   overflow: hidden;
   background: var(--v9-black);
-}
-
-.v9-gallery__plate::after {
-  position: absolute;
-  inset: auto 0 0;
-  height: 12rem;
-  background: linear-gradient(to top, rgba(11, 10, 8, 0.72), rgba(11, 10, 8, 0));
-  content: '';
-  pointer-events: none;
 }
 
 .v9-gallery__plate img {
@@ -187,17 +210,83 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 52% 50%;
 }
 
-.v9-gallery__caption {
+.v9-gallery__tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
+}
+
+.v9-gallery__tile {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
+  margin: 0;
+  overflow: hidden;
+  background: var(--v9-black);
+}
+
+.v9-gallery__tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The scrim under every plate caption: full strength at the caption line, held
+   so the caption block always sits on >= 0.6 opacity, then released. Over the
+   darkest pixel the captions measure far above AA; over a worst-case pure-white
+   photograph they still measure 5.6:1 (verified in docs/design-shots/v10). */
+.v9-gallery__plate::after,
+.v9-gallery__tile::after {
   position: absolute;
-  bottom: clamp(1.5rem, 3vw, 2.75rem);
-  left: clamp(1.5rem, 3vw, 2.75rem);
+  inset: auto 0 0;
+  height: 10rem;
+  background: linear-gradient(
+    to top,
+    rgba(11, 10, 8, 0.92) 0%,
+    rgba(11, 10, 8, 0.92) 40%,
+    rgba(11, 10, 8, 0) 100%
+  );
+  content: '';
+  pointer-events: none;
+}
+
+.v9-gallery__tile::after {
+  height: 8rem;
+  background: linear-gradient(
+    to top,
+    rgba(11, 10, 8, 0.92) 0%,
+    rgba(11, 10, 8, 0.92) 38%,
+    rgba(11, 10, 8, 0) 100%
+  );
+}
+
+.v9-gallery__overlay {
+  position: absolute;
+  bottom: clamp(1rem, 2vw, 1.75rem);
+  left: clamp(1rem, 2vw, 1.75rem);
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.v9-gallery__overlay-name {
   color: var(--v9-cream);
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
+  font-family: var(--font-serif);
+  font-size: clamp(1.15rem, 1.6vw, 1.6rem);
+  line-height: 1.05;
+}
+
+.v9-gallery__overlay-meta {
+  color: var(--v9-cream);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
 }
 
 .v9-gallery__panel {
@@ -297,8 +386,9 @@
 }
 
 /* ── design your own ───────────────────────────────────────────────────────
-   A dark studio. The capture is the proof: the actual five-step bar and the
-   commission ledger, with the studio's own empty state visible and named. */
+   A dark studio. The plate is an illustrative photograph of a rough tanzanite
+   crystal — the stone before the bench — captioned honestly. The three steps
+   are the sequence the studio enforces. */
 
 .v9-dyo {
   padding-block: clamp(5.5rem, 10vw, 9.5rem);
@@ -322,19 +412,17 @@
 }
 
 .v9-dyo__figure {
-  width: min(calc(100% - (var(--v9-gutter) * 2)), 1360px);
+  width: min(calc(100% - (var(--v9-gutter) * 2)), 720px);
   margin: clamp(3rem, 6vw, 5.5rem) auto 0;
 }
 
-.v9-dyo__figure img {
-  display: block;
-  width: 100%;
-  height: auto;
+.v9-dyo__media {
+  aspect-ratio: 4 / 5;
   border: 1px solid rgba(217, 187, 124, 0.32);
 }
 
 .v9-dyo__caption {
-  max-width: 72ch;
+  max-width: 46ch;
   margin-top: 1rem;
   color: #a8a197;
   font-size: 0.75rem;
@@ -387,8 +475,9 @@
 }
 
 /* ── AI gemologist ─────────────────────────────────────────────────────────
-   A quiet paper spread. The capture is the ask surface itself; the two-row
-   ledger states the boundary the handler enforces. */
+   A quiet paper spread. The plate is an illustrative photograph of cut stones
+   under raking light; the two-row ledger states the boundary the handler
+   enforces. */
 
 .v9-gemologist {
   padding-block: clamp(5.5rem, 10vw, 9.5rem);
@@ -411,18 +500,17 @@
 }
 
 .v9-gemologist__figure {
-  width: min(calc(100% - (var(--v9-gutter) * 2)), 1040px);
+  width: min(calc(100% - (var(--v9-gutter) * 2)), 1160px);
   margin: clamp(3rem, 6vw, 5rem) var(--v9-gutter) 0 auto;
 }
 
-.v9-gemologist__figure img {
-  display: block;
-  width: 100%;
-  height: auto;
+.v9-gemologist__media {
+  aspect-ratio: 16 / 10;
   border: 1px solid var(--v9-line);
 }
 
 .v9-gemologist__caption {
+  max-width: 64ch;
   margin-top: 0.9rem;
   color: var(--v9-ink-soft);
   font-size: 0.75rem;
@@ -469,8 +557,8 @@
 }
 
 /* ── certificate intelligence ──────────────────────────────────────────────
-   A dark proof spread. The screen capture is the actual certificate dossier,
-   not a redrawn certificate. The facts beside it are the record's fields. */
+   A dark proof spread. The record's fields sit beside an illustrative diamond
+   photograph; the caption keeps the two apart. */
 
 .v9-certificate {
   padding-block: clamp(5.5rem, 10vw, 9.5rem);
@@ -530,14 +618,13 @@
   margin: 0;
 }
 
-.v9-certificate__figure img {
-  display: block;
-  width: 100%;
-  height: auto;
+.v9-certificate__media {
+  aspect-ratio: 1 / 1;
   border: 1px solid rgba(217, 187, 124, 0.28);
 }
 
 .v9-certificate__caption {
+  max-width: 52ch;
   margin-top: 0.9rem;
   color: #a8a197;
   font-size: 0.75rem;
@@ -545,8 +632,9 @@
 }
 
 /* ── atelier ───────────────────────────────────────────────────────────────
-   A paper spread with two portrait plates, each the named record's own image,
-   then the register of ready-made pieces and mountings. */
+   A paper spread with two portrait plates — the page's largest plates — each
+   the named record's own image, then the register of ready-made pieces and
+   mountings. */
 
 .v9-atelier {
   padding-block: clamp(5.5rem, 10vw, 9.5rem);
@@ -572,7 +660,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(1rem, 2.5vw, 2.5rem);
-  width: min(calc(100% - (var(--v9-gutter) * 2)), 1360px);
+  width: min(calc(100% - (var(--v9-gutter) * 2)), var(--v9-max));
   margin: clamp(3rem, 6vw, 5.5rem) auto 0;
 }
 
@@ -582,6 +670,7 @@
 }
 
 .v9-atelier__image {
+  position: relative;
   aspect-ratio: 4 / 5;
   overflow: hidden;
   background: var(--v9-black);
@@ -592,6 +681,14 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.v9-atelier__image::after {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 clamp(2.5rem, 5vw, 5rem) rgba(11, 10, 8, 0.26);
+  content: '';
+  pointer-events: none;
 }
 
 .v9-atelier__caption {
@@ -684,7 +781,8 @@
 }
 
 /* ── vendor programme ─────────────────────────────────────────────────────
-   The quiet footnote: the portal door, captured empty, and one action. */
+   The quiet footnote: copy only. A picture of a login card is not evidence,
+   so the section carries no photograph. */
 
 .v9-vendor {
   padding-block: clamp(4.5rem, 8vw, 7.5rem);
@@ -692,11 +790,11 @@
   background: var(--v9-paper-2);
 }
 
-.v9-vendor__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.62fr);
-  gap: clamp(3rem, 7vw, 8rem);
-  align-items: center;
+.v9-vendor__inner {
+  display: flex;
+  max-width: 52rem;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .v9-vendor__title {
@@ -709,24 +807,6 @@
   color: var(--v9-ink-soft);
   font-size: 0.8125rem;
   line-height: 1.6;
-}
-
-.v9-vendor__figure {
-  margin: 0;
-}
-
-.v9-vendor__figure img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border: 1px solid var(--v9-line);
-}
-
-.v9-vendor__caption {
-  margin-top: 0.9rem;
-  color: var(--v9-ink-soft);
-  font-size: 0.75rem;
-  line-height: 1.5;
 }
 
 /* ── closing ───────────────────────────────────────────────────────────────
@@ -824,8 +904,12 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .v9-gallery__plate {
-    height: 62svh;
+  .v9-gallery__mosaic {
+    padding: 2.5rem var(--v9-gutter) 0;
+  }
+
+  .v9-gallery__tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .v9-gallery__panel {
@@ -839,8 +923,7 @@
   .v9-dyo__head,
   .v9-atelier__head,
   .v9-gemologist__head,
-  .v9-certificate__grid,
-  .v9-vendor__grid {
+  .v9-certificate__grid {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -873,10 +956,6 @@
     order: 2;
   }
 
-  .v9-vendor__figure {
-    max-width: 28rem;
-  }
-
   .v9-close__inner {
     align-items: flex-start;
     flex-direction: column;
@@ -889,8 +968,8 @@
     line-height: 0.96;
   }
 
-  .v9-gallery__plate {
-    height: 52svh;
+  .v9-gallery__mosaic {
+    padding-inline: var(--v9-gutter);
   }
 
   .v9-gallery__panel {

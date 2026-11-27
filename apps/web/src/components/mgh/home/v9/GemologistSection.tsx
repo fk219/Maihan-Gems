@@ -2,8 +2,9 @@ import Link from 'next/link';
 
 /**
  * The gemologist section markets a bounded capability: the assistant is useful
- * because it stays inside the catalogue. The proof is a capture of the shipped
- * ask surface, not a staged transcript or a paraphrased answer.
+ * because it stays inside the catalogue. The plate is an illustrative
+ * photograph of cut amethysts under raking light, captioned as such — it sets
+ * the reading of stones, it is not a screenshot of an answer.
  *
  * The refusal rule is stated in the product's own language and is enforced in
  * the handler: when the search returns nothing, the response carries the
@@ -26,16 +27,20 @@ export function GemologistSection() {
       </div>
 
       <figure className="v9-gemologist__figure">
-        <img
-          src="/proof/gemologist.jpg"
-          alt="The AI Gemologist ask surface: a plain-language query field and example questions"
-          width={1152}
-          height={451}
-          loading="lazy"
-          decoding="async"
-        />
+        <div className="v9-plate v9-gemologist__media">
+          <img
+            src="/media/stock/amethyst.jpg"
+            alt="Four large cut amethysts in purple tones under raking light, on a grey museum mount"
+            width={3234}
+            height={2426}
+            loading="lazy"
+            decoding="async"
+            style={{ objectPosition: '50% 48%' }}
+          />
+        </div>
         <figcaption className="v9-gemologist__caption">
-          The concierge surface, captured from <span className="v9-mono">/concierge</span>.
+          Illustrative photography — cut amethysts read under raking light. The concierge answers
+          from the records, not from a photograph.
         </figcaption>
       </figure>
 
