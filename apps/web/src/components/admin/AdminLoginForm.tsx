@@ -7,6 +7,8 @@
  *
  * Accessibility: labelled inputs, an aria-live error region, a disabled submit
  * while the request is in flight, and no password value retained after submit.
+ * Presentation is the shared console-auth frame, so the admin and vendor doors
+ * keep one visual system.
  */
 import { useState, type FormEvent } from 'react';
 
@@ -55,10 +57,11 @@ export function AdminLoginForm(): React.JSX.Element {
   }
 
   return (
-    <form onSubmit={onSubmit} className="console-auth__form">
-      <label>
-        <span>Email</span>
+    <form onSubmit={onSubmit} className="mh-auth__form">
+      <label className="mh-auth__field">
+        <span className="mh-auth__label">Email</span>
         <input
+          className="mh-auth__input"
           type="email"
           name="email"
           autoComplete="username"
@@ -67,9 +70,10 @@ export function AdminLoginForm(): React.JSX.Element {
           onChange={(event) => setEmail(event.target.value)}
         />
       </label>
-      <label>
-        <span>Password</span>
+      <label className="mh-auth__field">
+        <span className="mh-auth__label">Password</span>
         <input
+          className="mh-auth__input"
           type="password"
           name="password"
           autoComplete="current-password"
@@ -78,10 +82,10 @@ export function AdminLoginForm(): React.JSX.Element {
           onChange={(event) => setPassword(event.target.value)}
         />
       </label>
-      <p aria-live="polite" role="status" style={{ minHeight: '18px', color: '#9a3412', fontSize: '13px', margin: 0 }}>
+      <p aria-live="polite" role="status" className="mh-auth__status">
         {error ?? ''}
       </p>
-      <button type="submit" disabled={busy}>
+      <button type="submit" className="mh-auth__submit" disabled={busy}>
         {busy ? 'Signing in…' : 'Sign in'}
       </button>
     </form>

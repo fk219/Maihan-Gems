@@ -58,11 +58,13 @@
   --mh-dur-move: 300ms; /* transform / shadow */
   --mh-dur-enter: 520ms; /* entrance choreography */
 
-  /* Radius: hairlined controls, 8 px soft controls, 24 px media plates,
-     circles. Three values, no 10/12/16/20 mix. */
-  --mh-radius-control: 2px;
-  --mh-radius-soft: 8px;
-  --mh-radius-plate: 24px;
+  /* Radius: one scale — 4 px for hairlined controls, 16 px for cards and
+     fields, 28 px for section and footer plates, full for circles. No
+     10/12/20/24 mix anywhere. */
+  --mh-radius-control: 4px;
+  --mh-radius-soft: 16px;
+  --mh-radius-plate: 28px;
+  --mh-radius-full: 999px;
 
   /* One hairline. */
   --mh-hairline: 1px;
@@ -1095,6 +1097,8 @@ img {
 .mh6-home {
   --mh-paper: #f7f4ec;
   --mh-paper-deep: #efeae0;
+  --mh-paper-plate: #fbf8f1;
+  --mh-obsidian-plate: #0a0e15;
   --mh-ink: #17140f;
   --mh-ink-muted: #5e574b;
   --mh-obsidian: #070a0f;
@@ -1115,8 +1119,10 @@ img {
    does this for the elements it knows; these are new surfaces, so they
    declare the same pair and the same focus ring. */
 .mh6-hero,
-.mh6-rail,
+.mh6-rail__plate,
 .mh6-pieces,
+.mh6-ai__plate,
+.mh6-tryon__plate,
 .mh6-cta {
   --mh-gold-ink: var(--mh-gold-on-dark);
   --mh-muted-ink: var(--mh-muted-on-dark);
@@ -1190,6 +1196,7 @@ img {
   min-height: 52px;
   padding: 0 1.4rem;
   border: 1px solid var(--mh-gold-ink);
+  border-radius: var(--mh-radius-control);
   background: transparent;
   color: var(--mh-gold-ink);
   font-family: var(--font-sans);
@@ -1366,6 +1373,7 @@ img {
   height: 60px;
   padding: 0 0.4rem 0 1.05rem;
   border: 1px solid rgba(230, 201, 122, 0.34);
+  border-radius: var(--mh-radius-soft);
   background: var(--mh-obsidian);
   transition:
     border-color var(--mh-dur-state) var(--mh-ease),
@@ -1493,6 +1501,7 @@ img {
   max-height: min(56vh, 420px);
   overflow-y: auto;
   border: 1px solid rgba(230, 201, 122, 0.32);
+  border-radius: var(--mh-radius-soft);
   background: var(--mh-obsidian-2);
   box-shadow: 0 28px 64px rgba(0, 0, 0, 0.62);
   animation: mh6-panel-in 160ms var(--mh-ease);
@@ -1581,12 +1590,23 @@ img {
 /* ── 16.3 PROVENANCE RAIL ────────────────────────────────────────────────── */
 
 .mh6-rail {
-  padding-block: 1.25rem 1.5rem;
-  overflow: hidden;
-  border-top: 1px solid var(--mh-rule-dark);
-  border-bottom: 1px solid var(--mh-rule-dark);
-  background: var(--mh-obsidian);
+  padding-block: clamp(1.5rem, 3vw, 2.5rem);
+  background: var(--mh-paper);
   color: #efece0;
+}
+
+/* The one dark plate on the paper page: a rounded surface with a hairline,
+   never a translucent glass card. */
+.mh6-rail__plate {
+  width: calc(100% - (var(--mh6-home-gutter) * 2));
+  max-width: var(--mh6-home-max);
+  margin-inline: auto;
+  padding-block: 1.35rem 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--mh-rule-dark);
+  border-radius: var(--mh-radius-plate);
+  background: var(--mh-obsidian);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .mh6-rail__head {
@@ -1595,17 +1615,27 @@ img {
   align-items: baseline;
   justify-content: space-between;
   gap: 0.25rem 1.5rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding-inline: clamp(1.25rem, 3vw, 2rem);
 }
 
 .mh6-home .mh6-rail__title {
   margin: 0;
-  font-family: var(--font-sans);
-  font-size: var(--mh-fs-meta);
+  max-width: 34ch;
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-title);
   font-weight: 400;
-  letter-spacing: 0;
+  letter-spacing: var(--mh-track-title);
+  line-height: 1.15;
+  color: #f4f1e8;
+}
+
+.mh6-rail__count {
+  margin: 0;
+  font-size: var(--mh-fs-meta);
   line-height: 1.4;
   color: var(--mh-muted-on-dark);
+  font-variant-numeric: tabular-nums;
 }
 
 .mh6-rail__head .mh6-link {
@@ -1622,7 +1652,7 @@ img {
   display: flex;
   width: max-content;
   will-change: transform;
-  animation: mh6-rail-pass 72s linear infinite;
+  animation: mh6-rail-pass var(--mh6-rail-duration, 72s) linear infinite;
 }
 
 .mh6-rail:hover .mh6-rail__track,
@@ -2196,6 +2226,8 @@ img {
   position: relative;
   overflow: hidden;
   aspect-ratio: 4 / 3;
+  border: 1px solid var(--mh-rule-paper);
+  border-radius: var(--mh-radius-plate);
   background: var(--mh-obsidian);
 }
 
@@ -2693,7 +2725,554 @@ img {
   }
 }
 
-/* ── 16.11 MOTION GUARDS ─────────────────────────────────────────────────── */
+/* ── 16.11 JEWELLERY, ABOUT, TRY-ON AND ROUNDED FOOTER BLOCKS ──────────────
+   These are the v7 sections. Every panel takes one of the four radii; nothing
+   uses a translucent blur. A plate is paper or obsidian with a hairline and a
+   single inset highlight, so softness comes from the corner and the light,
+   not from glass.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.mh6-jewellery {
+  padding-block: clamp(4.5rem, 8vw, 7rem);
+  border-top: 1px solid var(--mh-rule-paper);
+  background: var(--mh-paper);
+}
+
+.mh6-jewellery__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
+  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+}
+
+.mh6-jewellery__note {
+  margin: 0.75rem 0 0;
+  max-width: 48ch;
+  font-size: var(--mh-fs-body);
+  line-height: 1.7;
+  color: var(--mh-ink-muted);
+}
+
+.mh6-jewellery__stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+}
+
+.mh6-jewellery__figure {
+  margin: 0;
+}
+
+.mh6-jewellery__plate {
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--mh-rule-paper);
+  border-radius: var(--mh-radius-plate);
+  background: var(--mh-paper-deep);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.mh6-jewellery__plate img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter var(--mh-dur-move) var(--mh-ease);
+}
+
+.mh6-jewellery__figure:hover .mh6-jewellery__plate img {
+  filter: brightness(1.04);
+}
+
+.mh6-jewellery__caption {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 1rem;
+  padding-left: 0.1rem;
+}
+
+.mh6-jewellery__caption-name {
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-title);
+  line-height: 1.15;
+  letter-spacing: var(--mh-track-title);
+  color: var(--mh-ink);
+}
+
+.mh6-jewellery__caption-meta {
+  font-size: var(--mh-fs-meta);
+  line-height: 1.5;
+  color: var(--mh-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.mh6-jewellery__ledger {
+  display: grid;
+  align-content: start;
+  gap: 1.75rem;
+}
+
+.mh6-jewellery__kicker {
+  margin: 0 0 0.35rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--mh-rule-paper);
+  font-size: var(--mh-fs-meta);
+  line-height: 1.4;
+  color: var(--mh-ink-muted);
+}
+
+.mh6-jewellery__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mh6-jewellery__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 68px;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--mh-rule-paper);
+  text-decoration: none;
+  transition: border-color var(--mh-dur-state) var(--mh-ease);
+}
+
+.mh6-jewellery__row:hover,
+.mh6-jewellery__row:focus-visible {
+  border-bottom-color: var(--mh-gold-line);
+}
+
+.mh6-jewellery__row-main {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.mh6-jewellery__row-name {
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-title);
+  line-height: 1.15;
+  letter-spacing: var(--mh-track-title);
+  color: var(--mh-ink);
+  transition: color var(--mh-dur-state) var(--mh-ease);
+}
+
+.mh6-jewellery__row:hover .mh6-jewellery__row-name,
+.mh6-jewellery__row:focus-visible .mh6-jewellery__row-name {
+  color: #7c6323;
+}
+
+.mh6-jewellery__row-spec {
+  font-size: var(--mh-fs-meta);
+  line-height: 1.5;
+  color: var(--mh-ink-muted);
+}
+
+.mh6-jewellery__row-price {
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-title);
+  line-height: 1.1;
+  color: var(--mh-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.mh6-jewellery__action {
+  justify-self: start;
+}
+
+@media (min-width: 1024px) {
+  .mh6-jewellery__stage {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2rem;
+    align-items: start;
+  }
+
+  .mh6-jewellery__figure {
+    grid-column: 1 / span 5;
+  }
+
+  .mh6-jewellery__ledger {
+    grid-column: 7 / span 6;
+    padding-top: 0.75rem;
+  }
+}
+
+/* ── ABOUT — the page's text-only composition ────────────────────────────── */
+
+.mh6-about {
+  padding-block: clamp(4rem, 7vw, 6.5rem);
+  border-top: 1px solid var(--mh-rule-paper);
+  background: var(--mh-paper);
+}
+
+.mh6-about__plate {
+  display: grid;
+  gap: 2.5rem;
+  padding: clamp(1.75rem, 5vw, 4.5rem);
+  border: 1px solid var(--mh-rule-paper);
+  border-radius: var(--mh-radius-plate);
+  background: var(--mh-paper-plate);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.mh6-about__kicker {
+  margin: 0 0 0.9rem;
+  font-family: var(--font-sans);
+  font-size: var(--mh-fs-meta);
+  line-height: 1.4;
+  color: #7c6323;
+}
+
+.mh6-home .mh6-about__title {
+  margin: 0;
+  max-width: 15ch;
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-display);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: var(--mh-track-display);
+  color: var(--mh-ink);
+}
+
+.mh6-about__body {
+  max-width: 54ch;
+}
+
+.mh6-about__lead {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-title);
+  line-height: 1.3;
+  letter-spacing: var(--mh-track-title);
+  color: var(--mh-ink);
+}
+
+.mh6-about__copy {
+  margin: 1.25rem 0 0;
+  font-size: var(--mh-fs-body);
+  line-height: 1.7;
+  color: var(--mh-ink-muted);
+}
+
+.mh6-about__facts {
+  display: grid;
+  gap: 0;
+  margin: 2rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--mh-rule-paper);
+}
+
+.mh6-about__facts > div {
+  display: grid;
+  grid-template-columns: minmax(6rem, 2fr) minmax(0, 5fr);
+  gap: 1.25rem;
+  padding-block: 0.85rem;
+  border-bottom: 1px solid var(--mh-rule-paper);
+}
+
+.mh6-about__facts dt {
+  font-size: var(--mh-fs-meta);
+  line-height: 1.5;
+  color: var(--mh-ink-muted);
+}
+
+.mh6-about__facts dd {
+  margin: 0;
+  font-size: var(--mh-fs-body);
+  line-height: 1.6;
+  color: var(--mh-ink);
+}
+
+.mh6-about__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.75rem;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .mh6-about__plate {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2rem;
+    align-items: start;
+  }
+
+  .mh6-about__head {
+    grid-column: 1 / span 5;
+  }
+
+  .mh6-about__body {
+    grid-column: 7 / span 6;
+    padding-top: 0.35rem;
+  }
+}
+
+/* ── THE GEMOLOGIST — a dark plate inside the paper page ─────────────────── */
+
+.mh6-ai {
+  padding-block: clamp(4rem, 7vw, 6.5rem);
+  border-top: 1px solid var(--mh-rule-paper);
+  background: var(--mh-paper);
+}
+
+.mh6-ai__plate {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.75rem, 5vw, 4.5rem);
+  border: 1px solid var(--mh-rule-dark);
+  border-radius: var(--mh-radius-plate);
+  background: var(--mh-obsidian-plate);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.mh6-ai__plate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    52% 60% at 88% 6%,
+    rgba(230, 201, 122, 0.13) 0%,
+    rgba(230, 201, 122, 0) 70%
+  );
+}
+
+.mh6-ai__grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem;
+}
+
+.mh6-home .mh6-ai__title {
+  margin: 0;
+  max-width: 14ch;
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-display);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: var(--mh-track-display);
+  color: #f7f3e8;
+}
+
+.mh6-ai__copy {
+  margin: 1.25rem 0 0;
+  max-width: 42ch;
+  font-size: var(--mh-fs-body);
+  line-height: 1.7;
+  color: var(--mh-muted-on-dark);
+}
+
+.mh6-ai .mh6-button--dark {
+  margin-top: 1.75rem;
+}
+
+.mh6-ai__questions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgba(230, 201, 122, 0.24);
+}
+
+.mh6-ai__question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-height: 72px;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(230, 201, 122, 0.24);
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-title);
+  line-height: 1.2;
+  letter-spacing: var(--mh-track-title);
+  color: #f4f1e8;
+  text-decoration: none;
+  transition: color var(--mh-dur-state) var(--mh-ease);
+}
+
+.mh6-ai__question svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--mh-gold-on-dark);
+}
+
+.mh6-ai__question:hover,
+.mh6-ai__question:focus-visible {
+  color: var(--mh-gold-light);
+}
+
+@media (min-width: 1024px) {
+  .mh6-ai__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2rem;
+    align-items: center;
+  }
+
+  .mh6-ai__intro {
+    grid-column: 1 / span 5;
+  }
+
+  .mh6-ai__questions {
+    grid-column: 7 / span 6;
+  }
+}
+
+/* ── TRY-ON — a viewfinder plate, one action, an honest empty state ──────── */
+
+.mh6-tryon {
+  padding-block: clamp(4rem, 7vw, 6.5rem);
+  border-top: 1px solid var(--mh-rule-paper);
+  background: var(--mh-paper);
+}
+
+.mh6-tryon__plate {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: clamp(30rem, 62vh, 42rem);
+  overflow: hidden;
+  border: 1px solid var(--mh-rule-dark);
+  border-radius: var(--mh-radius-plate);
+  background: var(--mh-obsidian);
+}
+
+.mh6-tryon__media {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(64%, 820px);
+}
+
+.mh6-tryon__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 58% 42%;
+}
+
+.mh6-tryon__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      var(--mh-obsidian) 0%,
+      rgba(7, 10, 15, 0.94) 34%,
+      rgba(7, 10, 15, 0.52) 64%,
+      rgba(7, 10, 15, 0.2) 100%
+    ),
+    linear-gradient(180deg, rgba(7, 10, 15, 0.5) 0%, rgba(7, 10, 15, 0.1) 42%, rgba(7, 10, 15, 0.55) 100%);
+}
+
+.mh6-tryon__reticle {
+  position: absolute;
+  inset: clamp(0.9rem, 2vw, 1.5rem);
+  border: 1px solid rgba(230, 201, 122, 0.26);
+  border-radius: var(--mh-radius-soft);
+  pointer-events: none;
+}
+
+.mh6-tryon__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 36rem;
+  padding: clamp(1.75rem, 5vw, 4.5rem);
+}
+
+.mh6-home .mh6-tryon__title {
+  margin: 0;
+  max-width: 14ch;
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-display);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: var(--mh-track-display);
+  color: #f7f3e8;
+}
+
+.mh6-tryon__copy {
+  margin: 1.25rem 0 0;
+  max-width: 42ch;
+  font-size: var(--mh-fs-body);
+  line-height: 1.7;
+  color: #c9c3b6;
+}
+
+.mh6-tryon .mh6-button {
+  margin-top: 1.75rem;
+}
+
+.mh6-tryon__note {
+  margin: 1rem 0 0;
+  max-width: 42ch;
+  font-size: var(--mh-fs-meta);
+  line-height: 1.6;
+  color: var(--mh-muted-on-dark);
+}
+
+@media (max-width: 767px) {
+  .mh6-tryon__media {
+    width: 100%;
+  }
+
+  .mh6-tryon__scrim {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(7, 10, 15, 0.55) 0%,
+        rgba(7, 10, 15, 0.5) 34%,
+        rgba(7, 10, 15, 0.92) 74%,
+        var(--mh-obsidian) 100%
+      ),
+      linear-gradient(90deg, rgba(7, 10, 15, 0.5) 0%, rgba(7, 10, 15, 0.15) 100%);
+  }
+}
+
+/* ── FOOTER BLOCKS — rounded, still obsidian, never glass ────────────────── */
+
+.mh6-footer__top {
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid rgba(230, 201, 122, 0.2);
+  border-radius: var(--mh-radius-plate);
+  background: rgba(255, 255, 255, 0.018);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.mh6-footer__statement {
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  border: 1px solid rgba(230, 201, 122, 0.2);
+  border-radius: var(--mh-radius-plate);
+  background: rgba(255, 255, 255, 0.018);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.mh6-journal__form {
+  padding: 0 0.35rem 0 0.95rem;
+  border: 1px solid rgba(230, 201, 122, 0.35);
+  border-radius: var(--mh-radius-soft);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mh6-journal__form:focus-within {
+  border-color: var(--mh-gold-light);
+  box-shadow: 0 0 0 1px rgba(230, 201, 122, 0.28);
+}
+
+.mh6-footer__base-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1.5rem;
+}
+
+/* ── 16.12 MOTION GUARDS ─────────────────────────────────────────────────── */
 
 @keyframes mh6-hold {
   from {
@@ -2743,6 +3322,7 @@ img {
 
   .mh6-piece::before,
   .mh6-room__plate img,
+  .mh6-jewellery__plate img,
   .mh6-link::after {
     transition: none;
   }

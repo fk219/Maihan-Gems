@@ -14,6 +14,8 @@
  *   - Every link resolves to a route in the application. No "#" targets.
  */
 import Link from 'next/link';
+import { DemoLoginButton } from '../../auth/DemoLoginButton.js';
+import { isDemoLoginEnabled } from '../../../lib/demo-login.js';
 import { ORGANIZATION_EVIDENCE } from '../../../lib/jsonld.js';
 import { FooterJournalForm } from './FooterJournalForm';
 
@@ -53,6 +55,7 @@ const LEGAL = [
 export function StorefrontFooter() {
   const currentYear = new Date().getFullYear();
   const identity = ORGANIZATION_EVIDENCE;
+  const demoEnabled = isDemoLoginEnabled();
 
   return (
     <footer className="mh6-footer" aria-label="Maihan Gems footer">
@@ -139,13 +142,18 @@ export function StorefrontFooter() {
 
         <div className="mh6-footer__base">
           <p>© {currentYear} Maihan Gems</p>
-          <ul className="mh6-footer__legal">
-            {LEGAL.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href}>{link.label}</Link>
-              </li>
-            ))}
-          </ul>
+          <div className="mh6-footer__base-end">
+            {demoEnabled ? (
+              <DemoLoginButton surface="customer" redirectTo="/account" quiet />
+            ) : null}
+            <ul className="mh6-footer__legal">
+              {LEGAL.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href}>{link.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </footer>

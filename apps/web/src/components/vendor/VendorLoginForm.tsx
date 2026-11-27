@@ -12,7 +12,6 @@
  * flight, and the password is cleared after every attempt.
  */
 import { useState, type FormEvent } from 'react';
-import { field, fieldLabel, input, primaryButton, alert } from './styles.js';
 
 interface VendorError {
   code?: string;
@@ -74,35 +73,35 @@ export function VendorLoginForm(): React.JSX.Element {
   }
 
   return (
-    <form onSubmit={onSubmit} style={{ display: 'grid', gap: '14px', maxWidth: '380px' }}>
-      <label style={field}>
-        <span style={fieldLabel}>Email</span>
+    <form onSubmit={onSubmit} className="mh-auth__form">
+      <label className="mh-auth__field">
+        <span className="mh-auth__label">Email</span>
         <input
+          className="mh-auth__input"
           type="email"
           name="email"
           autoComplete="username"
           required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          style={input}
         />
       </label>
-      <label style={field}>
-        <span style={fieldLabel}>Password</span>
+      <label className="mh-auth__field">
+        <span className="mh-auth__label">Password</span>
         <input
+          className="mh-auth__input"
           type="password"
           name="password"
           autoComplete="current-password"
           required
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          style={input}
         />
       </label>
-      <p aria-live="polite" role="status" style={error === null ? { minHeight: '18px', margin: 0 } : alert}>
+      <p aria-live="polite" role="status" className="mh-auth__status">
         {error ?? ''}
       </p>
-      <button type="submit" disabled={busy} style={primaryButton}>
+      <button type="submit" className="mh-auth__submit" disabled={busy}>
         {busy ? 'Signing in…' : 'Sign in'}
       </button>
     </form>

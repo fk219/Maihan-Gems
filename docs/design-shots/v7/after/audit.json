@@ -1,0 +1,3004 @@
+{
+  "base": "http://localhost:3101",
+  "label": "after",
+  "generatedAt": "2026-11-27T12:58:51.946Z",
+  "widths": [
+    1440,
+    1024,
+    768,
+    390
+  ],
+  "routes": 3,
+  "captures": 12,
+  "passes": 12,
+  "designPasses": 12,
+  "failures": 0,
+  "violationNodes": {},
+  "violationNodesTotal": 0,
+  "contrastIncompleteTotal": 148,
+  "overflowCaptures": 0,
+  "pageErrorCaptures": 0,
+  "targetsUnder24": 31,
+  "targetsUnder44": 156,
+  "typeScaleAtFirstWidth": [
+    {
+      "key": "12|1.5|normal|Outfit",
+      "count": 60,
+      "samples": [
+        "span",
+        "span",
+        "span",
+        "span",
+        "p.mh-auth__caption",
+        "p.mh-auth__caption"
+      ]
+    },
+    {
+      "key": "14|1.7|normal|Outfit",
+      "count": 26,
+      "samples": [
+        "p.mh6-hero__lede",
+        "p.mh6-jewellery__note",
+        "p.mh6-about__copy",
+        "p.mh6-dyo__copy",
+        "p.mh-auth__note",
+        "p.mh-auth__note"
+      ]
+    },
+    {
+      "key": "24.48|1.1|normal|\"Cormorant Garamond\"",
+      "count": 22,
+      "samples": [
+        "span.mh6-rail__variety",
+        "span.mh6-rail__variety",
+        "span.mh6-rail__variety",
+        "span.mh6-rail__variety"
+      ]
+    },
+    {
+      "key": "12|1.7|normal|Outfit",
+      "count": 18,
+      "samples": [
+        "span",
+        "a.mh6-link",
+        "a.mh6-link",
+        "a.mh6-link"
+      ]
+    },
+    {
+      "key": "12|1.4|normal|Outfit",
+      "count": 15,
+      "samples": [
+        "label.sr-only",
+        "p.mh6-rail__count",
+        "p.mh6-jewellery__kicker",
+        "p.mh6-jewellery__kicker",
+        "span.mh-auth__label",
+        "span.mh-auth__label",
+        "a.mh-auth__back",
+        "span.mh-auth__label",
+        "span.mh-auth__label",
+        "a.mh-auth__back"
+      ]
+    },
+    {
+      "key": "24.48|1.15|-0.2448px|\"Cormorant Garamond\"",
+      "count": 11,
+      "samples": [
+        "h2.mh6-rail__title",
+        "span.mh6-jewellery__caption-name",
+        "span.mh6-jewellery__row-name",
+        "span.mh6-jewellery__row-name"
+      ]
+    },
+    {
+      "key": "48|1.02|-0.72px|\"Cormorant Garamond\"",
+      "count": 10,
+      "samples": [
+        "h2.mh6-section-title",
+        "h2.mh6-about__title",
+        "h2.mh6-section-title",
+        "h2.mh6-ai__title",
+        "p.mh-auth__quote",
+        "h1.mh-auth__title",
+        "p.mh-auth__quote",
+        "h1.mh-auth__title"
+      ]
+    },
+    {
+      "key": "12|1.45|2.16px|\"EB Garamond\"",
+      "count": 8,
+      "samples": [
+        "span",
+        "a.text-[#E6C97A].hover:text-white.transition-colors",
+        "a.py-1.5.transition-colors.hover:text-white",
+        "a.py-1.5.transition-colors.hover:text-white"
+      ]
+    },
+    {
+      "key": "14|1.6|normal|Outfit",
+      "count": 6,
+      "samples": [
+        "dd",
+        "dd",
+        "dd",
+        "p.mh6-dyo__step-copy"
+      ]
+    },
+    {
+      "key": "12|1.75|normal|Outfit",
+      "count": 4,
+      "samples": [
+        "address.mh6-footer__address",
+        "a",
+        "p.mh6-footer__note",
+        "strong"
+      ]
+    },
+    {
+      "key": "24.48|1|normal|\"Cormorant Garamond\"",
+      "count": 3,
+      "samples": [
+        "span.mh6-dyo__num",
+        "span.mh6-dyo__num",
+        "span.mh6-dyo__num"
+      ]
+    },
+    {
+      "key": "24.48|1.2|-0.2448px|\"Cormorant Garamond\"",
+      "count": 3,
+      "samples": [
+        "span",
+        "span",
+        "span"
+      ]
+    },
+    {
+      "key": "12|1.4|normal|Inter",
+      "count": 3,
+      "samples": [
+        "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+        "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+        "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+      ]
+    },
+    {
+      "key": "12|1.45|1.68px|\"EB Garamond\"",
+      "count": 2,
+      "samples": [
+        "span.text-[#D4AF37].font-semibold.inline-flex.items-center",
+        "span"
+      ]
+    },
+    {
+      "key": "12|1.6|normal|Outfit",
+      "count": 2,
+      "samples": [
+        "p.mh6-tryon__note",
+        "p.mh6-cta__note"
+      ]
+    },
+    {
+      "key": "14|1|3.64px|\"Cormorant Garamond\"",
+      "count": 2,
+      "samples": [
+        "p.mh-auth__brand",
+        "p.mh-auth__brand"
+      ]
+    },
+    {
+      "key": "12|1.4|2.16px|Outfit",
+      "count": 2,
+      "samples": [
+        "p.mh-auth__eyebrow",
+        "p.mh-auth__eyebrow"
+      ]
+    },
+    {
+      "key": "12|NaN|1.68px|Outfit",
+      "count": 2,
+      "samples": [
+        "button.mh-auth__submit",
+        "button.mh-auth__submit"
+      ]
+    },
+    {
+      "key": "48|1.02|-0.72px|\"EB Garamond\"",
+      "count": 1,
+      "samples": [
+        "span.font-[family-name:var(--font-eb-garamond)].text-3xl.sm:text-5xl.lg:text-[48px].font-normal.tracking-[0.2em]"
+      ]
+    },
+    {
+      "key": "11|1.2|1.98px|\"EB Garamond\"",
+      "count": 1,
+      "samples": [
+        "span.text-[11px].sm:text-xs.font-[family-name:var(--font-eb-garamond)].uppercase.tracking-[0.34em].text-[#D4AF37]"
+      ]
+    },
+    {
+      "key": "11|1.2|1.98px|Inter",
+      "count": 1,
+      "samples": [
+        "strong"
+      ]
+    },
+    {
+      "key": "12|1.45|normal|Inter",
+      "count": 1,
+      "samples": [
+        "span.demo-content-badge__text"
+      ]
+    },
+    {
+      "key": "88|0.98|-1.76px|\"Cormorant Garamond\"",
+      "count": 1,
+      "samples": [
+        "h1.mh6-hero__title"
+      ]
+    },
+    {
+      "key": "24.48|1.3|-0.2448px|\"Cormorant Garamond\"",
+      "count": 1,
+      "samples": [
+        "p.mh6-about__lead"
+      ]
+    },
+    {
+      "key": "48|1|-0.72px|\"Cormorant Garamond\"",
+      "count": 1,
+      "samples": [
+        "h2.mh6-cta__title"
+      ]
+    },
+    {
+      "key": "24.48|1|3.4272px|\"Cormorant Garamond\"",
+      "count": 1,
+      "samples": [
+        "a.mh6-footer__wordmark"
+      ]
+    },
+    {
+      "key": "14|1.65|normal|Outfit",
+      "count": 1,
+      "samples": [
+        "p.mh6-footer__tagline"
+      ]
+    },
+    {
+      "key": "24.48|1.15|normal|\"Cormorant Garamond\"",
+      "count": 1,
+      "samples": [
+        "p.mh6-journal__label"
+      ]
+    },
+    {
+      "key": "12|1.65|normal|Outfit",
+      "count": 1,
+      "samples": [
+        "p.mh6-journal__copy"
+      ]
+    },
+    {
+      "key": "12|1.7|0.78px|Outfit",
+      "count": 1,
+      "samples": [
+        "span.ai-concierge-trigger__label"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "route": "/",
+      "name": "home",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 37,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 58,
+          "samples": [
+            "span",
+            "span",
+            "span",
+            "span"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 24,
+          "samples": [
+            "p.mh6-hero__lede",
+            "p.mh6-jewellery__note",
+            "p.mh6-about__copy",
+            "p.mh6-dyo__copy"
+          ]
+        },
+        {
+          "key": "24.48|1.1|normal|\"Cormorant Garamond\"",
+          "count": 22,
+          "samples": [
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety"
+          ]
+        },
+        {
+          "key": "12|1.7|normal|Outfit",
+          "count": 18,
+          "samples": [
+            "span",
+            "a.mh6-link",
+            "a.mh6-link",
+            "a.mh6-link"
+          ]
+        },
+        {
+          "key": "24.48|1.15|-0.2448px|\"Cormorant Garamond\"",
+          "count": 11,
+          "samples": [
+            "h2.mh6-rail__title",
+            "span.mh6-jewellery__caption-name",
+            "span.mh6-jewellery__row-name",
+            "span.mh6-jewellery__row-name"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 9,
+          "samples": [
+            "label.sr-only",
+            "p.mh6-rail__count",
+            "p.mh6-jewellery__kicker",
+            "p.mh6-jewellery__kicker"
+          ]
+        },
+        {
+          "key": "12|1.45|2.16px|\"EB Garamond\"",
+          "count": 8,
+          "samples": [
+            "span",
+            "a.text-[#E6C97A].hover:text-white.transition-colors",
+            "a.py-1.5.transition-colors.hover:text-white",
+            "a.py-1.5.transition-colors.hover:text-white"
+          ]
+        },
+        {
+          "key": "48|1.02|-0.72px|\"Cormorant Garamond\"",
+          "count": 6,
+          "samples": [
+            "h2.mh6-section-title",
+            "h2.mh6-about__title",
+            "h2.mh6-section-title",
+            "h2.mh6-ai__title"
+          ]
+        },
+        {
+          "key": "14|1.6|normal|Outfit",
+          "count": 6,
+          "samples": [
+            "dd",
+            "dd",
+            "dd",
+            "p.mh6-dyo__step-copy"
+          ]
+        },
+        {
+          "key": "12|1.75|normal|Outfit",
+          "count": 4,
+          "samples": [
+            "address.mh6-footer__address",
+            "a",
+            "p.mh6-footer__note",
+            "strong"
+          ]
+        },
+        {
+          "key": "24.48|1|normal|\"Cormorant Garamond\"",
+          "count": 3,
+          "samples": [
+            "span.mh6-dyo__num",
+            "span.mh6-dyo__num",
+            "span.mh6-dyo__num"
+          ]
+        },
+        {
+          "key": "24.48|1.2|-0.2448px|\"Cormorant Garamond\"",
+          "count": 3,
+          "samples": [
+            "span",
+            "span",
+            "span"
+          ]
+        },
+        {
+          "key": "12|1.45|1.68px|\"EB Garamond\"",
+          "count": 2,
+          "samples": [
+            "span.text-[#D4AF37].font-semibold.inline-flex.items-center",
+            "span"
+          ]
+        },
+        {
+          "key": "12|1.6|normal|Outfit",
+          "count": 2,
+          "samples": [
+            "p.mh6-tryon__note",
+            "p.mh6-cta__note"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "48|1.02|-0.72px|\"EB Garamond\"",
+          "count": 1,
+          "samples": [
+            "span.font-[family-name:var(--font-eb-garamond)].text-3xl.sm:text-5xl.lg:text-[48px].font-normal.tracking-[0.2em]"
+          ]
+        },
+        {
+          "key": "11|1.2|1.98px|\"EB Garamond\"",
+          "count": 1,
+          "samples": [
+            "span.text-[11px].sm:text-xs.font-[family-name:var(--font-eb-garamond)].uppercase.tracking-[0.34em].text-[#D4AF37]"
+          ]
+        },
+        {
+          "key": "11|1.2|1.98px|Inter",
+          "count": 1,
+          "samples": [
+            "strong"
+          ]
+        },
+        {
+          "key": "12|1.45|normal|Inter",
+          "count": 1,
+          "samples": [
+            "span.demo-content-badge__text"
+          ]
+        },
+        {
+          "key": "88|0.98|-1.76px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "h1.mh6-hero__title"
+          ]
+        },
+        {
+          "key": "24.48|1.3|-0.2448px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh6-about__lead"
+          ]
+        },
+        {
+          "key": "48|1|-0.72px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "h2.mh6-cta__title"
+          ]
+        },
+        {
+          "key": "24.48|1|3.4272px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "a.mh6-footer__wordmark"
+          ]
+        },
+        {
+          "key": "14|1.65|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh6-footer__tagline"
+          ]
+        },
+        {
+          "key": "24.48|1.15|normal|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh6-journal__label"
+          ]
+        },
+        {
+          "key": "12|1.65|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh6-journal__copy"
+          ]
+        },
+        {
+          "key": "12|1.7|0.78px|Outfit",
+          "count": 1,
+          "samples": [
+            "span.ai-concierge-trigger__label"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 85,
+        "countUnder24": 9,
+        "countUnder44": 45,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          },
+          {
+            "target": "a.text-[#E6C97A].hover:text-white.transition-colors",
+            "text": "Book a Visit →",
+            "w": 120.5,
+            "h": 17.39
+          },
+          {
+            "target": "button.p-0.5.cursor-pointer",
+            "text": "Toggle Gemstones menu",
+            "w": 18,
+            "h": 18
+          },
+          {
+            "target": "button.p-0.5.cursor-pointer",
+            "text": "Toggle Fine Jewelry menu",
+            "w": 18,
+            "h": 18
+          },
+          {
+            "target": "button.p-0.5.cursor-pointer",
+            "text": "Toggle Settings menu",
+            "w": 18,
+            "h": 18
+          },
+          {
+            "target": "button.p-0.5.cursor-pointer",
+            "text": "Toggle DYOJ menu",
+            "w": 18,
+            "h": 18
+          },
+          {
+            "target": "button.p-0.5.cursor-pointer",
+            "text": "Toggle About Us menu",
+            "w": 18,
+            "h": 18
+          },
+          {
+            "target": "section",
+            "text": "Notifications alt+T",
+            "w": 1440,
+            "h": 0
+          },
+          {
+            "target": "a",
+            "text": "+1-212-804-9994",
+            "w": 93.77,
+            "h": 16
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          },
+          {
+            "target": "a.text-[#E6C97A].hover:text-white.transition-colors",
+            "text": "Book a Visit →",
+            "w": 120.5,
+            "h": 17.39
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.rounded-full.bg-white/10.hover:bg-white/15",
+            "text": "Currency: USD",
+            "w": 76.91,
+            "h": 40
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.rounded-full.bg-white/10.hover:bg-white/15",
+            "text": "Language: English",
+            "w": 113.97,
+            "h": 40
+          },
+          {
+            "target": "a.py-1.5.transition-colors.hover:text-white",
+            "text": "Gemstones",
+            "w": 90.16,
+            "h": 29.39
+          },
+          {
+            "target": "button.p-0.5.cursor-pointer",
+            "text": "Toggle Gemstones menu",
+            "w": 18,
+            "h": 18
+          },
+          {
+            "target": "a.py-1.5.transition-colors.hover:text-white",
+            "text": "Fine Jewelry",
+            "w": 104.97,
+            "h": 29.39
+          },
+          {
+            "target": "button.p-0.5.cursor-pointer",
+            "text": "Toggle Fine Jewelry menu",
+            "w": 18,
+            "h": 18
+          },
+          {
+            "target": "a.py-1.5.transition-colors.hover:text-white",
+            "text": "Settings",
+            "w": 73.63,
+            "h": 29.39
+          },
+          {
+            "target": "button.p-0.5.cursor-pointer",
+            "text": "Toggle Settings menu",
+            "w": 18,
+            "h": 18
+          },
+          {
+            "target": "a.py-1.5.transition-colors.hover:text-white",
+            "text": "DYOJ",
+            "w": 37.39,
+            "h": 29.39
+          },
+          {
+            "target": "button.p-0.5.cursor-pointer",
+            "text": "Toggle DYOJ menu",
+            "w": 18,
+            "h": 18
+          },
+          {
+            "target": "a.py-1.5.transition-colors.hover:text-white",
+            "text": "About Us",
+            "w": 75.53,
+            "h": 29.39
+          },
+          {
+            "target": "button.p-0.5.cursor-pointer",
+            "text": "Toggle About Us menu",
+            "w": 18,
+            "h": 18
+          },
+          {
+            "target": "a.inline-flex.items-center.gap-1.5.py-1.5.transition-colors.text-[#D4AF37]",
+            "text": "AI Gemologist",
+            "w": 140.97,
+            "h": 29.39
+          },
+          {
+            "target": "button.p-2.text-white/85.hover:text-[#E6C97A].rounded-full.hover:bg-white/10.transition-colors",
+            "text": "Search gemstones and jewelry",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "button.p-2.rounded-full.hover:bg-white/10.transition-colors.cursor-pointer.text-white/85",
+            "text": "Account Login",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "a.relative.inline-flex.items-center.p-2.rounded-full.hover:bg-white/10",
+            "text": "Saved items (0)",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "a.relative.inline-flex.items-center.p-2.rounded-full.hover:bg-white/10",
+            "text": "Compare items (0)",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.px-3.5.py-1.5.rounded-full",
+            "text": "0 in the shopping bag",
+            "w": 57.2,
+            "h": 40
+          },
+          {
+            "target": "a.mh6-link",
+            "text": "All gemstones →",
+            "w": 90.83,
+            "h": 40
+          },
+          {
+            "target": "section",
+            "text": "Notifications alt+T",
+            "w": 1440,
+            "h": 0
+          },
+          {
+            "target": "a.mh6-footer__wordmark",
+            "text": "Maihan Gems",
+            "w": 170.34,
+            "h": 24.48
+          },
+          {
+            "target": "a",
+            "text": "+1-212-804-9994",
+            "w": 93.77,
+            "h": 16
+          },
+          {
+            "target": "a",
+            "text": "Gemstones",
+            "w": 69.06,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Fine jewellery",
+            "w": 83.2,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Settings",
+            "w": 49.75,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Design your own",
+            "w": 104.33,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Matched pairs",
+            "w": 87.78,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Search the catalogue",
+            "w": 129.34,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "About Maihan Gems",
+            "w": 126.78,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "The atelier",
+            "w": 64.58,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Provenance",
+            "w": 71.7,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "The Journal",
+            "w": 70.84,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Reading room",
+            "w": 87.39,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Salons",
+            "w": 40.03,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Your account",
+            "w": 80.19,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Your bag",
+            "w": 54.94,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Saved pieces",
+            "w": 79.34,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Comparison",
+            "w": 74.61,
+            "h": 32
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/home-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/admin/login",
+      "name": "admin-login",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 3,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 3,
+          "samples": [
+            "span.mh-auth__label",
+            "span.mh-auth__label",
+            "a.mh-auth__back"
+          ]
+        },
+        {
+          "key": "48|1.02|-0.72px|\"Cormorant Garamond\"",
+          "count": 2,
+          "samples": [
+            "p.mh-auth__quote",
+            "h1.mh-auth__title"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "14|1|3.64px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__brand"
+          ]
+        },
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__caption"
+          ]
+        },
+        {
+          "key": "12|1.4|2.16px|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__eyebrow"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__note"
+          ]
+        },
+        {
+          "key": "12|NaN|1.68px|Outfit",
+          "count": 1,
+          "samples": [
+            "button.mh-auth__submit"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 5,
+        "countUnder24": 1,
+        "countUnder44": 1,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/admin-login-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/vendor/login",
+      "name": "vendor-login",
+      "width": 1440,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 3,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 3,
+          "samples": [
+            "span.mh-auth__label",
+            "span.mh-auth__label",
+            "a.mh-auth__back"
+          ]
+        },
+        {
+          "key": "48|1.02|-0.72px|\"Cormorant Garamond\"",
+          "count": 2,
+          "samples": [
+            "p.mh-auth__quote",
+            "h1.mh-auth__title"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "14|1|3.64px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__brand"
+          ]
+        },
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__caption"
+          ]
+        },
+        {
+          "key": "12|1.4|2.16px|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__eyebrow"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__note"
+          ]
+        },
+        {
+          "key": "12|NaN|1.68px|Outfit",
+          "count": 1,
+          "samples": [
+            "button.mh-auth__submit"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 5,
+        "countUnder24": 1,
+        "countUnder44": 1,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/vendor-login-1440.png",
+      "errors": []
+    },
+    {
+      "route": "/",
+      "name": "home",
+      "width": 1024,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 31,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 58,
+          "samples": [
+            "span",
+            "span",
+            "span",
+            "span"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 24,
+          "samples": [
+            "p.mh6-hero__lede",
+            "p.mh6-jewellery__note",
+            "p.mh6-about__copy",
+            "p.mh6-dyo__copy"
+          ]
+        },
+        {
+          "key": "22|1.1|normal|\"Cormorant Garamond\"",
+          "count": 22,
+          "samples": [
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety"
+          ]
+        },
+        {
+          "key": "12|1.7|normal|Outfit",
+          "count": 18,
+          "samples": [
+            "span",
+            "a.mh6-link",
+            "a.mh6-link",
+            "a.mh6-link"
+          ]
+        },
+        {
+          "key": "22|1.15|-0.22px|\"Cormorant Garamond\"",
+          "count": 11,
+          "samples": [
+            "h2.mh6-rail__title",
+            "span.mh6-jewellery__caption-name",
+            "span.mh6-jewellery__row-name",
+            "span.mh6-jewellery__row-name"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 9,
+          "samples": [
+            "label.sr-only",
+            "p.mh6-rail__count",
+            "p.mh6-jewellery__kicker",
+            "p.mh6-jewellery__kicker"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"Cormorant Garamond\"",
+          "count": 6,
+          "samples": [
+            "h2.mh6-section-title",
+            "h2.mh6-about__title",
+            "h2.mh6-section-title",
+            "h2.mh6-ai__title"
+          ]
+        },
+        {
+          "key": "14|1.6|normal|Outfit",
+          "count": 6,
+          "samples": [
+            "dd",
+            "dd",
+            "dd",
+            "p.mh6-dyo__step-copy"
+          ]
+        },
+        {
+          "key": "12|1.75|normal|Outfit",
+          "count": 4,
+          "samples": [
+            "address.mh6-footer__address",
+            "a",
+            "p.mh6-footer__note",
+            "strong"
+          ]
+        },
+        {
+          "key": "22|1|normal|\"Cormorant Garamond\"",
+          "count": 3,
+          "samples": [
+            "span.mh6-dyo__num",
+            "span.mh6-dyo__num",
+            "span.mh6-dyo__num"
+          ]
+        },
+        {
+          "key": "22|1.2|-0.22px|\"Cormorant Garamond\"",
+          "count": 3,
+          "samples": [
+            "span",
+            "span",
+            "span"
+          ]
+        },
+        {
+          "key": "12|1.45|2.16px|\"EB Garamond\"",
+          "count": 2,
+          "samples": [
+            "span",
+            "a.text-[#E6C97A].hover:text-white.transition-colors"
+          ]
+        },
+        {
+          "key": "12|1.45|1.68px|\"EB Garamond\"",
+          "count": 2,
+          "samples": [
+            "span.text-[#D4AF37].font-semibold.inline-flex.items-center",
+            "span"
+          ]
+        },
+        {
+          "key": "12|1.6|normal|Outfit",
+          "count": 2,
+          "samples": [
+            "p.mh6-tryon__note",
+            "p.mh6-cta__note"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"EB Garamond\"",
+          "count": 1,
+          "samples": [
+            "span.font-[family-name:var(--font-eb-garamond)].text-3xl.sm:text-5xl.lg:text-[48px].font-normal.tracking-[0.2em]"
+          ]
+        },
+        {
+          "key": "11|1.2|1.98px|\"EB Garamond\"",
+          "count": 1,
+          "samples": [
+            "span.text-[11px].sm:text-xs.font-[family-name:var(--font-eb-garamond)].uppercase.tracking-[0.34em].text-[#D4AF37]"
+          ]
+        },
+        {
+          "key": "11|1.2|1.98px|Inter",
+          "count": 1,
+          "samples": [
+            "strong"
+          ]
+        },
+        {
+          "key": "12|1.45|normal|Inter",
+          "count": 1,
+          "samples": [
+            "span.demo-content-badge__text"
+          ]
+        },
+        {
+          "key": "72|0.98|-1.44px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "h1.mh6-hero__title"
+          ]
+        },
+        {
+          "key": "22|1.3|-0.22px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh6-about__lead"
+          ]
+        },
+        {
+          "key": "36|1|-0.54px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "h2.mh6-cta__title"
+          ]
+        },
+        {
+          "key": "22|1|3.08px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "a.mh6-footer__wordmark"
+          ]
+        },
+        {
+          "key": "14|1.65|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh6-footer__tagline"
+          ]
+        },
+        {
+          "key": "22|1.15|normal|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh6-journal__label"
+          ]
+        },
+        {
+          "key": "12|1.65|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh6-journal__copy"
+          ]
+        },
+        {
+          "key": "12|1.7|0.78px|Outfit",
+          "count": 1,
+          "samples": [
+            "span.ai-concierge-trigger__label"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 75,
+        "countUnder24": 5,
+        "countUnder44": 35,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          },
+          {
+            "target": "a.text-[#E6C97A].hover:text-white.transition-colors",
+            "text": "Book a Visit →",
+            "w": 120.5,
+            "h": 17.39
+          },
+          {
+            "target": "section",
+            "text": "Notifications alt+T",
+            "w": 1024,
+            "h": 0
+          },
+          {
+            "target": "a.mh6-footer__wordmark",
+            "text": "Maihan Gems",
+            "w": 153.08,
+            "h": 22
+          },
+          {
+            "target": "a",
+            "text": "+1-212-804-9994",
+            "w": 93.77,
+            "h": 16
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          },
+          {
+            "target": "a.text-[#E6C97A].hover:text-white.transition-colors",
+            "text": "Book a Visit →",
+            "w": 120.5,
+            "h": 17.39
+          },
+          {
+            "target": "button.p-2.text-white",
+            "text": "Toggle mobile menu",
+            "w": 40,
+            "h": 40
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.rounded-full.bg-white/10.hover:bg-white/15",
+            "text": "Currency: USD",
+            "w": 76.91,
+            "h": 40
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.rounded-full.bg-white/10.hover:bg-white/15",
+            "text": "Language: English",
+            "w": 113.97,
+            "h": 40
+          },
+          {
+            "target": "button.p-2.text-white/85.hover:text-[#E6C97A].rounded-full.hover:bg-white/10.transition-colors",
+            "text": "Search gemstones and jewelry",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "button.p-2.rounded-full.hover:bg-white/10.transition-colors.cursor-pointer.text-white/85",
+            "text": "Account Login",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "a.relative.inline-flex.items-center.p-2.rounded-full.hover:bg-white/10",
+            "text": "Saved items (0)",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "a.relative.inline-flex.items-center.p-2.rounded-full.hover:bg-white/10",
+            "text": "Compare items (0)",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.px-3.5.py-1.5.rounded-full",
+            "text": "0 in the shopping bag",
+            "w": 57.2,
+            "h": 40
+          },
+          {
+            "target": "a.mh6-link",
+            "text": "All gemstones →",
+            "w": 90.83,
+            "h": 40
+          },
+          {
+            "target": "section",
+            "text": "Notifications alt+T",
+            "w": 1024,
+            "h": 0
+          },
+          {
+            "target": "a.mh6-footer__wordmark",
+            "text": "Maihan Gems",
+            "w": 153.08,
+            "h": 22
+          },
+          {
+            "target": "a",
+            "text": "+1-212-804-9994",
+            "w": 93.77,
+            "h": 16
+          },
+          {
+            "target": "a",
+            "text": "Gemstones",
+            "w": 69.06,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Fine jewellery",
+            "w": 83.2,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Settings",
+            "w": 49.75,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Design your own",
+            "w": 104.33,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Matched pairs",
+            "w": 87.78,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Search the catalogue",
+            "w": 129.34,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "About Maihan Gems",
+            "w": 126.78,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "The atelier",
+            "w": 64.58,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Provenance",
+            "w": 71.7,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "The Journal",
+            "w": 70.84,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Reading room",
+            "w": 87.39,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Salons",
+            "w": 40.03,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Your account",
+            "w": 80.19,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Your bag",
+            "w": 54.94,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Saved pieces",
+            "w": 79.34,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Comparison",
+            "w": 74.61,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Unsubscribe",
+            "w": 75.86,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Policies",
+            "w": 38.94,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Privacy",
+            "w": 37.02,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Terms",
+            "w": 31,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Treatment disclosure",
+            "w": 109.5,
+            "h": 32
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/home-1024.png",
+      "errors": []
+    },
+    {
+      "route": "/admin/login",
+      "name": "admin-login",
+      "width": 1024,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 3,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 3,
+          "samples": [
+            "span.mh-auth__label",
+            "span.mh-auth__label",
+            "a.mh-auth__back"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"Cormorant Garamond\"",
+          "count": 2,
+          "samples": [
+            "p.mh-auth__quote",
+            "h1.mh-auth__title"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "14|1|3.64px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__brand"
+          ]
+        },
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__caption"
+          ]
+        },
+        {
+          "key": "12|1.4|2.16px|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__eyebrow"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__note"
+          ]
+        },
+        {
+          "key": "12|NaN|1.68px|Outfit",
+          "count": 1,
+          "samples": [
+            "button.mh-auth__submit"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 5,
+        "countUnder24": 1,
+        "countUnder44": 1,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/admin-login-1024.png",
+      "errors": []
+    },
+    {
+      "route": "/vendor/login",
+      "name": "vendor-login",
+      "width": 1024,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 3,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 3,
+          "samples": [
+            "span.mh-auth__label",
+            "span.mh-auth__label",
+            "a.mh-auth__back"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"Cormorant Garamond\"",
+          "count": 2,
+          "samples": [
+            "p.mh-auth__quote",
+            "h1.mh-auth__title"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "14|1|3.64px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__brand"
+          ]
+        },
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__caption"
+          ]
+        },
+        {
+          "key": "12|1.4|2.16px|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__eyebrow"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__note"
+          ]
+        },
+        {
+          "key": "12|NaN|1.68px|Outfit",
+          "count": 1,
+          "samples": [
+            "button.mh-auth__submit"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 5,
+        "countUnder24": 1,
+        "countUnder44": 1,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/vendor-login-1024.png",
+      "errors": []
+    },
+    {
+      "route": "/",
+      "name": "home",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 29,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 58,
+          "samples": [
+            "span",
+            "span",
+            "span",
+            "span"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 24,
+          "samples": [
+            "p.mh6-hero__lede",
+            "p.mh6-jewellery__note",
+            "p.mh6-about__copy",
+            "p.mh6-dyo__copy"
+          ]
+        },
+        {
+          "key": "22|1.1|normal|\"Cormorant Garamond\"",
+          "count": 22,
+          "samples": [
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety"
+          ]
+        },
+        {
+          "key": "12|1.7|normal|Outfit",
+          "count": 18,
+          "samples": [
+            "span",
+            "a.mh6-link",
+            "a.mh6-link",
+            "a.mh6-link"
+          ]
+        },
+        {
+          "key": "22|1.15|-0.22px|\"Cormorant Garamond\"",
+          "count": 11,
+          "samples": [
+            "h2.mh6-rail__title",
+            "span.mh6-jewellery__caption-name",
+            "span.mh6-jewellery__row-name",
+            "span.mh6-jewellery__row-name"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 9,
+          "samples": [
+            "label.sr-only",
+            "p.mh6-rail__count",
+            "p.mh6-jewellery__kicker",
+            "p.mh6-jewellery__kicker"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"Cormorant Garamond\"",
+          "count": 6,
+          "samples": [
+            "h2.mh6-section-title",
+            "h2.mh6-about__title",
+            "h2.mh6-section-title",
+            "h2.mh6-ai__title"
+          ]
+        },
+        {
+          "key": "14|1.6|normal|Outfit",
+          "count": 6,
+          "samples": [
+            "dd",
+            "dd",
+            "dd",
+            "p.mh6-dyo__step-copy"
+          ]
+        },
+        {
+          "key": "12|1.75|normal|Outfit",
+          "count": 4,
+          "samples": [
+            "address.mh6-footer__address",
+            "a",
+            "p.mh6-footer__note",
+            "strong"
+          ]
+        },
+        {
+          "key": "22|1|normal|\"Cormorant Garamond\"",
+          "count": 3,
+          "samples": [
+            "span.mh6-dyo__num",
+            "span.mh6-dyo__num",
+            "span.mh6-dyo__num"
+          ]
+        },
+        {
+          "key": "22|1.2|-0.22px|\"Cormorant Garamond\"",
+          "count": 3,
+          "samples": [
+            "span",
+            "span",
+            "span"
+          ]
+        },
+        {
+          "key": "12|1.45|2.16px|\"EB Garamond\"",
+          "count": 2,
+          "samples": [
+            "span",
+            "a.text-[#E6C97A].hover:text-white.transition-colors"
+          ]
+        },
+        {
+          "key": "12|1.45|1.68px|\"EB Garamond\"",
+          "count": 2,
+          "samples": [
+            "span.text-[#D4AF37].font-semibold.inline-flex.items-center",
+            "span"
+          ]
+        },
+        {
+          "key": "12|1.6|normal|Outfit",
+          "count": 2,
+          "samples": [
+            "p.mh6-tryon__note",
+            "p.mh6-cta__note"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"EB Garamond\"",
+          "count": 1,
+          "samples": [
+            "span.font-[family-name:var(--font-eb-garamond)].text-3xl.sm:text-5xl.lg:text-[48px].font-normal.tracking-[0.2em]"
+          ]
+        },
+        {
+          "key": "11|1.2|1.98px|\"EB Garamond\"",
+          "count": 1,
+          "samples": [
+            "span.text-[11px].sm:text-xs.font-[family-name:var(--font-eb-garamond)].uppercase.tracking-[0.34em].text-[#D4AF37]"
+          ]
+        },
+        {
+          "key": "11|1.2|1.98px|Inter",
+          "count": 1,
+          "samples": [
+            "strong"
+          ]
+        },
+        {
+          "key": "12|1.45|normal|Inter",
+          "count": 1,
+          "samples": [
+            "span.demo-content-badge__text"
+          ]
+        },
+        {
+          "key": "72|0.98|-1.44px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "h1.mh6-hero__title"
+          ]
+        },
+        {
+          "key": "22|1.3|-0.22px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh6-about__lead"
+          ]
+        },
+        {
+          "key": "36|1|-0.54px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "h2.mh6-cta__title"
+          ]
+        },
+        {
+          "key": "22|1|3.08px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "a.mh6-footer__wordmark"
+          ]
+        },
+        {
+          "key": "14|1.65|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh6-footer__tagline"
+          ]
+        },
+        {
+          "key": "22|1.15|normal|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh6-journal__label"
+          ]
+        },
+        {
+          "key": "12|1.65|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh6-journal__copy"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 75,
+        "countUnder24": 5,
+        "countUnder44": 35,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          },
+          {
+            "target": "a.text-[#E6C97A].hover:text-white.transition-colors",
+            "text": "Book a Visit →",
+            "w": 120.5,
+            "h": 17.39
+          },
+          {
+            "target": "section",
+            "text": "Notifications alt+T",
+            "w": 768,
+            "h": 0
+          },
+          {
+            "target": "a.mh6-footer__wordmark",
+            "text": "Maihan Gems",
+            "w": 153.08,
+            "h": 22
+          },
+          {
+            "target": "a",
+            "text": "+1-212-804-9994",
+            "w": 93.77,
+            "h": 16
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          },
+          {
+            "target": "a.text-[#E6C97A].hover:text-white.transition-colors",
+            "text": "Book a Visit →",
+            "w": 120.5,
+            "h": 17.39
+          },
+          {
+            "target": "button.p-2.text-white",
+            "text": "Toggle mobile menu",
+            "w": 40,
+            "h": 40
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.rounded-full.bg-white/10.hover:bg-white/15",
+            "text": "Currency: USD",
+            "w": 76.91,
+            "h": 40
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.rounded-full.bg-white/10.hover:bg-white/15",
+            "text": "Language: English",
+            "w": 113.97,
+            "h": 40
+          },
+          {
+            "target": "button.p-2.text-white/85.hover:text-[#E6C97A].rounded-full.hover:bg-white/10.transition-colors",
+            "text": "Search gemstones and jewelry",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "button.p-2.rounded-full.hover:bg-white/10.transition-colors.cursor-pointer.text-white/85",
+            "text": "Account Login",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "a.relative.inline-flex.items-center.p-2.rounded-full.hover:bg-white/10",
+            "text": "Saved items (0)",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "a.relative.inline-flex.items-center.p-2.rounded-full.hover:bg-white/10",
+            "text": "Compare items (0)",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.px-3.5.py-1.5.rounded-full",
+            "text": "0 in the shopping bag",
+            "w": 57.2,
+            "h": 40
+          },
+          {
+            "target": "a.mh6-link",
+            "text": "All gemstones →",
+            "w": 90.83,
+            "h": 40
+          },
+          {
+            "target": "section",
+            "text": "Notifications alt+T",
+            "w": 768,
+            "h": 0
+          },
+          {
+            "target": "a.mh6-footer__wordmark",
+            "text": "Maihan Gems",
+            "w": 153.08,
+            "h": 22
+          },
+          {
+            "target": "a",
+            "text": "+1-212-804-9994",
+            "w": 93.77,
+            "h": 16
+          },
+          {
+            "target": "a",
+            "text": "Gemstones",
+            "w": 69.06,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Fine jewellery",
+            "w": 83.2,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Settings",
+            "w": 49.75,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Design your own",
+            "w": 104.33,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Matched pairs",
+            "w": 87.78,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Search the catalogue",
+            "w": 129.34,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "About Maihan Gems",
+            "w": 126.78,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "The atelier",
+            "w": 64.58,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Provenance",
+            "w": 71.7,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "The Journal",
+            "w": 70.84,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Reading room",
+            "w": 87.39,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Salons",
+            "w": 40.03,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Your account",
+            "w": 80.19,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Your bag",
+            "w": 54.94,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Saved pieces",
+            "w": 79.34,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Comparison",
+            "w": 74.61,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Unsubscribe",
+            "w": 75.86,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Policies",
+            "w": 38.94,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Privacy",
+            "w": 37.02,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Terms",
+            "w": 31,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Treatment disclosure",
+            "w": 109.5,
+            "h": 32
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/home-768.png",
+      "errors": []
+    },
+    {
+      "route": "/admin/login",
+      "name": "admin-login",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 3,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 3,
+          "samples": [
+            "span.mh-auth__label",
+            "span.mh-auth__label",
+            "a.mh-auth__back"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "14|1|3.64px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__brand"
+          ]
+        },
+        {
+          "key": "48|1.02|-0.72px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__quote"
+          ]
+        },
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__caption"
+          ]
+        },
+        {
+          "key": "12|1.4|2.16px|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__eyebrow"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "h1.mh-auth__title"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__note"
+          ]
+        },
+        {
+          "key": "12|NaN|1.68px|Outfit",
+          "count": 1,
+          "samples": [
+            "button.mh-auth__submit"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 5,
+        "countUnder24": 1,
+        "countUnder44": 1,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/admin-login-768.png",
+      "errors": []
+    },
+    {
+      "route": "/vendor/login",
+      "name": "vendor-login",
+      "width": 768,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 3,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 3,
+          "samples": [
+            "span.mh-auth__label",
+            "span.mh-auth__label",
+            "a.mh-auth__back"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "14|1|3.64px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__brand"
+          ]
+        },
+        {
+          "key": "48|1.02|-0.72px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__quote"
+          ]
+        },
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__caption"
+          ]
+        },
+        {
+          "key": "12|1.4|2.16px|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__eyebrow"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "h1.mh-auth__title"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__note"
+          ]
+        },
+        {
+          "key": "12|NaN|1.68px|Outfit",
+          "count": 1,
+          "samples": [
+            "button.mh-auth__submit"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 5,
+        "countUnder24": 1,
+        "countUnder44": 1,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/vendor-login-768.png",
+      "errors": []
+    },
+    {
+      "route": "/",
+      "name": "home",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 27,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 58,
+          "samples": [
+            "span",
+            "span",
+            "span",
+            "span"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 24,
+          "samples": [
+            "p.mh6-hero__lede",
+            "p.mh6-jewellery__note",
+            "p.mh6-about__copy",
+            "p.mh6-dyo__copy"
+          ]
+        },
+        {
+          "key": "22|1.1|normal|\"Cormorant Garamond\"",
+          "count": 22,
+          "samples": [
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety",
+            "span.mh6-rail__variety"
+          ]
+        },
+        {
+          "key": "12|1.7|normal|Outfit",
+          "count": 17,
+          "samples": [
+            "a.mh6-link",
+            "a.mh6-link",
+            "a.mh6-link",
+            "a.mh6-button.mh6-jewellery__action"
+          ]
+        },
+        {
+          "key": "22|1.15|-0.22px|\"Cormorant Garamond\"",
+          "count": 11,
+          "samples": [
+            "h2.mh6-rail__title",
+            "span.mh6-jewellery__caption-name",
+            "span.mh6-jewellery__row-name",
+            "span.mh6-jewellery__row-name"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 9,
+          "samples": [
+            "label.sr-only",
+            "p.mh6-rail__count",
+            "p.mh6-jewellery__kicker",
+            "p.mh6-jewellery__kicker"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"Cormorant Garamond\"",
+          "count": 6,
+          "samples": [
+            "h2.mh6-section-title",
+            "h2.mh6-about__title",
+            "h2.mh6-section-title",
+            "h2.mh6-ai__title"
+          ]
+        },
+        {
+          "key": "14|1.6|normal|Outfit",
+          "count": 6,
+          "samples": [
+            "dd",
+            "dd",
+            "dd",
+            "p.mh6-dyo__step-copy"
+          ]
+        },
+        {
+          "key": "12|1.75|normal|Outfit",
+          "count": 4,
+          "samples": [
+            "address.mh6-footer__address",
+            "a",
+            "p.mh6-footer__note",
+            "strong"
+          ]
+        },
+        {
+          "key": "22|1|normal|\"Cormorant Garamond\"",
+          "count": 3,
+          "samples": [
+            "span.mh6-dyo__num",
+            "span.mh6-dyo__num",
+            "span.mh6-dyo__num"
+          ]
+        },
+        {
+          "key": "22|1.2|-0.22px|\"Cormorant Garamond\"",
+          "count": 3,
+          "samples": [
+            "span",
+            "span",
+            "span"
+          ]
+        },
+        {
+          "key": "12|1.45|1.68px|\"EB Garamond\"",
+          "count": 2,
+          "samples": [
+            "span.text-[#D4AF37].font-semibold.inline-flex.items-center",
+            "span"
+          ]
+        },
+        {
+          "key": "12|1.6|normal|Outfit",
+          "count": 2,
+          "samples": [
+            "p.mh6-tryon__note",
+            "p.mh6-cta__note"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"EB Garamond\"",
+          "count": 1,
+          "samples": [
+            "span.font-[family-name:var(--font-eb-garamond)].text-3xl.sm:text-5xl.lg:text-[48px].font-normal.tracking-[0.2em]"
+          ]
+        },
+        {
+          "key": "11|1.2|1.98px|\"EB Garamond\"",
+          "count": 1,
+          "samples": [
+            "span.text-[11px].sm:text-xs.font-[family-name:var(--font-eb-garamond)].uppercase.tracking-[0.34em].text-[#D4AF37]"
+          ]
+        },
+        {
+          "key": "11|1.2|1.98px|Inter",
+          "count": 1,
+          "samples": [
+            "strong"
+          ]
+        },
+        {
+          "key": "12|1.45|normal|Inter",
+          "count": 1,
+          "samples": [
+            "span.demo-content-badge__text"
+          ]
+        },
+        {
+          "key": "55.8|0.98|-1.116px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "h1.mh6-hero__title"
+          ]
+        },
+        {
+          "key": "22|1.3|-0.22px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh6-about__lead"
+          ]
+        },
+        {
+          "key": "36|1|-0.54px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "h2.mh6-cta__title"
+          ]
+        },
+        {
+          "key": "22|1|3.08px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "a.mh6-footer__wordmark"
+          ]
+        },
+        {
+          "key": "14|1.65|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh6-footer__tagline"
+          ]
+        },
+        {
+          "key": "22|1.15|normal|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh6-journal__label"
+          ]
+        },
+        {
+          "key": "12|1.65|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh6-journal__copy"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 73,
+        "countUnder24": 4,
+        "countUnder44": 33,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          },
+          {
+            "target": "section",
+            "text": "Notifications alt+T",
+            "w": 390,
+            "h": 0
+          },
+          {
+            "target": "a.mh6-footer__wordmark",
+            "text": "Maihan Gems",
+            "w": 153.08,
+            "h": 22
+          },
+          {
+            "target": "a",
+            "text": "+1-212-804-9994",
+            "w": 93.77,
+            "h": 16
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          },
+          {
+            "target": "button.p-2.text-white",
+            "text": "Toggle mobile menu",
+            "w": 40,
+            "h": 40
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.rounded-full.bg-white/10.hover:bg-white/15",
+            "text": "Currency: USD",
+            "w": 76.91,
+            "h": 40
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.rounded-full.bg-white/10.hover:bg-white/15",
+            "text": "Language: English",
+            "w": 113.97,
+            "h": 40
+          },
+          {
+            "target": "button.p-2.text-white/85.hover:text-[#E6C97A].rounded-full.hover:bg-white/10.transition-colors",
+            "text": "Search gemstones and jewelry",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "button.p-2.rounded-full.hover:bg-white/10.transition-colors.cursor-pointer.text-white/85",
+            "text": "Account Login",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "a.relative.inline-flex.items-center.p-2.rounded-full.hover:bg-white/10",
+            "text": "Saved items (0)",
+            "w": 32,
+            "h": 32
+          },
+          {
+            "target": "button.inline-flex.items-center.gap-1.5.px-3.5.py-1.5.rounded-full",
+            "text": "0 in the shopping bag",
+            "w": 57.2,
+            "h": 40
+          },
+          {
+            "target": "a.mh6-link",
+            "text": "All gemstones →",
+            "w": 90.83,
+            "h": 40
+          },
+          {
+            "target": "section",
+            "text": "Notifications alt+T",
+            "w": 390,
+            "h": 0
+          },
+          {
+            "target": "a.mh6-footer__wordmark",
+            "text": "Maihan Gems",
+            "w": 153.08,
+            "h": 22
+          },
+          {
+            "target": "a",
+            "text": "+1-212-804-9994",
+            "w": 93.77,
+            "h": 16
+          },
+          {
+            "target": "a",
+            "text": "Gemstones",
+            "w": 69.06,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Fine jewellery",
+            "w": 83.2,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Settings",
+            "w": 49.75,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Design your own",
+            "w": 104.33,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Matched pairs",
+            "w": 87.78,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Search the catalogue",
+            "w": 129.34,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "About Maihan Gems",
+            "w": 126.78,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "The atelier",
+            "w": 64.58,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Provenance",
+            "w": 71.7,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "The Journal",
+            "w": 70.84,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Reading room",
+            "w": 87.39,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Salons",
+            "w": 40.03,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Your account",
+            "w": 80.19,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Your bag",
+            "w": 54.94,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Saved pieces",
+            "w": 79.34,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Comparison",
+            "w": 74.61,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Unsubscribe",
+            "w": 75.86,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Policies",
+            "w": 38.94,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Privacy",
+            "w": 37.02,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Terms",
+            "w": 31,
+            "h": 32
+          },
+          {
+            "target": "a",
+            "text": "Treatment disclosure",
+            "w": 109.5,
+            "h": 32
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/home-390.png",
+      "errors": []
+    },
+    {
+      "route": "/admin/login",
+      "name": "admin-login",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 3,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 3,
+          "samples": [
+            "span.mh-auth__label",
+            "span.mh-auth__label",
+            "a.mh-auth__back"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"Cormorant Garamond\"",
+          "count": 2,
+          "samples": [
+            "p.mh-auth__quote",
+            "h1.mh-auth__title"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "14|1|3.64px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__brand"
+          ]
+        },
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__caption"
+          ]
+        },
+        {
+          "key": "12|1.4|2.16px|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__eyebrow"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__note"
+          ]
+        },
+        {
+          "key": "12|NaN|1.68px|Outfit",
+          "count": 1,
+          "samples": [
+            "button.mh-auth__submit"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 5,
+        "countUnder24": 1,
+        "countUnder44": 1,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/admin-login-390.png",
+      "errors": []
+    },
+    {
+      "route": "/vendor/login",
+      "name": "vendor-login",
+      "width": 390,
+      "status": 200,
+      "axe": [],
+      "contrastIncomplete": 3,
+      "overflowPx": 0,
+      "typeScale": [
+        {
+          "key": "12|1.4|normal|Outfit",
+          "count": 3,
+          "samples": [
+            "span.mh-auth__label",
+            "span.mh-auth__label",
+            "a.mh-auth__back"
+          ]
+        },
+        {
+          "key": "36|1.02|-0.54px|\"Cormorant Garamond\"",
+          "count": 2,
+          "samples": [
+            "p.mh-auth__quote",
+            "h1.mh-auth__title"
+          ]
+        },
+        {
+          "key": "12|1.4|normal|Inter",
+          "count": 1,
+          "samples": [
+            "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]"
+          ]
+        },
+        {
+          "key": "14|1|3.64px|\"Cormorant Garamond\"",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__brand"
+          ]
+        },
+        {
+          "key": "12|1.5|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__caption"
+          ]
+        },
+        {
+          "key": "12|1.4|2.16px|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__eyebrow"
+          ]
+        },
+        {
+          "key": "14|1.7|normal|Outfit",
+          "count": 1,
+          "samples": [
+            "p.mh-auth__note"
+          ]
+        },
+        {
+          "key": "12|NaN|1.68px|Outfit",
+          "count": 1,
+          "samples": [
+            "button.mh-auth__submit"
+          ]
+        }
+      ],
+      "interactive": {
+        "total": 5,
+        "countUnder24": 1,
+        "countUnder44": 1,
+        "under24": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ],
+        "under44": [
+          {
+            "target": "a.sr-only.focus:not-sr-only.focus:fixed.focus:top-3.focus:left-3.focus:z-[100]",
+            "text": "Skip to main content",
+            "w": 1,
+            "h": 1
+          }
+        ]
+      },
+      "screenshot": "docs/design-shots/v7/after/vendor-login-390.png",
+      "errors": []
+    }
+  ]
+}

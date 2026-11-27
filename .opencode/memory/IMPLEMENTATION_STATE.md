@@ -1,3 +1,36 @@
+# STOREFRONT v7 — ROUNDED SURFACES, FULL HOMEPAGE, SPLIT SIGN-INS, DEMO ACCESS (2026-11-27)
+
+- **Scope.** Homepage sections (all-variety marquee, jewellery, about,
+  gemologist, try-on, CTA), the couture footer's rounded blocks, and the
+  `/admin/login` + `/vendor/login` split frame. The navbar, consoles, other
+  pages, `packages/` and `api/` are untouched; one new route was added:
+  `POST /api/v1/auth/demo-login`.
+- **Rounded system.** One scale — 4 px control / 16 px field and card /
+  28 px section and footer plate / full circle. Paper or obsidian only; no
+  blur, no glass.
+- **Homepage data.** The marquee renders every active gemstone variety that
+  has a record; a variety with no record is omitted. The jewellery section
+  reads ready-made pieces and mountings from the existing adapters. The
+  try-on section links to the existing WebAR route and states its honest
+  missing-asset behaviour.
+- **Auth.** Both login pages share one image/quote aside; at ≤900 px it
+  collapses above the form. Existing endpoints, errors and redirects are
+  unchanged.
+- **Demo flag.** `DEMO_LOGIN_ENABLED=true` (server only) renders “View demo
+  account” on both login pages and the footer; the route 404s when unset.
+  Seeded identities: `admin@maihan.local`, `vendor@maihan.local`
+  (Atelier North, APPROVED), `customer@maihan.local`; password from
+  `packages/db/seed-demo.mjs`.
+- **Measured gates.** typecheck 0; build exit 0 with `DATABASE_URL` unset;
+  tests 618 passed / 21 skipped; slop clean; axe 0 across 12 captures
+  (home/admin/vendor × 1440/1024/768/390); overflow 0; initial JS
+  181.8 / 196.1 / 201.3 KB (+0.4 KB each vs v6). Absolute ceiling overrun
+  remains pre-existing.
+- **Evidence.** `docs/design-shots/v7/README.md`, `after/` (12 captures),
+  `before/` (v6 home), `demo-on/` (3 flag-on captures).
+
+---
+
 # STOREFRONT v5 — PERCEIVED-QUALITY PASS (2026-11-27)
 
 - **Scope.** Additive polish on top of the v4 craft pass: route crossfade,

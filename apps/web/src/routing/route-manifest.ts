@@ -635,6 +635,14 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
     storefront: false,
     group: 'api',
   },
+  {
+    fsPath: 'src/app/api/v1/auth/demo-login/route.ts',
+    sotPath: 'app/api/v1/auth/demo-login/route.ts   # POST, flag-gated demo session',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 (api/ route handlers) + ADR-027 (one session model) + the v7 demo-access brief: a review-only affordance that mints a normal first-party session for a seeded identity. It answers 404 unless DEMO_LOGIN_ENABLED is exactly "true" on the server, accepts no credentials, and adds no second identity model.',
+    storefront: false,
+    group: 'api',
+  },
 
   // ── SEO endpoints (Phase 4 Task 7: generated, never migrated) ────────────
   {
