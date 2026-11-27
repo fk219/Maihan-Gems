@@ -1,3 +1,40 @@
+# STOREFRONT v8 — GOLD AS MATERIAL, PURPOSE PER SECTION, SEVEN PLATES (2026-11-27)
+
+- **Scope.** The homepage only. Hero untouched by instruction; navbar
+  untouched; footer refined (warm black `#080604`). No other page, route,
+  package, dependency, font or type size changed.
+- **Client notes answered.** (1) Gold is material again: one full gold-gradient
+  atelier field, a gold wash on warm paper, gold light on warm black, gold type
+  accents, and a gold plaque holding the closing appointment. (2) Every section
+  opens with a purpose eyebrow and a one-line statement. (3) Eight sections,
+  eight compositions: full-bleed still, horizontal rail, dissolving
+  side-by-side, ledger split, circular loupe pair, image band over a three-cell
+  grid, centred camera window, statement plus plaque. (4) Seven of eight
+  sections carry a real image plate; all images already existed in
+  `apps/web/public/`.
+- **Gold exception.** `DESIGN_DIRECTION.md` says gold is "light, never a fill".
+  The atelier field is a documented one-surface exception at the client's
+  request; every text run on it is measured (worst pixel, not token) at 5.59:1
+  or better. The token comment in `storefront-craft.css` records the rule.
+- **Grounds.** New warm black `--mh-obsidian-warm` `#0b0906`, warm paper
+  `--mh-paper-warm` `#f2e9d6`, gold field `#f0d99b → #bd9646`. Sequence:
+  obsidian → warm paper → gradient → warm black → paper → warm black → paper →
+  warm black + gold plaque → footer.
+- **Fix carried in.** The v7 marquee had `tabindex="-1"` on **both** track
+  copies, so no variety was keyboard reachable. The duplicate copy is now the
+  only one removed from the tab order.
+- **Measured gates.** typecheck `pnpm -r` 0; build exit 0 with `DATABASE_URL`
+  unset; tests 618 passed / 21 skipped; slop clean; axe 0 violations across 4
+  home captures (1440/1024/768/390); overflow 0 px; type sizes unchanged
+  (11/12/14/24.48/48/88 at 1440); initial JS 181.8 / 196.1 / 201.3 KB (+0.0);
+  CSS +2.68 KB gzip; 44/44 internal links resolve; contrast probe 21/21.
+- **Evidence.** `docs/design-shots/v8/README.md`, `before/`, `after/` (+
+  `audit.json`), `sections/` (7 sections × 4 widths). New tools:
+  `scripts/section-shots.mjs`, `scripts/contrast-probe.mjs`,
+  `scripts/link-check.mjs`.
+
+---
+
 # STOREFRONT v7 — ROUNDED SURFACES, FULL HOMEPAGE, SPLIT SIGN-INS, DEMO ACCESS (2026-11-27)
 
 - **Scope.** Homepage sections (all-variety marquee, jewellery, about,

@@ -1096,17 +1096,37 @@ img {
 
 .mh6-home {
   --mh-paper: #f7f4ec;
-  --mh-paper-deep: #efeae0;
-  --mh-paper-plate: #fbf8f1;
-  --mh-obsidian-plate: #0a0e15;
+  --mh-paper-warm: #f2e9d6;
+  --mh-paper-deep: #eadfc6;
   --mh-ink: #17140f;
   --mh-ink-muted: #5e574b;
   --mh-obsidian: #070a0f;
   --mh-obsidian-2: #0a0e15;
+  --mh-obsidian-warm: #0b0906;
   --mh-gold-line: #c9a84c;
   --mh-gold-light: #e6c97a;
   --mh-rule-paper: rgba(124, 99, 35, 0.22);
   --mh-rule-dark: rgba(230, 201, 122, 0.2);
+
+  /* The page's one gold field. Every stop is light enough for the ink to
+     clear AA on it: the darkest (#bd9646) measures 6.25:1 against #211a0c
+     and 4.81:1 against #3a2e16. Nothing darker is ever placed under text. */
+  --mh-gold-field: linear-gradient(
+    148deg,
+    #f0d99b 0%,
+    #e2c47c 22%,
+    #d3ae5d 46%,
+    #c6a04c 68%,
+    #bd9646 100%
+  );
+  --mh-gold-ink: #211a0c;
+  --mh-gold-ink-soft: #3a2e16;
+  --mh-gold-rule: rgba(33, 26, 12, 0.24);
+  --mh-gold-wash: radial-gradient(
+    58% 62% at 16% 0%,
+    rgba(201, 168, 76, 0.16) 0%,
+    rgba(201, 168, 76, 0) 72%
+  );
 
   position: relative;
   overflow-x: clip;
@@ -1115,14 +1135,13 @@ img {
   font-family: var(--font-sans);
 }
 
-/* Re-solve the contextual pair on every obsidian surface. The craft layer
-   does this for the elements it knows; these are new surfaces, so they
+/* Re-solve the contextual pair on every warm or obsidian surface. The craft
+   layer does this for the elements it knows; these are new surfaces, so they
    declare the same pair and the same focus ring. */
 .mh6-hero,
-.mh6-rail__plate,
+.mh6-jewellery,
+.mh6-gemologist,
 .mh6-pieces,
-.mh6-ai__plate,
-.mh6-tryon__plate,
 .mh6-cta {
   --mh-gold-ink: var(--mh-gold-on-dark);
   --mh-muted-ink: var(--mh-muted-on-dark);
@@ -1130,6 +1149,29 @@ img {
   --mh-focus-halo: rgba(7, 10, 15, 0.9);
   --focus-ring-ink: #e6c97a;
 }
+
+/* The section eyebrow is the page's one small label: it names the job of the
+   section in plain language, and it is the only uppercase tracked text on a
+   surface. Colour is re-solved per ground. */
+.mh6-eyebrow {
+  margin: 0 0 0.9rem;
+  font-family: var(--font-sans);
+  font-size: var(--mh-fs-label);
+  font-weight: 500;
+  line-height: var(--mh-lh-label);
+  letter-spacing: var(--mh-track-label);
+  text-transform: uppercase;
+  color: var(--mh-gold-ink);
+}
+
+.mh6-eyebrow--dark {
+  color: var(--mh-gold-on-dark);
+}
+
+.mh6-eyebrow--field {
+  color: var(--mh-gold-ink-soft);
+}
+
 
 .mh6-home__wrap {
   width: 100%;
@@ -1587,80 +1629,86 @@ img {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── 16.3 PROVENANCE RAIL ────────────────────────────────────────────────── */
+/* ── 16.3 THE VARIETY INDEX ────────────────────────────────────────────────
+   The page's one running band: warm paper ruled top and bottom in gold, and a
+   material plate per variety. The plate is the catalogue's representative
+   stone photograph for that variety, cropped tight so the stone fills the
+   frame; a variety without a plate falls back to the record's own image, then
+   to a plain typographic plate. Nothing is photographed in.
 
-.mh6-rail {
-  padding-block: clamp(1.5rem, 3vw, 2.5rem);
-  background: var(--mh-paper);
-  color: #efece0;
+   The rail repeats, so the second copy is hidden from assistive technology and
+   out of the tab order: every record is announced and reachable once.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.mh6-index {
+  position: relative;
+  padding-block: clamp(3rem, 5vw, 4.25rem);
+  border-top: 1px solid var(--mh-rule-paper);
+  border-bottom: 1px solid var(--mh-rule-paper);
+  background-color: var(--mh-paper-warm);
+  background-image: var(--mh-gold-wash);
 }
 
-/* The one dark plate on the paper page: a rounded surface with a hairline,
-   never a translucent glass card. */
-.mh6-rail__plate {
-  width: calc(100% - (var(--mh6-home-gutter) * 2));
-  max-width: var(--mh6-home-max);
-  margin-inline: auto;
-  padding-block: 1.35rem 1.5rem;
-  overflow: hidden;
-  border: 1px solid var(--mh-rule-dark);
-  border-radius: var(--mh-radius-plate);
-  background: var(--mh-obsidian);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.mh6-rail__head {
+.mh6-index__head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 0.25rem 1.5rem;
-  margin-bottom: 0.85rem;
-  padding-inline: clamp(1.25rem, 3vw, 2rem);
+  gap: 1.5rem 2.5rem;
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
 }
 
-.mh6-home .mh6-rail__title {
-  margin: 0;
-  max-width: 34ch;
-  font-family: var(--font-serif);
-  font-size: var(--mh-fs-title);
-  font-weight: 400;
-  letter-spacing: var(--mh-track-title);
-  line-height: 1.15;
-  color: #f4f1e8;
+.mh6-index__intro {
+  max-width: 36rem;
 }
 
-.mh6-rail__count {
+.mh6-index__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
+.mh6-index__count {
   margin: 0;
   font-size: var(--mh-fs-meta);
-  line-height: 1.4;
-  color: var(--mh-muted-on-dark);
+  line-height: var(--mh-lh-meta);
+  color: var(--mh-ink-muted);
   font-variant-numeric: tabular-nums;
 }
 
-.mh6-rail__head .mh6-link {
-  min-height: 40px;
-}
-
-.mh6-rail__viewport {
+.mh6-index__viewport {
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
+  padding-inline: var(--mh6-home-gutter);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 var(--mh6-home-gutter),
+    #000 calc(100% - var(--mh6-home-gutter)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 var(--mh6-home-gutter),
+    #000 calc(100% - var(--mh6-home-gutter)),
+    transparent 100%
+  );
 }
 
-.mh6-rail__track {
+.mh6-index__track {
   display: flex;
   width: max-content;
   will-change: transform;
-  animation: mh6-rail-pass var(--mh6-rail-duration, 72s) linear infinite;
+  animation: mh6-rail-pass var(--mh6-index-duration, 72s) linear infinite;
 }
 
-.mh6-rail:hover .mh6-rail__track,
-.mh6-rail:focus-within .mh6-rail__track {
+.mh6-index:hover .mh6-index__track,
+.mh6-index:focus-within .mh6-index__track {
   animation-play-state: paused;
 }
 
-.mh6-rail__set {
+.mh6-index__set {
   display: flex;
   align-items: stretch;
   margin: 0;
@@ -1668,57 +1716,111 @@ img {
   list-style: none;
 }
 
-.mh6-rail__set > li {
+.mh6-index__set > li {
   display: flex;
 }
 
-.mh6-rail__item {
+.mh6-index__tile {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.35rem;
-  width: clamp(15rem, 22vw, 19rem);
-  min-height: 6.5rem;
-  padding: 0.5rem 2rem 0.5rem 1.75rem;
-  border-left: 1px solid rgba(230, 201, 122, 0.16);
+  gap: 0.8rem;
+  width: clamp(14.5rem, 19vw, 17.5rem);
+  padding-inline: clamp(1rem, 1.6vw, 1.5rem);
   text-decoration: none;
 }
 
-.mh6-rail__set > li:first-child .mh6-rail__item {
-  border-left: 0;
+.mh6-index__set > li:first-child .mh6-index__tile {
+  padding-left: 0;
 }
 
-.mh6-rail__variety {
-  font-family: var(--font-serif);
-  font-size: var(--mh-fs-title);
-  line-height: 1.1;
-  color: #f4f1e8;
-  transition: color var(--mh-dur-state) var(--mh-ease);
+/* The plate is obsidian so the stone is the only light in the frame, and the
+   crop is fixed so every tile shows the material at the same scale. */
+.mh6-index__plate {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border: 1px solid rgba(33, 26, 12, 0.16);
+  border-radius: var(--mh-radius-soft);
+  background: var(--mh-obsidian-warm);
 }
 
-.mh6-rail__facts {
+.mh6-index__plate img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(var(--plate-scale, 1.24));
+  transition: transform var(--mh-dur-move) var(--mh-ease);
+}
+
+/* A plate photographed on a pale ground is printed on champagne instead of
+   sitting in a pale rectangle: the ground multiplies into the warm paper and
+   only the stone keeps its own colour. */
+.mh6-index__plate--warm {
+  border-color: rgba(124, 99, 35, 0.24);
+  background: #f1e6cf;
+}
+
+.mh6-index__plate--warm img {
+  mix-blend-mode: multiply;
+}
+
+.mh6-index__tile:hover .mh6-index__plate img,
+.mh6-index__tile:focus-visible .mh6-index__plate img {
+  transform: scale(calc(var(--plate-scale, 1.24) + 0.06));
+}
+
+.mh6-index__monogram {
   display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  font-size: var(--mh-fs-meta);
-  line-height: 1.5;
-  color: var(--mh-muted-on-dark);
-  font-variant-numeric: tabular-nums;
-}
-
-.mh6-rail__facts span:last-child {
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-display);
+  line-height: 1;
+  letter-spacing: 0.06em;
   color: var(--mh-gold-on-dark);
 }
 
-.mh6-rail__item:hover .mh6-rail__variety,
-.mh6-rail__item:focus-visible .mh6-rail__variety {
-  color: var(--mh-gold-light);
+.mh6-index__body {
+  display: grid;
+  gap: 0.2rem;
 }
 
-.mh6-rail__item:hover .mh6-rail__facts {
-  color: #d9d3c5;
+.mh6-index__variety {
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-title);
+  line-height: 1.1;
+  letter-spacing: var(--mh-track-title);
+  color: var(--mh-ink);
+  transition: color var(--mh-dur-state) var(--mh-ease);
 }
 
+.mh6-index__tile:hover .mh6-index__variety,
+.mh6-index__tile:focus-visible .mh6-index__variety {
+  color: var(--mh-gold-ink);
+}
+
+.mh6-index__facts {
+  display: grid;
+  gap: 0.05rem;
+  font-size: var(--mh-fs-meta);
+  line-height: 1.45;
+  color: var(--mh-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.mh6-index__facts span:last-child {
+  color: var(--mh-gold-ink);
+}
+
+@media (max-width: 767px) {
+  .mh6-index__tile {
+    width: 13.5rem;
+  }
+}
 /* ── 16.4 RECORD ─────────────────────────────────────────────────────────── */
 
 .mh6-record {
@@ -2150,196 +2252,356 @@ img {
   }
 }
 
-/* ── 16.7 DESIGN YOUR OWN ────────────────────────────────────────────────── */
+/* ── 16.7 THE ATELIER BAND ─────────────────────────────────────────────────
+   The page's one sheet of gold: a warm metal field lit from the top left, and
+   a photograph whose own ground is the same warm stone, masked so it dissolves
+   into the field instead of sitting on it in a box.
 
-.mh6-dyo {
-  padding-block: clamp(4.5rem, 8vw, 7.5rem);
-  border-top: 1px solid var(--mh-rule-paper);
-  background: var(--mh-paper);
-}
+   Contrast: every stop of the field is light enough for the ink to clear AA.
+   The darkest stop (#bd9646) measures 6.25:1 against #211a0c and 4.81:1
+   against #3a2e16. Nothing darker than #bd9646 is used under text.
+   ─────────────────────────────────────────────────────────────────────────── */
 
-.mh6-dyo__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 2.5rem;
-}
+.mh6-atelier {
+  --mh-focus-ring: #211a0c;
+  --mh-focus-halo: rgba(255, 249, 230, 0.92);
 
-.mh6-dyo__copy {
-  margin: 1.25rem 0 0;
-  max-width: 44ch;
-  font-size: var(--mh-fs-body);
-  line-height: 1.7;
-  color: var(--mh-ink-muted);
-}
-
-.mh6-dyo__steps {
-  margin: 2rem 0 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--mh-rule-paper);
-}
-
-.mh6-dyo__step {
-  display: grid;
-  grid-template-columns: 2.75rem minmax(0, 1fr);
-  gap: 1.25rem;
-  padding-block: 1.25rem;
-  border-bottom: 1px solid var(--mh-rule-paper);
-}
-
-.mh6-dyo__num {
-  font-family: var(--font-serif);
-  font-size: var(--mh-fs-title);
-  line-height: 1;
-  color: var(--mh-gold-ink);
-  font-variant-numeric: tabular-nums;
-}
-
-.mh6-dyo__step-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.mh6-dyo .mh6-dyo__step-title {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-size: var(--mh-fs-title);
-  line-height: 1.15;
-  letter-spacing: var(--mh-track-title);
-  color: var(--mh-ink);
-}
-
-.mh6-dyo__step-copy {
-  max-width: 48ch;
-  margin: 0;
-  font-size: var(--mh-fs-body);
-  line-height: 1.6;
-  color: var(--mh-ink-muted);
-}
-
-.mh6-dyo .mh6-button {
-  margin-top: 2rem;
-}
-
-.mh6-dyo__plate {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 4 / 3;
-  border: 1px solid var(--mh-rule-paper);
-  border-radius: var(--mh-radius-plate);
-  background: var(--mh-obsidian);
+  padding-block: clamp(4.5rem, 9vw, 7.5rem);
+  background-color: #c6a04c;
+  background-image:
+    radial-gradient(64% 58% at 16% 2%, rgba(255, 249, 230, 0.82) 0%, rgba(255, 249, 230, 0) 68%),
+    radial-gradient(44% 48% at 97% 98%, rgba(255, 246, 219, 0.38) 0%, rgba(255, 246, 219, 0) 72%),
+    var(--mh-gold-field);
+  color: var(--mh-gold-ink);
 }
 
-.mh6-dyo__plate img {
+.mh6-atelier__figure {
+  position: relative;
+  height: clamp(16rem, 52vw, 24rem);
+  margin: 0;
+}
+
+.mh6-atelier__figure img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 52% 42%;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
 }
 
-@media (min-width: 1024px) {
-  .mh6-dyo__grid {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: 2rem;
-    align-items: start;
-  }
-
-  .mh6-dyo__text {
-    grid-column: 7 / span 6;
-    grid-row: 1;
-  }
-
-  .mh6-dyo__plate {
-    grid-column: 1 / span 5;
-    grid-row: 1;
-    aspect-ratio: 4 / 5;
-  }
+.mh6-atelier__inner {
+  position: relative;
+  z-index: 1;
+  padding-top: clamp(1.5rem, 4vw, 2.5rem);
 }
 
-/* ── 16.8 THE GEMOLOGIST ─────────────────────────────────────────────────── */
-
-.mh6-ai {
-  padding-block: clamp(4rem, 7vw, 6.5rem);
-  border-top: 1px solid var(--mh-rule-paper);
-  background: var(--mh-paper);
+.mh6-atelier__copy {
+  max-width: 33rem;
 }
 
-.mh6-ai__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 2.5rem;
-}
-
-.mh6-ai__copy {
-  margin: 1.25rem 0 0;
-  max-width: 40ch;
-  font-size: var(--mh-fs-body);
-  line-height: 1.7;
-  color: var(--mh-ink-muted);
-}
-
-.mh6-ai__questions {
+.mh6-atelier__title {
   margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--mh-rule-paper);
-}
-
-.mh6-ai__question {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  min-height: 72px;
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--mh-rule-paper);
+  max-width: 12ch;
   font-family: var(--font-serif);
-  font-size: var(--mh-fs-title);
-  line-height: 1.2;
-  letter-spacing: var(--mh-track-title);
-  color: var(--mh-ink);
-  text-decoration: none;
-  transition: color var(--mh-dur-state) var(--mh-ease);
-}
-
-.mh6-ai__question svg {
-  flex: none;
-  width: 18px;
-  height: 18px;
+  font-size: var(--mh-fs-display);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: var(--mh-track-display);
   color: var(--mh-gold-ink);
 }
 
-.mh6-ai__question:hover,
-.mh6-ai__question:focus-visible {
-  color: #7c6323;
+.mh6-atelier__lede {
+  margin: 1.35rem 0 0;
+  max-width: 42ch;
+  font-size: var(--mh-fs-body);
+  line-height: 1.7;
+  color: var(--mh-gold-ink-soft);
+}
+
+.mh6-atelier__steps {
+  margin: clamp(1.75rem, 3vw, 2.5rem) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--mh-gold-rule);
+}
+
+.mh6-atelier__step {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 1rem;
+  padding-block: 1.1rem;
+  border-bottom: 1px solid var(--mh-gold-rule);
+}
+
+.mh6-atelier__num {
+  padding-top: 0.1rem;
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-title);
+  line-height: 1;
+  color: var(--mh-gold-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.mh6-atelier__step-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-title);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: var(--mh-track-title);
+  color: var(--mh-gold-ink);
+}
+
+.mh6-atelier__step-copy {
+  margin: 0.35rem 0 0;
+  max-width: 46ch;
+  font-size: var(--mh-fs-body);
+  line-height: 1.6;
+  color: var(--mh-gold-ink-soft);
+}
+
+.mh6-atelier .mh6-button {
+  margin-top: clamp(1.75rem, 3vw, 2.25rem);
+}
+
+/* The one filled control on the page: ink on the gold sheet. */
+.mh6-button--ink {
+  border-color: rgba(33, 26, 12, 0.55);
+  background: #211a0c;
+  color: #f3e3b6;
+}
+
+.mh6-button--ink:hover {
+  border-color: #211a0c;
+  background: #3a2e16;
+  color: #fdf6e4;
 }
 
 @media (min-width: 1024px) {
-  .mh6-ai__grid {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: 2rem;
-    align-items: end;
+  .mh6-atelier {
+    padding-block: clamp(5rem, 8vw, 7.5rem);
   }
 
-  .mh6-ai__intro {
-    grid-column: 1 / span 5;
+  .mh6-atelier__figure {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 40%;
+    height: auto;
   }
 
-  .mh6-ai__questions {
-    grid-column: 7 / span 6;
+  .mh6-atelier__figure img {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.4) 13%, #000 36%);
+    mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.4) 13%, #000 36%);
+  }
+
+  .mh6-atelier__inner {
+    padding-top: 0;
+  }
+
+  .mh6-atelier__copy {
+    max-width: 26rem;
   }
 }
 
-/* ── 16.9 APPOINTMENT ────────────────────────────────────────────────────── */
+@media (min-width: 1280px) {
+  .mh6-atelier__figure {
+    width: 42%;
+  }
+
+  .mh6-atelier__copy {
+    max-width: 30rem;
+  }
+}
+/* ── 16.8 THE GEMOLOGIST ───────────────────────────────────────────────────
+   The page's instrument: a full-bleed strip of one stone across the top, then
+   a wide statement and a three-cell desk of real questions. The strip is
+   decorative and carries no text; the questions are the content and each one
+   carries its own words into the concierge.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.mh6-gemologist {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: clamp(4rem, 7vw, 6rem);
+  background: var(--mh-obsidian-warm);
+  color: #f3efe4;
+
+  --mh-gold-ink: var(--mh-gold-on-dark);
+  --mh-muted-ink: var(--mh-muted-on-dark);
+  --mh-focus-ring: #e6c97a;
+  --mh-focus-halo: rgba(11, 9, 6, 0.9);
+  --focus-ring-ink: #e6c97a;
+}
+
+.mh6-gemologist__band {
+  position: relative;
+  height: clamp(5rem, 9vw, 7.5rem);
+  overflow: hidden;
+  border-bottom: 1px solid rgba(230, 201, 122, 0.3);
+}
+
+.mh6-gemologist__band img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 54%;
+  opacity: 0.66;
+}
+
+.mh6-gemologist__band::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(11, 9, 6, 0.32) 0%,
+    rgba(11, 9, 6, 0) 44%,
+    rgba(11, 9, 6, 0.92) 100%
+  );
+}
+
+.mh6-gemologist__inner {
+  position: relative;
+  padding-top: clamp(2.5rem, 5vw, 3.75rem);
+}
+
+.mh6-gemologist__head {
+  max-width: 52rem;
+}
+
+.mh6-gemologist__title {
+  margin: 0;
+  max-width: 20ch;
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-display);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: var(--mh-track-display);
+  color: #f7f3e8;
+}
+
+.mh6-gemologist__copy {
+  margin: 1.25rem 0 0;
+  max-width: 52ch;
+  font-size: var(--mh-fs-body);
+  line-height: 1.7;
+  color: #c9c3b6;
+}
+
+.mh6-gemologist__questions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: clamp(2rem, 4vw, 3rem) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgba(230, 201, 122, 0.26);
+}
+
+/* The three samples are quotes you can send, not three buttons: real links,
+   underlined at rest, at body-adjacent size in the display face. The one
+   bordered action sits below them. */
+.mh6-gemologist__question {
+  display: block;
+  min-height: 84px;
+  padding: 1.15rem 0;
+  border-bottom: 1px solid rgba(230, 201, 122, 0.26);
+  font-family: var(--font-serif);
+  font-size: var(--mh-fs-title);
+  line-height: 1.25;
+  letter-spacing: var(--mh-track-title);
+  color: #f4f1e8;
+  text-decoration: underline;
+  text-decoration-color: rgba(230, 201, 122, 0.42);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 7px;
+  transition:
+    color var(--mh-dur-state) var(--mh-ease),
+    text-decoration-color var(--mh-dur-state) var(--mh-ease);
+}
+
+.mh6-gemologist__question:hover,
+.mh6-gemologist__question:focus-visible {
+  color: var(--mh-gold-light);
+  text-decoration-color: var(--mh-gold-light);
+}
+
+.mh6-gemologist__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem 2.5rem;
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.mh6-gemologist__note {
+  margin: 0;
+  max-width: 46ch;
+  font-size: var(--mh-fs-meta);
+  line-height: 1.6;
+  color: var(--mh-muted-on-dark);
+}
+
+@media (min-width: 900px) {
+  .mh6-gemologist__questions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-bottom: 1px solid rgba(230, 201, 122, 0.26);
+  }
+
+  .mh6-gemologist__question {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+    min-height: 8.5rem;
+    padding: 1.4rem clamp(1.25rem, 2.4vw, 1.9rem) 1.3rem;
+    border-bottom: 0;
+  }
+
+  .mh6-gemologist__questions > li:first-child .mh6-gemologist__question {
+    padding-left: 0;
+  }
+
+  .mh6-gemologist__questions > li:last-child .mh6-gemologist__question {
+    padding-right: 0;
+  }
+
+  .mh6-gemologist__questions > li + li .mh6-gemologist__question {
+    border-left: 1px solid rgba(230, 201, 122, 0.26);
+  }
+}
+/* ── 16.9 APPOINTMENT ──────────────────────────────────────────────────────
+   The close: the statement on warm black under a two-pixel gold seam, and the
+   appointment on a gold plaque with ink type. It is the only gold surface
+   outside the atelier band, and it ends the page on the metal rather than on
+   a second black rectangle before the footer.
+   ─────────────────────────────────────────────────────────────────────────── */
 
 .mh6-cta {
   position: relative;
   overflow: hidden;
-  padding-block: clamp(5rem, 10vw, 9rem);
-  border-top: 1px solid rgba(230, 201, 122, 0.3);
-  background: var(--mh-obsidian);
+  padding-block: clamp(4.5rem, 9vw, 7.5rem);
+  background: var(--mh-obsidian-warm);
   color: #f3efe4;
+
+  --mh-focus-ring: #e6c97a;
+  --mh-focus-halo: rgba(11, 9, 6, 0.9);
+  --focus-ring-ink: #e6c97a;
+}
+
+.mh6-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--mh-gold-field);
 }
 
 .mh6-cta__light {
@@ -2347,9 +2609,10 @@ img {
   inset: 0;
   pointer-events: none;
   background: radial-gradient(
-    48% 74% at 8% 100%,
-    rgba(230, 201, 122, 0.16) 0%,
-    rgba(230, 201, 122, 0) 72%
+    54% 96% at 0% 44%,
+    rgba(230, 201, 122, 0.26) 0%,
+    rgba(230, 201, 122, 0.08) 44%,
+    rgba(230, 201, 122, 0) 76%
   );
 }
 
@@ -2357,16 +2620,16 @@ img {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 2.5rem;
+  gap: clamp(2rem, 4vw, 3rem);
 }
 
-.mh6-home .mh6-cta__title {
+.mh6-cta__title {
   margin: 0;
   max-width: 13ch;
   font-family: var(--font-serif);
   font-size: var(--mh-fs-display);
   font-weight: 400;
-  line-height: 1.0;
+  line-height: 1;
   letter-spacing: -0.015em;
   color: #f7f3e8;
 }
@@ -2379,43 +2642,66 @@ img {
   color: #c9c3b6;
 }
 
-.mh6-cta__aside {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+/* The plaque: a sheet of the same gold as the atelier band, laid on the dark
+   page. Ink type on it, never ivory. */
+.mh6-cta__plaque {
+  --mh-focus-ring: #211a0c;
+  --mh-focus-halo: rgba(255, 249, 230, 0.92);
+
+  display: grid;
+  justify-items: start;
   gap: 1rem;
+  align-self: end;
+  padding: clamp(1.5rem, 2.4vw, 2rem);
+  border: 1px solid rgba(33, 26, 12, 0.32);
+  border-radius: var(--mh-radius-plate);
+  background-color: #c6a04c;
+  background-image:
+    radial-gradient(88% 74% at 14% 4%, rgba(255, 249, 230, 0.72) 0%, rgba(255, 249, 230, 0) 68%),
+    var(--mh-gold-field);
+  color: var(--mh-gold-ink);
+}
+
+.mh6-cta__plaque-line {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--mh-fs-label);
+  font-weight: 500;
+  line-height: var(--mh-lh-label);
+  letter-spacing: var(--mh-track-label);
+  text-transform: uppercase;
+  color: var(--mh-gold-ink-soft);
 }
 
 .mh6-cta__note {
   margin: 0;
-  max-width: 34ch;
+  max-width: 32ch;
   font-size: var(--mh-fs-meta);
   line-height: 1.6;
-  color: var(--mh-muted-on-dark);
+  color: var(--mh-gold-ink-soft);
 }
 
 @media (min-width: 1024px) {
   .mh6-cta__grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: 2rem;
+    column-gap: 2.5rem;
     align-items: end;
   }
 
-  .mh6-cta__grid > div:first-child {
-    grid-column: 1 / span 7;
+  .mh6-cta__copy-col {
+    grid-column: 1 / span 6;
   }
 
-  .mh6-cta__aside {
-    grid-column: 9 / span 4;
+  .mh6-cta__plaque {
+    grid-column: 8 / span 5;
   }
 }
-
 /* ── 16.10 FOOTER ────────────────────────────────────────────────────────── */
 
 .mh6-footer {
   padding-block: clamp(3.5rem, 6vw, 5.5rem) 1.75rem;
   border-top: 1px solid rgba(230, 201, 122, 0.38);
-  background: #05080c;
+  background: #080604;
   color: #efece0;
   font-family: var(--font-sans);
 }
@@ -2725,53 +3011,77 @@ img {
   }
 }
 
-/* ── 16.11 JEWELLERY, ABOUT, TRY-ON AND ROUNDED FOOTER BLOCKS ──────────────
-   These are the v7 sections. Every panel takes one of the four radii; nothing
-   uses a translucent blur. A plate is paper or obsidian with a hairline and a
-   single inset highlight, so softness comes from the corner and the light,
-   not from glass.
+/* ── 16.11 JEWELLERY, THE RECORD, TRY-ON AND THE FOOTER BLOCKS ─────────────
+   Three compositions that must not look like each other: a dark two-register
+   ledger with a tall plate, a warm-paper editorial pair with a circular loupe,
+   and a centred camera window. Every panel keeps one of the four radii; no
+   translucent blur, no glass.
    ─────────────────────────────────────────────────────────────────────────── */
 
+/* ── JEWELLERY — ledger left, one tall plate right ───────────────────────── */
+
 .mh6-jewellery {
+  position: relative;
+  overflow: hidden;
   padding-block: clamp(4.5rem, 8vw, 7rem);
-  border-top: 1px solid var(--mh-rule-paper);
-  background: var(--mh-paper);
+  border-top: 1px solid rgba(230, 201, 122, 0.26);
+  background: var(--mh-obsidian-warm);
+  color: #f3efe4;
+
+  --mh-gold-ink: var(--mh-gold-on-dark);
+  --mh-muted-ink: var(--mh-muted-on-dark);
+  --mh-focus-ring: #e6c97a;
+  --mh-focus-halo: rgba(11, 9, 6, 0.9);
+  --focus-ring-ink: #e6c97a;
 }
 
-.mh6-jewellery__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.25rem 2rem;
-  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+.mh6-jewellery::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    50% 44% at 92% 0%,
+    rgba(230, 201, 122, 0.16) 0%,
+    rgba(230, 201, 122, 0) 72%
+  );
+}
+
+.mh6-jewellery__grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem;
+}
+
+.mh6-jewellery .mh6-jewellery__title {
+  color: #f7f3e8;
 }
 
 .mh6-jewellery__note {
-  margin: 0.75rem 0 0;
+  margin: 0.9rem 0 0;
   max-width: 48ch;
   font-size: var(--mh-fs-body);
   line-height: 1.7;
-  color: var(--mh-ink-muted);
-}
-
-.mh6-jewellery__stage {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 2rem;
+  color: var(--mh-muted-on-dark);
 }
 
 .mh6-jewellery__figure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   margin: 0;
 }
 
 .mh6-jewellery__plate {
-  overflow: hidden;
+  position: relative;
+  width: min(100%, 26rem);
   aspect-ratio: 4 / 5;
-  border: 1px solid var(--mh-rule-paper);
+  overflow: hidden;
+  border: 1px solid rgba(230, 201, 122, 0.22);
   border-radius: var(--mh-radius-plate);
-  background: var(--mh-paper-deep);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  background: #100c07;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .mh6-jewellery__plate img {
@@ -2779,48 +3089,53 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 50% 46%;
   transition: filter var(--mh-dur-move) var(--mh-ease);
 }
 
 .mh6-jewellery__figure:hover .mh6-jewellery__plate img {
-  filter: brightness(1.04);
+  filter: brightness(1.05);
 }
 
 .mh6-jewellery__caption {
-  display: grid;
-  gap: 0.2rem;
-  margin-top: 1rem;
-  padding-left: 0.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1.25rem;
+  width: 100%;
+  max-width: 26rem;
+  padding-top: 0.85rem;
 }
 
 .mh6-jewellery__caption-name {
   font-family: var(--font-serif);
   font-size: var(--mh-fs-title);
-  line-height: 1.15;
+  line-height: 1.1;
   letter-spacing: var(--mh-track-title);
-  color: var(--mh-ink);
+  color: #f7f3e8;
 }
 
 .mh6-jewellery__caption-meta {
   font-size: var(--mh-fs-meta);
   line-height: 1.5;
-  color: var(--mh-ink-muted);
+  color: var(--mh-gold-on-dark);
   font-variant-numeric: tabular-nums;
 }
 
 .mh6-jewellery__ledger {
   display: grid;
   align-content: start;
-  gap: 1.75rem;
+  gap: 1.6rem;
 }
 
 .mh6-jewellery__kicker {
   margin: 0 0 0.35rem;
   padding-top: 0.8rem;
-  border-top: 1px solid var(--mh-rule-paper);
+  border-top: 1px solid rgba(230, 201, 122, 0.26);
   font-size: var(--mh-fs-meta);
   line-height: 1.4;
-  color: var(--mh-ink-muted);
+  color: var(--mh-gold-on-dark);
 }
 
 .mh6-jewellery__list {
@@ -2833,10 +3148,10 @@ img {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 1rem;
-  min-height: 68px;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--mh-rule-paper);
+  gap: 1.25rem;
+  min-height: 64px;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(230, 201, 122, 0.18);
   text-decoration: none;
   transition: border-color var(--mh-dur-state) var(--mh-ease);
 }
@@ -2857,26 +3172,26 @@ img {
   font-size: var(--mh-fs-title);
   line-height: 1.15;
   letter-spacing: var(--mh-track-title);
-  color: var(--mh-ink);
+  color: #f4f1e8;
   transition: color var(--mh-dur-state) var(--mh-ease);
 }
 
 .mh6-jewellery__row:hover .mh6-jewellery__row-name,
 .mh6-jewellery__row:focus-visible .mh6-jewellery__row-name {
-  color: #7c6323;
+  color: var(--mh-gold-light);
 }
 
 .mh6-jewellery__row-spec {
   font-size: var(--mh-fs-meta);
   line-height: 1.5;
-  color: var(--mh-ink-muted);
+  color: var(--mh-muted-on-dark);
 }
 
 .mh6-jewellery__row-price {
   font-family: var(--font-serif);
   font-size: var(--mh-fs-title);
   line-height: 1.1;
-  color: var(--mh-ink);
+  color: var(--mh-gold-on-dark);
   font-variant-numeric: tabular-nums;
 }
 
@@ -2885,371 +3200,301 @@ img {
 }
 
 @media (min-width: 1024px) {
-  .mh6-jewellery__stage {
+  .mh6-jewellery__grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: 2rem;
-    align-items: start;
+    column-gap: 2.5rem;
+    row-gap: 2.25rem;
   }
 
-  .mh6-jewellery__figure {
-    grid-column: 1 / span 5;
+  .mh6-jewellery__head {
+    grid-column: 1 / span 6;
+    grid-row: 1;
   }
 
   .mh6-jewellery__ledger {
-    grid-column: 7 / span 6;
-    padding-top: 0.75rem;
+    grid-column: 1 / span 6;
+    grid-row: 2;
+  }
+
+  .mh6-jewellery__figure {
+    grid-column: 8 / span 5;
+    grid-row: 1 / span 2;
+    align-self: stretch;
+    align-items: stretch;
+  }
+
+  .mh6-jewellery__plate {
+    flex: 1;
+    width: auto;
+    aspect-ratio: auto;
+    min-height: 26rem;
+  }
+
+  .mh6-jewellery__caption {
+    max-width: none;
   }
 }
 
-/* ── ABOUT — the page's text-only composition ────────────────────────────── */
+/* ── THE RECORD — paper, editorial pair, one loupe ───────────────────────── */
 
-.mh6-about {
-  padding-block: clamp(4rem, 7vw, 6.5rem);
+.mh6-record {
+  padding-block: clamp(4.5rem, 8vw, 7rem);
   border-top: 1px solid var(--mh-rule-paper);
   background: var(--mh-paper);
 }
 
-.mh6-about__plate {
+.mh6-record__grid {
   display: grid;
-  gap: 2.5rem;
-  padding: clamp(1.75rem, 5vw, 4.5rem);
-  border: 1px solid var(--mh-rule-paper);
-  border-radius: var(--mh-radius-plate);
-  background: var(--mh-paper-plate);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(2.25rem, 4vw, 3.5rem);
+  align-items: center;
 }
 
-.mh6-about__kicker {
-  margin: 0 0 0.9rem;
-  font-family: var(--font-sans);
-  font-size: var(--mh-fs-meta);
-  line-height: 1.4;
-  color: #7c6323;
-}
-
-.mh6-home .mh6-about__title {
+.mh6-record__figure {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
   margin: 0;
-  max-width: 15ch;
-  font-family: var(--font-serif);
-  font-size: var(--mh-fs-display);
-  font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: var(--mh-track-display);
-  color: var(--mh-ink);
 }
 
-.mh6-about__body {
-  max-width: 54ch;
+/* A loupe, not a card: the stone is examined through a circle with one gold
+   rim. It is the only round plate on the page. */
+.mh6-record__loupe {
+  position: relative;
+  display: block;
+  width: min(100%, 26rem);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--mh-paper-deep);
+  box-shadow:
+    0 0 0 1px rgba(124, 99, 35, 0.3),
+    0 0 0 9px rgba(251, 247, 238, 0.9),
+    0 0 0 10px rgba(124, 99, 35, 0.16),
+    var(--mh-shadow-2);
 }
 
-.mh6-about__lead {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-size: var(--mh-fs-title);
-  line-height: 1.3;
-  letter-spacing: var(--mh-track-title);
-  color: var(--mh-ink);
+.mh6-record__loupe img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 48%;
+  transform: scale(1.32);
 }
 
-.mh6-about__copy {
-  margin: 1.25rem 0 0;
-  font-size: var(--mh-fs-body);
-  line-height: 1.7;
-  color: var(--mh-ink-muted);
+/* Optical depth: the rim of the lens falls off, so the circle reads as
+   looking through glass rather than as a photograph on a grey card. The
+   photograph itself is untouched. */
+.mh6-record__loupe::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 56px rgba(23, 20, 15, 0.24),
+    inset 0 0 0 1px rgba(23, 20, 15, 0.06);
 }
 
-.mh6-about__facts {
-  display: grid;
-  gap: 0;
-  margin: 2rem 0 0;
-  padding: 0;
-  border-top: 1px solid var(--mh-rule-paper);
-}
-
-.mh6-about__facts > div {
-  display: grid;
-  grid-template-columns: minmax(6rem, 2fr) minmax(0, 5fr);
-  gap: 1.25rem;
-  padding-block: 0.85rem;
-  border-bottom: 1px solid var(--mh-rule-paper);
-}
-
-.mh6-about__facts dt {
+.mh6-record__caption {
+  max-width: 30ch;
   font-size: var(--mh-fs-meta);
   line-height: 1.5;
   color: var(--mh-ink-muted);
 }
 
-.mh6-about__facts dd {
+.mh6-record__copy {
+  max-width: 35rem;
+}
+
+.mh6-record .mh6-record__title {
+  margin-top: 0;
+  max-width: 17ch;
+}
+
+.mh6-record__lede {
+  margin: 1.35rem 0 0;
+  max-width: 48ch;
+  font-size: var(--mh-fs-body);
+  line-height: 1.7;
+  color: var(--mh-ink-muted);
+}
+
+.mh6-record__facts {
+  display: grid;
+  margin: clamp(1.75rem, 3vw, 2.25rem) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--mh-rule-paper);
+}
+
+.mh6-record__facts > div {
+  display: grid;
+  grid-template-columns: minmax(5rem, 1.4fr) minmax(0, 4fr);
+  gap: 1.25rem;
+  padding-block: 0.9rem;
+  border-bottom: 1px solid var(--mh-rule-paper);
+}
+
+.mh6-record__facts dt {
+  font-size: var(--mh-fs-meta);
+  line-height: 1.5;
+  color: var(--mh-gold-ink);
+}
+
+.mh6-record__facts dd {
   margin: 0;
   font-size: var(--mh-fs-body);
   line-height: 1.6;
   color: var(--mh-ink);
 }
 
-.mh6-about__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1.75rem;
-  margin-top: 1.25rem;
+.mh6-record .mh6-button {
+  margin-top: clamp(1.75rem, 3vw, 2.25rem);
 }
 
 @media (min-width: 1024px) {
-  .mh6-about__plate {
+  .mh6-record__grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: 2rem;
-    align-items: start;
+    column-gap: 2.5rem;
   }
 
-  .mh6-about__head {
+  .mh6-record__figure {
     grid-column: 1 / span 5;
+    justify-items: center;
   }
 
-  .mh6-about__body {
-    grid-column: 7 / span 6;
-    padding-top: 0.35rem;
-  }
-}
-
-/* ── THE GEMOLOGIST — a dark plate inside the paper page ─────────────────── */
-
-.mh6-ai {
-  padding-block: clamp(4rem, 7vw, 6.5rem);
-  border-top: 1px solid var(--mh-rule-paper);
-  background: var(--mh-paper);
-}
-
-.mh6-ai__plate {
-  position: relative;
-  overflow: hidden;
-  padding: clamp(1.75rem, 5vw, 4.5rem);
-  border: 1px solid var(--mh-rule-dark);
-  border-radius: var(--mh-radius-plate);
-  background: var(--mh-obsidian-plate);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.mh6-ai__plate::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    52% 60% at 88% 6%,
-    rgba(230, 201, 122, 0.13) 0%,
-    rgba(230, 201, 122, 0) 70%
-  );
-}
-
-.mh6-ai__grid {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 2.5rem;
-}
-
-.mh6-home .mh6-ai__title {
-  margin: 0;
-  max-width: 14ch;
-  font-family: var(--font-serif);
-  font-size: var(--mh-fs-display);
-  font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: var(--mh-track-display);
-  color: #f7f3e8;
-}
-
-.mh6-ai__copy {
-  margin: 1.25rem 0 0;
-  max-width: 42ch;
-  font-size: var(--mh-fs-body);
-  line-height: 1.7;
-  color: var(--mh-muted-on-dark);
-}
-
-.mh6-ai .mh6-button--dark {
-  margin-top: 1.75rem;
-}
-
-.mh6-ai__questions {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid rgba(230, 201, 122, 0.24);
-}
-
-.mh6-ai__question {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  min-height: 72px;
-  padding: 1rem 0;
-  border-bottom: 1px solid rgba(230, 201, 122, 0.24);
-  font-family: var(--font-serif);
-  font-size: var(--mh-fs-title);
-  line-height: 1.2;
-  letter-spacing: var(--mh-track-title);
-  color: #f4f1e8;
-  text-decoration: none;
-  transition: color var(--mh-dur-state) var(--mh-ease);
-}
-
-.mh6-ai__question svg {
-  flex: none;
-  width: 18px;
-  height: 18px;
-  color: var(--mh-gold-on-dark);
-}
-
-.mh6-ai__question:hover,
-.mh6-ai__question:focus-visible {
-  color: var(--mh-gold-light);
-}
-
-@media (min-width: 1024px) {
-  .mh6-ai__grid {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: 2rem;
-    align-items: center;
+  .mh6-record__caption {
+    text-align: center;
   }
 
-  .mh6-ai__intro {
-    grid-column: 1 / span 5;
-  }
-
-  .mh6-ai__questions {
+  .mh6-record__copy {
     grid-column: 7 / span 6;
   }
 }
 
-/* ── TRY-ON — a viewfinder plate, one action, an honest empty state ──────── */
+/* ── TRY-ON — one centred camera window ──────────────────────────────────── */
 
 .mh6-tryon {
-  padding-block: clamp(4rem, 7vw, 6.5rem);
+  padding-block: clamp(4.5rem, 8vw, 7rem);
   border-top: 1px solid var(--mh-rule-paper);
   background: var(--mh-paper);
 }
 
-.mh6-tryon__plate {
-  position: relative;
+.mh6-tryon__inner {
   display: flex;
-  align-items: flex-end;
-  min-height: clamp(30rem, 62vh, 42rem);
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.mh6-tryon__title {
+  margin: 0;
+  max-width: 16ch;
+  text-align: center;
+}
+
+.mh6-tryon__copy {
+  margin: 1.15rem 0 0;
+  max-width: 46ch;
+  font-size: var(--mh-fs-body);
+  line-height: 1.7;
+  color: var(--mh-ink-muted);
+}
+
+.mh6-tryon__frame {
+  width: min(100%, 32rem);
+  margin: clamp(2rem, 4vw, 2.75rem) 0 0;
+}
+
+.mh6-tryon__window {
+  position: relative;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
-  border: 1px solid var(--mh-rule-dark);
+  border: 1px solid var(--mh-rule-paper);
   border-radius: var(--mh-radius-plate);
-  background: var(--mh-obsidian);
+  background: #100c07;
+  box-shadow: var(--mh-shadow-2);
 }
 
-.mh6-tryon__media {
-  position: absolute;
-  inset: 0 0 0 auto;
-  width: min(64%, 820px);
-}
-
-.mh6-tryon__media img {
+.mh6-tryon__window img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 58% 42%;
+  object-position: 50% 46%;
 }
 
-.mh6-tryon__scrim {
+.mh6-tryon__mark {
   position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      90deg,
-      var(--mh-obsidian) 0%,
-      rgba(7, 10, 15, 0.94) 34%,
-      rgba(7, 10, 15, 0.52) 64%,
-      rgba(7, 10, 15, 0.2) 100%
-    ),
-    linear-gradient(180deg, rgba(7, 10, 15, 0.5) 0%, rgba(7, 10, 15, 0.1) 42%, rgba(7, 10, 15, 0.55) 100%);
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  border: 0 solid rgba(230, 201, 122, 0.9);
 }
 
-.mh6-tryon__reticle {
-  position: absolute;
-  inset: clamp(0.9rem, 2vw, 1.5rem);
-  border: 1px solid rgba(230, 201, 122, 0.26);
-  border-radius: var(--mh-radius-soft);
-  pointer-events: none;
+.mh6-tryon__mark--tl {
+  top: 16px;
+  left: 16px;
+  border-top-width: 1px;
+  border-left-width: 1px;
 }
 
-.mh6-tryon__content {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 36rem;
-  padding: clamp(1.75rem, 5vw, 4.5rem);
+.mh6-tryon__mark--tr {
+  top: 16px;
+  right: 16px;
+  border-top-width: 1px;
+  border-right-width: 1px;
 }
 
-.mh6-home .mh6-tryon__title {
-  margin: 0;
-  max-width: 14ch;
-  font-family: var(--font-serif);
-  font-size: var(--mh-fs-display);
-  font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: var(--mh-track-display);
-  color: #f7f3e8;
+.mh6-tryon__mark--bl {
+  bottom: 16px;
+  left: 16px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
 }
 
-.mh6-tryon__copy {
-  margin: 1.25rem 0 0;
-  max-width: 42ch;
-  font-size: var(--mh-fs-body);
-  line-height: 1.7;
-  color: #c9c3b6;
+.mh6-tryon__mark--br {
+  right: 16px;
+  bottom: 16px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+
+.mh6-tryon__caption {
+  margin-top: 0.85rem;
+  font-size: var(--mh-fs-meta);
+  line-height: 1.5;
+  color: var(--mh-ink-muted);
 }
 
 .mh6-tryon .mh6-button {
-  margin-top: 1.75rem;
+  margin-top: clamp(1.75rem, 3vw, 2.25rem);
 }
 
 .mh6-tryon__note {
   margin: 1rem 0 0;
-  max-width: 42ch;
+  max-width: 44ch;
   font-size: var(--mh-fs-meta);
   line-height: 1.6;
-  color: var(--mh-muted-on-dark);
-}
-
-@media (max-width: 767px) {
-  .mh6-tryon__media {
-    width: 100%;
-  }
-
-  .mh6-tryon__scrim {
-    background:
-      linear-gradient(
-        180deg,
-        rgba(7, 10, 15, 0.55) 0%,
-        rgba(7, 10, 15, 0.5) 34%,
-        rgba(7, 10, 15, 0.92) 74%,
-        var(--mh-obsidian) 100%
-      ),
-      linear-gradient(90deg, rgba(7, 10, 15, 0.5) 0%, rgba(7, 10, 15, 0.15) 100%);
-  }
+  color: var(--mh-ink-muted);
 }
 
 /* ── FOOTER BLOCKS — rounded, still obsidian, never glass ────────────────── */
 
 .mh6-footer__top {
   padding: clamp(1.5rem, 4vw, 3rem);
-  border: 1px solid rgba(230, 201, 122, 0.2);
+  border: 1px solid rgba(230, 201, 122, 0.22);
   border-radius: var(--mh-radius-plate);
-  background: rgba(255, 255, 255, 0.018);
+  background: rgba(255, 255, 255, 0.02);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .mh6-footer__statement {
   padding: clamp(1.5rem, 4vw, 2.75rem);
-  border: 1px solid rgba(230, 201, 122, 0.2);
+  border: 1px solid rgba(230, 201, 122, 0.22);
   border-radius: var(--mh-radius-plate);
-  background: rgba(255, 255, 255, 0.018);
+  background: rgba(255, 255, 255, 0.02);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
@@ -3271,7 +3516,6 @@ img {
   align-items: center;
   gap: 0.35rem 1.5rem;
 }
-
 /* ── 16.12 MOTION GUARDS ─────────────────────────────────────────────────── */
 
 @keyframes mh6-hold {
@@ -3306,22 +3550,17 @@ img {
     animation: none;
   }
 
-  .mh6-rail__track {
+  .mh6-index__track {
     animation: none;
   }
 
-  .mh6-rail__viewport {
+  .mh6-index__viewport {
     overflow-x: auto;
     -webkit-mask-image: none;
     mask-image: none;
   }
 
-  .mh6-room__plate::after {
-    display: none;
-  }
-
-  .mh6-piece::before,
-  .mh6-room__plate img,
+  .mh6-index__plate img,
   .mh6-jewellery__plate img,
   .mh6-link::after {
     transition: none;

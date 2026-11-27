@@ -73,6 +73,7 @@ function buildPieces(
       spec: pieceSpec(elysian.variety, elysian.carat),
       price: formatUsd(elysian.price),
       href: `/products/${elysian.slug}`,
+      image: elysian.images[0] ?? null,
     });
   }
   if (verdant) {
@@ -81,6 +82,7 @@ function buildPieces(
       spec: pieceSpec(verdant.variety, verdant.carat),
       price: formatUsd(verdant.price),
       href: `/products/${verdant.slug}`,
+      image: verdant.images[0] ?? null,
     });
   }
   if (pair) {
@@ -89,6 +91,7 @@ function buildPieces(
       spec: `${formatCarat(pair.totalCarat)} tw · Matched pair`,
       price: formatUsd(pair.price),
       href: '/pairs',
+      image: pair.images[0] ?? null,
     });
   }
 
@@ -107,14 +110,25 @@ export default async function HomePage() {
 
   const railRecords = selectRailRecords(allStones, varieties);
   const pieces = buildPieces(elysian, verdant, pairs[0] ?? null);
+  // The atelier band shows the ring the commission is built around; when the
+  // row is absent the editorial plate stands in, and no product caption is
+  // printed beside it.
+  const atelierImage = elysian?.images[0] ?? '/mgh/images/elysian-ring.jpg';
+  const atelierHref = elysian === null ? null : `/products/${elysian.slug}`;
+  // The jewellery plate is a different record from the atelier ring, so the
+  // page never shows the same photograph twice.
+  const jewelleryFigure =
+    pieces.find((piece) => piece.image !== null && piece.href !== atelierHref) ??
+    pieces.find((piece) => piece.image !== null) ??
+    null;
 
   return (
     <div className="mh6-home">
       <HomeHero />
       <ProvenanceRail records={railRecords} />
-      <JewellerySection pieces={pieces} settings={settings} />
+      <DyoSection image={atelierImage} />
+      <JewellerySection pieces={pieces} settings={settings} figure={jewelleryFigure} />
       <AboutSection />
-      <DyoSection />
       <GemologistSection />
       <TryOnSection />
       <AppointmentSection />

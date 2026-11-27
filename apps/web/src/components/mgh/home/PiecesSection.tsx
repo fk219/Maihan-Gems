@@ -6,6 +6,8 @@ export interface HomePiece {
   spec: string;
   price: string;
   href: string;
+  /** The record's own first image, or null when the row carries none. */
+  image: string | null;
 }
 
 /**

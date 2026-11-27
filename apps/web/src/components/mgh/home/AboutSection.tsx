@@ -1,68 +1,71 @@
 import Link from 'next/link';
-import { ORGANIZATION_EVIDENCE } from '@/lib/jsonld';
+import { ArrowRight } from 'lucide-react';
 
 /**
- * The text-only composition: no photograph stands in for a house history the
- * application does not yet publish. What is stated is the method and the
- * observed identity — the address and the salons already emitted on every
- * page — not a founding year, a client count or a press claim.
+ * The method section is the page's warm-paper composition: a loupe view of
+ * one stone against the rule the whole catalogue runs on. It publishes no
+ * founding year, no client count and no press claim, because the application
+ * cannot evidence them. What it does publish is the evidence vocabulary the
+ * product pages actually print.
  */
 export function AboutSection() {
-  const identity = ORGANIZATION_EVIDENCE;
-
   return (
-    <section className="mh6-about" aria-labelledby="mh6-about-title" data-reveal>
-      <div className="mh6-home__wrap">
-        <div className="mh6-about__plate">
-          <div className="mh6-about__head">
-            <p className="mh6-about__kicker">The house</p>
-            <h2 id="mh6-about-title" className="mh6-about__title">
-              An independent house for coloured stones.
-            </h2>
-          </div>
+    <section className="mh6-record" aria-labelledby="mh6-record-title" data-reveal>
+      <div className="mh6-home__wrap mh6-record__grid">
+        <figure className="mh6-record__figure">
+          <span className="mh6-record__loupe">
+            <img
+              src="/media/stone-ruby.jpg"
+              alt="A faceted oval ruby, photographed on a pale ground"
+              width={1774}
+              height={1428}
+              loading="lazy"
+              decoding="async"
+            />
+          </span>
+          <figcaption className="mh6-record__caption">
+            A ruby, photographed for the catalogue.
+          </figcaption>
+        </figure>
 
-          <div className="mh6-about__body">
-            <p className="mh6-about__lead">
-              Maihan Gems handles loose stones, matched pairs and atelier mountings as one
-              continuous record: the stone first, the mounting that fits it second, the dossier
-              last.
-            </p>
-            <p className="mh6-about__copy">
-              The catalogue is built as a record, not a feed. Every stone is one row, every field
-              shows the evidence it carries, and a value the row does not hold is printed as
-              missing rather than filled with a plausible number.
-            </p>
+        <div className="mh6-record__copy">
+          <p className="mh6-eyebrow">The record</p>
+          <h2 id="mh6-record-title" className="mh6-section-title mh6-record__title">
+            What the page will tell you, and what it will not.
+          </h2>
+          <p className="mh6-record__lede">
+            Every stone page is built from one row. A field the row carries is printed with the
+            evidence it holds; a field it does not carry is printed as missing. Nothing is
+            estimated from a neighbouring stone.
+          </p>
 
-            <dl className="mh6-about__facts">
-              <div>
-                <dt>New York</dt>
-                <dd>
-                  {identity.streetAddress}
-                  <br />
-                  {identity.addressLocality}, {identity.addressRegion} {identity.postalCode}
-                </dd>
-              </div>
-              <div>
-                <dt>Salons</dt>
-                <dd>New York · Geneva · London, by appointment</dd>
-              </div>
-              <div>
-                <dt>Method</dt>
-                <dd>One stone, one record. Price is the record’s price, never a per-carat estimate.</dd>
-              </div>
-            </dl>
-
-            <div className="mh6-about__links">
-              <Link href="/varieties" className="mh6-link">
-                Read the varieties
-                <span aria-hidden="true"> →</span>
-              </Link>
-              <Link href="/contact" className="mh6-link">
-                Request a viewing
-                <span aria-hidden="true"> →</span>
-              </Link>
+          <dl className="mh6-record__facts">
+            <div>
+              <dt>Carried</dt>
+              <dd>
+                Variety, carat, shape, origin, treatment and the report reference, exactly as the
+                row holds them.
+              </dd>
             </div>
-          </div>
+            <div>
+              <dt>Refused</dt>
+              <dd>
+                A field with no entry is shown as not recorded. The page does not infer it from a
+                similar stone.
+              </dd>
+            </div>
+            <div>
+              <dt>Marked</dt>
+              <dd>
+                An inferred value stays labelled inferred, and never renders as verified.
+              </dd>
+            </div>
+          </dl>
+
+          <Link href="/education/reading-a-record" className="mh6-button">
+            How to read a record
+            <ArrowRight aria-hidden="true" />
+          </Link>
         </div>
       </div>
     </section>

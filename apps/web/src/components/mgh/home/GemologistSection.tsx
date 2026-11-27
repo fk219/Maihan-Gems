@@ -8,46 +8,61 @@ const QUESTIONS = [
 ];
 
 /**
- * One statement, three real questions. The links carry the text into the
- * concierge's own query parameter; nothing is pre-answered and no transcript
- * is staged to look like a conversation. The answers are quoted from the
- * catalogue, and a field the record does not carry is refused, not guessed.
+ * The gemologist band is the page's instrument: a full-bleed strip of one
+ * stone across the top, then a wide statement and a three-cell desk of real
+ * questions. The links carry their text into the concierge's own query
+ * parameter; nothing is pre-answered and no transcript is staged to look like
+ * a conversation. The answers are quoted from the catalogue, and a field the
+ * record does not carry is refused, not guessed.
  */
 export function GemologistSection() {
   return (
-    <section className="mh6-ai" aria-labelledby="mh6-ai-title" data-reveal>
-      <div className="mh6-home__wrap">
-        <div className="mh6-ai__plate">
-          <div className="mh6-ai__grid">
-            <div className="mh6-ai__intro">
-              <h2 id="mh6-ai-title" className="mh6-ai__title">
-                A gemologist’s eye, on request.
-              </h2>
-              <p className="mh6-ai__copy">
-                Read a budget, compare two stones in plain language, and hear why one costs more
-                than another. Every answer is quoted from the catalogue; a field the record does
-                not carry is refused, not guessed.
-              </p>
-              <Link href="/concierge" className="mh6-button mh6-button--dark">
-                Ask the gemologist
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            </div>
+    <section className="mh6-gemologist" aria-labelledby="mh6-gemologist-title" data-reveal>
+      <div className="mh6-gemologist__band" aria-hidden="true">
+        <img
+          src="/media/stone-sapphire.jpg"
+          alt=""
+          width={1152}
+          height={864}
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
 
-            <ul className="mh6-ai__questions">
-              {QUESTIONS.map((question) => (
-                <li key={question.query}>
-                  <Link
-                    href={`/concierge?q=${encodeURIComponent(question.query)}`}
-                    className="mh6-ai__question"
-                  >
-                    <span>{question.label}</span>
-                    <ArrowRight aria-hidden="true" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+      <div className="mh6-home__wrap mh6-gemologist__inner">
+        <div className="mh6-gemologist__head">
+          <p className="mh6-eyebrow mh6-eyebrow--dark">The gemologist</p>
+          <h2 id="mh6-gemologist-title" className="mh6-gemologist__title">
+            A gemologist’s eye, on request.
+          </h2>
+          <p className="mh6-gemologist__copy">
+            Read a budget, compare two stones in plain language, and hear why one costs more than
+            another. Answers are quoted from the catalogue, never written over it.
+          </p>
+        </div>
+
+        <ul className="mh6-gemologist__questions">
+          {QUESTIONS.map((question) => (
+            <li key={question.query}>
+              <Link
+                href={`/concierge?q=${encodeURIComponent(question.query)}`}
+                className="mh6-gemologist__question"
+              >
+                {question.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mh6-gemologist__foot">
+          <Link href="/concierge" className="mh6-button mh6-button--dark">
+            Ask the gemologist
+            <ArrowRight aria-hidden="true" />
+          </Link>
+          <p className="mh6-gemologist__note">
+            A field the record does not carry comes back as a refusal. It is never filled with a
+            plausible value.
+          </p>
         </div>
       </div>
     </section>
