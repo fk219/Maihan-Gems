@@ -95,7 +95,7 @@ export function ComparePageClient() {
               {gems.map((stone) => (
                 <tr key={stone.id}>
                   <td>
-                    <Link href={`/product/${stone.slug}`} className="strong">{stone.name}</Link>
+                    <Link href={`/products/${stone.slug}`} className="strong">{stone.name}</Link>
                     <span className="dim">{stone.sku}</span>
                   </td>
                   <td>{stone.variety}</td>

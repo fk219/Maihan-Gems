@@ -86,8 +86,8 @@ export async function ProductDetailView({
     ],
     offers: {
       '@type': 'Offer',
-      // SoT 12.2: `products/[slug]` is the canonical product detail. The old
-      // `/product/` alias is a permanent redirect, so structured data must not
+      // SoT 12.2: `products/[slug]` is the canonical product detail. The
+      // develop-era alias is a permanent redirect, so structured data must not
       // advertise it as the offer URL.
       url: `${SITE_URL}/products/${stone.slug}`,
       priceCurrency: 'USD',

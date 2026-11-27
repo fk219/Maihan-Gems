@@ -621,7 +621,7 @@ export function CustomerAccountApp({ subPath }: { subPath: string[] }) {
             ) : (
               <div className="client-list">
                 {[...saved.gemstones.map((piece) => ({ ...piece, kind: 'Gemstone' })), ...saved.settings.map((piece) => ({ ...piece, kind: 'Setting', slug: piece.ref, variety: piece.jewellery_type }))].map((piece) => (
-                  <Link key={`${piece.kind}-${piece.ref}`} href={piece.kind === 'Gemstone' ? `/product/${piece.slug}` : `/settings/${piece.ref}`} className="client-list__item" style={{ textDecoration: 'none' }}>
+                  <Link key={`${piece.kind}-${piece.ref}`} href={piece.kind === 'Gemstone' ? `/products/${piece.slug}` : `/settings/${piece.ref}`} className="client-list__item" style={{ textDecoration: 'none' }}>
                     <span className="client-list__main">
                       <span className="client-list__title">{piece.name}</span>
                       <span className="client-list__sub">{piece.ref} · {piece.variety}</span>

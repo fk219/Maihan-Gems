@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CollectionExplorer } from '@/components/mgh/catalog/CollectionExplorer';
-import { ProductDetailView } from '@/components/mgh/catalog/ProductDetailView';
 import {
   getCatalogColourCollection,
   getCatalogGemstoneBySlugOrId,
   getCatalogVarietyCollection,
 } from '@/lib/mgh/adapters/catalog';
+import { redirectToCanonicalProduct } from '@/lib/canonical-product-route';
 import { SITE_URL } from '@/lib/mgh/site-url';
 
 export const dynamic = 'force-dynamic';
@@ -39,7 +39,7 @@ export async function generateMetadata({
     return {
       title: `${stone.name} (${stone.sku})`,
       description: stone.lede,
-      alternates: { canonical: `${SITE_URL}/product/${stone.slug}` },
+      alternates: { canonical: `${SITE_URL}/products/${stone.slug}` },
     };
   }
   // Soft-404 fix: throwing here (metadata phase) yields a true 404 status —
@@ -114,10 +114,9 @@ export default async function RootVarietyCatchAllPage({
     );
   }
 
-  const stone = await getCatalogGemstoneBySlugOrId(varietySlug);
-  if (stone) {
-    return <ProductDetailView stone={stone} />;
-  }
-
-  notFound();
+  // The single segment is not a variety or a colour. SoT 12.2 names exactly one
+  // product detail, so a segment that resolves as a product is a fifth alias:
+  // redirect it to /products/<slug> rather than render a second product page.
+  // An unresolved segment is notFound(), exactly as before.
+  return redirectToCanonicalProduct(varietySlug);
 }

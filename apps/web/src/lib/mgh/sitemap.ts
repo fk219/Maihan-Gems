@@ -67,7 +67,7 @@ export async function chunkEntries(id: number): Promise<SitemapEntry[] | null> {
 
   if (n < gemChunks) {
     const page = await sitemapPage('gemstone', n * PER_CHUNK, PER_CHUNK);
-    return (page.items ?? []).map((item) => ({ loc: `${BASE}/product/${item.key}`, changefreq: 'weekly', priority: 0.8 }));
+    return (page.items ?? []).map((item) => ({ loc: `${BASE}/products/${item.key}`, changefreq: 'weekly', priority: 0.8 }));
   }
   n -= gemChunks;
 

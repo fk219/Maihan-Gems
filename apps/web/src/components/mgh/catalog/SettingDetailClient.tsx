@@ -704,7 +704,7 @@ export function SettingDetailBelowFoldSections({ setting }: { setting: SettingIt
               key={gem.id}
               className="rounded-[20px] border border-[#E5D4B3] bg-[#FFFDF9] p-3.5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-3"
             >
-              <Link href={`/product/${gem.slug}`} className="block space-y-2.5 group">
+              <Link href={`/products/${gem.slug}`} className="block space-y-2.5 group">
                 <div className="aspect-square rounded-[14px] overflow-hidden border border-[#EFE5D1] bg-[#14100C]">
                   <img
                     src={gem.images[0]}

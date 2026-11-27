@@ -534,7 +534,7 @@ export function CollectionExplorer({
                       {stone.variety} · {stone.origin} · {stone.clarity}
                     </p>
                     <h3 className="font-[family-name:var(--font-display)] text-xl font-medium text-[#121211]">
-                      <Link href={`/product/${stone.slug}`} className="hover:text-[#9A7B2C]">
+                      <Link href={`/products/${stone.slug}`} className="hover:text-[#9A7B2C]">
                         {stone.name}
                       </Link>
                     </h3>
@@ -590,7 +590,7 @@ export function CollectionExplorer({
                   </button>
 
                   <Link
-                    href={`/product/${stone.slug}`}
+                    href={`/products/${stone.slug}`}
                     className="px-3.5 py-1.5 text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-wider font-semibold bg-[#0A0A0B] text-[#E6C97A] rounded-sm hover:bg-[#1C1C1F]"
                   >
                     Inspect
@@ -719,7 +719,7 @@ export function CollectionExplorer({
                     Acquire
                   </button>
                   <Link
-                    href={`/product/${quickViewStone.slug}`}
+                    href={`/products/${quickViewStone.slug}`}
                     onClick={() => setQuickViewStone(null)}
                     className="px-4 py-2.5 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider font-semibold border border-[#121211] text-[#121211] bg-white rounded-sm hover:bg-[#EFECE6]"
                   >

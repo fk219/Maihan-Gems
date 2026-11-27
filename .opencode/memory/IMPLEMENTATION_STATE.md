@@ -1,3 +1,43 @@
+# PRODUCT DETAIL RESIDUALS CLOSED — FIFTH ALIAS 308, LINK HYGIENE, DIGEST PROOF (2026-11-27)
+
+- **Resolves** the two "left alone (reported)" items of the entry below: the
+  `/[varietySlug]` single-segment stone fallback and the develop links to
+  `/product/...`.
+- **Fifth alias.** `app/(storefront)/[varietySlug]/page.tsx` no longer renders
+  `ProductDetailView`. After the variety and colour branches it calls
+  `redirectToCanonicalProduct(varietySlug)` — the same resolver and the same
+  `permanentRedirect` (308) the other three aliases use. A segment the
+  catalogue does not resolve is `notFound()`, unchanged. Its product-branch
+  `alternates.canonical` now emits `/products/<slug>`.
+- **Link hygiene.** `/product/<slug>` → `/products/<slug>` in
+  `CommandPalette`, `CollectionExplorer` (3), `SettingDetailClient`,
+  `ComparePageClient`, `LiveConcierge`, `CustomerAccountApp`,
+  `storefront-data`, `sitemap` (gemstone chunk), the demo index, the AR handoff
+  back link, and the `INITIAL_SEO_METADATA` fixture route/canonical. The
+  `ProductDetailView` comment was reworded so the alias is described without a
+  literal path. No copy, layout or behaviour changed.
+- **Proof.** `git grep -n "/product/" -- apps/web/src` now returns only the
+  redirect route's own registration: `app/(storefront)/product/[slug]/page.tsx`
+  (the alias redirect), `routing/canonical-product-routes.spec.ts` (its test),
+  and `routing/route-manifest.ts` + `.spec.ts` (the fsPath the manifest must
+  match on disk). Zero internal links or canonical URLs point at the alias.
+- **308 proof.** `apps/web/src/routing/canonical-product-redirect-response.spec.ts`
+  runs the REAL `next/navigation` (adapter mocked only) and asserts the exact
+  thrown digest `NEXT_REDIRECT;replace;/products/<slug>;308;` plus the parsed
+  destination and status, for both the single-segment fallback and
+  `/product/[slug]`; the unresolved segment asserts
+  `NEXT_HTTP_ERROR_FALLBACK;404`. This is framework-level (the digest Next's
+  request pipeline converts to the response), not socket-level. Playwright was
+  not used: no E2E runner is configured (`e2e/` has a README and no config or
+  spec), so a Playwright spec would first have to invent a runner.
+- **Gates.** `pnpm --filter @maihan/web run typecheck` exit 0; `next build
+  --webpack` exit 0 with `apps/web/.env` moved aside and `DATABASE_URL` unset;
+  `@maihan/web` **618 passed / 21 skipped** (614 baseline + 4 new assertions);
+  `check-slop: clean`. No new dependency. ESLint's only findings in touched
+  files are the pre-existing `@ts-nocheck` headers on three develop files.
+
+---
+
 # PRODUCT DETAIL — ONE CANONICAL ROUTE, DUPLICATES 308 (2026-11-27)
 
 - **Decision.** PROJECT_SOURCE_OF_TRUTH.md 12.2 line 2822
@@ -24,10 +64,12 @@
   `apps/web/.env` moved aside and `DATABASE_URL` unset; `@maihan/web`
   **614 passed / 21 skipped** (604 baseline + 10 new assertions); `check-slop`
   clean.
-- **Left alone (reported).** `/[varietySlug]` still falls back to rendering
+- **Left alone (reported).** ~~`/[varietySlug]` still falls back to rendering
   `ProductDetailView` for a single-segment stone slug, and several develop
   components still link to `/product/...`; both now take one 308 hop. Neither
-  is in the authorised duplicate set; fixing them is a separate decision.
+  is in the authorised duplicate set; fixing them is a separate decision.~~
+  **RESOLVED 2026-11-27 — see the entry above: the fallback is the fifth 308
+  alias and every internal link/canonical now names `/products/<slug>`.**
 
 ---
 

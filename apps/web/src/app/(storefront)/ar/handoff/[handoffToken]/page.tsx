@@ -62,7 +62,7 @@ export default async function ArHandoffPage({
   const handoffAsset = handoff.asset;
   const isMobilePreview = mode === 'mobile';
   const backHref = handoff.backProductSlug
-    ? `/product/${handoff.backProductSlug}`
+    ? `/products/${handoff.backProductSlug}`
     : '/browse';
 
   return (

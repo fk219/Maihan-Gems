@@ -160,7 +160,7 @@ export default function CommandPalette() {
                     {singles.map((stone) => (
                       <li key={stone.ref}>
                         <Link
-                          href={`/product/${stone.slug}`}
+                          href={`/products/${stone.slug}`}
                           onClick={() => setSearchOpen(false)}
                           className="flex items-center justify-between px-4 py-2.5 hover:bg-white/5 transition-colors"
                         >

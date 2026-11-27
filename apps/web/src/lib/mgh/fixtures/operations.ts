@@ -142,12 +142,12 @@ export const INITIAL_SEO_METADATA: SeoMetadataRecord[] = [
   },
   {
     id: 'SEO-02',
-    routePath: '/product/merelani-violetish-blue-tanzanite-1-31ct',
+    routePath: '/products/merelani-violetish-blue-tanzanite-1-31ct',
     title: '1.31 ct Violetish Blue Tanzanite (MG-TZ-0131) | Maihan Gems',
     description:
       'Anchor parcel MG-TZ-0131: a 1.31 ct round brilliant violetish blue tanzanite from Merelani Block D, graded VSI clarity with disclosed thermal enhancement.',
     canonicalUrl:
-      'https://maihangems.example.com/product/merelani-violetish-blue-tanzanite-1-31ct',
+      'https://maihangems.example.com/products/merelani-violetish-blue-tanzanite-1-31ct',
     noindex: false,
     updatedAt: '2026-10-22T12:15:00Z',
   },

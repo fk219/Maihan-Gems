@@ -137,7 +137,7 @@ export function LiveConcierge({ initialQuery = '' }: { initialQuery?: string }) 
               {result.items.map((stone) => (
                 <Link
                   key={stone.ref}
-                  href={stone.kind === 'PAIR' ? '/pairs' : `/product/${stone.slug || stone.ref}`}
+                  href={stone.kind === 'PAIR' ? '/pairs' : `/products/${stone.slug || stone.ref}`}
                   className="group rounded-sm border border-[#E4DFD5] bg-white overflow-hidden hover:border-[#D4AF37]/60 transition-colors"
                 >
                   <div className="relative flex h-36 items-center justify-center bg-[#FBF7EC]">

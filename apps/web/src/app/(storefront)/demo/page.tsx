@@ -9,7 +9,7 @@ export default function DemoShowcasePage() {
     {
       category: 'Storefront & Evidence-First PDPs',
       links: [
-        { label: `Anchor Stone: ${anchor.name} (${anchor.sku})`, href: `/product/${anchor.slug}` },
+        { label: `Anchor Stone: ${anchor.name} (${anchor.sku})`, href: `/products/${anchor.slug}` },
         { label: 'API-Shaped PDP (/products/[productSlug])', href: `/products/${anchor.slug}` },
         { label: 'Variety-Scoped PDP (/tanzanite/...)', href: `/${anchor.varietySlug}/${anchor.slug}` },
         { label: 'Branded 404 Catch-All (/unknown-variety-slug)', href: '/unknown-variety-slug' },

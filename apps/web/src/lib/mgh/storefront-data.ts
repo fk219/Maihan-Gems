@@ -587,7 +587,7 @@ export function getRealtimeGemologicalSuggestions(rawQuery: string): RealtimeGem
       label: `${g.name}`,
       sublabel: `${g.id} · ${g.origin} · ${g.clarity}`,
       metric: formatUsd(g.price),
-      href: `/product/${g.slug}`,
+      href: `/products/${g.slug}`,
       queryValue: g.id,
     }));
 
