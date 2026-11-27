@@ -1,0 +1,38 @@
+[
+  {
+    "width": 1440,
+    "violations": [],
+    "violationNodes": 0,
+    "incomplete": 27,
+    "overflowPx": 0,
+    "height": 6268,
+    "errors": []
+  },
+  {
+    "width": 1024,
+    "violations": [],
+    "violationNodes": 0,
+    "incomplete": 21,
+    "overflowPx": 0,
+    "height": 5597,
+    "errors": []
+  },
+  {
+    "width": 768,
+    "violations": [],
+    "violationNodes": 0,
+    "incomplete": 19,
+    "overflowPx": 0,
+    "height": 7698,
+    "errors": []
+  },
+  {
+    "width": 390,
+    "violations": [],
+    "violationNodes": 0,
+    "incomplete": 25,
+    "overflowPx": 0,
+    "height": 7625,
+    "errors": []
+  }
+]
