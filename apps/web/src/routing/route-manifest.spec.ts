@@ -152,4 +152,19 @@ describe('Phase 4 Task 1 — storefront route tree', () => {
       expect(entry.authority).toContain('PROJECT_SOURCE_OF_TRUTH.md');
     }
   });
+
+  it('redirect entries state "301/308 redirect to <canonical>" — the manifest tells the truth', () => {
+    const redirects = ROUTE_MANIFEST.filter((entry) => entry.redirect !== undefined);
+    expect(redirects.map((entry) => entry.fsPath).sort()).toEqual(
+      [
+        'src/app/(storefront)/[varietySlug]-rings/[productSlug]/page.tsx',
+        'src/app/(storefront)/[varietySlug]/[productSlug]/page.tsx',
+        'src/app/(storefront)/product/[slug]/page.tsx',
+      ].sort(),
+    );
+    for (const entry of redirects) {
+      expect(entry.redirect).toBe('301/308 redirect to /products/[slug]');
+      expect(entry.sotPath).toContain('301/308 redirect to /products/[slug]');
+    }
+  });
 });

@@ -1,40 +1,25 @@
 /**
  * apps/web/src/app/(storefront)/[varietySlug]-rings/[productSlug]/page.tsx
  *
- * `/tsavorite-garnet-rings/<slug>` — ready-made product detail (Task 4,
- * reached via the source's /{variety}-rings/{slug}-J##### family). Delegates
- * to the SAME loader and renderer as /products/[productSlug]: one detail
- * implementation, one contract, no duplicates.
+ * PROJECT_SOURCE_OF_TRUTH.md 12.2 names `[variety]-rings/[slug]` (ready-made)
+ * AND `products/[slug]` with the explicit label "canonical product detail";
+ * 13.1 maps `/{variety}-rings/{slug}-J#####` to `/products/{slug}` with status
+ * 301. The SoT-named folder therefore stays in the tree as a permanent
+ * redirect (308 via `permanentRedirect`) to the one canonical detail, instead
+ * of rendering a second copy of the same product record. An unresolved slug is
+ * `notFound()`, never a redirect to a 404.
  */
-import { notFound } from 'next/navigation';
+import { redirectToCanonicalProduct } from '../../../../lib/canonical-product-route.js';
 
-import { isProductNotFound } from '../../../../lib/catalog-errors.js';
-import { loadProductDetail } from '../../../../lib/catalog-server.js';
-import { ProductDetailContent } from '../../../../components/catalog/ProductDetailContent.js';
-
-// Route segment config. Catalog views render per request from the cached
-// CatalogQueryService (doc 12.3: Server-rendered, cacheable, no per-user
-// state); there is deliberately no build-time catalogue, so Next must not
-// prerender this route (it would otherwise invoke the page with empty params
-// during `next build`). Runtime caching stays in the service, not in Next.
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: Promise<{ productSlug: string }>;
+  params: Promise<{ varietySlug: string; productSlug: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<{ title: string }> {
+export default async function ReadyMadeProductAliasPage({
+  params,
+}: PageProps): Promise<never> {
   const { productSlug } = await params;
-  const detail = await loadProductDetail(productSlug);
-  return detail.ok ? { title: `${detail.value.title} | Maihan Gems` } : { title: 'Product | Maihan Gems' };
-}
-
-export default async function VarietyRingDetailPage({ params }: PageProps) {
-  const { productSlug } = await params;
-  const detail = await loadProductDetail(productSlug);
-  if (!detail.ok) {
-    if (isProductNotFound(detail.error)) notFound();
-    throw detail.error;
-  }
-  return <ProductDetailContent detail={detail.value} />;
+  return redirectToCanonicalProduct(productSlug);
 }

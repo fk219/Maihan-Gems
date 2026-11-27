@@ -36,6 +36,12 @@ export interface RouteManifestEntry {
   readonly extraFiles?: readonly string[];
   /** Files documented as reserved-but-unimplemented for later tasks. */
   readonly reserved?: readonly string[];
+  /**
+   * Set when the route file exists only to issue a permanent redirect. Names
+   * both codes the stack can emit for that intent — `301` in the SoT 13.1
+   * migration table, `308` from `permanentRedirect` — and the canonical path.
+   */
+  readonly redirect?: string;
 }
 
 /**
@@ -110,10 +116,13 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
   },
   {
     fsPath: 'src/app/(storefront)/[varietySlug]/[productSlug]/page.tsx',
-    sotPath: 'app/(storefront)/[variety]/[productSlug]/page.tsx',
-    authority: DEVELOP_PARITY,
+    sotPath:
+      'app/(storefront)/[variety]/[productSlug]/page.tsx   # 301/308 redirect to /products/[slug]',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 13.1: `/{variety}/{slug}-K#####` (19,997 observed URLs) -> `/products/{slug}` 301, and 12.2: `products/[slug]/page.tsx   # canonical product detail`. The variety-scoped detail is a source URL family whose target is the canonical product detail, so the SoT-shaped route stays registered only as a permanent redirect to it rather than a second renderer of the same record.',
     storefront: true,
     group: 'storefront',
+    redirect: '301/308 redirect to /products/[slug]',
     extraFiles: [
       'src/app/(storefront)/[varietySlug]/[productSlug]/not-found.tsx',
       'src/app/(storefront)/[varietySlug]/[productSlug]/loading.tsx',
@@ -146,10 +155,13 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
   },
   {
     fsPath: 'src/app/(storefront)/[varietySlug]-rings/[productSlug]/page.tsx',
-    sotPath: 'app/(storefront)/[variety]-rings/[slug]/page.tsx   # ready-made detail',
-    authority: 'PROJECT_SOURCE_OF_TRUTH.md 12.2: ready-made product detail',
+    sotPath:
+      'app/(storefront)/[variety]-rings/[slug]/page.tsx   # ready-made detail -> 301/308 redirect to /products/[slug]',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 names `[variety]-rings/[slug]/page.tsx` (ready-made) and the explicit label `products/[slug]/page.tsx   # canonical product detail`; 13.1 maps `/{variety}-rings/{slug}-J#####` (88 observed URLs) -> `/products/{slug}` 301. The SoT-named ready-made folder therefore stays registered only as a permanent redirect to the one canonical detail, not a second renderer of the same product record.',
     storefront: true,
     group: 'storefront',
+    redirect: '301/308 redirect to /products/[slug]',
     extraFiles: [
       'src/app/(storefront)/[varietySlug]-rings/[productSlug]/not-found.tsx',
       'src/app/(storefront)/[varietySlug]-rings/[productSlug]/loading.tsx',
@@ -505,10 +517,12 @@ export const ROUTE_MANIFEST: readonly RouteManifestEntry[] = [
   },
   {
     fsPath: 'src/app/(storefront)/product/[slug]/page.tsx',
-    sotPath: 'app/(storefront)/product/[slug]/page.tsx   # /product/<slug>',
-    authority: DEVELOP_PARITY,
+    sotPath: 'app/(storefront)/product/[slug]/page.tsx   # 301/308 redirect to /products/[slug]',
+    authority:
+      'PROJECT_SOURCE_OF_TRUTH.md 12.2 lists exactly one product detail route — `products/[slug]/page.tsx   # canonical product detail`. `/product/<slug>` is a develop-era alias with no SoT line naming it as a page, so it stays registered only as a permanent redirect to the canonical detail.',
     storefront: true,
     group: 'storefront',
+    redirect: '301/308 redirect to /products/[slug]',
     extraFiles: [
       'src/app/(storefront)/product/[slug]/not-found.tsx',
       'src/app/(storefront)/product/[slug]/loading.tsx',

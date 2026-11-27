@@ -1,3 +1,36 @@
+# PRODUCT DETAIL — ONE CANONICAL ROUTE, DUPLICATES 308 (2026-11-27)
+
+- **Decision.** PROJECT_SOURCE_OF_TRUTH.md 12.2 line 2822
+  (`products/[slug]/page.tsx         # canonical product detail`) is the only
+  product detail renderer. 13.1 lines 2979/2981 map the source families
+  `/{variety}/{slug}-K#####` and `/{variety}-rings/{slug}-J#####` to
+  `/products/{slug}` 301. `/product/<slug>` is a develop-era alias with no SoT
+  line naming it as a page.
+- **Change.** The three duplicate pages call one helper
+  (`apps/web/src/lib/canonical-product-route.ts`) that resolves the identifier
+  through the same adapter the canonical page renders from
+  (`getPdpCatalogGemstone`) and `permanentRedirect()`s (308) to
+  `/products/<resolved slug>`; an unresolved identifier is `notFound()`, and a
+  lookup failure reaches `error.tsx`. No layout, copy or visual change.
+  `/about` and `/policy` indexes are distinct from their slug detail pages
+  (12.2 names only `policy/[slug]`; 13.1 maps the two about sources to
+  `/about/...`), so both remain rendering: an index is not a duplicate of a
+  detail leaf.
+- **Manifest.** The three entries stay registered and carry
+  `redirect: '301/308 redirect to /products/[slug]'`; the manifest spec pins the
+  set. `ProductDetailView`'s JSON-LD offer URL now names `/products/<slug>`
+  instead of the redirecting alias.
+- **Gates.** `tsc -b` 0 errors; `next build --webpack` exit 0 with
+  `apps/web/.env` moved aside and `DATABASE_URL` unset; `@maihan/web`
+  **614 passed / 21 skipped** (604 baseline + 10 new assertions); `check-slop`
+  clean.
+- **Left alone (reported).** `/[varietySlug]` still falls back to rendering
+  `ProductDetailView` for a single-segment stone slug, and several develop
+  components still link to `/product/...`; both now take one 308 hop. Neither
+  is in the authorised duplicate set; fixing them is a separate decision.
+
+---
+
 # DESIGN CRAFT PASS v4 — TYPE SCALE, CONTRAST, STATES, MOTION (2026-11-27)
 
 - **Goal.** Elevate the *craft* of develop's ported storefront without
