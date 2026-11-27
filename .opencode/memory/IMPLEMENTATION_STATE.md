@@ -1,3 +1,41 @@
+# STOREFRONT v9 — EDITORIAL LUXURY, PROOF PER SECTION (2026-11-27)
+
+- **Scope.** The homepage only. Navbar untouched; footer structure untouched;
+  hero composition untouched (the promise line now names the platform). No other
+  page, route, API, package, console or dependency changed.
+- **Art direction.** Gradient plates removed. Warm-paper and warm-black grounds,
+  real photography at plate scale, 76 px section display against an 11 px
+  eyebrow, generous section padding, and gold as a hairline/light/price/closing
+  plaque rather than a background. Reference bar: Bulgari/Cartier product
+  storytelling, Rolex material confidence, Apple restraint.
+- **Section rule applied.** Every section carries, in order: an eyebrow naming
+  the capability, a one-line benefit promise, proof (a real record, a real
+  photograph or a real UI capture), and exactly one matching action.
+- **Sections shipped.** Hero; The collection (eight real catalogue rows); Design
+  your own (configurator capture); AI gemologist (concierge capture);
+  Certificate intelligence (certificate dossier capture + record fields);
+  Atelier (Elysian Ring and Verdant Drop records' own images); Vendor programme
+  (vendor portal door capture); one-line closing; existing footer.
+- **Shipped proof captures.** `apps/web/public/proof/configurator.jpg`
+  (`/design-your-own`), `gemologist.jpg` (`/concierge`), `certificate.jpg`
+  (`/products/elysian-ring`), `vendor.jpg` (`/vendor/login`). New script:
+  `apps/web/scripts/capture-proofs.mjs`.
+- **Removed with a stated reason.** AR Virtual Try-On. `webar_assets` has 0
+  rows, `loadWebArAssetView` returns null, and `/ar/webar-tz-0131` renders the
+  honest "No 3D asset is recorded" state. There is no live try-on surface to
+  capture, so the section was removed rather than decorated. The privacy rules
+  live in `WebArModal` but no route mounts it.
+- **Measured gates.** typecheck 0; build exit 0 with `DATABASE_URL` empty;
+  tests 618 passed / 21 skipped; slop clean; axe 0 violations across 4 home
+  captures (1440/1024/768/390); overflow 0 px; initial home JS 181.8 KB gzip
+  (+0.0 vs v8); 39/39 internal links resolve; contrast probe 15/15 pass (lowest
+  5.36, gallery caption 16.98, closing action 10.10); CSS +4.2 KB gzip.
+- **Evidence.** `docs/design-shots/v9/README.md`, `before/` (v8 baseline),
+  `after/` (+ `audit.json`), `sections/` (7 sections × 4 widths), `proofs/`
+  (archival copies of the shipped captures).
+
+---
+
 # STOREFRONT v8 — GOLD AS MATERIAL, PURPOSE PER SECTION, SEVEN PLATES (2026-11-27)
 
 - **Scope.** The homepage only. Hero untouched by instruction; navbar

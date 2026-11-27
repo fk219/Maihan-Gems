@@ -21,27 +21,21 @@ import { chromium } from 'playwright';
 const BASE = process.env.BASE_URL ?? 'http://localhost:3108';
 
 const TARGETS = [
-  ['atelier eyebrow', '.mh6-eyebrow--field'],
-  ['atelier title', '.mh6-atelier__title'],
-  ['atelier lede', '.mh6-atelier__lede'],
-  ['atelier step copy', '.mh6-atelier__step-copy'],
-  ['atelier numeral', '.mh6-atelier__num'],
-  ['atelier button label', '.mh6-atelier .mh6-button--ink'],
-  ['index certificate ref', '.mh6-index__facts span:last-child'],
-  ['index body meta', '.mh6-index__facts span:first-child'],
-  ['jewellery price', '.mh6-jewellery__row-price'],
-  ['jewellery spec', '.mh6-jewellery__row-spec'],
-  ['jewellery caption meta', '.mh6-jewellery__caption-meta'],
-  ['record term', '.mh6-record__facts dt'],
-  ['record body', '.mh6-record__facts dd'],
-  ['gemologist copy', '.mh6-gemologist__copy'],
-  ['gemologist note', '.mh6-gemologist__note'],
-  ['tryon caption', '.mh6-tryon__caption'],
-  ['tryon note', '.mh6-tryon__note'],
-  ['cta eyebrow', '.mh6-cta .mh6-eyebrow'],
-  ['cta title', '.mh6-cta__title'],
-  ['cta plaque line', '.mh6-cta__plaque-line'],
-  ['cta plaque note', '.mh6-cta__note'],
+  ['hero lede', '.mh6-hero__lede'],
+  ['gallery caption', '.v9-gallery__caption'],
+  ['gallery origin', '.v9-gallery__origin'],
+  ['gallery cert', '.v9-gallery__cert'],
+  ['gallery title', '.v9-gallery__title'],
+  ['dyo caption', '.v9-dyo__caption'],
+  ['dyo step copy', '.v9-step__copy'],
+  ['ai fact body', '.v9-gemologist__facts dd'],
+  ['ai caption', '.v9-gemologist__caption'],
+  ['certificate note', '.v9-certificate__note'],
+  ['certificate fact', '.v9-certificate__facts dd'],
+  ['atelier meta', '.v9-atelier__meta'],
+  ['atelier spec', '.v9-atelier__row-spec'],
+  ['vendor note', '.v9-vendor__note'],
+  ['close action', '.v9-close__action'],
 ];
 
 const browser = await chromium.launch();
@@ -60,10 +54,29 @@ await page.evaluate(async () => {
 });
 await page.waitForTimeout(500);
 await page.addStyleTag({
-  content: '.mh6-index__track{animation:none !important}.mh6-hero__light{animation:none !important}',
+  content: `
+    .mh6-hero__light { animation: none !important; }
+    .demo-content-badge,
+    .ai-concierge-trigger,
+    [data-testid='scroll-to-top-button'],
+    header { visibility: hidden !important; }
+  `,
 });
 
 const rows = [];
+const linear = (value) => {
+  const c = value / 255;
+  return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+};
+const rgbLum = (css) => {
+  const match = /rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)/.exec(css);
+  if (match === null) return 0;
+  return (
+    0.2126 * linear(Number(match[1])) +
+    0.7152 * linear(Number(match[2])) +
+    0.0722 * linear(Number(match[3]))
+  );
+};
 for (const [name, selector] of TARGETS) {
   const el = page.locator(selector).first();
   if ((await el.count()) === 0) {
@@ -87,7 +100,7 @@ for (const [name, selector] of TARGETS) {
   });
 
   const sampled = solid
-    ? { darkest: { l: 0, hex: ownBg }, lightest: { l: 0, hex: ownBg }, width: 0, height: 0 }
+    ? { darkest: { l: rgbLum(ownBg), hex: ownBg }, lightest: { l: rgbLum(ownBg), hex: ownBg }, width: 0, height: 0 }
     : await page.evaluate(async (dataUrl) => {
     const channel = (value) => {
       const c = value / 255;

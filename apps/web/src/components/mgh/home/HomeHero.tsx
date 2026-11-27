@@ -31,8 +31,8 @@ export function HomeHero() {
             The stone comes first.
           </h1>
           <p className="mh6-hero__lede">
-            Maihan Gems. Natural gemstones and atelier mountings, each shown with the evidence
-            the record carries.
+            Maihan Gems is a gemstone house: loose stones, matched pairs and atelier mountings,
+            each published with the record behind it.
           </p>
 
           <div className="mh6-hero__search">

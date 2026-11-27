@@ -7,23 +7,24 @@ import {
   getHomeCatalogGemstones,
   getHomeCatalogMatchedPairs,
 } from '@/lib/mgh/adapters/catalog';
-import { AboutSection } from '@/components/mgh/home/AboutSection';
-import { AppointmentSection } from '@/components/mgh/home/AppointmentSection';
-import { DyoSection } from '@/components/mgh/home/DyoSection';
-import { GemologistSection } from '@/components/mgh/home/GemologistSection';
 import { HomeHero } from '@/components/mgh/home/HomeHero';
-import { JewellerySection } from '@/components/mgh/home/JewellerySection';
 import type { HomePiece } from '@/components/mgh/home/PiecesSection';
-import { ProvenanceRail } from '@/components/mgh/home/ProvenanceRail';
-import { TryOnSection } from '@/components/mgh/home/TryOnSection';
 import { formatCarat, formatUsd } from '@/components/mgh/home/format';
+import { AtelierSection } from '@/components/mgh/home/v9/AtelierSection';
+import { CertificateSection } from '@/components/mgh/home/v9/CertificateSection';
+import { ClosingSection } from '@/components/mgh/home/v9/ClosingSection';
+import { ConfiguratorSection } from '@/components/mgh/home/v9/ConfiguratorSection';
+import { GemologistSection } from '@/components/mgh/home/v9/GemologistSection';
+import { StoneIndexSection } from '@/components/mgh/home/v9/StoneIndexSection';
+import { VendorSection } from '@/components/mgh/home/v9/VendorSection';
+import '@/styles/home-v9.css';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Maihan Gems — Natural Gemstones & Fine Jewelry',
+  title: 'Maihan Gems: Natural Gemstones and Fine Jewelry',
   description:
-    'Shop natural loose gemstones, matched earring pairs, and custom gold and platinum jewelry.',
+    'Maihan Gems is a gemstone house: natural loose stones, matched pairs and atelier mountings, each published with the record behind it.',
   alternates: {
     canonical: '/',
   },
@@ -33,12 +34,12 @@ export const metadata: Metadata = {
 const JEWELLERY_FORMS = new Set(['rings', 'necklaces', 'earrings', 'bracelets', 'pendants']);
 
 /**
- * One record per gemstone variety, for the marquee. The taxonomy decides the
+ * One record per gemstone variety, for the index. The taxonomy decides the
  * order; a variety with no record is omitted rather than filled. If the
- * taxonomy and the loaded rows share no slug, the rail renders nothing — an
- * honest empty state, not a stand-in.
+ * taxonomy and the loaded rows share no slug, the section renders nothing:
+ * an honest empty state, not a stand-in.
  */
-function selectRailRecords(
+function selectIndexRecords(
   stones: readonly GemstoneItem[],
   varieties: readonly { slug: string }[],
 ): GemstoneItem[] {
@@ -108,30 +109,19 @@ export default async function HomePage() {
     getCatalogGemstoneBySlugOrId('verdant-drop'),
   ]);
 
-  const railRecords = selectRailRecords(allStones, varieties);
+  const indexRecords = selectIndexRecords(allStones, varieties);
   const pieces = buildPieces(elysian, verdant, pairs[0] ?? null);
-  // The atelier band shows the ring the commission is built around; when the
-  // row is absent the editorial plate stands in, and no product caption is
-  // printed beside it.
-  const atelierImage = elysian?.images[0] ?? '/mgh/images/elysian-ring.jpg';
-  const atelierHref = elysian === null ? null : `/products/${elysian.slug}`;
-  // The jewellery plate is a different record from the atelier ring, so the
-  // page never shows the same photograph twice.
-  const jewelleryFigure =
-    pieces.find((piece) => piece.image !== null && piece.href !== atelierHref) ??
-    pieces.find((piece) => piece.image !== null) ??
-    null;
 
   return (
-    <div className="mh6-home">
+    <div className="mh6-home v9-home">
       <HomeHero />
-      <ProvenanceRail records={railRecords} />
-      <DyoSection image={atelierImage} />
-      <JewellerySection pieces={pieces} settings={settings} figure={jewelleryFigure} />
-      <AboutSection />
+      <StoneIndexSection records={indexRecords} />
+      <ConfiguratorSection />
       <GemologistSection />
-      <TryOnSection />
-      <AppointmentSection />
+      <CertificateSection record={elysian} />
+      <AtelierSection pieces={pieces} settings={settings} />
+      <VendorSection />
+      <ClosingSection />
     </div>
   );
 }

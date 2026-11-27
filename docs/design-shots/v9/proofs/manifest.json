@@ -1,0 +1,26 @@
+[
+  {
+    "asset": "configurator.jpg",
+    "source": "/design-your-own",
+    "width": 1280,
+    "height": 942
+  },
+  {
+    "asset": "gemologist.jpg",
+    "source": "/concierge",
+    "width": 1152,
+    "height": 451
+  },
+  {
+    "asset": "certificate.jpg",
+    "source": "/products/elysian-ring",
+    "width": 576,
+    "height": 425
+  },
+  {
+    "asset": "vendor.jpg",
+    "source": "/vendor/login",
+    "width": 720,
+    "height": 1000
+  }
+]

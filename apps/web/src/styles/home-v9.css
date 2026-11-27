@@ -1,0 +1,940 @@
+/* ============================================================================
+   home-v9.css — editorial luxury for the storefront homepage
+   ============================================================================
+   One art direction for the page: photography at scale, paper and ink, gold
+   as a hairline and a light, and a magazine rhythm (full-bleed, quiet,
+   full-bleed). The navbar, footer and every other route keep their own sheet.
+
+   The composition is deliberately not a stack of equal cards. Each section has
+   its own structure: a photograph with an index, a dark studio with a capture,
+   a paper proof spread, a certificate screen, a diptych, a portal footnote and
+   one closing line. The gold field from v8 is gone; gold is an accent again.
+   ========================================================================== */
+
+.mh6-home.v9-home {
+  --v9-ink: #13110d;
+  --v9-ink-soft: #4f4a41;
+  --v9-paper: #f3eee4;
+  --v9-paper-2: #ebe3d3;
+  --v9-black: #0b0a08;
+  --v9-black-2: #12100c;
+  --v9-cream: #f5f0e6;
+  --v9-cream-soft: #c9c1b3;
+  --v9-gold: #7a5c26;
+  --v9-gold-bright: #d9bb7c;
+  --v9-line: rgba(19, 17, 13, 0.18);
+  --v9-line-soft: rgba(19, 17, 13, 0.1);
+  --v9-line-dark: rgba(245, 240, 230, 0.18);
+  --v9-gutter: clamp(1.25rem, 5vw, 5rem);
+  --v9-max: 1440px;
+
+  position: relative;
+  overflow-x: clip;
+  background: var(--v9-paper);
+  color: var(--v9-ink);
+  font-family: var(--font-sans);
+}
+
+.v9-wrap {
+  width: 100%;
+  max-width: var(--v9-max);
+  margin-inline: auto;
+  padding-inline: var(--v9-gutter);
+}
+
+/* ── type ──────────────────────────────────────────────────────────────────
+   One display face, one text face, one mono face for references. The display
+   step is intentionally larger than the old section title: hierarchy comes
+   from size, space and weight, not from a second colour. */
+
+.mh6-home.v9-home .v9-display {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(2.65rem, 5.4vw, 4.75rem);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.v9-eyebrow {
+  margin: 0 0 1.15rem;
+  color: var(--v9-gold);
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.v9-eyebrow--dark {
+  color: var(--v9-gold-bright);
+}
+
+.v9-promise {
+  max-width: 42ch;
+  margin: 1.6rem 0 0;
+  color: var(--v9-ink-soft);
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.v9-promise--dark {
+  color: var(--v9-cream-soft);
+}
+
+.v9-mono {
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  letter-spacing: 0.02em;
+}
+
+/* One action per section: a rule, a verb, an arrow. No pills. */
+.v9-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 48px;
+  padding: 0 0 0.65rem;
+  border-bottom: 1px solid var(--v9-gold);
+  color: var(--v9-ink);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  line-height: 1.2;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    color 180ms var(--mh-ease, ease),
+    border-color 180ms var(--mh-ease, ease);
+}
+
+.v9-action__arrow {
+  display: inline-block;
+  font-size: 1rem;
+  letter-spacing: 0;
+  transition: transform 240ms var(--mh-ease, ease);
+}
+
+.v9-action:hover {
+  border-color: var(--v9-ink);
+  color: var(--v9-gold);
+}
+
+.v9-action:hover .v9-action__arrow {
+  transform: translateX(4px);
+}
+
+.v9-action--dark {
+  border-color: rgba(217, 187, 124, 0.55);
+  color: var(--v9-cream);
+}
+
+.v9-action--dark:hover {
+  border-color: var(--v9-gold-bright);
+  color: var(--v9-gold-bright);
+}
+
+.v9-home a:focus-visible,
+.v9-home button:focus-visible {
+  outline: 2px solid var(--v9-gold);
+  outline-offset: 4px;
+}
+
+.v9-dyo a:focus-visible,
+.v9-certificate a:focus-visible,
+.v9-close a:focus-visible {
+  outline-color: var(--v9-gold-bright);
+}
+
+/* ── the collection ────────────────────────────────────────────────────────
+   A full-height photograph on the left, a paper index on the right. The
+   photograph is the catalogue's representative stone; the index is the proof
+   that the range is made of records. */
+
+.v9-gallery {
+  background: var(--v9-paper);
+  border-top: 1px solid var(--v9-line);
+}
+
+.v9-gallery__grid {
+  display: grid;
+  min-height: 100svh;
+  grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.82fr);
+}
+
+.v9-gallery__plate {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  background: var(--v9-black);
+}
+
+.v9-gallery__plate::after {
+  position: absolute;
+  inset: auto 0 0;
+  height: 12rem;
+  background: linear-gradient(to top, rgba(11, 10, 8, 0.72), rgba(11, 10, 8, 0));
+  content: '';
+  pointer-events: none;
+}
+
+.v9-gallery__plate img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 52% 50%;
+}
+
+.v9-gallery__caption {
+  position: absolute;
+  bottom: clamp(1.5rem, 3vw, 2.75rem);
+  left: clamp(1.5rem, 3vw, 2.75rem);
+  z-index: 1;
+  color: var(--v9-cream);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.v9-gallery__panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(4.5rem, 6.5vw, 7rem) clamp(2.5rem, 4.5vw, 5.5rem)
+    clamp(2.5rem, 4.5vw, 5.5rem);
+  background: var(--v9-paper);
+}
+
+.v9-gallery__title {
+  max-width: 11ch;
+}
+
+.v9-count {
+  margin: 2.25rem 0 0;
+  color: var(--v9-ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.v9-gallery__index {
+  margin: 1.15rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--v9-line);
+  list-style: none;
+}
+
+.v9-gallery__row {
+  display: grid;
+  grid-template-areas:
+    'num variety carat'
+    '. origin cert';
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  gap: 0.25rem 0.75rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--v9-line);
+  color: inherit;
+  text-decoration: none;
+  transition: color 160ms var(--mh-ease, ease);
+}
+
+.v9-gallery__row:hover {
+  color: var(--v9-gold);
+}
+
+.v9-gallery__num {
+  grid-area: num;
+  color: var(--v9-gold);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  line-height: 1.8;
+}
+
+.v9-gallery__variety {
+  grid-area: variety;
+  font-family: var(--font-serif);
+  font-size: clamp(1.2rem, 1.5vw, 1.5rem);
+  line-height: 1.1;
+}
+
+.v9-gallery__carat {
+  grid-area: carat;
+  align-self: center;
+  color: var(--v9-ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  white-space: nowrap;
+}
+
+.v9-gallery__origin,
+.v9-gallery__cert {
+  color: var(--v9-ink-soft);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+}
+
+.v9-gallery__origin {
+  grid-area: origin;
+}
+
+.v9-gallery__cert {
+  grid-area: cert;
+  justify-self: end;
+  font-family: var(--font-mono);
+  text-align: right;
+}
+
+.v9-gallery__panel .v9-action {
+  align-self: flex-start;
+  margin-top: 1.75rem;
+}
+
+/* ── design your own ───────────────────────────────────────────────────────
+   A dark studio. The capture is the proof: the actual five-step bar and the
+   commission ledger, with the studio's own empty state visible and named. */
+
+.v9-dyo {
+  padding-block: clamp(5.5rem, 10vw, 9.5rem);
+  background: var(--v9-black);
+  color: var(--v9-cream);
+}
+
+.v9-dyo__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: end;
+}
+
+.v9-dyo__title {
+  max-width: 9ch;
+}
+
+.v9-dyo__head .v9-promise {
+  margin: 0 0 0.5rem;
+}
+
+.v9-dyo__figure {
+  width: min(calc(100% - (var(--v9-gutter) * 2)), 1360px);
+  margin: clamp(3rem, 6vw, 5.5rem) auto 0;
+}
+
+.v9-dyo__figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(217, 187, 124, 0.32);
+}
+
+.v9-dyo__caption {
+  max-width: 72ch;
+  margin-top: 1rem;
+  color: #a8a197;
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.v9-dyo__foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: end;
+  margin-top: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.v9-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 3vw, 3rem);
+  margin: 0;
+  padding: 1.5rem 0 0;
+  border-top: 1px solid var(--v9-line-dark);
+  list-style: none;
+}
+
+.v9-step__num {
+  color: var(--v9-gold-bright);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+}
+
+.v9-step__title {
+  margin: 0.55rem 0 0.4rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.3rem, 1.8vw, 1.65rem);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.v9-step__copy {
+  max-width: 30ch;
+  margin: 0;
+  color: #a8a197;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.v9-dyo__foot .v9-action {
+  white-space: nowrap;
+}
+
+/* ── AI gemologist ─────────────────────────────────────────────────────────
+   A quiet paper spread. The capture is the ask surface itself; the two-row
+   ledger states the boundary the handler enforces. */
+
+.v9-gemologist {
+  padding-block: clamp(5.5rem, 10vw, 9.5rem);
+  background: var(--v9-paper);
+}
+
+.v9-gemologist__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: end;
+}
+
+.v9-gemologist__title {
+  max-width: 13ch;
+}
+
+.v9-gemologist__head .v9-promise {
+  margin: 0 0 0.5rem;
+}
+
+.v9-gemologist__figure {
+  width: min(calc(100% - (var(--v9-gutter) * 2)), 1040px);
+  margin: clamp(3rem, 6vw, 5rem) var(--v9-gutter) 0 auto;
+}
+
+.v9-gemologist__figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--v9-line);
+}
+
+.v9-gemologist__caption {
+  margin-top: 0.9rem;
+  color: var(--v9-ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.v9-gemologist__foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: end;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+.v9-gemologist__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.5rem, 3vw, 3rem);
+  margin: 0;
+  padding: 1.25rem 0 0;
+  border-top: 1px solid var(--v9-line);
+}
+
+.v9-gemologist__facts > div {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.v9-gemologist__facts dt {
+  color: var(--v9-gold);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.v9-gemologist__facts dd {
+  margin: 0;
+  color: var(--v9-ink-soft);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+/* ── certificate intelligence ──────────────────────────────────────────────
+   A dark proof spread. The screen capture is the actual certificate dossier,
+   not a redrawn certificate. The facts beside it are the record's fields. */
+
+.v9-certificate {
+  padding-block: clamp(5.5rem, 10vw, 9.5rem);
+  background: var(--v9-black-2);
+  color: var(--v9-cream);
+}
+
+.v9-certificate__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  gap: clamp(2.5rem, 6vw, 7rem);
+  align-items: center;
+}
+
+.v9-certificate__title {
+  max-width: 11ch;
+}
+
+.v9-certificate__facts {
+  margin: 2rem 0 0;
+  border-top: 1px solid var(--v9-line-dark);
+}
+
+.v9-certificate__facts > div {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--v9-line-dark);
+}
+
+.v9-certificate__facts dt {
+  color: var(--v9-gold-bright);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  line-height: 1.7;
+  text-transform: uppercase;
+}
+
+.v9-certificate__facts dd {
+  margin: 0;
+  color: var(--v9-cream-soft);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.v9-certificate__note {
+  max-width: 46ch;
+  margin: 1.5rem 0 2rem;
+  color: #a8a197;
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.v9-certificate__figure {
+  margin: 0;
+}
+
+.v9-certificate__figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(217, 187, 124, 0.28);
+}
+
+.v9-certificate__caption {
+  margin-top: 0.9rem;
+  color: #a8a197;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* ── atelier ───────────────────────────────────────────────────────────────
+   A paper spread with two portrait plates, each the named record's own image,
+   then the register of ready-made pieces and mountings. */
+
+.v9-atelier {
+  padding-block: clamp(5.5rem, 10vw, 9.5rem);
+  background: var(--v9-paper);
+}
+
+.v9-atelier__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: end;
+}
+
+.v9-atelier__title {
+  max-width: 13ch;
+}
+
+.v9-atelier__head .v9-promise {
+  margin: 0 0 0.5rem;
+}
+
+.v9-atelier__plates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+  width: min(calc(100% - (var(--v9-gutter) * 2)), 1360px);
+  margin: clamp(3rem, 6vw, 5.5rem) auto 0;
+}
+
+.v9-atelier__plate {
+  min-width: 0;
+  margin: 0;
+}
+
+.v9-atelier__image {
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--v9-black);
+}
+
+.v9-atelier__image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.v9-atelier__caption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--v9-line);
+}
+
+.v9-atelier__name {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 2vw, 2rem);
+  line-height: 1.05;
+}
+
+.v9-atelier__meta {
+  color: var(--v9-gold);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+
+.v9-atelier__ledger {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+  margin-top: clamp(3rem, 6vw, 5rem);
+}
+
+.v9-atelier__kicker {
+  margin: 0 0 0.9rem;
+  color: var(--v9-gold);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.v9-atelier__list {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--v9-line);
+  list-style: none;
+}
+
+.v9-atelier__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--v9-line);
+  color: inherit;
+  text-decoration: none;
+}
+
+.v9-atelier__row-name {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  line-height: 1.2;
+  transition: color 160ms var(--mh-ease, ease);
+}
+
+.v9-atelier__row-spec {
+  grid-column: 1;
+  color: var(--v9-ink-soft);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+}
+
+.v9-atelier__row-price {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--v9-gold);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  white-space: nowrap;
+}
+
+.v9-atelier__row:hover .v9-atelier__row-name {
+  color: var(--v9-gold);
+}
+
+.v9-atelier__close {
+  align-self: end;
+}
+
+/* ── vendor programme ─────────────────────────────────────────────────────
+   The quiet footnote: the portal door, captured empty, and one action. */
+
+.v9-vendor {
+  padding-block: clamp(4.5rem, 8vw, 7.5rem);
+  border-top: 1px solid var(--v9-line);
+  background: var(--v9-paper-2);
+}
+
+.v9-vendor__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.62fr);
+  gap: clamp(3rem, 7vw, 8rem);
+  align-items: center;
+}
+
+.v9-vendor__title {
+  max-width: 10ch;
+}
+
+.v9-vendor__note {
+  max-width: 40ch;
+  margin: 1.5rem 0 2rem;
+  color: var(--v9-ink-soft);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.v9-vendor__figure {
+  margin: 0;
+}
+
+.v9-vendor__figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--v9-line);
+}
+
+.v9-vendor__caption {
+  margin-top: 0.9rem;
+  color: var(--v9-ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* ── closing ───────────────────────────────────────────────────────────────
+   Two elements only: the line and the action. Gold holds the action, not the
+   section. */
+
+.v9-close {
+  position: relative;
+  padding-block: clamp(6rem, 12vw, 12rem);
+  background: var(--v9-black);
+  color: var(--v9-cream);
+}
+
+.v9-close::before {
+  position: absolute;
+  top: 0;
+  right: var(--v9-gutter);
+  left: var(--v9-gutter);
+  height: 1px;
+  background: rgba(217, 187, 124, 0.42);
+  content: '';
+}
+
+.v9-close__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+
+.v9-close__title {
+  max-width: 15ch;
+}
+
+.v9-close__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-height: 56px;
+  padding: 0 1.6rem;
+  background: var(--v9-gold-bright);
+  color: #15120b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color 180ms var(--mh-ease, ease);
+}
+
+.v9-close__action:hover {
+  background: #e7ce97;
+}
+
+/* ── responsive ────────────────────────────────────────────────────────────
+   The phone layout is composed, not squashed: the photograph becomes a band,
+   the index becomes a full-width ledger, and the two spreads become a single
+   column. */
+
+@media (max-width: 1100px) {
+  .v9-gallery__grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  }
+
+  .v9-gallery__panel {
+    padding: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .v9-gallery__cert {
+    justify-self: start;
+    text-align: left;
+  }
+
+  .v9-gallery__row {
+    grid-template-areas:
+      'num variety carat'
+      '. origin origin'
+      '. cert cert';
+  }
+
+  .v9-atelier__ledger {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .v9-atelier__close {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .v9-gallery__grid {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .v9-gallery__plate {
+    height: 62svh;
+  }
+
+  .v9-gallery__panel {
+    padding: 4rem var(--v9-gutter) clamp(2.5rem, 6vw, 4rem);
+  }
+
+  .v9-gallery__title {
+    max-width: 14ch;
+  }
+
+  .v9-dyo__head,
+  .v9-atelier__head,
+  .v9-gemologist__head,
+  .v9-certificate__grid,
+  .v9-vendor__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .v9-dyo__head .v9-promise,
+  .v9-atelier__head .v9-promise {
+    margin-top: 1.4rem;
+  }
+
+  .v9-gemologist__head .v9-promise {
+    margin: 1.4rem 0 0;
+  }
+
+  .v9-gemologist__foot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .v9-dyo__foot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .v9-dyo__foot .v9-action {
+    justify-self: start;
+  }
+
+  .v9-certificate__grid {
+    gap: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  .v9-certificate__figure {
+    order: 2;
+  }
+
+  .v9-vendor__figure {
+    max-width: 28rem;
+  }
+
+  .v9-close__inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .mh6-home.v9-home .v9-display {
+    font-size: clamp(2.35rem, 10vw, 3.1rem);
+    line-height: 0.96;
+  }
+
+  .v9-gallery__plate {
+    height: 52svh;
+  }
+
+  .v9-gallery__panel {
+    padding-block: 2.75rem;
+  }
+
+  .v9-gallery__row {
+    grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+    padding: 0.8rem 0;
+  }
+
+  .v9-gallery__variety {
+    font-size: 1.2rem;
+  }
+
+  .v9-steps {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .v9-atelier__plates {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .v9-atelier__ledger {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .v9-atelier__close {
+    grid-column: auto;
+  }
+
+  .v9-gemologist__facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+
+  .v9-gemologist__facts > div,
+  .v9-certificate__facts > div {
+    grid-template-columns: 5.25rem minmax(0, 1fr);
+  }
+
+  .v9-close__action {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
