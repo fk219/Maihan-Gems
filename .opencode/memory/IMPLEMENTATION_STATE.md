@@ -1,3 +1,31 @@
+# STOREFRONT v12 rev 2 — MOBILE-FIRST HOMEPAGE (2026-11-28)
+
+- **Scope.** Homepage only (`app/(storefront)/page.tsx`,
+  `components/mgh/home/v12/`, `styles/home-v12.css`), the shared footer's
+  presentation, and one `overflow-x-clip` on the storefront wrapper. Navbar
+  markup/styles untouched; api/, packages/, consoles and every other page's
+  composition untouched.
+- **Client verdict answered.** Cards were not compelling, sections were too big,
+  the page was desktop-first, and 90 % of visitors are on a phone. The page is
+  rebuilt at 390 first: non-hero sections are 411–588 px, document 9,604 →
+  4,530 px at 390 and 6,431 → 4,698 px at 1440. Cards are 4:5, radius 12, one
+  hairline, one fact line, one action; the phone rails peek. About is restored;
+  DYO, the gemologist and try-on each get one idea and one action.
+- **System.** Radius 0/4/12/20; spacing 4–128; type 40/88 display, 32/64 h1,
+  24/40 h2, 20/24 h3, 16 body, 14 meta, 11/0.18em label; grid 4/8/12 with
+  16/24 gutters and 20/32/48 margins, max 1280; ink/paper/obsidian/gold/
+  gold-ink; motion 150/300/520 on one curve.
+- **Measured gates.** typecheck 0; build exit 0 with `DATABASE_URL` empty; tests
+  618 passed / 21 skipped; slop clean; axe 0 at 320/390/430/768/1024/1440;
+  overflow 0 at 320/390/430; home initial JS 181.3 KB gzip (181.8 before,
+  −0.5); 35/35 internal links.
+- **Evidence.** `docs/design-shots/v12/README.md`, `home-*.png`,
+  `sections-mobile-first/`, `interactions/`, `mobile-audit.json`.
+- **Note.** The 62 px 320 overflow was the locked navbar's icon rail; the
+  wrapper clip stops it without editing the navbar.
+
+---
+
 # STOREFRONT v10 — REAL PHOTOGRAPHY, PROOFS REPLACED (2026-11-27)
 
 - **Scope.** The homepage sections only (the v9 section components in
