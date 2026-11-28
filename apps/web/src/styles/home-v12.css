@@ -333,11 +333,6 @@ a:focus-visible .mh12-u::after {
   .mh12-hero__search {
     margin-top: 24px;
   }
-
-  .mh12-home .mh6-search__panel {
-    top: calc(100% + 8px);
-    bottom: auto;
-  }
 }
 
 @keyframes mh12-hero-in {

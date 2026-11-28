@@ -137,6 +137,8 @@ scrim is 0.70 → 6.68 : 1, and the hero's desktop column is 0.94 → 15.49 : 1.
 
 ### 5.2 Notes
 
+- The hero typeahead opens upward at every width so the hero's clipped edge
+  never cuts it; at 1440 the panel sits at 510–608 inside the 760 px hero.
 - The **62 px overflow at 320** came from the locked navbar's icon rail, not the
   page. One `overflow-x-clip` on the shared storefront wrapper stops it creating
   horizontal scroll; the navbar markup and styles are untouched.
@@ -200,6 +202,7 @@ docs/design-shots/v12/
   interactions/
     interactions.json            typeahead, disclosure, reduced motion, keyboard, hover
     search-panel-390.png
+    search-panel-1440.png
     footer-disclosure-open-390.png
     reduced-motion-390.png
     keyboard-focus-390.png
