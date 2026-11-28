@@ -8,6 +8,7 @@ import { GemstoneItem } from '@/lib/mgh/fixtures';
 import { VARIETIES_META, COLOURS_META } from '@/lib/mgh/fixtures/catalog';
 import { useStorefront } from '@/components/mgh/providers/StorefrontProvider';
 import { ProductCard } from './ProductCard';
+import { Skeleton } from '@/components/design-system/Skeleton';
 
 
 export function CollectionExplorerSkeleton({
@@ -26,17 +27,17 @@ export function CollectionExplorerSkeleton({
         {Array.from({ length: count }).map((_, idx) => (
           <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
             <div className="flex items-center gap-4">
-              <div className="mh-skeleton h-20 w-24 shrink-0 rounded-sm" />
+              <Skeleton width="96px" height="80px" variant="card" />
               <div className="space-y-2">
-                <div className="mh-skeleton h-2.5 w-32" />
-                <div className="mh-skeleton h-4 w-48" />
-                <div className="mh-skeleton h-2.5 w-40" />
+                <Skeleton width="128px" height="10px" variant="text" />
+                <Skeleton width="192px" height="16px" variant="text" />
+                <Skeleton width="160px" height="10px" variant="text" />
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="mh-skeleton h-5 w-20" />
-              <div className="mh-skeleton h-8 w-20 rounded-sm" />
-              <div className="mh-skeleton h-8 w-24 rounded-sm" />
+              <Skeleton width="80px" height="20px" variant="text" />
+              <Skeleton width="80px" height="32px" variant="block" />
+              <Skeleton width="96px" height="32px" variant="block" />
             </div>
           </div>
         ))}
@@ -56,21 +57,21 @@ export function CollectionExplorerSkeleton({
         >
           <div className="flex items-start justify-between gap-2">
             <div className="space-y-2">
-              <div className="mh-skeleton h-[11px] w-[72px]" />
-              <div className="mh-skeleton h-[2px] w-7" />
+              <Skeleton width="72px" height="11px" variant="text" />
+              <Skeleton width="28px" height="2px" variant="text" />
             </div>
             <div className="flex items-center gap-2">
-              <div className="mh-skeleton h-10 w-10 rounded-full" />
-              <div className="mh-skeleton h-10 w-10 rounded-full" />
+              <Skeleton width="40px" height="40px" variant="block" />
+              <Skeleton width="40px" height="40px" variant="block" />
             </div>
           </div>
           <div className="space-y-2.5">
-            <div className="mh-skeleton h-[2px] w-7" />
-            <div className="mh-skeleton h-[26px] w-[86%]" />
-            <div className="mh-skeleton h-[11px] w-[64%]" />
+            <Skeleton width="28px" height="2px" variant="text" />
+            <Skeleton width="86%" height="26px" variant="text" />
+            <Skeleton width="64%" height="11px" variant="text" />
             <div className="flex items-center justify-between gap-3 pt-2">
-              <div className="mh-skeleton h-6 w-24" />
-              <div className="mh-skeleton h-12 w-12 rounded-full" />
+              <Skeleton width="96px" height="24px" variant="text" />
+              <Skeleton width="48px" height="48px" variant="block" />
             </div>
           </div>
         </div>

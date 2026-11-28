@@ -1,0 +1,651 @@
+/* =============================================================================
+ * maihan-system.css — "Maihan Group App & Portal Design System v2"
+ *
+ * One token layer for the admin portal, the vendor portal and the storefront.
+ * The client scoped the source document to the app; it is applied to all three
+ * surfaces here (ADR-030). The storefront keeps its editorial type SCALE and
+ * its section composition; only families, colour, radius and component chrome
+ * are adopted from the system.
+ *
+ * Loaded from the root layout before every route sheet, so the console and
+ * storefront sheets can read the tokens. Route sheets that need to win a
+ * cascade (portal-premium.css, storefront-craft.css, home-v12.css) keep their
+ * own overrides; this file never re-declares a storefront family on :root.
+ *
+ * Token names are `--mi-*` (Maihan identity) so they cannot collide with the
+ * older `--mh-*`, `--mh12-*`, `--p-*` or shadcn layers.
+ * ========================================================================== */
+
+:root {
+  /* ── gold scale ───────────────────────────────────────────────────────── */
+  --mi-gold: #c9a84c;
+  --mi-gold-bright: #e8c96a;
+  --mi-gold-soft: #f1dc9b;
+  --mi-gold-wash: #f5e8c0;
+  --mi-gold-pale: #fbf5e6;
+  --mi-gold-deep: #8b6914;
+  --mi-gold-ink: #99731e;
+
+  /* Text-bearing gold fill. The document's primary CTA is white 11px/800 on a
+     135deg gold gradient. White on the bright gold (#c9a84c) is 2.1:1, so the
+     gradient runs through the deep end of the same scale; every stop clears
+     4.5:1 against white. The bright stops stay for light, hairlines and rules. */
+  --mi-gold-cta: linear-gradient(135deg, #94701c 0%, #8b6914 52%, #7e5f11 100%);
+  --mi-gold-line: rgba(201, 168, 76, 0.32);
+  --mi-gold-line-strong: rgba(201, 168, 76, 0.55);
+  --mi-gold-wash-08: rgba(201, 168, 76, 0.08);
+  --mi-gold-ring: rgba(201, 168, 76, 0.28);
+
+  /* ── navy scale ───────────────────────────────────────────────────────── */
+  --mi-navy: #0d1b2a;
+  --mi-navy-2: #132234;
+  --mi-navy-3: #1c2e3f;
+  --mi-navy-deep: #08121e;
+  --mi-navy-deep-2: #0b1626;
+  --mi-navy-deep-3: #0a1320;
+
+  /* ── light neutrals ───────────────────────────────────────────────────── */
+  --mi-canvas: #f8fafc;
+  --mi-surface: #ffffff;
+  --mi-ink: #0d1b2a;
+  --mi-muted: #64748b;
+  --mi-faint: #94a3b8;
+  --mi-line: #e2e8f0;
+
+  /* ── status ───────────────────────────────────────────────────────────── */
+  --mi-positive: #059669;
+  --mi-positive-dark: #34d399;
+  --mi-negative: #e11d48;
+  --mi-negative-dark: #fb7185;
+  --mi-info: #0ea5e9;
+  --mi-info-dark: #38bdf8;
+  --mi-warning: #d97706;
+  --mi-warning-dark: #f59e0b;
+
+  /* tinted fills for hovers and quiet status surfaces */
+  --mi-negative-soft: rgba(225, 29, 72, 0.12);
+  --mi-positive-soft: rgba(5, 150, 105, 0.12);
+  --mi-warning-soft: rgba(217, 119, 6, 0.14);
+  --mi-info-soft: rgba(14, 165, 233, 0.12);
+
+  /* ── radius ───────────────────────────────────────────────────────────── */
+  --mi-r-auth: 4px;
+  --mi-r-xs: 8px;
+  --mi-r-sm: 10px;
+  --mi-r-input: 12px;
+  --mi-r-card: 16px;
+  --mi-r-card-lg: 18px;
+  --mi-r-dialog: 20px;
+  --mi-r-sidebar: 22px;
+  --mi-r-sheet: 24px;
+  --mi-r-dock: 26px;
+  --mi-r-pill: 9999px;
+
+  /* ── elevation ────────────────────────────────────────────────────────── */
+  --mi-shadow-gold: 0 18px 40px -18px rgba(139, 105, 20, 0.5), 0 2px 8px rgba(139, 105, 20, 0.16);
+  --mi-shadow-gold-sm: 0 8px 18px -10px rgba(139, 105, 20, 0.42);
+  --mi-shadow-gold-nav: 0 1px 0 rgba(201, 168, 76, 0.32), 0 12px 28px -22px rgba(13, 27, 42, 0.55);
+  --mi-shadow-card: 0 1px 2px rgba(13, 27, 42, 0.05), 0 10px 24px -18px rgba(13, 27, 42, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  --mi-shadow-card-hover: 0 2px 4px rgba(13, 27, 42, 0.06), 0 18px 40px -22px rgba(13, 27, 42, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  --mi-shadow-dialog: 0 32px 80px -28px rgba(8, 18, 30, 0.55), 0 2px 6px rgba(8, 18, 30, 0.14);
+  --mi-shadow-capsule-light: 0 6px 18px -10px rgba(13, 27, 42, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --mi-shadow-capsule-dark: 0 10px 26px -14px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --mi-shadow-sidebar-panel: 0 24px 60px -32px rgba(0, 0, 0, 0.65);
+
+  /* ── motion ───────────────────────────────────────────────────────────── */
+  --ease-silk: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-160: 160ms;
+  --dur-240: 240ms;
+  --dur-550: 550ms;
+
+  /* ── type ─────────────────────────────────────────────────────────────── */
+  /* Set by next/font in app/layout.tsx. Aliased rather than re-declared so a
+     portal surface can opt in without touching the storefront stack. */
+  --mi-font-display: var(--font-montserrat), "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --mi-font-sans: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
+
+  /* system UI sizes (the storefront keeps its own editorial scale) */
+  --mi-fs-label: 8.5px;
+  --mi-fs-micro: 10px;
+  --mi-fs-meta: 11px;
+  --mi-fs-ui: 12.5px;
+  --mi-fs-body: 14px;
+  --mi-fs-title: 18px;
+  --mi-fs-display: 26px;
+  --mi-track-label: 0.12em;
+  --mi-fs-button: 11px;
+
+  /* ── skeleton + toast surfaces (Skullet / Sileo, ADR-031) ─────────────── */
+  --mi-skeleton-base: #e2e8f0;
+  --mi-skeleton-highlight: #f8fafc;
+  --mi-toast-bg: rgba(8, 18, 30, 0.95);
+  --mi-toast-line: rgba(201, 168, 76, 0.25);
+  --mi-toast-ink: #f1f5f9;
+  --mi-toast-muted: #94a3b8;
+}
+
+/* ── dark theme ─────────────────────────────────────────────────────────────
+   The console toggles `[data-portal-theme="dark"]`; the document theme
+   script toggles `.dark`. Both resolve to the same neutral ramp. */
+.dark,
+[data-theme="dark"],
+.portal-shell[data-portal-theme="dark"],
+.portal-theme[data-portal-theme="dark"] {
+  --mi-canvas: #08121e;
+  --mi-surface: #0b1626;
+  --mi-ink: #f1f5f9;
+  --mi-muted: #94a3b8;
+  --mi-faint: #64748b;
+  --mi-line: rgba(226, 232, 240, 0.13);
+  --mi-line-strong: rgba(226, 232, 240, 0.24);
+
+  --mi-positive: var(--mi-positive-dark);
+  --mi-negative: var(--mi-negative-dark);
+  --mi-info: var(--mi-info-dark);
+  --mi-warning: var(--mi-warning-dark);
+
+  --mi-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 30px -20px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --mi-shadow-card-hover: 0 2px 6px rgba(0, 0, 0, 0.45), 0 22px 46px -22px rgba(0, 0, 0, 0.68),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  --mi-shadow-capsule-light: var(--mi-shadow-capsule-dark);
+  --mi-skeleton-base: rgba(226, 232, 240, 0.12);
+  --mi-skeleton-highlight: rgba(226, 232, 240, 0.22);
+}
+
+/* The two families reach every non-portal surface from here. Declared on
+   `body` — an element rule — so it beats the `:root` theme variables emitted by
+   the older sheets (`globals.css`, Tailwind `@theme`, `mgh-applet.css`)
+   regardless of import order. Portal roots re-declare the identical stack. */
+body {
+  --font-sans: var(--mi-font-sans);
+  --font-serif: var(--mi-font-display);
+  --font-display: var(--mi-font-display);
+  --font-mono: var(--mi-font-sans);
+
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* The document base font is the system's interface face. `html body` outranks
+   the older `body { font-family: Inter }` injected by lib/theme-styles.ts
+   whatever the stylesheet order, and leaves the display face to the elements
+   that ask for it. */
+html body {
+  font-family: var(--mi-font-sans);
+}
+
+/* ── the portal typographic scope ───────────────────────────────────────────
+   Manrope body, Montserrat display, tabular lining numerals, gold selection,
+   2px gold focus ring. `.portal-shell` / `.portal-theme` / `.mh-auth` are the
+   three portal roots that already exist, so the scope reaches them without a
+   markup change; `.font-portal` is the explicit class for new surfaces.
+   Scoped on purpose: re-declaring `--font-sans` on :root would silently replace
+   the storefront stack, which the client forbade. */
+.font-portal,
+.portal-shell,
+.portal-theme,
+.mh-auth {
+  --font-sans: var(--mi-font-sans);
+  --font-display: var(--mi-font-display);
+  --font-serif: var(--mi-font-display);
+  --font-mono: var(--mi-font-sans);
+
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.font-portal :is(h1, h2, h3, h4, h5, h6),
+.font-portal .mi-display,
+.portal-shell :is(h1, h2, h3, h4, h5, h6),
+.portal-theme :is(h1, h2, h3, h4, h5, h6),
+.mh-auth :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.font-portal ::selection,
+.portal-shell ::selection,
+.portal-theme ::selection,
+.mh-auth ::selection {
+  background: rgba(201, 168, 76, 0.3);
+  color: var(--mi-navy-deep);
+}
+
+.font-portal :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible,
+.portal-shell :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible,
+.portal-theme :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible,
+.mh-auth :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--mi-gold);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* ============================================================================
+   PRIMITIVES
+   The recipes the six components in components/system/ render. They are also
+   written onto the console's existing class names (`.portal-btn`, `.portal-card`,
+   `.portal-input`, `.portal-badge`, `.portal-chip`) so the mounted consoles take
+   the same rules without a markup rewrite.
+   ========================================================================== */
+
+/* ── Button ───────────────────────────────────────────────────────────────── */
+.mi-btn,
+.portal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: var(--mi-r-pill);
+  font-family: var(--mi-font-sans);
+  font-size: var(--mi-fs-button);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: var(--mi-track-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform var(--dur-160) var(--ease-silk),
+    box-shadow var(--dur-160) var(--ease-silk),
+    background-color var(--dur-160) var(--ease-silk),
+    border-color var(--dur-160) var(--ease-silk),
+    color var(--dur-160) var(--ease-silk);
+}
+
+.mi-btn:disabled,
+.portal-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.mi-btn--primary,
+.portal-btn--gold {
+  background-color: var(--mi-gold-deep);
+  background-image: var(--mi-gold-cta);
+  color: #ffffff;
+  box-shadow: var(--mi-shadow-gold-sm), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.mi-btn--primary:hover,
+.portal-btn--gold:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--mi-shadow-gold), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.mi-btn--primary:active,
+.portal-btn--gold:active {
+  transform: translateY(0);
+}
+
+.mi-btn--secondary,
+.portal-btn--ghost {
+  background: var(--mi-surface);
+  border-color: var(--mi-line);
+  color: var(--mi-ink);
+  box-shadow: var(--mi-shadow-capsule-light);
+}
+
+.mi-btn--secondary:hover,
+.portal-btn--ghost:hover {
+  transform: translateY(-1px);
+  border-color: var(--mi-gold-line-strong);
+  background: var(--mi-surface);
+}
+
+.mi-btn--danger,
+.portal-btn--danger {
+  background: var(--mi-negative);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 8px 18px -10px rgba(225, 29, 72, 0.5);
+}
+
+.mi-btn--danger:hover,
+.portal-btn--danger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px -12px rgba(225, 29, 72, 0.55);
+}
+
+.mi-btn--quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--mi-muted);
+  min-height: 40px;
+  padding: 0 10px;
+}
+
+.mi-btn--quiet:hover {
+  color: var(--mi-ink);
+  background: var(--mi-gold-wash-08);
+}
+
+.mi-btn--icon,
+.portal-btn--icon {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
+.mi-btn svg,
+.portal-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.mi-btn--sm,
+.portal-btn--sm {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: var(--mi-fs-micro);
+}
+
+.mi-btn--sm.portal-btn--icon,
+.portal-btn--icon.portal-btn--sm,
+.mi-btn--icon.mi-btn--sm {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+}
+
+/* ── Input / Label ────────────────────────────────────────────────────────── */
+.mi-field,
+.portal-input,
+.portal-select,
+.portal-textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--mi-line);
+  border-radius: var(--mi-r-input);
+  background: var(--mi-surface);
+  color: var(--mi-ink);
+  font-family: var(--mi-font-sans);
+  font-size: var(--mi-fs-body);
+  font-variant-numeric: tabular-nums lining-nums;
+  transition:
+    border-color var(--dur-160) var(--ease-silk),
+    box-shadow var(--dur-160) var(--ease-silk);
+}
+
+.portal-textarea {
+  padding: 10px 14px;
+  min-height: 92px;
+  resize: vertical;
+}
+
+.mi-field::placeholder,
+.portal-input::placeholder,
+.portal-textarea::placeholder {
+  color: var(--mi-faint);
+}
+
+.mi-field:hover,
+.portal-input:hover,
+.portal-select:hover,
+.portal-textarea:hover {
+  border-color: var(--mi-gold-line-strong);
+}
+
+.mi-field:focus,
+.mi-field:focus-visible,
+.portal-input:focus,
+.portal-select:focus,
+.portal-textarea:focus {
+  outline: none;
+  border-color: var(--mi-gold);
+  box-shadow: 0 0 0 3px var(--mi-gold-ring);
+}
+
+.mi-label,
+.portal-label {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--mi-font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--mi-track-label);
+  text-transform: uppercase;
+  color: var(--mi-muted);
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+.mi-card,
+.portal-card {
+  position: relative;
+  border: 1px solid var(--mi-line);
+  border-radius: var(--mi-r-card);
+  background: var(--mi-surface);
+  box-shadow: var(--mi-shadow-card);
+  transition:
+    transform var(--dur-160) var(--ease-silk),
+    box-shadow var(--dur-160) var(--ease-silk),
+    border-color var(--dur-160) var(--ease-silk);
+}
+
+/* The top hairline: gold, faded at both ends, never a full box border. */
+.mi-card::before,
+.portal-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--mi-gold-line-strong) 16%,
+    var(--mi-gold-line-strong) 84%,
+    transparent 100%
+  );
+  opacity: 0.55;
+}
+
+.mi-card--interactive:hover,
+.mi-card--interactive:focus-within {
+  transform: translateY(-1px);
+  box-shadow: var(--mi-shadow-card-hover);
+  border-color: var(--mi-gold-line);
+}
+
+/* ── Chip ─────────────────────────────────────────────────────────────────── */
+.mi-chip,
+.portal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 1px solid var(--mi-line);
+  border-radius: var(--mi-r-pill);
+  background: var(--mi-surface);
+  color: var(--mi-muted);
+  font-family: var(--mi-font-sans);
+  font-size: var(--mi-fs-label);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: var(--mi-track-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mi-chip--gold {
+  background: var(--mi-gold-pale);
+  border-color: var(--mi-gold-line);
+  color: var(--mi-gold-deep);
+}
+
+.mi-chip--positive {
+  background: color-mix(in srgb, var(--mi-positive) 12%, var(--mi-surface));
+  border-color: color-mix(in srgb, var(--mi-positive) 28%, transparent);
+  color: var(--mi-positive);
+}
+
+.mi-chip--negative {
+  background: color-mix(in srgb, var(--mi-negative) 12%, var(--mi-surface));
+  border-color: color-mix(in srgb, var(--mi-negative) 28%, transparent);
+  color: var(--mi-negative);
+}
+
+.mi-chip--info {
+  background: color-mix(in srgb, var(--mi-info) 12%, var(--mi-surface));
+  border-color: color-mix(in srgb, var(--mi-info) 28%, transparent);
+  color: var(--mi-info);
+}
+
+.mi-chip--warning {
+  background: color-mix(in srgb, var(--mi-warning) 14%, var(--mi-surface));
+  border-color: color-mix(in srgb, var(--mi-warning) 30%, transparent);
+  color: var(--mi-warning);
+}
+
+/* ── Kpi ──────────────────────────────────────────────────────────────────── */
+.mi-kpi {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mi-kpi__label {
+  font-family: var(--mi-font-sans);
+  font-size: var(--mi-fs-micro);
+  font-weight: 700;
+  letter-spacing: var(--mi-track-label);
+  text-transform: uppercase;
+  color: var(--mi-muted);
+}
+
+.mi-kpi__value {
+  font-family: var(--mi-font-display);
+  font-size: var(--mi-fs-display);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--mi-ink);
+}
+
+.mi-kpi__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--mi-fs-meta);
+  color: var(--mi-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.mi-kpi__delta {
+  font-weight: 700;
+}
+
+.mi-kpi__delta--up {
+  color: var(--mi-positive);
+}
+
+.mi-kpi__delta--down {
+  color: var(--mi-negative);
+}
+
+/* ============================================================================
+   SKELETONS — Skullet (ADR-031)
+   The package owns the bone paint, the shimmer and the reduced-motion stop.
+   Its documented custom properties are pointed at the system neutrals here
+   rather than through <SkulletProvider>, so the skeleton runtime stays in the
+   route chunks that actually render a skeleton and never enters a page's
+   initial JS. Measurement mode (`Skeleton data/sample`) remains available for
+   a surface that later has real sample data.
+   ========================================================================== */
+[skullet-bar] {
+  --skullet-base: var(--mi-skeleton-base);
+  --skullet-highlight: var(--mi-skeleton-highlight);
+  --skullet-radius: 10px;
+  border-radius: var(--mi-r-sm);
+}
+
+/* The primitive's wrapper must not add a box to the layout it is reserving. */
+.skullet-wrap {
+  display: contents;
+}
+
+.dark [skullet-bar],
+[data-theme="dark"] [skullet-bar],
+[data-portal-theme="dark"] [skullet-bar] {
+  --skullet-base: rgba(226, 232, 240, 0.12);
+  --skullet-highlight: rgba(226, 232, 240, 0.22);
+}
+
+/* ============================================================================
+   TOASTS — Sileo (ADR-031)
+   16px radius, navy-deep at 95%, gold at 25% border.
+   ========================================================================== */
+[data-sileo-toast] {
+  --sileo-width: min(360px, calc(100vw - 32px));
+}
+
+[data-sileo-pill],
+[data-sileo-body] {
+  stroke: var(--mi-toast-line);
+  stroke-width: 1px;
+}
+
+[data-sileo-title] {
+  font-family: var(--mi-font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--mi-toast-ink);
+}
+
+[data-sileo-description] {
+  font-family: var(--mi-font-sans);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--mi-toast-muted);
+}
+
+[data-sileo-badge] {
+  border-radius: var(--mi-r-pill);
+}
+
+/* ============================================================================
+   SHARED STOREFRONT SURFACES
+   The storefront's own sheets are loaded after this one, so the family, radius
+   and chrome adoption lives at the end of storefront-craft.css and
+   home-v12.css. What is here is route-independent and cannot be overridden:
+   the reduced-motion contract for the system primitives.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .mi-btn,
+  .mi-card,
+  .mi-card--interactive,
+  .mi-field,
+  .portal-btn,
+  .portal-card,
+  .portal-input,
+  .portal-select,
+  .portal-textarea {
+    transition-duration: 0.01ms;
+  }
+
+  .mi-btn--primary:hover,
+  .mi-btn--secondary:hover,
+  .mi-btn--danger:hover,
+  .mi-card--interactive:hover,
+  .mi-card--interactive:focus-within,
+  .portal-btn--gold:hover,
+  .portal-btn--ghost:hover,
+  .portal-btn--danger:hover {
+    transform: none;
+  }
+}

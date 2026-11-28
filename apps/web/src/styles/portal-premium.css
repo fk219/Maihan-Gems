@@ -8,7 +8,11 @@
 
 .portal-shell,
 .portal-theme {
-  --p-font: var(--font-urbanist), "Urbanist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* ADR-030 — the console reads the design system's tokens. The `--p-*` names
+     stay because 2,600 lines of portal rules consume them; every value below
+     is now an alias of a `--mi-*` token, so a change to the system reaches the
+     console without touching a component. */
+  --p-font: var(--mi-font-sans);
   --p-fs-2xs: 11px;
   --p-fs-xs: 12px;
   --p-fs-sm: 12.5px;
@@ -21,60 +25,60 @@
   --p-fs-4xl: 26px;
   --p-fs-display: 34px;
 
-  --p-bg: #f4f2ee;
-  --p-card: #fbfaf8;
-  --p-card-2: #f2eee9;
-  --p-well: rgba(40, 32, 26, 0.04);
-  --p-well-solid: #ebe8e3;
-  --p-line: rgba(40, 32, 26, 0.08);
-  --p-line-2: rgba(40, 32, 26, 0.14);
-  --p-shadow: 0 1px 3px rgba(40, 32, 26, 0.04), 0 8px 24px -12px rgba(40, 32, 26, 0.12);
-  --p-shadow-lg: 0 24px 60px -28px rgba(40, 32, 26, 0.35);
+  --p-bg: var(--mi-canvas);
+  --p-card: var(--mi-surface);
+  --p-card-2: var(--mi-canvas);
+  --p-well: rgba(13, 27, 42, 0.04);
+  --p-well-solid: #eef2f7;
+  --p-line: var(--mi-line);
+  --p-line-2: #cbd5e1;
+  --p-shadow: var(--mi-shadow-card);
+  --p-shadow-lg: var(--mi-shadow-dialog);
 
-  --p-text: #1d1a18;
-  --p-muted: #6b635c;
-  --p-faint: #9c948c;
+  --p-text: var(--mi-ink);
+  --p-muted: var(--mi-muted);
+  --p-faint: var(--mi-faint);
 
-  --p-accent: #d4af37;
-  --p-accent-deep: #a8842d;
-  --p-accent-grad: linear-gradient(135deg, #f6e6b4 0%, #d4af37 45%, #a8842d 100%);
-  --p-accent-soft: #f7edd4;
-  --p-accent-muted: rgba(212, 175, 55, 0.14);
-  --p-on-accent: #241b12;
+  --p-accent: var(--mi-gold);
+  --p-accent-deep: var(--mi-gold-deep);
+  --p-accent-grad: var(--mi-gold-cta);
+  --p-accent-soft: var(--mi-gold-pale);
+  --p-accent-muted: var(--mi-gold-ring);
+  --p-on-accent: #ffffff;
 
-  --p-tile-gold: #f4e9cb;
-  --p-on-tile-gold: #52400e;
-  --p-tile-butter: #f8edd1;
-  --p-on-tile-butter: #523b08;
-  --p-tile-sky: #e1edf8;
-  --p-on-tile-sky: #13395b;
-  --p-tile-mint: #ddf2e4;
-  --p-on-tile-mint: #0f4625;
+  --p-tile-gold: var(--mi-gold-pale);
+  --p-on-tile-gold: var(--mi-gold-deep);
+  --p-tile-butter: #fdf6e3;
+  --p-on-tile-butter: #6b4e0c;
+  --p-tile-sky: #e0f2fe;
+  --p-on-tile-sky: #075985;
+  --p-tile-mint: #d1fae5;
+  --p-on-tile-mint: #065f46;
 
-  --p-good: #1b6b44;
-  --p-good-fill: #39b56f;
-  --p-good-bg: #e5f6ec;
-  --p-warn: #8a5700;
-  --p-warn-fill: #e89e24;
-  --p-warn-bg: #f8edd1;
-  --p-bad: #c2291d;
-  --p-bad-soft: #fde8e6;
-  --p-info: #33587f;
-  --p-info-bg: #eef4fb;
+  --p-good: var(--mi-positive);
+  --p-good-fill: var(--mi-positive);
+  --p-good-bg: #ecfdf5;
+  --p-warn: var(--mi-warning);
+  --p-warn-fill: var(--mi-warning);
+  --p-warn-bg: #fffbeb;
+  --p-bad: var(--mi-negative);
+  --p-bad-soft: #fff1f2;
+  --p-info: var(--mi-info);
+  --p-info-bg: #f0f9ff;
 
-  --p-chart-ghost: #f0ece6;
-  --p-chart-ghost-line: #e0dbd3;
-  --p-chart-current: #f0dfae;
+  --p-chart-ghost: #eef2f7;
+  --p-chart-ghost-line: var(--mi-line);
+  --p-chart-current: var(--mi-gold-soft);
 
-  --p-side: #1c1d1d;
-  --p-side-card: #252726;
-  --p-side-text: #f0f2f0;
-  --p-side-muted: #8d9591;
-  --p-side-line: rgba(255, 255, 255, 0.06);
+  --p-side: var(--mi-navy-deep);
+  --p-side-card: var(--mi-navy-2);
+  --p-side-text: #f1f5f9;
+  --p-side-muted: #94a3b8;
+  --p-side-line: rgba(226, 232, 240, 0.1);
 
-  --p-r-card: 22px;
-  --p-r-ctl: 12px;
-  --p-r-pill: 999px;
+  --p-r-card: var(--mi-r-card);
+  --p-r-ctl: var(--mi-r-input);
+  --p-r-pill: var(--mi-r-pill);
   --p-side-w: 248px;
 
   background: var(--p-bg);
@@ -84,6 +88,7 @@
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 .portal-shell {
@@ -101,52 +106,52 @@
 
 .portal-shell[data-portal-theme="dark"],
 .portal-theme[data-portal-theme="dark"] {
-  --p-bg: #121211;
-  --p-card: #1b1a18;
-  --p-card-2: #232120;
+  --p-bg: var(--mi-canvas);
+  --p-card: var(--mi-surface);
+  --p-card-2: var(--mi-navy-deep-2);
   --p-well: rgba(255, 255, 255, 0.04);
-  --p-well-solid: #2b2925;
-  --p-line: rgba(255, 255, 255, 0.08);
-  --p-line-2: rgba(255, 255, 255, 0.15);
-  --p-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), 0 10px 28px -16px rgba(0, 0, 0, 0.6);
-  --p-shadow-lg: 0 26px 70px -30px rgba(0, 0, 0, 0.8);
+  --p-well-solid: #16222f;
+  --p-line: var(--mi-line);
+  --p-line-2: #22303f;
+  --p-shadow: var(--mi-shadow-card);
+  --p-shadow-lg: var(--mi-shadow-dialog);
 
-  --p-text: #f4f1ea;
-  --p-muted: #aca49a;
-  --p-faint: #7e776e;
+  --p-text: var(--mi-ink);
+  --p-muted: var(--mi-muted);
+  --p-faint: var(--mi-faint);
 
-  --p-accent-soft: rgba(212, 175, 55, 0.14);
-  --p-accent-muted: rgba(212, 175, 55, 0.18);
+  --p-accent-soft: rgba(201, 168, 76, 0.14);
+  --p-accent-muted: var(--mi-gold-ring);
 
-  --p-tile-gold: #2e2717;
-  --p-on-tile-gold: #efdca4;
-  --p-tile-butter: #2f2a1b;
-  --p-on-tile-butter: #ecd9a2;
-  --p-tile-sky: #1b2832;
-  --p-on-tile-sky: #b9d8f3;
-  --p-tile-mint: #172a1f;
-  --p-on-tile-mint: #b6e6c8;
+  --p-tile-gold: #2a2417;
+  --p-on-tile-gold: var(--mi-gold-soft);
+  --p-tile-butter: #2b2518;
+  --p-on-tile-butter: #eed9a2;
+  --p-tile-sky: #122232;
+  --p-on-tile-sky: #bae6fd;
+  --p-tile-mint: #11261d;
+  --p-on-tile-mint: #a7f3d0;
 
-  --p-good: #7fd3a2;
-  --p-good-fill: #39b56f;
-  --p-good-bg: rgba(57, 181, 111, 0.14);
-  --p-warn: #e6bb6a;
-  --p-warn-fill: #e89e24;
-  --p-warn-bg: rgba(232, 158, 36, 0.14);
-  --p-bad: #f08a7e;
-  --p-bad-soft: rgba(194, 41, 29, 0.18);
-  --p-info: #9dc4ea;
-  --p-info-bg: rgba(51, 88, 127, 0.2);
+  --p-good: var(--mi-positive-dark);
+  --p-good-fill: var(--mi-positive-dark);
+  --p-good-bg: rgba(52, 211, 153, 0.14);
+  --p-warn: var(--mi-warning-dark);
+  --p-warn-fill: var(--mi-warning-dark);
+  --p-warn-bg: rgba(245, 158, 11, 0.14);
+  --p-bad: var(--mi-negative-dark);
+  --p-bad-soft: rgba(251, 113, 133, 0.16);
+  --p-info: var(--mi-info-dark);
+  --p-info-bg: rgba(56, 189, 248, 0.16);
 
-  --p-chart-ghost: #2a2825;
-  --p-chart-ghost-line: #3a3732;
-  --p-chart-current: #b99c4a;
+  --p-chart-ghost: #16222f;
+  --p-chart-ghost-line: #22303f;
+  --p-chart-current: var(--mi-gold);
 
-  --p-side: #0c0c0c;
-  --p-side-card: #181817;
-  --p-side-text: #f2f0e9;
-  --p-side-muted: #8e8b84;
-  --p-side-line: rgba(255, 255, 255, 0.08);
+  --p-side: #060d16;
+  --p-side-card: var(--mi-navy-2);
+  --p-side-text: #f1f5f9;
+  --p-side-muted: #94a3b8;
+  --p-side-line: rgba(226, 232, 240, 0.1);
 }
 
 .portal-shell *,
@@ -3068,4 +3073,449 @@ body.portal-surface .ai-concierge-trigger {
 
 .portal-theme[data-portal-theme="dark"] .portal-tile__icon {
   background: rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================================================
+   v13 — THE DESIGN SYSTEM APPLIED TO THE CONSOLE (ADR-030)
+   ============================================================================
+   The token block above already points every --p-* variable at a --mi-* token.
+   This section is the last word on the fourteen component recipes that carry a
+   look of their own, because these rules come after the originals in the
+   cascade. No component logic changed: the mounted consoles (AdminConsoleApp,
+   VendorPortalApp) and the Fresh consoles read the same class names.
+
+   The recipes are the primitives' recipes: .mi-btn/.portal-btn,
+   .mi-field/.portal-input, .mi-card/.portal-card, .mi-chip/.portal-badge are
+   declared together in styles/maihan-system.css; what follows is the part the
+   console's own geometry needs on top (dense controls, sidebar capsule, table
+   header, command palette).
+   ========================================================================== */
+
+/* ── the sidebar: a navy capsule, 22px, one gold hairline on its top edge ── */
+.portal-sidebar {
+  border-radius: var(--mi-r-sidebar);
+  background: var(--mi-navy-deep);
+  box-shadow: var(--mi-shadow-sidebar-panel);
+  border: 1px solid rgba(201, 168, 76, 0.12);
+}
+
+.portal-sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: var(--mi-r-sidebar) var(--mi-r-sidebar) 0 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.5) 30%, rgba(201, 168, 76, 0.5) 70%, transparent);
+}
+
+.portal-brand__mark {
+  border-radius: var(--mi-r-sm);
+  color: #ffffff;
+  box-shadow: var(--mi-shadow-gold-sm);
+}
+
+.portal-brand__mark svg {
+  color: #ffffff;
+}
+
+.portal-nav__head {
+  color: var(--mi-faint);
+}
+
+.portal-nav__item {
+  border-radius: var(--mi-r-sm);
+  min-height: 40px;
+}
+
+.portal-nav__item.is-active {
+  background-color: var(--mi-gold-deep);
+  background-image: var(--mi-gold-cta);
+  color: #ffffff;
+  box-shadow: var(--mi-shadow-gold-sm), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.portal-nav__item.is-active .portal-nav__count {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.portal-nav__count--warn {
+  background: var(--mi-warning);
+  color: #ffffff;
+}
+
+.portal-nav__item:focus-visible {
+  outline: 2px solid var(--mi-gold);
+  outline-offset: -2px;
+}
+
+.portal-user__panel {
+  border-radius: var(--mi-r-dialog);
+  background: var(--mi-navy-2);
+  border-color: rgba(201, 168, 76, 0.2);
+  box-shadow: var(--mi-shadow-dialog);
+}
+
+.portal-user__item {
+  border-radius: var(--mi-r-xs);
+  min-height: 40px;
+}
+
+.portal-avatar {
+  background: var(--mi-gold-pale);
+  color: var(--mi-gold-deep);
+  font-family: var(--mi-font-display);
+}
+
+/* ── the main canvas ────────────────────────────────────────────────────── */
+.portal-main {
+  color: var(--mi-ink);
+}
+
+.portal-top__search {
+  border-radius: var(--mi-r-pill);
+  min-height: 44px;
+  border-color: var(--mi-line);
+  background: var(--mi-surface);
+  box-shadow: var(--mi-shadow-capsule-light);
+}
+
+.portal-top__search:focus-visible {
+  outline: 2px solid var(--mi-gold);
+  outline-offset: 2px;
+}
+
+.portal-top__kbd {
+  border-radius: var(--mi-r-xs);
+}
+
+.portal-icon-btn {
+  border-radius: var(--mi-r-pill);
+  min-width: 44px;
+  min-height: 44px;
+  border-color: var(--mi-line);
+  background: var(--mi-surface);
+}
+
+.portal-menu-btn {
+  border-radius: var(--mi-r-input);
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* chips in the top bar */
+.portal-chip {
+  border-radius: var(--mi-r-pill);
+  min-height: 36px;
+  border: 1px solid var(--mi-line);
+  background: var(--mi-surface);
+  color: var(--mi-muted);
+  font-size: var(--mi-fs-label);
+  font-weight: 700;
+  letter-spacing: var(--mi-track-label);
+  text-transform: uppercase;
+}
+
+.portal-chip--live {
+  border-color: var(--mi-gold-line);
+  color: var(--mi-gold-deep);
+  background: var(--mi-gold-pale);
+}
+
+/* ── cards, tiles, stats ────────────────────────────────────────────────── */
+.portal-card {
+  border-radius: var(--mi-r-card);
+  border-color: var(--mi-line);
+  background: var(--mi-surface);
+  box-shadow: var(--mi-shadow-card);
+}
+
+.portal-card--pad,
+.portal-card__head {
+  border-radius: inherit;
+}
+
+.portal-card__title,
+.portal-stat__value,
+.portal-kpi__value,
+.portal-tile__value {
+  font-family: var(--mi-font-display);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.portal-tile {
+  border-radius: var(--mi-r-card);
+  border-color: var(--mi-line);
+  box-shadow: var(--mi-shadow-card);
+  transition:
+    transform var(--dur-160) var(--ease-silk),
+    box-shadow var(--dur-160) var(--ease-silk),
+    border-color var(--dur-160) var(--ease-silk);
+}
+
+.portal-tile:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--mi-shadow-card-hover);
+  border-color: var(--mi-gold-line);
+}
+
+.portal-tile__icon {
+  border-radius: var(--mi-r-sm);
+}
+
+.portal-stat__label,
+.portal-kpi__label {
+  font-family: var(--mi-font-sans);
+  font-size: var(--mi-fs-micro);
+  font-weight: 700;
+  letter-spacing: var(--mi-track-label);
+  text-transform: uppercase;
+  color: var(--mi-muted);
+}
+
+/* ── tables ─────────────────────────────────────────────────────────────── */
+.portal-table-wrap {
+  border-radius: var(--mi-r-card);
+  border-color: var(--mi-line);
+}
+
+.portal-table thead th {
+  font-family: var(--mi-font-sans);
+  font-size: var(--mi-fs-label);
+  font-weight: 700;
+  letter-spacing: var(--mi-track-label);
+  text-transform: uppercase;
+  color: var(--mi-muted);
+}
+
+.portal-table tbody tr.is-clickable:hover {
+  background: var(--mi-gold-wash-08);
+}
+
+/* ── buttons: the primitive recipe at console density ───────────────────── */
+.portal-btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: var(--mi-r-pill);
+  font-family: var(--mi-font-sans);
+  font-size: var(--mi-fs-button);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: var(--mi-track-label);
+  text-transform: uppercase;
+  transition:
+    transform var(--dur-160) var(--ease-silk),
+    box-shadow var(--dur-160) var(--ease-silk),
+    background-color var(--dur-160) var(--ease-silk),
+    border-color var(--dur-160) var(--ease-silk),
+    color var(--dur-160) var(--ease-silk);
+}
+
+.portal-btn--gold {
+  background-color: var(--mi-gold-deep);
+  background-image: var(--mi-gold-cta);
+  color: #ffffff;
+  box-shadow: var(--mi-shadow-gold-sm), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.portal-btn--gold:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--mi-shadow-gold), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.portal-btn--ghost {
+  background: var(--mi-surface);
+  border-color: var(--mi-line);
+  color: var(--mi-ink);
+  box-shadow: var(--mi-shadow-capsule-light);
+}
+
+.portal-btn--ghost:hover {
+  transform: translateY(-1px);
+  border-color: var(--mi-gold-line-strong);
+  background: var(--mi-surface);
+}
+
+.portal-btn--danger {
+  background: var(--mi-negative);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 8px 18px -10px rgba(225, 29, 72, 0.5);
+}
+
+.portal-btn--danger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px -12px rgba(225, 29, 72, 0.55);
+}
+
+.portal-btn--sm {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: var(--mi-fs-micro);
+}
+
+.portal-btn--icon {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
+.portal-btn--icon.portal-btn--sm {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+}
+
+/* ── forms ──────────────────────────────────────────────────────────────── */.portal-input,
+.portal-select,
+.portal-textarea {
+  min-height: 44px;
+  border-radius: var(--mi-r-input);
+  border-color: var(--mi-line);
+  background: var(--mi-surface);
+  font-size: var(--mi-fs-body);
+}
+
+.portal-input--sm,
+.portal-select--sm {
+  min-height: 36px;
+  border-radius: var(--mi-r-sm);
+}
+
+.portal-input:focus,
+.portal-select:focus,
+.portal-textarea:focus {
+  outline: none;
+  border-color: var(--mi-gold);
+  box-shadow: 0 0 0 3px var(--mi-gold-ring);
+}
+
+.portal-checkbox {
+  accent-color: var(--mi-gold-deep);
+  width: 16px;
+  height: 16px;
+}
+
+.portal-label {
+  font-size: 10px;
+  letter-spacing: var(--mi-track-label);
+  color: var(--mi-muted);
+}
+
+/* ── segmented control ──────────────────────────────────────────────────── */
+.portal-seg {
+  border-radius: var(--mi-r-input);
+  background: var(--mi-canvas);
+}
+
+.portal-seg__item {
+  border-radius: var(--mi-r-xs);
+  min-height: 32px;
+}
+
+.portal-seg__item.is-active {
+  background: var(--mi-surface);
+  box-shadow: var(--mi-shadow-card);
+}
+
+/* ── badges: the chip recipe, 8.5px/700 +0.12em ─────────────────────────── */
+.portal-badge {
+  padding: 4px 9px;
+  border: 1px solid var(--mi-line);
+  border-radius: var(--mi-r-pill);
+  background: var(--mi-surface);
+  color: var(--mi-muted);
+  font-size: var(--mi-fs-label);
+  font-weight: 700;
+  letter-spacing: var(--mi-track-label);
+}
+
+.portal-badge--active {
+  background: color-mix(in srgb, var(--mi-positive) 12%, var(--mi-surface));
+  border-color: color-mix(in srgb, var(--mi-positive) 28%, transparent);
+  color: var(--mi-positive);
+}
+
+.portal-badge--pending {
+  background: color-mix(in srgb, var(--mi-warning) 14%, var(--mi-surface));
+  border-color: color-mix(in srgb, var(--mi-warning) 30%, transparent);
+  color: var(--mi-warning);
+}
+
+.portal-badge--sold {
+  background: color-mix(in srgb, var(--mi-info) 12%, var(--mi-surface));
+  border-color: color-mix(in srgb, var(--mi-info) 28%, transparent);
+  color: var(--mi-info);
+}
+
+.portal-badge--rejected {
+  background: color-mix(in srgb, var(--mi-negative) 12%, var(--mi-surface));
+  border-color: color-mix(in srgb, var(--mi-negative) 28%, transparent);
+  color: var(--mi-negative);
+}
+
+.portal-badge--draft {
+  background: var(--mi-canvas);
+  border-color: var(--mi-line);
+  color: var(--mi-muted);
+}
+
+/* ── overlays ───────────────────────────────────────────────────────────── */
+.portal-palette,
+.portal-notifications__panel,
+.portal-drawer,
+.portal-modal {
+  border-radius: var(--mi-r-dialog);
+  border-color: var(--mi-line);
+  background: var(--mi-surface);
+  box-shadow: var(--mi-shadow-dialog);
+}
+
+.portal-palette__item {
+  border-radius: var(--mi-r-sm);
+  min-height: 44px;
+}
+
+.portal-palette__item:hover,
+.portal-palette__item.is-active {
+  background: var(--mi-gold-wash-08);
+  box-shadow: inset 2px 0 0 var(--mi-gold);
+}
+
+.portal-palette__search {
+  border-radius: var(--mi-r-input);
+}
+
+.portal-notice {
+  border-radius: var(--mi-r-input);
+}
+
+/* ── the auth door (portal-shell.portal-auth) ───────────────────────────── */
+.portal-shell.portal-auth {
+  background:
+    radial-gradient(120% 80% at 70% 0%, rgba(201, 168, 76, 0.14), transparent 62%),
+    var(--mi-navy-deep);
+}
+
+.portal-auth__card {
+  border-radius: var(--mi-r-dialog);
+  border-color: rgba(201, 168, 76, 0.24);
+  box-shadow: var(--mi-shadow-dialog);
+}
+
+.portal-auth__title {
+  font-family: var(--mi-font-display);
+  letter-spacing: -0.01em;
+}
+
+/* ── reduced motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .portal-tile:hover,
+  .portal-btn--gold:hover,
+  .portal-btn--ghost:hover,
+  .portal-btn--danger:hover {
+    transform: none;
+  }
 }

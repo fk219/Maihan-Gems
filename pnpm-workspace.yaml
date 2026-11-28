@@ -19,3 +19,10 @@ packages:
 # install. No other package builds scripts.
 allowBuilds:
   esbuild: true
+
+# ADR-031 — Sileo declares `motion ^12.34.0`; this app already ships motion
+# ^14.5.0. Sileo imports only the `motion` proxy (`motion.rect`), which is
+# unchanged across the two majors, so the transitive copy is pinned to the
+# app's range. One motion in the bundle instead of two; no new package.
+overrides:
+  sileo>motion: ^14.5.0

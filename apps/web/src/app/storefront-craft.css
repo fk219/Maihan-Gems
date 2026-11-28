@@ -3581,3 +3581,223 @@ img {
     box-shadow: none !important;
   }
 }
+
+/* ══ 17. V13 — THE DESIGN SYSTEM ON THE STOREFRONT (ADR-030) ═══════════════
+   The editorial composition, section order, plates, rhythm and scroll
+   behaviour are untouched. What changes is the component language: the two
+   families (already adopted on <body> by styles/maihan-system.css), the radius
+   scale, the gold tokens and the button / input / card / chip recipes.
+
+   Type-scale calls, recorded rather than guessed:
+     • hero + statement type keeps its editorial sizes (88 / 40 / 32 / 24 /
+       20 px at the widths the v12 sheet already sets);
+     • UI text uses the system sizes: 11px button, 8.5px chip, 10px label,
+       12px input radius, 14px field text;
+     • display and FIGURES are Montserrat (the `.mh12-*` sheet re-points its
+       own family vars in its §v13 block).
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* The system's radius scale replaces the 4 / 16 / 28 craft scale. */
+  --mh-radius-control: var(--mi-r-input);
+  --mh-radius-soft: var(--mi-r-card);
+  --mh-radius-plate: var(--mi-r-card-lg);
+
+  /* Gold is read from the design system; the AA ink value is the deep stop. */
+  --mh-gold-ink: var(--mi-gold-deep);
+  --mh-focus-ring: var(--mi-gold-deep);
+}
+
+/* The shell's legacy display alias is used by ~40 header/footer utilities.
+   Re-pointing it once converts all of them to the system's interface face
+   instead of editing 40 class strings. Declared on body so it wins over the
+   :root alias in mgh-applet.css regardless of import order. */
+html body {
+  --font-eb-garamond: var(--mi-font-sans);
+  font-family: var(--font-sans);
+}
+
+body .golden-cloud-gallery {
+  --mh-gold-ink: var(--mi-gold-deep);
+  --mh-focus-ring: var(--mi-gold-deep);
+}
+
+/* ── primary CTA: the one gold gradient pill ─────────────────────────────── */
+.mh6-button {
+  min-height: 44px;
+  padding: 0 22px;
+  border: 1px solid transparent;
+  border-radius: var(--mi-r-pill);
+  background-color: var(--mi-gold-deep);
+  background-image: var(--mi-gold-cta);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: var(--mi-fs-button);
+  font-weight: 800;
+  letter-spacing: var(--mi-track-label);
+  text-transform: uppercase;
+  box-shadow: var(--mi-shadow-gold-sm), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition:
+    transform var(--dur-160) var(--ease-silk),
+    box-shadow var(--dur-160) var(--ease-silk),
+    background-color var(--dur-160) var(--ease-silk);
+}
+
+.mh6-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mh6-button:hover,
+.mh6-button:focus-visible {
+  transform: translateY(-1px);
+  border-color: transparent;
+  background-color: var(--mi-gold-deep);
+  color: #ffffff;
+  box-shadow: var(--mi-shadow-gold), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* On the gold atelier field the button is ink, never a second gold. */
+.mh6-button--ink {
+  border-color: rgba(33, 26, 12, 0.5);
+  background-color: #211a0c;
+  background-image: none;
+  color: #f3e3b6;
+  box-shadow: 0 10px 24px -16px rgba(33, 26, 12, 0.7);
+}
+
+.mh6-button--ink:hover,
+.mh6-button--ink:focus-visible {
+  background-color: #3a2e16;
+  color: #fdf6e4;
+  border-color: #211a0c;
+}
+
+/* ── inputs: 12px radius, gold focus, 44px target ────────────────────────── */
+body .golden-cloud-gallery :where(input:not([type='hidden']):not([type='checkbox']):not([type='radio']):not(.mh6-search__input), select, textarea) {
+  min-height: 44px;
+  border: 1px solid var(--mi-line);
+  border-radius: var(--mi-r-input);
+  background: var(--mi-surface);
+  color: var(--mi-ink);
+  font-family: var(--font-sans);
+  font-size: var(--mi-fs-body);
+  font-variant-numeric: tabular-nums lining-nums;
+  transition:
+    border-color var(--dur-160) var(--ease-silk),
+    box-shadow var(--dur-160) var(--ease-silk);
+}
+
+body .golden-cloud-gallery :where(input, select, textarea):focus-visible {
+  outline: 2px solid var(--mi-gold);
+  outline-offset: 2px;
+  border-color: var(--mi-gold);
+  box-shadow: 0 0 0 3px var(--mi-gold-ring);
+}
+
+/* The hero search keeps its own obsidian capsule; only the radius moves. */
+.mh6-search__form {
+  border-radius: var(--mi-r-card);
+}
+
+/* ── cards: 16px, one gold top hairline, a 1px hover lift ────────────────── */
+.mh-card,
+.mh12-card__frame {
+  border-radius: var(--mi-r-card);
+  border-color: var(--mi-line);
+}
+
+.mh-card {
+  transition:
+    transform var(--dur-160) var(--ease-silk),
+    box-shadow var(--dur-160) var(--ease-silk),
+    border-color var(--dur-160) var(--ease-silk);
+}
+
+.mh-card:hover,
+.mh-card:focus-within {
+  transform: translateY(-1px);
+  box-shadow: var(--mi-shadow-card-hover);
+  border-color: var(--mi-gold-line);
+}
+
+.mh12-card__frame {
+  position: relative;
+}
+
+.mh12-card__frame::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: var(--mi-r-card) var(--mi-r-card) 0 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--mi-gold-line-strong) 18%,
+    var(--mi-gold-line-strong) 82%,
+    transparent 100%
+  );
+  opacity: 0.5;
+}
+
+.mh12-card {
+  transition: transform var(--dur-160) var(--ease-silk);
+}
+
+.mh12-card:hover,
+.mh12-card:focus-visible {
+  transform: translateY(-1px);
+}
+
+/* ── chips: 9999px at 8.5px / 700 / +0.12em ──────────────────────────────── */
+.mh-chip,
+.mi-chip,
+.demo-content-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--mi-line);
+  border-radius: var(--mi-r-pill);
+  background: var(--mi-surface);
+  color: var(--mi-muted);
+  font-family: var(--font-sans);
+  font-size: var(--mi-fs-label);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: var(--mi-track-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.demo-content-badge {
+  border-color: var(--mi-gold-line);
+  background: var(--mi-gold-pale);
+  color: var(--mi-gold-deep);
+}
+
+.demo-content-badge strong {
+  font-size: inherit;
+  font-weight: 800;
+  letter-spacing: inherit;
+}
+
+/* ── focus: the system's 2px gold ring ──────────────────────────────────── */
+body .golden-cloud-gallery :where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--mi-gold);
+  outline-offset: 2px;
+}
+
+/* ── reduced motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .mh6-button:hover,
+  .mh6-button:focus-visible,
+  .mh-card:hover,
+  .mh-card:focus-within,
+  .mh12-card:hover,
+  .mh12-card:focus-visible {
+    transform: none;
+  }
+}

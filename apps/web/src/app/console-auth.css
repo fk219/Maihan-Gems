@@ -49,16 +49,16 @@ a.sr-only:focus {
   text-decoration: none;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
    13. Auth (storefront + console sign-in)
-   ───────────────────────────────────────────────────────────────────────────── */
+   Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 .sf-v2 .auth-shell,
 .auth-shell {
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: clamp(32px, 6vw, 72px) 20px;
-  background: #0b1117;
+  background: var(--mi-navy-deep);
   color: #f6f3ec;
 }
 
@@ -69,25 +69,25 @@ a.sr-only:focus {
   max-width: 960px;
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  border: 1px solid rgba(201, 168, 76, 0.35);
-  background: #f6f3ec;
-  color: #0b1117;
+  border: 1px solid var(--mi-gold-line-strong);
+  background: var(--mi-canvas);
+  color: var(--mi-ink);
 }
 
 .auth-shell__aside {
   padding: clamp(28px, 4vw, 48px);
   background:
     radial-gradient(120% 80% at 70% 10%, rgba(232, 201, 106, 0.14), transparent 60%),
-    #0b1117;
+    var(--mi-navy-deep);
   color: #f6f3ec;
   display: grid;
   align-content: space-between;
   gap: 40px;
-  border-right: 1px solid rgba(201, 168, 76, 0.35);
+  border-right: 1px solid var(--mi-gold-line-strong);
 }
 
 .auth-shell__brand {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-display), Georgia, serif;
   font-size: 22px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -107,17 +107,17 @@ a.sr-only:focus {
 
 .auth-shell__eyebrow {
   margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #7a5a10;
+  color: var(--mi-gold-deep);
 }
 
 .auth-shell__title {
   margin: 6px 0 6px;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-display), Georgia, serif;
   font-size: clamp(34px, 4vw, 44px);
   font-weight: 400;
   line-height: 1;
@@ -128,32 +128,33 @@ a.sr-only:focus {
 
 .auth-shell__footer { margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(11, 17, 23, 0.12); font-size: 12px; color: #5f5a50; }
 
-.auth-shell__footer a { color: #6e4f0e; text-underline-offset: 3px; }
+.auth-shell__footer a { color: var(--mi-gold-deep); text-underline-offset: 3px; }
 
 .auth-shell input {
   width: 100%;
   min-height: 46px;
   padding: 12px 13px;
   background: #fff;
-  border: 1px solid rgba(11, 17, 23, 0.18);
-  border-radius: 0;
-  color: #0b1117;
-  font-family: 'Inter', system-ui, sans-serif;
+  border: 1px solid var(--mi-line);
+  border-radius: var(--mi-r-input);
+  color: var(--mi-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 14px;
 }
 
-.auth-shell input:focus { outline: 2px solid #0b1117; outline-offset: 1px; }
+.auth-shell input:focus { outline: 2px solid var(--mi-gold); outline-offset: 2px; border-color: var(--mi-gold); }
 
 .auth-shell label { font-size: 9.5px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #474339; }
 
 .auth-shell button[type='submit'] {
   min-height: 48px;
   width: 100%;
-  border: 1px solid #0b1117;
-  background: #0b1117;
-  color: #f6f3ec;
-  border-radius: 0;
-  font-family: 'Inter', system-ui, sans-serif;
+  border: 1px solid transparent;
+  background-color: var(--mi-gold-deep);
+  background-image: var(--mi-gold-cta);
+  color: #ffffff;
+  border-radius: var(--mi-r-pill);
+  font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.22em;
@@ -161,7 +162,7 @@ a.sr-only:focus {
   cursor: pointer;
 }
 
-.auth-shell button[type='submit']:hover { background: #000; }
+.auth-shell button[type='submit']:hover { transform: translateY(-1px); box-shadow: var(--mi-shadow-gold); }
 
 .auth-shell button[type='submit']:disabled { opacity: 0.55; cursor: progress; }
 
@@ -173,23 +174,23 @@ a.sr-only:focus {
   padding: clamp(28px, 5vw, 64px) 20px;
   background:
     radial-gradient(100% 70% at 70% 0%, rgba(201, 168, 76, 0.12), transparent 60%),
-    #0b1117;
+    var(--mi-navy-deep);
   color: #f6f3ec;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
 
 .console-auth__card {
   width: 100%;
   max-width: 440px;
   background: #f6f3ec;
-  color: #0b1117;
+  color: var(--mi-ink);
   border: 1px solid rgba(201, 168, 76, 0.35);
   padding: clamp(28px, 5vw, 44px);
 }
 
-.console-auth__brand { margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 19px; letter-spacing: 0.26em; text-transform: uppercase; }
+.console-auth__brand { margin: 0; font-family: var(--font-display), Georgia, serif; font-size: 19px; letter-spacing: 0.26em; text-transform: uppercase; }
 
-.console-auth__title { margin: 10px 0 6px; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 36px; font-weight: 400; line-height: 1; }
+.console-auth__title { margin: 10px 0 6px; font-family: var(--font-display), Georgia, serif; font-size: 36px; font-weight: 400; line-height: 1; }
 
 .console-auth__note { margin: 0 0 24px; font-size: 12.5px; line-height: 1.7; color: #5f5a50; }
 
@@ -200,9 +201,9 @@ a.sr-only:focus {
   min-height: 46px;
   padding: 12px 13px;
   background: #fff;
-  border: 1px solid rgba(11, 17, 23, 0.18);
-  border-radius: 0;
-  color: #0b1117;
+  border: 1px solid var(--mi-line);
+  border-radius: var(--mi-r-input);
+  color: var(--mi-ink);
   font-family: inherit;
   font-size: 14px;
 }
@@ -216,10 +217,11 @@ a.sr-only:focus {
 .console-auth button[type='submit'] {
   min-height: 48px;
   width: 100%;
-  border: 1px solid #0b1117;
-  background: #0b1117;
-  color: #f6f3ec;
-  border-radius: 0;
+  border: 1px solid transparent;
+  background-color: var(--mi-gold-deep);
+  background-image: var(--mi-gold-cta);
+  color: #ffffff;
+  border-radius: var(--mi-r-pill);
   font-family: inherit;
   font-size: 10px;
   font-weight: 600;
@@ -233,24 +235,24 @@ a.sr-only:focus {
 .auth-shell__aside { display: none; }
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   v7 — one split frame for the admin and vendor doors
-   ─────────────────────────────────────────────────────────────────────────────
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+   v7 Ã¢â‚¬â€ one split frame for the admin and vendor doors
+   Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
    Paper and obsidian, one lit still, one house line. The left half is the
    image treatment for both surfaces; the right half is the form. At <=900 px
    the image/quote sits above the form. Radii follow the storefront scale:
    4 px controls, 16 px fields, 28 px plates, full circles. No blur, no glass.
-   ──────────────────────────────────────────────────────────────────────────── */
+   Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 
 .mh-auth {
-  --auth-paper: #f7f4ec;
-  --auth-paper-plate: #fbf8f1;
-  --auth-ink: #17140f;
-  --auth-muted: #5e574b;
-  --auth-obsidian: #070a0f;
-  --auth-gold: #c9a84c;
-  --auth-gold-light: #e6c97a;
-  --auth-rule: rgba(124, 99, 35, 0.22);
+  --auth-paper: var(--mi-canvas);
+  --auth-paper-plate: var(--mi-surface);
+  --auth-ink: var(--mi-ink);
+  --auth-muted: var(--mi-muted);
+  --auth-obsidian: var(--mi-navy-deep);
+  --auth-gold: var(--mi-gold);
+  --auth-gold-light: var(--mi-gold-bright);
+  --auth-rule: var(--mi-line);
 
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -258,6 +260,7 @@ a.sr-only:focus {
   background: var(--auth-paper);
   color: var(--auth-ink);
   font-family: var(--font-sans), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 .mh-auth__aside {
@@ -305,8 +308,8 @@ a.sr-only:focus {
   pointer-events: none;
   background: radial-gradient(
     54% 46% at 70% 28%,
-    rgba(230, 201, 122, 0.18) 0%,
-    rgba(230, 201, 122, 0) 70%
+    rgba(201, 168, 76, 0.22) 0%,
+    rgba(201, 168, 76, 0) 70%
   );
 }
 
@@ -314,10 +317,11 @@ a.sr-only:focus {
   position: relative;
   z-index: 2;
   margin: 0;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-display), Georgia, serif;
   font-size: 14px;
+  font-weight: 600;
   line-height: 1;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: #f7f3e8;
 }
@@ -333,18 +337,18 @@ a.sr-only:focus {
 .mh-auth__quote {
   margin: 0;
   max-width: 15ch;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-display), Georgia, serif;
   font-size: clamp(2.25rem, 3.4vw, 3rem);
-  font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: -0.015em;
+  font-weight: 300;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
   color: #f7f3e8;
 }
 
 .mh-auth__caption {
   margin: 0;
   padding-top: 1rem;
-  border-top: 1px solid rgba(230, 201, 122, 0.3);
+  border-top: 1px solid var(--mi-gold-line);
   font-size: 12px;
   line-height: 1.5;
   color: #c9c3b6;
@@ -358,31 +362,52 @@ a.sr-only:focus {
 }
 
 .mh-auth__card {
+  position: relative;
   width: 100%;
   max-width: 460px;
   padding: clamp(1.5rem, 4vw, 2.75rem);
   border: 1px solid var(--auth-rule);
-  border-radius: 28px;
+  border-radius: var(--mi-r-card);
   background: var(--auth-paper-plate);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: var(--mi-shadow-card);
+}
+
+/* the card's gold top hairline Ã¢â‚¬â€ the system's card signature */
+.mh-auth__card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: var(--mi-r-card) var(--mi-r-card) 0 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--mi-gold-line-strong) 16%,
+    var(--mi-gold-line-strong) 84%,
+    transparent 100%
+  );
+  opacity: 0.55;
 }
 
 .mh-auth__eyebrow {
   margin: 0;
-  font-size: 12px;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
   line-height: 1.4;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #7c6323;
+  color: var(--mi-gold-deep);
 }
 
 .mh-auth__title {
   margin: 0.55rem 0 0;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-display), Georgia, serif;
   font-size: clamp(2.25rem, 3.4vw, 3rem);
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.02;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
   color: var(--auth-ink);
 }
 
@@ -405,27 +430,40 @@ a.sr-only:focus {
 }
 
 .mh-auth__label {
-  font-size: 12px;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
   line-height: 1.4;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--auth-muted);
 }
 
 .mh-auth__input {
   width: 100%;
-  min-height: 48px;
-  padding: 12px 14px;
-  border: 1px solid rgba(23, 20, 15, 0.24);
-  border-radius: 16px;
-  background: #ffffff;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--auth-rule);
+  border-radius: var(--mi-r-input);
+  background: var(--mi-surface);
   color: var(--auth-ink);
   font-family: inherit;
   font-size: 14px;
+  font-variant-numeric: tabular-nums lining-nums;
+  transition:
+    border-color 160ms var(--ease-silk),
+    box-shadow 160ms var(--ease-silk);
+}
+
+.mh-auth__input:hover {
+  border-color: var(--mi-gold-line-strong);
 }
 
 .mh-auth__input:focus-visible {
-  border-color: #7c6323;
-  outline: 2px solid #7c6323;
+  border-color: var(--mi-gold);
+  outline: 2px solid var(--mi-gold);
   outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--mi-gold-ring);
 }
 
 .mh-auth__status {
@@ -433,36 +471,41 @@ a.sr-only:focus {
   margin: 0;
   font-size: 12px;
   line-height: 1.5;
-  color: #9a3412;
+  color: var(--mi-negative);
 }
 
 .mh-auth__submit {
   width: 100%;
-  min-height: 50px;
+  min-height: 48px;
   padding: 0 1.25rem;
-  border: 1px solid var(--auth-ink);
-  border-radius: 4px;
-  background: var(--auth-ink);
-  color: #f7f4ec;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
+  border: 1px solid transparent;
+  border-radius: var(--mi-r-pill);
+  background-color: var(--mi-gold-deep);
+  background-image: var(--mi-gold-cta);
+  color: #ffffff;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
+  box-shadow: var(--mi-shadow-gold-sm), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   transition:
-    background-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    transform 160ms var(--ease-silk),
+    box-shadow 160ms var(--ease-silk),
+    background-color 160ms var(--ease-silk),
+    border-color 160ms var(--ease-silk);
 }
 
 .mh-auth__submit:hover {
-  background: #000000;
-  border-color: #000000;
+  transform: translateY(-1px);
+  box-shadow: var(--mi-shadow-gold), inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .mh-auth__submit:disabled {
   opacity: 0.6;
   cursor: progress;
+  transform: none;
 }
 
 .mh-auth__divider {
@@ -490,7 +533,7 @@ a.sr-only:focus {
   margin-top: 1.25rem;
   font-size: 12px;
   line-height: 1.4;
-  color: #7c6323;
+  color: var(--mi-gold-deep);
   text-decoration: none;
 }
 
@@ -521,7 +564,7 @@ a.sr-only:focus {
 @media (max-width: 479px) {
   .mh-auth__card {
     padding: 1.25rem;
-    border-radius: 28px;
+    border-radius: var(--mi-r-card);
   }
 
   .mh-auth__aside {
@@ -533,7 +576,7 @@ a.sr-only:focus {
   }
 }
 
-/* ── Demo access affordance (rendered only when the server flag is on) ────── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬ Demo access affordance (rendered only when the server flag is on) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 
 .mh-demo {
   display: grid;
@@ -547,10 +590,10 @@ a.sr-only:focus {
   justify-content: center;
   min-height: 44px;
   padding: 0 1rem;
-  border: 1px solid var(--mh-gold-ink, #7c6323);
+  border: 1px solid var(--mi-gold-deep);
   border-radius: 4px;
   background: transparent;
-  color: var(--mh-gold-ink, #7c6323);
+  color: var(--mi-gold-deep);
   font-family: inherit;
   font-size: 12px;
   line-height: 1.4;
@@ -565,7 +608,7 @@ a.sr-only:focus {
 }
 
 .mh-demo__button:focus-visible {
-  outline: 2px solid var(--mh-gold-ink, #7c6323);
+  outline: 2px solid var(--mi-gold);
   outline-offset: 2px;
 }
 
@@ -593,10 +636,10 @@ a.sr-only:focus {
   color: var(--mh-muted-ink, #5e574b);
   text-decoration: underline;
   text-underline-offset: 4px;
-  text-decoration-color: rgba(230, 201, 122, 0.4);
+  text-decoration-color: var(--mi-gold-line-strong);
 }
 
 .mh-demo--quiet .mh-demo__button:hover {
   background: transparent;
-  color: var(--mh-gold-ink, #7c6323);
+  color: var(--mi-gold-deep);
 }

@@ -2393,3 +2393,31 @@ flagged by its own advisory feed. The agent upgrade nudge is disabled in
 `next.config.ts` so the build gate is deterministic (single invocation,
 exit 0); that flag does not patch or upgrade. The upgrade itself remains an
 open client decision.
+
+## Design-system v2 pass — 2026-11-28
+
+The client adopted the "Maihan Group App & Portal Design System v2" (gold +
+navy, Montserrat + Manrope, curved surfaces) and overrode its app-only scope:
+admin portal, vendor portal and storefront. The storefront keeps its editorial
+composition and type scale; families, colour, radius and component chrome are
+adopted. ADR-030 and ADR-031 record the decision, the licences and the
+exceptions.
+
+- **Tokens**: `apps/web/src/styles/maihan-system.css` — gold/navy scales,
+  light + dark neutrals, four status pairs, eleven radii, nine elevations, two
+  easings, three durations, `.font-portal` scope.
+- **Primitives**: `apps/web/src/components/system/` — Button, Input, Label,
+  Card, Chip, Kpi, Toaster. Recipes are CSS and are shared with the console
+  class names, so the mounted consoles were restyled without a logic rewrite.
+- **Consoles**: `portal-premium.css` aliases every `--p-*` token to `--mi-*` and
+  restates the fourteen component recipes; the Fresh consoles' hex values were
+  replaced with tokens; the sign-in frames read the same scale.
+- **Libraries**: Skullet 0.0.3 (MIT) for skeletons, Sileo 0.1.6 (MIT) for
+  toasts. Both are lazy: Sileo mounts on the first notification, Skullet's chunk
+  belongs to the skeleton routes.
+- **Verification**: typecheck 0; build exit 0 with DATABASE_URL unset; 618
+  passed / 21 skipped; `check-slop` clean; axe 0 at 390/768/1440 on admin login,
+  vendor login and the homepage; overflow 0; initial JS 210.8–211.1 KB gzip
+  (same 14 scripts), no new initial script.
+- **Evidence**: `docs/design-shots/v13/README.md`, `audit.json`, nine
+  screenshots, `apps/web/scripts/v13-*.mjs`.

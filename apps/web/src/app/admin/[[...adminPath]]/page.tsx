@@ -14,6 +14,7 @@ import dynamicImport from 'next/dynamic';
 import { redirect } from 'next/navigation';
 import '../../../styles/mgh-applet.css';
 import '../../../styles/portal-premium.css';
+import { Toaster } from '../../../components/system/Toaster.js';
 import { getAdminSession } from '../../../lib/admin-session.js';
 
 export const metadata: Metadata = {
@@ -35,5 +36,10 @@ export default async function AdminGatePage(): Promise<React.JSX.Element> {
   const session = await getAdminSession();
   if (session === null) redirect('/admin/login');
 
-  return <AdminShellMount />;
+  return (
+    <>
+      <AdminShellMount />
+      <Toaster />
+    </>
+  );
 }

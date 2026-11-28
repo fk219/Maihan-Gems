@@ -1,0 +1,845 @@
+{
+  "base": "http://localhost:3113",
+  "generatedAt": "2026-11-28T10:21:23.877Z",
+  "widths": [
+    1440,
+    768,
+    390
+  ],
+  "scores": {
+    "axeViolationNodes": 0,
+    "overflowCaptures": 0,
+    "pageErrorCaptures": 0,
+    "nonOkCaptures": 0
+  },
+  "results": [
+    {
+      "page": "admin-login",
+      "surface": "portal",
+      "width": 1440,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 4
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v13/admin-login-1440.png",
+      "documentHeight": 900,
+      "families": [
+        {
+          "family": "Manrope",
+          "nodes": 8
+        },
+        {
+          "family": "Montserrat",
+          "nodes": 3
+        }
+      ],
+      "recipes": [
+        {
+          "selector": ".mh-auth__submit",
+          "fontFamily": "Manrope",
+          "fontSize": "11px",
+          "fontWeight": "800",
+          "letterSpacing": "1.32px",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "backgroundImage": "linear-gradient(135deg, rgb(148, 112, 28), rgb(139, 105, 20) 52%, rgb(126, 95, 17))",
+          "borderRadius": "9999px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(139, 105, 20, 0.42) 0px 8px 18px -10px, rgba(255, 255, 255, 0.18) 0px 1px 0px 0px inset",
+          "minHeight": "48px"
+        },
+        {
+          "selector": ".mh-auth__input",
+          "fontFamily": "Manrope",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "12px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "44px"
+        },
+        {
+          "selector": ".mh-auth__card",
+          "fontFamily": "Manrope",
+          "fontSize": "15px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "16px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(13, 27, 42, 0.05) 0px 1px 2px 0px, rgba(13, 27, 42, 0.28) 0px 10px 24px -18px, rgba(255, 255, 255, 0.82) 0px 1px 0p",
+          "minHeight": "auto"
+        },
+        {
+          "selector": ".mh-auth__eyebrow",
+          "fontFamily": "Manrope",
+          "fontSize": "10px",
+          "fontWeight": "700",
+          "letterSpacing": "1.2px",
+          "textTransform": "uppercase",
+          "color": "rgb(139, 105, 20)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        }
+      ],
+      "chips": [],
+      "figures": 0
+    },
+    {
+      "page": "admin-login",
+      "surface": "portal",
+      "width": 768,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 4
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v13/admin-login-768.png",
+      "documentHeight": 953,
+      "families": [
+        {
+          "family": "Manrope",
+          "nodes": 8
+        },
+        {
+          "family": "Montserrat",
+          "nodes": 3
+        }
+      ],
+      "recipes": [
+        {
+          "selector": ".mh-auth__submit",
+          "fontFamily": "Manrope",
+          "fontSize": "11px",
+          "fontWeight": "800",
+          "letterSpacing": "1.32px",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "backgroundImage": "linear-gradient(135deg, rgb(148, 112, 28), rgb(139, 105, 20) 52%, rgb(126, 95, 17))",
+          "borderRadius": "9999px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(139, 105, 20, 0.42) 0px 8px 18px -10px, rgba(255, 255, 255, 0.18) 0px 1px 0px 0px inset",
+          "minHeight": "48px"
+        },
+        {
+          "selector": ".mh-auth__input",
+          "fontFamily": "Manrope",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "12px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "44px"
+        },
+        {
+          "selector": ".mh-auth__card",
+          "fontFamily": "Manrope",
+          "fontSize": "15px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "16px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(13, 27, 42, 0.05) 0px 1px 2px 0px, rgba(13, 27, 42, 0.28) 0px 10px 24px -18px, rgba(255, 255, 255, 0.82) 0px 1px 0p",
+          "minHeight": "auto"
+        },
+        {
+          "selector": ".mh-auth__eyebrow",
+          "fontFamily": "Manrope",
+          "fontSize": "10px",
+          "fontWeight": "700",
+          "letterSpacing": "1.2px",
+          "textTransform": "uppercase",
+          "color": "rgb(139, 105, 20)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        }
+      ],
+      "chips": [],
+      "figures": 0
+    },
+    {
+      "page": "admin-login",
+      "surface": "portal",
+      "width": 390,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 4
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v13/admin-login-390.png",
+      "documentHeight": 844,
+      "families": [
+        {
+          "family": "Manrope",
+          "nodes": 8
+        },
+        {
+          "family": "Montserrat",
+          "nodes": 3
+        }
+      ],
+      "recipes": [
+        {
+          "selector": ".mh-auth__submit",
+          "fontFamily": "Manrope",
+          "fontSize": "11px",
+          "fontWeight": "800",
+          "letterSpacing": "1.32px",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "backgroundImage": "linear-gradient(135deg, rgb(148, 112, 28), rgb(139, 105, 20) 52%, rgb(126, 95, 17))",
+          "borderRadius": "9999px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(139, 105, 20, 0.42) 0px 8px 18px -10px, rgba(255, 255, 255, 0.18) 0px 1px 0px 0px inset",
+          "minHeight": "48px"
+        },
+        {
+          "selector": ".mh-auth__input",
+          "fontFamily": "Manrope",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "12px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "44px"
+        },
+        {
+          "selector": ".mh-auth__card",
+          "fontFamily": "Manrope",
+          "fontSize": "15px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "16px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(13, 27, 42, 0.05) 0px 1px 2px 0px, rgba(13, 27, 42, 0.28) 0px 10px 24px -18px, rgba(255, 255, 255, 0.82) 0px 1px 0p",
+          "minHeight": "auto"
+        },
+        {
+          "selector": ".mh-auth__eyebrow",
+          "fontFamily": "Manrope",
+          "fontSize": "10px",
+          "fontWeight": "700",
+          "letterSpacing": "1.2px",
+          "textTransform": "uppercase",
+          "color": "rgb(139, 105, 20)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        }
+      ],
+      "chips": [],
+      "figures": 0
+    },
+    {
+      "page": "vendor-login",
+      "surface": "portal",
+      "width": 1440,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 4
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v13/vendor-login-1440.png",
+      "documentHeight": 900,
+      "families": [
+        {
+          "family": "Manrope",
+          "nodes": 8
+        },
+        {
+          "family": "Montserrat",
+          "nodes": 3
+        }
+      ],
+      "recipes": [
+        {
+          "selector": ".mh-auth__submit",
+          "fontFamily": "Manrope",
+          "fontSize": "11px",
+          "fontWeight": "800",
+          "letterSpacing": "1.32px",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "backgroundImage": "linear-gradient(135deg, rgb(148, 112, 28), rgb(139, 105, 20) 52%, rgb(126, 95, 17))",
+          "borderRadius": "9999px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(139, 105, 20, 0.42) 0px 8px 18px -10px, rgba(255, 255, 255, 0.18) 0px 1px 0px 0px inset",
+          "minHeight": "48px"
+        },
+        {
+          "selector": ".mh-auth__input",
+          "fontFamily": "Manrope",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "12px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "44px"
+        },
+        {
+          "selector": ".mh-auth__card",
+          "fontFamily": "Manrope",
+          "fontSize": "15px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "16px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(13, 27, 42, 0.05) 0px 1px 2px 0px, rgba(13, 27, 42, 0.28) 0px 10px 24px -18px, rgba(255, 255, 255, 0.82) 0px 1px 0p",
+          "minHeight": "auto"
+        },
+        {
+          "selector": ".mh-auth__eyebrow",
+          "fontFamily": "Manrope",
+          "fontSize": "10px",
+          "fontWeight": "700",
+          "letterSpacing": "1.2px",
+          "textTransform": "uppercase",
+          "color": "rgb(139, 105, 20)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        }
+      ],
+      "chips": [],
+      "figures": 0
+    },
+    {
+      "page": "vendor-login",
+      "surface": "portal",
+      "width": 768,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 4
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v13/vendor-login-768.png",
+      "documentHeight": 977,
+      "families": [
+        {
+          "family": "Manrope",
+          "nodes": 8
+        },
+        {
+          "family": "Montserrat",
+          "nodes": 3
+        }
+      ],
+      "recipes": [
+        {
+          "selector": ".mh-auth__submit",
+          "fontFamily": "Manrope",
+          "fontSize": "11px",
+          "fontWeight": "800",
+          "letterSpacing": "1.32px",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "backgroundImage": "linear-gradient(135deg, rgb(148, 112, 28), rgb(139, 105, 20) 52%, rgb(126, 95, 17))",
+          "borderRadius": "9999px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(139, 105, 20, 0.42) 0px 8px 18px -10px, rgba(255, 255, 255, 0.18) 0px 1px 0px 0px inset",
+          "minHeight": "48px"
+        },
+        {
+          "selector": ".mh-auth__input",
+          "fontFamily": "Manrope",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "12px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "44px"
+        },
+        {
+          "selector": ".mh-auth__card",
+          "fontFamily": "Manrope",
+          "fontSize": "15px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "16px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(13, 27, 42, 0.05) 0px 1px 2px 0px, rgba(13, 27, 42, 0.28) 0px 10px 24px -18px, rgba(255, 255, 255, 0.82) 0px 1px 0p",
+          "minHeight": "auto"
+        },
+        {
+          "selector": ".mh-auth__eyebrow",
+          "fontFamily": "Manrope",
+          "fontSize": "10px",
+          "fontWeight": "700",
+          "letterSpacing": "1.2px",
+          "textTransform": "uppercase",
+          "color": "rgb(139, 105, 20)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        }
+      ],
+      "chips": [],
+      "figures": 0
+    },
+    {
+      "page": "vendor-login",
+      "surface": "portal",
+      "width": 390,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 4
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v13/vendor-login-390.png",
+      "documentHeight": 874,
+      "families": [
+        {
+          "family": "Manrope",
+          "nodes": 8
+        },
+        {
+          "family": "Montserrat",
+          "nodes": 3
+        }
+      ],
+      "recipes": [
+        {
+          "selector": ".mh-auth__submit",
+          "fontFamily": "Manrope",
+          "fontSize": "11px",
+          "fontWeight": "800",
+          "letterSpacing": "1.32px",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "backgroundImage": "linear-gradient(135deg, rgb(148, 112, 28), rgb(139, 105, 20) 52%, rgb(126, 95, 17))",
+          "borderRadius": "9999px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(139, 105, 20, 0.42) 0px 8px 18px -10px, rgba(255, 255, 255, 0.18) 0px 1px 0px 0px inset",
+          "minHeight": "48px"
+        },
+        {
+          "selector": ".mh-auth__input",
+          "fontFamily": "Manrope",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "12px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "44px"
+        },
+        {
+          "selector": ".mh-auth__card",
+          "fontFamily": "Manrope",
+          "fontSize": "15px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(13, 27, 42)",
+          "backgroundImage": "none",
+          "borderRadius": "16px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(13, 27, 42, 0.05) 0px 1px 2px 0px, rgba(13, 27, 42, 0.28) 0px 10px 24px -18px, rgba(255, 255, 255, 0.82) 0px 1px 0p",
+          "minHeight": "auto"
+        },
+        {
+          "selector": ".mh-auth__eyebrow",
+          "fontFamily": "Manrope",
+          "fontSize": "10px",
+          "fontWeight": "700",
+          "letterSpacing": "1.2px",
+          "textTransform": "uppercase",
+          "color": "rgb(139, 105, 20)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        }
+      ],
+      "chips": [],
+      "figures": 0
+    },
+    {
+      "page": "home",
+      "surface": "storefront",
+      "width": 1440,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 36
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v13/home-1440.png",
+      "documentHeight": 4698,
+      "families": [
+        {
+          "family": "Manrope",
+          "nodes": 121
+        },
+        {
+          "family": "Montserrat",
+          "nodes": 32
+        }
+      ],
+      "recipes": [
+        {
+          "selector": ".mh12-card__frame",
+          "fontFamily": "Manrope",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(246, 243, 236)",
+          "backgroundImage": "none",
+          "borderRadius": "16px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        },
+        {
+          "selector": ".mh12-card__fact",
+          "fontFamily": "Montserrat",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgba(246, 243, 236, 0.74)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        },
+        {
+          "selector": ".mh6-search__form",
+          "fontFamily": "Manrope",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(246, 243, 236)",
+          "backgroundImage": "none",
+          "borderRadius": "12px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        },
+        {
+          "selector": ".mh12-card",
+          "fontFamily": "Manrope",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(246, 243, 236)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        }
+      ],
+      "chips": [
+        {
+          "selector": ".mi-chip, .portal-badge, .demo-content-badge",
+          "fontFamily": "Manrope",
+          "fontSize": "8.5px",
+          "fontWeight": "700",
+          "letterSpacing": "1.02px",
+          "textTransform": "uppercase",
+          "color": "rgb(139, 105, 20)",
+          "backgroundImage": "none",
+          "borderRadius": "9999px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(24, 22, 19, 0.18) 0px 8px 24px 0px",
+          "minHeight": "0px"
+        }
+      ],
+      "figures": 18
+    },
+    {
+      "page": "home",
+      "surface": "storefront",
+      "width": 768,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 39
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v13/home-768.png",
+      "documentHeight": 4540,
+      "families": [
+        {
+          "family": "Manrope",
+          "nodes": 94
+        },
+        {
+          "family": "Montserrat",
+          "nodes": 24
+        }
+      ],
+      "recipes": [
+        {
+          "selector": ".mh12-card__frame",
+          "fontFamily": "Manrope",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(246, 243, 236)",
+          "backgroundImage": "none",
+          "borderRadius": "16px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        },
+        {
+          "selector": ".mh12-card__fact",
+          "fontFamily": "Montserrat",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgba(246, 243, 236, 0.74)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        },
+        {
+          "selector": ".mh6-search__form",
+          "fontFamily": "Manrope",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(246, 243, 236)",
+          "backgroundImage": "none",
+          "borderRadius": "12px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        },
+        {
+          "selector": ".mh12-card",
+          "fontFamily": "Manrope",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(246, 243, 236)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        }
+      ],
+      "chips": [
+        {
+          "selector": ".mi-chip, .portal-badge, .demo-content-badge",
+          "fontFamily": "Manrope",
+          "fontSize": "8.5px",
+          "fontWeight": "700",
+          "letterSpacing": "1.02px",
+          "textTransform": "uppercase",
+          "color": "rgb(139, 105, 20)",
+          "backgroundImage": "none",
+          "borderRadius": "9999px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(24, 22, 19, 0.18) 0px 8px 24px 0px",
+          "minHeight": "0px"
+        }
+      ],
+      "figures": 18
+    },
+    {
+      "page": "home",
+      "surface": "storefront",
+      "width": 390,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 40
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v13/home-390.png",
+      "documentHeight": 4606,
+      "families": [
+        {
+          "family": "Manrope",
+          "nodes": 91
+        },
+        {
+          "family": "Montserrat",
+          "nodes": 24
+        }
+      ],
+      "recipes": [
+        {
+          "selector": ".mh12-card__frame",
+          "fontFamily": "Manrope",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(246, 243, 236)",
+          "backgroundImage": "none",
+          "borderRadius": "16px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        },
+        {
+          "selector": ".mh12-card__fact",
+          "fontFamily": "Montserrat",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgba(246, 243, 236, 0.74)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        },
+        {
+          "selector": ".mh6-search__form",
+          "fontFamily": "Manrope",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(246, 243, 236)",
+          "backgroundImage": "none",
+          "borderRadius": "12px",
+          "borderTopWidth": "1px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        },
+        {
+          "selector": ".mh12-card",
+          "fontFamily": "Manrope",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(246, 243, 236)",
+          "backgroundImage": "none",
+          "borderRadius": "0px",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "minHeight": "0px"
+        }
+      ],
+      "chips": [
+        {
+          "selector": ".mi-chip, .portal-badge, .demo-content-badge",
+          "fontFamily": "Manrope",
+          "fontSize": "8.5px",
+          "fontWeight": "700",
+          "letterSpacing": "1.02px",
+          "textTransform": "uppercase",
+          "color": "rgb(139, 105, 20)",
+          "backgroundImage": "none",
+          "borderRadius": "9999px",
+          "borderTopWidth": "1px",
+          "boxShadow": "rgba(24, 22, 19, 0.18) 0px 8px 24px 0px",
+          "minHeight": "0px"
+        }
+      ],
+      "figures": 18
+    }
+  ]
+}

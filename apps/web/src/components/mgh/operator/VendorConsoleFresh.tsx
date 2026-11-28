@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 /**
- * F3-V vendor portal — fresh-api backed (key login, submission form, my
+ * F3-V vendor portal â€” fresh-api backed (key login, submission form, my
  * submissions). Applet partner styling: obsidian surface, gold mono eyebrows,
  * gold-gradient-cta. The API key lives in an httpOnly cookie.
  */
@@ -17,9 +17,9 @@ interface SubmissionRow {
 }
 
 const input =
-  'w-full rounded-sm border border-white/15 bg-[#121316] px-3 py-2.5 text-sm text-[#F7F5F0] placeholder-[#6E6250] focus:border-[#D4AF37] outline-none';
-const label = 'block text-[10px] font-[family-name:var(--font-mono)] uppercase tracking-wider text-[#8A857B] mb-1.5';
-const card = 'rounded-sm border border-white/10 bg-[#121316] p-5';
+  'w-full rounded-[var(--mi-r-input)] border border-[var(--mi-line)] bg-[var(--mi-surface)] px-3 py-2.5 text-sm text-[var(--mi-ink)] placeholder-[var(--mi-faint)] focus:border-[var(--mi-gold)] outline-none';
+const label = 'block text-[10px] font-[family-name:var(--font-mono)] uppercase tracking-wider text-[var(--mi-muted)] mb-1.5';
+const card = 'rounded-[var(--mi-r-card)] border border-white/10 bg-[var(--mi-surface)] p-5';
 
 type Kind = 'gemstone' | 'setting' | 'product';
 
@@ -113,13 +113,13 @@ export default function VendorConsole() {
     }
   };
 
-  if (authed === null) return <div className="min-h-screen bg-[#0A0A0B]" />;
+  if (authed === null) return <div className="min-h-screen bg-[var(--mi-canvas)]" />;
 
   if (!authed) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#0A0A0B] text-[#F7F5F0]">
+      <div className="min-h-screen flex flex-col bg-[var(--mi-canvas)] text-[var(--mi-ink)]">
         <main className="flex-1 mx-auto max-w-md w-full px-4 py-28 space-y-6">
-          <p className="text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.26em] text-[#D4AF37] text-center">
+          <p className="text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.26em] text-[var(--mi-gold)] text-center">
             MAIHAN GEMS PARTNERS
           </p>
           <h1 className="font-[family-name:var(--font-display)] text-3xl font-normal text-center">Vendor Sign-In</h1>
@@ -132,8 +132,8 @@ export default function VendorConsole() {
               <label htmlFor="vendor-key" className={label}>API key (issued at onboarding)</label>
               <input id="vendor-key" type="password" value={key} onChange={(e) => setKey(e.target.value)} className={input} />
             </div>
-            {error ? <p className="text-xs text-[#991B1B]">{error}</p> : null}
-            <button type="submit" className="w-full px-6 py-3 gold-gradient-cta text-sm">Sign in</button>
+            {error ? <p className="text-xs text-[var(--mi-negative)]">{error}</p> : null}
+            <button type="submit" className="w-full mi-btn mi-btn--primary w-full">Sign in</button>
           </form>
         </main>
       </div>
@@ -144,24 +144,24 @@ export default function VendorConsole() {
   const vendorCode = decodeURIComponent(saved ?? '');
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-[#F7F5F0]">
-      <header className="border-b border-white/10 bg-[#121316]">
+    <div className="min-h-screen bg-[var(--mi-canvas)] text-[var(--mi-ink)]">
+      <header className="border-b border-white/10 bg-[var(--mi-surface)]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 py-4 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-[family-name:var(--font-mono)] uppercase tracking-[0.26em] text-[#D4AF37]">
+            <p className="text-[10px] font-[family-name:var(--font-mono)] uppercase tracking-[0.26em] text-[var(--mi-gold)]">
               MAIHAN GEMS PARTNERS
             </p>
-            <p className="font-[family-name:var(--font-display)] text-lg">Vendor Portal · {vendorCode}</p>
+            <p className="font-[family-name:var(--font-display)] text-lg">Vendor Portal Â· {vendorCode}</p>
           </div>
-          <button onClick={logout} className="px-4 py-2 border border-[#D4AF37]/40 text-[#E6C97A] text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] hover:bg-[#D4AF37]/10">
+          <button onClick={logout} className="px-4 py-2 mi-btn mi-btn--secondary mi-btn--sm">
             Sign out
           </button>
         </div>
         <nav className="mx-auto max-w-4xl px-4 sm:px-6 flex gap-1">
-          <button onClick={() => setTab('mine')} className={`px-4 py-2 text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] border-b-2 transition-colors ${tab === 'mine' ? 'border-[#D4AF37] text-[#E6C97A]' : 'border-transparent text-[#8A857B] hover:text-[#F7F5F0]'}`}>
+          <button onClick={() => setTab('mine')} className={`px-4 py-2 text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] border-b-2 transition-colors ${tab === 'mine' ? 'border-[var(--mi-gold)] text-[var(--mi-gold-deep)]' : 'border-transparent text-[var(--mi-muted)] hover:text-[var(--mi-ink)]'}`}>
             My Submissions
           </button>
-          <button onClick={() => setTab('new')} className={`px-4 py-2 text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] border-b-2 transition-colors ${tab === 'new' ? 'border-[#D4AF37] text-[#E6C97A]' : 'border-transparent text-[#8A857B] hover:text-[#F7F5F0]'}`}>
+          <button onClick={() => setTab('new')} className={`px-4 py-2 text-[11px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] border-b-2 transition-colors ${tab === 'new' ? 'border-[var(--mi-gold)] text-[var(--mi-gold-deep)]' : 'border-transparent text-[var(--mi-muted)] hover:text-[var(--mi-ink)]'}`}>
             New Submission
           </button>
         </nav>
@@ -171,26 +171,26 @@ export default function VendorConsole() {
         {tab === 'mine' ? (
           <div className="space-y-4">
             {submissions.length === 0 ? (
-              <p className="text-sm text-[#8A857B]">No submissions yet — send your first stone from “New Submission”.</p>
+              <p className="text-sm text-[var(--mi-muted)]">No submissions yet â€” send your first stone from â€œNew Submissionâ€.</p>
             ) : (
               submissions.map((s) => (
                 <div key={s.id} className={card}>
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-[10px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] text-[#D4AF37]">
+                      <p className="text-[10px] font-[family-name:var(--font-mono)] uppercase tracking-[0.2em] text-[var(--mi-gold)]">
                         {s.submission_kind}
                       </p>
                       <p className="font-[family-name:var(--font-display)] text-lg mt-1">
-                        {String(s.payload?.['name'] ?? s.payload?.['variety'] ?? 'Submission')} · {String(s.payload?.['vendor_ref'] ?? '')}
+                        {String(s.payload?.['name'] ?? s.payload?.['variety'] ?? 'Submission')} Â· {String(s.payload?.['vendor_ref'] ?? '')}
                       </p>
                       {s.resulting_ref ? (
-                        <p className="text-xs font-[family-name:var(--font-mono)] text-[#7A7267] mt-1">
-                          Listed as <span className="text-[#E6C97A]">{s.resulting_ref}</span>
+                        <p className="text-xs font-[family-name:var(--font-mono)] text-[var(--mi-faint)] mt-1">
+                          Listed as <span className="text-[var(--mi-gold-deep)]">{s.resulting_ref}</span>
                         </p>
                       ) : null}
                     </div>
                     <span className={`text-[10px] font-[family-name:var(--font-mono)] uppercase tracking-wider px-2 py-1 border ${
-                      s.status === 'SUBMITTED' ? 'border-[#9A3412] text-[#9A3412]' : s.status === 'APPROVED' ? 'border-[#166534] text-[#166534]' : s.status === 'REJECTED' ? 'border-[#991B1B] text-[#991B1B]' : 'border-[#8A857B] text-[#8A857B]'
+                      s.status === 'SUBMITTED' ? 'border-[var(--mi-warning)] text-[var(--mi-warning)]' : s.status === 'APPROVED' ? 'border-[var(--mi-positive)] text-[var(--mi-positive)]' : s.status === 'REJECTED' ? 'border-[var(--mi-negative)] text-[var(--mi-negative)]' : 'border-[var(--mi-line)] text-[var(--mi-muted)]'
                     }`}>
                       {s.status}
                     </span>
@@ -249,12 +249,12 @@ export default function VendorConsole() {
               <label htmlFor="v-desc" className={label}>Description (optional)</label>
               <textarea id="v-desc" value={form['description']} onChange={set('description')} rows={3} className={input} />
             </div>
-            {error ? <p className="text-xs text-[#991B1B]">{error}</p> : null}
-            <button type="submit" disabled={busy} className="w-full px-6 py-3 gold-gradient-cta text-sm disabled:opacity-50">
-              {busy ? 'Submitting…' : 'Submit for approval'}
+            {error ? <p className="text-xs text-[var(--mi-negative)]">{error}</p> : null}
+            <button type="submit" disabled={busy} className="w-full mi-btn mi-btn--primary w-full disabled:opacity-50">
+              {busy ? 'Submittingâ€¦' : 'Submit for approval'}
             </button>
-            <p className="text-[10px] text-[#6E6250] font-[family-name:var(--font-mono)]">
-              Your reference ({form['vendor_ref'] ? form['vendor_ref'] : 'e.g. RB-777'}) is yours alone — the house mints its own code when the submission is approved.
+            <p className="text-[10px] text-[var(--mi-faint)] font-[family-name:var(--font-mono)]">
+              Your reference ({form['vendor_ref'] ? form['vendor_ref'] : 'e.g. RB-777'}) is yours alone â€” the house mints its own code when the submission is approved.
             </p>
           </form>
         )}

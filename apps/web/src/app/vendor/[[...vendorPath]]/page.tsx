@@ -15,6 +15,7 @@ import dynamicImport from 'next/dynamic';
 import { redirect } from 'next/navigation';
 import '../../../styles/mgh-applet.css';
 import '../../../styles/portal-premium.css';
+import { Toaster } from '../../../components/system/Toaster.js';
 import { getVendorSession } from '../../../lib/vendor-session.js';
 
 export const metadata: Metadata = {
@@ -35,5 +36,10 @@ export default async function VendorGatePage(): Promise<React.JSX.Element> {
   const session = await getVendorSession();
   if (session === null) redirect('/vendor/login');
 
-  return <VendorShellMount />;
+  return (
+    <>
+      <VendorShellMount />
+      <Toaster />
+    </>
+  );
 }

@@ -23,6 +23,7 @@ import {
   X,
 } from 'lucide-react';
 import { SettingItem, GEMSTONES } from '@/lib/mgh/fixtures';
+import { notifySuccess } from '@/components/system/Toaster';
 import { useStorefront } from '@/components/mgh/providers/StorefrontProvider';
 import { EvidenceValue } from '@/components/mgh/ui/EvidenceValue';
 import { FormattedPrice } from '@/components/mgh/ui/FormattedPrice';
@@ -462,7 +463,6 @@ export function SettingDetailBelowFoldSections({ setting }: { setting: SettingIt
   const [activeTab, setActiveTab] = useState<
     'details' | 'design' | 'customisation' | 'gemstones' | 'shipping'
   >('details');
-  const [specToast, setSpecToast] = useState(false);
 
   // Compatible loose gemstones for "Perfect Gemstone Pairings"
   const compatibleGemstones = GEMSTONES.filter(
@@ -560,19 +560,16 @@ export function SettingDetailBelowFoldSections({ setting }: { setting: SettingIt
             <button
               type="button"
               onClick={() => {
-                setSpecToast(true);
-                window.setTimeout(() => setSpecToast(false), 2500);
+                notifySuccess(
+                  'Specification prepared',
+                  `CAD & millimeter seat dossier for ${setting.sku}.`,
+                );
               }}
-              className="inline-flex items-center gap-2 rounded-full border border-[#C5A059] bg-[#FAF3E3] hover:bg-[#C5A059] hover:text-[#14100C] px-5 py-2.5 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider font-semibold text-[#1A1612] transition-colors cursor-pointer"
+              className="mi-btn mi-btn--secondary"
             >
               <FileText className="h-3.5 w-3.5" />
               Download Specification
             </button>
-            {specToast && (
-              <p className="text-xs font-[family-name:var(--font-mono)] text-[#15803D]">
-                CAD &amp; Millimeter Seat Dossier prepared for {setting.sku}.
-              </p>
-            )}
           </div>
 
           {/* Column 2: Editorial Narrative ("A Timeless Foundation") */}

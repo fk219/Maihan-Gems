@@ -1676,3 +1676,100 @@ a:focus-visible .mh12-u::after {
     transition: none !important;
   }
 }
+
+/* ══ V13 — THE DESIGN SYSTEM ON THE HOMEPAGE (ADR-030) ═════════════════════
+   Families and card chrome only. Every size, leading, tracking and section
+   height above is untouched: the editorial scale is the page, the system is
+   the material. Montserrat carries display and figures; Manrope carries body,
+   labels, cards and actions. */
+.mh12-home,
+.mh12-footer {
+  --mh12-serif: var(--font-montserrat), "Montserrat", Georgia, "Times New Roman", serif;
+  --mh12-sans: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --mh12-gold-ink: var(--mi-gold-deep);
+  --mh12-focus: var(--mi-gold-deep);
+}
+
+/* figures: Montserrat, tabular lining, so a price never reflows */
+html body .mh12-home .mh12-card__fact,
+html body .mh12-home .mh12-index__facts,
+html body .mh12-home [data-price] {
+  font-family: var(--mh12-serif);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* the closing CTA: the system's primary recipe, in place (same box, same row) */
+.mh12-closing__button {
+  min-height: 48px;
+  border: 1px solid transparent;
+  border-radius: var(--mi-r-pill);
+  background-color: var(--mi-gold-deep);
+  background-image: var(--mi-gold-cta);
+  color: #ffffff;
+  font-family: var(--mh12-sans);
+  font-size: var(--mi-fs-button);
+  font-weight: 800;
+  letter-spacing: var(--mi-track-label);
+  box-shadow: var(--mi-shadow-gold-sm), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition:
+    transform var(--dur-160) var(--ease-silk),
+    box-shadow var(--dur-160) var(--ease-silk);
+}
+
+.mh12-closing__button:hover {
+  transform: translateY(-1px);
+  background-color: var(--mi-gold-deep);
+  color: #ffffff;
+  box-shadow: var(--mi-shadow-gold), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mh12-closing__button:hover {
+    transform: none;
+  }
+}
+
+/* the hero search is an input surface: 12px, the system's input radius */
+.mh12-home .mh6-search__form {
+  border-radius: var(--mi-r-input);
+}
+
+/* the card plate: 16px, one gold hairline, a 1px lift -- no other change */.mh12-card__frame {
+  position: relative;
+  border-radius: var(--mi-r-card);
+  border-color: var(--mi-gold-line);
+}
+
+.mh12-card__frame::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: var(--mi-r-card) var(--mi-r-card) 0 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--mi-gold-line-strong) 18%,
+    var(--mi-gold-line-strong) 82%,
+    transparent 100%
+  );
+  opacity: 0.5;
+}
+
+.mh12-card {
+  transition: transform var(--dur-160) var(--ease-silk);
+}
+
+.mh12-card:hover,
+.mh12-card:focus-visible {
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mh12-card:hover,
+  .mh12-card:focus-visible {
+    transform: none;
+  }
+}

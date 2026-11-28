@@ -13,8 +13,9 @@ import { JsonLd } from '../components/seo/JsonLd.js';
 import './globals.css';
 import './console-auth.css';
 import '../styles/maison.css';
+import '../styles/maihan-system.css';
 import { MAIHAN_THEME_CSS } from '../lib/theme-styles.js';
-import { Geist, EB_Garamond, Plus_Jakarta_Sans, Urbanist } from "next/font/google";
+import { Geist, EB_Garamond, Plus_Jakarta_Sans, Urbanist, Montserrat, Manrope } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { StorefrontProvider as AppletStorefrontProvider } from '../components/mgh/providers/StorefrontProvider.js';
 
@@ -54,9 +55,31 @@ const urbanistPortal = Urbanist({
   display: 'swap',
 });
 
+/**
+ * ADR-030 — the design system's two families.
+ *
+ * Montserrat is the display and figure face; Manrope is the body and interface
+ * face. They are exposed as `--font-montserrat` / `--font-manrope` and aliased
+ * inside `.font-portal` (styles/maihan-system.css). They are deliberately NOT
+ * bound to `--font-sans` on :root: that variable is the storefront's own stack,
+ * and the client asked for the editorial storefront to keep its composition.
+ */
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-montserrat',
+  display: 'swap',
+});
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  variable: '--font-manrope',
+  display: 'swap',
+});
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable, ebGaramondApplet.variable, jakartaSansApplet.variable, urbanistPortal.variable)}>
+    <html lang="en" className={cn("font-sans", geist.variable, ebGaramondApplet.variable, jakartaSansApplet.variable, urbanistPortal.variable, montserrat.variable, manrope.variable)}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -78,7 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           ROOT, so admin/vendor inherit the same cart/currency context). */}
       <body
         suppressHydrationWarning
-        className="min-h-screen bg-[#F8F7F4] text-[#141413] antialiased font-[family-name:var(--font-eb-garamond)] selection:bg-[#D4AF37] selection:text-black"
+        className="min-h-screen bg-[#F8F7F4] text-[#141413] antialiased font-[family-name:var(--font-sans)] selection:bg-[#D4AF37] selection:text-black"
       >
         <a
           href="#main-content"
