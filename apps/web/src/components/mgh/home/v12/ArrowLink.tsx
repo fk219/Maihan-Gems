@@ -1,9 +1,9 @@
 import Link from 'next/link';
 
 /**
- * The page's one action shape: a small label, a rule that draws on hover and
- * an arrow that travels 4 px. It is never a pill and never a filled surface —
- * the four reference houses all refuse the button on editorial ground.
+ * The page's action shape: 14 px text, a rule that draws on hover and an
+ * arrow that travels 4 px. It is a link, never a pill; the closing invitation
+ * is the page's only filled control.
  */
 export function ArrowLink({
   href,
@@ -16,9 +16,9 @@ export function ArrowLink({
 }) {
   return (
     <Link href={href} className={className === undefined ? 'mh12-action' : `mh12-action ${className}`}>
-      {children}
+      <span className="mh12-u">{children}</span>
       <span aria-hidden="true" className="mh12-action__arrow">
-        →
+        &rarr;
       </span>
     </Link>
   );

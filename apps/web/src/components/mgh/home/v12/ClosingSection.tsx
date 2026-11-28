@@ -1,30 +1,24 @@
-import { ArrowLink } from './ArrowLink';
+import Link from 'next/link';
 
 /**
- * The closing is one line and one action. The gold hairline above the band is
- * the page's first gold use; the action's gradient text is the second and
- * last. Both sit on obsidian — no gold glyph ever lands on paper (2.1:1).
+ * The closing invitation. One line and one control. On a phone the control is
+ * a full-width button in the thumb zone; on desktop the line and the button
+ * share one row. The gold hairline above the band is this section's single
+ * gold accent.
  */
 export function ClosingSection() {
   return (
-    <section
-      className="mh12-band mh12-closing"
-      data-section="closing"
-      data-surface="obsidian"
-      aria-labelledby="mh12-close-title"
-    >
+    <section className="mh12-closing" data-section="closing" aria-labelledby="mh12-closing-title">
       <div className="mh12-wrap mh12-closing__inner">
-        <div>
-          <h2 id="mh12-close-title" className="mh12-h2 mh12-closing__title">
-            See the stone before you decide.
-          </h2>
-          <p className="mh12-lede mh12-closing__line">
-            A private viewing is arranged with the house, not through a form.
-          </p>
-        </div>
-        <ArrowLink href="/contact" className="mh12-closing__action">
+        <h2 id="mh12-closing-title" className="mh12-h2">
+          See the stone before you decide.
+        </h2>
+        <Link href="/contact" className="mh12-closing__button">
           Request a private viewing
-        </ArrowLink>
+          <span aria-hidden="true" className="mh12-closing__arrow">
+            &rarr;
+          </span>
+        </Link>
       </div>
     </section>
   );

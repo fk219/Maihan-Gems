@@ -42,7 +42,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
   const offline = isFreshCatalogueOffline();
   return (
     <StorefrontProvider rates={rates} initialCurrency={initialCurrency}>
-      <div className="relative min-h-screen flex flex-col golden-cloud-gallery">
+      <div className="relative min-h-screen flex flex-col golden-cloud-gallery overflow-x-clip">
         <StorefrontHeader />
         <DemoContentBadge />
         {offline ? (

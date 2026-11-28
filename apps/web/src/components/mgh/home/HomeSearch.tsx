@@ -249,7 +249,7 @@ export function HomeSearch() {
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
-          placeholder="Search by variety, origin or reference"
+          placeholder="Search the catalogue"
           className="mh6-search__input"
         />
 

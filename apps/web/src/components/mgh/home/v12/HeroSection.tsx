@@ -1,24 +1,24 @@
 import { HomeSearch } from '../HomeSearch';
 
 /**
- * The hero, kept as approved and re-measured: one stone on the right, one
- * line at 56/60, one supporting sentence, one search. One scrim, no ambient
- * light, no gold word. The photograph settles once over 600 ms.
+ * The hero is one photograph, one line, one search. On a phone the line and
+ * the search sit in the thumb zone above the fixed demo badge; the supporting
+ * sentence appears from the desktop breakpoint, where there is room for it.
+ * On desktop the photograph stays full bleed and the copy takes the left six
+ * columns.
+ *
+ * The photograph is the catalogue's representative sapphire ring, not a
+ * record's own image, and the caption says so.
  */
 export function HeroSection() {
   return (
-    <section
-      className="mh12-hero"
-      data-section="hero"
-      data-surface="obsidian"
-      aria-labelledby="mh12-hero-title"
-    >
-      <div className="mh12-hero__media" aria-hidden="true">
+    <section className="mh12-hero" data-section="hero" aria-labelledby="mh12-hero-title">
+      <div className="mh12-hero__media">
         <img
-          src="/mgh/images/gems/sapphire-gem.jpg"
-          alt=""
-          width={1200}
-          height={1800}
+          src="/media/jew-sapphire-ring.jpg"
+          alt="A sapphire and diamond ring on black velvet, a catalogue photograph"
+          width={1152}
+          height={864}
           fetchPriority="high"
           decoding="async"
         />
@@ -27,13 +27,15 @@ export function HeroSection() {
 
       <div className="mh12-wrap mh12-hero__inner">
         <div className="mh12-hero__content">
-          <h1 id="mh12-hero-title" className="mh12-h1 mh12-hero__title">
+          <span className="mh12-hero__rule" aria-hidden="true" />
+          <h1 id="mh12-hero-title" className="mh12-display">
             The stone comes first.
           </h1>
-          <p className="mh12-lede mh12-hero__lede">
-            Maihan Gems is a gemstone house: loose stones, matched pairs and atelier mountings,
-            each published with the record behind it.
+          <p className="mh12-hero__lede">
+            Loose stones, matched pairs and atelier mountings, each published with the record
+            behind it.
           </p>
+          <p className="mh12-label mh12-hero__note">Illustrative photography</p>
           <div className="mh12-hero__search">
             <HomeSearch />
           </div>

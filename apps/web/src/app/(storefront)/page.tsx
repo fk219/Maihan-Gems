@@ -1,19 +1,15 @@
 import type { Metadata } from 'next';
 import type { GemstoneItem } from '@/lib/mgh/fixtures';
-import {
-  getCatalogGemstoneBySlugOrId,
-  getHomeCatalogGemstones,
-} from '@/lib/mgh/adapters/catalog';
+import { VARIETIES_META } from '@/lib/mgh/fixtures';
+import { getCatalogGemstoneBySlugOrId } from '@/lib/mgh/adapters/catalog';
 import { formatCarat, formatUsd } from '@/components/mgh/home/format';
-import type { ProductCardData } from '@/components/mgh/home/v12/ProductCard';
 import { HeroSection } from '@/components/mgh/home/v12/HeroSection';
-import { CategoryRail } from '@/components/mgh/home/v12/CategoryRail';
-import { StoneRecordSection } from '@/components/mgh/home/v12/StoneRecordSection';
-import { FeaturedPieces } from '@/components/mgh/home/v12/FeaturedPieces';
+import { VarietyMarquee, type Variety } from '@/components/mgh/home/v12/VarietyMarquee';
+import { JewellerySection, type Piece } from '@/components/mgh/home/v12/JewellerySection';
+import { AboutSection } from '@/components/mgh/home/v12/AboutSection';
 import { DesignYourOwnSection } from '@/components/mgh/home/v12/DesignYourOwnSection';
-import { RecordSection } from '@/components/mgh/home/v12/RecordSection';
-import { AiStrip } from '@/components/mgh/home/v12/AiStrip';
-import { ServiceStrip } from '@/components/mgh/home/v12/ServiceStrip';
+import { GemologistSection } from '@/components/mgh/home/v12/GemologistSection';
+import { TryOnSection } from '@/components/mgh/home/v12/TryOnSection';
 import { ClosingSection } from '@/components/mgh/home/v12/ClosingSection';
 
 export const dynamic = 'force-dynamic';
@@ -28,145 +24,113 @@ export const metadata: Metadata = {
 };
 
 /**
- * Jewellery kinds are not stones: a card reading "Fine Rings · Botswana"
- * would describe a finished piece as a gem. Everything else in the pool is a
- * loose stone (or a variety the live taxonomy adds later).
+ * The eight stone varieties in the catalogue taxonomy, each paired with the
+ * catalogue's representative photograph of that variety. `rings` and
+ * `necklaces` are jewellery kinds rather than stones and are excluded.
+ *
+ * The photographs are illustrative stand-ins, not the record of any lot; the
+ * band says so and the site-wide demo badge carries the same notice. The ruby
+ * plate is the committed Wikimedia ruby specimen in `media/stock/` because the
+ * representative ruby render is the only one shot on a white field, which
+ * breaks the dark-fields band. Its caption and credit are in
+ * docs/IMAGE_CREDITS.md.
  */
-const JEWELLERY_VARIETY_SLUGS: ReadonlySet<string> = new Set([
-  'rings',
-  'necklaces',
-  'earrings',
-  'bracelets',
-  'pendants',
-]);
-
-/**
- * A record's title can repeat the weight the spec line already carries
- * ("1.31 ct Violetish Blue Tanzanite"). The card shows the weight once, so a
- * leading weight phrase is dropped from the display name only — no field is
- * altered, and a title without one is printed as it is.
- */
-function displayName(name: string): string {
-  const stripped = name.replace(/^\d+(?:\.\d+)?\s*ct\s+/i, '').trim();
-  return stripped.length > 0 ? stripped : name;
-}
-
-function cardSpec(stone: GemstoneItem): string {
-  const parts: string[] = [];
-  if (Number.isFinite(stone.carat) && stone.carat > 0) parts.push(formatCarat(stone.carat));
-  if (stone.variety.trim().length > 0) parts.push(stone.variety.trim());
-  if (stone.origin.trim().length > 0) parts.push(stone.origin.trim());
-  return parts.join(' · ');
-}
-
-function cardEvidence(stone: GemstoneItem): string {
-  const report = stone.evidence.reportNumber?.trim();
-  return report !== undefined && report.length > 0
-    ? `Report · ${report}`
-    : 'Evidence not recorded';
-}
-
-/**
- * Committed illustrative photographs by variety (docs/IMAGE_CREDITS.md).
- * The demo records' own image fields point at finished-jewellery photographs;
- * printing a necklace above "1.31 ct Tanzanite" would present illustrative
- * stock as the object. A stone card uses the committed variety photograph
- * instead, and the section states that photography is illustrative. A variety
- * without one falls back to the record's own image, then to no image at all.
- */
-const VARIETY_ILLUSTRATION: Readonly<Record<string, string>> = {
-  tanzanite: '/media/stock/tanzanite.jpg',
-  sapphire: '/media/stock/sapphire.jpg',
-  emerald: '/media/stock/emerald.jpg',
-  ruby: '/media/stock/ruby.jpg',
-  spinel: '/media/stock/spinel.jpg',
-  opal: '/media/stock/opal.jpg',
-  amethyst: '/media/stock/amethyst.jpg',
+const VARIETY_PHOTO: Readonly<Record<string, { src: string; alt: string }>> = {
+  tanzanite: {
+    src: '/media/stone-tanzanite.jpg',
+    alt: 'A faceted violet-blue tanzanite on black velvet',
+  },
+  sapphire: {
+    src: '/media/stone-sapphire.jpg',
+    alt: 'A cushion-cut royal blue sapphire on black velvet',
+  },
+  emerald: {
+    src: '/media/stone-emerald.jpg',
+    alt: 'An emerald-cut green emerald on black velvet',
+  },
+  ruby: {
+    src: '/media/stock/ruby.jpg',
+    alt: 'Red ruby crystals in white calcite on a black field',
+  },
+  spinel: {
+    src: '/media/stone-spinel-pink.jpg',
+    alt: 'A cushion-cut neon pink spinel on black velvet',
+  },
+  tourmaline: {
+    src: '/media/stone-rubellite.jpg',
+    alt: 'A cushion-cut rubellite tourmaline, deep pink, on black velvet',
+  },
+  alexandrite: {
+    src: '/media/stone-alexandrite.jpg',
+    alt: 'An oval alexandrite shifting between green and violet',
+  },
+  tsavorite: {
+    src: '/media/stone-tsavorite.jpg',
+    alt: 'A faceted vivid green tsavorite garnet on black velvet',
+  },
 };
 
-function toCard(stone: GemstoneItem): ProductCardData {
-  return {
-    id: stone.id,
-    name: displayName(stone.name),
-    spec: cardSpec(stone),
-    price: stone.price > 0 ? formatUsd(stone.price) : 'On request',
-    evidence: cardEvidence(stone),
-    href: `/products/${stone.slug}`,
-    image: VARIETY_ILLUSTRATION[stone.varietySlug] ?? stone.images[0] ?? null,
-  };
-}
+const STONE_VARIETY_SLUGS: ReadonlySet<string> = new Set(Object.keys(VARIETY_PHOTO));
 
-/**
- * Four priced records, one per variety where the pool allows it, so the row
- * reads as a catalogue rather than four crops of the same stone. Unpriced
- * records stay out of the priced row; the card would read "On request" but a
- * price row of four requests is not the commerce layer the page needs.
- */
-function buildFeaturedCards(stones: readonly GemstoneItem[]): ProductCardData[] {
-  const priced = stones.filter((stone) => stone.price > 0);
-  const chosen: GemstoneItem[] = [];
-  const seen = new Set<string>();
-
-  for (const stone of priced) {
-    if (chosen.length === 4) break;
-    if (JEWELLERY_VARIETY_SLUGS.has(stone.varietySlug)) continue;
-    if (seen.has(stone.varietySlug)) continue;
-    seen.add(stone.varietySlug);
-    chosen.push(stone);
-  }
-
-  for (const stone of priced) {
-    if (chosen.length === 4) break;
-    if (!chosen.includes(stone)) chosen.push(stone);
-  }
-
-  return chosen.slice(0, 4).map(toCard);
-}
-
-/**
- * The record used for the certificate split. The curated record's photograph
- * is the object the record names, so it is preferred; the pool's first
- * reported record is the fallback, and no record means the section does not
- * render.
- */
-function pickRecord(
-  stones: readonly GemstoneItem[],
-  curated: GemstoneItem | null,
-): GemstoneItem | null {
-  const curatedReport = curated?.evidence.reportNumber?.trim() ?? '';
-  if (curated !== null && curatedReport.length > 0) return curated;
-  return (
-    stones.find((stone) => (stone.evidence.reportNumber?.trim() ?? '').length > 0) ??
-    curated ??
-    null
+function buildVarieties(): Variety[] {
+  return VARIETIES_META.filter((variety) => STONE_VARIETY_SLUGS.has(variety.slug)).map(
+    (variety) => {
+      const photo = VARIETY_PHOTO[variety.slug]!;
+      const mohs = variety.mohsHardness.replace(/\s*[\u2013\u2014]\s*/g, '-');
+      return {
+        slug: variety.slug,
+        name: variety.name,
+        fact: `${variety.name} \u00b7 ${mohs} Mohs`,
+        href: `/varieties/${variety.slug}`,
+        image: photo.src,
+        alt: photo.alt,
+      };
+    },
   );
 }
 
 /**
- * The homepage order is the brand spec's: hero → category rail → stone and
- * record → four priced cards → design your own → record/certificate → AI
- * strip → service strip → closing. The footer comes from the storefront
- * layout.
+ * The two finished pieces the fixture ledger holds. Each card uses the
+ * record's own photograph and the record's own carat and price; nothing is
+ * computed from weight and no piece is invented.
+ */
+function toPiece(record: GemstoneItem | null): Piece | null {
+  if (record === null) return null;
+  const image = record.images[0];
+  if (image === undefined) return null;
+  return {
+    id: record.id,
+    name: record.name,
+    fact: `${formatCarat(record.carat)} · ${formatUsd(record.price)}`,
+    href: `/products/${record.slug}`,
+    image,
+    alt: `${record.name}, photographed for its catalogue record`,
+  };
+}
+
+/**
+ * The homepage order is the client brief's: hero, the variety band, jewellery,
+ * the house, design your own, the gemologist, try-on, the closing invitation.
+ * The footer comes from the storefront layout. Every section carries one idea
+ * and one action; the cards carry a photograph, one fact line and one link.
  */
 export default async function HomePage() {
-  const [stones, elysian] = await Promise.all([
-    getHomeCatalogGemstones(),
+  const [elysian, verdant] = await Promise.all([
     getCatalogGemstoneBySlugOrId('elysian-ring'),
+    getCatalogGemstoneBySlugOrId('verdant-drop'),
   ]);
 
-  const cards = buildFeaturedCards(stones);
-  const record = pickRecord(stones, elysian);
+  const pieces = [toPiece(elysian), toPiece(verdant)].filter((piece): piece is Piece => piece !== null);
 
   return (
     <div className="mh12-home">
       <HeroSection />
-      <CategoryRail />
-      <StoneRecordSection />
-      <FeaturedPieces cards={cards} />
+      <VarietyMarquee varieties={buildVarieties()} />
+      <JewellerySection pieces={pieces} />
+      <AboutSection />
       <DesignYourOwnSection />
-      <RecordSection record={record} />
-      <AiStrip />
-      <ServiceStrip />
+      <GemologistSection />
+      <TryOnSection />
       <ClosingSection />
     </div>
   );
