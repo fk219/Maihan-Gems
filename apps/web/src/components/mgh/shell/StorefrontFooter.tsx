@@ -1,9 +1,8 @@
 /**
  * apps/web/src/components/mgh/shell/StorefrontFooter.tsx
  *
- * The back cover of the house, compact: the wordmark and one line about how
- * the house publishes a record, four link groups, the evidence note and the
- * base row.
+ * The back cover of the house: the wordmark, one line about how the house
+ * publishes a record, four link groups, the evidence note and the base row.
  *
  * On a phone the four groups are native disclosures, so the footer opens at
  * about half the height of four stacked columns and needs no script. From the
@@ -15,9 +14,10 @@
  *
  * The address and telephone are the observed organization identity already
  * emitted in the Organization JSON-LD. Every link resolves to a route in the
- * application. There is no newsletter form and no gold fill.
+ * application. There is no newsletter form and no extra gold fill.
  */
 import Link from 'next/link';
+
 import { DemoLoginButton } from '../../auth/DemoLoginButton.js';
 import { isDemoLoginEnabled } from '../../../lib/demo-login.js';
 import { ORGANIZATION_EVIDENCE } from '../../../lib/jsonld.js';
@@ -91,21 +91,20 @@ export function StorefrontFooter() {
 
   return (
     <footer
-      className="mh12-footer"
+      className="mh14-footer"
       data-section="footer"
       data-surface="paper"
       aria-label="Maihan Gems footer"
     >
-      <div className="mh12-footer__inner">
-        <div className="mh12-footer__brand">
-          <Link href="/" className="mh12-footer__wordmark">
+      <div className="mh14-footer__inner">
+        <div className="mh14-footer__brand">
+          <Link href="/" className="mh14-footer__wordmark">
             Maihan Gems
           </Link>
-          <p className="mh12-footer__tagline">
-            Natural gemstones and atelier mountings. What a record carries is shown; what it does
-            not carry is left open.
+          <p className="mh14-footer__tagline">
+            Natural gemstones and atelier mountings, published with the record behind them.
           </p>
-          <address className="mh12-footer__address">
+          <address className="mh14-footer__address">
             {identity.streetAddress}
             <br />
             {identity.addressLocality}, {identity.addressRegion} {identity.postalCode}
@@ -114,15 +113,15 @@ export function StorefrontFooter() {
           </address>
         </div>
 
-        <div className="mh12-footer__accordions">
+        <div className="mh14-footer__accordions">
           {GROUPS.map((group) => (
-            <details className="mh12-fcol" key={group.id}>
-              <summary className="mh12-fcol__summary">
-                <span className="mh12-label">{group.title}</span>
-                <span aria-hidden="true" className="mh12-fcol__mark" />
+            <details className="mh14-fcol" key={group.id}>
+              <summary className="mh14-fcol__summary">
+                <span className="mh14-label">{group.title}</span>
+                <span aria-hidden="true" className="mh14-fcol__mark" />
               </summary>
               <nav aria-label={group.title}>
-                <ul className="mh12-footer__list">
+                <ul className="mh14-footer__list">
                   {group.links.map((link) => (
                     <li key={`${group.id}-${link.href}`}>
                       <Link href={link.href}>{link.label}</Link>
@@ -134,11 +133,11 @@ export function StorefrontFooter() {
           ))}
         </div>
 
-        <div className="mh12-footer__columns">
+        <div className="mh14-footer__columns">
           {GROUPS.map((group) => (
-            <nav aria-label={group.title} key={`${group.id}-wide`} className="mh12-fcol-wide">
-              <h2 className="mh12-label mh12-fcol-wide__title">{group.title}</h2>
-              <ul className="mh12-footer__list">
+            <nav aria-label={group.title} key={`${group.id}-wide`} className="mh14-fcol-wide">
+              <h2 className="mh14-label mh14-fcol-wide__title">{group.title}</h2>
+              <ul className="mh14-footer__list">
                 {group.links.map((link) => (
                   <li key={`${group.id}-wide-${link.href}`}>
                     <Link href={link.href}>{link.label}</Link>
@@ -149,18 +148,18 @@ export function StorefrontFooter() {
           ))}
         </div>
 
-        <p className="mh12-footer__note">
+        <p className="mh14-footer__note">
           <strong>Evidence, not adjectives.</strong> Every specification is shown with the
           evidence status its record carries (INV-07).
         </p>
 
-        <div className="mh12-footer__base">
+        <div className="mh14-footer__base">
           <p>&copy; {currentYear} Maihan Gems</p>
-          <div className="mh12-footer__base-end">
+          <div className="mh14-footer__base-end">
             {demoEnabled ? (
               <DemoLoginButton surface="customer" redirectTo="/account" quiet />
             ) : null}
-            <ul className="mh12-footer__legal">
+            <ul className="mh14-footer__legal">
               {LEGAL.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href}>{link.label}</Link>

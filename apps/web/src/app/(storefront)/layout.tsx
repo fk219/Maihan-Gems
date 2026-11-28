@@ -14,7 +14,7 @@ import '../../styles/operator.css';
 import '../../styles/cloth.css';
 import '../../styles/mgh-applet.css';
 import '../storefront-craft.css';
-import '../../styles/home-v12.css';
+import '../../styles/home-v14.css';
 import { Toaster } from '../../components/system/Toaster.js';
 
 import { AiConciergeLauncher } from '../../components/ai/AiConciergeLauncher.js';

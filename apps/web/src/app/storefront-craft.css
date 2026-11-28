@@ -3752,9 +3752,10 @@ body .golden-cloud-gallery :where(input, select, textarea):focus-visible {
 }
 
 /* ── chips: 9999px at 8.5px / 700 / +0.12em ──────────────────────────────── */
+/* The demo notice is deliberately not a chip: app/demo-content.css owns it,
+   because its text is a sentence at 11.5 px and must wrap, not nowrap. */
 .mh-chip,
-.mi-chip,
-.demo-content-badge {
+.mi-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -3770,18 +3771,6 @@ body .golden-cloud-gallery :where(input, select, textarea):focus-visible {
   letter-spacing: var(--mi-track-label);
   text-transform: uppercase;
   white-space: nowrap;
-}
-
-.demo-content-badge {
-  border-color: var(--mi-gold-line);
-  background: var(--mi-gold-pale);
-  color: var(--mi-gold-deep);
-}
-
-.demo-content-badge strong {
-  font-size: inherit;
-  font-weight: 800;
-  letter-spacing: inherit;
 }
 
 /* ── focus: the system's 2px gold ring ──────────────────────────────────── */
