@@ -1,5 +1,9 @@
 # Homepage v12 — spec compliance report
 
+> **Superseded by `README.md`.** This report records the first v12 spec pass
+> (`docs/BRAND_ANALYSIS.md` §8). The mobile-first rebuild replaced that
+> composition; its measurements, screenshots and card spec live in `README.md`.
+
 **Spec:** `docs/BRAND_ANALYSIS.md` §8 (the client-approved brand analysis).
 **Viewport for every acceptance number:** 1440 × 900, production build,
 `DATABASE_URL` unset (the fixture-backed demo state, so the page renders the

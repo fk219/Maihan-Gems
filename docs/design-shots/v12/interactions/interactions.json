@@ -1,0 +1,104 @@
+{
+  "typeahead": {
+    "visible": true,
+    "box": {
+      "x": 20,
+      "y": 562,
+      "width": 350,
+      "height": 98
+    },
+    "text": "The catalogue could not be read just now.Open the catalogue search"
+  },
+  "disclosure": {
+    "open": true,
+    "height": 317
+  },
+  "reducedMotion": {
+    "marqueeAnimation": "none",
+    "heroAnimation": "none",
+    "cardTransition": "1e-05s",
+    "docHeight": 4530,
+    "overflow": 0,
+    "allSectionsVisible": true
+  },
+  "keyboard": [
+    {
+      "tag": "a",
+      "text": "Skip to main content",
+      "outlineWidth": "3px",
+      "outlineStyle": "solid",
+      "outlineColor": "rgb(26, 26, 24)"
+    },
+    {
+      "tag": "a",
+      "text": "MAIHAN GEMSNatural Gemstones & Fine Jewelry",
+      "outlineWidth": "2px",
+      "outlineStyle": "solid",
+      "outlineColor": "rgb(212, 175, 55)"
+    },
+    {
+      "tag": "button",
+      "text": "Toggle mobile menu",
+      "outlineWidth": "3px",
+      "outlineStyle": "solid",
+      "outlineColor": "rgb(255, 255, 255)"
+    },
+    {
+      "tag": "button",
+      "text": "Currency: USD",
+      "outlineWidth": "2px",
+      "outlineStyle": "solid",
+      "outlineColor": "rgb(255, 255, 255)"
+    },
+    {
+      "tag": "button",
+      "text": "Language: English",
+      "outlineWidth": "2px",
+      "outlineStyle": "solid",
+      "outlineColor": "rgb(255, 255, 255)"
+    },
+    {
+      "tag": "button",
+      "text": "Search gemstones and jewelry",
+      "outlineWidth": "2px",
+      "outlineStyle": "solid",
+      "outlineColor": "rgba(255, 255, 255, 0.85)"
+    },
+    {
+      "tag": "button",
+      "text": "Account Login",
+      "outlineWidth": "2px",
+      "outlineStyle": "solid",
+      "outlineColor": "rgba(255, 255, 255, 0.85)"
+    },
+    {
+      "tag": "a",
+      "text": "Saved items (0)",
+      "outlineWidth": "2px",
+      "outlineStyle": "solid",
+      "outlineColor": "rgba(255, 255, 255, 0.85)"
+    },
+    {
+      "tag": "button",
+      "text": "0 in the shopping bag",
+      "outlineWidth": "3px",
+      "outlineStyle": "solid",
+      "outlineColor": "rgb(255, 255, 255)"
+    },
+    {
+      "tag": "input",
+      "text": "",
+      "outlineWidth": "3px",
+      "outlineStyle": "none",
+      "outlineColor": "rgb(246, 243, 236)"
+    }
+  ],
+  "desktopMarqueePause": {
+    "playState": "paused",
+    "hoveredCardFact": "Ruby · 9.0 Mohs"
+  },
+  "desktopCardHover": {
+    "imageOpacity": "0.9",
+    "underlineTransform": "matrix(1, 0, 0, 1, 0, 0)"
+  }
+}

@@ -1,0 +1,1498 @@
+{
+  "base": "http://localhost:3113",
+  "generatedAt": "2026-11-28T08:21:18.299Z",
+  "widths": [
+    320,
+    390,
+    430,
+    768,
+    1024,
+    1440
+  ],
+  "results": [
+    {
+      "width": 320,
+      "height": 844,
+      "status": 200,
+      "overflow": 0,
+      "axeViolations": 0,
+      "axeRules": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 38
+        }
+      ],
+      "errors": [],
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "document": {
+        "height": 4505,
+        "scrollWidth": 320,
+        "clientWidth": 320
+      },
+      "sections": [
+        {
+          "name": "hero",
+          "top": 0,
+          "height": 844
+        },
+        {
+          "name": "varieties",
+          "top": 844,
+          "height": 500.48
+        },
+        {
+          "name": "jewellery",
+          "top": 1344.48,
+          "height": 542.48
+        },
+        {
+          "name": "about",
+          "top": 1886.97,
+          "height": 457
+        },
+        {
+          "name": "design-your-own",
+          "top": 2343.97,
+          "height": 583
+        },
+        {
+          "name": "gemologist",
+          "top": 2926.97,
+          "height": 299
+        },
+        {
+          "name": "try-on",
+          "top": 3225.97,
+          "height": 407.66
+        },
+        {
+          "name": "closing",
+          "top": 3633.63,
+          "height": 261
+        },
+        {
+          "name": "footer",
+          "top": 3894.63,
+          "height": 610
+        }
+      ],
+      "cards": {
+        "marquee": [
+          {
+            "width": 249.59,
+            "height": 387.48
+          },
+          {
+            "width": 249.59,
+            "height": 387.48
+          }
+        ],
+        "jewellery": [
+          {
+            "width": 166.39,
+            "height": 311.48
+          },
+          {
+            "width": 166.39,
+            "height": 311.48
+          }
+        ]
+      },
+      "type": {
+        "sizes": [
+          {
+            "size": "40/44",
+            "count": 1
+          },
+          {
+            "size": "32/36",
+            "count": 1
+          },
+          {
+            "size": "24/30",
+            "count": 6
+          },
+          {
+            "size": "20/24",
+            "count": 5
+          },
+          {
+            "size": "16/26",
+            "count": 3
+          },
+          {
+            "size": "14/20",
+            "count": 53
+          },
+          {
+            "size": "12/16.8",
+            "count": 2
+          },
+          {
+            "size": "11/16",
+            "count": 19
+          }
+        ],
+        "families": [
+          "\"Cormorant Garamond\"",
+          "Jost"
+        ]
+      },
+      "targets": {
+        "total": 50,
+        "under24": [],
+        "under44": 7
+      },
+      "images": [
+        {
+          "src": "/media/jew-sapphire-ring.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/mgh/images/elysian-ring.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/verdant-drop.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/media/stock/tanzanite-rough.jpg",
+          "natural": "1920x2891",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/gems/setting-ring.jpg",
+          "natural": "1200x800",
+          "complete": true
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "overflow": 0,
+      "axeViolations": 0,
+      "axeRules": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 38
+        }
+      ],
+      "errors": [],
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "document": {
+        "height": 4530,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "sections": [
+        {
+          "name": "hero",
+          "top": 0,
+          "height": 844
+        },
+        {
+          "name": "varieties",
+          "top": 844,
+          "height": 568.5
+        },
+        {
+          "name": "jewellery",
+          "top": 1412.5,
+          "height": 587.98
+        },
+        {
+          "name": "about",
+          "top": 2000.48,
+          "height": 411.25
+        },
+        {
+          "name": "design-your-own",
+          "top": 2411.73,
+          "height": 537
+        },
+        {
+          "name": "gemologist",
+          "top": 2948.73,
+          "height": 279
+        },
+        {
+          "name": "try-on",
+          "top": 3227.73,
+          "height": 481.55
+        },
+        {
+          "name": "closing",
+          "top": 3709.28,
+          "height": 231
+        },
+        {
+          "name": "footer",
+          "top": 3940.28,
+          "height": 590
+        }
+      ],
+      "cards": {
+        "marquee": [
+          {
+            "width": 304,
+            "height": 455.5
+          },
+          {
+            "width": 304,
+            "height": 455.5
+          }
+        ],
+        "jewellery": [
+          {
+            "width": 202.8,
+            "height": 356.98
+          },
+          {
+            "width": 202.8,
+            "height": 356.98
+          }
+        ]
+      },
+      "type": {
+        "sizes": [
+          {
+            "size": "40/44",
+            "count": 1
+          },
+          {
+            "size": "32/36",
+            "count": 1
+          },
+          {
+            "size": "24/30",
+            "count": 6
+          },
+          {
+            "size": "20/24",
+            "count": 5
+          },
+          {
+            "size": "16/26",
+            "count": 3
+          },
+          {
+            "size": "14/20",
+            "count": 53
+          },
+          {
+            "size": "12/16.8",
+            "count": 2
+          },
+          {
+            "size": "11/16",
+            "count": 19
+          }
+        ],
+        "families": [
+          "\"Cormorant Garamond\"",
+          "Jost"
+        ]
+      },
+      "targets": {
+        "total": 50,
+        "under24": [],
+        "under44": 7
+      },
+      "images": [
+        {
+          "src": "/media/jew-sapphire-ring.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/mgh/images/elysian-ring.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/verdant-drop.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/media/stock/tanzanite-rough.jpg",
+          "natural": "1920x2891",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/gems/setting-ring.jpg",
+          "natural": "1200x800",
+          "complete": true
+        }
+      ]
+    },
+    {
+      "width": 430,
+      "height": 844,
+      "status": 200,
+      "overflow": 0,
+      "axeViolations": 0,
+      "axeRules": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 37
+        }
+      ],
+      "errors": [],
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "document": {
+        "height": 4526,
+        "scrollWidth": 430,
+        "clientWidth": 430
+      },
+      "sections": [
+        {
+          "name": "hero",
+          "top": 0,
+          "height": 844
+        },
+        {
+          "name": "varieties",
+          "top": 844,
+          "height": 568.5
+        },
+        {
+          "name": "jewellery",
+          "top": 1412.5,
+          "height": 588.25
+        },
+        {
+          "name": "about",
+          "top": 2000.75,
+          "height": 436.25
+        },
+        {
+          "name": "design-your-own",
+          "top": 2437,
+          "height": 537
+        },
+        {
+          "name": "gemologist",
+          "top": 2974,
+          "height": 243
+        },
+        {
+          "name": "try-on",
+          "top": 3217,
+          "height": 523.77
+        },
+        {
+          "name": "closing",
+          "top": 3740.77,
+          "height": 231
+        },
+        {
+          "name": "footer",
+          "top": 3971.77,
+          "height": 554
+        }
+      ],
+      "cards": {
+        "marquee": [
+          {
+            "width": 304,
+            "height": 455.5
+          },
+          {
+            "width": 304,
+            "height": 455.5
+          }
+        ],
+        "jewellery": [
+          {
+            "width": 203,
+            "height": 357.25
+          },
+          {
+            "width": 203,
+            "height": 357.25
+          }
+        ]
+      },
+      "type": {
+        "sizes": [
+          {
+            "size": "40/44",
+            "count": 1
+          },
+          {
+            "size": "32/36",
+            "count": 1
+          },
+          {
+            "size": "24/30",
+            "count": 6
+          },
+          {
+            "size": "20/24",
+            "count": 5
+          },
+          {
+            "size": "16/26",
+            "count": 3
+          },
+          {
+            "size": "14/20",
+            "count": 53
+          },
+          {
+            "size": "12/16.8",
+            "count": 2
+          },
+          {
+            "size": "11/16",
+            "count": 19
+          }
+        ],
+        "families": [
+          "\"Cormorant Garamond\"",
+          "Jost"
+        ]
+      },
+      "targets": {
+        "total": 50,
+        "under24": [],
+        "under44": 7
+      },
+      "images": [
+        {
+          "src": "/media/jew-sapphire-ring.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/mgh/images/elysian-ring.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/verdant-drop.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/media/stock/tanzanite-rough.jpg",
+          "natural": "1920x2891",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/gems/setting-ring.jpg",
+          "natural": "1200x800",
+          "complete": true
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "height": 844,
+      "status": 200,
+      "overflow": 0,
+      "axeViolations": 0,
+      "axeRules": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 37
+        }
+      ],
+      "errors": [],
+      "viewport": {
+        "width": 768,
+        "height": 844
+      },
+      "document": {
+        "height": 4504,
+        "scrollWidth": 768,
+        "clientWidth": 768
+      },
+      "sections": [
+        {
+          "name": "hero",
+          "top": 0,
+          "height": 844
+        },
+        {
+          "name": "varieties",
+          "top": 844,
+          "height": 553.28
+        },
+        {
+          "name": "jewellery",
+          "top": 1397.28,
+          "height": 485.88
+        },
+        {
+          "name": "about",
+          "top": 1883.16,
+          "height": 545.75
+        },
+        {
+          "name": "design-your-own",
+          "top": 2428.91,
+          "height": 443
+        },
+        {
+          "name": "gemologist",
+          "top": 2871.91,
+          "height": 217
+        },
+        {
+          "name": "try-on",
+          "top": 3088.91,
+          "height": 584.11
+        },
+        {
+          "name": "closing",
+          "top": 3673.02,
+          "height": 241
+        },
+        {
+          "name": "footer",
+          "top": 3914.02,
+          "height": 590
+        }
+      ],
+      "cards": {
+        "marquee": [
+          {
+            "width": 291.83,
+            "height": 440.28
+          },
+          {
+            "width": 291.83,
+            "height": 440.28
+          }
+        ],
+        "jewellery": [
+          {
+            "width": 203.5,
+            "height": 357.88
+          },
+          {
+            "width": 127.66,
+            "height": 263.06
+          }
+        ]
+      },
+      "type": {
+        "sizes": [
+          {
+            "size": "40/44",
+            "count": 1
+          },
+          {
+            "size": "32/36",
+            "count": 1
+          },
+          {
+            "size": "24/30",
+            "count": 6
+          },
+          {
+            "size": "20/24",
+            "count": 5
+          },
+          {
+            "size": "16/26",
+            "count": 3
+          },
+          {
+            "size": "14/20",
+            "count": 53
+          },
+          {
+            "size": "12/16.8",
+            "count": 2
+          },
+          {
+            "size": "11/16",
+            "count": 20
+          }
+        ],
+        "families": [
+          "\"Cormorant Garamond\"",
+          "Jost"
+        ]
+      },
+      "targets": {
+        "total": 50,
+        "under24": [],
+        "under44": 6
+      },
+      "images": [
+        {
+          "src": "/media/jew-sapphire-ring.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/mgh/images/elysian-ring.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/verdant-drop.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/media/stock/tanzanite-rough.jpg",
+          "natural": "1920x2891",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/gems/setting-ring.jpg",
+          "natural": "1200x800",
+          "complete": true
+        }
+      ]
+    },
+    {
+      "width": 1024,
+      "height": 900,
+      "status": 200,
+      "overflow": 0,
+      "axeViolations": 0,
+      "axeRules": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 27
+        }
+      ],
+      "errors": [],
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "document": {
+        "height": 4529,
+        "scrollWidth": 1024,
+        "clientWidth": 1024
+      },
+      "sections": [
+        {
+          "name": "hero",
+          "top": 0,
+          "height": 760
+        },
+        {
+          "name": "varieties",
+          "top": 760,
+          "height": 550.5
+        },
+        {
+          "name": "jewellery",
+          "top": 1310.5,
+          "height": 554.56
+        },
+        {
+          "name": "about",
+          "top": 1865.06,
+          "height": 488
+        },
+        {
+          "name": "design-your-own",
+          "top": 2353.06,
+          "height": 442
+        },
+        {
+          "name": "gemologist",
+          "top": 2795.06,
+          "height": 341
+        },
+        {
+          "name": "try-on",
+          "top": 3136.06,
+          "height": 584.11
+        },
+        {
+          "name": "closing",
+          "top": 3720.17,
+          "height": 241
+        },
+        {
+          "name": "footer",
+          "top": 3961.17,
+          "height": 568
+        }
+      ],
+      "cards": {
+        "marquee": [
+          {
+            "width": 200,
+            "height": 325.5
+          },
+          {
+            "width": 200,
+            "height": 325.5
+          }
+        ],
+        "jewellery": [
+          {
+            "width": 253.66,
+            "height": 426.56
+          },
+          {
+            "width": 161.11,
+            "height": 310.88
+          }
+        ]
+      },
+      "type": {
+        "sizes": [
+          {
+            "size": "88/88",
+            "count": 1
+          },
+          {
+            "size": "64/66",
+            "count": 1
+          },
+          {
+            "size": "40/44",
+            "count": 5
+          },
+          {
+            "size": "24/30",
+            "count": 6
+          },
+          {
+            "size": "16/26",
+            "count": 4
+          },
+          {
+            "size": "14/20",
+            "count": 71
+          },
+          {
+            "size": "12/16.8",
+            "count": 2
+          },
+          {
+            "size": "11/16",
+            "count": 20
+          }
+        ],
+        "families": [
+          "\"Cormorant Garamond\"",
+          "Jost"
+        ]
+      },
+      "targets": {
+        "total": 47,
+        "under24": [
+          {
+            "tag": "a",
+            "text": "+1-212-804-9994",
+            "w": 103,
+            "h": 20
+          }
+        ],
+        "under44": 7
+      },
+      "images": [
+        {
+          "src": "/media/jew-sapphire-ring.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "1920x1275",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "1920x1275",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/mgh/images/elysian-ring.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/verdant-drop.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/media/stock/tanzanite-rough.jpg",
+          "natural": "1920x2891",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/gems/setting-ring.jpg",
+          "natural": "1200x800",
+          "complete": true
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "overflow": 0,
+      "axeViolations": 0,
+      "axeRules": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 35
+        }
+      ],
+      "errors": [],
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "document": {
+        "height": 4698,
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "sections": [
+        {
+          "name": "hero",
+          "top": 0,
+          "height": 760
+        },
+        {
+          "name": "varieties",
+          "top": 760,
+          "height": 550.5
+        },
+        {
+          "name": "jewellery",
+          "top": 1310.5,
+          "height": 682.91
+        },
+        {
+          "name": "about",
+          "top": 1993.41,
+          "height": 598
+        },
+        {
+          "name": "design-your-own",
+          "top": 2591.41,
+          "height": 372
+        },
+        {
+          "name": "gemologist",
+          "top": 2963.41,
+          "height": 341
+        },
+        {
+          "name": "try-on",
+          "top": 3304.41,
+          "height": 584.11
+        },
+        {
+          "name": "closing",
+          "top": 3888.52,
+          "height": 241
+        },
+        {
+          "name": "footer",
+          "top": 4129.52,
+          "height": 568
+        }
+      ],
+      "cards": {
+        "marquee": [
+          {
+            "width": 200,
+            "height": 325.5
+          },
+          {
+            "width": 200,
+            "height": 325.5
+          }
+        ],
+        "jewellery": [
+          {
+            "width": 356.33,
+            "height": 554.91
+          },
+          {
+            "width": 229.55,
+            "height": 396.42
+          }
+        ]
+      },
+      "type": {
+        "sizes": [
+          {
+            "size": "88/88",
+            "count": 1
+          },
+          {
+            "size": "64/66",
+            "count": 1
+          },
+          {
+            "size": "40/44",
+            "count": 5
+          },
+          {
+            "size": "24/30",
+            "count": 6
+          },
+          {
+            "size": "16/26",
+            "count": 4
+          },
+          {
+            "size": "14/20",
+            "count": 71
+          },
+          {
+            "size": "12/16.8",
+            "count": 2
+          },
+          {
+            "size": "11/16",
+            "count": 20
+          }
+        ],
+        "families": [
+          "\"Cormorant Garamond\"",
+          "Jost"
+        ]
+      },
+      "targets": {
+        "total": 47,
+        "under24": [
+          {
+            "tag": "a",
+            "text": "+1-212-804-9994",
+            "w": 103,
+            "h": 20
+          }
+        ],
+        "under44": 7
+      },
+      "images": [
+        {
+          "src": "/media/jew-sapphire-ring.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "1920x1275",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "1152x864",
+          "complete": true
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tanzanite.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-sapphire.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-emerald.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stock/ruby.jpg",
+          "natural": "1920x1275",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-spinel-pink.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-rubellite.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-alexandrite.jpg",
+          "natural": "1152x864",
+          "complete": false
+        },
+        {
+          "src": "/media/stone-tsavorite.jpg",
+          "natural": "0x0",
+          "complete": false
+        },
+        {
+          "src": "/mgh/images/elysian-ring.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/verdant-drop.jpg",
+          "natural": "900x1200",
+          "complete": true
+        },
+        {
+          "src": "/media/stock/tanzanite-rough.jpg",
+          "natural": "1920x2891",
+          "complete": true
+        },
+        {
+          "src": "/mgh/images/gems/setting-ring.jpg",
+          "natural": "1200x800",
+          "complete": true
+        }
+      ]
+    }
+  ]
+}

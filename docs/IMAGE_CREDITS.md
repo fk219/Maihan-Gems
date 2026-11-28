@@ -35,20 +35,25 @@ regardless.
 | `spinel.jpg` | Red spinel octahedra in white marble on black | Nessa Eull | CC0 | [File:Spinel (GeoDIL number - 563).jpg](https://commons.wikimedia.org/wiki/File:Spinel_(GeoDIL_number_-_563).jpg) | original, 2240 × 1632 |
 | `diamond.jpg` | Large cushion-cut deep blue diamond in a white-diamond halo | Unknown photographer, Smithsonian Institution Archives | Public domain | [File:The Hope Diamond - SIA.jpg](https://commons.wikimedia.org/wiki/File:The_Hope_Diamond_-_SIA.jpg) | original, 2367 × 2193 |
 
-## Where each file is used
+## Where each file is used (homepage v12, mobile-first)
 
 | File | Section | Caption honesty |
 |---|---|---|
-| `tanzanite.jpg` | The collection (lead plate) | Variety name + the representative record's carat over the image, captioned "Illustrative photograph" |
-| `sapphire.jpg`, `ruby.jpg`, `emerald.jpg`, `opal.jpg` | The collection (variety tiles) | Variety name + "Illustrative" over the image |
-| `spinel.jpg` | The collection (variety tiles) | Variety name + "Illustrative" over the image |
-| `tanzanite-rough.jpg` | Design your own | "Illustrative photograph — the stone before the bench." |
-| `amethyst.jpg` | AI gemologist | "Illustrative photography" |
-| `diamond.jpg` | Certificate intelligence | "Illustrative photography — not the record's stone." |
+| `ruby.jpg` | The variety band, ruby card | The band's own label reads "Illustrative images"; the card reads "Ruby · 9.0 Mohs". |
+| `tanzanite-rough.jpg` | The house, the gold-lit plate | The plate's caption reads "Before the bench. Illustrative photograph." |
+
+The remaining stock photographs are not used by the homepage as built. The
+variety band's other seven cards use the catalogue's representative stone
+photographs in `apps/web/public/media/stone-*.jpg` (recorded in
+`apps/web/src/lib/storefront-images.ts`); the band labels all of them
+"Illustrative images". The hero uses the catalogue's representative sapphire
+ring (`media/jew-sapphire-ring.jpg`) and labels it "Illustrative photography".
 
 The atelier plates do not come from this directory; they are the two fixture
 records' own committed images (`/mgh/images/elysian-ring.jpg`,
-`/mgh/images/verdant-drop.jpg`), captioned with those records' names.
+`/mgh/images/verdant-drop.jpg`). The homepage's jewellery cards use those
+records' own photographs, names, carat and price; no illustrative caption is
+attached to them because the photograph is the record's own.
 
 ## Note on the renders
 
