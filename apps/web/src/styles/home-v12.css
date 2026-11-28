@@ -1,0 +1,1532 @@
+/* ============================================================================
+   home-v12.css — the homepage rebuilt on the measured brand spec
+   ============================================================================
+   Source of truth: docs/BRAND_ANALYSIS.md §8. This sheet implements the
+   quantities, not a new concept:
+
+     1. TWO SURFACES. Paper #F7F4EC and obsidian #08121E, hard cuts. Dark
+        chase photography lives in obsidian bands; light-field work on paper.
+     2. SEVEN TYPE STEPS. 56/60, 36/44, 18/28, 16/26, 16/22, 12/18, 14/20.
+        Cormorant Garamond and Jost only. No mono, no 10 px, no 115 px.
+     3. GOLD IS SPENT TWICE. The closing hairline and one gradient-text
+        action. No gold glyph on paper (2.1:1).
+     4. CARDS ARE BORDERLESS. Radius 0, no shadow, no lift. Hover is an
+        underline that draws (200 ms) and image opacity (300 ms).
+     5. MOTION IS A HOVER STATE. 150 ms links, 240 ms arrow, one 600 ms hero
+        entrance. No scroll-driven property, no marquee, no ambient loop.
+
+   Everything is scoped to .mh12-home / .mh12-footer so no other route is
+   restyled by accident.
+   ========================================================================== */
+
+.mh12-home,
+.mh12-footer {
+  --mh12-paper: #f7f4ec;
+  --mh12-obsidian: #08121e;
+  --mh12-ink: #17140f;
+  --mh12-ink-muted: #5e574b;
+  --mh12-cream: #f7f3e8;
+  --mh12-cream-muted: #b9b3a7;
+  --mh12-hairline: rgba(23, 20, 15, 0.16);
+  --mh12-hairline-dark: rgba(247, 243, 232, 0.18);
+  --mh12-gold: #c9a84c;
+  --mh12-gold-gradient: linear-gradient(90deg, #cc9200 0%, #e9cd6b 100%);
+  --mh12-max: 1360px;
+  --mh12-gutter: 40px;
+  /* Two families, named here rather than inherited: the storefront theme
+     re-solves --font-sans to Outfit, and this page is Cormorant + Jost. */
+  --mh12-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --mh12-sans: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Hover goes through the house curve; the arrow keeps its own nudge. */
+  --mh12-hover: cubic-bezier(0.4, 0, 0.6, 1);
+  --mh12-settle: cubic-bezier(0.25, 1, 0.5, 1);
+  --mh12-arrow: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mh12-home {
+  overflow-x: clip;
+  background: var(--mh12-paper);
+  color: var(--mh12-ink);
+  font-family: var(--mh12-sans);
+  font-size: 16px;
+  line-height: 26px;
+  font-weight: 400;
+}
+
+.mh12-home *,
+.mh12-footer * {
+  box-sizing: border-box;
+}
+
+/* ── the grid ──────────────────────────────────────────────────────────────
+   12 columns, 1360 px content, 24 px gutters, 40 px side margin at 1440.
+   max-width is the CONTENT width, so at 1440 the auto margins are the 40 px
+   side margin. Below 1440 the wrap pads instead of shrinking to the edge. */
+
+.mh12-wrap {
+  width: 100%;
+  max-width: var(--mh12-max);
+  margin-inline: auto;
+}
+
+@media (max-width: 1439px) {
+  .mh12-wrap {
+    max-width: none;
+    padding-inline: clamp(20px, 4vw, 40px);
+  }
+}
+
+/* ── the seven type steps ──────────────────────────────────────────────────
+   Two weights only: 500 for display and labels, 400 everywhere else. */
+
+.mh12-home h1.mh12-h1 {
+  margin: 0;
+  font-family: var(--mh12-serif);
+  font-size: 56px;
+  font-weight: 500;
+  line-height: 60px;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.mh12-home h2.mh12-h2 {
+  margin: 0;
+  font-family: var(--mh12-serif);
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 44px;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+.mh12-lede {
+  margin: 0;
+  font-family: var(--mh12-sans);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 28px;
+}
+
+.mh12-body {
+  margin: 0;
+  font-family: var(--mh12-sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 26px;
+  text-wrap: pretty;
+}
+
+.mh12-cardname {
+  margin: 0;
+  font-family: var(--mh12-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
+}
+
+.mh12-label {
+  margin: 0;
+  font-family: var(--mh12-sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.mh12-price {
+  margin: 0;
+  font-family: var(--mh12-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.mh12-home .mh12-muted {
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-dark .mh12-muted {
+  color: var(--mh12-cream-muted);
+}
+
+/* ── the one action per section ────────────────────────────────────────────
+   A label, a rule and an arrow. The rule draws over 150 ms; the arrow
+   travels 4 px over 240 ms. Never a pill, never a fill. */
+
+.mh12-action {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding-block: 10px 12px;
+  font-family: var(--mh12-sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: inherit;
+  text-decoration: none;
+}
+
+.mh12-action::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 8px;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 150ms var(--mh12-hover);
+}
+
+.mh12-action:hover::after,
+.mh12-action:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.mh12-action__arrow {
+  display: inline-block;
+  font-size: 14px;
+  letter-spacing: 0;
+  line-height: 20px;
+  transition: transform 240ms var(--mh12-arrow);
+}
+
+.mh12-action:hover .mh12-action__arrow {
+  transform: translateX(4px);
+}
+
+/* ── the section band ──────────────────────────────────────────────────────
+   Three heights only: hero 810, editorial 560–760, strip 420–500. The
+   min-block-size values hold the measured rhythm at desktop; the content
+   defines the height below 1024. */
+
+.mh12-band {
+  padding-block: 48px;
+}
+
+.mh12-band--paper {
+  background: var(--mh12-paper);
+  color: var(--mh12-ink);
+}
+
+.mh12-band--dark {
+  background: var(--mh12-obsidian);
+  color: var(--mh12-cream);
+}
+
+/* The focus ring is re-solved on every obsidian band: the paper ring
+   (#7c6323) is a 2.9:1 indicator on #08121E. Cream is 17:1 and spends no
+   gold. */
+.mh12-hero,
+.mh12-band--dark,
+.mh12-dyo,
+.mh12-closing {
+  --mh-focus-ring: var(--mh12-cream);
+  --focus-ring-ink: var(--mh12-cream);
+  --mh-focus-halo: rgba(8, 18, 30, 0.9);
+}
+
+/* ══ 1. HERO ════════════════════════════════════════════════════════════════
+   One stone on the right, one line at 56/60, one sentence, one search. One
+   scrim, no ambient light, one 600 ms entrance on the photograph. */
+
+.mh12-hero {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-block-size: 810px;
+  overflow: hidden;
+  background: var(--mh12-obsidian);
+  color: var(--mh12-cream);
+}
+
+.mh12-hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+}
+
+.mh12-hero__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 10%;
+  animation: mh12-hero-in 600ms var(--mh12-settle) both;
+}
+
+/* The single legibility device: one gradient, left to right. */
+.mh12-hero__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    var(--mh12-obsidian) 0%,
+    rgba(8, 18, 30, 0.97) 32%,
+    rgba(8, 18, 30, 0.88) 50%,
+    rgba(8, 18, 30, 0.55) 70%,
+    rgba(8, 18, 30, 0.14) 100%
+  );
+}
+
+.mh12-hero__inner {
+  position: relative;
+  z-index: 2;
+  padding-block: 128px 96px;
+}
+
+.mh12-hero__content {
+  max-width: 720px;
+}
+
+.mh12-hero__title {
+  color: var(--mh12-cream);
+}
+
+.mh12-hero__lede {
+  margin-top: 24px;
+  max-width: 46ch;
+  color: var(--mh12-cream-muted);
+}
+
+.mh12-hero__search {
+  margin-top: 40px;
+  max-width: 600px;
+}
+
+@keyframes mh12-hero-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* The search control, re-solved for this page: one hairline, no gold. */
+.mh12-home .mh6-search__form {
+  height: 56px;
+  padding: 0 6px 0 16px;
+  border: 1px solid rgba(247, 243, 232, 0.28);
+  border-radius: 0;
+  background: rgba(8, 18, 30, 0.8);
+  transition: border-color 150ms var(--mh12-hover);
+}
+
+.mh12-home .mh6-search__form:hover {
+  border-color: rgba(247, 243, 232, 0.55);
+}
+
+.mh12-home .mh6-search__form:focus-within {
+  border-color: var(--mh12-cream);
+  box-shadow: none;
+}
+
+.mh12-home .mh6-search__icon {
+  color: var(--mh12-cream-muted);
+}
+
+.mh12-home .mh6-search__input {
+  font-family: var(--mh12-sans);
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--mh12-cream);
+}
+
+.mh12-home .mh6-search__input::placeholder {
+  color: var(--mh12-cream-muted);
+}
+
+.mh12-home .mh6-search__submit {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(247, 243, 232, 0.32);
+  border-radius: 0;
+  color: var(--mh12-cream);
+  font-family: var(--mh12-sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  transition: border-color 150ms var(--mh12-hover);
+}
+
+.mh12-home .mh6-search__submit:hover {
+  border-color: var(--mh12-cream);
+  background: rgba(247, 243, 232, 0.06);
+}
+
+.mh12-home .mh6-search__clear {
+  color: var(--mh12-cream-muted);
+}
+
+.mh12-home .mh6-search__panel {
+  border: 1px solid var(--mh12-hairline-dark);
+  border-radius: 0;
+  background: var(--mh12-obsidian);
+  box-shadow: none;
+}
+
+.mh12-home .mh6-search__state {
+  color: var(--mh12-cream-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.mh12-home .mh6-search__state-link {
+  color: var(--mh12-cream);
+  font-size: 14px;
+  line-height: 20px;
+  text-decoration-color: var(--mh12-hairline-dark);
+}
+
+.mh12-home .mh6-search__option {
+  border-top: 1px solid var(--mh12-hairline-dark);
+}
+
+.mh12-home .mh6-search__option:hover,
+.mh12-home .mh6-search__option.is-active {
+  background: rgba(247, 243, 232, 0.05);
+  box-shadow: inset 2px 0 0 var(--mh12-cream);
+}
+
+.mh12-home .mh6-search__option-name {
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--mh12-cream);
+}
+
+.mh12-home .mh6-search__option.is-active .mh6-search__option-name {
+  color: var(--mh12-cream);
+}
+
+.mh12-home .mh6-search__option-meta {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--mh12-cream-muted);
+}
+
+.mh12-home .mh6-search__option-price {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--mh12-cream-muted);
+}
+
+/* ══ 2. CATEGORY RAIL ═══════════════════════════════════════════════════════
+   Three tiles, 437 × 546 (4:5), label under. The commerce enters as named
+   categories, the way all four reference houses do it in screen two. */
+
+.mh12-cats {
+  padding-block: 48px;
+}
+
+.mh12-cats__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mh12-cat {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.mh12-cat__frame {
+  display: block;
+  overflow: hidden;
+  background: var(--mh12-obsidian);
+}
+
+.mh12-cat__frame img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  transition: opacity 300ms ease-out;
+}
+
+.mh12-cat:hover .mh12-cat__frame img {
+  opacity: 0.96;
+}
+
+.mh12-cat__body {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 12px;
+}
+
+.mh12-cat__name {
+  color: var(--mh12-ink);
+}
+
+.mh12-cat__hint {
+  flex: none;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-cat__draw {
+  position: relative;
+  display: inline-block;
+}
+
+.mh12-cat__draw::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms ease-out;
+}
+
+.mh12-cat:hover .mh12-cat__draw::after,
+.mh12-cat:focus-visible .mh12-cat__draw::after {
+  transform: scaleX(1);
+}
+
+.mh12-cats__note {
+  margin-top: 24px;
+  color: var(--mh12-ink-muted);
+}
+
+/* ══ 3. THE STONE AND THE RECORD ════════════════════════════════════════════
+   One 21:9 full-bleed photograph on the paper band; the line sits on the
+   image's own field at its foot, one scrim only. */
+
+.mh12-stone {
+  padding-block: 0;
+}
+
+.mh12-stone__figure {
+  position: relative;
+  margin: 0;
+}
+
+.mh12-stone__figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.mh12-stone__figure::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    0deg,
+    rgba(8, 18, 30, 0.94) 0%,
+    rgba(8, 18, 30, 0.82) 24%,
+    rgba(8, 18, 30, 0) 60%
+  );
+}
+
+.mh12-stone__copy {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px 48px;
+  padding-bottom: 40px;
+  color: var(--mh12-cream);
+}
+
+.mh12-stone__title {
+  max-width: 22ch;
+  color: var(--mh12-cream);
+}
+
+.mh12-stone__action {
+  margin-bottom: 4px;
+  color: var(--mh12-cream);
+}
+
+.mh12-stone__caption {
+  padding-top: 16px;
+  padding-bottom: 40px;
+  color: var(--mh12-ink-muted);
+}
+
+/* ══ 4. FEATURED PIECES — the card grid ═════════════════════════════════════
+   Four cards of 322 px. Borderless, radius 0, no shadow, no lift. */
+
+.mh12-featured {
+  padding-block: 48px;
+}
+
+.mh12-featured__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 48px;
+  padding-bottom: 32px;
+}
+
+.mh12-featured__action {
+  margin-bottom: 4px;
+}
+
+.mh12-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mh12-featured__note {
+  margin-top: 8px;
+  color: var(--mh12-ink-muted);
+}
+
+/* ══ THE CARD ═══════════════════════════════════════════════════════════════
+   image → spec → name → price/on request → evidence. Radius 0, border 0,
+   shadow none. Hover draws the name's rule (200 ms) and drops the image
+   opacity to 0.96 (300 ms). No scale, no translate. */
+
+.mh12-card {
+  display: block;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--mh12-ink);
+  text-decoration: none;
+}
+
+.mh12-card__frame {
+  display: block;
+  overflow: hidden;
+  background: var(--mh12-obsidian);
+}
+
+.mh12-card__frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  transition: opacity 300ms ease-out;
+}
+
+.mh12-card[data-ratio='1:1'] .mh12-card__frame img {
+  aspect-ratio: 1 / 1;
+}
+
+.mh12-card[data-ratio='4:5'] .mh12-card__frame img {
+  aspect-ratio: 4 / 5;
+}
+
+.mh12-card:hover .mh12-card__frame img,
+.mh12-card:focus-visible .mh12-card__frame img {
+  opacity: 0.96;
+}
+
+/* A record with no photograph keeps its text block; nothing stands in. */
+.mh12-card__frame--empty {
+  display: none;
+}
+
+.mh12-card__body {
+  display: block;
+  padding-top: 12px;
+}
+
+.mh12-card__spec {
+  display: block;
+  overflow: hidden;
+  color: var(--mh12-ink-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mh12-card__name {
+  display: block;
+  margin-top: 4px;
+  color: var(--mh12-ink);
+}
+
+.mh12-card__draw {
+  position: relative;
+  display: inline-block;
+}
+
+.mh12-card__draw::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms ease-out;
+}
+
+.mh12-card:hover .mh12-card__draw::after,
+.mh12-card:focus-visible .mh12-card__draw::after {
+  transform: scaleX(1);
+}
+
+.mh12-card__price {
+  display: block;
+  margin-top: 6px;
+  color: var(--mh12-ink);
+}
+
+.mh12-card__evidence {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--mh12-ink);
+}
+
+.mh12-card__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ══ 5. DESIGN YOUR OWN ═════════════════════════════════════════════════════
+   Obsidian, one 3:4 photograph, one line, one action. */
+
+.mh12-dyo {
+  background: var(--mh12-obsidian);
+  color: var(--mh12-cream);
+}
+
+.mh12-dyo__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  gap: 64px;
+  align-items: center;
+}
+
+.mh12-dyo__title {
+  color: var(--mh12-cream);
+}
+
+.mh12-dyo__line {
+  margin-top: 24px;
+  max-width: 44ch;
+  color: var(--mh12-cream-muted);
+}
+
+.mh12-dyo__action {
+  margin-top: 32px;
+  color: var(--mh12-cream);
+}
+
+.mh12-dyo__figure {
+  width: 100%;
+  max-width: 420px;
+  margin: 0;
+  justify-self: end;
+}
+
+.mh12-dyo__figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: 50% 42%;
+}
+
+.mh12-dyo__caption {
+  margin-top: 12px;
+  color: var(--mh12-cream-muted);
+}
+
+/* ══ 6. RECORD / CERTIFICATE ════════════════════════════════════════════════
+   A split on paper: the record's real fields on the left, its own photograph
+   on the right. Absent fields print as absent. */
+
+.mh12-record__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  gap: 64px;
+  align-items: center;
+}
+
+.mh12-record__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-record__facts {
+  margin: 32px 0 0;
+  border-top: 1px solid var(--mh12-hairline);
+}
+
+.mh12-record__facts > div {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 16px;
+  padding-block: 10px;
+  border-bottom: 1px solid var(--mh12-hairline);
+}
+
+.mh12-record__facts dt {
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-record__facts dd {
+  margin: 0;
+  color: var(--mh12-ink);
+}
+
+.mh12-record__action {
+  margin-top: 32px;
+}
+
+.mh12-record__figure {
+  width: 100%;
+  max-width: 480px;
+  margin: 0;
+  justify-self: end;
+}
+
+.mh12-record__figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.mh12-record__caption {
+  margin-top: 12px;
+  color: var(--mh12-ink-muted);
+}
+
+/* ══ 7. THE AI GEMOLOGIST — a strip, not a section ══════════════════════════
+   One line, one honest entry, one refusal note. 420 px. */
+
+.mh12-ai {
+  display: flex;
+  align-items: center;
+}
+
+.mh12-ai__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px 64px;
+  align-items: center;
+  width: 100%;
+}
+
+.mh12-ai__title {
+  max-width: 20ch;
+}
+
+.mh12-ai__form {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--mh12-ink);
+  transition: border-color 150ms var(--mh12-hover);
+}
+
+.mh12-ai__form:focus-within {
+  border-color: var(--mh12-ink);
+}
+
+.mh12-ai__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  border: 0;
+  background: transparent;
+  color: var(--mh12-ink);
+  font-family: var(--mh12-sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 26px;
+}
+
+.mh12-ai__input::placeholder {
+  color: var(--mh12-ink-muted);
+  opacity: 1;
+}
+
+.mh12-ai__input:focus {
+  outline: none;
+}
+
+.mh12-ai__input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.mh12-ai__submit {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 4px 0 16px;
+  border: 0;
+  background: transparent;
+  color: var(--mh12-ink);
+  font-family: var(--mh12-sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.mh12-ai__note {
+  margin-top: 16px;
+  color: var(--mh12-ink-muted);
+}
+
+/* ══ 8. SERVICE STRIP ═══════════════════════════════════════════════════════
+   Four facts, four hairlines. Nothing here promises what the house has not
+   decided. 460 px. */
+
+.mh12-service {
+  display: flex;
+  align-items: center;
+}
+
+.mh12-service__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+.mh12-service__item {
+  display: block;
+  padding-top: 16px;
+  border-top: 1px solid var(--mh12-hairline);
+  color: inherit;
+  text-decoration: none;
+}
+
+.mh12-service__label {
+  display: block;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-service__line {
+  display: block;
+  margin-top: 12px;
+  color: var(--mh12-ink);
+}
+
+.mh12-service__note {
+  margin-top: 8px;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-service__draw {
+  position: relative;
+  display: inline-block;
+}
+
+.mh12-service__draw::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 150ms var(--mh12-hover);
+}
+
+.mh12-service__item:hover .mh12-service__draw::after,
+.mh12-service__item:focus-visible .mh12-service__draw::after {
+  transform: scaleX(1);
+}
+
+/* ══ 9. CLOSING ═════════════════════════════════════════════════════════════
+   Obsidian, one line, one action. Gold use #1 is the hairline above the
+   band; gold use #2 is the gradient text of the action. */
+
+.mh12-closing {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--mh12-gold);
+  background: var(--mh12-obsidian);
+  color: var(--mh12-cream);
+}
+
+.mh12-closing__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px 64px;
+}
+
+.mh12-closing__title {
+  max-width: 18ch;
+  color: var(--mh12-cream);
+}
+
+.mh12-closing__line {
+  margin-top: 16px;
+  max-width: 44ch;
+  color: var(--mh12-cream-muted);
+}
+
+/* The one gradient-text moment. Never on paper; #CC9200 retains 6.9:1 on
+   #08121E, so the darkest stop still clears AA for 12 px text. */
+.mh12-closing__action {
+  color: transparent;
+  background-image: var(--mh12-gold-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.mh12-closing__action::after {
+  background: var(--mh12-gold-gradient);
+}
+
+/* The base layer hard-codes a #D4AF37 focus ring (2.1:1 on paper). On this
+   page the ring takes the surface's own ink: #7c6323 on paper, cream on every
+   obsidian band. The width and offset stay the base layer's. */
+.mh12-home *:focus-visible,
+.mh12-footer *:focus-visible {
+  outline-color: var(--focus-ring-ink, #7c6323) !important;
+}
+
+/* Forced-colors mode cannot paint background-clip text; fall back to the
+   system ink so the action never disappears. */
+@media (forced-colors: active) {
+  .mh12-closing__action {
+    color: CanvasText;
+    background-image: none;
+  }
+
+  .mh12-closing__action::after {
+    background: CanvasText;
+  }
+}
+
+/* ── desktop rhythm ────────────────────────────────────────────────────────
+   Exactly three heights: 810, 560–760, 420–500. The footer keeps its own
+   520–680 target. */
+
+@media (min-width: 1024px) {
+  .mh12-hero {
+    min-block-size: 810px;
+  }
+
+  .mh12-cats {
+    min-block-size: 738px;
+  }
+
+  .mh12-stone {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-block-size: 723px;
+  }
+
+  .mh12-featured {
+    min-block-size: 610px;
+  }
+
+  .mh12-dyo {
+    min-block-size: 656px;
+  }
+
+  .mh12-record {
+    min-block-size: 696px;
+  }
+
+  .mh12-ai {
+    min-block-size: 420px;
+  }
+
+  .mh12-service {
+    min-block-size: 460px;
+  }
+
+  .mh12-closing {
+    min-block-size: 560px;
+  }
+
+  .mh12-footer {
+    min-block-size: 640px;
+  }
+}
+
+/* ── responsive ────────────────────────────────────────────────────────────
+   The card grid follows the spec: 4 at 1440, 3 at 1024, 2 at 768, 1 at 390. */
+
+@media (max-width: 1279px) {
+  .mh12-grid-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1023px) {
+  .mh12-hero {
+    min-block-size: 100svh;
+    align-items: end;
+  }
+
+  .mh12-hero__media {
+    width: 100%;
+  }
+
+  .mh12-hero__media img {
+    object-position: 62% 34%;
+  }
+
+  .mh12-hero__scrim {
+    background: linear-gradient(
+      180deg,
+      rgba(8, 18, 30, 0.72) 0%,
+      rgba(8, 18, 30, 0.5) 32%,
+      rgba(8, 18, 30, 0.92) 50%,
+      rgba(8, 18, 30, 0.97) 66%,
+      var(--mh12-obsidian) 82%,
+      var(--mh12-obsidian) 100%
+    );
+  }
+
+  .mh12-hero__inner {
+    padding-block: 160px 120px;
+  }
+
+  .mh12-cats {
+    padding-block: 40px;
+  }
+
+  .mh12-dyo__grid,
+  .mh12-record__grid,
+  .mh12-ai__inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+
+  .mh12-stone__copy {
+    position: static;
+    padding: 24px 0 0;
+    color: var(--mh12-ink);
+  }
+
+  .mh12-stone__figure::after {
+    display: none;
+  }
+
+  .mh12-stone__title,
+  .mh12-stone__action {
+    color: var(--mh12-ink);
+  }
+
+  .mh12-stone__caption {
+    padding-top: 12px;
+  }
+
+  .mh12-service {
+    padding-block: 40px;
+  }
+
+  .mh12-service__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 24px;
+  }
+
+  .mh12-ai {
+    padding-block: 40px;
+  }
+
+  .mh12-ai__inner {
+    gap: 24px;
+  }
+
+  .mh12-closing {
+    padding-block: 64px;
+  }
+}
+
+@media (max-width: 900px) {
+  .mh12-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .mh12-cats__grid,
+  .mh12-grid-4,
+  .mh12-service__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mh12-hero__inner {
+    padding-block: 160px 120px;
+  }
+
+  .mh12-record__facts > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .mh12-closing__inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* ── reduced motion ────────────────────────────────────────────────────────
+   The hero entrance is the page's only automatic motion. */
+
+@media (prefers-reduced-motion: reduce) {
+  .mh12-hero__media img {
+    animation: none;
+  }
+
+  .mh12-action,
+  .mh12-action::after,
+  .mh12-action__arrow,
+  .mh12-card__frame img,
+  .mh12-card__draw::after,
+  .mh12-cat__frame img,
+  .mh12-cat__draw::after,
+  .mh12-service__draw::after,
+  .mh12-footer__list a::after,
+  .mh12-home .mh6-search__form {
+    transition: none;
+  }
+}
+
+/* ══ THE FOOTER ═════════════════════════════════════════════════════════════
+   Paper, 520–680 px: a four-item service row, four link columns, the brand
+   block with the evidence note, and the base row. No gold fills. */
+
+.mh12-footer {
+  padding-block: 40px 96px;
+  border-top: 1px solid var(--mh12-hairline);
+  background: var(--mh12-paper);
+  color: var(--mh12-ink);
+  font-family: var(--mh12-sans);
+  font-size: 16px;
+  line-height: 26px;
+  font-weight: 400;
+}
+
+.mh12-footer__inner {
+  width: 100%;
+  max-width: var(--mh12-max);
+  margin-inline: auto;
+}
+
+@media (max-width: 1439px) {
+  .mh12-footer__inner {
+    max-width: none;
+    padding-inline: clamp(20px, 4vw, 40px);
+  }
+}
+
+.mh12-footer__service {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0 0 24px;
+  border-bottom: 1px solid var(--mh12-hairline);
+  list-style: none;
+}
+
+.mh12-footer__service a {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.mh12-footer__service-label {
+  display: block;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-footer__service-line {
+  display: block;
+  margin-top: 4px;
+  color: var(--mh12-ink);
+}
+
+.mh12-footer__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) repeat(4, minmax(0, 0.72fr));
+  gap: 32px;
+  padding-block: 16px;
+}
+
+.mh12-footer__wordmark {
+  font-family: var(--mh12-serif);
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 44px;
+  letter-spacing: -0.005em;
+  color: var(--mh12-ink);
+  text-decoration: none;
+}
+
+.mh12-footer__tagline {
+  margin-top: 12px;
+  max-width: 34ch;
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-footer__journal {
+  margin-top: 14px;
+  max-width: 320px;
+}
+
+.mh12-footer__journal .mh6-journal {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.mh12-footer__journal .mh6-journal__label {
+  font-family: var(--mh12-sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-footer__journal .mh6-journal__copy {
+  display: none;
+}
+
+.mh12-footer__journal .mh6-journal__form {
+  border-bottom: 1px solid var(--mh12-ink);
+}
+
+.mh12-footer__journal .mh6-journal__form:focus-within {
+  border-color: var(--mh12-ink);
+  box-shadow: none;
+}
+
+.mh12-footer__journal .mh6-journal__input {
+  color: var(--mh12-ink);
+  font-family: var(--mh12-sans);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.mh12-footer__journal .mh6-journal__input::placeholder {
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-footer__journal .mh6-journal__submit {
+  color: var(--mh12-ink);
+  font-family: var(--mh12-sans);
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.mh12-footer__journal .mh6-journal__confirm,
+.mh12-footer__journal .mh6-journal__error {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-footer__address {
+  margin-top: 16px;
+  font-size: 14px;
+  font-style: normal;
+  line-height: 20px;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-footer__address a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--mh12-hairline);
+  text-underline-offset: 3px;
+}
+
+.mh12-footer h3.mh12-footer__col-title {
+  margin: 0 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--mh12-hairline);
+  font-family: var(--mh12-sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-footer__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mh12-footer__list a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--mh12-ink);
+  text-decoration: none;
+}
+
+.mh12-footer__list a::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 5px;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 150ms var(--mh12-hover);
+}
+
+.mh12-footer__list a:hover::after,
+.mh12-footer__list a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.mh12-footer__note {
+  max-width: 88ch;
+  margin: 0;
+  padding-block: 16px;
+  border-top: 1px solid var(--mh12-hairline);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-footer__note strong {
+  font-weight: 500;
+  color: var(--mh12-ink);
+}
+
+.mh12-footer__base {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 32px;
+  padding-top: 8px;
+  border-top: 1px solid var(--mh12-hairline);
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--mh12-ink-muted);
+}
+
+.mh12-footer__base p {
+  margin: 0;
+}
+
+.mh12-footer__base-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+}
+
+.mh12-footer__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mh12-footer__legal a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.mh12-footer__legal a:hover,
+.mh12-footer__legal a:focus-visible {
+  color: var(--mh12-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 1023px) {
+  .mh12-footer__top {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .mh12-footer__brand {
+    grid-column: 1 / -1;
+  }
+
+  .mh12-footer__service {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .mh12-footer {
+    padding-block: 40px 24px;
+  }
+
+  .mh12-footer__service {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .mh12-footer__top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

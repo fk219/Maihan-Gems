@@ -1,0 +1,2586 @@
+{
+  "base": "http://localhost:3113",
+  "generatedAt": "2026-11-28T07:13:49.858Z",
+  "widths": [
+    1440,
+    1024,
+    768,
+    390
+  ],
+  "scores": {
+    "axeViolationNodes": 0,
+    "contentViolationNodes": 0,
+    "contentIncompleteNodes": 47,
+    "overflowCaptures": 0,
+    "pageErrorCaptures": 0,
+    "nonOkCaptures": 0
+  },
+  "at1440": {
+    "documentHeight": 6431,
+    "surfaces": {
+      "paper": 4372.89,
+      "obsidian": 2058,
+      "other": 0,
+      "paperPct": 68,
+      "obsidianPct": 32,
+      "otherPct": 0
+    },
+    "media": {
+      "area": 3710238,
+      "sharePct": 40.06
+    },
+    "computed": {
+      "h1": {
+        "fontFamily": "Cormorant Garamond",
+        "fontSize": "56px",
+        "fontWeight": "500",
+        "lineHeight": "60px",
+        "letterSpacing": "-0.56px",
+        "textTransform": "none",
+        "color": "rgb(247, 243, 232)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "normal"
+      },
+      "h2": {
+        "fontFamily": "Cormorant Garamond",
+        "fontSize": "36px",
+        "fontWeight": "500",
+        "lineHeight": "44px",
+        "letterSpacing": "-0.18px",
+        "textTransform": "none",
+        "color": "rgb(23, 20, 15)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "normal"
+      },
+      "lede": {
+        "fontFamily": "Jost",
+        "fontSize": "18px",
+        "fontWeight": "400",
+        "lineHeight": "28px",
+        "letterSpacing": "normal",
+        "textTransform": "none",
+        "color": "rgb(185, 179, 167)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "normal"
+      },
+      "body": {
+        "fontFamily": "Jost",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26px",
+        "letterSpacing": "normal",
+        "textTransform": "none",
+        "color": "rgb(23, 20, 15)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "normal"
+      },
+      "cardName": {
+        "fontFamily": "Cormorant Garamond",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "22px",
+        "letterSpacing": "normal",
+        "textTransform": "none",
+        "color": "rgb(23, 20, 15)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "normal"
+      },
+      "label": {
+        "fontFamily": "Jost",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "lineHeight": "18px",
+        "letterSpacing": "0.84px",
+        "textTransform": "uppercase",
+        "color": "rgb(94, 87, 75)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "normal"
+      },
+      "price": {
+        "fontFamily": "Jost",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "20px",
+        "letterSpacing": "normal",
+        "textTransform": "none",
+        "color": "rgb(23, 20, 15)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "card": {
+        "fontFamily": "Jost",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26px",
+        "letterSpacing": "normal",
+        "textTransform": "none",
+        "color": "rgb(23, 20, 15)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0.15s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "normal"
+      },
+      "cardImage": {
+        "fontFamily": "Jost",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26px",
+        "letterSpacing": "normal",
+        "textTransform": "none",
+        "color": "rgb(23, 20, 15)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0.3s",
+        "transitionProperty": "opacity",
+        "fontVariantNumeric": "normal"
+      },
+      "cardNameDraw": {
+        "fontFamily": "Cormorant Garamond",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "22px",
+        "letterSpacing": "normal",
+        "textTransform": "none",
+        "color": "rgb(23, 20, 15)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "normal"
+      },
+      "action": {
+        "fontFamily": "Jost",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "lineHeight": "18px",
+        "letterSpacing": "0.84px",
+        "textTransform": "uppercase",
+        "color": "rgb(23, 20, 15)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0.15s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "normal"
+      },
+      "footer": {
+        "fontFamily": "Jost",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26px",
+        "letterSpacing": "normal",
+        "textTransform": "none",
+        "color": "rgb(23, 20, 15)",
+        "backgroundColor": "rgb(247, 244, 236)",
+        "borderRadius": "0px",
+        "borderWidth": "1px",
+        "boxShadow": "none",
+        "transitionDuration": "0s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "normal"
+      },
+      "closingAction": {
+        "fontFamily": "Jost",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "lineHeight": "18px",
+        "letterSpacing": "0.84px",
+        "textTransform": "uppercase",
+        "color": "rgba(0, 0, 0, 0)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transitionDuration": "0.15s",
+        "transitionProperty": "all",
+        "fontVariantNumeric": "normal"
+      }
+    },
+    "typeSizes": [
+      {
+        "size": "56px",
+        "count": 1
+      },
+      {
+        "size": "36px",
+        "count": 7
+      },
+      {
+        "size": "18px",
+        "count": 3
+      },
+      {
+        "size": "16px",
+        "count": 18
+      },
+      {
+        "size": "14px",
+        "count": 45
+      },
+      {
+        "size": "12px",
+        "count": 46
+      }
+    ],
+    "typeFamilies": [
+      {
+        "family": "Jost",
+        "count": 105
+      },
+      {
+        "family": "Cormorant Garamond",
+        "count": 15
+      }
+    ],
+    "gold": {
+      "count": 2,
+      "items": [
+        {
+          "tag": "section",
+          "cls": "mh12-band.mh12-closing",
+          "text": "See the stone before you decide.A private viewin",
+          "properties": [
+            "borderTopColor=rgb(201, 168, 76)"
+          ]
+        },
+        {
+          "tag": "a",
+          "cls": "mh12-action.mh12-closing__action",
+          "text": "Request a private viewing→",
+          "properties": [
+            "backgroundImage=linear-gradient(90deg, rgb(204, 146, 0), rgb(233, 205, 107))"
+          ]
+        }
+      ]
+    },
+    "hero": {
+      "height": 810,
+      "animationName": "mh12-hero-in",
+      "firstPriceTop": 2807
+    },
+    "cards": [
+      {
+        "w": 322,
+        "h": 431.5
+      },
+      {
+        "w": 322,
+        "h": 431.5
+      },
+      {
+        "w": 322,
+        "h": 431.5
+      },
+      {
+        "w": 322,
+        "h": 431.5
+      }
+    ],
+    "categories": [
+      {
+        "w": 437.33,
+        "h": 580.66
+      },
+      {
+        "w": 437.33,
+        "h": 580.66
+      },
+      {
+        "w": 437.34,
+        "h": 580.67
+      }
+    ],
+    "footer": {
+      "top": 5758.5,
+      "w": 1440,
+      "h": 672.39
+    },
+    "gridGap": "24px",
+    "sideMargin": {
+      "left": 40,
+      "right": 40
+    },
+    "sections": [
+      {
+        "name": "hero",
+        "surface": "obsidian",
+        "top": 0,
+        "height": 810
+      },
+      {
+        "name": "categories",
+        "surface": "paper",
+        "top": 810,
+        "height": 738
+      },
+      {
+        "name": "stone",
+        "surface": "paper",
+        "top": 1548,
+        "height": 723
+      },
+      {
+        "name": "featured",
+        "surface": "paper",
+        "top": 2271,
+        "height": 631.5
+      },
+      {
+        "name": "dyo",
+        "surface": "obsidian",
+        "top": 2902.5,
+        "height": 688
+      },
+      {
+        "name": "record",
+        "surface": "paper",
+        "top": 3590.5,
+        "height": 728
+      },
+      {
+        "name": "ai",
+        "surface": "paper",
+        "top": 4318.5,
+        "height": 420
+      },
+      {
+        "name": "service",
+        "surface": "paper",
+        "top": 4738.5,
+        "height": 460
+      },
+      {
+        "name": "closing",
+        "surface": "obsidian",
+        "top": 5198.5,
+        "height": 560
+      },
+      {
+        "name": "footer",
+        "surface": "paper",
+        "top": 5758.5,
+        "height": 672.39
+      }
+    ]
+  },
+  "results": [
+    {
+      "width": 1440,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 29
+        }
+      ],
+      "contentAxe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "nodes": [
+              {
+                "target": "#mh12-hero-title",
+                "html": "<h1 id=\"mh12-hero-title\" class=\"mh12-h1 mh12-hero__title\">The stone comes first.</h1>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": ".mh12-hero__lede",
+                "html": "<p class=\"mh12-lede mh12-hero__lede\">Maihan Gems is a gemstone house: loose stones, matched pairs and atelier mountings, each published with the record behind i",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": "#mh6-home-search",
+                "html": "<input id=\"mh6-home-search\" type=\"text\" inputmode=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combobox\" aria-expanded=\"false\" aria-autocomplete=\"list\" ",
+                "summary": "Fix any of the following: Element has no value; test color contrast with a value entered"
+              },
+              {
+                "target": ".mh6-search__submit > span",
+                "html": "<span>Search</span>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": "#mh12-stone-title",
+                "html": "<h2 id=\"mh12-stone-title\" class=\"mh12-h2 mh12-stone__title\">The stone, and the record behind it.</h2>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a pseudo element"
+              },
+              {
+                "target": ".mh12-stone__action",
+                "html": "<a class=\"mh12-action mh12-stone__action\" href=\"/gemstones\">See every gemstone<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span></a>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a pseudo element"
+              },
+              {
+                "target": ".mh12-stone__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-featured__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-dyo__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-record__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-ai__submit > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-closing__action",
+                "html": "<a class=\"mh12-action mh12-closing__action\" href=\"/contact\">Request a private viewing<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span></a>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": ".mh12-closing__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              }
+            ]
+          }
+        ]
+      },
+      "errors": [],
+      "screenshot": "docs/design-shots/v12/home-1440.png",
+      "documentHeight": 6431,
+      "documentWidth": 1440,
+      "sections": [
+        {
+          "name": "hero",
+          "surface": "obsidian",
+          "top": 0,
+          "height": 810
+        },
+        {
+          "name": "categories",
+          "surface": "paper",
+          "top": 810,
+          "height": 738
+        },
+        {
+          "name": "stone",
+          "surface": "paper",
+          "top": 1548,
+          "height": 723
+        },
+        {
+          "name": "featured",
+          "surface": "paper",
+          "top": 2271,
+          "height": 631.5
+        },
+        {
+          "name": "dyo",
+          "surface": "obsidian",
+          "top": 2902.5,
+          "height": 688
+        },
+        {
+          "name": "record",
+          "surface": "paper",
+          "top": 3590.5,
+          "height": 728
+        },
+        {
+          "name": "ai",
+          "surface": "paper",
+          "top": 4318.5,
+          "height": 420
+        },
+        {
+          "name": "service",
+          "surface": "paper",
+          "top": 4738.5,
+          "height": 460
+        },
+        {
+          "name": "closing",
+          "surface": "obsidian",
+          "top": 5198.5,
+          "height": 560
+        },
+        {
+          "name": "footer",
+          "surface": "paper",
+          "top": 5758.5,
+          "height": 672.39
+        }
+      ],
+      "surfaces": {
+        "paper": 4372.89,
+        "obsidian": 2058,
+        "other": 0,
+        "paperPct": 68,
+        "obsidianPct": 32,
+        "otherPct": 0
+      },
+      "computed": {
+        "h1": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "56px",
+          "fontWeight": "500",
+          "lineHeight": "60px",
+          "letterSpacing": "-0.56px",
+          "textTransform": "none",
+          "color": "rgb(247, 243, 232)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "h2": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "36px",
+          "fontWeight": "500",
+          "lineHeight": "44px",
+          "letterSpacing": "-0.18px",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "lede": {
+          "fontFamily": "Jost",
+          "fontSize": "18px",
+          "fontWeight": "400",
+          "lineHeight": "28px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(185, 179, 167)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "body": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "cardName": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "22px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "label": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgb(94, 87, 75)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "price": {
+          "fontFamily": "Jost",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "tabular-nums"
+        },
+        "card": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "cardImage": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.3s",
+          "transitionProperty": "opacity",
+          "fontVariantNumeric": "normal"
+        },
+        "cardNameDraw": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "22px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "action": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "footer": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgb(247, 244, 236)",
+          "borderRadius": "0px",
+          "borderWidth": "1px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "closingAction": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgba(0, 0, 0, 0)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        }
+      },
+      "media": {
+        "area": 3710238,
+        "pageArea": 9260640,
+        "sharePct": 40.06,
+        "items": [
+          {
+            "src": "/mgh/images/gems/sapphire-gem.jpg",
+            "w": 1440,
+            "h": 810,
+            "area": 1166400
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 437.33,
+            "h": 546.66,
+            "area": 239068
+          },
+          {
+            "src": "/mgh/images/gems/earrings-pair.jpg",
+            "w": 437.33,
+            "h": 546.66,
+            "area": 239068
+          },
+          {
+            "src": "/mgh/images/gems/setting-ring.jpg",
+            "w": 437.34,
+            "h": 546.67,
+            "area": 239084
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 1440,
+            "h": 617.14,
+            "area": 888683
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 322,
+            "h": 322,
+            "area": 103684
+          },
+          {
+            "src": "/media/stock/sapphire.jpg",
+            "w": 322,
+            "h": 322,
+            "area": 103684
+          },
+          {
+            "src": "/media/stock/emerald.jpg",
+            "w": 322,
+            "h": 322,
+            "area": 103684
+          },
+          {
+            "src": "/media/stock/ruby.jpg",
+            "w": 322,
+            "h": 322,
+            "area": 103684
+          },
+          {
+            "src": "/media/stock/tanzanite-rough.jpg",
+            "w": 420,
+            "h": 560,
+            "area": 235200
+          },
+          {
+            "src": "/mgh/images/elysian-ring.jpg",
+            "w": 480,
+            "h": 600,
+            "area": 288000
+          }
+        ]
+      },
+      "type": {
+        "sizes": [
+          {
+            "size": "56px",
+            "count": 1
+          },
+          {
+            "size": "36px",
+            "count": 7
+          },
+          {
+            "size": "18px",
+            "count": 3
+          },
+          {
+            "size": "16px",
+            "count": 18
+          },
+          {
+            "size": "14px",
+            "count": 45
+          },
+          {
+            "size": "12px",
+            "count": 46
+          }
+        ],
+        "families": [
+          {
+            "family": "Jost",
+            "count": 105
+          },
+          {
+            "family": "Cormorant Garamond",
+            "count": 15
+          }
+        ]
+      },
+      "gold": {
+        "count": 2,
+        "items": [
+          {
+            "tag": "section",
+            "cls": "mh12-band.mh12-closing",
+            "text": "See the stone before you decide.A private viewin",
+            "properties": [
+              "borderTopColor=rgb(201, 168, 76)"
+            ]
+          },
+          {
+            "tag": "a",
+            "cls": "mh12-action.mh12-closing__action",
+            "text": "Request a private viewing→",
+            "properties": [
+              "backgroundImage=linear-gradient(90deg, rgb(204, 146, 0), rgb(233, 205, 107))"
+            ]
+          }
+        ]
+      },
+      "hero": {
+        "height": 810,
+        "animationName": "mh12-hero-in",
+        "firstPriceTop": 2807
+      },
+      "cards": [
+        {
+          "w": 322,
+          "h": 431.5
+        },
+        {
+          "w": 322,
+          "h": 431.5
+        },
+        {
+          "w": 322,
+          "h": 431.5
+        },
+        {
+          "w": 322,
+          "h": 431.5
+        }
+      ],
+      "categories": [
+        {
+          "w": 437.33,
+          "h": 580.66
+        },
+        {
+          "w": 437.33,
+          "h": 580.66
+        },
+        {
+          "w": 437.34,
+          "h": 580.67
+        }
+      ],
+      "footer": {
+        "top": 5758.5,
+        "w": 1440,
+        "h": 672.39
+      },
+      "gridGap": "24px",
+      "sideMargin": {
+        "left": 40,
+        "right": 40
+      }
+    },
+    {
+      "width": 1024,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 23
+        }
+      ],
+      "contentAxe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "nodes": [
+              {
+                "target": "#mh12-hero-title",
+                "html": "<h1 id=\"mh12-hero-title\" class=\"mh12-h1 mh12-hero__title\">The stone comes first.</h1>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": ".mh12-hero__lede",
+                "html": "<p class=\"mh12-lede mh12-hero__lede\">Maihan Gems is a gemstone house: loose stones, matched pairs and atelier mountings, each published with the record behind i",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": "#mh6-home-search",
+                "html": "<input id=\"mh6-home-search\" type=\"text\" inputmode=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combobox\" aria-expanded=\"false\" aria-autocomplete=\"list\" ",
+                "summary": "Fix any of the following: Element has no value; test color contrast with a value entered"
+              },
+              {
+                "target": ".mh6-search__submit > span",
+                "html": "<span>Search</span>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": "#mh12-stone-title",
+                "html": "<h2 id=\"mh12-stone-title\" class=\"mh12-h2 mh12-stone__title\">The stone, and the record behind it.</h2>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a pseudo element"
+              },
+              {
+                "target": ".mh12-stone__action",
+                "html": "<a class=\"mh12-action mh12-stone__action\" href=\"/gemstones\">See every gemstone<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span></a>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a pseudo element"
+              },
+              {
+                "target": ".mh12-stone__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-featured__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-dyo__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-record__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-ai__submit > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-closing__action",
+                "html": "<a class=\"mh12-action mh12-closing__action\" href=\"/contact\">Request a private viewing<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span></a>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": ".mh12-closing__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              }
+            ]
+          }
+        ]
+      },
+      "errors": [],
+      "screenshot": "docs/design-shots/v12/home-1024.png",
+      "documentHeight": 6802,
+      "documentWidth": 1024,
+      "sections": [
+        {
+          "name": "hero",
+          "surface": "obsidian",
+          "top": 0,
+          "height": 810
+        },
+        {
+          "name": "categories",
+          "surface": "paper",
+          "top": 810,
+          "height": 738
+        },
+        {
+          "name": "stone",
+          "surface": "paper",
+          "top": 1548,
+          "height": 723
+        },
+        {
+          "name": "featured",
+          "surface": "paper",
+          "top": 2271,
+          "height": 1040.33
+        },
+        {
+          "name": "dyo",
+          "surface": "obsidian",
+          "top": 3311.33,
+          "height": 656
+        },
+        {
+          "name": "record",
+          "surface": "paper",
+          "top": 3967.33,
+          "height": 696
+        },
+        {
+          "name": "ai",
+          "surface": "paper",
+          "top": 4663.33,
+          "height": 420
+        },
+        {
+          "name": "service",
+          "surface": "paper",
+          "top": 5083.33,
+          "height": 460
+        },
+        {
+          "name": "closing",
+          "surface": "obsidian",
+          "top": 5543.33,
+          "height": 560
+        },
+        {
+          "name": "footer",
+          "surface": "paper",
+          "top": 6103.33,
+          "height": 698.39
+        }
+      ],
+      "surfaces": {
+        "paper": 4775.72,
+        "obsidian": 2026,
+        "other": 0,
+        "paperPct": 70.21,
+        "obsidianPct": 29.79,
+        "otherPct": 0
+      },
+      "computed": {
+        "h1": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "56px",
+          "fontWeight": "500",
+          "lineHeight": "60px",
+          "letterSpacing": "-0.56px",
+          "textTransform": "none",
+          "color": "rgb(247, 243, 232)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "h2": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "36px",
+          "fontWeight": "500",
+          "lineHeight": "44px",
+          "letterSpacing": "-0.18px",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "lede": {
+          "fontFamily": "Jost",
+          "fontSize": "18px",
+          "fontWeight": "400",
+          "lineHeight": "28px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(185, 179, 167)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "body": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "cardName": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "22px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "label": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgb(94, 87, 75)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "price": {
+          "fontFamily": "Jost",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "tabular-nums"
+        },
+        "card": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "cardImage": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.3s",
+          "transitionProperty": "opacity",
+          "fontVariantNumeric": "normal"
+        },
+        "cardNameDraw": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "22px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "action": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "footer": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgb(247, 244, 236)",
+          "borderRadius": "0px",
+          "borderWidth": "1px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "closingAction": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgba(0, 0, 0, 0)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        }
+      },
+      "media": {
+        "area": 2365290,
+        "pageArea": 6965248,
+        "sharePct": 33.96,
+        "items": [
+          {
+            "src": "/mgh/images/gems/sapphire-gem.jpg",
+            "w": 1024,
+            "h": 810,
+            "area": 829440
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 298.66,
+            "h": 373.31,
+            "area": 111492
+          },
+          {
+            "src": "/mgh/images/gems/earrings-pair.jpg",
+            "w": 298.67,
+            "h": 373.33,
+            "area": 111503
+          },
+          {
+            "src": "/mgh/images/gems/setting-ring.jpg",
+            "w": 298.66,
+            "h": 373.31,
+            "area": 111492
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 1024,
+            "h": 438.84,
+            "area": 449376
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 298.66,
+            "h": 298.66,
+            "area": 89196
+          },
+          {
+            "src": "/media/stock/sapphire.jpg",
+            "w": 298.67,
+            "h": 298.67,
+            "area": 89205
+          },
+          {
+            "src": "/media/stock/emerald.jpg",
+            "w": 298.66,
+            "h": 298.66,
+            "area": 89196
+          },
+          {
+            "src": "/media/stock/ruby.jpg",
+            "w": 298.66,
+            "h": 298.66,
+            "area": 89196
+          },
+          {
+            "src": "/media/stock/tanzanite-rough.jpg",
+            "w": 391.13,
+            "h": 521.5,
+            "area": 203972
+          },
+          {
+            "src": "/mgh/images/elysian-ring.jpg",
+            "w": 391.13,
+            "h": 488.91,
+            "area": 191223
+          }
+        ]
+      },
+      "type": {
+        "sizes": [
+          {
+            "size": "56px",
+            "count": 1
+          },
+          {
+            "size": "36px",
+            "count": 7
+          },
+          {
+            "size": "18px",
+            "count": 3
+          },
+          {
+            "size": "16px",
+            "count": 18
+          },
+          {
+            "size": "14px",
+            "count": 45
+          },
+          {
+            "size": "12px",
+            "count": 46
+          }
+        ],
+        "families": [
+          {
+            "family": "Jost",
+            "count": 105
+          },
+          {
+            "family": "Cormorant Garamond",
+            "count": 15
+          }
+        ]
+      },
+      "gold": {
+        "count": 2,
+        "items": [
+          {
+            "tag": "section",
+            "cls": "mh12-band.mh12-closing",
+            "text": "See the stone before you decide.A private viewin",
+            "properties": [
+              "borderTopColor=rgb(201, 168, 76)"
+            ]
+          },
+          {
+            "tag": "a",
+            "cls": "mh12-action.mh12-closing__action",
+            "text": "Request a private viewing→",
+            "properties": [
+              "backgroundImage=linear-gradient(90deg, rgb(204, 146, 0), rgb(233, 205, 107))"
+            ]
+          }
+        ]
+      },
+      "hero": {
+        "height": 810,
+        "animationName": "mh12-hero-in",
+        "firstPriceTop": 2783.66
+      },
+      "cards": [
+        {
+          "w": 298.66,
+          "h": 408.16
+        },
+        {
+          "w": 298.67,
+          "h": 408.17
+        },
+        {
+          "w": 298.66,
+          "h": 408.16
+        },
+        {
+          "w": 298.66,
+          "h": 408.16
+        }
+      ],
+      "categories": [
+        {
+          "w": 298.66,
+          "h": 407.31
+        },
+        {
+          "w": 298.67,
+          "h": 407.33
+        },
+        {
+          "w": 298.66,
+          "h": 407.31
+        }
+      ],
+      "footer": {
+        "top": 6103.33,
+        "w": 1024,
+        "h": 698.39
+      },
+      "gridGap": "24px",
+      "sideMargin": {
+        "left": 0,
+        "right": 0
+      }
+    },
+    {
+      "width": 768,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 18
+        }
+      ],
+      "contentAxe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "nodes": [
+              {
+                "target": "#mh12-hero-title",
+                "html": "<h1 id=\"mh12-hero-title\" class=\"mh12-h1 mh12-hero__title\">The stone comes first.</h1>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": ".mh12-hero__lede",
+                "html": "<p class=\"mh12-lede mh12-hero__lede\">Maihan Gems is a gemstone house: loose stones, matched pairs and atelier mountings, each published with the record behind i",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": "#mh6-home-search",
+                "html": "<input id=\"mh6-home-search\" type=\"text\" inputmode=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combobox\" aria-expanded=\"false\" aria-autocomplete=\"list\" ",
+                "summary": "Fix any of the following: Element has no value; test color contrast with a value entered"
+              },
+              {
+                "target": ".mh6-search__submit > span",
+                "html": "<span>Search</span>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": ".mh12-stone__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-featured__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-dyo__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-record__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-ai__submit > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-closing__action",
+                "html": "<a class=\"mh12-action mh12-closing__action\" href=\"/contact\">Request a private viewing<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span></a>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": ".mh12-closing__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              }
+            ]
+          }
+        ]
+      },
+      "errors": [],
+      "screenshot": "docs/design-shots/v12/home-768.png",
+      "documentHeight": 6894,
+      "documentWidth": 768,
+      "sections": [
+        {
+          "name": "hero",
+          "surface": "obsidian",
+          "top": 0,
+          "height": 844
+        },
+        {
+          "name": "categories",
+          "surface": "paper",
+          "top": 844,
+          "height": 432.39
+        },
+        {
+          "name": "stone",
+          "surface": "paper",
+          "top": 1276.39,
+          "height": 513.14
+        },
+        {
+          "name": "featured",
+          "surface": "paper",
+          "top": 1789.53,
+          "height": 1125.56
+        },
+        {
+          "name": "dyo",
+          "surface": "obsidian",
+          "top": 2915.09,
+          "height": 928
+        },
+        {
+          "name": "record",
+          "surface": "paper",
+          "top": 3843.09,
+          "height": 1191.5
+        },
+        {
+          "name": "ai",
+          "surface": "paper",
+          "top": 5034.59,
+          "height": 243
+        },
+        {
+          "name": "service",
+          "surface": "paper",
+          "top": 5277.59,
+          "height": 258
+        },
+        {
+          "name": "closing",
+          "surface": "obsidian",
+          "top": 5535.59,
+          "height": 365
+        },
+        {
+          "name": "footer",
+          "surface": "paper",
+          "top": 5900.59,
+          "height": 993.39
+        }
+      ],
+      "surfaces": {
+        "paper": 4756.98,
+        "obsidian": 2137,
+        "other": 0,
+        "paperPct": 69,
+        "obsidianPct": 31,
+        "otherPct": 0
+      },
+      "computed": {
+        "h1": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "56px",
+          "fontWeight": "500",
+          "lineHeight": "60px",
+          "letterSpacing": "-0.56px",
+          "textTransform": "none",
+          "color": "rgb(247, 243, 232)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "h2": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "36px",
+          "fontWeight": "500",
+          "lineHeight": "44px",
+          "letterSpacing": "-0.18px",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "lede": {
+          "fontFamily": "Jost",
+          "fontSize": "18px",
+          "fontWeight": "400",
+          "lineHeight": "28px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(185, 179, 167)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "body": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "cardName": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "22px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "label": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgb(94, 87, 75)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "price": {
+          "fontFamily": "Jost",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "tabular-nums"
+        },
+        "card": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "cardImage": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.3s",
+          "transitionProperty": "opacity",
+          "fontVariantNumeric": "normal"
+        },
+        "cardNameDraw": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "22px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "action": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "footer": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgb(247, 244, 236)",
+          "borderRadius": "0px",
+          "borderWidth": "1px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "closingAction": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgba(0, 0, 0, 0)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        }
+      },
+      "media": {
+        "area": 2070763,
+        "pageArea": 5294592,
+        "sharePct": 39.11,
+        "items": [
+          {
+            "src": "/mgh/images/gems/sapphire-gem.jpg",
+            "w": 768,
+            "h": 844,
+            "area": 648192
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 219.52,
+            "h": 274.39,
+            "area": 60233
+          },
+          {
+            "src": "/mgh/images/gems/earrings-pair.jpg",
+            "w": 219.52,
+            "h": 274.39,
+            "area": 60233
+          },
+          {
+            "src": "/mgh/images/gems/setting-ring.jpg",
+            "w": 219.52,
+            "h": 274.39,
+            "area": 60233
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 768,
+            "h": 329.14,
+            "area": 252780
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 341.28,
+            "h": 341.28,
+            "area": 116473
+          },
+          {
+            "src": "/media/stock/sapphire.jpg",
+            "w": 341.28,
+            "h": 341.28,
+            "area": 116473
+          },
+          {
+            "src": "/media/stock/emerald.jpg",
+            "w": 341.28,
+            "h": 341.28,
+            "area": 116473
+          },
+          {
+            "src": "/media/stock/ruby.jpg",
+            "w": 341.28,
+            "h": 341.28,
+            "area": 116473
+          },
+          {
+            "src": "/media/stock/tanzanite-rough.jpg",
+            "w": 420,
+            "h": 560,
+            "area": 235200
+          },
+          {
+            "src": "/mgh/images/elysian-ring.jpg",
+            "w": 480,
+            "h": 600,
+            "area": 288000
+          }
+        ]
+      },
+      "type": {
+        "sizes": [
+          {
+            "size": "56px",
+            "count": 1
+          },
+          {
+            "size": "36px",
+            "count": 7
+          },
+          {
+            "size": "18px",
+            "count": 3
+          },
+          {
+            "size": "16px",
+            "count": 18
+          },
+          {
+            "size": "14px",
+            "count": 45
+          },
+          {
+            "size": "12px",
+            "count": 46
+          }
+        ],
+        "families": [
+          {
+            "family": "Jost",
+            "count": 105
+          },
+          {
+            "family": "Cormorant Garamond",
+            "count": 15
+          }
+        ]
+      },
+      "gold": {
+        "count": 2,
+        "items": [
+          {
+            "tag": "section",
+            "cls": "mh12-band.mh12-closing",
+            "text": "See the stone before you decide.A private viewin",
+            "properties": [
+              "borderTopColor=rgb(201, 168, 76)"
+            ]
+          },
+          {
+            "tag": "a",
+            "cls": "mh12-action.mh12-closing__action",
+            "text": "Request a private viewing→",
+            "properties": [
+              "backgroundImage=linear-gradient(90deg, rgb(204, 146, 0), rgb(233, 205, 107))"
+            ]
+          }
+        ]
+      },
+      "hero": {
+        "height": 844,
+        "animationName": "mh12-hero-in",
+        "firstPriceTop": 2344.81
+      },
+      "cards": [
+        {
+          "w": 341.28,
+          "h": 450.78
+        },
+        {
+          "w": 341.28,
+          "h": 450.78
+        },
+        {
+          "w": 341.28,
+          "h": 450.78
+        },
+        {
+          "w": 341.28,
+          "h": 450.78
+        }
+      ],
+      "categories": [
+        {
+          "w": 219.52,
+          "h": 308.39
+        },
+        {
+          "w": 219.52,
+          "h": 308.39
+        },
+        {
+          "w": 219.52,
+          "h": 308.39
+        }
+      ],
+      "footer": {
+        "top": 5900.59,
+        "w": 768,
+        "h": 993.39
+      },
+      "gridGap": "24px",
+      "sideMargin": {
+        "left": 0,
+        "right": 0
+      }
+    },
+    {
+      "width": 390,
+      "status": 200,
+      "overflowPx": 0,
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 15
+        }
+      ],
+      "contentAxe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "nodes": [
+              {
+                "target": "#mh12-hero-title",
+                "html": "<h1 id=\"mh12-hero-title\" class=\"mh12-h1 mh12-hero__title\">The stone comes first.</h1>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": ".mh12-hero__lede",
+                "html": "<p class=\"mh12-lede mh12-hero__lede\">Maihan Gems is a gemstone house: loose stones, matched pairs and atelier mountings, each published with the record behind i",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": "#mh6-home-search",
+                "html": "<input id=\"mh6-home-search\" type=\"text\" inputmode=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combobox\" aria-expanded=\"false\" aria-autocomplete=\"list\" ",
+                "summary": "Fix any of the following: Element has no value; test color contrast with a value entered"
+              },
+              {
+                "target": ".mh12-stone__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-featured__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-dyo__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-record__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-ai__submit > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              },
+              {
+                "target": ".mh12-closing__action",
+                "html": "<a class=\"mh12-action mh12-closing__action\" href=\"/contact\">Request a private viewing<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span></a>",
+                "summary": "Fix any of the following: Element's background color could not be determined due to a background gradient"
+              },
+              {
+                "target": ".mh12-closing__action > .mh12-action__arrow[aria-hidden=\"true\"]",
+                "html": "<span aria-hidden=\"true\" class=\"mh12-action__arrow\">→</span>",
+                "summary": "Fix any of the following: Element content contains only non-text characters"
+              }
+            ]
+          }
+        ]
+      },
+      "errors": [],
+      "screenshot": "docs/design-shots/v12/home-390.png",
+      "documentHeight": 9604,
+      "documentWidth": 390,
+      "sections": [
+        {
+          "name": "hero",
+          "surface": "obsidian",
+          "top": 0,
+          "height": 844
+        },
+        {
+          "name": "categories",
+          "surface": "paper",
+          "top": 844,
+          "height": 1606.5
+        },
+        {
+          "name": "stone",
+          "surface": "paper",
+          "top": 2450.5,
+          "height": 423.14
+        },
+        {
+          "name": "featured",
+          "surface": "paper",
+          "top": 2873.64,
+          "height": 2238
+        },
+        {
+          "name": "dyo",
+          "surface": "obsidian",
+          "top": 5111.64,
+          "height": 906.66
+        },
+        {
+          "name": "record",
+          "surface": "paper",
+          "top": 6018.3,
+          "height": 1173
+        },
+        {
+          "name": "ai",
+          "surface": "paper",
+          "top": 7191.3,
+          "height": 269
+        },
+        {
+          "name": "service",
+          "surface": "paper",
+          "top": 7460.3,
+          "height": 468
+        },
+        {
+          "name": "closing",
+          "surface": "obsidian",
+          "top": 7928.3,
+          "height": 365
+        },
+        {
+          "name": "footer",
+          "surface": "paper",
+          "top": 8293.3,
+          "height": 1310.39
+        }
+      ],
+      "surfaces": {
+        "paper": 7488.03,
+        "obsidian": 2115.66,
+        "other": 0,
+        "paperPct": 77.97,
+        "obsidianPct": 22.03,
+        "otherPct": 0
+      },
+      "computed": {
+        "h1": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "56px",
+          "fontWeight": "500",
+          "lineHeight": "60px",
+          "letterSpacing": "-0.56px",
+          "textTransform": "none",
+          "color": "rgb(247, 243, 232)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "h2": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "36px",
+          "fontWeight": "500",
+          "lineHeight": "44px",
+          "letterSpacing": "-0.18px",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "lede": {
+          "fontFamily": "Jost",
+          "fontSize": "18px",
+          "fontWeight": "400",
+          "lineHeight": "28px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(185, 179, 167)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "body": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "cardName": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "22px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "label": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgb(94, 87, 75)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "price": {
+          "fontFamily": "Jost",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "tabular-nums"
+        },
+        "card": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "cardImage": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.3s",
+          "transitionProperty": "opacity",
+          "fontVariantNumeric": "normal"
+        },
+        "cardNameDraw": {
+          "fontFamily": "Cormorant Garamond",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "22px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "action": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "footer": {
+          "fontFamily": "Jost",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "26px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "color": "rgb(23, 20, 15)",
+          "backgroundColor": "rgb(247, 244, 236)",
+          "borderRadius": "0px",
+          "borderWidth": "1px",
+          "boxShadow": "none",
+          "transitionDuration": "0s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        },
+        "closingAction": {
+          "fontFamily": "Jost",
+          "fontSize": "12px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "0.84px",
+          "textTransform": "uppercase",
+          "color": "rgba(0, 0, 0, 0)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "boxShadow": "none",
+          "transitionDuration": "0.15s",
+          "transitionProperty": "all",
+          "fontVariantNumeric": "normal"
+        }
+      },
+      "media": {
+        "area": 1660175,
+        "pageArea": 3745560,
+        "sharePct": 44.32,
+        "items": [
+          {
+            "src": "/mgh/images/gems/sapphire-gem.jpg",
+            "w": 390,
+            "h": 844,
+            "area": 329160
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 350,
+            "h": 437.5,
+            "area": 153125
+          },
+          {
+            "src": "/mgh/images/gems/earrings-pair.jpg",
+            "w": 350,
+            "h": 437.5,
+            "area": 153125
+          },
+          {
+            "src": "/mgh/images/gems/setting-ring.jpg",
+            "w": 350,
+            "h": 437.5,
+            "area": 153125
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 390,
+            "h": 167.14,
+            "area": 65185
+          },
+          {
+            "src": "/media/stock/tanzanite.jpg",
+            "w": 350,
+            "h": 350,
+            "area": 122500
+          },
+          {
+            "src": "/media/stock/sapphire.jpg",
+            "w": 350,
+            "h": 350,
+            "area": 122500
+          },
+          {
+            "src": "/media/stock/emerald.jpg",
+            "w": 350,
+            "h": 350,
+            "area": 122500
+          },
+          {
+            "src": "/media/stock/ruby.jpg",
+            "w": 350,
+            "h": 350,
+            "area": 122500
+          },
+          {
+            "src": "/media/stock/tanzanite-rough.jpg",
+            "w": 350,
+            "h": 466.66,
+            "area": 163330
+          },
+          {
+            "src": "/mgh/images/elysian-ring.jpg",
+            "w": 350,
+            "h": 437.5,
+            "area": 153125
+          }
+        ]
+      },
+      "type": {
+        "sizes": [
+          {
+            "size": "56px",
+            "count": 1
+          },
+          {
+            "size": "36px",
+            "count": 7
+          },
+          {
+            "size": "18px",
+            "count": 3
+          },
+          {
+            "size": "16px",
+            "count": 18
+          },
+          {
+            "size": "14px",
+            "count": 45
+          },
+          {
+            "size": "12px",
+            "count": 45
+          }
+        ],
+        "families": [
+          {
+            "family": "Jost",
+            "count": 104
+          },
+          {
+            "family": "Cormorant Garamond",
+            "count": 15
+          }
+        ]
+      },
+      "gold": {
+        "count": 2,
+        "items": [
+          {
+            "tag": "section",
+            "cls": "mh12-band.mh12-closing",
+            "text": "See the stone before you decide.A private viewin",
+            "properties": [
+              "borderTopColor=rgb(201, 168, 76)"
+            ]
+          },
+          {
+            "tag": "a",
+            "cls": "mh12-action.mh12-closing__action",
+            "text": "Request a private viewing→",
+            "properties": [
+              "backgroundImage=linear-gradient(90deg, rgb(204, 146, 0), rgb(233, 205, 107))"
+            ]
+          }
+        ]
+      },
+      "hero": {
+        "height": 844,
+        "animationName": "mh12-hero-in",
+        "firstPriceTop": 3565.64
+      },
+      "cards": [
+        {
+          "w": 350,
+          "h": 459.5
+        },
+        {
+          "w": 350,
+          "h": 459.5
+        },
+        {
+          "w": 350,
+          "h": 459.5
+        },
+        {
+          "w": 350,
+          "h": 459.5
+        }
+      ],
+      "categories": [
+        {
+          "w": 350,
+          "h": 471.5
+        },
+        {
+          "w": 350,
+          "h": 471.5
+        },
+        {
+          "w": 350,
+          "h": 471.5
+        }
+      ],
+      "footer": {
+        "top": 8293.3,
+        "w": 390,
+        "h": 1310.39
+      },
+      "gridGap": "24px",
+      "sideMargin": {
+        "left": 0,
+        "right": 0
+      }
+    }
+  ]
+}
