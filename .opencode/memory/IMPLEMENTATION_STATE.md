@@ -1,4 +1,47 @@
-# STOREFRONT v12 rev 2 — MOBILE-FIRST HOMEPAGE (2026-11-28)
+# STOREFRONT v14 - RESTORED CENTRED HERO, FULL HOMEPAGE REBUILD (2026-11-28)
+
+- **Scope.** Homepage only (`app/(storefront)/page.tsx`,
+  `components/mgh/home/v14/`, `styles/home-v14.css`), the shared footer's
+  presentation, the demo-badge CSS conflict, and the v14 evidence scripts.
+  Navbar markup and styles untouched; api/, packages/, consoles and every other
+  page's composition untouched. No new dependency, no new client component.
+- **Client verdict answered.** The old hero is restored: 100svh, edge to edge,
+  one photograph, the slogan centred on both axes, the 58px catalogue search
+  directly below, one quiet link. The slogan's own centre line is the viewport
+  centre line (measured 0px offset at 320/390/430/768/1440). The rest of the
+  page is rebuilt in the brief's eleven-section order; collection and
+  certificate intelligence are the two sections the previous build lacked.
+- **System.** The gold/navy system in `maihan-system.css`: Montserrat 300
+  display + Manrope body; navy `#0d1b2a` / deep `#08121e` / canvas `#f8fafc`;
+  gold `#c9a84c` for light and rules, `#8b6914` for gold glyphs on light; the
+  system radius scale (12 controls and cards); spacing 4-128; one action shape
+  per section, the closing invitation the only filled gold button.
+- **Sections and gate.** Hero 100vh; varieties 586/624; collection 488/821;
+  jewellery 542/692; about 423/733; design your own 579/409; gemologist
+  287/327; try-on 583/660; certificate 536/584; closing 245/197; footer
+  568/566 (390/1440, px). At 390 no non-hero section exceeds 70vh (max 69.4vh).
+- **Measured gates.** typecheck 0; build exit 0 with `DATABASE_URL` empty; tests
+  618 passed / 21 skipped (no regression); slop clean; axe 0 at
+  320/390/430/768/1440, normal and reduced motion; overflow 0px at 320/390/430;
+  home initial JS 210.8 KB gzip, unchanged (page chunk 3.8 KB); 39/39 internal
+  links resolve; 24/24 keyboard stops paint a focus indicator; hero text
+  contrast 11.3:1 worst case at 390 (measured from pixels, not assumed).
+- **Removed / refused.** No scroll-reveal library, no per-section fade-up, no
+  second hero label, no fabricated product or certificate. The hero photograph
+  is a labelled stand-in; the collection uses the second stock set so the tray
+  does not repeat the band's frames; both sections say so in their own lines.
+- **Fixed on the way.** The design-system chip rule had given the demo notice
+  `white-space: nowrap` and an 8.5px chip size, so its sentence ran past the
+  viewport. The notice is excluded from the chip recipe and uses its own
+  wrapping 11.5px rule in `app/demo-content.css`.
+- **Evidence.** `docs/design-shots/v14/README.md`, `home-*.png`,
+  `scroll/00-11`, `audit.json`, `search-*.png`, `focus-hero-search-390.png`.
+  Re-run: `scripts/v14-home-audit.mjs`, `v14-scroll-sequence.mjs`,
+  `v14-hero-contrast.mjs`, `v14-link-and-focus.mjs`.
+
+---
+
+# STOREFRONT v12 rev 2 - MOBILE-FIRST HOMEPAGE (2026-11-28)
 
 - **Scope.** Homepage only (`app/(storefront)/page.tsx`,
   `components/mgh/home/v12/`, `styles/home-v12.css`), the shared footer's

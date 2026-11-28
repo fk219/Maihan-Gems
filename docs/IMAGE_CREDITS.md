@@ -35,25 +35,30 @@ regardless.
 | `spinel.jpg` | Red spinel octahedra in white marble on black | Nessa Eull | CC0 | [File:Spinel (GeoDIL number - 563).jpg](https://commons.wikimedia.org/wiki/File:Spinel_(GeoDIL_number_-_563).jpg) | original, 2240 × 1632 |
 | `diamond.jpg` | Large cushion-cut deep blue diamond in a white-diamond halo | Unknown photographer, Smithsonian Institution Archives | Public domain | [File:The Hope Diamond - SIA.jpg](https://commons.wikimedia.org/wiki/File:The_Hope_Diamond_-_SIA.jpg) | original, 2367 × 2193 |
 
-## Where each file is used (homepage v12, mobile-first)
+## Where each file is used (homepage v14)
 
 | File | Section | Caption honesty |
 |---|---|---|
-| `ruby.jpg` | The variety band, ruby card | The band's own label reads "Illustrative images"; the card reads "Ruby · 9.0 Mohs". |
-| `tanzanite-rough.jpg` | The house, the gold-lit plate | The plate's caption reads "Before the bench. Illustrative photograph." |
+| `tanzanite.jpg` | The collection, tanzanite plate | The tray's note reads "Illustrative photographs of the variety. Carat and price are the record's." |
+| `sapphire.jpg` | The collection, sapphire plate | As above. |
+| `emerald.jpg` | The collection, emerald plate | As above. |
+| `ruby.jpg` | The variety band, ruby card | The band's own line reads "Illustrative photographs." |
+| `tanzanite-rough.jpg` | The house, the gold-framed plate | The plate's caption reads "Before the bench. Illustrative photograph." |
 
-The remaining stock photographs are not used by the homepage as built. The
-variety band's other seven cards use the catalogue's representative stone
+The variety band's other seven cards use the catalogue's representative stone
 photographs in `apps/web/public/media/stone-*.jpg` (recorded in
 `apps/web/src/lib/storefront-images.ts`); the band labels all of them
-"Illustrative images". The hero uses the catalogue's representative sapphire
-ring (`media/jew-sapphire-ring.jpg`) and labels it "Illustrative photography".
+"Illustrative photographs." The hero uses `media/stone-tanzanite.jpg` as its
+background and carries a descriptive alt that says it is illustrative; the
+hero is deliberately free of any other label (the brief allows nothing else in
+it) and the site-wide demo badge remains the visible notice. The try-on phone
+frame uses `media/jew-sapphire-ring.jpg`, captioned "Illustrative photograph".
 
-The atelier plates do not come from this directory; they are the two fixture
-records' own committed images (`/mgh/images/elysian-ring.jpg`,
-`/mgh/images/verdant-drop.jpg`). The homepage's jewellery cards use those
-records' own photographs, names, carat and price; no illustrative caption is
-attached to them because the photograph is the record's own.
+The atelier plate does not come from this directory: it is the lead jewellery
+record's own committed image (`/mgh/images/verdant-drop.jpg`). The jewellery
+ledger uses that record's name, carat and price; its caption reads "Record
+photograph". The remaining stock photographs are not used by the homepage as
+built.
 
 ## Note on the renders
 

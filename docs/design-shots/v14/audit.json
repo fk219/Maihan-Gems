@@ -1,0 +1,691 @@
+{
+  "base": "http://localhost:3113",
+  "generatedAt": "2026-11-28T15:18:55.001Z",
+  "widths": [
+    320,
+    390,
+    430,
+    768,
+    1440
+  ],
+  "scores": {
+    "axeViolationNodes": 0,
+    "overflowCaptures": 0,
+    "pageErrorCaptures": 0,
+    "nonOkCaptures": 0,
+    "sectionsOver70vh": [
+      "320:design-your-own:74.1",
+      "320:try-on:72",
+      "768:varieties:74.5",
+      "768:collection:78.3",
+      "768:certificate:80.6",
+      "1440:varieties:75.8",
+      "1440:collection:91.2",
+      "1440:jewellery:76.9",
+      "1440:about:81.4",
+      "1440:try-on:73.3"
+    ]
+  },
+  "results": [
+    {
+      "width": 320,
+      "height": 844,
+      "status": 200,
+      "overflowPx": 0,
+      "overflow": {
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "bodyScrollWidth": 320
+      },
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 41
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v14/home-320.png",
+      "documentHeight": 5849,
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "sections": [
+        {
+          "name": "hero",
+          "height": 844,
+          "vh": 100,
+          "width": 320,
+          "heading": "The stone comes first.",
+          "actions": 2
+        },
+        {
+          "name": "varieties",
+          "height": 569,
+          "vh": 67.4,
+          "width": 320,
+          "heading": "Every variety, photographed.",
+          "actions": 9
+        },
+        {
+          "name": "collection",
+          "height": 507,
+          "vh": 60.1,
+          "width": 320,
+          "heading": "Loose stones.",
+          "actions": 4
+        },
+        {
+          "name": "jewellery",
+          "height": 512,
+          "vh": 60.7,
+          "width": 320,
+          "heading": "Finished at the bench.",
+          "actions": 3
+        },
+        {
+          "name": "about",
+          "height": 501,
+          "vh": 59.4,
+          "width": 320,
+          "heading": "A gemstone house, not a marketplace.",
+          "actions": 1
+        },
+        {
+          "name": "design-your-own",
+          "height": 625,
+          "vh": 74.1,
+          "width": 320,
+          "heading": "Design it stone first.",
+          "actions": 1
+        },
+        {
+          "name": "gemologist",
+          "height": 308,
+          "vh": 36.5,
+          "width": 320,
+          "heading": "Where was this stone mined?",
+          "actions": 1
+        },
+        {
+          "name": "try-on",
+          "height": 608,
+          "vh": 72,
+          "width": 320,
+          "heading": "See it on your hand.",
+          "actions": 1
+        },
+        {
+          "name": "certificate",
+          "height": 541,
+          "vh": 64.1,
+          "width": 320,
+          "heading": "Every field the laboratory returned.",
+          "actions": 1
+        },
+        {
+          "name": "closing",
+          "height": 245,
+          "vh": 29,
+          "width": 320,
+          "heading": "See the stone before you decide.",
+          "actions": 1
+        },
+        {
+          "name": "footer",
+          "height": 588,
+          "vh": 69.7,
+          "width": 320,
+          "heading": "The collection",
+          "actions": 50
+        }
+      ],
+      "hero": {
+        "width": 320,
+        "height": 844,
+        "vh": 100,
+        "h1": "The stone comes first.",
+        "fontFamily": "Montserrat",
+        "fontSize": "40px",
+        "fontWeight": "300",
+        "letterSpacing": "-1.4px",
+        "lines": 2,
+        "centerOffset": 0,
+        "inputWidth": 180.2,
+        "formWidth": 280,
+        "formHeight": 58,
+        "formRadius": "12px",
+        "links": 1
+      }
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "overflowPx": 0,
+      "overflow": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "bodyScrollWidth": 390
+      },
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 41
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v14/home-390.png",
+      "documentHeight": 5665,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "sections": [
+        {
+          "name": "hero",
+          "height": 844,
+          "vh": 100,
+          "width": 390,
+          "heading": "The stone comes first.",
+          "actions": 2
+        },
+        {
+          "name": "varieties",
+          "height": 586,
+          "vh": 69.4,
+          "width": 390,
+          "heading": "Every variety, photographed.",
+          "actions": 9
+        },
+        {
+          "name": "collection",
+          "height": 488,
+          "vh": 57.8,
+          "width": 390,
+          "heading": "Loose stones.",
+          "actions": 4
+        },
+        {
+          "name": "jewellery",
+          "height": 542,
+          "vh": 64.2,
+          "width": 390,
+          "heading": "Finished at the bench.",
+          "actions": 3
+        },
+        {
+          "name": "about",
+          "height": 423,
+          "vh": 50.1,
+          "width": 390,
+          "heading": "A gemstone house, not a marketplace.",
+          "actions": 1
+        },
+        {
+          "name": "design-your-own",
+          "height": 579,
+          "vh": 68.6,
+          "width": 390,
+          "heading": "Design it stone first.",
+          "actions": 1
+        },
+        {
+          "name": "gemologist",
+          "height": 287,
+          "vh": 34,
+          "width": 390,
+          "heading": "Where was this stone mined?",
+          "actions": 1
+        },
+        {
+          "name": "try-on",
+          "height": 583,
+          "vh": 69.1,
+          "width": 390,
+          "heading": "See it on your hand.",
+          "actions": 1
+        },
+        {
+          "name": "certificate",
+          "height": 519,
+          "vh": 61.5,
+          "width": 390,
+          "heading": "Every field the laboratory returned.",
+          "actions": 1
+        },
+        {
+          "name": "closing",
+          "height": 245,
+          "vh": 29,
+          "width": 390,
+          "heading": "See the stone before you decide.",
+          "actions": 1
+        },
+        {
+          "name": "footer",
+          "height": 568,
+          "vh": 67.3,
+          "width": 390,
+          "heading": "The collection",
+          "actions": 50
+        }
+      ],
+      "hero": {
+        "width": 390,
+        "height": 844,
+        "vh": 100,
+        "h1": "The stone comes first.",
+        "fontFamily": "Montserrat",
+        "fontSize": "40px",
+        "fontWeight": "300",
+        "letterSpacing": "-1.4px",
+        "lines": 2,
+        "centerOffset": 0,
+        "inputWidth": 250.2,
+        "formWidth": 350,
+        "formHeight": 58,
+        "formRadius": "12px",
+        "links": 1
+      }
+    },
+    {
+      "width": 430,
+      "height": 844,
+      "status": 200,
+      "overflowPx": 0,
+      "overflow": {
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "bodyScrollWidth": 430
+      },
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 41
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v14/home-430.png",
+      "documentHeight": 5637,
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "sections": [
+        {
+          "name": "hero",
+          "height": 844,
+          "vh": 100,
+          "width": 430,
+          "heading": "The stone comes first.",
+          "actions": 2
+        },
+        {
+          "name": "varieties",
+          "height": 580,
+          "vh": 68.7,
+          "width": 430,
+          "heading": "Every variety, photographed.",
+          "actions": 9
+        },
+        {
+          "name": "collection",
+          "height": 502,
+          "vh": 59.5,
+          "width": 430,
+          "heading": "Loose stones.",
+          "actions": 4
+        },
+        {
+          "name": "jewellery",
+          "height": 521,
+          "vh": 61.7,
+          "width": 430,
+          "heading": "Finished at the bench.",
+          "actions": 3
+        },
+        {
+          "name": "about",
+          "height": 444,
+          "vh": 52.6,
+          "width": 430,
+          "heading": "A gemstone house, not a marketplace.",
+          "actions": 1
+        },
+        {
+          "name": "design-your-own",
+          "height": 579,
+          "vh": 68.6,
+          "width": 430,
+          "heading": "Design it stone first.",
+          "actions": 1
+        },
+        {
+          "name": "gemologist",
+          "height": 287,
+          "vh": 34,
+          "width": 430,
+          "heading": "Where was this stone mined?",
+          "actions": 1
+        },
+        {
+          "name": "try-on",
+          "height": 583,
+          "vh": 69.1,
+          "width": 430,
+          "heading": "See it on your hand.",
+          "actions": 1
+        },
+        {
+          "name": "certificate",
+          "height": 519,
+          "vh": 61.5,
+          "width": 430,
+          "heading": "Every field the laboratory returned.",
+          "actions": 1
+        },
+        {
+          "name": "closing",
+          "height": 245,
+          "vh": 29,
+          "width": 430,
+          "heading": "See the stone before you decide.",
+          "actions": 1
+        },
+        {
+          "name": "footer",
+          "height": 532,
+          "vh": 63,
+          "width": 430,
+          "heading": "The collection",
+          "actions": 50
+        }
+      ],
+      "hero": {
+        "width": 430,
+        "height": 844,
+        "vh": 100,
+        "h1": "The stone comes first.",
+        "fontFamily": "Montserrat",
+        "fontSize": "40px",
+        "fontWeight": "300",
+        "letterSpacing": "-1.4px",
+        "lines": 2,
+        "centerOffset": 0,
+        "inputWidth": 290.2,
+        "formWidth": 390,
+        "formHeight": 58,
+        "formRadius": "12px",
+        "links": 1
+      }
+    },
+    {
+      "width": 768,
+      "height": 844,
+      "status": 200,
+      "overflowPx": 0,
+      "overflow": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "bodyScrollWidth": 768
+      },
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 41
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v14/home-768.png",
+      "documentHeight": 6044,
+      "viewport": {
+        "width": 768,
+        "height": 844
+      },
+      "sections": [
+        {
+          "name": "hero",
+          "height": 844,
+          "vh": 100,
+          "width": 768,
+          "heading": "The stone comes first.",
+          "actions": 2
+        },
+        {
+          "name": "varieties",
+          "height": 629,
+          "vh": 74.5,
+          "width": 768,
+          "heading": "Every variety, photographed.",
+          "actions": 9
+        },
+        {
+          "name": "collection",
+          "height": 661,
+          "vh": 78.3,
+          "width": 768,
+          "heading": "Loose stones.",
+          "actions": 4
+        },
+        {
+          "name": "jewellery",
+          "height": 578,
+          "vh": 68.5,
+          "width": 768,
+          "heading": "Finished at the bench.",
+          "actions": 3
+        },
+        {
+          "name": "about",
+          "height": 565,
+          "vh": 66.9,
+          "width": 768,
+          "heading": "A gemstone house, not a marketplace.",
+          "actions": 1
+        },
+        {
+          "name": "design-your-own",
+          "height": 436,
+          "vh": 51.7,
+          "width": 768,
+          "heading": "Design it stone first.",
+          "actions": 1
+        },
+        {
+          "name": "gemologist",
+          "height": 335,
+          "vh": 39.7,
+          "width": 768,
+          "heading": "Where was this stone mined?",
+          "actions": 1
+        },
+        {
+          "name": "try-on",
+          "height": 554,
+          "vh": 65.6,
+          "width": 768,
+          "heading": "See it on your hand.",
+          "actions": 1
+        },
+        {
+          "name": "certificate",
+          "height": 680,
+          "vh": 80.6,
+          "width": 768,
+          "heading": "Every field the laboratory returned.",
+          "actions": 1
+        },
+        {
+          "name": "closing",
+          "height": 208,
+          "vh": 24.6,
+          "width": 768,
+          "heading": "See the stone before you decide.",
+          "actions": 1
+        },
+        {
+          "name": "footer",
+          "height": 554,
+          "vh": 65.6,
+          "width": 768,
+          "heading": "The collection",
+          "actions": 50
+        }
+      ],
+      "hero": {
+        "width": 768,
+        "height": 844,
+        "vh": 100,
+        "h1": "The stone comes first.",
+        "fontFamily": "Montserrat",
+        "fontSize": "51.456px",
+        "fontWeight": "300",
+        "letterSpacing": "-1.80096px",
+        "lines": 1,
+        "centerOffset": 0,
+        "inputWidth": 400.2,
+        "formWidth": 560,
+        "formHeight": 58,
+        "formRadius": "12px",
+        "links": 1
+      }
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "overflowPx": 0,
+      "overflow": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "bodyScrollWidth": 1440
+      },
+      "axe": [],
+      "axeIncomplete": [
+        {
+          "id": "color-contrast",
+          "nodes": 39
+        }
+      ],
+      "errors": [],
+      "screenshot": "docs/design-shots/v14/home-1440.png",
+      "documentHeight": 6569,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "sections": [
+        {
+          "name": "hero",
+          "height": 900,
+          "vh": 100,
+          "width": 1440,
+          "heading": "The stone comes first.",
+          "actions": 2
+        },
+        {
+          "name": "varieties",
+          "height": 682,
+          "vh": 75.8,
+          "width": 1440,
+          "heading": "Every variety, photographed.",
+          "actions": 9
+        },
+        {
+          "name": "collection",
+          "height": 821,
+          "vh": 91.2,
+          "width": 1440,
+          "heading": "Loose stones.",
+          "actions": 4
+        },
+        {
+          "name": "jewellery",
+          "height": 692,
+          "vh": 76.9,
+          "width": 1440,
+          "heading": "Finished at the bench.",
+          "actions": 3
+        },
+        {
+          "name": "about",
+          "height": 733,
+          "vh": 81.4,
+          "width": 1440,
+          "heading": "A gemstone house, not a marketplace.",
+          "actions": 1
+        },
+        {
+          "name": "design-your-own",
+          "height": 409,
+          "vh": 45.4,
+          "width": 1440,
+          "heading": "Design it stone first.",
+          "actions": 1
+        },
+        {
+          "name": "gemologist",
+          "height": 327,
+          "vh": 36.3,
+          "width": 1440,
+          "heading": "Where was this stone mined?",
+          "actions": 1
+        },
+        {
+          "name": "try-on",
+          "height": 660,
+          "vh": 73.3,
+          "width": 1440,
+          "heading": "See it on your hand.",
+          "actions": 1
+        },
+        {
+          "name": "certificate",
+          "height": 584,
+          "vh": 64.9,
+          "width": 1440,
+          "heading": "Every field the laboratory returned.",
+          "actions": 1
+        },
+        {
+          "name": "closing",
+          "height": 197,
+          "vh": 21.9,
+          "width": 1440,
+          "heading": "See the stone before you decide.",
+          "actions": 1
+        },
+        {
+          "name": "footer",
+          "height": 566,
+          "vh": 62.9,
+          "width": 1440,
+          "heading": "The collection",
+          "actions": 50
+        }
+      ],
+      "hero": {
+        "width": 1440,
+        "height": 900,
+        "vh": 100,
+        "h1": "The stone comes first.",
+        "fontFamily": "Montserrat",
+        "fontSize": "96px",
+        "fontWeight": "300",
+        "letterSpacing": "-3.36px",
+        "lines": 1,
+        "centerOffset": 0,
+        "inputWidth": 400.2,
+        "formWidth": 560,
+        "formHeight": 58,
+        "formRadius": "12px",
+        "links": 1
+      }
+    }
+  ]
+}
